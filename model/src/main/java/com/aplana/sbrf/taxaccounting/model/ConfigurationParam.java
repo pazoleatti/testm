@@ -24,7 +24,8 @@ public enum ConfigurationParam {
     // Электронная почта
     EMAIL_LOGIN("Имя пользователя", ConfigurationParamGroup.EMAIL, true, false, 0),
     EMAIL_PASSWORD("Пароль", ConfigurationParamGroup.EMAIL, true, false, 0),
-    EMAIL_SERVER("Адрес сервера исходящей почты", ConfigurationParamGroup.EMAIL, true, false, 0);
+    EMAIL_SERVER("Адрес сервера исходящей почты", ConfigurationParamGroup.EMAIL, true, false, 0),
+    EMAIL_PORT("Порт сервера исходящей почты", ConfigurationParamGroup.EMAIL, true, false, 0);
 
     private String caption;
     private ConfigurationParamGroup group;

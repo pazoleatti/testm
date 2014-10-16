@@ -322,7 +322,13 @@ void logicCheck() {
             }
             // Проверка допустимых значений «Графы 14»
             if (formDataDepartment.regionId && row.subject && row.taxBenefitCode) {
-                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + " and RECORD_ID = " + row.taxBenefitCode + " and PARAM_DESTINATION = 2"
+                def String filter = String.format("DECLARATION_REGION_ID %s " +
+                        "and REGION_ID = %s " +
+                        "and RECORD_ID = %s " +
+                        "and PARAM_DESTINATION = 2",
+                        formDataDepartment.regionId == null ? "is null" : "=" + formDataDepartment.regionId.toString(),
+                        row.subject?.toString(),
+                        row.taxBenefitCode)
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0 || !(getBenefitCode(row.taxBenefitCode)?.toString() in ["2012000", "2012400", "2012500"])) {
                     loggerError(row, errorMsg + "Графа «${getColumnName(row, 'taxBenefitCode')}» заполнена неверно!")

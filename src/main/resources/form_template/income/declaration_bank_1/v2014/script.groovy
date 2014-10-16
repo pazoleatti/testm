@@ -595,7 +595,7 @@ void generateXML() {
     def builder = new MarkupBuilder(xml)
     builder.Файл(
             ИдФайл : declarationService.generateXmlFileId(2, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
-            ВерсПрог : appVersion,
+            ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
         // Титульный лист
@@ -605,9 +605,8 @@ void generateXML() {
                 Период : period,
                 ОтчетГод : (taxPeriod != null ? taxPeriod.year : empty),
                 КодНО : taxOrganCode,
-                НомКорр : reportPeriodService.getCorrectionPeriodNumber(reportPeriodId, departmentId),
+                НомКорр : reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 ПоМесту : taxPlaceTypeCode) {
-
             СвНП(
                     ОКВЭД : okvedCode,
                     Тлф : phone) {
@@ -1786,7 +1785,7 @@ def getXmlData(def reportPeriodId, def departmentId) {
     if (reportPeriodId != null) {
         // вид декларации 2 - декларация по налогу на прибыль уровня банка
         def declarationTypeId = 2
-        def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
+        def declarationData = declarationService.getLast(declarationTypeId, departmentId, reportPeriodId)
         if (declarationData != null && declarationData.id != null) {
             def xmlString = declarationService.getXmlData(declarationData.id)
             if(xmlString == null){
@@ -1868,9 +1867,6 @@ List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals('5.05')) {
         errorList.add("«Версия формата»")
-    }
-    if (record.APP_VERSION == null || record.APP_VERSION.value == null || !record.APP_VERSION.value.equals('XLR_FNP_TAXCOM_5_05')) {
-        errorList.add("«Версия программы, с помощью которой сформирован файл»")
     }
     errorList
 }

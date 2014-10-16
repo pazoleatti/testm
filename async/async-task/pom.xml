@@ -89,7 +89,37 @@
                     <clientIncludes>
                         <clientInclude>com/aplana/sbrf/taxaccounting/async/task</clientInclude>
                     </clientIncludes>
+                    <archive>
+                        <manifest>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Built-Date>${maven.build.timestamp}</Built-Date>
+                            <X-Git-Branch>${git.branch}</X-Git-Branch>
+                            <X-Git-Tag>${git.tag}</X-Git-Tag>
+                            <X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
+                            <X-Git-Revision>${git.revision}</X-Git-Revision>
+                            <X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
+                            <X-Git>${git.buildnumber}(${maven.build.timestamp})</X-Git>
+                            <Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>ru.concerteza.buildnumber</groupId>
+                <artifactId>maven-jgit-buildnumber-plugin</artifactId>
+                <version>1.2.6</version>
+                <executions>
+                    <execution>
+                        <id>git-buildnumber</id>
+                        <goals>
+                            <goal>extract-buildnumber</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -121,6 +151,5 @@
             </build>
         </profile>
     </profiles>
-
 
 </project>

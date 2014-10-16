@@ -66,11 +66,6 @@ public class DeclarationDataDaoTest {
 		declarationDataDao.get(1000l);
 	}
 
-    @Test
-    public void testHasXmlData() {
-        assertFalse(declarationDataDao.hasXmlData(1));
-        assertFalse(declarationDataDao.hasXmlData(2));
-    }
 /*
 	@Test
 	public void testGetData() {

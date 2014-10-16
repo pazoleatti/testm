@@ -58,8 +58,8 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
     @Override
     protected String flush() throws IOException {
         String fileName = String.format(PATTER_LOG_FILE_NAME,
-                SDF_LOG_NAME.format(items.get(0).getLogDate()),
-                SDF_LOG_NAME.format(items.get(items.size() - 1).getLogDate()));
+                SDF_LOG_NAME.format(items.get(items.size() - 1).getLogDate()),
+                SDF_LOG_NAME.format(items.get(0).getLogDate()));
         String tmpDir = System.getProperty("java.io.tmpdir");
         File file = new File(tmpDir + File.separator + fileName + ".csv");
         CSVWriter csvWriter = new CSVWriter(new FileWriter(file), ';');

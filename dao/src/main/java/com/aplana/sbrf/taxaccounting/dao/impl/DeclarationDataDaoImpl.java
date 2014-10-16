@@ -47,10 +47,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             d.setReportPeriodId(SqlUtils.getInteger(rs, "report_period_id"));
             d.setDepartmentReportPeriodId(SqlUtils.getInteger(rs, "department_report_period_id"));
             d.setAccepted(rs.getBoolean("is_accepted"));
-           /* d.setPdfDataUuid(rs.getString("data_pdf"));
-            d.setXlsxDataUuid(rs.getString("data_xlsx"));
-            d.setXmlDataUuid(rs.getString("data"));
-            d.setJasperPrintUuid(rs.getString("jasper_print"));*/
             return d;
         }
     }
@@ -60,7 +56,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
-                            "dd.data_pdf, dd.data_xlsx, dd.data, dd.jasper_print, dd.department_report_period_id, " +
+                            "dd.department_report_period_id, " +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and dd.id = ?",
@@ -70,12 +66,6 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(DECLARATION_NOT_FOUND_MESSAGE, declarationDataId);
         }
-    }
-
-    @Override
-    public boolean hasXmlData(long declarationDataId) {
-        return getJdbcTemplate().queryForInt("select count(*) from declaration_data where data is not null and id = ?",
-                declarationDataId) == 1;
     }
 
     @Override
@@ -91,7 +81,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         try {
             return getJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
-                            "dd.data_pdf, dd.data_xlsx, dd.data, dd.jasper_print, dd.department_report_period_id, " +
+                            "dd.department_report_period_id, " +
                             "drp.report_period_id, drp.department_id " +
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and drp.id = ?" +
@@ -387,7 +377,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return getJdbcTemplate().queryForObject(
                     "select * from " +
                             "(select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
-                            "dd.data_pdf, dd.data_xlsx, dd.data, dd.jasper_print, dd.department_report_period_id, " +
+                            "dd.department_report_period_id, " +
                             "drp.report_period_id, drp.department_id, rownum " +
                             "from declaration_data dd, department_report_period drp, declaration_template dt " +
                             "where dd.department_report_period_id = drp.id " +

@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
@@ -200,8 +201,7 @@ public class PeriodServiceImpl implements PeriodService {
 		boolean allGood = true;
         List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
         for (FormData fd : formDataList) {
-            LockData lock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + fd.getId(),
-                    user.getId(), LockData.STANDARD_LIFE_TIME);
+            LockData lock = lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + fd.getId());
             if (lock != null) {
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +
@@ -409,7 +409,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11389882#id-Формаспискапериодов-Удалениепериода
 	@Override
-	public void removeReportPeriod(TaxType taxType, int drpId, List<LogEntry> logs, TAUserInfo user) {
+	public void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user) {
         //Проверка форм не относится к этой постановке
         List<Integer> departmentIds = departmentService.getBADepartmentIds(user.getUser());
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
@@ -417,9 +417,9 @@ public class PeriodServiceImpl implements PeriodService {
         //Check forms
         List<FormData> formDatas = formDataService.find(departmentIds, drp.getReportPeriod().getId());
         for (FormData fd : formDatas) {
-            logs.add(new LogEntry(LogLevel.ERROR, "Форма " + fd.getFormType().getName() + " " + fd.getKind().getName() +
-                    " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
-                    " находится в удаляемом периоде!"));
+            logger.error("Форма %s %s в подразделении %s находится в удаляемом периоде!",
+                    fd.getFormType().getName(), fd.getKind().getName(),
+                    departmentService.getDepartment(fd.getDepartmentId()).getName());
         }
 
         DeclarationDataFilter filter = new DeclarationDataFilter();
@@ -429,17 +429,14 @@ public class PeriodServiceImpl implements PeriodService {
         for (Long id : declarations) {
             DeclarationData dd = declarationDataService.get(id, user);
             DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            logs.add(new LogEntry(LogLevel.ERROR, dt.getType().getName() + " в подразделении " +
-                    departmentService.getDepartment(dd.getDepartmentId()).getName() +
-                    " находится в удаляемом периоде!"));
+            logger.error("%s в подразделении %s находится в удаляемом периоде!", dt.getType().getName(), departmentService.getDepartment(dd.getDepartmentId()).getName());
         }
 
         int reportPeriodId = drp.getReportPeriod().getId();
         //2 Проверка вида периода
         if (drp.getCorrectionDate() != null &&
                 departmentReportPeriodService.existLargeCorrection(drp.getDepartmentId(), reportPeriodId, drp.getCorrectionDate())){
-            logs.add(new LogEntry(LogLevel.ERROR,
-                    "Удаление периода невозможно, т.к. существует более поздний корректирующий период!"));
+            logger.error("Удаление периода невозможно, т.к. существует более поздний корректирующий период!");
             return;
         } else if (drp.getCorrectionDate() == null){
             //3 Существуют ли корректирующий период
@@ -449,15 +446,17 @@ public class PeriodServiceImpl implements PeriodService {
             drpFilter.setDepartmentIdList(Arrays.asList(drp.getDepartmentId()));
             List<Integer> corrIds = departmentReportPeriodService.getListIdsByFilter(drpFilter);
             if (!corrIds.isEmpty()){
-                logs.add(new LogEntry(LogLevel.ERROR,
-                        "Удаление периода невозможно, т.к. для него существует корректирующий период!"));
+                logger.error("Удаление периода невозможно, т.к. для него существует корректирующий период!");
                 return;
             }
         }
+        if (logger.containsLevel(LogLevel.ERROR)){
+            return;
+        }
 		List<Integer> departments = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, drp.getDepartmentId());
 
-		if (checkBeforeRemove(departments, drp.getReportPeriod().getId(), logs)) {
-			removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logs);
+		if (checkBeforeRemove(departments, drp.getReportPeriod().getId(), logger.getEntries())) {
+			removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
 		}
 	}
 
@@ -785,8 +784,6 @@ public class PeriodServiceImpl implements PeriodService {
         List<DepartmentReportPeriod> onePeriod = departmentReportPeriodService.getListByFilter(filter);
         if (!onePeriod.isEmpty() && onePeriod.size()!=1){
             throw new ServiceException("Найдено больше одного периода корректировки с заданной датой корректировки.");
-        } else if (onePeriod.isEmpty()){
-            throw new ServiceException("Не найден корректирующий период.");
         } else if (onePeriod.size() == 1 && onePeriod.get(0).isActive()){
             return PeriodStatusBeforeOpen.CORRECTION_PERIOD_NOT_CLOSE;
         }
