@@ -111,16 +111,27 @@ switch (formDataEvent) {
         break
 }
 
-// Кэш провайдеров
+//// Кэши и константы
 @Field
 def providerCache = [:]
-// Кэш id записей справочника
 @Field
 def recordCache = [:]
+@Field
+def refBookCache = [:]
+
+@Field
+def startDate = null
 
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -145,11 +156,16 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 // Проверка при создании формы
 void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId)
+    def findForm = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
     if (findForm != null) {
-        logger.error('Формирование содного отчета невозможно, т.к. отчет с указанными параметрами уже сформирован!')
+        logger.error('Формирование сводного отчета невозможно, т.к. отчет с указанными параметрами уже сформирован!')
     }
 }
 
@@ -201,8 +217,9 @@ void consolidation() {
     def int i = 1
     // мапа идентификаторов для группировки
     def groupStr = [:]
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind).each {
-        def source = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).allCached.each { srcRow ->
                 if (srcRow.getAlias() == null) {
@@ -498,7 +515,7 @@ def buildRow(def srcRow, def matrixRow) {
         case 384: // 9
             if (srcRow.transactionMode != null) {
                 def val16Rec = getRefBookValue(14, srcRow.transactionMode)
-                if (val16Rec.ID != null && val16Rec.ID == 1) {
+                if (val16Rec.ID != 2) {
                     val16 = 2
                 }
             }
@@ -637,26 +654,26 @@ def buildRow(def srcRow, def matrixRow) {
             break
     }
 
-    // Графа 25
-    if (formTypeId == 393 || formTypeId == 394) {
-        def values25 = getRefBookValue(64, row.dealType)
-        if (values25 != null && values25.CODE.numberValue == 2) {
-            row.dealSubjectCode1 = getRecordId(73, 'CODE', '7108120001')
-        }
-    }
-
-    // Графа 26
-    def val26 = null
+    def val25and26 = null
     switch (formTypeId) {
         case 393: // 18
-            val26 = srcRow.innerCode
+            val25and26 = srcRow.innerCode
             break
         case 394: // 19
-            val26 = srcRow.metalName
+            val25and26 = srcRow.metalName
             break
     }
-    if (val26 != null) {
-        def String innerCode = getRefBookValue(17, val26).INNER_CODE.stringValue
+    if (val25and26 != null) {
+        metal = getRefBookValue(17, val25and26)
+
+        // Графа 25
+        def values25 = getRefBookValue(64, row.dealType)
+        if (values25 != null && values25.CODE.numberValue == 2) {
+            row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
+        }
+
+        // Графа 26
+        def String innerCode = metal.INNER_CODE.stringValue
         def String code = null;
         if ("A33".equals(innerCode)) {
             code = '17 5140'
@@ -1726,6 +1743,8 @@ void addData(def xml, int headRowCount) {
         if (row.cell[0].text() == null || row.cell[0].text() == "") {
             continue
         }
+
+        emptyRow = false
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
