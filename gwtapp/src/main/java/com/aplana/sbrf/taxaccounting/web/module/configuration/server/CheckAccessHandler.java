@@ -62,8 +62,8 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                         model.get(ConfigurationParam.EMAIL_PORT, 0).get(0),
                         model.get(ConfigurationParam.EMAIL_LOGIN, 0).get(0),
                         model.get(ConfigurationParam.EMAIL_PASSWORD, 0).get(0), logger);
+                uuid = logEntryService.save(logger.getEntries());
                 if (!success) {
-                    uuid = logEntryService.save(logger.getEntries());
                     UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
                             .getAuthentication().getPrincipal()));
                     auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
