@@ -554,7 +554,7 @@ public class FormDataServiceImpl implements FormDataService {
             //Устанавливаем блокировку на текущую нф
             List<String> lockedObjects = new ArrayList<String>();
             int userId = userInfo.getUser().getId();
-            String lockKey = LockData.LOCK_OBJECTS.TAX_FORM.name() + "_" + formDataId;
+            String lockKey = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId;
             LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
             checkLockAnotherUser(lockData, logger,  userInfo.getUser());
             if (lockData == null) {
