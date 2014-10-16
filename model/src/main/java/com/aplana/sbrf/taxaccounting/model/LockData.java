@@ -13,11 +13,11 @@ public final class LockData {
 
     public enum LOCK_OBJECTS {
         REF_BOOK,
-        TAX_FORM,
         DECLARATION_DATA,
         FORM_DATA,
         DECLARATION_TEMPLATE,
-        FORM_TEMPLATE
+        FORM_TEMPLATE,
+        LOG_SYSTEM_BACKUP
     }
 
     public static final int STANDARD_LIFE_TIME = 3600000;  // 1 час
