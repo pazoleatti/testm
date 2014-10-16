@@ -19,8 +19,6 @@ import java.util.Properties;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    private static final int PORT = 25;
-
     @Autowired
     private ConfigurationDao configurationDao;
 
@@ -30,10 +28,11 @@ public class EmailServiceImpl implements EmailService {
         final String login = model.get(ConfigurationParam.EMAIL_LOGIN, 0).get(0);
         final String password = model.get(ConfigurationParam.EMAIL_PASSWORD, 0).get(0);
         String server = model.get(ConfigurationParam.EMAIL_SERVER, 0).get(0);
+        String port = model.get(ConfigurationParam.EMAIL_PORT, 0).get(0);
 
         Properties props = new Properties();
         props.put("mail.smtp.host", server);
-        props.put("mail.smtp.port", PORT);
+        props.put("mail.smtp.port", port);
 
         Session session = Session.getInstance(props,
                 new javax.mail.Authenticator() {
@@ -58,13 +57,13 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public boolean testAuth(String server, final String login, final String password, Logger logger) {
+    public boolean testAuth(String server, String port, String login, String password, Logger logger) {
         try {
             Properties props = new Properties();
             props.setProperty("mail.smtp.auth", "true");
             Session session = Session.getInstance(props);
             Transport transport = session.getTransport("smtp");
-            transport.connect(server, PORT, login, password);
+            transport.connect(server, Integer.parseInt(port), login, password);
             transport.close();
             return true;
         } catch (Exception e) {
