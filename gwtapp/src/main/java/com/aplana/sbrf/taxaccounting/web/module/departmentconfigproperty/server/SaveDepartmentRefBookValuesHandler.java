@@ -118,6 +118,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                         rowFromClient.put("LINK",new RefBookValue(RefBookAttributeType.REFERENCE, recordId));
                         rowFromClient.put("ROW_ORD",rowFromServer.get("ROW_ORD"));
                         rowFromClient.put("record_id",rowFromServer.get("record_id"));
+                        rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, saveDepartmentRefBookValuesAction.getDepartmentId().longValue()));
                         toUpdate.add(rowFromClient);
                         break;
                     }
@@ -131,6 +132,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 if (!contains) {
                     rowFromClient.put("LINK", new RefBookValue(RefBookAttributeType.REFERENCE, recordId));
                     rowFromClient.put("ROW_ORD", new RefBookValue(RefBookAttributeType.NUMBER, ++maxRowOrd));
+                    rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, saveDepartmentRefBookValuesAction.getDepartmentId().longValue()));
                     toAdd.add(rowFromClient);
                 }
             }
