@@ -124,7 +124,7 @@ public class DiffServiceImpl implements DiffService {
         }
 
         // Кэш разыменованных значений
-        Map<Long, String> dereferenceCache = new HashMap<Long, String>();
+        Map<Integer, Map<Long, String>> dereferenceCache = new HashMap<Integer, Map<Long, String>>();
 
         // Пары строк для подстановок
         List<Pair<Integer, Integer>> pairList = getMergedOrder(diffList, Math.max(original.size(), revisedList.size()));
@@ -153,7 +153,7 @@ public class DiffServiceImpl implements DiffService {
      * Стили для отображения изменений
      */
     private void diffStyles(DiffType diffType, DataRow<Cell> dataRow, DataRow<Cell> originalRow,
-                            DataRow<Cell> revisedRow, Map<Long, String> dereferenceCache) {
+                            DataRow<Cell> revisedRow, Map<Integer, Map<Long, String>> dereferenceCache) {
         // Очистка всех стилей
         rowStyle(dataRow, null);
 
@@ -202,28 +202,40 @@ public class DiffServiceImpl implements DiffService {
                                 String revisedDereference = null;
 
                                 if (originalParentCell.getNumericValue() != null) {
+                                    if (!dereferenceCache.containsKey(originalReferenceColumn.getId())) {
+                                        dereferenceCache.put(originalReferenceColumn.getId(), new HashMap<Long, String>());
+                                    }
+
+                                    Map<Long, String> map =  dereferenceCache.get(originalReferenceColumn.getId());
+
                                     long refKey = originalParentCell.getNumericValue().longValue();
-                                    if (dereferenceCache.containsKey(refKey)) {
-                                        originalDereference = dereferenceCache.get(refKey);
+                                    if (map.containsKey(refKey)) {
+                                        originalDereference = map.get(refKey);
                                     } else {
                                         refBookHelper.dataRowsDereference(new Logger(),
                                                 Arrays.asList(new DataRow<Cell>(Arrays.asList(originalCell, originalParentCell))),
                                                 Arrays.asList(originalCell.getColumn(), originalParentCell.getColumn()));
                                         originalDereference = originalCell.getRefBookDereference();
-                                        dereferenceCache.put(refKey, originalDereference);
+                                        map.put(refKey, originalDereference);
                                     }
                                 }
 
                                 if (revisedParentCell.getNumericValue() != null) {
+                                    if (!dereferenceCache.containsKey(originalReferenceColumn.getId())) {
+                                        dereferenceCache.put(originalReferenceColumn.getId(), new HashMap<Long, String>());
+                                    }
+
+                                    Map<Long, String> map =  dereferenceCache.get(originalReferenceColumn.getId());
+
                                     long refKey = revisedParentCell.getNumericValue().longValue();
-                                    if (dereferenceCache.containsKey(refKey)) {
-                                        revisedDereference = dereferenceCache.get(refKey);
+                                    if (map.containsKey(refKey)) {
+                                        revisedDereference = map.get(refKey);
                                     } else {
                                         refBookHelper.dataRowsDereference(new Logger(),
                                                 Arrays.asList(new DataRow<Cell>(Arrays.asList(revisedCell, revisedParentCell))),
                                                 Arrays.asList(revisedCell.getColumn(), revisedParentCell.getColumn()));
                                         revisedDereference = revisedCell.getRefBookDereference();
-                                        dereferenceCache.put(refKey, revisedDereference);
+                                        map.put(refKey, revisedDereference);
                                     }
                                 }
                                 if (isValueChanged(originalDereference, revisedDereference)) {
