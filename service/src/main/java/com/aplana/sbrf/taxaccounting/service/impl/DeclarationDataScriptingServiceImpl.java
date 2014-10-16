@@ -92,9 +92,12 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
 		b.put("declarationData", declarationData);
+        String applicationVersion = "АС Учет налогов";
         if (manifestProperties != null) {
-            b.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
+            applicationVersion += "" + manifestProperties.getProperty("Implementation-Version");
         }
+        b.put("applicationVersion", applicationVersion);
+
 		if (exchangeParams != null) {
 			for (Map.Entry<String, Object> entry : exchangeParams.entrySet()) {
 				if (b.containsKey(entry.getKey()))
