@@ -231,7 +231,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LockData lockData = lock(id, userInfo);
         if (lockData == null) {
             try {
-                if (lockDataService.getLock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + id + "_" + ReportType.XML_DEC.getName()) != null) {
+                if (lockDataService.getLock(generateAsyncTaskKey(id, ReportType.XML_DEC)) != null) {
                     throw new ServiceException("Дождитесь завершения пересчета для принятия формы");
                 }
 
@@ -279,6 +279,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	public String getXmlData(long declarationId, TAUserInfo userInfo) {
 		declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL1);
         String xmlUuid = reportService.getDec(userInfo, declarationId, ReportType.XML_DEC);
+        if (xmlUuid == null) return null;
         return new String(getBytesFromInputstream(xmlUuid));
 	}
 
@@ -541,14 +542,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private byte[] getBytesFromInputstream(String blobId){
         if (blobId == null) return null;
-        BlobData blobPdfData = blobDataService.get(blobId);
+        BlobData blobData = blobDataService.get(blobId);
         ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
         try {
-            IOUtils.copy(blobPdfData.getInputStream(), arrayOutputStream);
+            IOUtils.copy(blobData.getInputStream(), arrayOutputStream);
         } catch (IOException e) {
-            throw new ServiceException("Не удалось извлечь pdf.", e);
+            throw new ServiceException("Не удалось извлечь отчет.", e);
         }
         return arrayOutputStream.toByteArray();
+    }
+
+    @Override
+    public String generateAsyncTaskKey(long declarationDataId, ReportType reportType) {
+        return LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + reportType.getName();
     }
 
     @Override
@@ -597,7 +603,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (isLock) {
             ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.EXCEL_DEC};
             for (ReportType reportType : reportTypes) {
-                lockDataService.unlock(String.format("%s_%s_%s", LockData.LOCK_OBJECTS.DECLARATION_DATA.name(), declarationDataId, reportType.getName()), 0, true);
+                lockDataService.unlock(generateAsyncTaskKey(declarationDataId, reportType), 0, true);
             }
         }
         reportService.deleteDec(declarationDataId);

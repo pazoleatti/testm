@@ -132,6 +132,14 @@ public interface DeclarationDataService {
     boolean existDeclaration(int declarationTypeId, int departmentId, List<LogEntry> logs);
 
     /**
+     * Генерация ключа блокировки для асинхронных задач по декларациям
+     * @param declarationDataId
+     * @param reportType
+     * @return код блокировки
+     */
+    String generateAsyncTaskKey(long declarationDataId, ReportType reportType);
+
+    /**
      * Заблокировать DeclarationData.
      * @param declarationDataId - идентификатор декларации
      * @param userInfo информация о пользователе
