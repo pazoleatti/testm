@@ -257,6 +257,9 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 separator.setVisible(true);
                 edit.setVisible(false);
                 cancelEdit.setVisible(true);
+                search.setEnabled(true);
+                filterText.setEnabled(true);
+                refbookDataTree.setEnabled(true);
                 break;
             case READ:
                 addRow.setVisible(false);
@@ -264,6 +267,9 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 separator.setVisible(false);
                 edit.setVisible(false);
                 cancelEdit.setVisible(false);
+                search.setEnabled(true);
+                filterText.setEnabled(true);
+                refbookDataTree.setEnabled(true);
                 break;
             case VIEW:
                 edit.setVisible(true);
@@ -271,6 +277,18 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
                 separator.setVisible(false);
+                search.setEnabled(true);
+                filterText.setEnabled(true);
+                refbookDataTree.setEnabled(true);
+                break;
+            case CREATE:
+                addRow.setVisible(false);
+                deleteRow.setVisible(false);
+                cancelEdit.setVisible(false);
+                search.setEnabled(false);
+                filterText.setEnabled(false);
+                separator.setVisible(false);
+                refbookDataTree.setEnabled(false);
                 break;
         }
     }

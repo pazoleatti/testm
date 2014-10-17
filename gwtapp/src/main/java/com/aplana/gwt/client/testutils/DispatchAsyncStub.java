@@ -11,7 +11,7 @@ import org.mockito.stubbing.Stubber;
  *
  * @author Fail Mukhametdinov
  */
-public class DispatchAsyncStubber {
+public class DispatchAsyncStub {
     public static <T, C extends AsyncCallback> Stubber callSuccessWith(final T data) {
         return Mockito.doAnswer(new Answer<T>() {
             @Override

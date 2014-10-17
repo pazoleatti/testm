@@ -17,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.ConfirmButtonClickHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
@@ -53,7 +54,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private FormMode mode;
     /**Может ли справочник работать с версиями*/
     private boolean canVersion= false;
-    private Map<String, Object> modifiedFields = new HashMap<String, Object>();
+    // Признак того, что справочник подразделений
+    private boolean isDepartments = false;
+    Map<String, Object> modifiedFields = new HashMap<String, Object>();
 
     public void setNeedToReload() {
         getView().setNeedToReload(true);
@@ -85,22 +88,26 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     protected final RenameDialogPresenter renameDialogPresenter;
 
+    private RefBookHierDataPresenter.MyView refBookHierDataPresenterMyView;
+
 	@Inject
 	public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync,
-                             PlaceManager placeManager, RenameDialogPresenter renameDialogPresenter) {
+                             PlaceManager placeManager, RenameDialogPresenter renameDialogPresenter,
+                             RefBookHierDataPresenter.MyView refBookHierDataPresenterMyView) {
 		super(eventBus, view);
 		this.placeManager = placeManager;
 		this.dispatchAsync = dispatchAsync;
         this.renameDialogPresenter = renameDialogPresenter;
-		getView().setUiHandlers(this);
+        this.refBookHierDataPresenterMyView = refBookHierDataPresenterMyView;
+        getView().setUiHandlers(this);
 	}
 
 	public void init(final Long refbookId, final boolean readOnly) {
-
-		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-		action.setRefBookId(refbookId);
+        if (refbookId == 30) isDepartments = true;
+        GetRefBookAttributesAction action = new GetRefBookAttributesAction();
+        action.setRefBookId(refbookId);
         currentRefBookId = refbookId;
-		dispatchAsync.execute(action,
+        dispatchAsync.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetRefBookAttributesResult>() {
                             @Override
@@ -116,7 +123,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 }
                             }
                         }, this));
-	}
+    }
 
 	// TODO: отрефакторить, чтобы дата была общая с com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataView.getRelevanceDate() (Marat Fayzullin 2013-09-15)
 	public Date getRelevanceDate() {
@@ -218,7 +225,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             }
             Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
             //TODO : Специфические для справочника подразделений проверки. Подумать над возможностью избавиться
-            if (currentRefBookId == 30 && modifiedFields.containsKey("TYPE") &&
+            if (isDepartments && modifiedFields.containsKey("TYPE") &&
                     map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
                 Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
                 return;
@@ -253,6 +260,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         recordChanges.setId(newId);
                                         currentUniqueRecordId = newId;
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
+                                        if (isDepartments) refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
                                     }
                                 }, this));
 			} else {
@@ -266,14 +274,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
 
-                if (currentRefBookId == 30) {
-                    if (modifiedFields.containsKey("TYPE")){
-                        if (map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
-                           Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
-                            return;
-                        }
-
-                    }
+                if (isDepartments) {
                     if(modifiedFields.containsKey("NAME")){
                         renameDialogPresenter.open(new ConfirmButtonClickHandler() {
                             @Override
@@ -375,7 +376,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         } else {
             showRecord(currentUniqueRecordId);
         }
-	}
+
+        if (isDepartments) refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
+    }
 
 	@Override
 	public void valueChanged(String alias, Object value) {
