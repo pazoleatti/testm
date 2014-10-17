@@ -10,7 +10,6 @@
 	</ui:style>
 
 	<g:HorizontalPanel>
-		<g:Label text="Версия: " styleName="{style.myStyle}"/>
 		<g:Label ui:field="projectVersion" styleName="{style.myStyle}"/>
 	</g:HorizontalPanel>
 

@@ -92,8 +92,8 @@ def checkDeclarationBank() {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
-    /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 7 - новая декларация банка */
-    def declarationTypeId = ((newDeclaration) ? 7 : 2)
+    /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка */
+    def declarationTypeId = ((newDeclaration) ? 9 : 2)
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1
