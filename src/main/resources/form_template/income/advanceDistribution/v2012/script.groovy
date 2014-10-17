@@ -280,8 +280,8 @@ void calc() {
     // добавить итого (графа 5..7, 10, 11, 13..22)
     def totalRow = formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 3
+    totalRow.fix = 'Сбербанк России'
+    totalRow.getCell('fix').colSpan = 5
     setTotalStyle(totalRow)
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
