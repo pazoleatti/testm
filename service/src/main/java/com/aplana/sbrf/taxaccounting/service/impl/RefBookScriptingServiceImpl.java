@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,7 +56,8 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     private LogEntryService logEntryService;
 
     @Autowired
-    private Properties manifestProperties;
+    @Qualifier("versionInfoProperties")
+    private Properties versionInfoProperties;
 
     @Override
     public void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
@@ -107,10 +109,11 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         bindings.put("logger", scriptLogger);
         bindings.put("userInfo", userInfo);
         bindings.put("refBookFactory", refBookFactory);
-        if (manifestProperties != null) {
-            bindings.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
-            bindings.put("applicationRevision", manifestProperties.getProperty("X-Git"));
+        String applicationVersion = "АС Учет налогов";
+        if (versionInfoProperties != null) {
+            applicationVersion += " " + versionInfoProperties.getProperty("version");
         }
+        bindings.put("applicationVersion", applicationVersion);
 
         if (userInfo != null && userInfo.getUser() != null) {
             bindings.put("user", userInfo.getUser());

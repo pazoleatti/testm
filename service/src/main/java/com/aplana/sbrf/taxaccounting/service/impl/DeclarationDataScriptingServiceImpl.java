@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +38,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     private LogEntryService logEntryService;
 
     @Autowired
-    private Properties manifestProperties;
+    @Qualifier("versionInfoProperties")
+    private Properties versionInfoProperties;
 
 	/**
 	 * Возвращает спринг-бины доcтупные для использования в скрипте создания декларации.
@@ -92,9 +94,12 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
 		b.put("declarationData", declarationData);
-        if (manifestProperties != null) {
-            b.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
+        String applicationVersion = "АС Учет налогов";
+        if (versionInfoProperties != null) {
+            applicationVersion += " " + versionInfoProperties.getProperty("version");
         }
+        b.put("applicationVersion", applicationVersion);
+
 		if (exchangeParams != null) {
 			for (Map.Entry<String, Object> entry : exchangeParams.entrySet()) {
 				if (b.containsKey(entry.getKey()))

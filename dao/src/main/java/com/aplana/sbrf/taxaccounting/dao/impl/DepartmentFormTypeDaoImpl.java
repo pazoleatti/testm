@@ -761,7 +761,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "where department_id = :departmentId and exists (\n" +
             "select 1 from form_type ft \n" +
             "left join form_template ftemp on ftemp.type_id = ft.id \n" +
-            "left join form_template next_ftemp on (next_ftemp.type_id = ft.id and next_ftemp.version > ftemp.version) \n" +
+            "left join form_template next_ftemp on (next_ftemp.type_id = ft.id and next_ftemp.version > ftemp.version and next_ftemp.status = 0) \n" +
             "where ft.id = src_dft.form_type_id and (:taxType is null or ft.tax_type = :taxType) \n" +
             "and (:periodStart is null or (ftemp.status = 0 and (\n" +
             "(:periodStart >= ftemp.version and (next_ftemp.version is null or :periodStart <= next_ftemp.version)) or \n" +

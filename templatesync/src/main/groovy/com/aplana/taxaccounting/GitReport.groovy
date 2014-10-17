@@ -26,7 +26,7 @@ class GitReport {
                         def scanResult = scanSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
                         if (!scanResult.isEmpty()) {
                             tr {
-                                td(colspan: 6, class: 'hdr', Main.TAX_FOLDERS[folderName])
+                                td(colspan: 7, class: 'hdr', Main.TAX_FOLDERS[folderName])
                             }
                             tr {
                                 th 'type_id'
@@ -34,7 +34,8 @@ class GitReport {
                                 th 'Название'
                                 th 'Версия git'
                                 th 'Версия БД'
-                                th 'Сравнение'
+                                th 'Сравнение скриптов'
+                                th 'Сравнение стилей'
                             }
                             scanResult.each { result ->
                                 tr {
@@ -52,6 +53,7 @@ class GitReport {
                                     td result.versionGit
                                     td result.versionDB
                                     td(class: (result.error ? 'td_error' : 'td_ok'), result.check)
+                                    td(class: (result.errorStyle ? 'td_error' : 'td_ok'), result.checkStyle)
                                 }
                             }
                         }
@@ -110,7 +112,7 @@ class GitReport {
                                 result.versionDB = versions[version]?.version
                                 scanResult.add(result)
 
-                                // Сравненение скриптов
+                                // Сравнение скриптов
                                 def scriptFile = new File("$versionFolder/script.groovy")
                                 if (!scriptFile.exists()) {
                                     result.check = "Скрипт не найден в «${scriptFile.absolutePath}»"
@@ -138,6 +140,62 @@ class GitReport {
                                         }
                                     }
                                 }
+                                // Сравнение стилей
+                                def contentFile = new File("$versionFolder/content.xml")
+                                if (!contentFile.exists()) {
+                                    result.checkStyle = "Файл со стилями не найден в «${contentFile.absolutePath}»"
+                                    result.errorStyle = true
+                                } else {
+                                    def Map mapStylesXml = [:]
+                                    def xml = new XmlSlurper().parseText(contentFile.getText())
+                                    def stylesDb = versions[version]?.styles
+                                    // Собираем все стили из xml
+                                    for (def styleXml : xml.styles) {
+                                        def style = new Expando()
+                                        style.alias = styleXml.alias.text()
+                                        style.back_color = StyleColor[styleXml.backColor.text()]
+                                        style.font_color = StyleColor[styleXml.fontColor.text()]
+                                        style.bold = Boolean.parseBoolean(styleXml.bold.text())
+                                        style.italic = Boolean.parseBoolean(styleXml.italic.text())
+                                        mapStylesXml.put(styleXml.alias.text(), style)
+                                    }
+                                    def errorMap = [:]
+                                    // Находим стили
+                                    def absentStyles = stylesDb.findAll { alias, styleDb -> mapStylesXml[alias] == null }
+                                    // Проходим по стилям из базы и удаляем повторяющиеся из найденных в xml
+                                    stylesDb.each { alias, styleDb ->
+                                        def styleXml = mapStylesXml.remove(alias)
+                                        if (styleXml != null) {
+                                            def errorList = []
+                                            ['back_color', 'font_color', 'bold', 'italic'].each {
+                                                if (styleXml[it] != styleDb[it]) {
+                                                    errorList.add(it)
+                                                }
+                                            }
+                                            if (!errorList.isEmpty()) {
+                                                errorMap.put(alias, errorList)
+                                            }
+                                        }
+                                    }
+                                    if (!absentStyles.isEmpty()){
+                                        result.checkStyle = "В DB обнаружены стили '${absentStyles.keySet().join('\', \'')}' отсутствующие в Git. "
+                                        result.errorStyle = true
+                                    }
+                                    if (!mapStylesXml.isEmpty()) {
+                                        result.checkStyle = (result.checkStyle?:"") + "В Git обнаружены стили '${mapStylesXml.keySet().join('\', \'')}' отсутствующие в DB. "
+                                        result.errorStyle = true
+                                    }
+                                    if (!errorMap.isEmpty()){
+                                        //TODO вывести различия?
+                                        result.checkStyle = (result.checkStyle?:"") + "В Git и DB отличаются стили '${errorMap.keySet().join('\', \'')}'"
+                                        result.errorStyle = true
+                                    }
+                                    if (absentStyles.isEmpty() && mapStylesXml.isEmpty() && errorMap.isEmpty()){
+                                        result.checkStyle = "Ok"
+                                        result.errorStyle = false
+                                    }
+                                }
+
                                 // Удаляем из списка не найденных
                                 notExistVersions.remove(version)
                             }
@@ -168,6 +226,16 @@ class GitReport {
                 scanResult.add(result)
             }
         }
+        scanResult.sort(new Comparator() {
+            @Override
+            int compare(Object o1, Object o2) {
+                if (o1.id != o2.id) {
+                    return o1.id <=> o2.id
+                } else {
+                    return o1.version <=> o2.version
+                }
+            }
+        })
         return scanResult
     }
 
@@ -194,6 +262,25 @@ class GitReport {
         }
         sql.close()
         println("Load DB form_template OK")
+
+        def styleSql = Sql.newInstance(Main.DB_URL, Main.DB_USER, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+        styleSql.eachRow("select fs.alias, ft.type_id, to_char(ft.version, 'RRRR') as version, fs.font_color, fs.back_color, fs.italic, fs.bold from form_style fs, form_template ft where fs.form_template_id=ft.id and ft.status not in (-1, 2)") {
+            def type_id = it.type_id as Integer
+            def version = it.version
+            if (map[type_id][version].styles == null) {
+                map[type_id][version].styles = [:]
+            }
+            // Стиль версии макета
+            def style = new Expando()
+            style.alias = it.alias
+            style.font_color = StyleColor.getById(it.font_color as Integer)
+            style.back_color = StyleColor.getById(it.back_color as Integer)
+            style.italic = it.italic == 1
+            style.bold = it.bold == 1
+            map[type_id][version].styles.put(it.alias, style)
+        }
+        styleSql.close()
+        println("Load DB form_style OK")
         return map
     }
 }

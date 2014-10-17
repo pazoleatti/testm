@@ -9,7 +9,7 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (ОП)
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
- * declarationTemplateId=21048
+ * declarationTemplateId=21108
  *
  * @author rtimerbaev
  */
@@ -236,7 +236,7 @@ void generateXML(def xmlBankData) {
 
     def xmlbuilder = new MarkupBuilder(xml)
     xmlbuilder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(5, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(5, declarationData.departmentId, declarationData.reportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 

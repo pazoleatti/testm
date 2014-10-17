@@ -29,6 +29,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -56,7 +57,8 @@ public class GetMainMenuActionHandler extends
 	private SecurityService securityService;
 
     @Autowired
-    Properties manifestProperties;
+    @Qualifier("versionInfoProperties")
+    private Properties versionInfoProperties;
 
 	@Override
 	public GetMainMenuResult execute(GetMainMenuAction action,
@@ -146,7 +148,7 @@ public class GetMainMenuActionHandler extends
             if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                 MenuItem gar = new MenuItem("Гарантии", "", "Гарантии");
                 taxMenu.getSubMenu().add(gar);
-                String url = manifestProperties.getProperty("Url-Guarantee", "#");
+                String url = versionInfoProperties == null ? "#" : versionInfoProperties.getProperty("guarantee.url", "#");
                 gar.getSubMenu().add(new MenuItem("Ввод гарантий", url));
             }
 

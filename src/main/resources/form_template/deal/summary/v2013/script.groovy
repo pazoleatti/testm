@@ -1744,6 +1744,8 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
+        emptyRow = false
+
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
 

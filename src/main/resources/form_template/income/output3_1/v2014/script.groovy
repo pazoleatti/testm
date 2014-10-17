@@ -6,7 +6,7 @@ import groovy.transform.Field
 
 /**
  * Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика
- * formTemplateId=10142
+ * formTemplateId=1412
  *
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *

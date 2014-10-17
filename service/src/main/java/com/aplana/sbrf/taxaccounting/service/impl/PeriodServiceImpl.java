@@ -201,8 +201,7 @@ public class PeriodServiceImpl implements PeriodService {
 		boolean allGood = true;
         List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
         for (FormData fd : formDataList) {
-            LockData lock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + fd.getId(),
-                    user.getId(), LockData.STANDARD_LIFE_TIME);
+            LockData lock = lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + fd.getId());
             if (lock != null) {
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +
@@ -418,7 +417,7 @@ public class PeriodServiceImpl implements PeriodService {
         //Check forms
         List<FormData> formDatas = formDataService.find(departmentIds, drp.getReportPeriod().getId());
         for (FormData fd : formDatas) {
-            logger.error("Форма %s %s в подразделении %s находится в удаляемом периоде!",
+            logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
                     fd.getFormType().getName(), fd.getKind().getName(),
                     departmentService.getDepartment(fd.getDepartmentId()).getName());
         }
@@ -430,7 +429,7 @@ public class PeriodServiceImpl implements PeriodService {
         for (Long id : declarations) {
             DeclarationData dd = declarationDataService.get(id, user);
             DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            logger.error("%s в подразделении %s находится в удаляемом периоде!", dt.getType().getName(), departmentService.getDepartment(dd.getDepartmentId()).getName());
+            logger.error("\"%s\" в подразделении \"%s\" находится в удаляемом периоде!", dt.getType().getName(), departmentService.getDepartment(dd.getDepartmentId()).getName());
         }
 
         int reportPeriodId = drp.getReportPeriod().getId();
@@ -785,8 +784,6 @@ public class PeriodServiceImpl implements PeriodService {
         List<DepartmentReportPeriod> onePeriod = departmentReportPeriodService.getListByFilter(filter);
         if (!onePeriod.isEmpty() && onePeriod.size()!=1){
             throw new ServiceException("Найдено больше одного периода корректировки с заданной датой корректировки.");
-        } else if (onePeriod.isEmpty()){
-            throw new ServiceException("Не найден корректирующий период.");
         } else if (onePeriod.size() == 1 && onePeriod.get(0).isActive()){
             return PeriodStatusBeforeOpen.CORRECTION_PERIOD_NOT_CLOSE;
         }
