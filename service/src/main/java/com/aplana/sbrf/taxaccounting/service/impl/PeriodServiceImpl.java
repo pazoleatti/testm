@@ -201,8 +201,7 @@ public class PeriodServiceImpl implements PeriodService {
 		boolean allGood = true;
         List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
         for (FormData fd : formDataList) {
-            LockData lock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + fd.getId(),
-                    user.getId(), LockData.STANDARD_LIFE_TIME);
+            LockData lock = lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + fd.getId());
             if (lock != null) {
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +
@@ -785,8 +784,6 @@ public class PeriodServiceImpl implements PeriodService {
         List<DepartmentReportPeriod> onePeriod = departmentReportPeriodService.getListByFilter(filter);
         if (!onePeriod.isEmpty() && onePeriod.size()!=1){
             throw new ServiceException("Найдено больше одного периода корректировки с заданной датой корректировки.");
-        } else if (onePeriod.isEmpty()){
-            throw new ServiceException("Не найден корректирующий период.");
         } else if (onePeriod.size() == 1 && onePeriod.get(0).isActive()){
             return PeriodStatusBeforeOpen.CORRECTION_PERIOD_NOT_CLOSE;
         }

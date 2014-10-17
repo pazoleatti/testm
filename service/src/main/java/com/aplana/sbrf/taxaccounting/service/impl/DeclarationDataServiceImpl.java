@@ -170,8 +170,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
 
-        deleteReport(id, false);
-
         setDeclarationBlobs(logger, declarationData, docDate, userInfo);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
@@ -228,13 +226,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo) {
-        LockData lockData = lock(id, userInfo);
-        if (lockData == null) {
+        if (lock(id, userInfo) == null) {
             try {
-                if (lockDataService.getLock(generateAsyncTaskKey(id, ReportType.XML_DEC)) != null) {
-                    throw new ServiceException("Дождитесь завершения пересчета для принятия формы");
-                }
-
                 // TODO (sgoryachkin) Это 2 метода должо быть
                 if (accepted) {
                     DeclarationData declarationData = declarationDataDao.get(id);
@@ -271,7 +264,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 unlock(id, userInfo);
             }
         } else {
-            throw new ServiceException(String.format(LockDataService.LOCK_DATA, taUserService.getUser(lockData.getUserId()).getName(), lockData.getUserId()));
+            throw new ServiceException("Декларация заблокирована и не может быть принята. Попробуйте выполнить операцию позже");
         }
     }
 
@@ -357,8 +350,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Locale oldLocale = Locale.getDefault();
         Locale.setDefault(new Locale("ru", "RU"));
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
-        if (xmlUuid == null) { // не проверяем пустые XML
-            return;
+        if (xmlUuid == null) {
+            throw new ServiceException("В декларации отсутствуют данные (не бы выполнен расчет). Операция \"Принять\" не может быть выполнена");
         }
         String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
@@ -560,7 +553,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
-        LockData lockData = lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
         checkLock(lockData, userInfo.getUser());
         return lockData;
     }
@@ -568,22 +561,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void unlock(final long declarationDataId, final TAUserInfo userInfo) {
-        tx.executeInNewTransaction(new TransactionLogic() {
-            @Override
-            public void execute() {
-                lockDataService.unlock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId, userInfo.getUser().getId());
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
-            }
-        });
+        lockDataService.unlock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId());
     }
 
     @Override
     public void checkLockedMe(Long declarationDataId, TAUserInfo userInfo) {
-        checkLock(lockDataService.getLock(LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId),
+        checkLock(lockDataService.getLock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC)),
                 userInfo.getUser());
     }
 

@@ -294,7 +294,6 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 					public void onSuccess(RemovePeriodResult result) {
 						find();
 						LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
-                        getView().clearSelection();
                         Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
 					}
 				}, PeriodsPresenter.this));

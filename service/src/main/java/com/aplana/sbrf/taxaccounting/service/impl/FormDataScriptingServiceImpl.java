@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,8 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private Properties manifestProperties;
+    @Qualifier("versionInfoProperties")
+    private Properties versionInfoProperties;
 
     @Override
     public void executeScript(TAUserInfo userInfo, FormData formData,
@@ -66,10 +68,11 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         b.put("formDataEvent", event);
         b.put("logger", logger);
         b.put("formData", formData);
-        if (manifestProperties != null) {
-            b.put("applicationVersion", manifestProperties.getProperty("Implementation-Version"));
-            b.put("applicationRevision", manifestProperties.getProperty("X-Git"));
+        String applicationVersion = "АС Учет налогов";
+        if (versionInfoProperties != null) {
+            applicationVersion += " " + versionInfoProperties.getProperty("version");
         }
+        b.put("applicationVersion", applicationVersion);
         if (userInfo != null && userInfo.getUser() != null) {
             b.put("user", userInfo.getUser());
             b.put("userDepartment", departmentService.getDepartment(userInfo.getUser().getDepartmentId()));

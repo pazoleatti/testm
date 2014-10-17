@@ -57,7 +57,7 @@ public interface LockDataService {
     /**
      * Возвращает данные блокировки по ключу
      * @param key ключ блокировки
-     * @return данные блокировки
+     * @return данные блокировки. Если блокировки не существует - возвращается null
      */
     LockData getLock(String key);
 

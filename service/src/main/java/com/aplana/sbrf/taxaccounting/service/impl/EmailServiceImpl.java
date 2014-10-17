@@ -65,6 +65,7 @@ public class EmailServiceImpl implements EmailService {
             Transport transport = session.getTransport("smtp");
             transport.connect(server, Integer.parseInt(port), login, password);
             transport.close();
+            logger.info("Проверка выполнена, ошибок не найдено");
             return true;
         } catch (Exception e) {
             logger.error("Авторизация с указанными параметрами не выполнена!");
