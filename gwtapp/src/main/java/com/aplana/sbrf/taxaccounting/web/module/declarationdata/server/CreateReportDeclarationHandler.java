@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
@@ -59,37 +60,46 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     public CreateReportResult execute(CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         CreateReportResult result = new CreateReportResult();
         Map<String, Object> params = new HashMap<String, Object>();
-        String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), action.getType());
         TAUserInfo userInfo = securityService.currentUserInfo();
-        params.put("declarationDataId", action.getDeclarationDataId());
-        params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
-        params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
         Logger logger = new Logger();
-        LockData lockData;
-        if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4)) == null) {
+        LockData lockData = declarationDataService.lock(action.getDeclarationDataId(), userInfo);
+        if (lockData == null) {
             try {
-                String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), action.getType());
-                if (uuid == null) {
-                    params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
-                    lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);
-                    logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));
+                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), action.getType());
+                params.put("declarationDataId", action.getDeclarationDataId());
+                params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
+                params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                LockData lockDataReportTask;
+                if ((lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4)) == null) {
+                    try {
+                        String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), action.getType());
+                        if (uuid == null) {
+                            params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
+                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                            asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);
+                            logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));
+                        } else {
+                            result.setExistReport(true);
+                            lockDataService.unlock(key, userInfo.getUser().getId());
+                        }
+                    } catch (Exception e) {
+                        lockDataService.unlock(key, userInfo.getUser().getId());
+                        throw new ActionException("Ошибка при постановке в очередь асинхронной задачи", e);
+                    }
                 } else {
-                    result.setExistReport(true);
-                    lockDataService.unlock(key, userInfo.getUser().getId());
+                    if (lockDataReportTask.getUserId() != userInfo.getUser().getId()) {
+                        try {
+                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                        } catch (ServiceException e) {
+                        }
+                    }
+                    logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));
                 }
-            } catch (Exception e) {
-                lockDataService.unlock(key, userInfo.getUser().getId());
-                throw new ActionException("Ошибка при постановке в очередь асинхронной задачи", e);
+            } finally {
+                declarationDataService.unlock(action.getDeclarationDataId(), userInfo);
             }
         } else {
-            if (lockData.getUserId() != userInfo.getUser().getId()) {
-                try {
-                    lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                } catch(ServiceException e) {
-                }
-            }
-            logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));
+            throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
