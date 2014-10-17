@@ -245,7 +245,14 @@ public class DeclarationDataPresenter
 										revealPlaceRequest();
                                         getView().startTimerReport(ReportType.XML_DEC);
 									}
-								}, DeclarationDataPresenter.this));
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        super.onFailure(caught);
+                                        onTimerReport(ReportType.EXCEL_DEC, false);
+                                        onTimerReport(ReportType.XML_DEC, false);
+                                    }
+                                }, DeclarationDataPresenter.this));
 	}
 
 	@Override
@@ -350,6 +357,13 @@ public class DeclarationDataPresenter
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
                         }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        super.onFailure(caught);
+                        onTimerReport(ReportType.EXCEL_DEC, false);
+                        onTimerReport(ReportType.XML_DEC, false);
                     }
                 }, this));
 	}

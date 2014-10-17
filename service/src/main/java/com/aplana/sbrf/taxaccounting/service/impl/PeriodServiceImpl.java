@@ -784,8 +784,6 @@ public class PeriodServiceImpl implements PeriodService {
         List<DepartmentReportPeriod> onePeriod = departmentReportPeriodService.getListByFilter(filter);
         if (!onePeriod.isEmpty() && onePeriod.size()!=1){
             throw new ServiceException("Найдено больше одного периода корректировки с заданной датой корректировки.");
-        } else if (onePeriod.isEmpty()){
-            throw new ServiceException("Не найден корректирующий период.");
         } else if (onePeriod.size() == 1 && onePeriod.get(0).isActive()){
             return PeriodStatusBeforeOpen.CORRECTION_PERIOD_NOT_CLOSE;
         }
