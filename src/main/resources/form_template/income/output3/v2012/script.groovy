@@ -42,13 +42,19 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        calc()
+        logicCheck()
         break
 }
 
 //// Кэши и константы
 @Field
 def refBookCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def providerCache = [:]
 
 @Field
 def editableColumns = ['paymentType', 'dateOfPayment', 'sumTax']
@@ -62,6 +68,16 @@ def nonEmptyColumns = ['paymentType', 'okatoCode', 'budgetClassificationCode', '
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
 
 //// Кастомные методы
@@ -96,4 +112,87 @@ def logicCheck() {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
+}
+
+void importData() {
+    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Вид платежа', null, 5, 2)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
+
+    def headerMapping = [
+            (xml.row[0].cell[0]) : 'Вид платежа',
+            (xml.row[0].cell[1]) : 'Код по ОКТМО',
+            (xml.row[0].cell[2]) : 'Код бюджетной классификации',
+            (xml.row[0].cell[3]) : 'Срок уплаты',
+            (xml.row[0].cell[4]) : 'Сумма налога, подлежащая уплате',
+    ]
+    (0..4).each { index ->
+        headerMapping.put((xml.row[1].cell[index]), (index + 1).toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+
+    // добавить данные в форму
+    addData(xml, 2)
+}
+
+void addData(def xml, headRowCount) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def xmlIndexRow = -1 // Строки xml, от 0
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    def columnCount = 5
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        // Пропуск строк шапки
+        if (xmlIndexRow <= headRowCount - 1) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        if (row.cell.size() >= columnCount) {
+            def newRow = formData.createDataRow()
+            newRow.setIndex(rowIndex++)
+            editableColumns.each {
+                newRow.getCell(it).editable = true
+                newRow.getCell(it).setStyleAlias('Редактируемая')
+            }
+
+            def xmlIndexCol = 0
+
+            // графа 1
+            newRow.paymentType = getRecordIdImport(24, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+            xmlIndexCol++
+
+            // графа 2
+            newRow.okatoCode = row.cell[xmlIndexCol].text()
+            xmlIndexCol++
+
+            // графа 3
+            newRow.budgetClassificationCode = row.cell[xmlIndexCol].text()
+            xmlIndexCol++
+
+            // графа 4
+            newRow.dateOfPayment = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol++
+
+            // графа 5
+            newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            xmlIndexCol++
+
+            rows.add(newRow)
+        }
+    }
+    dataRowHelper.save(rows)
 }
