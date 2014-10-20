@@ -11,6 +11,8 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
 
+    <import resource="classpath:com/aplana/sbrf/taxaccounting/version-info.xml"/>
+
 	<context:annotation-config />
 	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.web.main.api.server"/>
 	<bean class="com.aplana.sbrf.taxaccounting.web.main.entry.server.MainServerModule" />

@@ -544,4 +544,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public void setVisible(boolean visible){
         scrollPanel.setVisible(visible);
     }
+
+    public void setEnabled(boolean isEnabled) {
+        tree.setEnabled(isEnabled);
+    }
 }

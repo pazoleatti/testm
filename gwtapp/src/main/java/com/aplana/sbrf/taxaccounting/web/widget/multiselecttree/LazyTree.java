@@ -4,6 +4,9 @@ import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.HasLazyTre
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.multiselecttree.event.LazyTreeSelectionHandler;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -45,6 +48,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     private List<H> loadedItems = new ArrayList<H>();
     private Integer itemsCount = 0;
     private HandlerRegistration selectionHandlerRegistration;
+    DivElement glass;
 
     /**
      * Дерево множественного выбора.
@@ -93,6 +97,19 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
                 LazyTree.this.onSelectionChange();
             }
         });
+
+        glass = Document.get().createDivElement();
+        glass.setAttribute("id", "666");
+
+        Style style = glass.getStyle();
+        style.setOpacity(0.5);
+        style.setBackgroundColor("#ffffff");
+        style.setPosition(Style.Position.ABSOLUTE);
+        style.setLeft(0, Style.Unit.PX);
+        style.setTop(0, Style.Unit.PX);
+        style.setRight(0, Style.Unit.PX);
+        style.setBottom(0, Style.Unit.PX);
+        style.setZIndex(2147483647); // Maximum z-index
     }
 
     private void onSelectionChange(){
@@ -377,5 +394,12 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     @Override
     public HandlerRegistration addLazyTreeSelectionHandler(LazyTreeSelectionHandler<H> handler) {
         return addHandler(handler, LazyTreeSelectionEvent.getType());
+    }
+
+    public void setEnabled(boolean isEnabled) {
+        this.getElement().appendChild(glass);
+        if (isEnabled) {
+            this.getElement().removeChild(glass);
+        }
     }
 }
