@@ -5,6 +5,8 @@
 
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.common"/>
 
+    <import resource="classpath:com/aplana/sbrf/taxaccounting/version-info.xml"/>
+
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="org.springframework.jdbc.datasource.DataSourceTransactionManager"/>
     </bean>
