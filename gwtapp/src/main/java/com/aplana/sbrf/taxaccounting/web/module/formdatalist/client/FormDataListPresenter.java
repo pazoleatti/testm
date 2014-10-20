@@ -93,16 +93,23 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 		filterPresenter.changeFilterElementNames(taxType);
         getView().updatePageSize(taxType);
         if (taxTypeOld == null || !taxType.equals(taxTypeOld)) {
+            consoleLog("CLEAN 1");
             filterStates.clear();
             getView().updateFormDataTable(taxType);
             selectedItemId = null;
-        }
-        String url = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID;
-        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
-                (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
-            filterPresenter.getView().clean();
-            filterStates.clear();
-            selectedItemId = null;
+        } else {
+            String url = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID;
+            consoleLog("url = " + url);
+            consoleLog("lstHistory 1 = " + lstHistory.get(0));
+            consoleLog("lstHistory 2 = " + lstHistory.get(1));
+            // Если ни одна из хранимых ссылок истории не содержит
+            if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
+                    (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
+                consoleLog("CLEAN 2");
+                filterPresenter.getView().clean();
+                filterStates.clear();
+                selectedItemId = null;
+            }
         }
         // Передаем типы налоговых форм
         GetKindListAction kindListAction = new GetKindListAction();
@@ -223,4 +230,9 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
         super.onHide();
         selectedItemId = getView().getSelectedId();
     }
+
+    // TODO Отладочный вывод
+    public static native void consoleLog(String message) /*-{
+      console.log(message);
+  }-*/;
 }
