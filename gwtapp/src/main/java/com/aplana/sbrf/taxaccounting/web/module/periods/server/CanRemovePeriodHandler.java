@@ -51,8 +51,8 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
         //Check forms
         List<FormData> formDatas = formDataService.find(departmentIds, action.getReportPeriodId());
         for (FormData fd : formDatas) {
-            logs.add(new LogEntry(LogLevel.ERROR, "Форма " + fd.getFormType().getName() + " " + fd.getKind().getName() +
-                    " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() + " находится в " +
+            logs.add(new LogEntry(LogLevel.ERROR, "Форма \"" + fd.getFormType().getName() + "\" \"" + fd.getKind().getName() +
+                    "\" в подразделении \"" + departmentService.getDepartment(fd.getDepartmentId()).getName() + "\" находится в " +
                     action.getOperationName() +
                     " периоде!"));
         }
@@ -64,8 +64,8 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
         for (Long id : declarations) {
             DeclarationData dd = declarationDataService.get(id, user);
             DeclarationTemplate dt = declarationService.get(dd.getDeclarationTemplateId());
-            logs.add(new LogEntry(LogLevel.ERROR, dt.getType().getName() + " в подразделении " +
-                    departmentService.getDepartment(dd.getDepartmentId()).getName() + " находится в " +
+            logs.add(new LogEntry(LogLevel.ERROR, "\""+dt.getType().getName() + "\" в подразделении \"" +
+                    departmentService.getDepartment(dd.getDepartmentId()).getName() + "\" находится в " +
                     action.getOperationName() +
                     " периоде!"));
         }

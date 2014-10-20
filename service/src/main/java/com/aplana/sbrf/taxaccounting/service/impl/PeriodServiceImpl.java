@@ -417,7 +417,7 @@ public class PeriodServiceImpl implements PeriodService {
         //Check forms
         List<FormData> formDatas = formDataService.find(departmentIds, drp.getReportPeriod().getId());
         for (FormData fd : formDatas) {
-            logger.error("Форма %s %s в подразделении %s находится в удаляемом периоде!",
+            logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
                     fd.getFormType().getName(), fd.getKind().getName(),
                     departmentService.getDepartment(fd.getDepartmentId()).getName());
         }
@@ -429,7 +429,7 @@ public class PeriodServiceImpl implements PeriodService {
         for (Long id : declarations) {
             DeclarationData dd = declarationDataService.get(id, user);
             DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            logger.error("%s в подразделении %s находится в удаляемом периоде!", dt.getType().getName(), departmentService.getDepartment(dd.getDepartmentId()).getName());
+            logger.error("\"%s\" в подразделении \"%s\" находится в удаляемом периоде!", dt.getType().getName(), departmentService.getDepartment(dd.getDepartmentId()).getName());
         }
 
         int reportPeriodId = drp.getReportPeriod().getId();

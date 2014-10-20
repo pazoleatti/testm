@@ -246,35 +246,29 @@ public class FormDataServiceImpl implements FormDataService {
         formData.setPeriodOrder(periodOrder);
         formData.setManual(false);
 
-//        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(departmentReportPeriod.getReportPeriod().getId());
-        // TODO Левыкин: Исправить в рамках http://jira.aplana.com/browse/SBRFACCTAX-6073. Вынести в отдельный метод, который должен быть покрыт тестом.
-//        FormDataPerformer performer = null;
-//        if (prevReportPeriod != null) {
-//            FormData formDataOld;
-//            if (periodOrder == null)
-//                formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId());
-//            else
-//                formDataOld = formDataDao.findMonth(formTemplate.getType().getId(), kind, departmentId, prevReportPeriod.getId(), periodOrder);
-//            if (formDataOld != null) {
-//                List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
-//                List<FormDataSigner> signerOld = formDataOld.getSigners();
-//                for (FormDataSigner formDataSignerOld : signerOld) {
-//                    FormDataSigner formDataSigner = new FormDataSigner();
-//                    formDataSigner.setName(formDataSignerOld.getName());
-//                    formDataSigner.setPosition(formDataSignerOld.getPosition());
-//                    signer.add(formDataSigner);
-//                }
-//                formData.setSigners(signer);
-//                performer = formDataOld.getPerformer();
-//            }
-//        }
-//        if (performer == null) {
-//            performer = new FormDataPerformer();
-//            performer.setName(" ");
-//            performer.setPrintDepartmentId(departmentId);
-//            performer.setReportDepartmentName(departmentDao.getReportDepartmentName(departmentId));
-//        }
-//        formData.setPerformer(performer);
+        FormDataPerformer performer = null;
+        FormData formDataOld = getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder);
+        if (formDataOld != null) {
+            FormData fdOld = formDataDao.get(formDataOld.getId(), false);
+            List<FormDataSigner> signerOld = fdOld.getSigners();
+            List<FormDataSigner> signer = new ArrayList<FormDataSigner>();
+            for (FormDataSigner formDataSignerOld : signerOld) {
+                FormDataSigner formDataSigner = new FormDataSigner();
+                formDataSigner.setName(formDataSignerOld.getName());
+                formDataSigner.setPosition(formDataSignerOld.getPosition());
+                formDataSigner.setOrd(formDataSignerOld.getOrd());
+                signer.add(formDataSigner);
+            }
+            formData.setSigners(signer);
+            performer = fdOld.getPerformer();
+        }
+        if (performer == null) {
+            performer = new FormDataPerformer();
+            performer.setName(" ");
+            performer.setPrintDepartmentId(departmentReportPeriod.getDepartmentId());
+            performer.setReportDepartmentName(departmentDao.getReportDepartmentName(departmentReportPeriod.getDepartmentId()));
+        }
+        formData.setPerformer(performer);
 
         // Execute scripts for the form event CREATE
 		formDataScriptingService.executeScript(userInfo, formData,
@@ -308,6 +302,37 @@ public class FormDataServiceImpl implements FormDataService {
         updatePreviousRowNumber(formData);
         return formData.getId();
 	}
+
+    /**
+     * Получение налоговой формы из предыдущего отчетного периода (для ежемесячных форм поиск ведется в текущем периоде, если это не первый месяц периода)
+     * @param formTemplate
+     * @param departmentReportPeriod
+     * @param kind
+     * @param periodOrder
+     * @return
+     */
+    public FormData getPrevPeriodFormData(FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod, FormDataKind kind, Integer periodOrder) {
+        FormData formDataOld = null;
+        boolean isNotThisReportPeriod = false;
+        if (periodOrder != null) {
+            List<Months> availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
+            if  (periodOrder > 1 && availableMonthList.contains(Months.fromId(periodOrder - 1))) {
+                isNotThisReportPeriod = true;
+                formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriod.getId().intValue(), Integer.valueOf(periodOrder - 1));
+            }
+        }
+        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(departmentReportPeriod.getReportPeriod().getId());
+        if (!isNotThisReportPeriod && prevReportPeriod != null) {
+            Integer lastPeriodOrder = null;
+            if (periodOrder != null) {
+                List<Months> availableMonthList = reportPeriodService.getAvailableMonthList(prevReportPeriod.getId());
+                lastPeriodOrder = availableMonthList.get(availableMonthList.size() - 1).getId();
+            }
+            DepartmentReportPeriod departmentReportPeriodOld = departmentReportPeriodDao.getLast(departmentReportPeriod.getDepartmentId(), prevReportPeriod.getId().intValue());
+            formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriodOld.getId().intValue(), lastPeriodOrder);
+        }
+        return formDataOld;
+    }
 
 	/**
 	 * Добавляет строку в форму и выполняет соответствующие скрипты.

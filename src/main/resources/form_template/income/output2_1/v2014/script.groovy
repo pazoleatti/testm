@@ -6,7 +6,7 @@ import groovy.transform.Field
 
 /**
  * Сведения о дивидендах, выплаченных в отчетном квартале
- * formTemplateId=10144
+ * formTemplateId=1413
  *
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  */
