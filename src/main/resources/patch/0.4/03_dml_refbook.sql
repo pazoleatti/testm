@@ -244,5 +244,11 @@ INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 965, 206,'Наименование организации представителя','APPROVE_ORG_NAME', 1, 16,null,null, 1,null, 100, 0, 0,null,null, 0, 1000);
 
 ---------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-9166: Корректировка наименований атрибутов в справочнике "Коды налоговых льгот транспортного налога"
+
+update ref_book_attribute set name = 'Код налоговой льготы' where id = 15;
+update ref_book_attribute set name = 'Код родительской записи' where id = 300;
+---------------------------------------------------------------------------------------------------
+
 COMMIT;
 EXIT;
