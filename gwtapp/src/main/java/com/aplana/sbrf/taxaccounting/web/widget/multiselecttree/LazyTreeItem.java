@@ -21,13 +21,22 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
     /* Тип узла дерева: true - с чекбоксом, false - с радиокнопкой, null - только с текстом*/
     protected Boolean multiSelection;
 
-    protected Label label;
+    protected Anchor label;
     protected CheckBox checkBox;
     protected RadioButton radioButton;
 
     protected static final String RADIO_BUTTON_GROUP = "LTI_GROUP";
 
     protected Boolean isChildLoaded;
+
+    class CustomLabel extends Anchor {
+        public CustomLabel() {
+            getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
+            getElement().getStyle().setColor("#000000");
+            getElement().getStyle().setCursor(Style.Cursor.POINTER);
+            getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
+        }
+    }
 
     /**
      * Элемент дерева множественного выбора. По-умолчанию создается узел с чекбоксом.
@@ -41,20 +50,25 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
         this.multiSelection = multiSelection;
         this.isChildLoaded = false;
 
-        label = new Label(name);
-
-        checkBox = new CheckBox(name);
-
-        radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
-        radioButton.getElement().getFirstChildElement().getStyle().setDisplay(Style.Display.NONE);
+        label = new CustomLabel();
 
         label.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-        DOM.getChild(checkBox.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
-        DOM.getChild(checkBox.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
-        DOM.getChild(radioButton.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
-        DOM.getChild(radioButton.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
 
-        setWidget(multiSelection == null ? label : multiSelection ? checkBox : radioButton);
+        if (multiSelection != null){
+            checkBox = new CheckBox(name);
+            radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
+            radioButton.getElement().getFirstChildElement().getStyle().setDisplay(Style.Display.NONE);
+            DOM.getChild(checkBox.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
+            DOM.getChild(checkBox.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
+            DOM.getChild(radioButton.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
+            DOM.getChild(radioButton.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
+            setWidget(multiSelection ? checkBox : radioButton);
+        } else {
+            label.setText(name);
+            DOM.getChild(label.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
+            DOM.getChild(label.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
+            setWidget(label);
+        }
 
         getWidget().getElement().getStyle().setVerticalAlign(Style.VerticalAlign.MIDDLE);
         //gwt-TreeItem
@@ -72,8 +86,10 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
 
     public void setName(String name) {
         label.setText(name);
-        checkBox.setText(name);
-        radioButton.setText(name);
+        if (multiSelection != null){
+            checkBox.setText(name);
+            radioButton.setText(name);
+        }
     }
 
     public String getName() {
@@ -155,9 +171,7 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
                 if (sb.toString().equals("()")) sb.delete(0, sb.length());
                 highLightedString = highLightedString + sb.toString();
             }
-            label.getElement().setInnerHTML(highLightedString);
-            DOM.getChild(checkBox.getElement(), 1).setInnerHTML(highLightedString);
-            DOM.getChild(radioButton.getElement(), 1).setInnerHTML(highLightedString);
+            getWidget().getElement().setInnerHTML(highLightedString);
         }
     }
 
