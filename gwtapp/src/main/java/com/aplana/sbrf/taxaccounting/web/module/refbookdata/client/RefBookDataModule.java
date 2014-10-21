@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.TaPlaceManagerImpl;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogPresenter;
@@ -12,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydial
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionView;
+import com.google.inject.Singleton;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 public class RefBookDataModule extends AbstractPresenterModule {
@@ -39,5 +42,7 @@ public class RefBookDataModule extends AbstractPresenterModule {
         // Для скрипта
         bindPresenter(RefBookScriptPresenter.class, RefBookScriptPresenter.MyView.class,
                 RefBookScriptView.class, RefBookScriptPresenter.MyProxy.class);
+
+        bind(TaPlaceManager.class).to(TaPlaceManagerImpl.class).in(Singleton.class);
     }
 }

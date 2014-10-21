@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
@@ -472,7 +473,7 @@ public class FormDataServiceTest {
         LockData lockData = new LockData();
         lockData.setUserId(user.getId());
 
-        when(lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(), user.getId(), LockData.STANDARD_LIFE_TIME)).
+        when(lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId())).
                 thenReturn(lockData);
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
@@ -614,6 +615,97 @@ public class FormDataServiceTest {
         // 3
         prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod3);
         Assert.assertNull(prevFormData);
+    }
+
+    @Test
+    public void testGetPrevPeriodFormData() {
+        FormTemplate formTemplate = new FormTemplate();
+        FormType formType = new FormType();
+        formType.setId(111);
+        formTemplate.setType(formType);
+
+        FormDataKind kind = FormDataKind.PRIMARY;
+        Integer periodOrder = null;
+
+        DepartmentReportPeriod departmentReportPeriodPrev = new DepartmentReportPeriod();
+        ReportPeriod reportPeriodPrev = new ReportPeriod();
+        reportPeriodPrev.setId(0);
+        reportPeriodPrev.setTaxPeriod(new TaxPeriod());
+        departmentReportPeriodPrev.setId(0);
+        departmentReportPeriodPrev.setReportPeriod(reportPeriodPrev);
+        departmentReportPeriodPrev.setDepartmentId(1);
+
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(1);
+        reportPeriod.setTaxPeriod(new TaxPeriod());
+        departmentReportPeriod.setId(1);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        departmentReportPeriod.setDepartmentId(1);
+
+        FormData formData1 = new FormData();
+        formData1.setId(1L);
+
+        when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
+        when(periodService.getPrevReportPeriod(1)).thenReturn(reportPeriodPrev);
+        when(departmentReportPeriodDao.getLast(new Integer(1), 0)).thenReturn(departmentReportPeriodPrev);
+        when(formDataDao.find(111, kind, 0, null)).thenReturn(formData1);
+
+        FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder);
+        Assert.assertEquals(formDataOld.getId(), formData1.getId());
+    }
+
+    @Test
+    public void testGetPrevPeriodFormData2() {
+        FormTemplate formTemplate = new FormTemplate();
+        FormType formType = new FormType();
+        formType.setId(111);
+        formTemplate.setType(formType);
+
+        FormDataKind kind = FormDataKind.PRIMARY;
+        Integer periodOrder = 1;
+        Integer periodOrder2 = 2;
+
+        List<Months> monthsList = new ArrayList<Months>();
+        monthsList.add(null);
+        for (int i = 0; i <= 11; ++i) {
+            monthsList.add(Months.values()[i]);
+        }
+
+        DepartmentReportPeriod departmentReportPeriodPrev = new DepartmentReportPeriod();
+        ReportPeriod reportPeriodPrev = new ReportPeriod();
+        reportPeriodPrev.setId(0);
+        reportPeriodPrev.setTaxPeriod(new TaxPeriod());
+        departmentReportPeriodPrev.setId(0);
+        departmentReportPeriodPrev.setReportPeriod(reportPeriodPrev);
+        departmentReportPeriodPrev.setDepartmentId(1);
+
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(1);
+        reportPeriod.setTaxPeriod(new TaxPeriod());
+        departmentReportPeriod.setId(1);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        departmentReportPeriod.setDepartmentId(1);
+
+        FormData formData1 = new FormData();
+        formData1.setId(1L);
+        FormData formData2 = new FormData();
+        formData1.setId(2L);
+
+        when(periodService.getAvailableMonthList(0)).thenReturn(monthsList);
+        when(periodService.getAvailableMonthList(1)).thenReturn(monthsList);
+        when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
+        when(periodService.getPrevReportPeriod(1)).thenReturn(reportPeriodPrev);
+        when(departmentReportPeriodDao.getLast(new Integer(1), 0)).thenReturn(departmentReportPeriodPrev);
+        when(formDataDao.find(111, kind, 0, new Integer(12))).thenReturn(formData1);
+        when(formDataDao.find(111, kind, 1, new Integer(1))).thenReturn(formData2);
+
+        FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder);
+        FormData formDataOld2 = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder2);
+
+        Assert.assertEquals(formDataOld.getId(), formData1.getId());
+        Assert.assertEquals(formDataOld2.getId(), formData2.getId());
     }
 
     private FormData getFormData() {

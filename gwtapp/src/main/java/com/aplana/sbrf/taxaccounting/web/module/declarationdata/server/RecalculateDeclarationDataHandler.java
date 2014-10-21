@@ -56,33 +56,24 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     @Override
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
+        Logger logger = new Logger();
+        declarationDataService.checkDepartmentConfig(logger, action.getDeclarationId(), userInfo);
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
-        LockData lockData = declarationDataService.lock(action.getDeclarationId(), userInfo);
+        String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
+        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4); //ставим такую блокировку т.к. стандартная на 1 час
         if (lockData == null) {
             try {
-                Logger logger = new Logger();
-                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", action.getDeclarationId());
                 params.put("docDate", action.getDocDate());
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                if (lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24) != null) {
-                    // отменяем заданичу на формирование XML
-                    List<Integer> userIds = lockDataService.getUsersWaitingForLock(key);
-                    lockDataService.unlock(key, 0, true);
-
-                    // ставим новую блокировку
-                    lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 12);
-                    userIds.remove((Integer) userInfo.getUser().getId());
-                    for (int userId : userIds)
-                        lockDataService.addUserWaitingForLock(key, userId);
-                }
+                params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
                 try {
+                    declarationDataService.deleteReport(action.getDeclarationId(), false);
                     // отменяем задания на формирование XLSX
                     lockDataService.unlock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.EXCEL_DEC), 0, true);
                     // ставим задачу в очередь
-                    params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                     asyncManager.executeAsync(ReportType.XML_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
                 } catch (AsyncTaskException e) {
@@ -90,11 +81,12 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                     logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");
                 }
                 result.setUuid(logEntryService.save(logger.getEntries()));
-            } finally {
-                declarationDataService.unlock(action.getDeclarationId(), userInfo);
+            } catch(Exception e) {
+                lockDataService.unlock(key, userInfo.getUser().getId());
+                throw new ActionException(e);
             }
         } else {
-            throw new ActionException(String.format(LockDataService.LOCK_DATA, userService.getUser(lockData.getUserId()).getName(), lockData.getUserId()));
+            throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
         }
         return result;
     }

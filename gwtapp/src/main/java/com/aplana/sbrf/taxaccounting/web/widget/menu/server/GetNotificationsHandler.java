@@ -74,9 +74,9 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
         // пользователь может удалить оповещение:
         // если заполнен ID пользователя-получателя (для любой роли) или ID роли получателя (для любой роли)
         // или ID подразделения-получателя (для роли Контролёр УНП или Контролёр НС)
-        return notification.getUserId() != null || notification.getRoleId() != null ||
-                (notification.getReceiverDepartmentId() != null
-                        && (user.hasRole(TARole.ROLE_CONTROL_UNP) || user.hasRole(TARole.ROLE_CONTROL_NS)));
+        return notification.getUserId() > 0 || notification.getRoleId() > 0 ||
+                (notification.getReceiverDepartmentId() != null && (user.hasRole(TARole.ROLE_CONTROL_UNP) ||
+                                (user.hasRole(TARole.ROLE_CONTROL_NS) && user.getDepartmentId() == notification.getReceiverDepartmentId())));
 
     }
 

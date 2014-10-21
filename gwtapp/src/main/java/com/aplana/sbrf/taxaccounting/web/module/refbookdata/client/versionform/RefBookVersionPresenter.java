@@ -27,7 +27,6 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
@@ -73,11 +72,11 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     }
 
 	@Inject
-	public RefBookVersionPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, PlaceManager placeManager, final MyProxy proxy,
+	public RefBookVersionPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, TaPlaceManager placeManager, final MyProxy proxy,
                                    DispatchAsync dispatcher) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
-		this.placeManager = (TaPlaceManager)placeManager;
+		this.placeManager = placeManager;
 		this.editFormPresenter = editFormPresenter;
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize(), dataProvider);

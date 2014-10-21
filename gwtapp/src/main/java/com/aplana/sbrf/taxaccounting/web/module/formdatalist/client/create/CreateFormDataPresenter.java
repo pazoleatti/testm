@@ -3,10 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.inject.Inject;
@@ -16,18 +14,15 @@ import com.gwtplatform.mvp.client.HasPopupSlot;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PopupView;
 import com.gwtplatform.mvp.client.PresenterWidget;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
-    private final PlaceManager placeManager;
     private final DispatchAsync dispatchAsync;
     private TaxType taxType;
+    private CreateFormDataSuccessHandler createFormDataSuccessHandler;
 
     public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
         void init();
@@ -50,9 +45,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
     }
 
     @Inject
-    public CreateFormDataPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync, PlaceManager placeManager) {
+    public CreateFormDataPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync) {
         super(eventBus, view);
-        this.placeManager = placeManager;
         this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
     }
@@ -81,12 +75,10 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                     @Override
                     public void onSuccess(final CreateFormDataResult createResult) {
                         getView().hide();
-                        String uuid = createResult.getUuid();
-                        placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN)
-                                .with(FormDataPresenter.READ_ONLY, "false")
-                                .with(FormDataPresenter.FORM_DATA_ID, String.valueOf(createResult.getFormDataId()))
-                                .build());
-                        LogAddEvent.fire(CreateFormDataPresenter.this, uuid);
+                        // После успешного создания НФ управление переходит к форме списка НФ
+                        if (createFormDataSuccessHandler != null) {
+                            createFormDataSuccessHandler.onSuccess(createResult);
+                        }
                     }
                 }, CreateFormDataPresenter.this)
         );
@@ -167,8 +159,9 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 				}, this));
 	}
 
-    public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe){
+    public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe, CreateFormDataSuccessHandler createFormDataSuccessHandler){
         taxType = filter.getTaxType();
+        this.createFormDataSuccessHandler = createFormDataSuccessHandler;
         FillFormFieldsAction action = new FillFormFieldsAction();
         action.setFieldsNum(FillFormFieldsAction.FieldsNum.FIRST);
         action.setTaxType(taxType);

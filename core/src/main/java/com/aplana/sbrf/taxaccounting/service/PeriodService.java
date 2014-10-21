@@ -145,7 +145,7 @@ public interface PeriodService {
 	 * Удалить отчетный период
 	 * @param taxType тип налога
 	 * @param drpId идентификатор периода
-	 * @param logs логер, при необходимости
+	 * @param logger логер, при необходимости
 	 * @param user пользователь, который выполняет действие
 	 */
 	void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user);

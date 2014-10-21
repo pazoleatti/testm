@@ -3,7 +3,6 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
-             xmlns:r="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
              xmlns:dw="urn:import:com.aplana.gwt.client">
     <ui:style>
         .content {
@@ -58,10 +57,7 @@
                     <g:Label width="140px" wordWrap="false" text="Налоговый орган:" height="16px"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <r:RefBookPickerWidget ui:field="taxOrganCode" width="100%" versionEnabled="false"
-                                           attributeIdInt="2041"
-                                           isHierarchical="false" multiSelect="false"
-                                           title="Выбор кода налогового органа"/>
+                    <g:TextBox ui:field="taxOrganCode" width="100%" maxLength="4"/>
                 </g:cell>
             </g:HorizontalPanel>
 
@@ -71,9 +67,7 @@
                     <g:Label width="140px" wordWrap="false" text="КПП:" height="16px"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <r:RefBookPickerWidget ui:field="taxOrganKpp" width="100%" versionEnabled="false"
-                                           attributeIdInt="2051"
-                                           isHierarchical="false" multiSelect="false" title="Выбор КПП"/>
+                    <g:TextBox ui:field="taxOrganKpp" width="100%" maxLength="9"/>
                 </g:cell>
             </g:HorizontalPanel>
 

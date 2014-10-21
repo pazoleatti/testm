@@ -71,11 +71,13 @@ void checkDepartmentParams(LogLevel logLevel) {
 
     departmentParam = departmentParam.get(0)
 
-    def departmentParamAdd = getProvider(206).getRecords(getEndDate() - 1, null, "LINK = ${departmentParam.record_id.value} AND LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') AND LOWER(KPP) = LOWER('${declarationData.kpp}')", null)?.get(0)
+    def departmentParamAdd = getProvider(206).getRecords(getEndDate() - 1, null, "LINK = ${departmentParam.record_id.value} AND LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') AND LOWER(KPP) = LOWER('${declarationData.kpp}')", null)
 
-    if (departmentParamAdd == null) {
+    if (departmentParamAdd == null ||  departmentParamAdd.size() ==0 || departmentParamAdd.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения!")
     }
+
+    departmentParamAdd = departmentParamAdd.get(0)
 
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParam, departmentParamAdd)

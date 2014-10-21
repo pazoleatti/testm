@@ -90,7 +90,7 @@ void calc() {
 
         for (def row in dataRows) {
             // графа 2
-            row.okatoCode = "45293554000"
+            row.okatoCode = "45397000"
             // графа 3
             def paymentType = getRefBookValue(24, row.paymentType)?.CODE?.stringValue
             if ('1'.equals(paymentType)) {
@@ -161,39 +161,37 @@ void addData(def xml, headRowCount) {
             break
         }
 
-        if (row.cell.size() >= columnCount) {
-            def newRow = formData.createDataRow()
-            newRow.setIndex(rowIndex++)
-            newRow.setImportIndex(xlsIndexRow)
-            editableColumns.each {
-                newRow.getCell(it).editable = true
-                newRow.getCell(it).setStyleAlias('Редактируемая')
-            }
-
-            def xmlIndexCol = 0
-
-            // графа 1
-            newRow.paymentType = getRecordIdImport(24, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-            xmlIndexCol++
-
-            // графа 2
-            newRow.okatoCode = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 3
-            newRow.budgetClassificationCode = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 4
-            newRow.dateOfPayment = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-
-            // графа 5
-            newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-
-            rows.add(newRow)
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
         }
+
+        def xmlIndexCol = 0
+
+        // графа 1
+        newRow.paymentType = getRecordIdImport(24, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 2
+        newRow.okatoCode = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 3
+        newRow.budgetClassificationCode = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 4
+        newRow.dateOfPayment = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 5
+        newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        rows.add(newRow)
     }
     dataRowHelper.save(rows)
 }

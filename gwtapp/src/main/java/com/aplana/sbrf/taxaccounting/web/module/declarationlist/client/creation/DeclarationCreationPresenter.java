@@ -36,8 +36,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		void setSelectedDeclarationType(Integer id);
 		void setSelectedReportPeriod(List<Integer> periodIds);
 		void setSelectedDepartment(List<Integer> departmentIds);
-		void setSelectedTaxOrganCode(List<Long> taxOrganCode);
-		void setSelectedTaxOrganKpp(List<Long> taxOrganKpp);
+		void setSelectedTaxOrganCode(String taxOrganCode);
+		void setSelectedTaxOrganKpp(String taxOrganKpp);
         void setCorrectionDate(String correctionDate, TaxType taxType);
 
 		Integer getSelectedDeclarationType();
@@ -45,7 +45,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		List<Integer> getSelectedDepartment();
         void setTaxType(TaxType taxType);
 
-        void setTaxOrganFilter(String filter);
         String getTaxOrganCode();
         String getTaxOrganKpp();
 
@@ -125,7 +124,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 	@Override
 	public void onDepartmentChange() {
 		if (getView().getSelectedDepartment().isEmpty() || getView().getSelectedReportPeriod().isEmpty()) {
-            getView().setTaxOrganFilter(null);
 			return;
 		}
 		GetDeclarationTypeAction action = new GetDeclarationTypeAction();
@@ -138,7 +136,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 			@Override
 			public void onSuccess(GetDeclarationTypeResult result) {
 				getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
-                getView().setTaxOrganFilter(result.getFilter());
                 if (result.getCorrectionDate() != null) {
                     getView().setCorrectionDate(DateTimeFormat.getFormat("dd.MM.yyyy").format(result.getCorrectionDate()), result.getTaxType());
                 } else {

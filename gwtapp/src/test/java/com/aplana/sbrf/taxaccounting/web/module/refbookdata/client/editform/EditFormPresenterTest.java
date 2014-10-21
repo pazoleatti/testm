@@ -1,7 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
-import com.aplana.gwt.client.testutils.DispatchAsyncStubber;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.gwt.client.testutils.DispatchAsyncStub;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionAction;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionResult;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionAction;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionResult;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -11,49 +16,82 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(JukitoRunner.class)
 public class EditFormPresenterTest {
     @Inject
-    EditFormPresenter presenter;
+    private EditFormPresenter presenter;
+
+    private static final long REF_BOOK_DEPARTMENTS_ID = 30L;
+
+    @Test
+    public void testOnCancelClickedWhenDepartments(RefBookHierDataPresenter.MyView myView) {
+        presenter.init(REF_BOOK_DEPARTMENTS_ID, true);
+        presenter.onCancelClicked();
+        verify(myView).updateMode(FormMode.EDIT);
+    }
+
+    @Test
+    public void testOnCancelClickedWhenNotDepartments(RefBookHierDataPresenter.MyView myView) {
+        presenter.init(eq(anyLong()), true);
+        presenter.onCancelClicked();
+        verify(myView, never()).updateMode(FormMode.EDIT);
+    }
 
     /**
-     * Добавление элемента справочника
+     * Добавление элемента справочника подразделений
      *
      * @param dispatchAsync
      * @throws ActionException
      */
     @Test
     @SuppressWarnings("unchecked")
-    public void testOnSaveClickedWhenCreate(DispatchAsync dispatchAsync) throws ActionException {
-        RefBookValueSerializable refBookValueSerializable = new RefBookValueSerializable();
-        refBookValueSerializable.setDateValue(new Date());
-
-        Map<String, RefBookValueSerializable> map = new HashMap<String, RefBookValueSerializable>();
-        map.put("code", refBookValueSerializable);
-
+    public void testOnSaveClickedWhenCreateAndDepartments(DispatchAsync dispatchAsync, RefBookHierDataPresenter.MyView myView) throws ActionException {
+        presenter.init(REF_BOOK_DEPARTMENTS_ID, true);
         ArrayList<Long> ids = new ArrayList<Long>();
         ids.add(1000L);
 
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
         result.setNewIds(ids);
 
-        presenter.init(1L, true);
-        DispatchAsyncStubber.callSuccessWith(result)
+        DispatchAsyncStub.callSuccessWith(result)
                 .when(dispatchAsync)
                 .execute((AddRefBookRowVersionAction) any(), (AsyncCallback<AddRefBookRowVersionResult>) any());
 
         presenter.onSaveClicked();
         verify(dispatchAsync, atLeastOnce()).execute((AddRefBookRowVersionAction) any(), (AsyncCallback<AddRefBookRowVersionResult>) any());
+        verify(myView).updateMode(FormMode.EDIT);
+        assertNotNull(presenter.currentUniqueRecordId);
+        assertTrue(presenter.currentUniqueRecordId == 1000);
+    }
+
+    /**
+     * Добавление элемента справочника подразделений
+     *
+     * @param dispatchAsync
+     * @throws ActionException
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testOnSaveClickedWhenCreateAndNotDepartments(DispatchAsync dispatchAsync, RefBookHierDataPresenter.MyView myView) throws ActionException {
+        presenter.init(eq(anyLong()), true);
+        ArrayList<Long> ids = new ArrayList<Long>();
+        ids.add(1000L);
+
+        AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
+        result.setNewIds(ids);
+
+        DispatchAsyncStub.callSuccessWith(result)
+                .when(dispatchAsync)
+                .execute((AddRefBookRowVersionAction) any(), (AsyncCallback<AddRefBookRowVersionResult>) any());
+
+        presenter.onSaveClicked();
+        verify(dispatchAsync, atLeastOnce()).execute((AddRefBookRowVersionAction) any(), (AsyncCallback<AddRefBookRowVersionResult>) any());
+        verify(myView, never()).updateMode(FormMode.EDIT);
         assertNotNull(presenter.currentUniqueRecordId);
         assertTrue(presenter.currentUniqueRecordId == 1000);
     }
@@ -66,7 +104,7 @@ public class EditFormPresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOnSaveClickedWhenUpdate(DispatchAsync dispatchAsync) {
-        presenter.init(1L, true);
+        presenter.init(REF_BOOK_DEPARTMENTS_ID, true);
         presenter.setCurrentUniqueRecordId(1000L);
         presenter.onSaveClicked();
         verify(dispatchAsync, atLeastOnce()).execute((SaveRefBookRowVersionAction) any(), (AsyncCallback<SaveRefBookRowVersionResult>) any());

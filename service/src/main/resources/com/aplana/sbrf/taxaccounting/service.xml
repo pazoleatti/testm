@@ -8,10 +8,4 @@
 	<context:component-scan base-package="com.aplana.sbrf.taxaccounting.service.impl"/>
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.refbook.impl"/>
     <context:component-scan base-package="com.aplana.sbrf.taxaccounting.core.impl"/>
-
-    <bean id="manifestProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-		<property name="location" value="META-INF/MANIFEST.MF"/>
-		<property name="ignoreResourceNotFound" value="true"/>
-	</bean>
-
 </beans>

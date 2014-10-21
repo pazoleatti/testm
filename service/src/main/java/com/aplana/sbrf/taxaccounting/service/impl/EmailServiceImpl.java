@@ -33,6 +33,9 @@ public class EmailServiceImpl implements EmailService {
         Properties props = new Properties();
         props.put("mail.smtp.host", server);
         props.put("mail.smtp.port", port);
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.transport.protocol", "smtps");
 
         Session session = Session.getInstance(props,
                 new javax.mail.Authenticator() {
@@ -52,6 +55,7 @@ public class EmailServiceImpl implements EmailService {
             message.setText(text);
             Transport.send(message);
         } catch (MessagingException e) {
+            e.printStackTrace();
             throw new ServiceException("Ошибка отправки сообщения. %s", e.getMessage());
         }
     }
@@ -65,6 +69,7 @@ public class EmailServiceImpl implements EmailService {
             Transport transport = session.getTransport("smtp");
             transport.connect(server, Integer.parseInt(port), login, password);
             transport.close();
+            logger.info("Проверка выполнена, ошибок не найдено");
             return true;
         } catch (Exception e) {
             logger.error("Авторизация с указанными параметрами не выполнена!");
