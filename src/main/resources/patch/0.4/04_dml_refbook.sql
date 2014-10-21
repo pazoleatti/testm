@@ -259,7 +259,7 @@ ALTER TABLE department ADD garant_use number(1) default 0 not null;
 COMMENT ON COLUMN department.garant_use is 'Признак, что используется в модуле Гарантий';
 ALTER TABLE department ADD CONSTRAINT department_chk_garant_use check (garant_use in (0, 1));
 
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (167,30,'Используется в модуле Гарантий','GARANT_USE',2,9,null,null,1,0,15,0,0,null,6,1,1);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (167,30,'Используется в АС "Гарантии"','GARANT_USE',2,9,null,null,1,0,15,0,0,null,6,1,1);
 ---------------------------------------------------------------------------------------------------
 
 COMMIT;
