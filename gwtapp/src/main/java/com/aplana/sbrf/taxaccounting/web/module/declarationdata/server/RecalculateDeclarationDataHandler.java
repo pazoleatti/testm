@@ -56,12 +56,13 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     @Override
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
+        Logger logger = new Logger();
+        declarationDataService.checkDepartmentConfig(logger, action.getDeclarationId(), userInfo);
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
         LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4); //ставим такую блокировку т.к. стандартная на 1 час
         if (lockData == null) {
             try {
-                Logger logger = new Logger();
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", action.getDeclarationId());
                 params.put("docDate", action.getDocDate());
