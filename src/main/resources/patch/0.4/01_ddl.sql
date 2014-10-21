@@ -49,6 +49,12 @@ COMMENT ON COLUMN log_system.form_type_id is 'Идентификатор вид�
 ALTER TABLE log_system DROP COLUMN tb_department_id;
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-8471 - Добавить в LOG_SYSTEM поле IS_ERROR
+ALTER TABLE log_system ADD is_error number(1) DEFAULT 0 NOT NULL;
+COMMENT ON COLUMN log_system.is_error IS 'Признак ошибки';
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_is_error CHECK (is_error IN (0, 1));
+
+---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8403 - Изменения таблицы DECLARATION_DATA для налога на имущество
 ALTER TABLE declaration_data ADD tax_organ_code VARCHAR2(4);
 ALTER TABLE declaration_data ADD kpp VARCHAR2(9);
