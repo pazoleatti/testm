@@ -49,9 +49,10 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
                     .defaultCallback(new AbstractCallback<SendQueryResult>() {
                         @Override
                         public void onSuccess(SendQueryResult result) {
-                            if (result != null) {
+                            if (result.getUuid() != null) {
                                 LogAddEvent.fire(DialogPresenter.this, result.getUuid());
-                            } else {
+                            }
+                            if (result.isSuccess()) {
                                 getView().hide();
                             }
 
