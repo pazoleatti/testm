@@ -30,10 +30,7 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, SourcesPresenter.MyProxy>
 		implements SourcesUiHandlers{
@@ -353,10 +350,9 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     }
 
     @Override
-    public void prepareUpdateAssign(final DepartmentAssign departmentAssign, final CurrentAssign currentAssign) {
+    public void prepareUpdateAssign(final DepartmentAssign departmentAssign, final Set<CurrentAssign> currentAssigns) {
         GetPeriodIntervalAction action = new GetPeriodIntervalAction();
-        action.setPeriodStart(currentAssign.getStartDateAssign());
-        action.setPeriodEnd(currentAssign.getEndDateAssign());
+        action.setCurrentAssigns(currentAssigns);
         action.setTaxType(taxType);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetPeriodIntervalResult>() {
@@ -365,7 +361,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                         openAssignDialog(AssignDialogView.State.UPDATE, result.getPeriodsInterval(), new ButtonClickHandlers() {
                             @Override
                             public void ok(PeriodsInterval periodsInterval) {
-                                updateCurrentAssign(departmentAssign, currentAssign, periodsInterval);
+                                updateCurrentAssign(departmentAssign, currentAssigns,
+                                        result.getPeriodsInterval(), result.getPeriodsIntervals());
                             }
 
                             @Override
@@ -408,19 +405,16 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
     }
 
     @Override
-	public void updateCurrentAssign(final DepartmentAssign departmentAssign, CurrentAssign currentAssign, PeriodsInterval periodInterval) {
-        if (checkInterval(periodInterval)) {
+	public void updateCurrentAssign(final DepartmentAssign departmentAssign, Set<CurrentAssign> currentAssigns, PeriodsInterval periodsInterval, Map<CurrentAssign, PeriodsInterval> periodIntervals) {
+        if (checkInterval(periodsInterval)) {
             UpdateCurrentAssignsAction action = new UpdateCurrentAssignsAction();
             action.setDeclaration(getView().isDeclaration());
             action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
-            action.setNewPeriodsInterval(periodInterval);
-            action.setCurrentAssign(currentAssign);
+            action.setNewPeriodsInterval(periodsInterval);
+            action.setCurrentAssigns(currentAssigns);
             action.setDepartmentAssign(departmentAssign);
-            action.setOldDateFrom(currentAssign.getStartDateAssign());
-            action.setOldDateTo(currentAssign.getEndDateAssign());
             action.setTaxType(taxType);
             action.setLeftDepartmentId(departmentAssign.getDepartmentId());
-            action.setRightDepartmentId(currentAssign.getDepartmentId());
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<UpdateCurrentAssignsResult>() {
                         @Override
