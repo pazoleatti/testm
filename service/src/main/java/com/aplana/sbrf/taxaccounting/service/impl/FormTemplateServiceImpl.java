@@ -103,9 +103,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	@Override
 	public void checkLockedByAnotherUser(Integer formTemplateId, TAUserInfo userInfo){
 		if (formTemplateId!=null){
-            LockData objectLock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId,
-                    userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
-			if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
+            LockData objectLock = lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId);
+			if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
 				throw new AccessDeniedException("Шаблон формы заблокирован другим пользователем");
 			}
 		}
@@ -117,8 +116,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData executeWithReturn() {
-                return lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId,
-                        userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+                return lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId);
             }
 
             @Override

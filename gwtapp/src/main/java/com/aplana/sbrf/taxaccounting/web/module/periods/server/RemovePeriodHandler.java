@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -33,6 +34,9 @@ public class RemovePeriodHandler extends AbstractActionHandler<RemovePeriodActio
         Logger logger = new Logger();
 		periodService.removeReportPeriod(removePeriodAction.getTaxType(), removePeriodAction.getDepartmentReportPeriodId(), logger, securityService.currentUserInfo());
 		RemovePeriodResult result = new RemovePeriodResult();
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            result.setHasFatalErrors(true);
+        }
 		result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}

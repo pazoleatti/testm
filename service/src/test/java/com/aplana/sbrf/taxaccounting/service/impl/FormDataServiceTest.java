@@ -473,7 +473,7 @@ public class FormDataServiceTest {
         LockData lockData = new LockData();
         lockData.setUserId(user.getId());
 
-        when(lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(), user.getId(), LockData.STANDARD_LIFE_TIME)).
+        when(lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId())).
                 thenReturn(lockData);
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
