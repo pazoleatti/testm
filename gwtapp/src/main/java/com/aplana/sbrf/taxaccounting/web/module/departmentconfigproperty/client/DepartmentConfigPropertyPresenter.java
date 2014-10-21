@@ -32,6 +32,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private List<RefBookAttribute> attributes;
 
     private static final long TABLE_REFBOOK_ID = 206L;
+    private static final long REFBOOK_ID = 99L;
 
     private Department userDepartment;
 
@@ -83,6 +84,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         void setTableColumns(List<RefBookAttribute> attributes);
 
+        void setTextFieldsParams(List<RefBookAttribute> attributes);
+
         Map<String, TableCell> getNonTableParams();
 
     }
@@ -117,6 +120,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                         break;
                     case REFERENCE:
                         tableCell.setRefValue((Long) val);
+                        tableCell.setDeRefValue(cell.getRefBookDereference());
                         tableCell.setType(RefBookAttributeType.REFERENCE);
                         break;
                 }
@@ -156,7 +160,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                     public void yes() {
                         super.yes();
                         DeleteConfigPropertyAction action = new DeleteConfigPropertyAction();
-                        action.setRefBookId(99L);
+                        action.setRefBookId(REFBOOK_ID);
                         action.setSlaveRefBookId(TABLE_REFBOOK_ID);
                         action.setReportPeriodId(getView().getReportPeriodId());
                         action.setDepartmentId(getView().getDepartmentId());
@@ -180,7 +184,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private void getData() {
         GetRefBookValuesAction action = new GetRefBookValuesAction();
-        action.setRefBookId(99L);
+        action.setRefBookId(REFBOOK_ID);
         action.setSlaveRefBookId(TABLE_REFBOOK_ID);
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartmentId(getView().getDepartmentId());
@@ -211,15 +215,16 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     }
 
     private void createTableColumns() {
-
-        GetTableAttributesAction action = new GetTableAttributesAction();
-        action.setRefBookId(TABLE_REFBOOK_ID);
+        GetFormAttributesAction action = new GetFormAttributesAction();
+        action.setRefBookId(REFBOOK_ID);
+        action.setTableRefBookId(TABLE_REFBOOK_ID);
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTableAttributesResult>() {
+                .defaultCallback(new AbstractCallback<GetFormAttributesResult>() {
                     @Override
-                    public void onSuccess(GetTableAttributesResult result) {
-                        DepartmentConfigPropertyPresenter.this.attributes = result.getAttributes();
-                        getView().setTableColumns(result.getAttributes());
+                    public void onSuccess(GetFormAttributesResult result) {
+                        DepartmentConfigPropertyPresenter.this.attributes = result.getTableAttributes();
+                        getView().setTableColumns(result.getTableAttributes());
+                        getView().setTextFieldsParams(result.getAttributes());
                     }
                 }, this));
 
@@ -240,8 +245,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     }
 
     private void saveData(List<Map<String, TableCell>> rows) {
-        if (!isKppTaxOrgCodeFiled(rows)) {
-            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"Код налогового органа\" и \"КПП\"");
+        if (!checkBeforeSave(rows)) {
             return;
         }
         SaveDepartmentRefBookValuesAction action = new SaveDepartmentRefBookValuesAction();
@@ -250,15 +254,29 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartmentId(getView().getDepartmentId());
         action.setNotTableParams(getView().getNonTableParams());
-        action.setRefBookId(99L);
+        action.setRefBookId(REFBOOK_ID);
         action.setSlaveRefBookId(TABLE_REFBOOK_ID);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<SaveDepartmentRefBookValuesResult>() {
                     @Override
                     public void onSuccess(SaveDepartmentRefBookValuesResult result) {
-                        getData();
+
+                        if (result.isHasFatalError()) {
+                            Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
+                            LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+                        } else {
+                            getData();
+                        }
                     }
                 }, this));
+    }
+
+    private boolean checkBeforeSave(List<Map<String, TableCell>> rows) {
+        if (!isKppTaxOrgCodeFiled(rows)) {
+            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"Код налогового органа\" и \"КПП\"");
+            return false;
+        }
+        return true;
     }
 
 
