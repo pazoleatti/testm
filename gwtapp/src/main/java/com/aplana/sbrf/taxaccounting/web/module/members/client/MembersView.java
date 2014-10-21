@@ -58,6 +58,8 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 	@UiField
 	TextBox userName;
 
+    List<Long> defaultRoleIds = new ArrayList<Long>();
+
     private final Widget widget;
     private AsyncDataProvider<TAUserView> dataProvider = new  AsyncDataProvider<TAUserView>() {
         @Override
@@ -231,7 +233,13 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
             departmentIds.add(d.getId());
         }
         departmentPicker.setAvalibleValues(values.getDepartments(), departmentIds);
-	}
+        if (values.getRoleFilter() != null) {
+            role.setFilter(values.getRoleFilter());
+        }
+        for (TARole taRole : values.getRoles()) {
+            defaultRoleIds.add((long) taRole.getId());
+        }
+    }
 
 	@Override
 	public void getBlobFromServer(String uuid) {

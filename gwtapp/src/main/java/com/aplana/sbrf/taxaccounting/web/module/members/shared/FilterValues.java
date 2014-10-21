@@ -10,6 +10,7 @@ public class FilterValues implements Result {
 
 	private List<TARole> roles;
 	private List<Department> departments;
+    private String roleFilter;
 
 	public List<TARole> getRoles() {
 		return roles;
@@ -26,4 +27,12 @@ public class FilterValues implements Result {
 	public void setDepartments(List<Department> departments) {
 		this.departments = departments;
 	}
+
+    public String getRoleFilter() {
+        return roleFilter;
+    }
+
+    public void setRoleFilter(String roleFilter) {
+        this.roleFilter = roleFilter;
+    }
 }
