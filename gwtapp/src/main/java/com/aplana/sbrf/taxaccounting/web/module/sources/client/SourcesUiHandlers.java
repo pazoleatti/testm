@@ -9,10 +9,11 @@ import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentA
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInterval;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface SourcesUiHandlers extends AplanaUiHandlers {
-    void updateCurrentAssign(DepartmentAssign departmentFormType, CurrentAssign currentAssign, PeriodsInterval periodInterval);
+    void updateCurrentAssign(DepartmentAssign departmentFormType, Set<CurrentAssign> currentAssigns, PeriodsInterval periodsInterval, Map<CurrentAssign, PeriodsInterval> periodIntervals);
 
     void openAssignDialog(AssignDialogView.State state, PeriodsInterval pi, ButtonClickHandlers handlers);
 
@@ -32,7 +33,7 @@ public interface SourcesUiHandlers extends AplanaUiHandlers {
 
     void deleteCurrentAssign(DepartmentAssign departmentAssign, Set<CurrentAssign> currentAssigns);
 
-    void prepareUpdateAssign(DepartmentAssign departmentAssign, CurrentAssign currentAssign);
+    void prepareUpdateAssign(DepartmentAssign departmentAssign, Set<CurrentAssign> currentAssign);
 
     void createAssign(DepartmentAssign leftObject, Set<DepartmentAssign> rightSelectedObjects, PeriodsInterval periodsInterval, List<Integer> leftDepartment, List<Integer> rightDepartment);
 }

@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodsInte
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.Date;
+import java.util.Set;
 
 public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurrentAssignsResult> {
     private DepartmentAssign departmentAssign;
@@ -16,31 +17,11 @@ public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurren
     /** Назначение источников или приемников? */
     private SourceMode mode;
     private PeriodsInterval newPeriodsInterval;
-    private CurrentAssign currentAssign;
+    private Set<CurrentAssign> currentAssigns;
 
-    private Date oldDateFrom;
-    private Date oldDateTo;
     private TaxType taxType;
     /** Подразделение-слева */
     private Integer leftDepartmentId;
-    /** Подразделение-справа */
-    private Integer rightDepartmentId;
-
-    public Date getOldDateFrom() {
-        return oldDateFrom;
-    }
-
-    public void setOldDateFrom(Date oldDateFrom) {
-        this.oldDateFrom = oldDateFrom;
-    }
-
-    public Date getOldDateTo() {
-        return oldDateTo;
-    }
-
-    public void setOldDateTo(Date oldDateTo) {
-        this.oldDateTo = oldDateTo;
-    }
 
     public DepartmentAssign getDepartmentAssign() {
         return departmentAssign;
@@ -74,12 +55,12 @@ public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurren
         this.newPeriodsInterval = newPeriodsInterval;
     }
 
-    public CurrentAssign getCurrentAssign() {
-        return currentAssign;
+    public Set<CurrentAssign> getCurrentAssigns() {
+        return currentAssigns;
     }
 
-    public void setCurrentAssign(CurrentAssign currentAssign) {
-        this.currentAssign = currentAssign;
+    public void setCurrentAssigns(Set<CurrentAssign> currentAssigns) {
+        this.currentAssigns = currentAssigns;
     }
 
     public TaxType getTaxType() {
@@ -96,13 +77,5 @@ public class UpdateCurrentAssignsAction extends UnsecuredActionImpl<UpdateCurren
 
     public void setLeftDepartmentId(Integer leftDepartmentId) {
         this.leftDepartmentId = leftDepartmentId;
-    }
-
-    public Integer getRightDepartmentId() {
-        return rightDepartmentId;
-    }
-
-    public void setRightDepartmentId(Integer rightDepartmentId) {
-        this.rightDepartmentId = rightDepartmentId;
     }
 }

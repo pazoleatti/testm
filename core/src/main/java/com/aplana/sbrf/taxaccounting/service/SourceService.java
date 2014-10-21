@@ -459,9 +459,9 @@ public interface SourceService {
     /**
      * Обновляет указанные назначения источников-приемников
      *
-     * @param sourceClientData данные связок источников-приемников
+     * @param sourceClientDataList список связок источников-приемников
      */
-    void updateSources(Logger logger, SourceClientData sourceClientData);
+    void updateSources(Logger logger, List<SourceClientData> sourceClientDataList);
 
     /**
      * Возвращает количество назначенных налоговых форм для выбранного налога и подразделений
