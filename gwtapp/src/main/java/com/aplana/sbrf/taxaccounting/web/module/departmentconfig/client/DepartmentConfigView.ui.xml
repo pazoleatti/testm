@@ -159,7 +159,7 @@
                                     <g:HorizontalPanel width="100%" spacing="1">
                                         <g:cell width="1%" height="22px">
                                             <g:Label text="Наименование для Приложения № 5:"
-                                                     addStyleNames="{style.leftLabels}"/>
+                                                     addStyleNames="{style.leftLabels}" ui:field="additionalNameLbl"/>
                                         </g:cell>
                                         <g:cell width="99%">
                                             <aplana:TextArea ui:field="additionalName" visibleLines="4"/>
