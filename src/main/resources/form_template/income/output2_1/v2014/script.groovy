@@ -207,116 +207,114 @@ void addData(def xml, headRowCount) {
             break
         }
 
-        if (row.cell.size() >= columnCount) {
-            def newRow = formData.createDataRow()
-            newRow.setIndex(rowIndex++)
-            editableColumns.each {
-                newRow.getCell(it).editable = true
-                newRow.getCell(it).setStyleAlias('Редактируемая')
-            }
-
-            // графа 1
-            def xmlIndexCol = 0
-            newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-
-            // графа 2
-            newRow.emitent = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 3
-            newRow.decreeNumber = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 4
-            newRow.title = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 5
-            newRow.zipCode = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 6 - справочник "Коды субъектов Российской Федерации"
-            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-            xmlIndexCol++
-
-            // графа 7
-            newRow.area = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 8
-            newRow.city = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 9
-            newRow.region = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 10
-            newRow.street = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 11
-            newRow.homeNumber = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 12
-            newRow.corpNumber = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 13
-            newRow.apartment = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 14
-            newRow.surname = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 15
-            newRow.name = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 16
-            newRow.patronymic = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 17
-            newRow.phone = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 18
-            newRow.sumDividend = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-
-            // графа 19
-            newRow.dividendDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-
-            // графа 20
-            newRow.dividendNum = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 21
-            newRow.dividendSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-
-            // графа 22
-            newRow.taxDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-
-            // графа 23
-            newRow.taxNum = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-
-            // графа 24
-            newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-
-            // графа 25
-            newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-            rows.add(newRow)
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
         }
+
+        // графа 1
+        def xmlIndexCol = 0
+        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 2
+        newRow.emitent = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 3
+        newRow.decreeNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 4
+        newRow.title = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 5
+        newRow.zipCode = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 6 - справочник "Коды субъектов Российской Федерации"
+        newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        xmlIndexCol++
+
+        // графа 7
+        newRow.area = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 8
+        newRow.city = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 9
+        newRow.region = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 10
+        newRow.street = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 11
+        newRow.homeNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 12
+        newRow.corpNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 13
+        newRow.apartment = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 14
+        newRow.surname = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 15
+        newRow.name = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 16
+        newRow.patronymic = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 17
+        newRow.phone = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 18
+        newRow.sumDividend = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 19
+        newRow.dividendDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 20
+        newRow.dividendNum = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 21
+        newRow.dividendSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 22
+        newRow.taxDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 23
+        newRow.taxNum = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
+
+        // графа 24
+        newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 25
+        newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
     }
     dataRowHelper.save(rows)
 }
