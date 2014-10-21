@@ -677,7 +677,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Override
     @Transactional(readOnly = true)
     public boolean checkDestinations(long formDataId) {
-        // Признак наличия хотя бы одного назначения-приемника
+        // Признак наличия назначения-приемника в другом подразделении
         boolean retVal = false;
 
         // НФ
@@ -699,7 +699,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 if (form != null && form.getState() != WorkflowState.CREATED) {
                     throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
                 }
-                retVal = true;
+                if (formData.getDepartmentId() != departmentFormType.getDepartmentId()) {
+                    retVal = true;
+                }
             }
         }
 
@@ -716,7 +718,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             "принята декларация";
                     throw new ServiceException("Переход невозможен, т.к. уже %s.", str);
                 }
-                retVal = true;
+                if (!retVal) {
+                    if (formData.getDepartmentId() != departmentDeclarationType.getDepartmentId()) {
+                        retVal = true;
+                    }
+                }
             }
         }
 

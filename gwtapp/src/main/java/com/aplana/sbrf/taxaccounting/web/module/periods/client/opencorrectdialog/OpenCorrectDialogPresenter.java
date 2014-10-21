@@ -168,11 +168,15 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                                                 "Корректирующий период уже открыт!");
                                         break;
                                     case INVALID:
-                                        Dialog.errorMessage("Указанный период корректировки должен быть больше " +
+                                        Dialog.errorMessage( "Корректирование периода",
+                                                "Указанный период корректировки должен быть больше " +
                                                 "последнего корректирующего периода для указанного отчётного периода!");
                                         break;
                                     case CORRECTION_PERIOD_LAST_OPEN:
-                                        Dialog.errorMessage("Корректирующий период не может быть открыт, т.к. открыт предыдущий корректирующий период!");
+                                        Dialog.errorMessage( "Корректирование периода", "Корректирующий период не может быть открыт, т.к. открыт предыдущий корректирующий период!");
+                                        break;
+                                    case CORRECTION_PERIOD_NOT_CLOSE:
+                                        Dialog.errorMessage( "Корректирование периода", "Корректирующий период не может быть открыт, т.к. период корректировки не закрыт!");
                                         break;
                                 }
                             }

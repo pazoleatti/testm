@@ -109,6 +109,10 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @UiField
     CheckBox prepayment;
 
+    @UiField
+    @Editor.Ignore
+    Label additionalNameLbl;
+
 	@UiField
 	TextArea name,
             additionalName;
@@ -298,6 +302,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		payPanelObligation.setVisible(isPayPanelVisible);
 		payPanelType.setVisible(isPayPanelVisible);
         payPanelPrepayment.setVisible(currentTaxType == TaxType.TRANSPORT);
+
+        additionalName.setVisible(currentTaxType == TaxType.INCOME);
+        additionalNameLbl.setVisible(currentTaxType == TaxType.INCOME);
 	}
 
 	@UiHandler("findButton")

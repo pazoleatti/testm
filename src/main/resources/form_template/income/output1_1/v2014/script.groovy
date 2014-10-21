@@ -304,83 +304,81 @@ void addData(def xml, headRowCount) {
             break
         }
 
-        if (row.cell.size() >= columnCount) {
-            def newRow = formData.createDataRow()
-            newRow.setIndex(rowIndex++)
-            editableColumns.each {
-                newRow.getCell(it).editable = true
-                newRow.getCell(it).setStyleAlias('Редактируемая')
-            }
-            autoFillColumns.each {
-                newRow.getCell(it).setStyleAlias('Автозаполняемая')
-            }
+        def newRow = formData.createDataRow()
+        newRow.setIndex(rowIndex++)
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).setStyleAlias('Автозаполняемая')
+        }
 
-            def xmlIndexCol = 0
+        def xmlIndexCol = 0
 
-            def yearStr = row.cell[xmlIndexCol].text()
-            if (yearStr != null) {
-                if (yearStr.contains(".")) {
-                    newRow.financialYear = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-                } else {
-                    def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-                    if (yearNum != null && yearNum != 0) {
-                        newRow.financialYear = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
-                    }
+        def yearStr = row.cell[xmlIndexCol].text()
+        if (yearStr != null) {
+            if (yearStr.contains(".")) {
+                newRow.financialYear = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            } else {
+                def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                if (yearNum != null && yearNum != 0) {
+                    newRow.financialYear = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
                 }
             }
-            xmlIndexCol = 1
-            newRow.taxPeriod = row.cell[xmlIndexCol].text()
-            xmlIndexCol = 2
-            newRow.emitent = row.cell[xmlIndexCol].text()
-            xmlIndexCol = 3
-            newRow.decreeNumber = row.cell[xmlIndexCol].text()
-            xmlIndexCol = 4
-            newRow.dividendType = row.cell[xmlIndexCol].text()
-            xmlIndexCol = 5
-            newRow.dividendSumRaspredPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 6
-            newRow.dividendSumNalogAgent = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 7
-            newRow.dividendForgeinOrgAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 8
-            newRow.dividendForgeinPersonalAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 9
-            newRow.dividendStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 10
-            newRow.dividendStavkaLess5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 11
-            newRow.dividendStavkaMore5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 12
-            newRow.dividendStavkaMore10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 13
-            newRow.dividendRussianMembersAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 14
-            newRow.dividendRussianOrgStavka9 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 15
-            newRow.dividendRussianOrgStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 16
-            newRow.dividendPersonRussia = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 17
-            newRow.dividendMembersNotRussianTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 18
-            newRow.dividendAgentAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 19
-            newRow.dividendAgentWithStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 20
-            newRow.dividendSumForTaxAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 21
-            newRow.dividendSumForTaxStavka9 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 22
-            newRow.dividendSumForTaxStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 23
-            newRow.taxSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 24
-            newRow.taxSumFromPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol = 25
-            newRow.taxSumFromPeriodAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-            rows.add(newRow)
         }
+        xmlIndexCol = 1
+        newRow.taxPeriod = row.cell[xmlIndexCol].text()
+        xmlIndexCol = 2
+        newRow.emitent = row.cell[xmlIndexCol].text()
+        xmlIndexCol = 3
+        newRow.decreeNumber = row.cell[xmlIndexCol].text()
+        xmlIndexCol = 4
+        newRow.dividendType = row.cell[xmlIndexCol].text()
+        xmlIndexCol = 5
+        newRow.dividendSumRaspredPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 6
+        newRow.dividendSumNalogAgent = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 7
+        newRow.dividendForgeinOrgAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 8
+        newRow.dividendForgeinPersonalAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 9
+        newRow.dividendStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 10
+        newRow.dividendStavkaLess5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 11
+        newRow.dividendStavkaMore5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 12
+        newRow.dividendStavkaMore10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 13
+        newRow.dividendRussianMembersAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 14
+        newRow.dividendRussianOrgStavka9 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 15
+        newRow.dividendRussianOrgStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 16
+        newRow.dividendPersonRussia = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 17
+        newRow.dividendMembersNotRussianTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 18
+        newRow.dividendAgentAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 19
+        newRow.dividendAgentWithStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 20
+        newRow.dividendSumForTaxAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 21
+        newRow.dividendSumForTaxStavka9 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 22
+        newRow.dividendSumForTaxStavka0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 23
+        newRow.taxSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 24
+        newRow.taxSumFromPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol = 25
+        newRow.taxSumFromPeriodAll = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
     }
     dataRowHelper.save(rows)
 }

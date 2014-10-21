@@ -54,6 +54,7 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
     @Override
     public SendQueryResult execute(SendQueryAction action, ExecutionContext executionContext) throws ActionException {
         SendQueryResult result = new SendQueryResult();
+        result.setSuccess(false);
         Logger logger = new Logger();
         UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal()));
@@ -62,7 +63,7 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
         int count = emails.size();
         if (count == 0) {
             logger.info(SEND_LOGGER);
-            auditService.add(FormDataEvent.EXTERNAL_INTERACTION, principal.getUserInfo(), principal.getUserInfo().getUser().getDepartmentId(),
+            auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), principal.getUserInfo().getUser().getDepartmentId(),
                     null, null, null, null, SEND_LOGGER, null, null);
         } else {
             try {
@@ -70,6 +71,7 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
                 logger.info(SEND_SUCCESS);
                 auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
                         count == 1 ? String.format(SEND_MAIL, emails.get(0)) : String.format(SEND_MAILS, StringUtils.join(emails.toArray(), ',')), null, null);
+                result.setSuccess(true);
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,

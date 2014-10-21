@@ -146,9 +146,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	@Override
 	public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo){
 		if (declarationTemplateId!=null){
-			LockData objectLock = lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
-                    userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
-			if(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()){
+			LockData objectLock = lockDataService.getLock(LockData.LOCK_OBJECTS.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
+			if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
 				throw new AccessDeniedException("Шаблон декларации заблокирован другим пользователем");
 			}
 		}
@@ -160,8 +159,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData executeWithReturn() {
-                return lockDataService.lock(LockData.LOCK_OBJECTS.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
-                        userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+                return lockDataService.getLock(LockData.LOCK_OBJECTS.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
             }
 
             @Override

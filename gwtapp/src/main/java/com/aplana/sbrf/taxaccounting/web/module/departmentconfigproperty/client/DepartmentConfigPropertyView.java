@@ -151,8 +151,17 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         model.addDataDisplay(table);
     }
 
+    private void removeAllColumns() {
+        columns.clear();
+        while (table.getColumnCount() > 0) {
+            table.removeColumn(0);
+        }
+    }
+
     @Override
     public void setTableColumns(List<RefBookAttribute> attributes) {
+        removeAllColumns();
+
         checkColumn = new Column<DataRow<Cell>, Boolean>(
                 new CheckboxCell(false, true)) {
             @Override
@@ -179,7 +188,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         for (RefBookAttribute attr : attributes) {
             attributeMap.put(attr.getAlias(), attr);
         }
-        columns.clear();
+
         for (TABLE_HEADER h : TABLE_HEADER.values()) {
             if (attributeMap.containsKey(h.name())) {
                 RefBookAttribute cell = attributeMap.get(h.name());
@@ -213,6 +222,19 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         columns.add(refColumn);
                         break;
                 }
+            }
+        }
+    }
+
+    @Override
+    public void setTextFieldsParams(List<RefBookAttribute> attributes) {
+        for (RefBookAttribute attr : attributes) {
+            if ("INN".equals(attr.getAlias())) {
+                inn.setMaxLength(attr.getMaxLength());
+            } else if ("FORMAT_VERSION".equals(attr.getAlias())) {
+                formatVersion.setMaxLength(attr.getMaxLength());
+            } else if ("PREPAYMENT_VERSION".equals(attr.getAlias())) {
+                version.setMaxLength(attr.getMaxLength());
             }
         }
     }
@@ -272,7 +294,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @Override
     public List<DataRow<Cell>> getTableRows() {
-        return table.getVisibleItems();
+        return model.getList();
     }
 
     @UiHandler("delLink")

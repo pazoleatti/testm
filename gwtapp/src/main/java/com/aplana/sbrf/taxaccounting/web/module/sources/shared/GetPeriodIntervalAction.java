@@ -2,17 +2,18 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.shared;
 
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
+import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Преобразование периода назначения в интервал отчетных периодов
  * @author dloshkarev
  */
 public class GetPeriodIntervalAction extends UnsecuredActionImpl<GetPeriodIntervalResult> implements ActionName {
-    private Date periodStart;
-    private Date periodEnd;
+    private Set<CurrentAssign> currentAssigns;
     private TaxType taxType;
 
     public TaxType getTaxType() {
@@ -23,20 +24,12 @@ public class GetPeriodIntervalAction extends UnsecuredActionImpl<GetPeriodInterv
         this.taxType = taxType;
     }
 
-    public Date getPeriodStart() {
-        return periodStart;
+    public Set<CurrentAssign> getCurrentAssigns() {
+        return currentAssigns;
     }
 
-    public void setPeriodStart(Date periodStart) {
-        this.periodStart = periodStart;
-    }
-
-    public Date getPeriodEnd() {
-        return periodEnd;
-    }
-
-    public void setPeriodEnd(Date periodEnd) {
-        this.periodEnd = periodEnd;
+    public void setCurrentAssigns(Set<CurrentAssign> currentAssigns) {
+        this.currentAssigns = currentAssigns;
     }
 
     @Override
