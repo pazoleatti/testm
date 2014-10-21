@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server.DepartmentParamAliases;
@@ -38,11 +39,38 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     SecurityService securityService;
     @Autowired
     PeriodService reportService;
+    @Autowired
+    LogEntryService logEntryService;
 
     @Override
     public SaveDepartmentRefBookValuesResult execute(SaveDepartmentRefBookValuesAction saveDepartmentRefBookValuesAction, ExecutionContext executionContext) throws ActionException {
-        RefBookDataProvider provider = rbFactory.getDataProvider(saveDepartmentRefBookValuesAction.getRefBookId());
 
+
+        Logger logger = new Logger();
+        logger.setTaUserInfo(securityService.currentUserInfo());
+
+        for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
+            Integer signatoryId = row.get("SIGNATORY_ID").getDeRefValue() == null ?
+                    null :
+                    Integer.parseInt(row.get("SIGNATORY_ID").getDeRefValue().trim());
+            String approveDocName = row.get("APPROVE_DOC_NAME").getStringValue();
+            String approveOrgName = row.get("APPROVE_ORG_NAME").getStringValue();
+
+            if (signatoryId == 1
+                    && approveDocName != null && !approveDocName.isEmpty()
+                    && approveOrgName != null && !approveOrgName.isEmpty()) {
+                logger.error("Поля \"Наименование документа представителя\", " +
+                        "\"Наименование организации представителя\" " +
+                        "должны заполняться только в том случае, если " +
+                        "поле \"Признак лица подписавшего документ\" равно значению \"2\" (представитель налогоплательщика)");
+                SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                result.setHasFatalError(true);
+                return result;
+            }
+        }
+
+        RefBookDataProvider provider = rbFactory.getDataProvider(saveDepartmentRefBookValuesAction.getRefBookId());
         ReportPeriod rp = reportService.getReportPeriod(saveDepartmentRefBookValuesAction.getReportPeriodId());
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + saveDepartmentRefBookValuesAction.getDepartmentId();
 
@@ -76,8 +104,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             recordId = recordPairs.get(0).getFirst();
         }
 
-        Logger logger = new Logger();
-        logger.setTaUserInfo(securityService.currentUserInfo());
         Map<String, RefBookValue> notTable = convert(saveDepartmentRefBookValuesAction.getNotTableParams());
         notTable.put(DepartmentParamAliases.DEPARTMENT_ID.name(), new RefBookValue(RefBookAttributeType.REFERENCE, saveDepartmentRefBookValuesAction.getDepartmentId().longValue()));
 
