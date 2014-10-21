@@ -4,18 +4,17 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create.CreateFormDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.create.CreateFormDataSuccessHandler;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterFormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FilterFormDataReadyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FormDataListApplyEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.filter.FormDataListCreateEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataList;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFormDataListResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetKindListAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetKindListResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
@@ -27,6 +26,7 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.HashMap;
@@ -57,7 +57,8 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 	 */
 	private Map<TaxType, FormDataFilter> filterStates = new HashMap<TaxType, FormDataFilter>();
 
-    private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
+    // Ссылка, по которой перешли из данной формы. Если вернулись оттуда же, то фильтр не сбрасывается
+    private String historyRef;
 
     private Long selectedItemId;
 
@@ -67,11 +68,17 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 			FilterFormDataPresenter filterPresenter, CreateFormDataPresenter dialogPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, filterPresenter, dialogPresenter);
 		getView().setUiHandlers(this);
+        // Осуществился переход по ссылке
         History.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                lstHistory.put(0, lstHistory.get(1));
-                lstHistory.put(1, event.getValue());
+                String ref = event.getValue();
+                String currentUrl = FormDataListNameTokens.FORM_DATA_LIST + ";nType=" + taxType.name();
+                // Для правильной работы браузерной кнопки «Назад»
+                if (ref != null && ref.equals(currentUrl)) {
+                    return;
+                }
+                historyRef = ref;
             }
         });
 	}
@@ -86,26 +93,23 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
-		LogCleanEvent.fire(this);
-		LogShowEvent.fire(this, false);
+        LogCleanEvent.fire(this);
+        LogShowEvent.fire(this, false);
         TaxType taxTypeOld = taxType;
-		taxType = TaxType.valueOf(request.getParameter("nType", ""));
-		filterPresenter.changeFilterElementNames(taxType);
+        taxType = TaxType.valueOf(request.getParameter("nType", ""));
+        filterPresenter.changeFilterElementNames(taxType);
         getView().updatePageSize(taxType);
         if (taxTypeOld == null || !taxType.equals(taxTypeOld)) {
-            consoleLog("CLEAN 1");
             filterStates.clear();
             getView().updateFormDataTable(taxType);
             selectedItemId = null;
         } else {
+            // Id экземпляра не передается, т.к. не важно из какого именно экземпляра НФ мы перешли к списку,
+            // фильтры все равно не будут сброшены
             String url = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID;
-            consoleLog("url = " + url);
-            consoleLog("lstHistory 1 = " + lstHistory.get(0));
-            consoleLog("lstHistory 2 = " + lstHistory.get(1));
-            // Если ни одна из хранимых ссылок истории не содержит
-            if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
-                    (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
-                consoleLog("CLEAN 2");
+
+            // Переход обратно из этой же формы
+            if (historyRef == null || !historyRef.startsWith(url)) {
                 filterPresenter.getView().clean();
                 filterStates.clear();
                 selectedItemId = null;
@@ -125,11 +129,24 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 	}
 
     @Override
-	public void onClickCreate(FormDataListCreateEvent event) {
-		// При создании формы берем не последний примененный фильтр, а фильтр который сейчас выставлен в форме фильтрации
-		// Если это поведение не устаривает то нужно получить фильтр из состояни формы getFilterState
-		dialogPresenter.initAndShowDialog(filterPresenter.getFilterData(), this);
-	}
+    public void onClickCreate(FormDataListCreateEvent event) {
+        // При создании формы берем не последний примененный фильтр, а фильтр который сейчас выставлен в форме фильтрации
+        // Если это поведение не устаривает то нужно получить фильтр из состояни формы getFilterState
+        dialogPresenter.initAndShowDialog(filterPresenter.getFilterData(), this, new CreateFormDataSuccessHandler() {
+            @Override
+            public void onSuccess(CreateFormDataResult result) {
+                String uuid = result.getUuid();
+                // По какой-то причине переход к экземпляру НФ не попадает в историю, добавляем принудительно
+                historyRef = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID + "=" + result.getFormDataId();
+                // Переход к созданному экземпляру. Режим редактирования.
+                placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN)
+                        .with(FormDataPresenter.READ_ONLY, "false")
+                        .with(FormDataPresenter.FORM_DATA_ID, String.valueOf(result.getFormDataId()))
+                        .build());
+                LogAddEvent.fire(FormDataListPresenter.this, uuid);
+            }
+        });
+    }
 
 	@Override
 	public void onClickFind(FormDataListApplyEvent event) {
@@ -230,9 +247,4 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
         super.onHide();
         selectedItemId = getView().getSelectedId();
     }
-
-    // TODO Отладочный вывод
-    public static native void consoleLog(String message) /*-{
-      console.log(message);
-  }-*/;
 }
