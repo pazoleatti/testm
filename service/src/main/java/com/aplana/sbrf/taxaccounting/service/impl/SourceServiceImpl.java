@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
@@ -230,6 +231,7 @@ public class SourceServiceImpl implements SourceService {
         for (String msg : msgs) {
             switch (level) {
                 case ERROR: {
+                    logger.clear(LogLevel.INFO);
                     logger.error(msg);
                     break;
                 }
@@ -735,214 +737,216 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void updateSources(Logger logger, SourceClientData sourceClientData) {
-        Date periodStart = sourceClientData.getPeriodStart();
-        Date periodEnd = sourceClientData.getPeriodEnd();
-        Date oldPeriodStart = sourceClientData.getOldPeriodStart();
-        Date oldPeriodEnd = sourceClientData.getOldPeriodEnd();
-        String sourceDepartmentName = departmentDao.getDepartment(sourceClientData.getSourceDepartmentId()).getName();
-        String destinationDepartmentName = departmentDao.getDepartment(sourceClientData.getDestinationDepartmentId()).getName();
-        if (sourceClientData.getSourcePairs() != null && !sourceClientData.getSourcePairs().isEmpty()) {
-            List<SourcePair> sourcePairs = sourceClientData.getSourcePairs();
-            if (sourcePairs.size() > 1) {
-                throw new ServiceException("Нельзя редактировать более одной пары за раз!");
-            }
-
-            SourcePair sourcePair = sourcePairs.get(0);
-
-            if (periodStart.after(oldPeriodStart) || (periodEnd != null && oldPeriodEnd == null)
-                    || (periodEnd != null && oldPeriodEnd != null && periodEnd.before(oldPeriodEnd))) {
-                /** Если новый период сузился */
-
-                List<String> acceptedSources = new ArrayList<String>();
-                /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
-                if (periodStart.after(oldPeriodStart)) {
-                    acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                            oldPeriodStart, periodStart));
-                }
-                if ((periodEnd != null && oldPeriodEnd == null) || (periodEnd != null && oldPeriodEnd != null && periodEnd.before(oldPeriodEnd))) {
-                    acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                            periodEnd, oldPeriodEnd));
+    public void updateSources(Logger logger, List<SourceClientData> sourceClientDataList) {
+        for (SourceClientData sourceClientData : sourceClientDataList) {
+            Date periodStart = sourceClientData.getPeriodStart();
+            Date periodEnd = sourceClientData.getPeriodEnd();
+            Date oldPeriodStart = sourceClientData.getOldPeriodStart();
+            Date oldPeriodEnd = sourceClientData.getOldPeriodEnd();
+            String sourceDepartmentName = departmentDao.getDepartment(sourceClientData.getSourceDepartmentId()).getName();
+            String destinationDepartmentName = departmentDao.getDepartment(sourceClientData.getDestinationDepartmentId()).getName();
+            if (sourceClientData.getSourcePairs() != null && !sourceClientData.getSourcePairs().isEmpty()) {
+                List<SourcePair> sourcePairs = sourceClientData.getSourcePairs();
+                if (sourcePairs.size() > 1) {
+                    throw new ServiceException("Нельзя редактировать более одной пары за раз!");
                 }
 
-                if (!acceptedSources.isEmpty()) {
-                    /** Если существуют принятые источники в промежуточных периодах */
-                    logger.error(String.format(EDIT_FATAL_ERROR,
-                            sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
-                            sourceDepartmentName,
-                            StringUtils.join(acceptedSources, ", ")));
-                    throw new ServiceLoggerException(FATAL_SAVE_MSG,
-                            logEntryService.save(logger.getEntries()));
-                }
-            }
+                SourcePair sourcePair = sourcePairs.get(0);
 
-            if (periodStart.before(oldPeriodStart)) {
-                /** Дата начала нового периода меньше даты начала старого периода */
-                if (periodEnd != null && ((oldPeriodEnd != null && periodEnd.before(oldPeriodEnd)) || oldPeriodEnd == null) && periodEnd.after(oldPeriodStart)) {
-                    /** Дата окончания нового периода меньше даты окончания старого периода и больше даты начала старого периода */
+                if (periodStart.after(oldPeriodStart) || (periodEnd != null && oldPeriodEnd == null)
+                        || (periodEnd != null && oldPeriodEnd != null && periodEnd.before(oldPeriodEnd))) {
+                    /** Если новый период сузился */
 
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, oldPeriodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
-                            oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if (periodEnd != null && (periodEnd.before(oldPeriodStart))) {
-                    /** Дата окончания нового периода меньше даты начала старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, oldPeriodStart, oldPeriodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    checkFormInstances(logger, sourcePairs, periodStart, periodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, periodEnd, oldPeriodStart, oldPeriodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if ((periodEnd == null && oldPeriodEnd != null)
-                        || (periodEnd != null && oldPeriodEnd != null && periodEnd.after(oldPeriodEnd))) {
-                    /** Дата окончания нового периода больше даты окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
-                            oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd.equals(oldPeriodEnd))) {
-                    /** Равна дате окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
-                            oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                }
-            } else if (periodStart.equals(oldPeriodStart)) {
-                /** Дата начала нового периода равна дате начала старого периода */
-                if ((periodEnd != null && oldPeriodEnd == null) || (periodEnd != null && periodEnd.before(oldPeriodEnd))) {
-                    /** Дата окончания нового периода меньше даты окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                } else if ((periodEnd == null && oldPeriodEnd != null)
-                        || (periodEnd != null && periodEnd.after(oldPeriodEnd))) {
-                    /** Дата окончания нового периода больше даты окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
-                            oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                }
-            } else if (periodStart.after(oldPeriodStart) && (
-                    (oldPeriodEnd != null && periodStart.before(oldPeriodEnd) || oldPeriodEnd == null)
-            )) {
-                /** Дата начала нового периода больше даты начала старого периода и меньше даты окончания старого периода */
-                if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd != null && oldPeriodEnd != null && periodEnd.equals(oldPeriodEnd))) {
-                    /** Равна дате окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-
-                } else if (periodEnd != null && (oldPeriodEnd == null || periodEnd.before(oldPeriodEnd))) {
-                    /** Дата окончания нового периода меньше даты окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                } else if ((periodEnd == null && oldPeriodEnd != null)|| (periodEnd.after(oldPeriodEnd))) {
-                    /** Дата окончания нового периода больше даты окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, periodEnd,
-                            oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                } else if (periodEnd.after(oldPeriodEnd)) {
-                    /** Дата окончания нового периода равна дате окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                }
-            } else if (oldPeriodEnd != null && periodStart.after(oldPeriodEnd)) {
-                /** Дата начала нового периода больше даты окончания старого периода */
-                if (periodEnd == null || periodEnd.after(oldPeriodEnd)) {
-                    /** Дата окончания нового периода больше даты окончания старого периода */
-
-                    /** Проверка существования экземпляров нф */
-                    checkFormInstances(logger, sourcePairs, oldPeriodStart, oldPeriodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    checkFormInstances(logger, sourcePairs, periodStart, periodEnd,
-                            sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
-                    /** Проверка зацикливания */
-                    sourcePairs = checkLoops(logger, periodStart, periodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                    /** Проверка пересечений */
-                    sourcePairs = checkIntersections(logger, periodStart, periodEnd, oldPeriodStart, oldPeriodEnd,
-                            sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
-                }
-            }
-            if (!sourcePairs.isEmpty()) {
-                List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, oldPeriodStart, oldPeriodEnd);
-                sourceDao.updateAll(sourceObjects, periodStart, periodEnd, sourceClientData.isDeclaration());
-                if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
-                    for (SourceObject sourceObject : sourceObjects) {
-                        logger.info(UPDATE_SUCCESS_MSG,
-                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
-                                "приемником",
-                                sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
-                                formatter.get().format(periodStart) + " - " +
-                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
-                        );
+                    List<String> acceptedSources = new ArrayList<String>();
+                    /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
+                    if (periodStart.after(oldPeriodStart)) {
+                        acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
+                                oldPeriodStart, periodStart));
                     }
-                } else {
-                    for (SourceObject sourceObject : sourceObjects) {
-                        logger.info(UPDATE_SUCCESS_MSG,
-                                sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
-                                "источником",
-                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
-                                formatter.get().format(periodStart) + " - " +
-                                        (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
-                        );
+                    if ((periodEnd != null && oldPeriodEnd == null) || (periodEnd != null && oldPeriodEnd != null && periodEnd.before(oldPeriodEnd))) {
+                        acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
+                                periodEnd, oldPeriodEnd));
+                    }
+
+                    if (!acceptedSources.isEmpty()) {
+                        /** Если существуют принятые источники в промежуточных периодах */
+                        logger.error(String.format(EDIT_FATAL_ERROR,
+                                sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
+                                sourceDepartmentName,
+                                StringUtils.join(acceptedSources, ", ")));
+                        throw new ServiceLoggerException(FATAL_SAVE_MSG,
+                                logEntryService.save(logger.getEntries()));
                     }
                 }
+
+                if (periodStart.before(oldPeriodStart)) {
+                    /** Дата начала нового периода меньше даты начала старого периода */
+                    if (periodEnd != null && ((oldPeriodEnd != null && periodEnd.before(oldPeriodEnd)) || oldPeriodEnd == null) && periodEnd.after(oldPeriodStart)) {
+                        /** Дата окончания нового периода меньше даты окончания старого периода и больше даты начала старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        /** Проверка зацикливания */
+                        sourcePairs = checkLoops(logger, periodStart, oldPeriodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                        /** Проверка пересечений */
+                        sourcePairs = checkIntersections(logger, periodStart, periodEnd,
+                                oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    } else if (periodEnd != null && (periodEnd.before(oldPeriodStart))) {
+                        /** Дата окончания нового периода меньше даты начала старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, oldPeriodStart, oldPeriodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        checkFormInstances(logger, sourcePairs, periodStart, periodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        /** Проверка зацикливания */
+                        sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                        /** Проверка пересечений */
+                        sourcePairs = checkIntersections(logger, periodStart, periodEnd, oldPeriodStart, oldPeriodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    } else if ((periodEnd == null && oldPeriodEnd != null)
+                            || (periodEnd != null && oldPeriodEnd != null && periodEnd.after(oldPeriodEnd))) {
+                        /** Дата окончания нового периода больше даты окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        /** Проверка зацикливания */
+                        sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                        /** Проверка пересечений */
+                        sourcePairs = checkIntersections(logger, periodStart, periodEnd,
+                                oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    } else if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd.equals(oldPeriodEnd))) {
+                        /** Равна дате окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1),
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        /** Проверка зацикливания */
+                        sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                        /** Проверка пересечений */
+                        sourcePairs = checkIntersections(logger, periodStart, periodEnd,
+                                oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    }
+                } else if (periodStart.equals(oldPeriodStart)) {
+                    /** Дата начала нового периода равна дате начала старого периода */
+                    if ((periodEnd != null && oldPeriodEnd == null) || (periodEnd != null && periodEnd.before(oldPeriodEnd))) {
+                        /** Дата окончания нового периода меньше даты окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                    } else if ((periodEnd == null && oldPeriodEnd != null)
+                            || (periodEnd != null && periodEnd.after(oldPeriodEnd))) {
+                        /** Дата окончания нового периода больше даты окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        /** Проверка зацикливания */
+                        sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                        /** Проверка пересечений */
+                        sourcePairs = checkIntersections(logger, periodStart, periodEnd,
+                                oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    }
+                } else if (periodStart.after(oldPeriodStart) && (
+                        (oldPeriodEnd != null && periodStart.before(oldPeriodEnd) || oldPeriodEnd == null)
+                )) {
+                    /** Дата начала нового периода больше даты начала старого периода и меньше даты окончания старого периода */
+                    if ((periodEnd == null && oldPeriodEnd == null) || (periodEnd != null && oldPeriodEnd != null && periodEnd.equals(oldPeriodEnd))) {
+                        /** Равна дате окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+
+                    } else if (periodEnd != null && (oldPeriodEnd == null || periodEnd.before(oldPeriodEnd))) {
+                        /** Дата окончания нового периода меньше даты окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                    } else if ((periodEnd == null && oldPeriodEnd != null)|| (periodEnd.after(oldPeriodEnd))) {
+                        /** Дата окончания нового периода больше даты окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        /** Проверка зацикливания */
+                        sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                        /** Проверка пересечений */
+                        sourcePairs = checkIntersections(logger, periodStart, periodEnd,
+                                oldPeriodStart, oldPeriodEnd, sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    } else if (periodEnd.after(oldPeriodEnd)) {
+                        /** Дата окончания нового периода равна дате окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1),
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                    }
+                } else if (oldPeriodEnd != null && periodStart.after(oldPeriodEnd)) {
+                    /** Дата начала нового периода больше даты окончания старого периода */
+                    if (periodEnd == null || periodEnd.after(oldPeriodEnd)) {
+                        /** Дата окончания нового периода больше даты окончания старого периода */
+
+                        /** Проверка существования экземпляров нф */
+                        checkFormInstances(logger, sourcePairs, oldPeriodStart, oldPeriodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        checkFormInstances(logger, sourcePairs, periodStart, periodEnd,
+                                sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
+                        /** Проверка зацикливания */
+                        sourcePairs = checkLoops(logger, periodStart, periodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                        /** Проверка пересечений */
+                        sourcePairs = checkIntersections(logger, periodStart, periodEnd, oldPeriodStart, oldPeriodEnd,
+                                sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
+                    }
+                }
+                if (!sourcePairs.isEmpty()) {
+                    List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, oldPeriodStart, oldPeriodEnd);
+                    sourceDao.updateAll(sourceObjects, periodStart, periodEnd, sourceClientData.isDeclaration());
+                    if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
+                        for (SourceObject sourceObject : sourceObjects) {
+                            logger.info(UPDATE_SUCCESS_MSG,
+                                    sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                            sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                    "приемником",
+                                    sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                    formatter.get().format(periodStart) + " - " +
+                                            (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                            );
+                        }
+                    } else {
+                        for (SourceObject sourceObject : sourceObjects) {
+                            logger.info(UPDATE_SUCCESS_MSG,
+                                    sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                    "источником",
+                                    sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                            sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                    formatter.get().format(periodStart) + " - " +
+                                            (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
+                            );
+                        }
+                    }
+                }
+            } else {
+                throw new ServiceException(EMPTY_LIST_MSG);
             }
-        } else {
-            throw new ServiceException(EMPTY_LIST_MSG);
         }
     }
 

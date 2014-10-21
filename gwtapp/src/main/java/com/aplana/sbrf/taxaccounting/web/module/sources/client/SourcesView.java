@@ -915,11 +915,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         if (downSM.getSelectedSet().isEmpty()) {
             return;
         }
-        if (downSM.getSelectedSet().size() > 1) {
+        /*if (downSM.getSelectedSet().size() > 1) {
             Dialog.errorMessage("Возможно редактирование не более одной записи!");
             return;
-        }
-        getUiHandlers().prepareUpdateAssign(leftSM.getSelectedObject(), downSM.getSelectedSet().iterator().next());
+        }*/
+        getUiHandlers().prepareUpdateAssign(leftSM.getSelectedObject(), downSM.getSelectedSet());
     }
 
     @UiHandler("appointmentTypePicker")

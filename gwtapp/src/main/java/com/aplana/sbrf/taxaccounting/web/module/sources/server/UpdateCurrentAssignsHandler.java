@@ -49,97 +49,100 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
     public UpdateCurrentAssignsResult execute(UpdateCurrentAssignsAction action, ExecutionContext context) {
         UpdateCurrentAssignsResult result = new UpdateCurrentAssignsResult();
         PeriodsInterval period = action.getNewPeriodsInterval();
-        SourceClientData sourceClientData = new SourceClientData();
         Logger logger = new Logger();
 
-        List<SourceObject> sourceObjects = new ArrayList<SourceObject>();
-        List<SourcePair> sourcePairs = new ArrayList<SourcePair>();
-        SourcePair sourcePair;
-        CurrentAssign assign = action.getCurrentAssign();
-        if (action.getMode() == SourceMode.SOURCES) {
-            sourcePair = new SourcePair(assign.getId(), action.getDepartmentAssign().getId());
-            sourcePair.setSourceKind(assign.getFormKind().getName());
-            sourcePair.setSourceType(assign.getFormType().getName());
-            if (action.isDeclaration()) {
-                sourcePair.setDestinationType(sourceService.getDeclarationType(action.getDepartmentAssign().getTypeId()).getName());
+        List<SourceClientData> sourceClientDataList = new ArrayList<SourceClientData>();
+        for (CurrentAssign currentAssign : action.getCurrentAssigns()) {
+            List<SourceObject> sourceObjects = new ArrayList<SourceObject>();
+            List<SourcePair> sourcePairs = new ArrayList<SourcePair>();
+            SourceClientData sourceClientData = new SourceClientData();
+            SourcePair sourcePair;
+            if (action.getMode() == SourceMode.SOURCES) {
+                sourcePair = new SourcePair(currentAssign.getId(), action.getDepartmentAssign().getId());
+                sourcePair.setSourceKind(currentAssign.getFormKind().getName());
+                sourcePair.setSourceType(currentAssign.getFormType().getName());
+                if (action.isDeclaration()) {
+                    sourcePair.setDestinationType(sourceService.getDeclarationType(action.getDepartmentAssign().getTypeId()).getName());
+                } else {
+                    sourcePair.setDestinationKind(action.getDepartmentAssign().getKind().getName());
+                    sourcePair.setDestinationType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
+                }
             } else {
-                sourcePair.setDestinationKind(action.getDepartmentAssign().getKind().getName());
-                sourcePair.setDestinationType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
+                sourcePair = new SourcePair(action.getDepartmentAssign().getId(), currentAssign.getId());
+                sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
+                sourcePair.setDestinationKind(currentAssign.getFormKind().getName());
+                if (action.isDeclaration()) {
+                    sourcePair.setDestinationType(currentAssign.getDeclarationType().getName());
+                } else {
+                    sourcePair.setSourceKind(action.getDepartmentAssign().getKind().getName());
+                    sourcePair.setDestinationType(currentAssign.getFormType().getName());
+                }
             }
-        } else {
-            sourcePair = new SourcePair(action.getDepartmentAssign().getId(), assign.getId());
-            sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
-            sourcePair.setDestinationKind(assign.getFormKind().getName());
-            if (action.isDeclaration()) {
-                sourcePair.setDestinationType(assign.getDeclarationType().getName());
+            SourceObject sourceObject = new SourceObject(sourcePair, currentAssign.getStartDateAssign(), currentAssign.getEndDateAssign());
+            sourceObjects.add(sourceObject);
+            sourcePairs.add(sourcePair);
+
+            sourceClientData.setSourceObjects(sourceObjects);
+            sourceClientData.setSourcePairs(sourcePairs);
+            sourceClientData.setMode(action.getMode());
+            sourceClientData.setDeclaration(action.isDeclaration());
+            sourceClientData.setPeriodStart(PeriodConvertor.getDateFrom(period));
+            sourceClientData.setPeriodStartName(period.getPeriodStartName());
+            sourceClientData.setPeriodEnd(PeriodConvertor.getDateTo(period));
+            sourceClientData.setPeriodEndName(period.getPeriodTo() != null ? period.getPeriodEndName() : null);
+
+            /** Получение информации по периодам из справочника Коды, определяющие налоговый (отчётный) период*/
+            RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
+            RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
+
+            String filter = action.getTaxType().getCode() + " = 1";
+            PagingResult<Map<String, RefBookValue>> records = provider.getRecords(new Date(), null, filter ,null);
+            if (records.isEmpty()) {
+                throw new ServiceException("Некорректные данные в справочнике \"Коды, определяющие налоговый (отчётный) период\"");
+            }
+
+            Calendar calendarFrom = Calendar.getInstance();
+            calendarFrom.setTime(currentAssign.getStartDateAssign());
+            calendarFrom.set(Calendar.YEAR, 1970);
+            Date oldDateFrom = calendarFrom.getTime();
+
+            Date oldDateTo = null;
+            if (currentAssign.getEndDateAssign() != null) {
+                Calendar calendarTo = Calendar.getInstance();
+                calendarTo.setTime(currentAssign.getEndDateAssign());
+                calendarTo.set(Calendar.YEAR, 1970);
+                oldDateTo = calendarTo.getTime();
+            }
+
+            /** Начало старого периода в текстовом представлении. Используется в обработке ошибок */
+            String oldPeriodStartName = null;
+            /** Окончание старого периода в текстовом представлении. Используется в обработке ошибок */
+            String oldPeriodEndName = null;
+            for (Map<String, RefBookValue> record : records) {
+                Date startDate = record.get("CALENDAR_START_DATE").getDateValue();
+                Date endDate = record.get("END_DATE").getDateValue();
+                if (startDate.equals(oldDateFrom)) {
+                    oldPeriodStartName = record.get("NAME").getStringValue();
+                }
+                if (currentAssign.getEndDateAssign() != null && endDate.equals(oldDateTo)) {
+                    oldPeriodEndName = record.get("NAME").getStringValue();
+                }
+            }
+            sourceClientData.setOldPeriodStart(currentAssign.getStartDateAssign());
+            sourceClientData.setOldPeriodStartName(oldPeriodStartName);
+            sourceClientData.setOldPeriodEnd(currentAssign.getEndDateAssign());
+            sourceClientData.setOldPeriodEndName(oldPeriodEndName);
+            if (action.getMode() == SourceMode.SOURCES) {
+                sourceClientData.setSourceDepartmentId(currentAssign.getDepartmentId());
+                sourceClientData.setDestinationDepartmentId(action.getLeftDepartmentId());
             } else {
-                sourcePair.setSourceKind(action.getDepartmentAssign().getKind().getName());
-                sourcePair.setDestinationType(assign.getFormType().getName());
+                sourceClientData.setSourceDepartmentId(action.getLeftDepartmentId());
+                sourceClientData.setDestinationDepartmentId(currentAssign.getDepartmentId());
             }
-        }
-        SourceObject sourceObject = new SourceObject(sourcePair, assign.getStartDateAssign(), assign.getEndDateAssign());
-        sourceObjects.add(sourceObject);
-        sourcePairs.add(sourcePair);
-
-        sourceClientData.setSourceObjects(sourceObjects);
-        sourceClientData.setSourcePairs(sourcePairs);
-        sourceClientData.setMode(action.getMode());
-        sourceClientData.setDeclaration(action.isDeclaration());
-        sourceClientData.setPeriodStart(PeriodConvertor.getDateFrom(period));
-        sourceClientData.setPeriodStartName(period.getPeriodStartName());
-        sourceClientData.setPeriodEnd(PeriodConvertor.getDateTo(period));
-        sourceClientData.setPeriodEndName(period.getPeriodTo() != null ? period.getPeriodEndName() : null);
-
-        /** Получение информации по периодам из справочника Коды, определяющие налоговый (отчётный) период*/
-        RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);
-        RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
-
-        String filter = action.getTaxType().getCode() + " = 1";
-        PagingResult<Map<String, RefBookValue>> records = provider.getRecords(new Date(), null, filter ,null);
-        if (records.isEmpty()) {
-            throw new ServiceException("Некорректные данные в справочнике \"Коды, определяющие налоговый (отчётный) период\"");
+            sourceClientDataList.add(sourceClientData);
         }
 
-        Calendar calendarFrom = Calendar.getInstance();
-        calendarFrom.setTime(action.getOldDateFrom());
-        calendarFrom.set(Calendar.YEAR, 1970);
-        Date oldDateFrom = calendarFrom.getTime();
-
-        Date oldDateTo = null;
-        if (action.getOldDateTo() != null) {
-            Calendar calendarTo = Calendar.getInstance();
-            calendarTo.setTime(action.getOldDateTo());
-            calendarTo.set(Calendar.YEAR, 1970);
-            oldDateTo = calendarTo.getTime();
-        }
-
-        /** Начало старого периода в текстовом представлении. Используется в обработке ошибок */
-        String oldPeriodStartName = null;
-        /** Окончание старого периода в текстовом представлении. Используется в обработке ошибок */
-        String oldPeriodEndName = null;
-        for (Map<String, RefBookValue> record : records) {
-            Date startDate = record.get("CALENDAR_START_DATE").getDateValue();
-            Date endDate = record.get("END_DATE").getDateValue();
-            if (startDate.equals(oldDateFrom)) {
-                oldPeriodStartName = record.get("NAME").getStringValue();
-            }
-            if (action.getOldDateTo() != null && endDate.equals(oldDateTo)) {
-                oldPeriodEndName = record.get("NAME").getStringValue();
-            }
-        }
-        sourceClientData.setOldPeriodStart(action.getOldDateFrom());
-        sourceClientData.setOldPeriodStartName(oldPeriodStartName);
-        sourceClientData.setOldPeriodEnd(action.getOldDateTo());
-        sourceClientData.setOldPeriodEndName(oldPeriodEndName);
-        if (action.getMode() == SourceMode.SOURCES) {
-            sourceClientData.setSourceDepartmentId(action.getRightDepartmentId());
-            sourceClientData.setDestinationDepartmentId(action.getLeftDepartmentId());
-        } else {
-            sourceClientData.setSourceDepartmentId(action.getLeftDepartmentId());
-            sourceClientData.setDestinationDepartmentId(action.getRightDepartmentId());
-        }
-
-        sourceService.updateSources(logger, sourceClientData);
+        sourceService.updateSources(logger, sourceClientDataList);
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
     }
