@@ -7,6 +7,8 @@ public class RemovePeriodResult implements Result {
 
 	private String uuid;
 
+    private boolean hasFatalErrors = false;
+
 	public String getUuid() {
 		return uuid;
 	}
@@ -14,4 +16,12 @@ public class RemovePeriodResult implements Result {
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
+
+    public boolean isHasFatalErrors() {
+        return hasFatalErrors;
+    }
+
+    public void setHasFatalErrors(boolean hasFatalErrors) {
+        this.hasFatalErrors = hasFatalErrors;
+    }
 }
