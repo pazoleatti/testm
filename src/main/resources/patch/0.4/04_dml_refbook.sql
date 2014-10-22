@@ -243,6 +243,24 @@ INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 964, 206,'Наименование документа представителя','APPROVE_DOC_NAME', 1, 15,null,null, 1,null, 100, 0, 0,null,null, 0, 120);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 965, 206,'Наименование организации представителя','APPROVE_ORG_NAME', 1, 16,null,null, 1,null, 100, 0, 0,null,null, 0, 1000);
 
+-- http://jira.aplana.com/browse/SBRFACCTAX-9103: Добавление атрибута подразделения
+INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2062, 206,'Код подразделения','DEPARTMENT_ID', 4, 17,30,161, 1,null, 10, 1, 0,null,null, 0, null);
+
+
 ---------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-9166: Корректировка наименований атрибутов в справочнике "Коды налоговых льгот транспортного налога"
+
+UPDATE ref_book_attribute SET name = 'Код налоговой льготы' WHERE id = 15;
+UPDATE ref_book_attribute SET name = 'Код родительской записи' WHERE id = 300;
+---------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-9181: Добавление признака использования в модуле Гарантий для справочника Подразделений
+
+ALTER TABLE department ADD garant_use number(1) default 0 not null;
+COMMENT ON COLUMN department.garant_use is 'Признак, что используется в модуле Гарантий';
+ALTER TABLE department ADD CONSTRAINT department_chk_garant_use check (garant_use in (0, 1));
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (167,30,'Используется в АС "Гарантии"','GARANT_USE',2,9,null,null,1,0,15,0,0,null,6,1,1);
+---------------------------------------------------------------------------------------------------
+
 COMMIT;
 EXIT;

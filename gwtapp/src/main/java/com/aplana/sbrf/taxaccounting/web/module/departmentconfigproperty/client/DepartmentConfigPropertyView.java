@@ -151,8 +151,17 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         model.addDataDisplay(table);
     }
 
+    private void removeAllColumns() {
+        columns.clear();
+        while (table.getColumnCount() > 0) {
+            table.removeColumn(0);
+        }
+    }
+
     @Override
     public void setTableColumns(List<RefBookAttribute> attributes) {
+        removeAllColumns();
+
         checkColumn = new Column<DataRow<Cell>, Boolean>(
                 new CheckboxCell(false, true)) {
             @Override
@@ -179,7 +188,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         for (RefBookAttribute attr : attributes) {
             attributeMap.put(attr.getAlias(), attr);
         }
-        columns.clear();
+
         for (TABLE_HEADER h : TABLE_HEADER.values()) {
             if (attributeMap.containsKey(h.name())) {
                 RefBookAttribute cell = attributeMap.get(h.name());

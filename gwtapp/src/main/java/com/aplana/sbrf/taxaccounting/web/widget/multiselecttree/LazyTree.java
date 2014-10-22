@@ -77,15 +77,13 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
 
                 Boolean multiSelect = item.isMultiSelection();
 
-                if (multiSelect != null) {
-                    if (multiSelect) {
-                        setSelected(item, !item.isSelected());
-                    } else {
-                        clearSelection();
-                        setSelected(item, true);
-                    }
-                    LazyTreeSelectionEvent.fire(LazyTree.this, item);
+                if (multiSelect != null && multiSelect) {
+                    setSelected(item, !item.isSelected());
+                } else {
+                    clearSelection();
+                    setSelected(item, true);
                 }
+                LazyTreeSelectionEvent.fire(LazyTree.this, item);
             }
         });
 
@@ -358,8 +356,8 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         parent.setState(false);
     }
 
-    private SetSelectionModel<H> getSelectionModel(boolean multiSelect, ProvidesKey<H> key) {
-        return multiSelect ?
+    private SetSelectionModel<H> getSelectionModel(Boolean multiSelect, ProvidesKey<H> key) {
+        return multiSelect != null && multiSelect ?
                 new MultiSelectionModel<H>(key) {
                     // Переопределение методов - попытка убрать задержку при сеттинге селекта
                     @Override

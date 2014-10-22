@@ -478,6 +478,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     @Override
     public void updateMode(FormMode mode) {
+        if (mode == null) {
+            mode = FormMode.VIEW;
+        }
         switch (mode){
             case CREATE:
                 save.setEnabled(true);

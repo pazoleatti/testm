@@ -70,7 +70,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
                 LockData lockDataReportTask;
-                if ((lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4)) == null) {
+                if ((lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24)) == null) {
                     try {
                         String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), action.getType());
                         if (uuid == null) {

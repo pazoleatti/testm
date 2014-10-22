@@ -28,6 +28,11 @@ public class TARole implements Serializable {
 	 */
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
+    /**
+     * Алиас роли "Пользователь модуля Гарантий"
+     */
+    public static final String ROLE_GARANT = "ROLE_GARANT";
+
 	private static final long serialVersionUID = 1L;
 	
 	private int id;

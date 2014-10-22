@@ -265,7 +265,8 @@ create table department (
   sbrf_code   varchar2(255),
   region_id number(18),
   is_active number(1,0) default 1 not null,
-  code number(9,0) not null
+  code number(9,0) not null,
+  garant_use number(1) default 0 not null
 );
 comment on table department is 'Подразделения банка';
 comment on column department.id is 'Идентификатор записи';
@@ -278,6 +279,7 @@ comment on column department.sbrf_code is 'Код подразделения в 
 comment on column department.region_id is 'Код региона';
 comment on column department.is_active is 'Действующее подразделение (0 - не действующее, 1 - действующее)';
 comment on column department.code is 'Код подразделения';
+comment on column department.garant_use is 'Признак, что используется в модуле Гарантий';
 
 create sequence seq_department start with 1000;
 ---------------------------------------------------------------------------------------------------
@@ -697,7 +699,8 @@ create_date date not null,
 deadline date null,
 user_id number(9) null,
 role_id number(9) null,
-is_read number(1) default 0 not null
+is_read number(1) default 0 not null,
+blob_data_id varchar2(36)
 );
 
 comment on table notification is 'Оповещения';
@@ -711,6 +714,7 @@ comment on column notification.deadline is 'дата сдачи отчетнос
 comment on column notification.user_id is 'Идентификатор пользователя, который получит оповещение';
 comment on column notification.role_id is 'Идентификатор роли пользователя, который получит оповещение';
 comment on column notification.is_read is 'Признак прочтения';
+comment on column notification.blob_data_id is 'Ссылка на логи';
 
 create sequence seq_notification start with 10000;
 

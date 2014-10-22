@@ -60,10 +60,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     private Iterator<Long> iterator;
 
     public RefBookTreePickerView() {
-        this(false);
+        this(null);
     }
 
-    public RefBookTreePickerView(final boolean multiSelect) {
+    public RefBookTreePickerView(final Boolean multiSelect) {
         this.multiSelect = multiSelect;
 
         tree = new LazyTree<RefBookUiTreeItem>(multiSelect, RefBookPickerUtils.TREE_KEY_PROVIDER);
