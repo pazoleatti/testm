@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -27,6 +26,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
@@ -51,7 +51,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	EditFormPresenter editFormPresenter;
 
 	private final DispatchAsync dispatcher;
-	private final TaPlaceManager placeManager;
+	private final PlaceManager placeManager;
 
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
@@ -72,7 +72,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     }
 
 	@Inject
-	public RefBookVersionPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, TaPlaceManager placeManager, final MyProxy proxy,
+	public RefBookVersionPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, PlaceManager placeManager, final MyProxy proxy,
                                    DispatchAsync dispatcher) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;

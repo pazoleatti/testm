@@ -43,6 +43,6 @@ public class RefBookDataModule extends AbstractPresenterModule {
         bindPresenter(RefBookScriptPresenter.class, RefBookScriptPresenter.MyView.class,
                 RefBookScriptView.class, RefBookScriptPresenter.MyProxy.class);
 
-        bind(TaPlaceManager.class).to(TaPlaceManagerImpl.class).in(Singleton.class);
+        //bind(TaPlaceManager.class).to(TaPlaceManagerImpl.class).in(Singleton.class);
     }
 }
