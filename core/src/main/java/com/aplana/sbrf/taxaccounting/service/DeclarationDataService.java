@@ -61,14 +61,6 @@ public interface DeclarationDataService {
 	 */
 	void check(Logger logger, long declarationDataId, TAUserInfo userInfo);
 
-    /**
-     * Запускает только groovy-скриптовые проверки(проверка настроек подразделения)
-     * @param logger
-     * @param id
-     * @param userInfo
-     */
-    void checkDepartmentConfig(Logger logger, long id, TAUserInfo userInfo);
-
 	/**
 	 * Установить в декларации флаг принятия
 	 * @param logger - объект журнала
