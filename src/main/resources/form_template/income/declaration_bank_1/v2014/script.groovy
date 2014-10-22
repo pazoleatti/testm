@@ -572,7 +572,7 @@ void generateXML() {
         }
         // 790
         [790:[20501]].each { id, codes ->
-            def result = getSimpleConsumptionSumRows8(dataRowsSimpleConsumption, codes)
+            def result = getLong(getSimpleConsumptionSumRows8(dataRowsSimpleConsumption, codes))
             if (result != 0) {
                 svCelSred[id] = result
             }
