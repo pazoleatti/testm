@@ -36,8 +36,25 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 	@Override
 	public FilterValues execute(GetFilterValues action, ExecutionContext context) throws ActionException {
 		FilterValues result = new FilterValues();
-		result.setRoles(taRoleService.getAll());
-		TAUser currentUser = securityService.currentUserInfo().getUser();
+
+        TAUser currentUser = securityService.currentUserInfo().getUser();
+
+        List<TARole> allRoles = taRoleService.getAll();
+
+        // исключаем роль гарантий из списка если пользователи бизнес контролеры, для админа можно
+        // http://conf.aplana.com/pages/diffpagesbyversion.action?pageId=10486850&selectedPageVersions=41&selectedPageVersions=42
+        if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP) || currentUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+            for (int i = allRoles.size() - 1; i >= 0; i--) {
+                TARole role = allRoles.get(i);
+                if (TARole.ROLE_GARANT.equals(role.getAlias())) {
+                    allRoles.remove(role);
+                    break;
+                }
+            }
+            result.setRoleFilter("ALIAS != '" + TARole.ROLE_GARANT + "'");
+        }
+
+        result.setRoles(allRoles);
 
 		Set<Integer> depIds = new HashSet<Integer>();
 

@@ -277,5 +277,11 @@ ALTER TABLE declaration_data DROP COLUMN report_period_id;
 ALTER TABLE declaration_data ADD CONSTRAINT declaration_data_uniq_template UNIQUE(department_report_period_id, declaration_template_id);
 
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-9184: Обновление таблицы NOTIFICATION для хранения ссылок на логи
+
+ALTER TABLE notification ADD blob_data_id varchar2(36);
+ALTER TABLE notification ADD CONSTRAINT notification_fk_blob_data_id FOREIGN KEY (blob_data_id) REFERENCES blob_data(id);
+COMMENT ON COLUMN notification.blob_data_id IS 'Ссылка на логи';
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

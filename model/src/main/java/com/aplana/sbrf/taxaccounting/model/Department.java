@@ -31,6 +31,8 @@ public class Department implements Serializable {
     private Long regionId;
     private boolean isActive;
     private Integer code;
+    /* Поле признак указывающее что подразделение используется в модуле гарантий */
+    private boolean garantUse;
 
     /**
      * Полное имя подразделения
@@ -192,5 +194,16 @@ public class Department implements Serializable {
 
     public String getFullName() {
         return fullName;
+    }
+
+    /**
+     * Получить код подразделения в нотации Сбербанка
+     */
+    public boolean isGarantUse() {
+        return garantUse;
+    }
+
+    public void setGarantUse(boolean garantUse) {
+        this.garantUse = garantUse;
     }
 }
