@@ -37,7 +37,7 @@
             position: absolute !important;
             bottom: 0;
             right: 10px;
-            left: 10px;
+            left: 1px;
             top: 140px;
             height: inherit !important;
             border-top: 1px solid #aeaeac;
@@ -175,6 +175,7 @@
                 </g:HorizontalPanel>
 
                 <cm:CodeMirror ui:field="createScript" addStyleNames="{style.table}"/>
+
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>
