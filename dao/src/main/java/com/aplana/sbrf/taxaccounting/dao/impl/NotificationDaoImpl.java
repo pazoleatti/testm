@@ -33,6 +33,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             notification.setReceiverDepartmentId(SqlUtils.getInteger(rs, "RECEIVER_DEPARTMENT_ID"));
             notification.setRead(rs.getBoolean("IS_READ"));
             notification.setText(rs.getString("TEXT"));
+            notification.setBlobDataId(rs.getString("BLOB_DATA_ID"));
             notification.setCreateDate(new Date(rs.getTimestamp("CREATE_DATE").getTime()));
             notification.setDeadline(rs.getDate("DEADLINE"));
             notification.setUserId(rs.getInt("USER_ID"));
@@ -52,8 +53,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
         jt.update(
                 "insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
-                        "IS_READ, TEXT, CREATE_DATE, DEADLINE)" +
-                        " values (?, ?, ?, ?, ?, ?, ?, ?)",
+                        "IS_READ, TEXT, CREATE_DATE, DEADLINE, BLOB_DATA_ID)" +
+                        " values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 notification.getReportPeriodId(),
                 notification.getSenderDepartmentId(),
@@ -61,7 +62,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 notification.isRead() ? 1 : 0,
                 notification.getText(),
                 notification.getCreateDate(),
-                notification.getDeadline()
+                notification.getDeadline(),
+                notification.getBlobDataId()
         );
         notification.setId(id);
         return id;
@@ -90,8 +92,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     @Override
     public void saveList(final List<Notification> notifications) {
         getJdbcTemplate().batchUpdate("insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
-                "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID)" +
-                " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+                "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, BLOB_DATA_ID)" +
+                " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
 
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -139,6 +141,12 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 } else {
                     ps.setNull(10, Types.NUMERIC);
                 }
+
+                if (elem.getBlobDataId() != null) {
+                    ps.setString(11, elem.getBlobDataId());
+                } else {
+                    ps.setNull(11, Types.VARCHAR);
+                }
             }
 
             @Override
@@ -179,7 +187,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 	}
 
     private static final String GET_BY_FILTER = "select * from (\n" +
-            "  select ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, \n" +
+            "  select ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, BLOB_DATA_ID, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, \n" +
             " row_number() %s as rn \n" +
             "  from notification \n" +
             "where (\n" +

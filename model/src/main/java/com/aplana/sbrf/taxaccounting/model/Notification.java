@@ -15,6 +15,7 @@ public class Notification implements Serializable {
     private Integer senderDepartmentId;
     private Integer receiverDepartmentId;
     private String text;
+    private String blobDataId;
     private Date createDate;
     private Date deadline;
     /** Идентификатор пользователя, который получит оповещение */
@@ -78,6 +79,14 @@ public class Notification implements Serializable {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getBlobDataId() {
+        return blobDataId;
+    }
+
+    public void setBlobDataId(String blobDataId) {
+        this.blobDataId = blobDataId;
     }
 
     public Date getCreateDate() {

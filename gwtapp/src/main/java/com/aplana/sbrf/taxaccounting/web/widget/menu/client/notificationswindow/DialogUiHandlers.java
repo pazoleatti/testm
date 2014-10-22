@@ -10,4 +10,6 @@ public interface DialogUiHandlers extends UiHandlers {
 	void onRangeChange(int start, int length);
 
     void deleteNotifications(Set<NotificationTableRow> selectedSet);
+
+    void onEventClick(String uuid);
 }

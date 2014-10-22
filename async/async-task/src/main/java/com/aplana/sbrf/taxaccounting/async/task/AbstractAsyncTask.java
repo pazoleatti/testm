@@ -2,6 +2,9 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -29,12 +32,14 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private NotificationService notificationService;
     @Autowired
     private TransactionHelper transactionHelper;
+    @Autowired
+    private LogEntryService logEntryService;
 
     /**
      * Выполнение бизнес логики задачи
      * @param params параметры
      */
-    protected abstract void executeBusinessLogic(Map<String, Object> params);
+    protected abstract void executeBusinessLogic(Map<String, Object> params, Logger logger);
 
     /**
      * Возвращает название задачи. Используется при выводе ошибок.
@@ -60,23 +65,28 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
         try {
             if (lockService.isLockExists(lock, lockDateEnd)) {
+                Logger logger = new Logger();
                 //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                executeBusinessLogic(params);
+                executeBusinessLogic(params, logger);
                 if (!lockService.isLockExists(lock, lockDateEnd)) {
                     //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                     //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                     throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                 }
-                sendNotifications(lock, getNotificationMsg(params));
+                sendNotifications(lock, getNotificationMsg(params), logEntryService.save(logger.getEntries()));
                 lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
             }
-        } catch (Exception e) {
-            log.error(e);
+        } catch (final Exception e) {
+            log.error(e, e);
             if (lockService.isLockExists(lock, lockDateEnd)) {
                 transactionHelper.executeInNewTransaction(new TransactionLogic() {
                     @Override
                     public void execute() {
-                        sendNotifications(lock, getErrorMsg(params));
+                        if (e instanceof ServiceLoggerException) {
+                            sendNotifications(lock, getErrorMsg(params), ((ServiceLoggerException) e).getUuid());
+                        } else {
+                            sendNotifications(lock, getErrorMsg(params) + ". " + e.getMessage(), null);
+                        }
                         lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                     }
 
@@ -94,7 +104,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * Отправка уведомлений подисчикам на указанную блокировку
      * @param lock ключ блокировки
      */
-    private void sendNotifications(String lock, String msg) {
+    private void sendNotifications(String lock, String msg, String uuid) {
         if (msg != null && !msg.isEmpty()) {
             //Получаем список пользователей-подписчиков, для которых надо сформировать оповещение
             List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
@@ -105,6 +115,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     notification.setUserId(userId);
                     notification.setCreateDate(new Date());
                     notification.setText(msg);
+                    notification.setBlobDataId(uuid);
                     notifications.add(notification);
                 }
                 //Создаем оповещение для каждого пользователя из списка

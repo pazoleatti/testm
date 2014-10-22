@@ -63,7 +63,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
         Logger logger = new Logger();
         LockData lockData;
-        if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4)) == null) {
+        if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24)) == null) {
             try {
                 params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), action.isSaved());
@@ -76,7 +76,13 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                     lockDataService.unlock(key, userInfo.getUser().getId());
                 }
             } catch (Exception e) {
-                lockDataService.unlock(key, userInfo.getUser().getId());
+                try {
+                    lockDataService.unlock(key, userInfo.getUser().getId());
+                } catch (ServiceException e2) {
+                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
+                        throw new ActionException(e2);
+                    }
+                }
                 throw new ActionException("Ошибка при постановке в очередь асинхронной задачи", e);
             }
         } else {

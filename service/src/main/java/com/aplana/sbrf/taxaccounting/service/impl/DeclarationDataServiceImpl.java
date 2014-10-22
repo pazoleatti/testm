@@ -195,18 +195,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void checkDepartmentConfig(Logger logger, long id, TAUserInfo userInfo) {
-        declarationDataScriptingService.executeScript(userInfo,
-                declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-        // Проверяем ошибки при пересчете
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Декларация/уведомление не может быть сформирована. Есть ошибки в заполнении формы настоек подразделений",
-                    logEntryService.save(logger.getEntries()));
-        }
-    }
-
-    @Override
     public DeclarationData get(long id, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         return declarationDataDao.get(id);
@@ -344,6 +332,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""), ReportType.XML_DEC);
 
+        validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE);
         // Заполнение отчета и экспорт в формате PDF
         JasperPrint jasperPrint = fillReport(xml,
                 declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));

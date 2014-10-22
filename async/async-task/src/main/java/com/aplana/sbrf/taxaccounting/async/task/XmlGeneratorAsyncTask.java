@@ -37,14 +37,12 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
     private DeclarationTemplateService declarationTemplateService;
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params) {
+    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         Date docDate = (Date)params.get("docDate");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
-
-        Logger logger = new Logger();
 
         declarationDataService.calculate(logger, declarationDataId, userInfo, docDate);
     }

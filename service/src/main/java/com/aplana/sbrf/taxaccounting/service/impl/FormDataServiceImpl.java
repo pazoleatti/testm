@@ -101,9 +101,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
-    // Время блокировки при консолидации (3 часа)
-    private static final int BLOCK_TIME =  3 * 60 * 60 * 1000;
-
     @Override
     public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder) {
         formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
@@ -770,7 +767,7 @@ public class FormDataServiceImpl implements FormDataService {
                 String lockKey = formData.getReportPeriodId() + "." + periodOrder + "." + destinationDFT.getDepartmentId()
                         + "." + destinationDFT.getFormTypeId() + "." + destinationDFT.getKind();
 
-                LockData lockData = lockService.lock(lockKey, userInfo.getUser().getId(), BLOCK_TIME);
+                LockData lockData = lockService.lock(lockKey, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 3);
                 if (lockData != null) {
                     FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId()));
                     errorsList.add(String.format("«%s» %s, %s, «%s» заблокирована пользователем %s, %s",
