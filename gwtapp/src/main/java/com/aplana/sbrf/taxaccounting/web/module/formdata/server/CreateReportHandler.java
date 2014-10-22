@@ -63,7 +63,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
         Logger logger = new Logger();
         LockData lockData;
-        if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4)) == null) {
+        if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24)) == null) {
             try {
                 params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), action.isSaved());

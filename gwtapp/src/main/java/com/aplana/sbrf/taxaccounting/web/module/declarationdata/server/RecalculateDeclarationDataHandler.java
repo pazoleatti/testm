@@ -60,7 +60,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
         Logger logger = new Logger();
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
-        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4); //ставим такую блокировку т.к. стандартная на 1 час
+        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24); //ставим такую блокировку т.к. стандартная на 1 час
         if (lockData == null) {
             try {
                 Map<String, Object> params = new HashMap<String, Object>();
