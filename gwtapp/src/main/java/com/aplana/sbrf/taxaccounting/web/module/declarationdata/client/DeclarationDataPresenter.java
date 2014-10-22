@@ -198,7 +198,7 @@ public class DeclarationDataPresenter
         action.setDeclarationDataId(declarationId);
         action.setType(reportType);
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<TimerReportResult>() {
+                .defaultCallbackNoLock(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
                         if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
@@ -394,5 +394,12 @@ public class DeclarationDataPresenter
     @Override
     public TaxType getTaxType() {
         return taxType;
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().stopTimerReport(ReportType.XML_DEC);
+        getView().stopTimerReport(ReportType.EXCEL_DEC);
     }
 }
