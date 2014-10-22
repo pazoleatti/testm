@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -57,7 +58,6 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        declarationDataService.checkDepartmentConfig(logger, action.getDeclarationId(), userInfo);
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
         LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4); //ставим такую блокировку т.к. стандартная на 1 час
@@ -82,7 +82,13 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 }
                 result.setUuid(logEntryService.save(logger.getEntries()));
             } catch(Exception e) {
-                lockDataService.unlock(key, userInfo.getUser().getId());
+                try {
+                    lockDataService.unlock(key, userInfo.getUser().getId());
+                } catch (ServiceException e2) {
+                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
+                        throw new ActionException(e2);
+                    }
+                }
                 throw new ActionException(e);
             }
         } else {

@@ -26,7 +26,7 @@ public class TestAsyncTaskSpring extends AbstractAsyncTask {
     RefBookFactory refBookFactory;
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params) {
+    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         System.out.println("TestAsyncTaskSpring has been started!");
         /*TAUserInfo userInfo = (TAUserInfo) params.get("userInfo");
         Logger logger = new Logger();

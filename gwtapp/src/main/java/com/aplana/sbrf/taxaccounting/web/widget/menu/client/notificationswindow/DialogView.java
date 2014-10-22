@@ -7,12 +7,14 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -20,6 +22,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
@@ -115,12 +118,29 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 		    }
 	    };
 
-	    TextColumn<NotificationTableRow> contentColumn = new TextColumn<NotificationTableRow>() {
-		    @Override
-		    public String getValue(NotificationTableRow object) {
-			    return object.getMsg();
-		    }
-	    };
+        Column<NotificationTableRow, NotificationTableRow> contentColumn = new Column<NotificationTableRow, NotificationTableRow>(
+                new AbstractCell<NotificationTableRow>() {
+                    @Override
+                    public void render(Context context,
+                                       NotificationTableRow notificationTableRow,
+                                       SafeHtmlBuilder sb) {
+                        if (notificationTableRow == null) {
+                            return;
+                        }
+                        if (notificationTableRow.getBlobDataId() == null) {
+                            sb.appendHtmlConstant(notificationTableRow.getMsg());
+                        } else {
+                            sb.appendHtmlConstant("<div class=\"LinkDiv\">"
+                                    + notificationTableRow.getMsg() + "</div>");
+                        }
+                    }
+                }) {
+            @Override
+            public NotificationTableRow getValue(
+                    NotificationTableRow object) {
+                return object;
+            }
+        };
 
         contentColumn.setSortable(true);
         contentColumn.setDataStoreName(NotificationsFilterData.SortColumn.TEXT.name());
@@ -150,9 +170,23 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
                     @Override
                     public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<NotificationTableRow> event) {
-                        return DefaultSelectionEventManager.SelectAction.TOGGLE;
+                        if (event.getColumn() != 2)
+                            return DefaultSelectionEventManager.SelectAction.TOGGLE;
+                        return DefaultSelectionEventManager.SelectAction.IGNORE;
                     }
                 }));
+
+        notificationTable.addCellPreviewHandler(new CellPreviewEvent.Handler<NotificationTableRow>(){
+            @Override
+            public void onCellPreview(final CellPreviewEvent<NotificationTableRow> event) {
+                if (event.getColumn() == 2 && Event.getTypeInt(event.getNativeEvent().getType()) == Event.ONCLICK) {
+                    String blobDataId = event.getValue().getBlobDataId();
+                    if (blobDataId != null){
+                        getUiHandlers().onEventClick(blobDataId);
+                    }
+                }
+            }
+        });
 	    pager.setDisplay(notificationTable);
     }
 

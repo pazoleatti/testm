@@ -41,7 +41,7 @@ public class TestXlsmGeneratorAsyncTaskSpring extends AbstractAsyncTask {
     private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params) {
+    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");

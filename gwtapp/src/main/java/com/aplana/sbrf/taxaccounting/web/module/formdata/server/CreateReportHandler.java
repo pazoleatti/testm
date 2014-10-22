@@ -76,7 +76,13 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                     lockDataService.unlock(key, userInfo.getUser().getId());
                 }
             } catch (Exception e) {
-                lockDataService.unlock(key, userInfo.getUser().getId());
+                try {
+                    lockDataService.unlock(key, userInfo.getUser().getId());
+                } catch (ServiceException e2) {
+                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
+                        throw new ActionException(e2);
+                    }
+                }
                 throw new ActionException("Ошибка при постановке в очередь асинхронной задачи", e);
             }
         } else {

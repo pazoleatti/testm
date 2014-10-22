@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ public class TestXlsxGeneratorAsyncTaskSpring extends AbstractAsyncTask {
     private DeclarationTemplateService declarationTemplateService;
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params) {
+    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
