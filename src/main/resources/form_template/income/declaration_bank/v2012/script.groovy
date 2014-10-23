@@ -1942,20 +1942,6 @@ def getDataRows(def formDataCollection, def departmentId, def formTemplateId, de
     }
 }
 
-def getReportPeriod9month(def reportPeriod) {
-    if (reportPeriod == null) {
-        return null;
-    }
-    def code = getRefBookValue(8, reportPeriod.dictTaxPeriodId)?.CODE?.value
-    if (code == '34') { // период "год"
-        return getReportPeriod9month(reportPeriodService.getPrevReportPeriod(reportPeriod.id));
-    } else if (code == '33') { // период "9 месяцев"
-        return reportPeriod;
-    }
-    return null;
-}
-}
-
 /**
  * Получить правильные названия подразделении для Приложения 5 декларации.
  *
@@ -1991,3 +1977,16 @@ def departmentCorrectNameMap = [
         '783502001' : 'Северо-Западный банк ОАО "Сбербанк России"',
         '870902001' : 'Чукотское отделение (на правах отдела) Северо-Восточного отделения №8645 ОАО "Сбербанк России"'
 ]
+
+def getReportPeriod9month(def reportPeriod) {
+    if (reportPeriod == null) {
+        return null;
+    }
+    def code = getRefBookValue(8, reportPeriod.dictTaxPeriodId)?.CODE?.value
+    if (code == '34') { // период "год"
+        return getReportPeriod9month(reportPeriodService.getPrevReportPeriod(reportPeriod.id));
+    } else if (code == '33') { // период "9 месяцев"
+        return reportPeriod;
+    }
+    return null;
+}
