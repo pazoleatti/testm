@@ -601,14 +601,16 @@ void generateXML() {
     def svCelSred = new HashMap()
     if (dataRowsComplexConsumption != null) {
         // 700, 770, 890
-        [700:[20750], 770:[20321], 890:[21280]].each { id, codes ->
+        [700: [20750], 770: [20321], 890: [21280]].each { id, codes ->
             def result = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, codes))
             if (result != 0) {
                 svCelSred[id] = result
             }
         }
+    }
+    if (dataRowsSimpleConsumption != null) {
         // 780, 811, 812, 813, 940, 950
-        [780:[20530], 811:[20700], 812:[20698], 813:[20690], 940:[23040], 950:[23050]].each { id, codes ->
+        [780: [20530], 811: [20700], 812: [20698], 813: [20690], 940: [23040], 950: [23050]].each { id, codes ->
             def result = getLong(getCalculatedSimpleConsumption(dataRowsSimpleConsumption, codes))
             if (result != 0) {
                 svCelSred[id] = result
