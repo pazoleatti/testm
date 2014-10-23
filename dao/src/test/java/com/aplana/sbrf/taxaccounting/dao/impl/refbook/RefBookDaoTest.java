@@ -23,9 +23,6 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
@@ -440,7 +437,23 @@ public class RefBookDaoTest {
     }
 
     @Test
-    public void getMatchedRecordsByUniqueAttributes() {
+    public void getMatchedRecordsByUniqueAttributesWhenOneRecordFound() {
+        RefBook refBook = refBookDao.get(1L);
+        PagingResult<Map<String, RefBookValue>> allValues = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
+        assertEquals(2, allValues.size());
+        List<RefBookRecord> records = new ArrayList<RefBookRecord>();
+        RefBookRecord record = new RefBookRecord();
+        record.setValues(allValues.get(0));
+        record.setRecordId(null);
+        records.add(record);
+
+        List<Pair<Long,String>> matches = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), 111L, refBook.getAttributes(), records);
+        assertEquals(1, matches.size());
+        assertTrue(matches.get(0).getSecond().equals("Количество страниц, Наименование, Автор"));
+    }
+
+    @Test
+    public void getMatchedRecordsByUniqueAttributesWhenMoreOneRecordFound() {
         RefBook refBook = refBookDao.get(1L);
         PagingResult<Map<String, RefBookValue>> allValues = refBookDao.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
         assertEquals(2, allValues.size());
@@ -453,26 +466,8 @@ public class RefBookDaoTest {
         }
         List<Pair<Long,String>> matches = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), 111L, refBook.getAttributes(), records);
         assertEquals(2, matches.size());
-    }
-
-    @Test
-    public void getMatchedRecordsByUniqueAttributesNotAttributeValues() {
-        RefBookDao spy = spy(refBookDao);
-        RefBook refBook = spy.get(1L);
-
-        PagingResult<Map<String, RefBookValue>> allValues = spy.getRecords(refBook.getId(), getDate(1, 1, 2013), null, null, null);
-
-        assertEquals(2, allValues.size());
-        List<RefBookRecord> records = new ArrayList<RefBookRecord>();
-        for (Map<String, RefBookValue> values : allValues) {
-            RefBookRecord record = new RefBookRecord();
-            record.setValues(values);
-            record.setRecordId(null);
-            records.add(record);
-        }
-        when(spy.getUniqueAttributeValues(anyLong(), anyLong())).thenReturn(new HashMap<Integer, List<Pair<RefBookAttribute, RefBookValue>>>());
-        List<Pair<Long, String>> matches = spy.getMatchedRecordsByUniqueAttributes(refBook.getId(), 111L, refBook.getAttributes(), records);
-        assertEquals(0, matches.size());
+        assertTrue(matches.get(0).getSecond().equals("Количество страниц, Наименование, Автор"));
+        assertTrue(matches.get(1).getSecond().equals("Количество страниц, Наименование, Автор"));
     }
 
     /*@Test

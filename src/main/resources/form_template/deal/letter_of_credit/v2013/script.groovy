@@ -387,14 +387,8 @@ void addData(def xml, int headRowCount) {
 
         // графа 4
         if (map != null) {
-            def text = row.cell[xmlIndexCol].text()
             map = getRefBookValue(10, map.COUNTRY?.referenceValue)
-            if ((text != null && !text.isEmpty() && !text.equals(map?.FULLNAME?.stringValue)) || ((text == null || text.isEmpty()) && map?.FULLNAME?.stringValue != null)) {
-                if ((text != null && !text.isEmpty() && !text.equals(map?.CODE?.stringValue)) || ((text == null || text.isEmpty()) && map?.CODE?.stringValue != null)) {
-                    logger.error("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                            "содержит значение «%s», отсутствующее в справочнике «" + refBookFactory.get(10).getName() + "»!")
-                }
-            }
+            formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map?.FULLNAME?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 

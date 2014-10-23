@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import groovy.util.XmlSlurper;
 import groovy.util.slurpersupport.GPathResult;
+import org.apache.poi.ss.util.CellReference;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -46,9 +47,9 @@ public final class ScriptUtils {
 
     private static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
 
-    private static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %d содержит нечисловое значение «%s»!";
+    private static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %s содержит нечисловое значение «%s»!";
 
-    private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %d содержит значение «%s», которое не " +
+    private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не " +
             "соответствует дате в формате «%s»!";
 
     private static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
@@ -96,11 +97,13 @@ public final class ScriptUtils {
     private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
 
     // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
-    public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
+    public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
     // Ссылочный, зависимая графа: Значение в файле отличается от того, которое должно быть в зависимой графе
-    public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d содержит значение «%s», отсутствующее в справочнике «%s»!";
+    public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s содержит значение «%s», отсутствующее в справочнике «%s»!";
     // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
-    public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %d: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
+    public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
+
+    private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -325,7 +328,7 @@ public final class ScriptUtils {
         if (tmp.matches("-?\\d+(\\.\\d+)?")) {
             return new BigDecimal(tmp);
         } else {
-            String msg = String.format(WRONG_NUMBER, indexRow, indexColumn, value);
+            String msg = String.format(WRONG_NUMBER, indexRow, getXLSColumnName(indexColumn), value);
             if (required) {
                 throw new ServiceException(msg);
             } else {
@@ -362,7 +365,7 @@ public final class ScriptUtils {
         } catch (ParseException ex) {
         }
         if (retVal == null) {
-            String msg = String.format(WRONG_DATE, indexRow, indexColumn, value, format);
+            String msg = String.format(WRONG_DATE, indexRow, getXLSColumnName(indexColumn), value, format);
             if (required) {
                 throw new ServiceException(msg);
             } else {
@@ -1105,7 +1108,7 @@ public final class ScriptUtils {
             String dateFormat = (new SimpleDateFormat("dd.MM.yyyy")).format(date);
             String msg = String.format(
                     (records.size() > 1 ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : REF_BOOK_NOT_FOUND_IMPORT_ERROR),
-                    rowIndex, colIndex, refBook.getName(), refBook.getAttribute(alias).getName(), value, dateFormat);
+                    rowIndex, getXLSColumnName(colIndex), refBook.getName(), refBook.getAttribute(alias).getName(), value, dateFormat);
             if (required) {
                 logger.error("%s", msg);
             } else {
@@ -1113,5 +1116,18 @@ public final class ScriptUtils {
             }
         }
         return false;
+    }
+
+    /** Получить название столбца excel'я по номеру. */
+    public static String getXLSColumnName(int index) {
+        return index + " (" + getXLSColumnNumber(index) + ")";
+    }
+
+    /** Получить буквенное название столбца excel'я по номеру. */
+    public static String getXLSColumnNumber(int index) {
+        if (index < 1) {
+            throw new IllegalArgumentException(WRONG_XLS_COLUMN_INDEX);
+        }
+        return CellReference.convertNumToColString(index - 1);
     }
 }
