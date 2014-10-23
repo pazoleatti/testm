@@ -590,7 +590,7 @@ create table log_business (
   declaration_data_id number(9,0),
   form_data_id        number(9,0),
   note                varchar2(510),
-  user_department_id  number(9,0) not null
+  user_department_name  varchar2(510) not null
 );
 comment on table log_business is 'Журнал событий налоговых форм\деклараций';
 comment on column log_business.id is 'Код записи';
@@ -601,7 +601,7 @@ comment on column log_business.roles is 'Список ролей пользов�
 comment on column log_business.declaration_data_id is 'Код декларации';
 comment on column log_business.form_data_id is 'Код налоговой формы';
 comment on column log_business.note is 'Текст сообщения';
-comment on column log_business.user_department_id is 'Код подразделения пользователя';
+comment on column log_business.user_department_name is 'Код подразделения пользователя';
 
 create sequence seq_log_business;
 ------------------------------------------------------------------------------------------------------
