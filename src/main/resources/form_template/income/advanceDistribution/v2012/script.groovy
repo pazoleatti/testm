@@ -283,7 +283,7 @@ void calc() {
         }
 
         // графа 14
-        caTotalRow.taxSumOutside = sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
+        caTotalRow.taxSumOutside = 0.9 * sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
     }
 
     dataRowHelper.save(dataRows)

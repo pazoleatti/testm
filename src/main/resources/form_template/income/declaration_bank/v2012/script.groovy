@@ -1025,7 +1025,7 @@ void generateXML() {
                                 stavNalSubRF = row.subjectTaxStavka
                                 sumNal = row.taxSum
                                 nalNachislSubRF = row.subjectTaxCredit
-                                sumNalP = row.taxSumToPay
+                                sumNalP = (row.taxSumToPay != 0) ? row.taxSumToPay : (- row.taxSumToReduction)
                                 nalViplVneRF = row.taxSumOutside
                                 mesAvPlat = row.everyMontherPaymentAfterPeriod
                                 mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
