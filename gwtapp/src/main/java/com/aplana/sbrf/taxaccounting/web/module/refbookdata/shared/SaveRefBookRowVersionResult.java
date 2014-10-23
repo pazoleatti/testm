@@ -7,6 +7,8 @@ public class SaveRefBookRowVersionResult implements Result {
 
     private boolean exception;
 
+    private boolean checkRegion;
+
     public String getUuid() {
         return uuid;
     }
@@ -21,5 +23,13 @@ public class SaveRefBookRowVersionResult implements Result {
 
     public void setException(boolean exception) {
         this.exception = exception;
+    }
+
+    public boolean isCheckRegion() {
+        return checkRegion;
+    }
+
+    public void setCheckRegion(boolean checkRegion) {
+        this.checkRegion = checkRegion;
     }
 }

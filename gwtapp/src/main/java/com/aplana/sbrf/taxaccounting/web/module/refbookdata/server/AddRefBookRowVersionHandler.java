@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -7,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
+import com.aplana.sbrf.taxaccounting.service.RegionSecurityService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionResult;
@@ -43,11 +45,13 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private RegionSecurityService regionSecurityService;
+
     @Override
     public AddRefBookRowVersionResult execute(AddRefBookRowVersionAction action, ExecutionContext executionContext) throws ActionException {
-        RefBookDataProvider refBookDataProvider = refBookFactory
-                .getDataProvider(action.getRefBookId());
-
+        AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
+        TAUser user = securityService.currentUserInfo().getUser();
 
         List<RefBookRecord> records = new ArrayList<RefBookRecord>();
         List<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
@@ -57,6 +61,13 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
                 RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
                 values.put(v.getKey(), value);
             }
+            Boolean check = regionSecurityService.check(user, action.getRefBookId(), null,
+                    action.getRecordId(), values, action.getVersionFrom(), action.getVersionTo());
+            if (!check) {
+                result.setCheckRegion(false);
+                return result;
+            }
+
             saveRecords.add(values);
             RefBookRecord record = new RefBookRecord();
             record.setValues(values);
@@ -71,10 +82,12 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
         loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), saveRecords, action.getVersionFrom(),
                 action.getVersionTo(), true, securityService.currentUserInfo(), logger);
 
-        AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
+        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
+
         logger.setTaUserInfo(securityService.currentUserInfo());
         result.setNewIds(refBookDataProvider.createRecordVersion(logger, action.getVersionFrom(), action.getVersionTo(), records));
         result.setUuid(logEntryService.save(logger.getEntries()));
+        result.setCheckRegion(true);
 
         return result;
     }
