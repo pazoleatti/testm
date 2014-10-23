@@ -1907,7 +1907,7 @@ def getOkato(def id) {
         okato = getRefBookValue(96, id)?.CODE?.stringValue
     }
     return okato
-}}
+}
 
 /**
  * Получить правильные названия подразделении для Приложения 5 декларации.
