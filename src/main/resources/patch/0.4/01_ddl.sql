@@ -283,5 +283,49 @@ ALTER TABLE notification ADD blob_data_id varchar2(36);
 ALTER TABLE notification ADD CONSTRAINT notification_fk_blob_data_id FOREIGN KEY (blob_data_id) REFERENCES blob_data(id);
 COMMENT ON COLUMN notification.blob_data_id IS 'Ссылка на логи';
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-9217: Изменения по таблице LOG_BUSINESS
+
+alter table log_business drop constraint log_business_fk_user_login;
+alter table log_business drop constraint log_business_fk_usr_departm_id;
+
+alter table log_business add user_department_name varchar2(4000);
+comment on column log_business.user_department_name is 'Подразделение пользователя';
+
+merge into log_business lg
+using
+(
+select id, substr(sys_connect_by_path(name, '/'), 2) as fullname
+from department
+start with parent_id = 0
+connect by parent_id = prior id
+union all
+select id, name from department where id = 0
+) d
+on
+(lg.user_department_id = d.id)
+when matched then
+     update set lg.user_department_name = d.fullname;
+
+
+alter table log_business modify user_department_name not null;
+alter table log_business drop column user_department_id;
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-9218: Таблица для МСФО
+create table ifrs_data 
+(
+report_period_id number(9) not null,
+blob_data_id varchar2(36)
+);
+
+comment on table ifrs_data is 'Отчетность для МСФО';
+comment on column ifrs_data.report_period_id is 'Отчетный период';
+comment on column ifrs_data.blob_data_id is 'Файл архива с отчетностью для МСФО';
+
+alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id);
+alter table ifrs_data add constraint ifrs_data_fk_report_period foreign key (report_period_id) references report_period(id);
+alter table ifrs_data add constraint ifrs_data_fk_blob_data foreign key (blob_data_id) references blob_data(id);
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

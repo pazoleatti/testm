@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RegionSecurityService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteRefBookRowAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.DeleteRefBookRowResult;
@@ -32,12 +34,23 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private RegionSecurityService regionSecurityService;
+
 	@Override
 	public DeleteRefBookRowResult execute(DeleteRefBookRowAction action, ExecutionContext executionContext) throws ActionException {
-		RefBookDataProvider refBookDataProvider = refBookFactory
-				.getDataProvider(action.getRefBookId());
-
         DeleteRefBookRowResult result = new DeleteRefBookRowResult();
+
+        TAUser user = securityService.currentUserInfo().getUser();
+        for (Long recordId : action.getRecordsId()) {
+            if (!regionSecurityService.check(user, action.getRefBookId(), recordId)) {
+                result.setCheckRegion(false);
+                return result;
+            }
+        }
+        result.setCheckRegion(true);
+
+        RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
         if (action.getRecordsId().size() > 0) {

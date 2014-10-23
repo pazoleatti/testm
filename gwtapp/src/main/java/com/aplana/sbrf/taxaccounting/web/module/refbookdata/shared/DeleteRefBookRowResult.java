@@ -8,6 +8,7 @@ public class DeleteRefBookRowResult implements Result {
     private Long nextVersion;
 
     private boolean exception;
+    private boolean checkRegion;
 
     public String getUuid() {
         return uuid;
@@ -31,5 +32,13 @@ public class DeleteRefBookRowResult implements Result {
 
     public void setException(boolean exception) {
         this.exception = exception;
+    }
+
+    public boolean isCheckRegion() {
+        return checkRegion;
+    }
+
+    public void setCheckRegion(boolean checkRegion) {
+        this.checkRegion = checkRegion;
     }
 }

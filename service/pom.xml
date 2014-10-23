@@ -157,7 +157,15 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>**/*.xml</include>
+                    <include>**/version-info.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/service.xml</include>
+                    <include>**/acctax.xlsm</include>
                 </includes>
             </resource>
         </resources>

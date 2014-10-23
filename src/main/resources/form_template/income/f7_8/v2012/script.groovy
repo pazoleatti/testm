@@ -796,8 +796,8 @@ void addData(def xml, int headRowCount) {
             if (record84 != null) {
                 // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
                 indexCell = 6
-                def value1 = record84?.SHORTNAME?.value
-                def value2 = row.cell[indexCell].text()
+                def value1 = row.cell[indexCell].text()
+                def value2 = record84?.SHORTNAME?.value
                 formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
 
                 // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
@@ -830,8 +830,8 @@ void addData(def xml, int headRowCount) {
                 // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
                 indexCell = 10
                 if (record15 != null) {
-                    value1 = record15?.NAME?.value
-                    value2 = row.cell[indexCell].text()
+                    value1 = row.cell[indexCell].text()
+                    value2 = record15?.NAME?.value
                     formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
                 }
             }
@@ -864,8 +864,8 @@ void addData(def xml, int headRowCount) {
 
         // графа 16 - зависит от графы 15 - атрибут 66 NAME - «Наименование валюты», справочник 15 «Единый справочник валют»
         if (record15 != null) {
-            def value1 = record15?.NAME?.value
-            def value2 = row.cell[indexCell].text()
+            def value1 = row.cell[indexCell].text()
+            def value2 = record15?.NAME?.value
             formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, indexCell + colOffset, logger, true)
         }
         indexCell++
@@ -1023,8 +1023,8 @@ void addTransportData(def xml) {
             if (record84 != null) {
                 // графа 6 - зависит от графы 5 - атрибут 812 - SHORTNAME - «Краткое название ценной бумаги / Выпуск», справочник 84 «Ценные бумаги»
                 indexCell = 6
-                def value1 = record84?.SHORTNAME?.value
-                def value2 = row.cell[indexCell].text()
+                def value1 = row.cell[indexCell].text()
+                def value2 = record84?.SHORTNAME?.value
                 formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
 
                 // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
@@ -1057,8 +1057,8 @@ void addTransportData(def xml) {
                 // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
                 indexCell = 10
                 if (record15 != null) {
-                    value1 = record15?.NAME?.value
-                    value2 = row.cell[indexCell].text()
+                    value1 = row.cell[indexCell].text()
+                    value2 = record15?.NAME?.value
                     formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
                 }
             }
@@ -1091,8 +1091,8 @@ void addTransportData(def xml) {
         // графа 16 - зависит от графы 15 - атрибут 66 NAME - «Наименование валюты», справочник 15 «Единый справочник валют»
         indexCell = 16
         if (record15 != null) {
-            def value1 = record15?.NAME?.value
-            def value2 = row.cell[indexCell].text()
+            def value1 = row.cell[indexCell].text()
+            def value2 = record15?.NAME?.value
             formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
         }
 

@@ -37,7 +37,7 @@ public class LogBusinessDaoTest {
 		assertEquals("operator", logBusiness.getRoles());
 		assertEquals(Long.valueOf(1), logBusiness.getDeclarationId());
 		assertEquals(null, logBusiness.getFormId());
-		assertEquals(1, logBusiness.getDepartmentId());
+		assertEquals("А - департамент", logBusiness.getDepartmentName());
 		assertEquals("the best note", logBusiness.getNote());
 	}
 
@@ -50,7 +50,7 @@ public class LogBusinessDaoTest {
 		logBusiness.setEventId(3);
 		logBusiness.setUserLogin(LOGIN_CONTROL_BANK);
 		logBusiness.setRoles("operator");
-		logBusiness.setDepartmentId(2);
+		logBusiness.setDepartmentName("Б - департамент");
 		logBusiness.setNote("the best note");
 		logBusinessDao.add(logBusiness);
 
@@ -61,7 +61,7 @@ public class LogBusinessDaoTest {
 		assertEquals("operator", logBusiness.getRoles());
 		assertEquals(Long.valueOf(1), logBusiness.getDeclarationId());
 		assertEquals(null, logBusiness.getFormId());
-		assertEquals(2, logBusiness.getDepartmentId());
+		assertEquals("Б - департамент", logBusiness.getDepartmentName());
 		assertEquals("the best note", logBusiness.getNote());
 	}
 
@@ -74,7 +74,7 @@ public class LogBusinessDaoTest {
 		assertEquals("operator", logBusiness.getRoles());
 		assertEquals(null, logBusiness.getDeclarationId());
 		assertEquals(Long.valueOf(1), logBusiness.getFormId());
-		assertEquals(2, logBusiness.getDepartmentId());
+		assertEquals("Б - департамент", logBusiness.getDepartmentName());
 		assertEquals("the best note", logBusiness.getNote());
 	}
 
@@ -88,7 +88,7 @@ public class LogBusinessDaoTest {
 		assertEquals("operator", logBusiness.getRoles());
 		assertEquals(null, logBusiness.getDeclarationId());
 		assertEquals(Long.valueOf(1), logBusiness.getFormId());
-		assertEquals(1, logBusiness.getDepartmentId());
+		assertEquals("А - департамент", logBusiness.getDepartmentName());
 		assertEquals("the best note", logBusiness.getNote());
 	}
 
@@ -112,7 +112,7 @@ public class LogBusinessDaoTest {
 		logBusiness.setEventId(event_id);
 		logBusiness.setUserLogin(LOGIN_CONTROL_BANK);
 		logBusiness.setRoles("operator");
-		logBusiness.setDepartmentId(1);
+		logBusiness.setDepartmentName("А - департамент");
 		logBusiness.setNote("the best note");
 		return logBusiness;
 	}
