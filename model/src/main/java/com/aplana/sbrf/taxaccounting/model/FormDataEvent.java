@@ -69,9 +69,6 @@ public enum FormDataEvent implements Serializable {
     TEMPLATE_DEACTIVATED(704, "Версия выведена из действия"),
     TEMPLATE_DELETED(705, "Версия удалена"),
 
-    LOGIN_MODULE(801, "Вход пользователя в модуль"),
-    LOGOUT_MODULE(802, "Выход пользователя из модуля"),
-
     UPLOAD_CONTRACTS(810, "Загрузка данных о договорах обеспечения"),
     UPLOAD_CUSTOMER_DATA(811, "Загрузка данных о клиентах"),
     UPLOAD_PAYMENTS_DATA(812, "Загрузка данных о платежах"),
