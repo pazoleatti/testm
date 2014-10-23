@@ -150,6 +150,12 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						new AbstractCallback<DeleteRefBookRowResult>() {
 							@Override
 							public void onSuccess(DeleteRefBookRowResult result) {
+                                if (!result.isCheckRegion()) {
+                                    String title = "Удаление элемента справочника";
+                                    String msg = "Отсутствуют права доступ на удаление записи для указанного региона!";
+                                    Dialog.errorMessage(title, msg);
+                                    return;
+                                }
                                 LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
                                 if (result.isException()) {
                                     Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!");
@@ -166,7 +172,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		if (getView().getSelectedRow() != null) {
             Long recordId = getView().getSelectedRow().getRefBookRowId();
             editFormPresenter.setRecordId(recordId);
-			editFormPresenter.show(recordId);
+            editFormPresenter.show(recordId);
+        } else {
+            editFormPresenter.setRecordId(null);
         }
 	}
 

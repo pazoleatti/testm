@@ -174,6 +174,12 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                     new AbstractCallback<DeleteRefBookRowResult>() {
                         @Override
                         public void onSuccess(DeleteRefBookRowResult result) {
+                            if (!result.isCheckRegion()) {
+                                String title = "Удаление элемента справочника";
+                                String msg = "Отсутствуют права доступ на удаление записи для указанного региона!";
+                                Dialog.errorMessage(title, msg);
+                                return;
+                            }
                             LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                             if (result.isException()) {
                                 Dialog.errorMessage("Удаление всех версий элемента справочника",

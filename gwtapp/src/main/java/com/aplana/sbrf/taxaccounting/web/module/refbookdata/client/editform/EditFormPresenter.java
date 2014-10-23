@@ -254,6 +254,14 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 new AbstractCallback<AddRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(AddRefBookRowVersionResult result) {
+                                        if (!result.isCheckRegion()) {
+                                            String title = (isVersionMode ? "Создание записи справочника" : "Создание элемента справочника");
+                                            String msg = (isVersionMode ?
+                                                    "Отсутствуют права доступ на создание записи для указанного региона!" :
+                                                    "Отсутствуют права доступ на редактирование записи для указанного региона!");
+                                            Dialog.errorMessage(title, msg);
+                                            return;
+                                        }
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         setIsFormModified(false);
                                         Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
@@ -268,6 +276,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 final SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
                 action.setRefBookId(currentRefBookId);
                 action.setRecordId(currentUniqueRecordId);
+                action.setRecordCommonId(recordId);
                 action.setValueToSave(map);
                 action.setVersionFrom(getView().getVersionFrom());
                 action.setVersionTo(getView().getVersionTo());
@@ -311,6 +320,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
+                                        if (!result.isCheckRegion()) {
+                                            String title = "Редактирование записи справочника";
+                                            String msg = "Отсутствуют права доступ на редактирование записи для указанного региона!";
+                                            Dialog.errorMessage(title, msg);
+                                            return;
+                                        }
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {

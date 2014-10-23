@@ -6,6 +6,7 @@ import java.util.List;
 
 public class AddRefBookRowVersionResult implements Result {
     private String uuid;
+    private boolean checkRegion;
 
     private List<Long> newIds;
 
@@ -23,5 +24,13 @@ public class AddRefBookRowVersionResult implements Result {
 
     public void setNewIds(List<Long> newIds) {
         this.newIds = newIds;
+    }
+
+    public boolean isCheckRegion() {
+        return checkRegion;
+    }
+
+    public void setCheckRegion(boolean checkRegion) {
+        this.checkRegion = checkRegion;
     }
 }
