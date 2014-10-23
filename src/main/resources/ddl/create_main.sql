@@ -398,11 +398,7 @@ create table declaration_data (
   declaration_template_id number(9) not null,
   tax_organ_code          varchar2(4),
   kpp                     varchar2(9),
-  data                    varchar2(36),
   is_accepted             number(1) not null,
-  data_pdf                varchar2(36),
-  data_xlsx               varchar2(36),
-  jasper_print            varchar2(36),
   department_report_period_id number(18) not null
 );
 
