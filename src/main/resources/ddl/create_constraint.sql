@@ -244,6 +244,10 @@ alter table declaration_report add constraint decl_report_fk_decl_data foreign k
 alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id);
 alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3));
 
+alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id);
+alter table ifrs_data add constraint ifrs_data_fk_report_period foreign key (report_period_id) references report_period(id);
+alter table ifrs_data add constraint ifrs_data_fk_blob_data foreign key (blob_data_id) references blob_data(id);
+
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
