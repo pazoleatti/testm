@@ -1,6 +1,5 @@
 package form_template.income.remainsPrepayments.v2012
 
-
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
