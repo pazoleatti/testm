@@ -22,7 +22,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-        noImport()
+        noImport(logger)
         break
 }
 
