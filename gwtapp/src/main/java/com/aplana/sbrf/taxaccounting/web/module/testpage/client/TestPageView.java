@@ -27,10 +27,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> implements TestPagePresenter.MyView {
 
@@ -117,6 +114,14 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
     @UiField
     DropdownButton dropdownButton;
+    @UiField
+    CheckBox depUsageCb;
+    @UiField
+    Button depUsageBtn;
+    @UiField
+    ListBox eventLb;
+    @UiField
+    Button eventBtn;
 
     @Inject
     public TestPageView(final Binder uiBinder) {
@@ -156,6 +161,9 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
             }
         });
         dropdownButton.addItem(btn);
+
+        initDepUsage();
+        initEvents();
 
     }
 
@@ -477,6 +485,54 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
     private String getTestMaskValues(Date eventValue, Date elemValue) {
         return "Событие: \"" + (eventValue != null ? formatDMY.format(eventValue) : null) + "\", значение: \"" + (elemValue != null ? formatDMY.format(elemValue) : null) + "\" .";
+    }
+
+
+    private void initDepUsage(){
+        depUsageCb.setValue(false);
+        depUsageBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (hPicker.getAttributeId() == 161L) {
+                    getUiHandlers().setUsageDepartment();
+                } else {
+                    Dialog.infoMessage("Иерархический справочник не справочник подразделений");
+                }
+            }
+        });
+    }
+
+    private void initEvents(){
+        eventBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if(eventLb.getSelectedIndex() > 0){
+                    getUiHandlers().doEvent();
+                }
+            }
+        });
+    }
+
+    @Override
+    public Long getDepId() {
+        return hPicker.getSingleValue();
+    }
+
+    @Override
+    public Boolean getDepUsageValue() {
+        return depUsageCb.getValue();
+    }
+
+    @Override
+    public String getSelectedEvent() {
+        return eventLb.getValue(eventLb.getSelectedIndex());
+    }
+
+    @Override
+    public void setEvents(Map<Integer, String> map) {
+        for (Map.Entry<Integer, String> integerStringEntry : map.entrySet()) {
+            eventLb.addItem(integerStringEntry.getValue(), String.valueOf(integerStringEntry.getKey()));
+        }
     }
 
 

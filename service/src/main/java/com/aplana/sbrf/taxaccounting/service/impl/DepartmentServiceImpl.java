@@ -419,6 +419,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentDao.getDepartment(formDataDao.getWithoutRows(formDataId).getDepartmentId());
     }
 
+    @Override
+    public void setUsedByGarant(int depId, boolean used) {
+        departmentDao.setUsedByGarant(depId, used);
+    }
+
     private List<Integer> getExecutorsDepartments(List<Integer> departments, int formType) {
         return departmentDao.getPerformers(departments, formType);
     }

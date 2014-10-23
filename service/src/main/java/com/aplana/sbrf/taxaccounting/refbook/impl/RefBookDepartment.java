@@ -242,7 +242,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
 
                 Map<String, RefBookValue> refBookValueMap = records.get(0).getValues();
-                System.out.println("111 " + refBookValueMap.get(DEPARTMENT_GARANT_USE).getNumberValue()+"");
                 checkCorrectness(logger, null, attributes, records);
                 if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
