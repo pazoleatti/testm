@@ -1931,13 +1931,14 @@ def getDataRows(def formDataCollection, def departmentId, def formTemplateId, de
     }
 }
 
-def getReportPeriod9month(def reportPeriod){
-    if(reportPeriod == null){
+def getReportPeriod9month(def reportPeriod) {
+    if (reportPeriod == null) {
         return null;
     }
-    if(reportPeriod.dictTaxPeriodId == 46){ // период "год"
+    def code = getRefBookValue(8, reportPeriod.dictTaxPeriodId)?.CODE?.value
+    if (code == '34') { // период "год"
         return getReportPeriod9month(reportPeriodService.getPrevReportPeriod(reportPeriod.id));
-    } else if(reportPeriod.dictTaxPeriodId == 43){ // период "9 месяцев"
+    } else if (code == '33') { // период "9 месяцев"
         return reportPeriod;
     }
     return null;
