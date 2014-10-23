@@ -1825,8 +1825,8 @@ def getOldValue(def data, def kind, def valueName) {
  */
 def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly) {
     if (reportPeriodId != null) {
-        // вид декларации 2 - декларация по налогу на прибыль уровня банка
-        def declarationTypeId = 2
+        /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка */
+        def declarationTypeId = ((newDeclaration) ? 9 : 2)
         def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
         if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
             def xmlString = declarationService.getXmlData(declarationData.id)
