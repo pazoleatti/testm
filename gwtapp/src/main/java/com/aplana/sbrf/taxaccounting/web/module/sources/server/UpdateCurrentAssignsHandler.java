@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -143,6 +144,9 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
         }
 
         sourceService.updateSources(logger, sourceClientDataList);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            logger.clear(LogLevel.INFO);
+        }
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
     }

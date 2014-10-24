@@ -176,7 +176,7 @@ public class SourceServiceImpl implements SourceService {
      *
      * @param logger                   логгер
      * @param sourcePairs              оригинальный список пар источников-приемников
-     * @param errorDepartmentFormTypes список назначений, которые должны быть исключены
+     * @param errorPairs               список назначений, которые должны быть исключены
      * @param mode                     режим работы
      * @param isDeclaration            признак того, что идет обработка в режиме "Декларации"
      * @param emptyIsOk                признак того, что если в результате выполнения входной список оказывается пуст - это нормальная ситуация.
@@ -186,15 +186,15 @@ public class SourceServiceImpl implements SourceService {
      * @return обрезанный входной список пар источников-приемников
      */
     public List<SourcePair> truncateSources(Logger logger, List<SourcePair> sourcePairs,
-                                            List<Long> errorDepartmentFormTypes,
+                                            List<SourcePair> errorPairs,
                                             SourceMode mode, boolean isDeclaration, boolean emptyIsOk, LOG_LEVEL level,
                                             MessageBuilder messageBuilder) {
         List<SourcePair> sourcePairsOut = new LinkedList<SourcePair>(sourcePairs);
-        for (Long error : errorDepartmentFormTypes) {
+        for (SourcePair error : errorPairs) {
             for (Iterator<SourcePair> it = sourcePairsOut.iterator(); it.hasNext(); ) {
                 SourcePair pair = it.next();
                 /** Исключаем связку из обработки */
-                if (pair.getSource().equals(error) || pair.getDestination().equals(error)) {
+                if (pair.equals(error)) {
                     if (isDeclaration) {
                         if (pair.getDestination().equals(error)) {
                             printMsgs(logger, messageBuilder.getDestinationMessage(pair), level);
@@ -209,11 +209,7 @@ public class SourceServiceImpl implements SourceService {
                     it.remove();
                 }
                 /** Если единственное назначение было удалено, то продолжать нет смысла */
-                if (!emptyIsOk && pair.getSource().equals(error) && mode == SourceMode.DESTINATIONS) {
-                    throw new ServiceLoggerException(FATAL_SAVE_MSG,
-                            logEntryService.save(logger.getEntries()));
-                }
-                if (!emptyIsOk && pair.getDestination().equals(error) && mode == SourceMode.SOURCES) {
+                if (!emptyIsOk && sourcePairsOut.size() == 0) {
                     throw new ServiceLoggerException(FATAL_SAVE_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
@@ -231,7 +227,6 @@ public class SourceServiceImpl implements SourceService {
         for (String msg : msgs) {
             switch (level) {
                 case ERROR: {
-                    logger.clear(LogLevel.INFO);
                     logger.error(msg);
                     break;
                 }
@@ -358,7 +353,14 @@ public class SourceServiceImpl implements SourceService {
         } else {
             notExisting = (List<Long>) CollectionUtils.subtract(rightPart, sourceDao.checkDFTExistence(rightPart));
         }
-        return truncateSources(logger, sourcePairs, notExisting, mode, isDeclaration, false, LOG_LEVEL.ERROR,
+
+        List<SourcePair> notExistingPairs = new ArrayList<SourcePair>();
+        for (SourcePair pair : sourcePairs) {
+            if (notExisting.contains(pair.getSource()) || notExisting.contains(pair.getDestination())) {
+                notExistingPairs.add(pair);
+            }
+        }
+        return truncateSources(logger, sourcePairs, notExistingPairs, mode, isDeclaration, false, LOG_LEVEL.ERROR,
                 new MessageBuilder() {
                     @Override
                     public List<String> getSourceMessage(SourcePair sourcePair) {
@@ -459,7 +461,7 @@ public class SourceServiceImpl implements SourceService {
             }
             //Получаем данные о назначениях-причинах зацикливания для вывода в сообщениях
             final Map<Long, String> objectNames = sourceDao.getSourceNames(new ArrayList<Long>(circleCauses));
-            return truncateSources(logger, sourcePairs, unionSourcePairs(loopedSources), mode, isDeclaration, false, LOG_LEVEL.ERROR,
+            return truncateSources(logger, sourcePairs, loopedSources, mode, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
                         @Override
                         public List<String> getSourceMessage(SourcePair sourcePair) {
@@ -514,6 +516,7 @@ public class SourceServiceImpl implements SourceService {
             final Map<SourceObject, Pair<Date, Date>> unionSources = new HashMap<SourceObject, Pair<Date, Date>>();
             final Map<SourcePair, Pair<Date, Date>> unionPairs = new HashMap<SourcePair, Pair<Date, Date>>();
             List<SourceObject> deleteSources = new ArrayList<SourceObject>();
+            List<SourcePair> deletePairs = new ArrayList<SourcePair>();
             final Map<SourcePair, SourceObject> unionMap = new HashMap<SourcePair, SourceObject>();
             final List<String> intersectionParts = new ArrayList<String>();
             int n = 0;
@@ -530,6 +533,7 @@ public class SourceServiceImpl implements SourceService {
                         maxDate = intersection.getPeriodEnd();
                     }
                     deleteSources.add(intersection);
+                    deletePairs.add(intersection.getSourcePair());
                     if (mode == SourceMode.SOURCES) {
                         intersectionParts.add(String.format(INTERSECTION_PART,
                                         isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType(),
@@ -568,14 +572,14 @@ public class SourceServiceImpl implements SourceService {
             /** Удаляем все назначения, с периодами которых были найдены пересечения. */
             sourceDao.deleteAll(deleteSources, isDeclaration);
 
-            List<Long> intersectingSources = unionSourcePairs(new ArrayList<SourcePair>(intersections.keySet()));
+            List<SourcePair> intersectingPairs = new ArrayList<SourcePair>(intersections.keySet());
             if (excludedPeriodStart == null) {
                 //Идет создание назначений
                 /** Создаем новые назначения с объединенными периодами */
                 sourceDao.createAll(new ArrayList<SourceObject>(unionSources.keySet()), isDeclaration);
             } else {
                 //Идет редактирование назначений
-                intersectingSources = unionSourceObjects(deleteSources);
+                intersectingPairs = deletePairs;
                 for (Map.Entry<SourceObject, Pair<Date, Date>> sourceEntry : unionSources.entrySet()) {
                     sourceDao.updateAll(Arrays.asList(sourceEntry.getKey()),
                             sourceEntry.getValue().getFirst(), sourceEntry.getValue().getSecond(), isDeclaration);
@@ -583,7 +587,7 @@ public class SourceServiceImpl implements SourceService {
             }
 
             /** Убираем назначения с пересечениями из обработки */
-            return truncateSources(logger, sourcePairs, intersectingSources, mode, isDeclaration, true, LOG_LEVEL.INFO,
+            return truncateSources(logger, sourcePairs, intersectingPairs, mode, isDeclaration, true, LOG_LEVEL.INFO,
                     new MessageBuilder() {
                         @Override
                         public List<String> getSourceMessage(SourcePair sourcePair) {

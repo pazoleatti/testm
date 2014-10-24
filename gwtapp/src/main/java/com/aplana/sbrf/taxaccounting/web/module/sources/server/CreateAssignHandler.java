@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
@@ -84,6 +85,9 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
         }
 
         sourceService.createSources(logger, sourceClientData);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            logger.clear(LogLevel.INFO);
+        }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

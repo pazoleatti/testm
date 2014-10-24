@@ -166,7 +166,12 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Override
     public void unlockAll(TAUserInfo userInfo) {
-        dao.unlockAllByUserId(userInfo.getUser().getId());
+        dao.unlockAllByUserId(userInfo.getUser().getId(), false);
+    }
+
+    @Override
+    public void unlockAll(TAUserInfo userInfo, boolean ignoreError) {
+        dao.unlockAllByUserId(userInfo.getUser().getId(), ignoreError);
     }
 
     @Override

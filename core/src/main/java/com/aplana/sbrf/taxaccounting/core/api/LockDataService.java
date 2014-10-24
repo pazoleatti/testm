@@ -106,6 +106,14 @@ public interface LockDataService {
 
     void unlockAll(TAUserInfo userInfo);
 
+    /**
+     * Убрать все блокировки пользователя.
+     *
+     * @param userInfo пользователь
+     * @param ignoreError признак игнорирования ошибок при снятии блокировок. Нужен при разлогинивании
+     */
+    void unlockAll(TAUserInfo userInfo, boolean ignoreError);
+
     void unlockIfOlderThan(int sec);
 
     /**
