@@ -706,7 +706,7 @@ void generateXML() {
                             def rowForNalPu = getDataRow(dataRowsAdvance, 'ca')
                             // налПу = строка 070, если строка 070 == 0, то строка 080, если строка 080 == 0, то 0
                             nalPu = (rowForNalPu != null ?
-                                    (rowForNalPu.taxSumToPay ?: rowForNalPu.taxSumToReduction) : 0)
+                                    (rowForNalPu.taxSumToPay ?: (- (rowForNalPu.taxSumToReduction ?: 0))) : 0)
                             if (nalPu == null) {
                                 nalPu = 0
                             }
