@@ -14,7 +14,7 @@ import javax.sql.DataSource;
  */
 @Stateless
 @Local(DataSourceHolderServiceLocal.class)
-public class DataSourceHolderBean implements DataSourceHolderService {
+public class AuditDSHolderBean implements DataSourceHolderService {
     @Resource(name = "jdbc/TaxAccDS")
     DataSource applicationDataSource;
 
