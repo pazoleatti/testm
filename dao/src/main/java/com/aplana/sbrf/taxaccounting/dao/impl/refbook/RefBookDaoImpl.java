@@ -1334,17 +1334,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         });
     }
 
-    private final static String CHECK_UNIQUE_MATCHES = "FROM ref_book_value v1\n" +
-            "  JOIN ref_book_value v2 ON v1.record_id = v2.record_id\n" +
-            "  JOIN ref_book_value v3 ON v2.record_id = v3.record_id\n" +
-            "  JOIN ref_book_value v4 ON v3.record_id = v4.record_id\n" +
-            "  JOIN ref_book_attribute a1 ON a1.id = v1.attribute_id\n" +
-            "  JOIN ref_book_attribute a2 ON a2.id = v2.attribute_id\n" +
-            "  JOIN ref_book_attribute a3 ON a3.id = v3.attribute_id\n" +
-            "  JOIN ref_book_attribute a4 ON a4.id = v4.attribute_id\n" +
-            "  JOIN ref_book_record r ON r.id = v1.record_id\n" +
-            "WHERE r.status = 0 AND r.ref_book_id = ? AND\n";
-
     @Override
     public List<Pair<Long, String>> getMatchedRecordsByUniqueAttributes(Long refBookId, Long uniqueRecordId,
                                                                         List<RefBookAttribute> attributes,
@@ -1362,33 +1351,42 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         List<Object> whereParams = new ArrayList<Object>();
         whereParams.add(refBookId);
 
-        StringBuilder sqlBuilder = new StringBuilder(CHECK_UNIQUE_MATCHES);
-        StringBuilder sqlWherePartBuilder = new StringBuilder();
-        StringBuilder sqlSelectPartBuilder = new StringBuilder("SELECT DISTINCT v1.record_id as id, CASE\n");
+        StringBuilder sqlCaseBuilder = new StringBuilder("CASE\n");
+        StringBuilder sqlFromBuilder = new StringBuilder("FROM ref_book_record r\n");
+        StringBuilder sqlWhereBuilder = new StringBuilder("WHERE r.status = 0 AND r.ref_book_id = ? AND\n");
 
+        // Максимальное количество self-join таблиц
+        int maxTablesCount = 0;
         // OR по каждой записи
         for (int i = 0; i < records.size(); i++) {
-            sqlWherePartBuilder.append("(");
+            sqlWhereBuilder.append("(");
             RefBookRecord record = records.get(i);
             Map<String, RefBookValue> recordValues = record.getValues();
             Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues = recordsGroupsUniqueAttributesValues.get(i);
             // OR по группам уникальности
             for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupUniqueAttributesValues : groupsUniqueAttributesValues.entrySet()) {
-                sqlSelectPartBuilder.append(" WHEN ");
-                sqlWherePartBuilder.append("(");
+                sqlCaseBuilder.append("WHEN ");
+                sqlWhereBuilder.append("(");
                 List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupUniqueAttributesValues.getValue();
                 StringBuilder clauseForGroup = new StringBuilder();
                 StringBuilder attrNameBuilder = new StringBuilder();
                 // AND по уникальным аттрибутам группы
                 for (int j = 0; j < uniqueAttributesValues.size(); j++) {
-                    // Используем self-join 4 раза, для кадого типа value. Поэтому нужно корректно нумеровать их
+                    // Нумерация self-join таблиц
                     int tableNumber = j + 1;
-                    attrNameBuilder.append("a").append(tableNumber).append(".name");
+                    String valuesTableName = "v" + tableNumber;
+                    String attributesTableName = "a" + tableNumber;
+                    if (maxTablesCount < uniqueAttributesValues.size() && maxTablesCount < tableNumber) {
+                        sqlFromBuilder.append("JOIN ref_book_value ").append(valuesTableName).append(" ON ").append(valuesTableName).append(".record_id = r.id\n");
+                        sqlFromBuilder.append("JOIN ref_book_attribute ").append(attributesTableName).append(" ON ").append(attributesTableName).append(".id = ").append(valuesTableName).append(".attribute_id\n");
+                    }
+
+                    attrNameBuilder.append(attributesTableName).append(".name");
                     Pair<RefBookAttribute, RefBookValue> pair = uniqueAttributesValues.get(j);
                     RefBookAttribute attribute = pair.getFirst();
                     String type = attribute.getAttributeType().toString() + "_VALUE";
                     // Здесь проставляем номера таблиц
-                    clauseForGroup.append("v").append(tableNumber).append(".attribute_id = ? AND v").append(tableNumber).append(".").append(type).append(" = ? ");
+                    clauseForGroup.append(valuesTableName).append(".attribute_id = ? AND ").append(valuesTableName).append(".").append(type).append(" = ? ");
 
                     /*************************************Добавление параметров****************************************/
                     selectParams.add(attribute.getId());
@@ -1416,34 +1414,40 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         clauseForGroup.append(" AND ");
                         attrNameBuilder.append(" || ', ' || ");
                     } else {
-                        sqlSelectPartBuilder.append(clauseForGroup);
+                        sqlCaseBuilder.append(clauseForGroup);
                         clauseForGroup.append(" AND (? IS NULL OR r.record_id != ?)");
                         whereParams.add(record.getRecordId());
                         whereParams.add(record.getRecordId());
+                        attrNameBuilder.append("\n");
                     }
                 }
 
-                sqlSelectPartBuilder.append("THEN ").append(attrNameBuilder);
+                sqlCaseBuilder.append("THEN ").append(attrNameBuilder);
 
-                sqlWherePartBuilder.append(clauseForGroup);
-                sqlWherePartBuilder.append(")");
+                sqlWhereBuilder.append(clauseForGroup);
+                sqlWhereBuilder.append(")");
                 if (groupUniqueAttributesValues.getKey() < groupsUniqueAttributesValues.size()) {
-                    sqlWherePartBuilder.append(" OR ");
+                    sqlWhereBuilder.append(" OR ");
                 }
+                if (maxTablesCount < uniqueAttributesValues.size()) maxTablesCount = uniqueAttributesValues.size();
             }
 
-            sqlWherePartBuilder.append(")\n");
-            if (i < records.size() - 1) sqlWherePartBuilder.append(" OR ");
+            sqlWhereBuilder.append(")\n");
+            if (i < records.size() - 1) sqlWhereBuilder.append(" OR ");
         }
 
-        sqlSelectPartBuilder.append(" END AS name\n");
+        sqlCaseBuilder.append(" END AS name\n");
 
         if (uniqueRecordId != null) {
-            sqlWherePartBuilder.append(" AND v1.record_id != ?");
+            sqlWhereBuilder.append(" AND v1.record_id != ?");
             whereParams.add(uniqueRecordId);
         }
 
-        sqlBuilder.insert(0, sqlSelectPartBuilder).append(sqlWherePartBuilder);
+        // Собираем куски в запрос
+        StringBuilder sqlBuilder = new StringBuilder("SELECT DISTINCT v1.record_id as id,\n");
+        sqlBuilder.append(sqlCaseBuilder);
+        sqlBuilder.append(sqlFromBuilder);
+        sqlBuilder.append(sqlWhereBuilder);
 
         selectParams.addAll(whereParams);
 

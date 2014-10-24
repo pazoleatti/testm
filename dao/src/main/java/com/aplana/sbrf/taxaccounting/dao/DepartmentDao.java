@@ -187,4 +187,12 @@ public interface DepartmentDao {
      * назначенных подразделениям departments
      */
     List<Integer> getDepartmentIdsByDestinationSource(List<Integer> departments, Date periodStart, Date periodEnd);
+
+    /**
+     * Установка значения поля GARANT_USE
+     * Используется для установки флага что данное поразделение используется в модуле Гарантий
+     * @param depId ид подразделения
+     * @param used true - используется, false - не используется
+     */
+    void setUsedByGarant(int depId, boolean used);
 }

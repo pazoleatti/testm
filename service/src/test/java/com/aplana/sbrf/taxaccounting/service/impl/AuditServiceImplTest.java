@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-
-import com.aplana.sbrf.taxaccounting.common.service.CommonService;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -45,9 +43,6 @@ public class AuditServiceImplTest {
         ReflectionTestUtils.setField(auditService, "departmentService", departmentService);
 
 
-        CommonService commonService = mock(CommonService.class);
-        ReflectionTestUtils.setField(auditService, "commonService", commonService);
-
         auditDao = mock(AuditDao.class);
         ReflectionTestUtils.setField(auditService, "auditDao", auditDao);
 
@@ -68,8 +63,7 @@ public class AuditServiceImplTest {
 
     @Test
     public void testAdd(){
-        //Уже не получается тестировать этот метод, т.к возникает циклическая зависимость в maven
-        /*TAUser user = new TAUser();
+        TAUser user = new TAUser();
         user.setLogin("user1");
         user.setRoles(new ArrayList<TARole>(){{
                 add(new TARole(){{
@@ -83,18 +77,16 @@ public class AuditServiceImplTest {
         userInfo.setIp("127.0.0.1");
         userInfo.setUser(user);
 
-        auditService.add(FormDataEvent.MIGRATION, userInfo, 0, null, null, null, null, "MIGRATION", null);
-        auditService.add(FormDataEvent.LOGIN, userInfo, 1, null, null, null, null, "LOGIN", null);
+        auditService.add(FormDataEvent.MIGRATION, userInfo, 0, null, null, null, null, "MIGRATION", null, null);
+        auditService.add(FormDataEvent.LOGIN, userInfo, 1, null, null, null, null, "LOGIN", null, null);
 
         ArgumentCaptor<LogSystem> argument = ArgumentCaptor.forClass(LogSystem.class);
         verify(auditDao, times(2)).add(argument.capture());
 
         assertEquals(argument.getAllValues().get(0).getFormDepartmentName(), "Открытое акционерное общество \"Сбербанк России\"");
         assertEquals(argument.getAllValues().get(0).getRoles(), TARole.ROLE_ADMIN + ", " + TARole.ROLE_CONTROL);
-        assertEquals(argument.getAllValues().get(0).getDepartmentTBId(), null);
 
         assertEquals(argument.getAllValues().get(1).getFormDepartmentName(), "Центральный аппарат/Управление налогового планирования");
         assertEquals(argument.getAllValues().get(1).getUserDepartmentName(), "Открытое акционерное общество \"Сбербанк России\"");
-        assertEquals(argument.getAllValues().get(1).getDepartmentTBId(), new Integer(113));*/
     }
 }

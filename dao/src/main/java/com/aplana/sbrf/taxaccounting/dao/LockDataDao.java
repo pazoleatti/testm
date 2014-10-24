@@ -50,7 +50,13 @@ public interface LockDataDao {
 	 */
 	void deleteLock(String key);
 
-    void unlockAllByUserId(int userId);
+    /**
+     * Убрать все блокировки пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @param ignoreError признак игнорирования ошибок при снятии блокировок. Нужен при разлогинивании
+     */
+    void unlockAllByUserId(int userId, boolean ignoreError);
 
     /**
      * Удаляет все блокировки, которые старше заданого времени

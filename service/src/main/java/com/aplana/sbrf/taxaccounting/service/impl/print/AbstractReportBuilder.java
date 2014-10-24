@@ -5,7 +5,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +28,6 @@ public abstract class AbstractReportBuilder {
     protected static final int cellWidthMin = 30;
     protected static final int cellWidthMax = 100;
 
-
     protected Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
 
     private String fileName;
@@ -39,7 +42,7 @@ public abstract class AbstractReportBuilder {
      * Формирование отчета. Условно разбит на шесть частей.
      * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
      * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
-     * @return пуьь до сфориирвванного файла
+     * @return путь до сформированного файла
      * @throws IOException
      */
     public final String createReport() throws IOException {
@@ -81,7 +84,7 @@ public abstract class AbstractReportBuilder {
     protected abstract void createTableHeaders();
 
     /**
-     * Заполнение шапк отчета.
+     * Заполнение шапки отчета.
      */
     protected abstract void fillHeader();
 
@@ -119,9 +122,9 @@ public abstract class AbstractReportBuilder {
     }
 
     /**
-     * Необходимо чтобы знать какой конечный размер ячеек установить. Делается только в самом конце.
+     * Необходимо, чтобы знать какой конечный размер ячеек установить. Делается только в самом конце.
      * @param cellNumber номер ячейки
-     * @param length иирнна
+     * @param length ширина
      */
     protected final void fillWidth(Integer cellNumber,Integer length){
 
@@ -140,6 +143,5 @@ public abstract class AbstractReportBuilder {
         }
         else
             widthCellsMap.put(cellNumber, cellWidthMin);
-
     }
 }

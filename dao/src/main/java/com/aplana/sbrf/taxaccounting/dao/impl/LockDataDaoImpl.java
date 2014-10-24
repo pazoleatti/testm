@@ -100,12 +100,19 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	}
 
     @Override
-    public void unlockAllByUserId(int userId) {
+    public void unlockAllByUserId(int userId, boolean ignoreError) {
         try {
-            getJdbcTemplate().update("delete from lock_data where user_id = ?",
-                    userId);
-        } catch (DataAccessException e){
+            getJdbcTemplate().update("delete from lock_data where user_id = ?", userId);
+        } catch (DataAccessException e) {
+            if (ignoreError) {
+                e.printStackTrace();
+                return;
+            }
             throw new LockException("Ошибка при удалении блокировок для пользователя с id = %d. %s", userId, e.getMessage());
+        } catch (Exception e) {
+            if (ignoreError) {
+                e.printStackTrace();
+            }
         }
     }
 

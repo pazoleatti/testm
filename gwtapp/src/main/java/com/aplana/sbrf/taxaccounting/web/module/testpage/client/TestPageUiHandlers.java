@@ -6,4 +6,8 @@ public interface TestPageUiHandlers extends UiHandlers {
     void openMessageDialog();
 
     void updateIdsFromPath();
+
+    void setUsageDepartment();
+
+    void doEvent();
 }
