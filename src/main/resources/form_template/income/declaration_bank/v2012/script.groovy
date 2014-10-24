@@ -862,7 +862,6 @@ void generateXML() {
                                 ВырРеалПред : virRealPred,
                                 ВырРеалОпер32 : viruchOp302It,
                                 ВырРеалИтог : dohReal) {
-
                             // 0..1
                             ВырРеал(
                                     ВырРеалВс : virRealVs,
@@ -1025,7 +1024,7 @@ void generateXML() {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
                                 obRasch = getRefBookValue(26, row.calcFlag)?.CODE?.value
-                                naimOP = getDepartmentCorrectName(row)
+                                naimOP = getRefBookValue(30, row.regionBankDivision)?.NAME?.value
                                 kppop = row.kpp
                                 obazUplNalOP = getRefBookValue(25, row.obligationPayTax)?.CODE?.value
                                 dolaNalBaz = row.baseTaxOf
@@ -1095,7 +1094,6 @@ void generateXML() {
                                     НалИсчисл : getLong(row.taxSum),
                                     НалДивПред : getLong(row.taxSumFromPeriod),
                                     НалДивПосл : getLong(row.taxSumFromPeriodAll)) {
-
                                 // 0..1
                                 ДивИОФЛНеРез(
                                         ДивИнОрг : getLong(row.dividendForgeinOrgAll),
@@ -1834,10 +1832,10 @@ def getOldValue(def data, def kind, def valueName) {
  */
 def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly) {
     if (reportPeriodId != null) {
-        // вид декларации 2 - декларация по налогу на прибыль уровня банка
-        def declarationTypeId = 2
+        /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка */
+        def declarationTypeId = ((newDeclaration) ? 9 : 2)
         def declarationData = declarationService.getLast(declarationTypeId, departmentId, reportPeriodId)
-        if (declarationData != null && declarationData.id != null) {
+        if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
             def xmlString = declarationService.getXmlData(declarationData.id)
             if(xmlString == null){
                 return null
@@ -1969,43 +1967,7 @@ void сancelAccepted() {
     if (declarationService.checkExistDeclarationsInPeriod(declarationTypeId, declarationData.reportPeriodId)) {
         throw new Exception('Отменить принятие данной декларации Банка невозможно. Так как в текущем периоде создана декларация ОП по прибыли!')
     }
-}}
-
-/**
- * Получить правильные названия подразделении для Приложения 5 декларации.
- *
- * @param row строка нф «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации».
- */
-def getDepartmentCorrectName(def row) {
-    if (departmentCorrectNameMap[row.kpp]) {
-        return departmentCorrectNameMap[row.kpp]
-    }
-    return getRefBookValue(30, row.regionBankDivision)?.NAME?.value
 }
-
-/** Мапа для получения правильных названии подразделении для Приложения 5 декларации. */
-@Field
-def departmentCorrectNameMap = [
-        '143502001' : 'Якутское ОСБ №8603 ОАО "Сбербанк России"',
-        '246602001' : 'Восточно-Сибирский банк ОАО "Сбербанк России"',
-        '263402001' : 'Северо-Кавказский банк ОАО "Сбербанк России"',
-        '272202001' : 'Дальневосточный банк ОАО "Сбербанк России"',
-        '366402001' : 'Центрально-Черноземный банк ОАО "Сбербанк России"',
-        '380843001' : 'Байкальский банк ОАО "Сбербанк России"',
-        '490902001' : 'Северо-Восточное отделение №8645 ОАО "Сбербанк России"',
-        '526002001' : 'Волго-Вятский банк ОАО "Сбербанк России"',
-        '540602001' : 'Сибирский банк ОАО "Сбербанк России"',
-        '590202001' : 'Западно-Уральский банк ОАО "Сбербанк России"',
-        '616143001' : 'Юго-Западный банк ОАО "Сбербанк России"',
-        '631602001' : 'Поволжский банк ОАО "Сбербанк России"',
-        '667102008' : 'Уральский банк ОАО "Сбербанк России"',
-        '720302020' : 'Западно-Сибирский банк ОАО "Сбербанк России"',
-        '760443001' : 'Северный банк ОАО "Сбербанк России"',
-        '775001001' : 'Центральный аппарат ОАО "Сбербанк России"',
-        '775002002' : 'Среднерусский банк ОАО "Сбербанк России"',
-        '783502001' : 'Северо-Западный банк ОАО "Сбербанк России"',
-        '870902001' : 'Чукотское отделение (на правах отдела) Северо-Восточного отделения №8645 ОАО "Сбербанк России"'
-]
 
 def getReportPeriod9month(def reportPeriod) {
     if (reportPeriod == null) {
