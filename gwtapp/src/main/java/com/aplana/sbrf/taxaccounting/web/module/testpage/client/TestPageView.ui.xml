@@ -132,6 +132,12 @@
                                     <g:Label text="Выбрано: "/>
                                     <g:Label ui:field="showResult"/>
                                 </g:HorizontalPanel>
+                                <g:Label text="Пробросить событие" addStyleNames="{style.labelName}"/>
+                                <g:HorizontalPanel spacing="1">
+                                    <g:ListBox ui:field="eventLb"/>
+                                    <g:Button ui:field="eventBtn" text="Событнуть"/>
+                                </g:HorizontalPanel>
+
                             </g:VerticalPanel>
                         </g:HTMLPanel>
                     </g:cell>
@@ -161,7 +167,7 @@
                     <g:VerticalPanel>
                         <refbookmultipicker:RefBookPickerWidget ui:field="hPicker" width="480px" labelWordWrap="false"
                                                                 multiSelect="true" isHierarchical="true"
-                                                                attributeIdInt="423" addStyleNames="{style.margin5}"/>
+                                                                attributeIdInt="161" addStyleNames="{style.margin5}"/>
                         <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                             <g:VerticalPanel>
                                 <g:CheckBox ui:field="hpMultiPickCb" wordWrap="false" text="Мультивыбор"/>
@@ -174,6 +180,10 @@
                             <g:HorizontalPanel spacing="3" verticalAlignment="middle">
                                 <g:TextBox ui:field="hpValueTb" title="введите идентификаторы записей через запятую, если пусто выставит null"/>
                                 <g:Button ui:field="hpSetValueBtn" text="Установить" title="Установить написанное значение"/>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel spacing="3" verticalAlignment="middle">
+                                <g:CheckBox ui:field="depUsageCb" wordWrap="false" text="Использовать в гарантиях"/>
+                                <g:Button ui:field="depUsageBtn" text="Установить" title="Установить написанное значение из 'Использовать в гарантиях'"/>
                             </g:HorizontalPanel>
                         </g:HorizontalPanel>
                     </g:VerticalPanel>

@@ -284,4 +284,35 @@ public class ScriptUtilsTest {
         headerMapping.put(column1, column2);
         ScriptUtils.checkHeaderEquals(headerMapping);
     }
+
+    @Test
+    public void getColumnNumberSuccess() {
+        Map<Integer, String> map = new HashMap<Integer, String>();
+        map.put(1, "A");
+        map.put(26, "Z");
+        map.put(27, "AA");
+        map.put(28, "AB");
+
+        map.put(51, "AY");
+        map.put(52, "AZ");
+        map.put(53, "BA");
+
+        map.put(100, "CV");
+        map.put(1000, "ALL");
+
+        for (Integer index : map.keySet()) {
+            String value = map.get(index);
+            Assert.assertEquals(value, ScriptUtils.getXLSColumnNumber(index));
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getColumnNumberFailByZero() {
+        ScriptUtils.getXLSColumnNumber(0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getColumnNumberFailByNegative() {
+        ScriptUtils.getXLSColumnNumber(-10);
+    }
 }

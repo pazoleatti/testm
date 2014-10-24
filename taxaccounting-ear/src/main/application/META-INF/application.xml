@@ -28,7 +28,10 @@
         <ejb>async-task.jar</ejb>
     </module>
     <module>
-        <ejb>common-core.jar</ejb>
+        <ejb>audit-ejb.jar</ejb>
+    </module>
+    <module>
+        <ejb>department-ejb.jar</ejb>
     </module>
     <security-role>
         <description>Все аутентифицированные пользователи</description>

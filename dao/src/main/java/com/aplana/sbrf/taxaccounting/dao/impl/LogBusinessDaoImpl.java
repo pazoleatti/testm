@@ -36,7 +36,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 			log.setRoles(rs.getString("roles"));
 			log.setDeclarationId(SqlUtils.getLong(rs, "declaration_data_id"));
 			log.setFormId(SqlUtils.getLong(rs, "form_data_id"));
-			log.setDepartmentId(SqlUtils.getInteger(rs,"user_department_id"));
+			log.setDepartmentName(rs.getString("user_department_name"));
 			log.setNote(rs.getString("note"));
 			return log;
 		}
@@ -116,7 +116,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 		}
 
 		jt.update(
-				"insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, form_data_id, user_department_id, note)" +
+				"insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, form_data_id, user_department_name, note)" +
 						" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				id,
 				logBusiness.getLogDate(),
@@ -125,7 +125,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 				logBusiness.getRoles(),
 				logBusiness.getDeclarationId(),
 				logBusiness.getFormId(),
-				logBusiness.getDepartmentId(),
+				logBusiness.getDepartmentName(),
 				logBusiness.getNote()
 		);
 	}
@@ -148,7 +148,7 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
                 clause.append("ORDER BY roles");
                 break;
             case DEPARTMENT:
-                clause.append("ORDER BY user_department_id");
+                clause.append("ORDER BY user_department_name");
                 break;
             case NOTE:
                 clause.append("ORDER BY note");

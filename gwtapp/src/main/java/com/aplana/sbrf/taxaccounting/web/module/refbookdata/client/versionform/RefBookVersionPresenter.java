@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -27,6 +27,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
@@ -51,7 +52,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	EditFormPresenter editFormPresenter;
 
 	private final DispatchAsync dispatcher;
-	private final TaPlaceManager placeManager;
+	private final PlaceManager placeManager;
 
 	private final TableDataProvider dataProvider = new TableDataProvider();
 
@@ -72,7 +73,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     }
 
 	@Inject
-	public RefBookVersionPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, TaPlaceManager placeManager, final MyProxy proxy,
+	public RefBookVersionPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, PlaceManager placeManager, final MyProxy proxy,
                                    DispatchAsync dispatcher) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
@@ -127,10 +128,16 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 						new AbstractCallback<DeleteRefBookRowResult>() {
 							@Override
 							public void onSuccess(DeleteRefBookRowResult result) {
+                                if (!result.isCheckRegion()) {
+                                    String title = "Удаление элемента справочника";
+                                    String msg = "Отсутствуют права доступ на удаление записи для указанного региона!";
+                                    Dialog.errorMessage(title, msg);
+                                    return;
+                                }
                                 LogCleanEvent.fire(RefBookVersionPresenter.this);
                                 LogAddEvent.fire(RefBookVersionPresenter.this, result.getUuid());
-								editFormPresenter.show(null);
-								editFormPresenter.setMode(mode);
+                                editFormPresenter.setMode(mode);
+                                editFormPresenter.show(null);
                                 if (result.getNextVersion() != null) {
                                     placeManager
                                             .revealPlace(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookVersion)
@@ -151,7 +158,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
             editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
-		}
+        } else {
+            editFormPresenter.show(null);
+        }
 	}
 
 	@Override
@@ -229,6 +238,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 											result.getTotalCount(), result.getDataRows());
                                     if (!result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
+                                        // recordCommonId = result.getRefBookRecordCommonId();
                                     }
 								}
 							}, RefBookVersionPresenter.this));

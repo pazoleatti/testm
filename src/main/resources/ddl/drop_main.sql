@@ -54,6 +54,7 @@ drop table income_102;
 drop sequence seq_income_101;
 drop table income_101;
 drop sequence seq_report_period;
+drop table ifrs_data;
 drop table report_period;
 drop sequence seq_department;
 drop sequence seq_form_column;

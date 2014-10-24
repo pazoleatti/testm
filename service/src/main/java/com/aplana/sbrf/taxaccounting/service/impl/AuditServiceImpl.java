@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.common.service.CommonService;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -8,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,9 @@ public class AuditServiceImpl implements AuditService {
     @Autowired
     private LockDataService lockDataService;
     @Autowired
-    private CommonService commonService;
+    private PeriodService periodService;
+
+    private static final String RP_NAME_PATTERN = "%s %s";
 
     @Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
@@ -46,8 +48,44 @@ public class AuditServiceImpl implements AuditService {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
-                commonService.addAuditLog(event, userInfo, departmentId, reportPeriodId,
-                        declarationTypeName, formTypeName, formKindId, note, blobDataId, formTypeId);
+                LogSystem log = new LogSystem();
+                log.setLogDate(new Date());
+                log.setIp(userInfo.getIp());
+                log.setEventId(event.getCode());
+                log.setUserLogin(userInfo.getUser().getLogin());
+
+                StringBuilder roles = new StringBuilder();
+                List<TARole> taRoles = userInfo.getUser().getRoles();
+                for (int i = 0; i < taRoles.size(); i++) {
+                    roles.append(taRoles.get(i).getName());
+                    if (i != taRoles.size() - 1) {
+                        roles.append(", ");
+                    }
+                }
+                log.setRoles(roles.toString());
+
+                String departmentName = departmentId == null ? "" : (departmentId == 0 ? departmentService.getDepartment(departmentId).getName() : departmentService.getParentsHierarchy(departmentId));
+                log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
+                log.setFormDepartmentId(departmentId);
+
+                if (reportPeriodId == null)
+                    log.setReportPeriodName(null);
+                else {
+                    ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+                    log.setReportPeriodName(String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
+                }
+                log.setDeclarationTypeName(declarationTypeName);
+                log.setFormTypeName(formTypeName);
+                log.setFormKindId(formKindId);
+                log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
+                int userDepId = userInfo.getUser().getDepartmentId();
+                String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
+                log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
+
+                log.setBlobDataId(blobDataId);
+                log.setFormTypeId(formTypeId);
+
+                auditDao.add(log);
             }
 
             @Override

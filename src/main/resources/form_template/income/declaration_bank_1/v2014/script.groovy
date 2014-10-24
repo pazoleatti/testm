@@ -94,7 +94,7 @@ void checkDeparmentParams(LogLevel logLevel) {
 /** Логические проверки. */
 void logicCheck() {
     // получение данных из xml'ки
-    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId)
+    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false)
     if(xmlData == null){
         return
     }
@@ -261,7 +261,7 @@ void generateXML() {
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId)
 
     /** XML декларации за предыдущий отчетный период. */
-    def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId)
+    def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId, false)
 
     /** Налоговый период. */
     def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
@@ -271,6 +271,33 @@ void generateXML() {
 
     /** Признак первый ли это отчетный период. */
     def isFirstPeriod = (reportPeriod != null && reportPeriod.order == 1)
+
+    /** Принятая декларация за период «9 месяцев» предыдущего налогового периода. */
+    def xmlData9month = null
+    /** Используемые поля декларации за период «9 месяцев» предыдущего налогового периода. */
+    /** НалВыпл311ФБ за предыдущий отчетный период. Код строки декларации 250. */
+    def nalVipl311FB9month = 0
+    /** НалВыпл311Суб за предыдущий отчетный период. Код строки декларации 260. */
+    def nalVipl311Sub9month = 0
+    /** НалИсчислФБ. Код строки декларации 190. */
+    def nalIschislFB9month = 0
+    /** НалИсчислСуб. Столбец «Сумма налога». */
+    def nalIschislSub9month = 0
+    /** АвПлатМесСуб. Код строки декларации 310. */
+    def avPlatMesSub9month = 0
+    /** АвПлатМесФБ. Код строки декларации 300. */
+    def avPlatMesFB9month = 0
+    if (isFirstPeriod) {
+        xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true)
+        if (xmlData9month != null) {
+            nalVipl311FB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311ФБ.text() ?: 0)
+            nalVipl311Sub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311Суб.text() ?: 0)
+            nalIschislFB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалИсчислФБ.text() ?: 0)
+            nalIschislSub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалИсчислСуб.text() ?: 0)
+            avPlatMesSub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатМесСуб.text() ?: 0)
+            avPlatMesFB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатМесФБ.text() ?: 0)
+        }
+    }
 
     /*
      * Данные налоговых форм.
@@ -303,6 +330,9 @@ void generateXML() {
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
     def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308, FormDataKind.ADDITIONAL)
+
+    /** форма «Остатки по начисленным авансовым платежам». */
+    def dataRowsRemains = getDataRows(formDataCollection, departmentId, 309, FormDataKind.PRIMARY)
 
     /*
      * Получение значении декларации за предыдущий период.
@@ -476,7 +506,7 @@ void generateXML() {
     /** НалИсчисл. Код строки декларации 180. */
     def nalIschisl = nalIschislFB + nalIschislSub
     /** НалВыпл311. Код строки декларации 240. */
-    def nalVipl311 = getLong(sumTax + nalVipl311FBOld + nalVipl311SubOld)
+    def nalVipl311 = getLong(sumTax)
     /** НалВыпл311ФБ. Код строки декларации 250. */
     def nalVipl311FB = getLong(nalVipl311 * 2 / 20)
     /** НалВыпл311Суб. Код строки декларации 260. */
@@ -485,7 +515,16 @@ void generateXML() {
     /** АвПлатМесФБ. Код строки декларации 300. */
     def avPlatMesFB = nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0)
     /** АвНачислФБ. Код строки декларации 220. */
-    def avNachislFB = nalIschislFBOld - nalVipl311FBOld + avPlatMesFBOld
+    def avNachislFB
+    if(isFirstPeriod){
+        if(xmlData9month != null){
+            avNachislFB = nalIschislFB9month - nalVipl311FB9month + avPlatMesFB9month
+        }   else{
+            avNachislFB = getTotalFromForm(dataRowsRemains, 'sum1')
+        }
+    }   else{
+        avNachislFB = nalIschislFBOld - nalVipl311FBOld + avPlatMesFBOld
+    }
     /** АвПлатМесСуб. Код строки декларации 310. */
     def avPlatMesSub = nalIschislSub - (isFirstPeriod ? 0 : nalIschislSubOld)
     /** АвПлатМес. */
@@ -497,7 +536,16 @@ void generateXML() {
     /** АвПлатУпл1Кв. */
     def avPlatUpl1Cv = (reportPeriod != null && reportPeriod.order == 3 ? avPlatUpl1CvFB + avPlatUpl1CvSub : empty)
     /** АвНачислСуб. Код строки декларации 230. 200 - 260 + 310. */
-    def avNachislSub = getLong(nalIschislSubOld - nalVipl311SubOld + avPlatMesSubOld)
+    def avNachislSub
+    if(isFirstPeriod){
+        if(xmlData9month != null){
+            avNachislSub = getLong(nalIschislSub9month - nalVipl311Sub9month + avPlatMesSub9month)
+        }   else{
+            avNachislSub = getTotalFromForm( dataRowsRemains, 'sum2')
+        }
+    }   else{
+        avNachislSub =  getLong(nalIschislSubOld - nalVipl311SubOld + avPlatMesSubOld)
+    }
     /** АвНачисл. Код строки декларации 210. */
     def avNachisl = avNachislFB + avNachislSub
     /** НалДоплФБ. Код строки декларации 270. */
@@ -561,14 +609,16 @@ void generateXML() {
     def svCelSred = new HashMap()
     if (dataRowsComplexConsumption != null) {
         // 700, 770, 890
-        [700:[20750], 770:[20321], 890:[21280]].each { id, codes ->
+        [700: [20750], 770: [20321], 890: [21280]].each { id, codes ->
             def result = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, codes))
             if (result != 0) {
                 svCelSred[id] = result
             }
         }
+    }
+    if (dataRowsSimpleConsumption != null) {
         // 780, 811, 812, 813, 940, 950
-        [780:[20530], 811:[20700], 812:[20698], 813:[20690], 940:[23040], 950:[23050]].each { id, codes ->
+        [780: [20530], 811: [20700], 812: [20698], 813: [20690], 940: [23040], 950: [23050]].each { id, codes ->
             def result = getLong(getCalculatedSimpleConsumption(dataRowsSimpleConsumption, codes))
             if (result != 0) {
                 svCelSred[id] = result
@@ -576,7 +626,7 @@ void generateXML() {
         }
         // 790
         [790:[20501]].each { id, codes ->
-            def result = getSimpleConsumptionSumRows8(dataRowsSimpleConsumption, codes)
+            def result = getLong(getSimpleConsumptionSumRows8(dataRowsSimpleConsumption, codes))
             if (result != 0) {
                 svCelSred[id] = result
             }
@@ -974,7 +1024,7 @@ void generateXML() {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
                                 obRasch = getRefBookValue(26, row.calcFlag)?.CODE?.value
-                                naimOP = getRefBookValue(30, row.regionBankDivision)?.NAME?.value
+                                naimOP = getDepartmentCorrectName(row)
                                 kppop = row.kpp
                                 obazUplNalOP = getRefBookValue(25, row.obligationPayTax)?.CODE?.value
                                 dolaNalBaz = row.baseTaxOf
@@ -982,7 +1032,7 @@ void generateXML() {
                                 stavNalSubRF = row.subjectTaxStavka
                                 sumNal = row.taxSum
                                 nalNachislSubRF = row.subjectTaxCredit
-                                sumNalP = row.taxSumToPay
+                                sumNalP = (row.taxSumToPay != 0) ? row.taxSumToPay : (- row.taxSumToReduction)
                                 nalViplVneRF = row.taxSumOutside
                                 mesAvPlat = row.everyMontherPaymentAfterPeriod
                                 mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
@@ -1781,7 +1831,7 @@ def getOldValue(def data, def kind, def valueName) {
  * @param reportPeriodId
  * @param departmentId
  */
-def getXmlData(def reportPeriodId, def departmentId) {
+def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly) {
     if (reportPeriodId != null) {
         // вид декларации 2 - декларация по налогу на прибыль уровня банка
         def declarationTypeId = 2
@@ -1918,4 +1968,53 @@ void сancelAccepted() {
     if (declarationService.checkExistDeclarationsInPeriod(declarationTypeId, declarationData.reportPeriodId)) {
         throw new Exception('Отменить принятие данной декларации Банка невозможно. Так как в текущем периоде создана декларация ОП по прибыли!')
     }
+}}
+
+/**
+ * Получить правильные названия подразделении для Приложения 5 декларации.
+ *
+ * @param row строка нф «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации».
+ */
+def getDepartmentCorrectName(def row) {
+    if (departmentCorrectNameMap[row.kpp]) {
+        return departmentCorrectNameMap[row.kpp]
+    }
+    return getRefBookValue(30, row.regionBankDivision)?.NAME?.value
+}
+
+/** Мапа для получения правильных названии подразделении для Приложения 5 декларации. */
+@Field
+def departmentCorrectNameMap = [
+        '143502001' : 'Якутское ОСБ №8603 ОАО "Сбербанк России"',
+        '246602001' : 'Восточно-Сибирский банк ОАО "Сбербанк России"',
+        '263402001' : 'Северо-Кавказский банк ОАО "Сбербанк России"',
+        '272202001' : 'Дальневосточный банк ОАО "Сбербанк России"',
+        '366402001' : 'Центрально-Черноземный банк ОАО "Сбербанк России"',
+        '380843001' : 'Байкальский банк ОАО "Сбербанк России"',
+        '490902001' : 'Северо-Восточное отделение №8645 ОАО "Сбербанк России"',
+        '526002001' : 'Волго-Вятский банк ОАО "Сбербанк России"',
+        '540602001' : 'Сибирский банк ОАО "Сбербанк России"',
+        '590202001' : 'Западно-Уральский банк ОАО "Сбербанк России"',
+        '616143001' : 'Юго-Западный банк ОАО "Сбербанк России"',
+        '631602001' : 'Поволжский банк ОАО "Сбербанк России"',
+        '667102008' : 'Уральский банк ОАО "Сбербанк России"',
+        '720302020' : 'Западно-Сибирский банк ОАО "Сбербанк России"',
+        '760443001' : 'Северный банк ОАО "Сбербанк России"',
+        '775001001' : 'Центральный аппарат ОАО "Сбербанк России"',
+        '775002002' : 'Среднерусский банк ОАО "Сбербанк России"',
+        '783502001' : 'Северо-Западный банк ОАО "Сбербанк России"',
+        '870902001' : 'Чукотское отделение (на правах отдела) Северо-Восточного отделения №8645 ОАО "Сбербанк России"'
+]
+
+def getReportPeriod9month(def reportPeriod) {
+    if (reportPeriod == null) {
+        return null;
+    }
+    def code = getRefBookValue(8, reportPeriod.dictTaxPeriodId)?.CODE?.value
+    if (code == '34') { // период "год"
+        return getReportPeriod9month(reportPeriodService.getPrevReportPeriod(reportPeriod.id));
+    } else if (code == '33') { // период "9 месяцев"
+        return reportPeriod;
+    }
+    return null;
 }

@@ -57,6 +57,7 @@ public class EditFormPresenterTest {
 
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
         result.setNewIds(ids);
+        result.setCheckRegion(true);
 
         DispatchAsyncStub.callSuccessWith(result)
                 .when(dispatchAsync)
@@ -84,6 +85,7 @@ public class EditFormPresenterTest {
 
         AddRefBookRowVersionResult result = new AddRefBookRowVersionResult();
         result.setNewIds(ids);
+        result.setCheckRegion(true);
 
         DispatchAsyncStub.callSuccessWith(result)
                 .when(dispatchAsync)

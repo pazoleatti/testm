@@ -289,7 +289,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<TimerReportResult>() {
+                .defaultCallbackNoLock(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
                         if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
@@ -767,5 +767,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         super.onHide();
         removeFromPopupSlot(formSearchPresenter);
         formSearchPresenter.close();
+        getView().stopTimerReport(ReportType.CSV);
+        getView().stopTimerReport(ReportType.EXCEL);
     }
 }

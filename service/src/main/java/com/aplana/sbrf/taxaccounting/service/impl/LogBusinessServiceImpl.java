@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 
 	@Autowired
 	private LogBusinessDao logBusinessDao;
+    @Autowired
+    private DepartmentService departmentService;
 
     @Override
 	public List<LogBusiness> getFormLogsBusiness(long formId, HistoryBusinessSearchOrdering ordering, boolean isAscSorting) {
@@ -32,7 +35,8 @@ public class LogBusinessServiceImpl implements LogBusinessService {
 		log.setUserLogin(userInfo.getUser().getLogin());
 		log.setLogDate(new Date());
 		log.setNote(note);
-		log.setDepartmentId(userInfo.getUser().getDepartmentId());
+
+		log.setDepartmentName(departmentService.getParentsHierarchyShortNames(userInfo.getUser().getDepartmentId()));
 
 		StringBuilder roles = new StringBuilder();
         List<TARole> taRoles = userInfo.getUser().getRoles();

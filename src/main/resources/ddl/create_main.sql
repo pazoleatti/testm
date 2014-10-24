@@ -398,11 +398,7 @@ create table declaration_data (
   declaration_template_id number(9) not null,
   tax_organ_code          varchar2(4),
   kpp                     varchar2(9),
-  data                    varchar2(36),
   is_accepted             number(1) not null,
-  data_pdf                varchar2(36),
-  data_xlsx               varchar2(36),
-  jasper_print            varchar2(36),
   department_report_period_id number(18) not null
 );
 
@@ -594,7 +590,7 @@ create table log_business (
   declaration_data_id number(9,0),
   form_data_id        number(9,0),
   note                varchar2(510),
-  user_department_id  number(9,0) not null
+  user_department_name  varchar2(4000) not null
 );
 comment on table log_business is 'Журнал событий налоговых форм\деклараций';
 comment on column log_business.id is 'Код записи';
@@ -605,7 +601,7 @@ comment on column log_business.roles is 'Список ролей пользов�
 comment on column log_business.declaration_data_id is 'Код декларации';
 comment on column log_business.form_data_id is 'Код налоговой формы';
 comment on column log_business.note is 'Текст сообщения';
-comment on column log_business.user_department_id is 'Код подразделения пользователя';
+comment on column log_business.user_department_name is 'Подразделение пользователя';
 
 create sequence seq_log_business;
 ------------------------------------------------------------------------------------------------------
@@ -837,4 +833,14 @@ comment on table lock_data_subscribers is 'Cписок пользователе�
 comment on column lock_data_subscribers.lock_key is 'Ключ блокировки объекта, после завершения операции над которым, будет выполнено оповещение';
 comment on column lock_data_subscribers.user_id is 'Идентификатор пользователя, который получит оповещение';
 
+--------------------------------------------------------------------------------------------------------
+create table ifrs_data 
+(
+report_period_id number(9) not null,
+blob_data_id varchar2(36)
+);
+
+comment on table ifrs_data is 'Отчетность для МСФО';
+comment on column ifrs_data.report_period_id is 'Отчетный период';
+comment on column ifrs_data.blob_data_id is 'Файл архива с отчетностью для МСФО';
 --------------------------------------------------------------------------------------------------------

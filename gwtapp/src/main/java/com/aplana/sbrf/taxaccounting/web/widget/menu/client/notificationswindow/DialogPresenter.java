@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -102,5 +103,10 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
                     }
                 }, DialogPresenter.this));
 
+    }
+
+    @Override
+    public void onEventClick(String uuid) {
+        LogAddEvent.fire(DialogPresenter.this, uuid);
     }
 }

@@ -403,7 +403,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(tooManyValue ? ScriptUtils.REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : ScriptUtils.REF_BOOK_NOT_FOUND_IMPORT_ERROR,
-                rowIndex, colIndex, rb.getName(), rb.getAttribute(alias).getName(), value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
+                rowIndex, ScriptUtils.getXLSColumnName(colIndex), rb.getName(), rb.getAttribute(alias).getName(), value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
         if (required) {
             throw new ServiceException("%s", msg);
         } else {
@@ -431,7 +431,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(tooManyValue ? ScriptUtils.REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR : ScriptUtils.REF_BOOK_NOT_FOUND_IMPORT_ERROR,
-                rowIndex, colIndex, rb.getName(), rb.getAttribute(alias).getName(), value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
+                rowIndex, ScriptUtils.getXLSColumnName(colIndex), rb.getName(), rb.getAttribute(alias).getName(), value, (new SimpleDateFormat("dd.MM.yyyy")).format(date));
         if (required) {
             throw new ServiceException("%s", msg);
         } else {
@@ -541,7 +541,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return;
         }
         RefBook rb = refBookFactory.get(refBookId);
-        String msg = String.format(ScriptUtils.REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR, rowIndex, colIndex, referenceValue, rb.getName());
+        String msg = String.format(ScriptUtils.REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR, rowIndex, ScriptUtils.getXLSColumnName(colIndex), referenceValue, rb.getName());
         if (required) {
             throw new ServiceException("%s", msg);
         } else {

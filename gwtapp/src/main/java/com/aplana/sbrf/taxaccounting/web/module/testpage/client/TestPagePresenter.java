@@ -1,11 +1,15 @@
 package com.aplana.sbrf.taxaccounting.web.module.testpage.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
+import com.aplana.sbrf.taxaccounting.web.module.testpage.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -18,6 +22,8 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.Map;
+
 public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
         TestPagePresenter.MyProxy> implements TestPageUiHandlers {
     @ProxyCodeSplit
@@ -27,12 +33,19 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
 
     public interface MyView extends View, HasUiHandlers<TestPageUiHandlers> {
         void setIds(int fpicker, int hpicker);
+        Long getDepId();
+        Boolean getDepUsageValue();
+        String getSelectedEvent();
+        void setEvents(Map<Integer, String> map);
     }
+
+    private final DispatchAsync dispatcher;
 
     @Inject
     public TestPagePresenter(final EventBus eventBus, final MyView view, final MyProxy proxy,
-                                DispatchAsync dispatcher) {
+                             DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+        this.dispatcher = dispatcher;
         getView().setUiHandlers(this);
     }
 
@@ -47,10 +60,21 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
 
         fpicker = Integer.valueOf(request.getParameter("f", "-1"));
         hpicker = Integer.valueOf(request.getParameter("h", "-1"));
+        // подрузка событий АПИ
+            dispatcher.execute(new GetEventsAction()
+                    , CallbackUtils
+                    .defaultCallback(new AbstractCallback<GetEventsResult>() {
+                        @Override
+                        public void onSuccess(GetEventsResult result) {
+                            if(result.getMap()!= null){
+                                getView().setEvents(result.getMap());
+                            }
+                        }
+                    }, this));
     }
 
     @Override
-    public void openMessageDialog(){
+    public void openMessageDialog() {
         ScreenLockEvent.fire(this, true);
         TaActionException ffffffff = new TaActionException("ffffffff");
         ffffffff.setNeedStackTrace(true);
@@ -59,7 +83,7 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
                 "\n efufufufufufufdsfsdfsdfsdf," +
                 "\n efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf,efufufufufufufdsfsdfsdfsdf," +
                 "\n efufufufufufufdsfsdfsdfsdf");
-        MessageEvent.fire(this,true, "Ошибочная ошибка ошибки в ошибочной ошибке ошибочно ошибается за ошибки ошибки ололололололо ",ffffffff);
+        MessageEvent.fire(this, true, "Ошибочная ошибка ошибки в ошибочной ошибке ошибочно ошибается за ошибки ошибки ололололололо ", ffffffff);
     }
 
     @Override
@@ -71,5 +95,38 @@ public class TestPagePresenter extends Presenter<TestPagePresenter.MyView,
     @Override
     public void updateIdsFromPath() {
         getView().setIds(fpicker, hpicker);
+    }
+
+    @Override
+    public void setUsageDepartment() {
+        if (getView().getDepId() == null) {
+            Dialog.errorMessage("Не выбрано подразделение.");
+        } else {
+            SetUsageDepartmentAction action = new SetUsageDepartmentAction(getView().getDepId(), getView().getDepUsageValue());
+            dispatcher.execute(action
+                    , CallbackUtils
+                    .defaultCallback(new AbstractCallback<SetUsageDepartmentResult>() {
+                        @Override
+                        public void onSuccess(SetUsageDepartmentResult result) {
+                            Dialog.infoMessage(result.getMessage());
+                        }
+                    }, this));
+        }
+    }
+
+    @Override
+    public void doEvent() {
+        if (getView().getSelectedEvent() == null) {
+            Dialog.errorMessage("Не выбрано событие.");
+        } else {
+            DoEventAction action = new DoEventAction(getView().getSelectedEvent());
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<DoEventResult>() {
+                        @Override
+                        public void onSuccess(DoEventResult result) {
+                            Dialog.infoMessage(result.getMessage());
+                        }
+                    }, this));
+        }
     }
 }

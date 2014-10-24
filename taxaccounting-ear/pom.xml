@@ -142,7 +142,20 @@
                 </dependency>
                 <dependency>
                     <groupId>com.aplana.taxaccounting</groupId>
-                    <artifactId>common-core</artifactId>
+                    <artifactId>audit-ejb</artifactId>
+                    <version>${project.version}</version>
+                    <type>ejb</type>
+                    <classifier>jar-with-dependencies</classifier>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>service</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>com.aplana.taxaccounting</groupId>
+                    <artifactId>department-ejb</artifactId>
                     <version>${project.version}</version>
                     <type>ejb</type>
                     <classifier>jar-with-dependencies</classifier>
@@ -220,8 +233,13 @@
                                 </ejbModule>
                                 <ejbModule>
                                     <groupId>${project.groupId}</groupId>
-                                    <artifactId>common-core</artifactId>
-                                    <bundleFileName>common-core.jar</bundleFileName>
+                                    <artifactId>audit-ejb</artifactId>
+                                    <bundleFileName>audit-ejb.jar</bundleFileName>
+                                </ejbModule>
+                                <ejbModule>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>department-ejb</artifactId>
+                                    <bundleFileName>department-ejb.jar</bundleFileName>
                                 </ejbModule>
                             </modules>
                         </configuration>

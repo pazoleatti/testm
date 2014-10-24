@@ -50,11 +50,11 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
-def providerCache = [:]
+def refBookCache = [:]
 @Field
 def recordCache = [:]
 @Field
-def refBookCache = [:]
+def providerCache = [:]
 
 @Field
 def editableColumns = ['paymentType', 'dateOfPayment', 'sumTax']
@@ -65,6 +65,11 @@ def nonEmptyColumns = ['paymentType', 'okatoCode', 'budgetClassificationCode', '
 
 //// Обертки методов
 
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = true) {
@@ -73,11 +78,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
-}
-
-// Разыменование записи справочника
-def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 //// Кастомные методы

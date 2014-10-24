@@ -10,6 +10,7 @@ public class SaveRefBookRowVersionAction extends UnsecuredActionImpl<SaveRefBook
 
 	Long refBookId;
 	Long recordId;
+    Long recordCommonId;
 	Map<String, RefBookValueSerializable> valueToSave;
     Date versionFrom;
     Date versionTo;
@@ -52,6 +53,14 @@ public class SaveRefBookRowVersionAction extends UnsecuredActionImpl<SaveRefBook
 
     public void setVersionTo(Date versionTo) {
         this.versionTo = versionTo;
+    }
+
+    public Long getRecordCommonId() {
+        return recordCommonId;
+    }
+
+    public void setRecordCommonId(Long recordCommonId) {
+        this.recordCommonId = recordCommonId;
     }
 
     @Override

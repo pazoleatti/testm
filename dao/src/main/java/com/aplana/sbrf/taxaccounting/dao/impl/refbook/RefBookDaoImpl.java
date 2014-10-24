@@ -1334,10 +1334,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         });
     }
 
-    private final static String CHECK_UNIQUE_MATCHES = "SELECT DISTINCT v.record_id as id, a.name as name\n" +
-            "FROM ref_book_value v\n" +
-            "  JOIN ref_book_record r ON r.id = v.record_id\n" +
-            "  JOIN ref_book_attribute a ON a.id = v.attribute_id\n" +
+    private final static String CHECK_UNIQUE_MATCHES = "FROM ref_book_value v1\n" +
+            "  JOIN ref_book_value v2 ON v1.record_id = v2.record_id\n" +
+            "  JOIN ref_book_value v3 ON v2.record_id = v3.record_id\n" +
+            "  JOIN ref_book_value v4 ON v3.record_id = v4.record_id\n" +
+            "  JOIN ref_book_attribute a1 ON a1.id = v1.attribute_id\n" +
+            "  JOIN ref_book_attribute a2 ON a2.id = v2.attribute_id\n" +
+            "  JOIN ref_book_attribute a3 ON a3.id = v3.attribute_id\n" +
+            "  JOIN ref_book_attribute a4 ON a4.id = v4.attribute_id\n" +
+            "  JOIN ref_book_record r ON r.id = v1.record_id\n" +
             "WHERE r.status = 0 AND r.ref_book_id = ? AND\n";
 
     @Override
@@ -1345,77 +1350,176 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                                                         List<RefBookAttribute> attributes,
                                                                         List<RefBookRecord> records) {
 
-        Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> attributeValues = getUniqueAttributeValues(refBookId, uniqueRecordId);
+        List<Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>>> recordsGroupsUniqueAttributesValues = aggregateUniqueAttributesAndValuesByRecords(attributes, records);
 
-        if (attributeValues.size() == 0) {
+        if (recordsGroupsUniqueAttributesValues.size() == 0) {
             return new ArrayList<Pair<Long, String>>();
         }
 
-        List<Object> params = new ArrayList<Object>();
-        params.add(refBookId);
+        // Параметры для case'ов
+        List<Object> selectParams = new ArrayList<Object>();
+        // Параметры для where
+        List<Object> whereParams = new ArrayList<Object>();
+        whereParams.add(refBookId);
 
         StringBuilder sqlBuilder = new StringBuilder(CHECK_UNIQUE_MATCHES);
-        sqlBuilder.append("(");
+        StringBuilder sqlWherePartBuilder = new StringBuilder();
+        StringBuilder sqlSelectPartBuilder = new StringBuilder("SELECT DISTINCT v1.record_id as id, CASE\n");
 
+        // OR по каждой записи
         for (int i = 0; i < records.size(); i++) {
-            sqlBuilder.append("(");
-            Map<String, RefBookValue> values = records.get(i).getValues();
+            sqlWherePartBuilder.append("(");
             RefBookRecord record = records.get(i);
-
-            for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> entry : attributeValues.entrySet()) {
-                sqlBuilder.append("(");
-                List<Pair<RefBookAttribute, RefBookValue>> groupValues = entry.getValue();
-
-                for (int j = 0; j < groupValues.size(); j++) {
-                    Pair<RefBookAttribute, RefBookValue> pair = groupValues.get(j);
+            Map<String, RefBookValue> recordValues = record.getValues();
+            Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues = recordsGroupsUniqueAttributesValues.get(i);
+            // OR по группам уникальности
+            for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupUniqueAttributesValues : groupsUniqueAttributesValues.entrySet()) {
+                sqlSelectPartBuilder.append(" WHEN ");
+                sqlWherePartBuilder.append("(");
+                List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupUniqueAttributesValues.getValue();
+                StringBuilder clauseForGroup = new StringBuilder();
+                StringBuilder attrNameBuilder = new StringBuilder();
+                // AND по уникальным аттрибутам группы
+                for (int j = 0; j < uniqueAttributesValues.size(); j++) {
+                    // Используем self-join 4 раза, для кадого типа value. Поэтому нужно корректно нумеровать их
+                    int tableNumber = j + 1;
+                    attrNameBuilder.append("a").append(tableNumber).append(".name");
+                    Pair<RefBookAttribute, RefBookValue> pair = uniqueAttributesValues.get(j);
                     RefBookAttribute attribute = pair.getFirst();
-                    String type = attribute.getAttributeType().toString() + "_value";
-                    sqlBuilder.append("(v.attribute_id = ? and v.").append(type).append(" = ? ");
-                    params.add(attribute.getId());
+                    String type = attribute.getAttributeType().toString() + "_VALUE";
+                    // Здесь проставляем номера таблиц
+                    clauseForGroup.append("v").append(tableNumber).append(".attribute_id = ? AND v").append(tableNumber).append(".").append(type).append(" = ? ");
+
+                    /*************************************Добавление параметров****************************************/
+                    selectParams.add(attribute.getId());
+                    whereParams.add(attribute.getId());
 
                     if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                        params.add(values.get(attribute.getAlias()).getStringValue());
+                        selectParams.add(recordValues.get(attribute.getAlias()).getStringValue());
+                        whereParams.add(recordValues.get(attribute.getAlias()).getStringValue());
                     }
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        params.add(values.get(attribute.getAlias()).getReferenceValue());
+                        selectParams.add(recordValues.get(attribute.getAlias()).getReferenceValue());
+                        whereParams.add(recordValues.get(attribute.getAlias()).getReferenceValue());
                     }
                     if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                        params.add(values.get(attribute.getAlias()).getNumberValue());
+                        selectParams.add(recordValues.get(attribute.getAlias()).getNumberValue());
+                        whereParams.add(recordValues.get(attribute.getAlias()).getNumberValue());
                     }
                     if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
-                        params.add(values.get(attribute.getAlias()).getDateValue());
+                        selectParams.add(recordValues.get(attribute.getAlias()).getDateValue());
+                        whereParams.add(recordValues.get(attribute.getAlias()).getDateValue());
                     }
+                    /**************************************************************************************************/
 
-                    sqlBuilder.append(" AND (? IS NULL OR r.record_id != ?))");
-                    params.add(record.getRecordId());
-                    params.add(record.getRecordId());
-
-                    if (j < groupValues.size() - 1) sqlBuilder.append(" AND ");
+                    if (j < uniqueAttributesValues.size() - 1) {
+                        clauseForGroup.append(" AND ");
+                        attrNameBuilder.append(" || ', ' || ");
+                    } else {
+                        sqlSelectPartBuilder.append(clauseForGroup);
+                        clauseForGroup.append(" AND (? IS NULL OR r.record_id != ?)");
+                        whereParams.add(record.getRecordId());
+                        whereParams.add(record.getRecordId());
+                    }
                 }
 
-                sqlBuilder.append(")");
-                if (entry.getKey() < attributeValues.size()) {
-                    sqlBuilder.append(" OR ");
+                sqlSelectPartBuilder.append("THEN ").append(attrNameBuilder);
+
+                sqlWherePartBuilder.append(clauseForGroup);
+                sqlWherePartBuilder.append(")");
+                if (groupUniqueAttributesValues.getKey() < groupsUniqueAttributesValues.size()) {
+                    sqlWherePartBuilder.append(" OR ");
                 }
             }
 
-            sqlBuilder.append(")\n");
-            if (i < records.size() - 1) sqlBuilder.append(" OR ");
+            sqlWherePartBuilder.append(")\n");
+            if (i < records.size() - 1) sqlWherePartBuilder.append(" OR ");
         }
 
-        sqlBuilder.append(")");
+        sqlSelectPartBuilder.append(" END AS name\n");
 
         if (uniqueRecordId != null) {
-            sqlBuilder.append(" AND v.record_id != ?");
-            params.add(uniqueRecordId);
+            sqlWherePartBuilder.append(" AND v1.record_id != ?");
+            whereParams.add(uniqueRecordId);
         }
 
-        return getJdbcTemplate().query(sqlBuilder.toString(), params.toArray(), new RowMapper<Pair<Long, String>>() {
+        sqlBuilder.insert(0, sqlSelectPartBuilder).append(sqlWherePartBuilder);
+
+        selectParams.addAll(whereParams);
+
+        List<Pair<Long, String>> result = getJdbcTemplate().query(sqlBuilder.toString(), selectParams.toArray(), new RowMapper<Pair<Long, String>>() {
             @Override
             public Pair<Long, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
                 return new Pair<Long, String>(SqlUtils.getLong(rs, "id"), rs.getString("name"));
             }
         });
+
+        return aggregateUniqueAttributeNamesByRecords(result);
+    }
+
+    /**
+     * Агрегировать названия уникальных аттрибутов по записям
+     *
+     * @param result список пар идентификатор записи - название уникального атрибута
+     * @return список пар идентификатор записи - названия уникальных атрибутов через запятую
+     */
+    List<Pair<Long, String>> aggregateUniqueAttributeNamesByRecords(List<Pair<Long, String>> result) {
+        List<Pair<Long, String>> matchedRecords = new ArrayList<Pair<Long, String>>();
+        Long prevRecordId = 0L;
+        String prevName = "";
+        for (Pair<Long, String> pair : result) {
+
+            if (!prevRecordId.equals(pair.getFirst()) && prevRecordId != 0) {
+                Pair<Long, String> newPair = new Pair<Long, String>(prevRecordId, prevName);
+                matchedRecords.add(newPair);
+            }
+
+            if (prevRecordId.equals(pair.getFirst())) {
+                prevName = prevName + ", " + pair.getSecond();
+            } else {
+                prevName = pair.getSecond();
+            }
+
+            prevRecordId = pair.getFirst();
+        }
+
+        Pair<Long, String> newPair = new Pair<Long, String>(prevRecordId, prevName);
+        matchedRecords.add(newPair);
+        return matchedRecords;
+    }
+
+    /**
+     * Агрегировать список пар уникальный атрибут - его значение по группам уникальности и по записям
+     *
+     * @param attributes атрибуты справочника
+     * @param records    записи
+     * @return список записей с группами уникальности списков пар уникальных атрибутов и значений
+     */
+    List<Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>>> aggregateUniqueAttributesAndValuesByRecords(List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+        // Формируем список для каждой записи из групп уникальных атрибутов с их значениями
+        List<Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>>> listAttributeValues = new ArrayList<Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>>>();
+
+        // для каждой записи
+        for (RefBookRecord record : records) {
+            Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> attributeValues = new HashMap<Integer, List<Pair<RefBookAttribute, RefBookValue>>>();
+            // для каждого атрибута
+            for (RefBookAttribute attribute : attributes) {
+                // если уникальный
+                if (attribute.getUnique() != 0) {
+                    List<Pair<RefBookAttribute, RefBookValue>> values;
+                    if (attributeValues.get(attribute.getUnique()) != null) {
+                        values = attributeValues.get(attribute.getUnique());
+                    } else {
+                        values = new ArrayList<Pair<RefBookAttribute, RefBookValue>>();
+                    }
+
+                    values.add(new Pair<RefBookAttribute, RefBookValue>(attribute, record.getValues().get(attribute.getAlias())));
+                    attributeValues.put(attribute.getUnique(), values);
+                }
+            }
+            listAttributeValues.add(attributeValues);
+        }
+        return listAttributeValues;
     }
 
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where %s),\n" +

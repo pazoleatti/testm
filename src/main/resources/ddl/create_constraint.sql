@@ -184,12 +184,10 @@ alter table sec_user_role add constraint sec_user_role_pk primary key (user_id, 
 alter table sec_user_role add constraint sec_user_role_fk_user_id foreign key (user_id) references sec_user(id);
 alter table sec_user_role add constraint sec_user_role_fk_role_id foreign key (role_id) references sec_role(id);
 
-alter table log_business add constraint log_business_fk_user_login foreign key (user_login) references sec_user(login);
 alter table log_business add constraint log_business_fk_declaration_id foreign key (declaration_data_id) references declaration_data(id) on delete cascade;
 alter table log_business add constraint log_business_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table log_business add constraint log_business_chk_event_id check (event_id in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 203, 204, 205, 206, 207, 208, 209, 210, 301, 302, 303, 401));
 alter table log_business add constraint log_business_chk_frm_dcl_ev check (form_data_id is not null or declaration_data_id is not null);
-alter table log_business add constraint log_business_fk_usr_departm_id foreign key (user_department_id) references department(id);
 
 alter table task_context add constraint task_context_uniq_task_id unique (task_id);
 alter table task_context add constraint task_context_uniq_task_name unique (task_name);
@@ -245,6 +243,10 @@ alter table declaration_report add constraint decl_report_pk primary key (declar
 alter table declaration_report add constraint decl_report_fk_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
 alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id);
 alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3));
+
+alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id);
+alter table ifrs_data add constraint ifrs_data_fk_report_period foreign key (report_period_id) references report_period(id);
+alter table ifrs_data add constraint ifrs_data_fk_blob_data foreign key (blob_data_id) references blob_data(id);
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);

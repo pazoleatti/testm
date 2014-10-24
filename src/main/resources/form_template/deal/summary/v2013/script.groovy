@@ -1894,47 +1894,29 @@ void addData(def xml, int headRowCount) {
         if (map != null) {
             // 48. п. 020 "Сведения об организации"
             xmlIndexCol = 46
-            def text = row.cell[xmlIndexCol].text()
-            map2 = getRefBookValue(70, map.ORGANIZATION?.referenceValue)
-            if ((text != null && !text.isEmpty() && !text.equals(map2.VALUE?.stringValue)) || ((text == null || text.isEmpty()) && map2.VALUE?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
-            }
+            def map2 = getRefBookValue(70, map.ORGANIZATION?.referenceValue)
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map2.VALUE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
             // 51. п. 050 "ИНН организации"
             xmlIndexCol = 49
-            text = row.cell[xmlIndexCol].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.INN_KIO?.stringValue)) || ((text == null || text.isEmpty()) && map.INN_KIO?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
             // 52. п. 060 "КПП организации"
             xmlIndexCol = 50
             def number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-            if ((number != null && !number.equals(map.KPP?.numberValue)) || ((number == null) && map.KPP?.numberValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(9, number?.toString(), map.KPP?.numberValue?.toString(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
             // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
             xmlIndexCol = 51
-            text = row.cell[xmlIndexCol].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.REG_NUM?.stringValue)) || ((text == null || text.isEmpty()) && map.REG_NUM?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.REG_NUM?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
             // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
             xmlIndexCol = 52
-            text = row.cell[xmlIndexCol].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.TAXPAYER_CODE?.stringValue)) || ((text == null || text.isEmpty()) && map.TAXPAYER_CODE?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.TAXPAYER_CODE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
             // 55. п. 090 "Адрес"
             xmlIndexCol = 53
-            text = row.cell[xmlIndexCol].text()
-            if ((text != null && !text.isEmpty() && !text.equals(map.ADDRESS?.stringValue)) || ((text == null || text.isEmpty()) && map.ADDRESS?.stringValue != null)) {
-                logger.warn("Проверка файла: Строка ${xlsIndexRow}, столбец ${xmlIndexCol + colOffset} " +
-                        "содержит значение, отсутствующее в справочнике «" + refBookFactory.get(9).getName() + "»!")
-            }
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.ADDRESS?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
         rows.add(newRow)
