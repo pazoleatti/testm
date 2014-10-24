@@ -85,31 +85,34 @@ COMMENT ON COLUMN async_task_type.handler_jndi IS 'JNDI имя класса-об
 
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8815 - Новые типы события для ЖА
+-- С изменениями от http://jira.aplana.com/browse/SBRFACCTAX-9230 и http://jira.aplana.com/browse/SBRFACCTAX-9232
 INSERT ALL 
-INTO event (id, name) VALUES(801,'Вход пользователя в модуль') 
-INTO event (id, name) VALUES(802,'Выход пользователя из модуля') 
-INTO event (id, name) VALUES(810,'Загрузка данных о договорах обеспечения') 
-INTO event (id, name) VALUES(811,'Загрузка данных о клиентах') 
-INTO event (id, name) VALUES(812,'Загрузка данных о платежах') 
-INTO event (id, name) VALUES(813,'Загрузка справочника') 
-INTO event (id, name) VALUES(820,'Создание анкеты клиента') 
-INTO event (id, name) VALUES(821,'Редактирование анкеты клиента') 
-INTO event (id, name) VALUES(830,'Создание договора гарантии') 
-INTO event (id, name) VALUES(831,'Редактирование договора гарантии') 
-INTO event (id, name) VALUES(832,'Закрытие договора гарантии') 
-INTO event (id, name) VALUES(840,'Создание договора обеспечения') 
-INTO event (id, name) VALUES(841,'Редактирование договора обеспечения') 
-INTO event (id, name) VALUES(842,'Закрытие договора обеспечения') 
-INTO event (id, name) VALUES(850,'Создание задачи формирования РНУ-23') 
-INTO event (id, name) VALUES(860,'Создание задачи формирования отчета')
+INTO event (id, name) VALUES(810,'Гарантии: Загрузка данных о договорах обеспечения') 
+INTO event (id, name) VALUES(811,'Гарантии: Загрузка данных о клиентах') 
+INTO event (id, name) VALUES(812,'Гарантии: Загрузка данных о платежах') 
+INTO event (id, name) VALUES(813,'Гарантии: Загрузка справочника') 
+INTO event (id, name) VALUES(820,'Гарантии: Создание анкеты клиента') 
+INTO event (id, name) VALUES(821,'Гарантии: Редактирование анкеты клиента') 
+INTO event (id, name) VALUES(830,'Гарантии: Создание договора гарантии') 
+INTO event (id, name) VALUES(831,'Гарантии: Редактирование договора гарантии') 
+INTO event (id, name) VALUES(832,'Гарантии: Закрытие договора гарантии') 
+INTO event (id, name) VALUES(840,'Гарантии: Создание договора обеспечения') 
+INTO event (id, name) VALUES(841,'Гарантии: Редактирование договора обеспечения') 
+INTO event (id, name) VALUES(842,'Гарантии: Закрытие договора обеспечения') 
+INTO event (id, name) VALUES(850,'Гарантии: Создание задачи формирования РНУ-23') 
+INTO event (id, name) VALUES(860,'Гарантии: Создание задачи формирования отчета')
 INTO event (id, name) VALUES(650,'Отправка email')
 SELECT * FROM dual;
 
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_dcl_form;
-ALTER TABLE log_system ADD CONSTRAINT log_system_chk_dcl_form CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR declaration_type_name IS NOT NULL OR (form_type_name IS NOT NULL AND form_kind_id IS NOT NULL));
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_dcl_form CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR declaration_type_name IS NOT NULL OR (form_type_name IS NOT NULL AND form_kind_id IS NOT NULL));
 
 ALTER TABLE log_system DROP CONSTRAINT log_system_chk_rp;
-ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 801, 802, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR report_period_name IS NOT NULL);
+ALTER TABLE log_system ADD CONSTRAINT log_system_chk_rp CHECK (event_id IN (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) OR report_period_name IS NOT NULL);
+
+---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-9170 - Добавить роль "Оператор гарантий"
+INSERT INTO sec_role (id, ALIAS, name) VALUES (7, 'ROLE_GARANT', 'Оператор Гарантий');
 
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-9017 - Связь таблиц EVENT и SEC_ROLE
@@ -146,6 +149,8 @@ INSERT INTO role_event(event_id, role_id)
    OR to_char(id) LIKE '10_'
    OR to_char(id) LIKE '40_'
    OR to_char(id) LIKE '90_');
+   
+INSERT INTO role_event SELECT id AS event_id, 7 AS role_id FROM event WHERE to_char(id) LIKE '8__';   
 
 ALTER TABLE log_business ADD CONSTRAINT log_business_fk_event_id FOREIGN KEY (event_id) REFERENCES event(id);
 

@@ -18,9 +18,13 @@ insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, referenc
 insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
   (3, 1, 4, 'Автор', 'author', 4, 2, 4, 1, null, 10, 1, null);
 insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
-  (5, 1, 5, 'Вес', 'weight', 2, null, null, 1, 3, 10, 0, 10);
+  (5, 1, 5, 'Вес', 'weight', 2, null, null, 1, 3, 10, 1, 10);
 insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
   (9, 1, 6, 'Ничего', 'null', 1, null, null, 1, null, 10, 0, 50);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (10, 1, 7, 'Уникальный атрибут', 'unique', 1, null, null, 1, null, 10, 1, 50);
+insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (11, 1, 8, 'Еще один уникальный атрибут', 'unique_2', 1, null, null, 1, null, 10, 1, 50);
 --ОКАТО
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
   (8, 4, 'Наименование муниципального образования', 'NAME', 1, 3, null, null, 1, null, 510, 1, 0, 50);
@@ -74,6 +78,10 @@ insert into ref_book_value(record_id, attribute_id, string_value, number_value, 
   (1, 3, null, null, null, 5);
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (1, 5, null, 0.25, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (1, 10, 'Уникальный атрибут', null, null, null);
+insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+  (1, 11, 'Еще один уникальный атрибут', null , null, null);
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (2, 1, 'Алиса в стране', null, null, null);
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
