@@ -328,7 +328,7 @@ void generateXML() {
     def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308, FormDataKind.ADDITIONAL)
 
     /** форма «Остатки по начисленным авансовым платежам». */
-    def dataRowsRemains = getDataRows(formDataCollection, departmentId, 309, FormDataKind.PRIMARY)
+    def dataRowsRemains = getDataRows(formDataCollection, 309, FormDataKind.PRIMARY)
 
     /*
      * Получение значении декларации за предыдущий период.
