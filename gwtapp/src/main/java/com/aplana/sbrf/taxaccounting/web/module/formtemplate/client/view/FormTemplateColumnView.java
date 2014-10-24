@@ -396,7 +396,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         else{
             refBookAttrRefBox.setVisible(false);
             refBookAttrRefBox.setValue(null);
-            ((ReferenceColumn) currentColumn).setRefBookAttributeId2(null);
+            ((RefBookColumn) currentColumn).setRefBookAttributeId2(null);
         }
     }
 
@@ -544,7 +544,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             refBookAttrRefBox.setVisible(false);
             refBookAttrFilterPanel.setVisible(true);
             // Указанный атрибут
-            long attributeId = ((RefBookColumn)column).getRefBookAttributeId();
+            long attributeId = (((RefBookColumn) column).getRefBookAttributeId() != null) ? ((RefBookColumn) column).getRefBookAttributeId() : 0;
             RefBookAttribute refBookAttribute = getUiHandlers().getRefBookAttribute(attributeId);
             refBookAttrBox.setValue(refBookAttribute, false);
             refBookAttrBox.setAcceptableValues(getUiHandlers().getRefBook(

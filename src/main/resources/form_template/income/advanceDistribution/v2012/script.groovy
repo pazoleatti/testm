@@ -303,8 +303,8 @@ void calc() {
             caTotalRow.baseTaxOfRub = taxBase - totalRow.baseTaxOfRub + caRow.baseTaxOfRub
         }
 
-        // графа 15
-        caTotalRow.taxSumOutside = sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
+        // графа 14
+        caTotalRow.taxSumOutside = 0.9 * sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
     }
 
     dataRowHelper.save(dataRows)

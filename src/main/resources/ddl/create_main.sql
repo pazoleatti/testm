@@ -494,12 +494,16 @@ create table data_cell (
   colspan number(3),
   rowspan number(3)
 );
-comment on table data_cell is 'Значения налоговых форм типа дата';
-comment on column data_cell.column_id is 'Идентификатор столбца';
-comment on column data_cell.row_id is 'Идентификатор строки';
-comment on column data_cell.svalue is 'Строковое значение';
-comment on column data_cell.nvalue is 'Числовое значение (в том числе и для ссылок)';
-comment on column data_cell.dvalue is 'Значение для даты-времени';
+COMMENT ON TABLE data_cell IS 'Значения налоговых форм типа дата';
+COMMENT ON COLUMN data_cell.column_id IS 'Идентификатор столбца';
+COMMENT ON COLUMN data_cell.row_id IS 'Идентификатор строки';
+COMMENT ON COLUMN data_cell.svalue IS 'Строковое значение';
+COMMENT ON COLUMN data_cell.nvalue IS 'Числовое значение (в том числе и для ссылок)';
+COMMENT ON COLUMN data_cell.dvalue IS 'Значение для даты-времени';
+COMMENT ON COLUMN data_cell.style_id IS 'Идентификатор стиля ячейки';
+COMMENT ON COLUMN data_cell.editable IS 'Признак редактируемости ячейки (0 - только чтение, 1 - доступна на запись)';
+COMMENT ON COLUMN data_cell.colspan IS 'Количество объединяемых по горизонтали ячеек';
+COMMENT ON COLUMN data_cell.rowspan IS 'Количество объединяемых по вертикали ячеек';
 ---------------------------------------------------------------------------------------------------
 create table department_form_type (
   id      number(9) not null,
