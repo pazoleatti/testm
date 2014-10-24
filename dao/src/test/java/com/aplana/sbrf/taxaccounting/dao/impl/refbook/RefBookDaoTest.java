@@ -52,7 +52,7 @@ public class RefBookDaoTest {
 	public void testGet1() {
 		RefBook refBook1 = refBookDao.get(1L);
 		assertEquals(1, refBook1.getId().longValue());
-		assertEquals(5, refBook1.getAttributes().size());
+		assertEquals(7, refBook1.getAttributes().size());
 	}
 
 	@Test
@@ -429,7 +429,7 @@ public class RefBookDaoTest {
     public void getGroupUniqueAttributeValues() {
         Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groups = refBookDao.getUniqueAttributeValues(1L, 1L);
         assertEquals(2, groups.size());
-        assertEquals(2, groups.get(1).size());
+        assertEquals(5, groups.get(1).size());
         assertEquals(1, groups.get(2).size());
         assertEquals("Алиса в стране чудес", groups.get(1).get(0).getSecond().toString());
         assertEquals("5", groups.get(1).get(1).getSecond().toString());
@@ -449,7 +449,7 @@ public class RefBookDaoTest {
 
         List<Pair<Long,String>> matches = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), 111L, refBook.getAttributes(), records);
         assertEquals(1, matches.size());
-        assertTrue(matches.get(0).getSecond().equals("Количество страниц, Наименование, Автор"));
+        assertTrue(matches.get(0).getSecond().equals("Количество страниц, Наименование, Автор, Вес, Уникальный атрибут, Еще один уникальный атрибут"));
     }
 
     @Test
@@ -466,8 +466,8 @@ public class RefBookDaoTest {
         }
         List<Pair<Long,String>> matches = refBookDao.getMatchedRecordsByUniqueAttributes(refBook.getId(), 111L, refBook.getAttributes(), records);
         assertEquals(2, matches.size());
-        assertTrue(matches.get(0).getSecond().equals("Количество страниц, Наименование, Автор"));
-        assertTrue(matches.get(1).getSecond().equals("Количество страниц, Наименование, Автор"));
+        assertTrue(matches.get(0).getSecond().equals("Количество страниц, Наименование, Автор, Вес, Уникальный атрибут, Еще один уникальный атрибут"));
+        assertTrue(matches.get(1).getSecond().equals("Количество страниц"));
     }
 
     /*@Test
