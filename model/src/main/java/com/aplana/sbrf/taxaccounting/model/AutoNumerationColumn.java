@@ -11,6 +11,7 @@ public class AutoNumerationColumn extends Column {
 
     public AutoNumerationColumn() {
 		setColumnType(ColumnType.AUTO);
+        setNumerationType(NumerationType.SERIAL);
     }
 
     public AutoNumerationColumn(NumerationType numerationType) {

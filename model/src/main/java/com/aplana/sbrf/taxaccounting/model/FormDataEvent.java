@@ -69,27 +69,24 @@ public enum FormDataEvent implements Serializable {
     TEMPLATE_DEACTIVATED(704, "Версия выведена из действия"),
     TEMPLATE_DELETED(705, "Версия удалена"),
 
-    LOGIN_MODULE(801, "Вход пользователя в модуль"),
-    LOGOUT_MODULE(802, "Выход пользователя из модуля"),
+    GAR_UPLOAD_CONTRACTS(810, "Гарантии: Загрузка данных о договорах обеспечения"),
+    GAR_UPLOAD_CUSTOMER_DATA(811, "Гарантии: Загрузка данных о клиентах"),
+    GAR_UPLOAD_PAYMENTS_DATA(812, "Гарантии: Загрузка данных о платежах"),
+    GAR_UPLOAD_REFBOOK(813, "Гарантии: Загрузка справочника"),
 
-    UPLOAD_CONTRACTS(810, "Загрузка данных о договорах обеспечения"),
-    UPLOAD_CUSTOMER_DATA(811, "Загрузка данных о клиентах"),
-    UPLOAD_PAYMENTS_DATA(812, "Загрузка данных о платежах"),
-    UPLOAD_REFBOOK(813, "Загрузка справочника"),
+    GAR_CREATE_CLIENT_PROFILES(820, "Гарантии: Создание анкеты клиента"),
+    GAR_EDIT_CLIENT_PROFILES(821, "Гарантии: Редактирование анкеты клиента"),
 
-    CREATE_CLIENT_PROFILES(820, "Создание анкеты клиента"),
-    EDIT_CLIENT_PROFILES(821, "Редактирование анкеты клиента"),
+    GAR_CREATE_GUARANTEE(830, "Гарантии: Создание договора гарантии"),
+    GAR_EDIT_GUARANTEE(831, "Гарантии: Редактирование договора гарантии"),
+    GAR_CLOSE_GUARANTEE(832, "Гарантии: Закрытие договора гарантии"),
 
-    CREATE_GUARANTEE(830, "Создание договора гарантии"),
-    EDIT_GUARANTEE(831, "Редактирование договора гарантии"),
-    CLOSE_GUARANTEE(832, "Закрытие договора гарантии"),
+    GAR_CREATE_OBSP(840, "Гарантии: Создание договора обеспечения"),
+    GAR_EDIT_OBSP(841, "Гарантии: Редактирование договора обеспечения"),
+    GAR_CLOSE_OBSP(842, "Гарантии: Закрытие договора обеспечения"),
 
-    CREATE_SECURITY_AGREEMENTS(840, "Создание договора обеспечения"),
-    EDIT_SECURITY_AGREEMENTS(841, "Редактирование договора обеспеченияь"),
-    CLOSE_SECURITY_AGREEMENTS(842, "Закрытие договора обеспечения"),
-
-    CREATE_TASK_FORMATION_RNU23(850, "Создание задачи формирования РНУ-23"),
-    CREATE_TASK_FORMATION_REPORT(860, "Создание задачи формирования отчета"),
+    GAR_CREATE_TASK_FORMATION_RNU23(850, "Гарантии: Создание задачи формирования РНУ-23"),
+    GAR_CREATE_TASK_FORMATION_REPORT(860, "Гарантии: Создание задачи формирования отчета"),
 
     ADD_DEPARTMENT(901, "Создание подразделения"),
     UPDATE_DEPARTMENT(902, "Модификация подразделения"),

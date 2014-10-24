@@ -107,7 +107,10 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.LockDataDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.aplana.sbrf.taxaccounting.common.service.CommonService"/>
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.common.service.EventAuditService"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.common.service.DepartmentUsageService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ReportDao"/>

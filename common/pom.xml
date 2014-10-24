@@ -11,8 +11,9 @@
     <packaging>pom</packaging>
     <modules>
         <module>common-api</module>
-        <module>common-core</module>
         <module>common-service</module>
+        <module>audit-ejb</module>
+        <module>department-ejb</module>
     </modules>
 
     <artifactId>common</artifactId>

@@ -238,5 +238,12 @@ public interface DepartmentService {
      */
     Department getFormDepartment(Long formDataId);
 
+    /**
+     * Переключание флага использования подразделения модулем Гарантий
+     * @param depId ид подразделения
+     * @param used true - используется, false - не используется
+     */
+    void setUsedByGarant(int depId, boolean used);
+
 
 }

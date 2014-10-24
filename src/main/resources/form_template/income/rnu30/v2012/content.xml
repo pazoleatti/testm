@@ -11,14 +11,16 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>
+        <columnType>AUTO</columnType>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <type>0</type>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>forLabel</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name></name>
         <order>2</order>
         <width>0</width>
@@ -28,6 +30,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>debtor</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Наименование дебитора</name>
         <order>3</order>
         <width>10</width>
@@ -37,16 +40,19 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>provision</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Обеспечение</name>
         <order>4</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>822</nameAttributeId>
         <refBookAttributeId>822</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>nameBalanceAccount</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Наименование балансового счёта</name>
         <order>5</order>
         <width>10</width>
@@ -56,6 +62,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>debt45_90DaysSum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Задолженность от 45 до 90 дней. Сумма долга</name>
         <order>6</order>
         <width>10</width>
@@ -65,6 +72,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>debt45_90DaysNormAllocation50per</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Задолженность от 45 до 90 дней. Норматив отчислений 50%</name>
         <order>7</order>
         <width>5</width>
@@ -74,6 +82,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>debt45_90DaysReserve</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Задолженность от 45 до 90 дней. Расчётный резерв</name>
         <order>8</order>
         <width>10</width>
@@ -83,6 +92,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>debtOver90DaysSum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Задолженность более 90 дней. Сумма долга</name>
         <order>9</order>
         <width>10</width>
@@ -92,6 +102,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>debtOver90DaysNormAllocation100per</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Задолженность более 90 дней. Норматив отчислений 100%</name>
         <order>10</order>
         <width>5</width>
@@ -101,6 +112,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>debtOver90DaysReserve</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Задолженность более 90 дней. Расчётный резерв</name>
         <order>11</order>
         <width>10</width>
@@ -110,6 +122,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>totalReserve</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Итого расчётный резерв</name>
         <order>12</order>
         <width>10</width>
@@ -119,6 +132,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reservePrev</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Резерв на отчётную дату. Предыдущую</name>
         <order>13</order>
         <width>10</width>
@@ -128,6 +142,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reserveCurrent</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Резерв на отчётную дату. Текущую</name>
         <order>14</order>
         <width>10</width>
@@ -137,6 +152,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>calcReserve</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Изменение фактического резерва. Доначисление резерва с отнесением на расходы код 22670</name>
         <order>15</order>
         <width>10</width>
@@ -146,6 +162,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>reserveRecovery</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Изменение фактического резерва. Восстановление резерва на доходах код 13091</name>
         <order>16</order>
         <width>10</width>
@@ -155,6 +172,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>useReserve</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Изменение фактического резерва. Использование резерва на погашение процентов по безнадежным долгам в
             отчетном периоде
         </name>

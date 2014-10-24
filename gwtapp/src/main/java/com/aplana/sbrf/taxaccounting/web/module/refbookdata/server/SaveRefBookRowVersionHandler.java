@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -7,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RegionSecurityService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionAction;
@@ -43,6 +45,9 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private RegionSecurityService regionSecurityService;
+
 	@Override
 	public SaveRefBookRowVersionResult execute(SaveRefBookRowVersionAction action, ExecutionContext executionContext) throws ActionException {
 		Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
@@ -50,6 +55,16 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
 			RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
 			valueToSave.put(v.getKey(), value);
 		}
+
+        SaveRefBookRowVersionResult result = new SaveRefBookRowVersionResult();
+        TAUser user = securityService.currentUserInfo().getUser();
+        Boolean check = regionSecurityService.check(user, action.getRefBookId(), action.getRecordId(), action.getRecordCommonId(),
+                valueToSave, action.getVersionFrom(), action.getVersionTo());
+
+        result.setCheckRegion(check);
+        if (!check) {
+            return result;
+        }
 
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
@@ -61,7 +76,6 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
                 action.getVersionTo(), false, securityService.currentUserInfo(), logger);
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
-        SaveRefBookRowVersionResult result = new SaveRefBookRowVersionResult();
 
         refBookDataProvider.updateRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valueToSave);
         if (logger.containsLevel(LogLevel.ERROR)) {

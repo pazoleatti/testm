@@ -50,6 +50,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
     private static final String DEPARTMENT_ACTIVE_NAME = "IS_ACTIVE";
+    private static final String DEPARTMENT_GARANT_USE = "GARANT_USE";
 
     @Autowired
     RefBookDao refBookDao;
@@ -245,7 +246,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
                             logEntryService.save(logger.getEntries()));
-                Department newDepartment = new Department();
+                Department newDepartment = new Department();    //TODO (aivanov 22.10.14) newDepartment нигде дальше не используется
                 newDepartment.setName(records.get(0).getValues().get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue());
                 if (logger.containsLevel(LogLevel.ERROR))
                     return new ArrayList<Long>(0);
@@ -318,6 +319,12 @@ public class RefBookDepartment implements RefBookDataProvider {
                     }
                 }
                 final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
+                // проверка использования подразделения в модуле гарантий
+                if (dep.isGarantUse()) {
+                    logger.error("Подразделение используется в АС \"Гарантии\"");
+                    throw new ServiceLoggerException("Подразделение не может быть отредактировано!",
+                            logEntryService.save(logger.getEntries()));
+                }
                 Department parentDep = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
                         departmentService.getDepartment(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
                         : null;
@@ -717,6 +724,10 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     //Проверка использования
     private void isInUsed(final Department department, Logger logger){
+        // проверка использования подразделения в гарантиях
+        if (department.isGarantUse()) {
+            logger.error("Подразделение используется в АС \"Гарантии\"");
+        }
         //1 точка запроса
         List<FormData> formDatas =
                 formDataSearchService.findDataByFilter(new FormDataFilter(){{

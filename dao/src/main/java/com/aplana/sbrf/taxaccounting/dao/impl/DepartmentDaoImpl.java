@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -513,5 +514,21 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
                 "       where %s)" +
                 "   )", SqlUtils.transformToSqlInStatement("department_id", departments));
         return getNamedParameterJdbcTemplate().queryForList(sql, params, Integer.class);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    @CacheEvict(value = CacheConstants.DEPARTMENT,key = "#depId", beforeInvocation = true)
+    public void setUsedByGarant(int depId, boolean used) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Updating usage department by Garant with id = " + depId + " to value = " + used);
+        }
+        try {
+            int usedInt = used ? 1 : 0;
+            getJdbcTemplate().update(
+                    "update department set garant_use = ? where id = ?", usedInt, depId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException("Не удалось найти подразделение банка с id = " + depId);
+        }
     }
 }

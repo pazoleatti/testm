@@ -47,7 +47,7 @@ public class GetFormLogsBusinessHandler extends
             //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
             LogBusinessClient business = new LogBusinessClient(log);
             business.setUserName(userService.getUser(log.getUserLogin()).getName());
-            business.setDepartmentName(departmentService.getParentsHierarchyShortNames(log.getDepartmentId()));
+            business.setDepartmentName(log.getDepartmentName());
             logBusinessClients.add(business);
 		}
         result.setLogs(logBusinessClients);

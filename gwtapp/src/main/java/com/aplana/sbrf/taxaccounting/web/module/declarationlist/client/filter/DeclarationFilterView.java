@@ -1,10 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
-import com.aplana.gwt.client.ListBoxWithTooltip;
+import com.aplana.gwt.client.*;
+import com.aplana.gwt.client.TextBox;
+import com.aplana.gwt.client.mask.ui.TextMaskBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -13,6 +14,7 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -44,9 +46,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
 	private Map<Integer, String> declarationTypeMap;
 
-    private RefBookPickerWidget taxOrganisationPicker;
+    private TextBox taxOrganisationPicker;
 
-    private RefBookPickerWidget kppPicker;
+    private TextBox kppPicker;
 
     private ValueListBox<Boolean> correctionTag;
 
@@ -98,17 +100,13 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         correctionTag.setWidth("200px");
 
         Date date = new Date();
-        taxOrganisationPicker = new RefBookPickerWidget(false, true);
+        taxOrganisationPicker = new TextBox();
+        taxOrganisationPicker.setMaxLength(4);
         taxOrganisationPicker.setTitle("Выбор налогового органа");
-        taxOrganisationPicker.setAttributeId(2041L);
-        taxOrganisationPicker.setPeriodDates(date, date);
-        taxOrganisationPicker.setVersionEnabled(false);
 
-        kppPicker = new RefBookPickerWidget(false, true);
+        kppPicker = new TextBox();
+        kppPicker.setMaxLength(9);
         kppPicker.setTitle("Выбор КПП");
-        kppPicker.setAttributeId(2051L);
-        kppPicker.setPeriodDates(date, date);
-        kppPicker.setVersionEnabled(false);
 
 	    initWidget(binder.createAndBindUi(this));
     }
@@ -140,8 +138,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         formDataFilter.setReportPeriodIds(reportPeriodPicker.getValue());
         formDataFilter.setDeclarationTypeId(declarationTypePicker.getValue());
         formDataFilter.setFormState(formStatePicker.getValue());
-        formDataFilter.setTaxOrganCode(taxOrganisationPicker.getDereferenceValue());
-        formDataFilter.setTaxOrganKpp(kppPicker.getDereferenceValue());
+        formDataFilter.setTaxOrganCode(taxOrganisationPicker.getValue());
+        formDataFilter.setTaxOrganKpp(kppPicker.getValue());
         formDataFilter.setCorrectionTag(correctionTag.getValue());
 		return formDataFilter;
 	}

@@ -177,6 +177,10 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 			sql.append(", ");
 		}
 
+        if (ordering != FormDataSearchOrdering.REPORT_PERIOD_MONTH_NAME) {
+            sql.append(" fd.period_order, ");
+        }
+
 		sql.append("fd.id");
 		if (!ascSorting) {
 			sql.append(" desc");

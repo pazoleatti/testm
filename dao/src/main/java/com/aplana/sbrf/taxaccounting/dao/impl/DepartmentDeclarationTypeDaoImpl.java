@@ -227,6 +227,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             }
             department.setActive(rs.getBoolean("department_is_active"));
             department.setCode(rs.getInt("department_code"));
+            department.setGarantUse(rs.getBoolean("department_garant_use"));
 
             FormTypeKind formTypeKind = new FormTypeKind();
             formTypeKind.setId(SqlUtils.getLong(rs, "id"));
@@ -282,6 +283,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "department_region_id, \n" +
                     "department_is_active, \n" +
                     "department_code \n" +
+                    "department_garant_use \n" +
                     // пейджинг
                     (paging ? ", rownum as row_number_over \n":"") +
                 "FROM ("+
@@ -289,16 +291,17 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "  dt.NAME,\n" +
                     "  dt.ID AS type_id,\n" +
                     "  -- Для подразделения\n" +
-                    "  d.ID        AS department_id,\n" +
-                    "  d.NAME      AS department_name,\n" +
-                    "  d.PARENT_ID AS department_parent_id,\n" +
-                    "  d.TYPE      AS department_type,\n" +
-                    "  d.SHORTNAME AS department_short_name,\n" +
-                    "  d.TB_INDEX  AS department_tb_index,\n" +
-                    "  d.SBRF_CODE AS department_sbrf_code,\n" +
-                    "  d.REGION_ID AS department_region_id,\n" +
-                    "  d.IS_ACTIVE AS department_is_active,\n" +
-                    "  d.CODE      AS department_code,\n" +
+                    "  d.ID         AS department_id,\n" +
+                    "  d.NAME       AS department_name,\n" +
+                    "  d.PARENT_ID  AS department_parent_id,\n" +
+                    "  d.TYPE       AS department_type,\n" +
+                    "  d.SHORTNAME  AS department_short_name,\n" +
+                    "  d.TB_INDEX   AS department_tb_index,\n" +
+                    "  d.SBRF_CODE  AS department_sbrf_code,\n" +
+                    "  d.REGION_ID  AS department_region_id,\n" +
+                    "  d.IS_ACTIVE  AS department_is_active,\n" +
+                    "  d.CODE       AS department_code,\n" +
+                    "  d.GARANT_USE AS department_garant_use,\n" +
                     "  -- Для сортировки\n" +
                     "  dt.NAME AS dec_type,\n" +
                     "  d.NAME  AS department,\n" +

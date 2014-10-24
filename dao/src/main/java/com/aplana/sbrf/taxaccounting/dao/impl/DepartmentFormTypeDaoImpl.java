@@ -494,6 +494,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             }
             department.setActive(rs.getBoolean("department_is_active"));
             department.setCode(rs.getInt("department_code"));
+            department.setGarantUse(rs.getBoolean("department_garant_use"));
 
             // Исполнитель
             Integer performerId = SqlUtils.getInteger(rs, "performer_id");
@@ -517,6 +518,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 }
                 performer.setActive(rs.getBoolean("performer_is_active"));
                 performer.setCode(rs.getInt("performer_code"));
+                department.setGarantUse(rs.getBoolean("department_garant_use"));
             }
 
             FormTypeKind formTypeKind = new FormTypeKind();
@@ -576,6 +578,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "department_region_id, \n" +
                     "department_is_active, \n" +
                     "department_code, \n" +
+                    "department_garant_use \n" +
                     "performer_id, \n" +
                     "performer_name, \n" +
                     "performer_parent_id, \n" +
@@ -595,16 +598,17 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                         "  ft.NAME,\n" +
                         "  ft.ID AS type_id,\n" +
                         "  -- Для подразделения\n" +
-                        "  d.ID        AS department_id,\n" +
-                        "  d.NAME      AS department_name,\n" +
-                        "  d.PARENT_ID AS department_parent_id,\n" +
-                        "  d.TYPE      AS department_type,\n" +
-                        "  d.SHORTNAME AS department_short_name,\n" +
-                        "  d.TB_INDEX  AS department_tb_index,\n" +
-                        "  d.SBRF_CODE AS department_sbrf_code,\n" +
-                        "  d.REGION_ID AS department_region_id,\n" +
-                        "  d.IS_ACTIVE AS department_is_active,\n" +
-                        "  d.CODE      AS department_code,\n" +
+                        "  d.ID         AS department_id,\n" +
+                        "  d.NAME       AS department_name,\n" +
+                        "  d.PARENT_ID  AS department_parent_id,\n" +
+                        "  d.TYPE       AS department_type,\n" +
+                        "  d.SHORTNAME  AS department_short_name,\n" +
+                        "  d.TB_INDEX   AS department_tb_index,\n" +
+                        "  d.SBRF_CODE  AS department_sbrf_code,\n" +
+                        "  d.REGION_ID  AS department_region_id,\n" +
+                        "  d.IS_ACTIVE  AS department_is_active,\n" +
+                        "  d.CODE       AS department_code,\n" +
+                        "  d.GARANT_USE AS department_garant_use,\n" +
                         "  -- Для исполнителя\n" +
                         "  dp.ID        AS performer_id,\n" +
                         "  dp.NAME      AS performer_name,\n" +
