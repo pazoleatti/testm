@@ -15,6 +15,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -406,24 +407,40 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		}
 	}
 
-    @Override
-    public List<Long> getAttributeId2(Long attributeId) {
-        if (attributeId == null) {
-            return null;
-        }
-        String query = "SELECT DISTINCT ATTRIBUTE_ID2" +
-                " FROM FORM_COLUMN" +
-                " WHERE ATTRIBUTE_ID=" + attributeId +
-                " AND ATTRIBUTE_ID2 is not null" +
-                " AND ATTRIBUTE_ID2<>0";
+	private static final String getAttributeId2Query = "SELECT DISTINCT attribute_id, attribute_id2 " +
+			" FROM form_column WHERE %s AND attribute_id2 IS NOT NULL AND attribute_id2 <> 0";
 
-        List<Long> result = getJdbcTemplate().queryForList(
-                query,
-                Long.class
-        );
-        if (result.isEmpty()) {
-            return null;
-        }
+    @Override
+	public Map<Long, List<Long>> getAttributeId2(List<RefBookAttribute> attributes) {
+		final Map<Long, List<Long>> result = new HashMap<Long, List<Long>>();
+		if (attributes.size() == 0) {
+			return result;
+		}
+		// создаем пустые списки
+		Iterator<RefBookAttribute> iterator = attributes.iterator();
+		List<Long> attributeIds = new ArrayList<Long>();
+		while (iterator.hasNext()) {
+			Long attributeId = iterator.next().getId();
+			attributeIds.add(attributeId);
+			result.put(attributeId, new ArrayList<Long>());
+		}
+        getJdbcTemplate().query(
+			String.format(getAttributeId2Query, SqlUtils.transformToSqlInStatement("attribute_id", attributeIds)),
+			new RowCallbackHandler() {
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					 result.get(rs.getLong(1)).add(rs.getLong(2));
+				}
+			}
+		);
+
+		Iterator<Long> iterator2 = attributeIds.iterator();
+		while (iterator2.hasNext()) {
+			Long attributeId = iterator2.next();
+			if (result.get(attributeId).isEmpty()) {
+				result.remove(attributeId);
+			}
+		}
         return result;
     }
 

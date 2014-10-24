@@ -28,9 +28,10 @@ import java.util.*;
 public class RefBookUser implements RefBookDataProvider {
 
     public static final Long REF_BOOK_ID = 74L;
+	public static final String TABLE_NAME = RefBookUserDao.TABLE_NAME;
 
     @Autowired
-    RefBookDao refBookDao;
+    private RefBookDao refBookDao;
 
     @Autowired
     private RefBookUserDao refBookUserDao;
@@ -189,4 +190,10 @@ public class RefBookUser implements RefBookDataProvider {
     public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
         return refBookUserDao.isRecordsActiveInPeriod(recordIds);
     }
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		return refBookDao.dereferenceValues(TABLE_NAME, attributeId, recordIds);
+	}
+
 }

@@ -852,4 +852,10 @@ public class RefBookDepartment implements RefBookDataProvider {
 
         return sb.toString();
     }
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		return refBookDao.dereferenceValues(DEPARTMENT_TABLE_NAME, attributeId, recordIds);
+	}
+
 }

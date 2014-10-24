@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 public class ReferenceColumn extends Column {
 
+	// ссылка на родительскую графу
 	private int parentId;
 
     // только для экспорта/импорта

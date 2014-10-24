@@ -23,6 +23,9 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
@@ -633,4 +636,23 @@ public class RefBookDaoTest {
         List<String> recordsValueChanged = refBookDao.isVersionUsedInRefBooks(2L, recordIds, getDate(1, 2, 2013), getDate(1, 5, 2013), true, null);
         assertEquals(3, recordsValueChanged.size());
     }
+
+	@Test
+	public void testDereference() {
+		Map<Long, RefBookValue> result;
+		List<Long> recordIds = new ArrayList<Long>();
+	   	result = refBookDao.dereferenceValues(4L, recordIds);
+		assertNull(result);
+		recordIds.add(5L);
+		recordIds.add(6L);
+		recordIds.add(7L);
+		result = refBookDao.dereferenceValues(4L, recordIds);
+		assertEquals(3, result.size());
+		assertEquals("Иванов И.И.", result.get(5L).getStringValue());
+		assertEquals("Петров П.П.", result.get(6L).getStringValue());
+		assertEquals("Петренко П.П.", result.get(7L).getStringValue());
+		result = refBookDao.dereferenceValues(3L, recordIds);
+		assertEquals(0, result.size());
+	}
+
 }

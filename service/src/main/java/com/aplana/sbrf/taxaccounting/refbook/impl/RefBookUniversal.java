@@ -924,4 +924,10 @@ public class RefBookUniversal implements RefBookDataProvider {
             throw new ServiceException(String.format(LOCK_MESSAGE, refBook.getName()));
         }
 	}
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		return refBookDao.dereferenceValues(attributeId, recordIds);
+	}
+
 }

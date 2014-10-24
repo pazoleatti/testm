@@ -176,7 +176,7 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                         //Получаем связки для атрибутов второго уровня
                         if (attrId2Map.get(id) != null) {
                             for (Long id2 : attrId2Map.get(id)) {
-                                RefBook refBook2 = refBookHelper.getRefBookByAttributeId(id2);
+                                RefBook refBook2 = refBookFactory.getByAttribute(id2);
                                 attributeIds.add(id2);
                                 if (attributesMap.containsKey(refBook2.getId())) {
                                     attributesMap.get(refBook2.getId()).add(new RefBookAttributePair(id2, refValue));

@@ -43,6 +43,7 @@ public class Cell extends AbstractCell {
 
     @Override
     public Object getValue() {
+		//todo возвращать согласно типу столбца, а не типу хранимых данных
         // Получаем значение из главной ячейки (SBRFACCTAX-2082)
         if (hasValueOwner()) {
             return getValueOwner().getValue();
@@ -291,4 +292,14 @@ public class Cell extends AbstractCell {
     public FormStyle getClientStyle() {
         return clientStyle;
     }
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Cell{");
+		sb.append("value=").append(getValue());
+		sb.append("; dereference=").append(getRefBookDereference());
+		sb.append('}');
+
+		return sb.toString();
+	}
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -56,4 +57,10 @@ public class RefBookConfigurationParam extends AbstractPermanentRefBook {
         }
         return records;
     }
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		throw new UnsupportedOperationException();
+	}
+
 }

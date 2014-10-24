@@ -102,6 +102,12 @@ public interface DataRowDao {
 	 */
 	void saveRows(FormData formData, List<DataRow<Cell>> rows);
 
+	/**
+	 * Вставляем строки начания с указанного индекса
+	 * @param formData
+	 * @param index
+	 * @param rows
+	 */
 	void insertRows(FormData formData, int index, List<DataRow<Cell>> rows);
 
 	void insertRows(FormData formData, DataRow<Cell> afterRow, List<DataRow<Cell>> rows);

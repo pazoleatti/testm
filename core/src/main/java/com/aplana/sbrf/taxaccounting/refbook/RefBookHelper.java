@@ -25,8 +25,14 @@ public interface RefBookHelper {
      */
     void dataRowsCheck(Collection<DataRow<Cell>> dataRows, List<Column> columns);
 
-	void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows,
-			List<Column> columns);
+	/**
+	 * Разыменовывание справочных значений
+	 *
+	 * @param logger
+	 * @param dataRows данные для разыменовывания
+	 * @param columns список граф для разыменовывания. Зависимые графы должны обязательно иметь родителей в этом списке.
+	 */
+	void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows, List<Column> columns);
 
 //	Map<String, String> singleRecordDereference(RefBook refBook, RefBookDataProvider provider,
 //			List<RefBookAttribute> attributes, Map<String, RefBookValue> record);
@@ -62,7 +68,10 @@ public interface RefBookHelper {
 //    Map<Long, String> singleRecordDereferenceWithAttrId2(RefBook refBook, RefBookDataProvider provider,
 //                                                         List<RefBookAttribute> attributes, Map<String, RefBookValue> record);
 
-    RefBook getRefBookByAttributeId(Long attributeId);
-
+	/**
+	 * Возвращает список провайдеров данных для указанного списка атрибутов
+	 * @param attributeIds
+	 * @return
+	 */
     Map<Long, RefBookDataProvider> getProviders(Set<Long> attributeIds);
 }

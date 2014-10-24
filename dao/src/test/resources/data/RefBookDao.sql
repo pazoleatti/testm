@@ -98,14 +98,14 @@ insert into ref_book_value(record_id, attribute_id, string_value, number_value, 
   (4, 3, null, null, null, 6);
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (4, 5, null, 2.399, null, null);
-insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
-  (6, 1, 'Алиса в стране чудес', null, null, null);
-insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
-  (6, 2, null, 1113, null, null);
-insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
-  (6, 3, null, null, null, 5);
-insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
-  (6, 5, null, 0.25, null, null);
+--insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+--  (3, 1, 'Алиса в стране чудес', null, null, null);
+--insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+--  (3, 2, null, 1113, null, null);
+--insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+--  (3, 3, null, null, null, 5);
+--insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
+--  (3, 5, null, 0.25, null, null);
 
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value) values
   (5, 4, 'Иванов И.И.', null, null, null);
