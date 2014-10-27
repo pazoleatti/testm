@@ -151,4 +151,9 @@ public interface DataRowHelper {
      * Очистка формы
      */
     void clear();
+
+    /**
+     * Сохранить отсортированные строки без учета остальных изменении. Обновятся только значения атрибута DATA_ROW.ORD
+     */
+    void saveSort(List<DataRow<Cell>> dataRows);
 }
