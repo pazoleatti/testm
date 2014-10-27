@@ -56,7 +56,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
+        formDataService.addRow(formData, currentDataRow, editableColumns, null)
         break
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -93,10 +93,6 @@ def editableColumns = ['financialYear', 'taxPeriod', 'emitent', 'decreeNumber', 
                        'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendSumForTaxAll','dividendSumForTaxStavka9',
                        'dividendSumForTaxStavka0','taxSum', 'taxSumFromPeriod', 'taxSumFromPeriodAll']
 
-// Автозаполняемые атрибуты
-@Field
-def autoFillColumns = ['dividendSumForTaxAll', 'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum']
-
 @Field
 def nonEmptyColumns = ['financialYear', 'taxPeriod', 'dividendType', 'dividendSumRaspredPeriod', 'dividendSumNalogAgent',
                        'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0', 'dividendStavkaLess5',
@@ -129,42 +125,9 @@ void calc() {
     // расчетов нет
 }
 
-def BigDecimal calc21(def row) {
-    if (row.dividendSumRaspredPeriod == null || row.dividendAgentWithStavka0 == null) {
-        return null
-    }
-    return roundValue(row.dividendSumRaspredPeriod - row.dividendAgentWithStavka0, 0)
-}
-
-def BigDecimal calc22(def row) {
-    if (row.dividendRussianOrgStavka9 == null || !row.dividendSumRaspredPeriod || row.dividendSumForTaxAll == null) {
-        return null
-    }
-    return roundValue(row.dividendRussianOrgStavka9 / row.dividendSumRaspredPeriod * row.dividendSumForTaxAll, 0)
-}
-
-def BigDecimal calc23(def row) {
-    if (row.dividendRussianOrgStavka0 == null || !row.dividendSumRaspredPeriod || row.dividendSumForTaxAll == null) {
-        return null
-    }
-    return roundValue(row.dividendRussianOrgStavka0 / row.dividendSumRaspredPeriod * row.dividendSumForTaxAll, 0)
-}
-
-def BigDecimal calc24(def row) {
-    if (row.dividendSumForTaxStavka9 == null) {
-        return null
-    }
-    return roundValue(row.dividendSumForTaxStavka9 * 0.09, 0)
-}
-
 def logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-
-    // Алиасы граф для арифметической проверки
-    def arithmeticCheckAlias = ['dividendSumForTaxAll', 'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum']
-    // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
-    def needValue = [:]
 
     for (def row in dataRows) {
         def rowNum = row.getIndex()
@@ -172,13 +135,6 @@ def logicCheck() {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
         checkNonEmptyColumns(row, rowNum, ['emitent', 'decreeNumber'], logger, false)
-
-        // Арифметические проверки расчета граф 21-24, 26
-        needValue['dividendSumForTaxAll'] = calc21(row)
-        needValue['dividendSumForTaxStavka9'] = calc22(row)
-        needValue['dividendSumForTaxStavka0'] = calc23(row)
-        needValue['taxSum'] = calc24(row)
-        checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // Проверка наличия значения графы 2 в справочнике «Коды, определяющие налоговый (отчётный) период»
         def cell = row.getCell('taxPeriod')
@@ -297,9 +253,6 @@ void addData(def xml, headRowCount) {
             editableColumns.each {
                 newRow.getCell(it).editable = true
                 newRow.getCell(it).setStyleAlias('Редактируемая')
-            }
-            autoFillColumns.each {
-                newRow.getCell(it).setStyleAlias('Автозаполняемая')
             }
 
             def xmlIndexCol = 0
