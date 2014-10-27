@@ -187,11 +187,11 @@
                             <g:Button text="Отменить принятие" ui:field="cancelButton" />
                         </style:LeftBar>
                         <g:HorizontalPanel>
-                            <g:cell width="205px" verticalAlignment="middle">
+                            <g:cell verticalAlignment="middle">
                                 <g:Label ui:field="dateBoxLabel" title="Дата формирования декларации" wordWrap="false" text="Дата формирования декларации:" />
                             </g:cell>
-                            <g:cell verticalAlignment="middle">
-                                <d:DateMaskBoxPicker ui:field="dateBox" />
+                            <g:cell width="100%" verticalAlignment="middle">
+                                <d:DateMaskBoxPicker ui:field="dateBox" addStyleNames="{style.centerBlock}" />
                             </g:cell>
                         </g:HorizontalPanel>
                 </g:HorizontalPanel>
