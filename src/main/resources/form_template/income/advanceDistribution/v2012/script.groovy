@@ -102,7 +102,7 @@ def allColumns = ['number', 'regionBank', 'fix', 'regionBankDivision', 'kpp', 'p
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'amountTax']
+def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'minimizeTaxSum', 'amountTax']
 
 // Автозаполняемые атрибуты
 @Field
