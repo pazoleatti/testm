@@ -83,7 +83,7 @@ def editableColumns = ['emitent', 'decreeNumber', 'title', 'zipCode', 'subdivisi
 
 // Проверяемые на пустые значения атрибуты 1-16, 18-25
 @Field
-def nonEmptyColumns = ['rowNumber', 'emitent', 'decreeNumber', 'title', 'zipCode', 'sumDividend', 'dividendDate', 'dividendSum', 'sumTax']
+def nonEmptyColumns = ['rowNumber', 'emitent', 'decreeNumber', 'title', 'sumDividend', 'dividendDate', 'dividendSum', 'sumTax']
 
 // Дата окончания отчетного периода
 @Field
