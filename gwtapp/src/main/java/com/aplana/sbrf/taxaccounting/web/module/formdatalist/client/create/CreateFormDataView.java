@@ -170,7 +170,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @UiHandler("formTypeId")
     public void onFormTypeIdChange(ValueChangeEvent<List<Long>> event) {
         formMonth.setValue(null);
-        if (getUiHandlers() != null && formTypeId.getValue() != null && reportPeriodIds.getValue() != null) {
+        if (getUiHandlers() != null && formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty()) {
             getUiHandlers().isMonthly(formTypeId.getValue().get(0).intValue(), reportPeriodIds.getValue().get(0));
         }
 
