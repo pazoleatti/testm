@@ -7,4 +7,6 @@ public interface PdfViewerView {
 	void setPages(Pdf pdf);
 
     void setPage(int page);
+
+    void setVisible(boolean visible);
 }
