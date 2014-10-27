@@ -103,7 +103,6 @@ public class RefBookHelperImplTest {
 	}
 
 	@Test
-    @Ignore
 	public void testDataRowsDereference() {
 		StringColumn sColumn = new StringColumn();
 		sColumn.setAlias("No");
