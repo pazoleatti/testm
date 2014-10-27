@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -582,4 +583,21 @@ public interface RefBookDao {
      * @param uniqueRecordId уникальный идентификатор версии записи
      */
     void deleteVersion(String tableName, @NotNull Long uniqueRecordId);
+
+	/**
+	 * Разыменование набора ссылок для универсальных справочников
+	 * @param attributeId идентификатор атрибута-ссылки
+	 * @param recordIds перечень ссылок
+	 * @return data_row.id - ref_book_value
+	 */
+	Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds);
+
+	/**
+	 * Разыменование набора ссылок для простых справочников: один справочник - одна таблица
+	 * @param tableName название таблицы с данными
+	 * @param attributeId идентификатор атрибута-ссылки
+	 * @param recordIds перечень ссылок
+	 * @return data_row.id - ref_book_value
+	 */
+	Map<Long, RefBookValue> dereferenceValues(String tableName, Long attributeId, Collection<Long> recordIds);
 }

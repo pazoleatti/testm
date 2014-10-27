@@ -731,7 +731,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @Override
     public final void setRefBookList(List<RefBook> refBookList) {
-        if (refBookList.isEmpty())
+        if (refBookList == null || refBookList.isEmpty())
             return;
         refBookBox.setValue(refBookList.get(0));
         refBookBox.setAcceptableValues(refBookList);

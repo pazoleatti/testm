@@ -27,9 +27,10 @@ import java.util.*;
 public class RefBookIncome102 implements RefBookDataProvider {
 
     public static final Long REF_BOOK_ID = RefBookIncome102Dao.REF_BOOK_ID;
+	public static final String TABLE_NAME = RefBookIncome102Dao.TABLE_NAME;
 
 	@Autowired
-    RefBookDao rbDao;
+    private RefBookDao refBookDao;
 
     @Autowired
     private RefBookIncome102Dao dao;
@@ -112,7 +113,7 @@ public class RefBookIncome102 implements RefBookDataProvider {
 
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
-        RefBook refBook = rbDao.get(REF_BOOK_ID);
+        RefBook refBook = refBookDao.get(REF_BOOK_ID);
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
         return dao.getRecordData(recordId).get(attribute.getAlias());
     }
@@ -187,4 +188,8 @@ public class RefBookIncome102 implements RefBookDataProvider {
         throw new UnsupportedOperationException();
     }
 
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		return refBookDao.dereferenceValues(TABLE_NAME, attributeId, recordIds);
+	}
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -71,4 +72,10 @@ public class RefBookTaxOrganKpp extends AbstractReadOnlyRefBook {
     public int getRecordsCount(Date version, String filter) {
         return refBookTaxOrganDao.getRecordsCount(REF_BOOK_ID, filter);
     }
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		throw new UnsupportedOperationException();
+	}
+
 }

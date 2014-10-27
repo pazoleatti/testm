@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.common.service;
 import com.aplana.sbrf.taxaccounting.common.model.EventType;
 import com.aplana.sbrf.taxaccounting.common.model.UserInfo;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -54,7 +55,18 @@ public class EventAuditServiceImpl implements EventAuditService {
     private TAUserInfo getTaUserInfo(UserInfo userInfo) {
         TAUserInfo taUserInfo = new TAUserInfo();
         taUserInfo.setIp(userInfo.getUserIp());
-        taUserInfo.setUser(userService.getUser((int) userInfo.getUserId()));
+        TAUser user = null;
+        for (TAUser taUser : userService.listAllUsers()) {
+            if (taUser.getId() == userInfo.getUserId()) {
+                user = taUser;
+                break;
+            }
+        }
+        if (user == null) {
+            user = userService.getSystemUserInfo().getUser();
+        }
+        taUserInfo.setUser(user);
+
         return taUserInfo;
     }
 

@@ -315,4 +315,9 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
         }
         return tableName;
     }
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		return refBookDao.dereferenceValues(tableName, attributeId, recordIds);
+	}
 }

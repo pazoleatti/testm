@@ -29,7 +29,7 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
     @Autowired
     private RefBookDao refBookDao;
 
-    private static final String TABLE_NAME = "SEC_USER";
+    public static final String TABLE_NAME = RefBookUserDao.TABLE_NAME;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {

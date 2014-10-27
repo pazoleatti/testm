@@ -43,6 +43,8 @@ import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 04.07.13 18:48
@@ -79,7 +81,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<RefBook> getAll(Integer typeId) {
-        return getAll(getJdbcTemplate().queryForList("select id from ref_book where (? is null or type = ?) order by name",
+        return getAll(getJdbcTemplate().queryForList("SELECT id FROM ref_book WHERE (? IS NULL OR type = ?) ORDER BY NAME",
                 new Object[]{typeId, typeId},
                 Long.class));
     }
@@ -97,7 +99,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<RefBook> getAllVisible(Integer typeId) {
         return getAll(
                 getJdbcTemplate().queryForList(
-                        "select id from ref_book where visible = 1 and (? is null or type = ?) order by name",
+                        "SELECT id FROM ref_book WHERE visible = 1 AND (? IS NULL OR type = ?) ORDER BY NAME",
                         new Object[]{typeId, typeId},
                         Long.class));
     }
@@ -107,7 +109,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook getByAttribute(Long attributeId) {
         try {
             return get(getJdbcTemplate().queryForLong(
-                    "select r.id from ref_book r join ref_book_attribute a on a.ref_book_id = r.id where a.id = ?",
+                    "SELECT r.id FROM ref_book r JOIN ref_book_attribute a ON a.ref_book_id = r.id WHERE a.id = ?",
                     new Object[]{attributeId}, new int[]{Types.NUMERIC}));
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найден атрибут справочника с id = %d", attributeId));
@@ -922,7 +924,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
         String sql = "select count(*) from ref_book_record where ref_book_id = ? and %s and version = trunc(?, 'DD')";
-        return getJdbcTemplate().queryForInt(String.format(sql, SqlUtils.transformToSqlInStatement("record_id", recordIds)), refBookId, version) != 0;
+        return getJdbcTemplate().queryForInt(String.format(sql, transformToSqlInStatement("record_id", recordIds)), refBookId, version) != 0;
     }
 
     private static final String IS_RECORDS_ACTIVE_IN_PERIOD = "select id from (\n" +
@@ -936,7 +938,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
-        String sql = String.format(IS_RECORDS_ACTIVE_IN_PERIOD, SqlUtils.transformToSqlInStatement("input.id", recordIds));
+        String sql = String.format(IS_RECORDS_ACTIVE_IN_PERIOD, transformToSqlInStatement("input.id", recordIds));
         Set<Long> result = new HashSet<Long>(recordIds);
         List<Long> existRecords = new ArrayList<Long>();
         Map<String, Object> params = new HashMap<String, Object>();
@@ -1111,7 +1113,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public Map<Long, Date> getRecordsVersionStart(List<Long> uniqueRecordIds) {
         final Map<Long, Date> result = new HashMap<Long, Date>();
         getJdbcTemplate().query(String.format("select id, version from ref_book_record where %s",
-                SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), new RowCallbackHandler() {
+                transformToSqlInStatement("id", uniqueRecordIds)), new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 result.put(SqlUtils.getLong(rs, "id"), rs.getDate("version"));
@@ -1124,7 +1126,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public List<Date> hasChildren(Long refBookId, List<Long> uniqueRecordIds) {
         String sql = String.format("select distinct r.version from ref_book_value v, ref_book_record r where v.attribute_id = (select id from ref_book_attribute where ref_book_id=? and alias='%s') and %s and r.id=v.reference_value",
-                RefBook.RECORD_PARENT_ID_ALIAS, SqlUtils.transformToSqlInStatement("v.reference_value", uniqueRecordIds));
+                RefBook.RECORD_PARENT_ID_ALIAS, transformToSqlInStatement("v.reference_value", uniqueRecordIds));
         try {
             return getJdbcTemplate().query(sql, new RowMapper<Date>() {
                 @Override
@@ -1174,7 +1176,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
         }
         if (!ids.isEmpty()) {
-            String sql = String.format(CHECK_PARENT_CONFLICT, SqlUtils.transformToSqlInStatement("id", ids));
+            String sql = String.format(CHECK_PARENT_CONFLICT, transformToSqlInStatement("id", ids));
             final Set<Pair<Long, Integer>> result = new HashSet<Pair<Long, Integer>>();
             getJdbcTemplate().query(sql, new RowMapper<Pair<Long, Integer>>() {
                 @Override
@@ -1551,7 +1553,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
-                SqlUtils.transformToSqlInStatement("ID", recordIds));
+                transformToSqlInStatement("ID", recordIds));
         Map<String, Date> params = new HashMap<String, Date>();
         params.put("versionFrom", versionFrom);
         params.put("versionTo", versionTo);
@@ -1638,7 +1640,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         try {
             //Проверка использования в налоговых формах
-            in = SqlUtils.transformToSqlInStatement("nv.nvalue", uniqueRecordIds);
+            in = transformToSqlInStatement("nv.nvalue", uniqueRecordIds);
             sql = String.format(CHECK_USAGES_IN_FORMS, in);
             params.clear();
             params.put("refBookId", refBookId);
@@ -1670,7 +1672,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         try {
             //Проверка использования в настройках подразделений
-            in = SqlUtils.transformToSqlInStatement("r.id", uniqueRecordIds);
+            in = transformToSqlInStatement("r.id", uniqueRecordIds);
             sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in);
             params.clear();
             if (!isValuesChanged) {
@@ -1726,10 +1728,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                                 boolean isValuesChanged, List<Long> excludedRefBooks) {
 
         List<String> results = new ArrayList<String>();
-        String in = SqlUtils.transformToSqlInStatement("v.reference_value", uniqueRecordIds);
+        String in = transformToSqlInStatement("v.reference_value", uniqueRecordIds);
         String inExcludeRefBook = "";
         if (excludedRefBooks != null && !excludedRefBooks.isEmpty()) {
-            inExcludeRefBook = "where " + SqlUtils.transformToSqlInStatement("b.id not ", excludedRefBooks);
+            inExcludeRefBook = "where " + transformToSqlInStatement("b.id not ", excludedRefBooks);
         }
         String sql;
         Map<String, Object> params = new HashMap<String, Object>();
@@ -1895,7 +1897,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void deleteAllRecordVersions(Long refBookId, List<Long> uniqueRecordIds) {
-        String sql = String.format(DELETE_ALL_VERSIONS, SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
+        String sql = String.format(DELETE_ALL_VERSIONS, transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql, refBookId);
     }
 
@@ -1907,7 +1909,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public List<Long> getRelatedVersions(List<Long> uniqueRecordIds) {
         try {
             String sql = String.format(GET_RELATED_VERSIONS,
-                    SqlUtils.transformToSqlInStatement("id", uniqueRecordIds), VersionedObjectStatus.FAKE.getId());
+                    transformToSqlInStatement("id", uniqueRecordIds), VersionedObjectStatus.FAKE.getId());
             return getJdbcTemplate().queryForList(sql, Long.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
@@ -2552,7 +2554,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             if (in.size() != 0) {
                 /** Проверяем пересекаются ли периоды ссылочных атрибутов с периодом текущей записи справочника */
-                String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, SqlUtils.transformToSqlInStatement("id", in));
+                String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, transformToSqlInStatement("id", in));
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("versionFrom", versionFrom);
                 params.put("versionTo", versionTo);
@@ -2572,7 +2574,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
 
                 /** Проверяем не начинается ли период актуальности ссылочного атрибута раньше чем период актуальности текущей записи справочника */
-                sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, SqlUtils.transformToSqlInStatement("id", in));
+                sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, transformToSqlInStatement("id", in));
                 result = getJdbcTemplate().query(sql, new RowMapper<Long>() {
                     @Override
                     public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -2670,7 +2672,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds) {
-        String sql = String.format(DELETE_VERSION, tableName, SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
+        String sql = String.format(DELETE_VERSION, tableName, transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql);
     }
 
@@ -2678,4 +2680,79 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public void deleteVersion(String tableName, @NotNull Long uniqueRecordId) {
         getJdbcTemplate().update(String.format("delete from %s where id=?", tableName), uniqueRecordId);
     }
+
+	private class DereferenceMapper implements RowCallbackHandler {
+		private RefBookAttribute attribute;
+		private Map<Long, RefBookValue> result;
+
+		public DereferenceMapper(RefBookAttribute attribute) {
+			this.attribute = attribute;
+			result = new HashMap<Long, RefBookValue>();
+		}
+
+		@Override
+		public void processRow(ResultSet rs) throws SQLException {
+			Long recordId = rs.getLong("record_id");
+			Object value = null;
+			switch (attribute.getAttributeType()) {
+				case STRING: {
+					value = rs.getString("value");
+				}
+				break;
+				case NUMBER: {
+					value = rs.getBigDecimal("value").setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
+				}
+				break;
+				case DATE: {
+					value = rs.getDate("value");
+				}
+				break;
+				case REFERENCE: {
+					value = SqlUtils.getLong(rs, "value");
+				}
+				break;
+			}
+			result.put(recordId, new RefBookValue(attribute.getAttributeType(), value));
+		}
+
+		public Map<Long, RefBookValue> getResult() {
+			return result;
+		}
+	}
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		if (recordIds.isEmpty()) {
+			return null;
+		}
+		RefBook refBook = getByAttribute(attributeId);
+ 		final RefBookAttribute attribute = refBook.getAttribute(attributeId);
+		String sql = String.format(
+			"SELECT record_id, %s value FROM ref_book_value WHERE attribute_id = %s AND %s",
+			attribute.getAttributeType() + "_value",
+			attributeId,
+			transformToSqlInStatement("record_id", recordIds));
+
+		DereferenceMapper mapper = new DereferenceMapper(attribute);
+		getJdbcTemplate().query(sql, mapper);
+		return mapper.getResult();
+	}
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(String tableName, Long attributeId, Collection<Long> recordIds) {
+		if (recordIds.isEmpty()) {
+			return null;
+		}
+		RefBook refBook = getByAttribute(attributeId);
+		final RefBookAttribute attribute = refBook.getAttribute(attributeId);
+		String sql = String.format(
+				"SELECT id record_id, %s value FROM %s WHERE %s",
+				attribute.getAlias(),
+				tableName,
+				transformToSqlInStatement("id", recordIds));
+
+		DereferenceMapper mapper = new DereferenceMapper(attribute);
+		getJdbcTemplate().query(sql, mapper);
+		return mapper.getResult();
+	}
 }

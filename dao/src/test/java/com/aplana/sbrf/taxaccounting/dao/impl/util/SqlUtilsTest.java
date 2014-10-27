@@ -29,7 +29,7 @@ public class SqlUtilsTest {
 
     @Test
     public void transformToSqlInStatementTest1() {
-        Assert.assertEquals("(abc in (1,2,3) or abc in (4,5,6))", SqlUtils.transformToSqlInStatement("abc", Arrays.asList(new Integer[]{1, 2, 3, 4, 5, 6}), 3));
+        Assert.assertEquals("(abc IN (1,2,3) OR abc IN (4,5,6))", SqlUtils.transformToSqlInStatement("abc", Arrays.asList(new Integer[]{1, 2, 3, 4, 5, 6}), 3));
     }
 
     @Test

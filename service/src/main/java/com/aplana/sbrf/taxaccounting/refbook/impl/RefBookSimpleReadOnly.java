@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +110,11 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
 	public void setWhereClause(String whereClause) {
 		this.whereClause = whereClause;
+	}
+
+	@Override
+	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
+		return refBookDao.dereferenceValues(tableName, attributeId, recordIds);
 	}
 
 }

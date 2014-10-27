@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -282,4 +283,12 @@ public interface RefBookDataProvider {
      */
     @Deprecated
     void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
+
+	/**
+	 * Разыменование набора ссылок
+	 * @param attributeId идентификатор атрибута-ссылки
+	 * @param recordIds перечень ссылок
+	 * @return data_row.id - ref_book_value
+	 */
+	Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds);
 }

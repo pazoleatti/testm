@@ -1,10 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
@@ -32,6 +36,9 @@ public class DataRowDaoImplTest extends Assert {
 
 	@Autowired
 	FormDataDao formDataDao;
+
+	@Autowired
+	FormTemplateDao formTemplateDao;
 
 	@Autowired
 	DataRowDao dataRowDao;
@@ -456,16 +463,35 @@ public class DataRowDaoImplTest extends Assert {
         }
 	}
 
+	private List<DataRow<Cell>> createDataRows(FormData formData, long count) {
+		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+
+
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+		for (int i = 0; i < count; i++) {
+			DataRow<Cell> dataRow = formData.createDataRow();
+			for (Column column : formTemplate.getColumns()) {
+				Object value = null;
+				switch (column.getColumnType()) {
+					case STRING: value = Long.valueOf(Math.round(Math.random() * 100000)).toString();
+						break;
+					case DATE: value = new Date(new Date().getTime() - 50000000 + Math.round(Math.random() * 100000000));
+						break;
+					case NUMBER: value = Math.round(Math.random() * 100000);
+						break;
+				}
+				dataRow.put(column.getAlias(), value);
+			}
+			dataRows.add(dataRow);
+		}
+		return dataRows;
+	}
+
 	@Test
 	public void repackORDSuccessCenter() {
 		FormData fd = formDataDao.get(1, false);
         //int sizeBefore = dataRowDao.getSize(fd,null);
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
-		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
-			DataRow<Cell> dr = fd.createDataRow();
-			dataRows.add(dr);
-		}
+		List<DataRow<Cell>> dataRows = createDataRows(fd, DEFAULT_ORDER_STEP_TEST);
         List<DataRow<Cell>> addedDataRowsBefore = dataRowDao.getRows(fd, null);
 		dataRowDao.insertRows(fd, 5, dataRows);
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null);
@@ -479,12 +505,7 @@ public class DataRowDaoImplTest extends Assert {
 	public void repackORDSuccessLast() {
 		FormData fd = formDataDao.get(1, false);
         int sizeBefore = dataRowDao.getSize(fd);
-		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
-		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
-			DataRow<Cell> dr = fd.createDataRow();
-			dataRows.add(dr);
-		}
+		List<DataRow<Cell>> dataRows = createDataRows(fd, DEFAULT_ORDER_STEP_TEST);
         List<DataRow<Cell>> addedDataRowsBefore = dataRowDao.getRows(fd, null);
 		dataRowDao.insertRows(fd, 6, dataRows);
         List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null);
@@ -511,12 +532,7 @@ public class DataRowDaoImplTest extends Assert {
 
         //Execute
         int sizeAfterRem = dataRowDao.getSize(fd);
-        List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
-        for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
-            DataRow<Cell> dr = fd.createDataRow();
-            dataRows.add(dr);
-        }
+		List<DataRow<Cell>> dataRows = createDataRows(fd, DEFAULT_ORDER_STEP_TEST);
         dataRowDao.insertRows(fd, 1, dataRows);
         Assert.assertEquals(DEFAULT_ORDER_STEP_TEST + sizeAfterRem, dataRowDao.getRows(fd, null).size());
 

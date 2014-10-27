@@ -10,14 +10,16 @@ class Schematron {
 		pSw.Start();
 		try {
 			// Проверка количества аргументов. Вывод справки
-			if (args.Length != 2) {
+			if (args.Length != 2 && args.Length != 3) {
 				throw new Exception (
 					"Program description: Check xml by xsd scheme with schematron extension.\n" +
-					"Usage syntax: Schematron.exe \"PATH_TO_XML_FILE\" \"PATH_TO_XSD_FILE\"\n" +
+					"Usage syntax1: Schematron.exe \"PATH_TO_XML_FILE\" \"PATH_TO_XSD_FILE\" \n" +
+					"Usage syntax2: Schematron.exe \"PATH_TO_XML_FILE\" \"PATH_TO_XSD_FILE\" \"TARGET_XML_FILE_NAME\"\n" +
 					"Result: Warnings or info of success result will be writed in system out.");
 			}
 			string xmlFleName = args[0];
 			string xsdFleName = args[1];
+			string xmlTargetFileName = args.Length == 2 ? Path.GetFileNameWithoutExtension(xmlFleName) : args[2];
 			
 			FileStream pXml = new FileStream(xmlFleName, FileMode.Open, FileAccess.Read);
 			XmlSchemaSet pXsd = new System.Xml.Schema.XmlSchemaSet();
@@ -38,7 +40,7 @@ class Schematron {
 			// затратный по времени валидации по сравнению с предыдущим способом).
 			//var reader = new SnpXmlValidatingReader { ValidatingType = EVsaxValidateType.SaxSchematronSnp };
 			
-			bool result = reader.Validate(pXml, Path.GetFileNameWithoutExtension(xmlFleName), pXsd);
+			bool result = reader.Validate(pXml, xmlTargetFileName, pXsd);
 			IVsaxErrorHandler errors = reader.ErrorHandler;
 			Console.WriteLine(result && errors.Errors.Count == 0 ? "Result: SUCCESS" : "Result: FAIL");
 			foreach (ErrorsStruct e in errors.Errors) {

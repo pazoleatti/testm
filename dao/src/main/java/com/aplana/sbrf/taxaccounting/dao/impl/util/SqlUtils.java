@@ -40,8 +40,15 @@ public final class SqlUtils {
 	}
 
 	/**
-     * Метод возвращает строку вида prefix in (...) or prefix in (...) разбивая
+     * <p>
+	 * Метод возвращает строку вида prefix in (...) or prefix in (...) разбивая
      * параметры в условии in по size штук.
+	 * </p>
+	 * Пример вызова:
+	 * <p>
+	 * 	 transformToSqlInStatement("form_data.id", [309, 376, 410], 1000)
+	 * </p>
+	 *
      * @param prefix название поля в бд
      * @param collection коллекция идентификаторо
      * @param size размер идентификаторов в условии in
@@ -56,7 +63,7 @@ public final class SqlUtils {
             StringBuffer buffer = new StringBuffer();
             buffer
                     .append(prefix)
-                    .append(" in ")
+                    .append(" IN ")
                     .append("(")
                     .append(StringUtils.join(list.toArray(), ','))
                     .append(")");
@@ -67,12 +74,21 @@ public final class SqlUtils {
         StringBuffer buffer = new StringBuffer();
         buffer
                 .append("(")
-                .append(StringUtils.join(strings.toArray(), " or ", ""))
+                .append(StringUtils.join(strings.toArray(), " OR ", ""))
                 .append(")");
 
         return buffer.toString();
     }
 
+	/**
+	 * <p>
+	 * Метод возвращает строку вида prefix in (...) or prefix in (...) разбивая параметры в условии in по IN_CAUSE_LIMIT штук.
+	 * </p>
+	 * Пример вызова:
+	 * <p>
+	 * 	 transformToSqlInStatement("form_data.id", [309, 376, 410], 1000)
+	 * </p>
+	 */
     public static String transformToSqlInStatement(String prefix, Collection<?> collection) {
         return transformToSqlInStatement(prefix, collection, IN_CAUSE_LIMIT);
 	}

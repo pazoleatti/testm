@@ -342,8 +342,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("types", TypeFlag.rtsToKeys(types));
         params.put("manual", formData.isManual() ? 1 : 0);
 		return getNamedParameterJdbcTemplate().queryForInt(
-			"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual",
-			params);
+				"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual",
+				params);
 	}
 
     /**
@@ -358,8 +358,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         params.put("types", TypeFlag.rtsToKeys(types));
         params.put("manual", formData.isManual() ? 1 : 0);
         return getNamedParameterJdbcTemplate().queryForInt(
-			"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual AND alias IS NULL ",
-			params);
+				"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual AND alias IS NULL ",
+				params);
     }
 
     private void physicalInsertRows(final FormData formData,
@@ -451,15 +451,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("dataRowId", dataRowId);
 		try {
 			return DataAccessUtils.requiredSingleResult(getNamedParameterJdbcTemplate()
-							.query(sql, params,
-									new RowMapper<Pair<Long, Integer>>() {
-										@Override
-										public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
-											return new Pair<Long, Integer>(
-													SqlUtils.getLong(rs,"ord"),
-													SqlUtils.getInteger(rs, "idx"));
-										}
-									}));
+					.query(sql, params,
+							new RowMapper<Pair<Long, Integer>>() {
+								@Override
+								public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+									return new Pair<Long, Integer>(
+											SqlUtils.getLong(rs, "ord"),
+											SqlUtils.getInteger(rs, "idx"));
+								}
+							}));
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(ERROR_MSG_NO_ROWID, dataRowId, formDataId);
 		}
@@ -548,17 +548,21 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					}
 				}
 				FormStyle style = cell.getStyle();
-				batchList.add(new Object[] {dataRow.getId(), column.getId(), svalue, nvalue, dvalue,
-						style == null ? null : style.getId(),
-						cell.isEditable() ? 1 : null,
-						cell.getColSpan() == 1 ? null : cell.getColSpan(),
-						cell.getRowSpan() == 1 ? null : cell.getRowSpan()});
+				if (svalue != null || nvalue != null || dvalue != null || style != null ||
+						cell.isEditable() || cell.getColSpan() > 1 || cell.getRowSpan() > 1) {
+
+					batchList.add(new Object[] {dataRow.getId(), column.getId(), svalue, nvalue, dvalue,
+							style == null ? null : style.getId(),
+							cell.isEditable() ? 1 : null,
+							cell.getColSpan() == 1 ? null : cell.getColSpan(),
+							cell.getRowSpan() == 1 ? null : cell.getRowSpan()});
+				}
 			}
 		}
 		if (!batchList.isEmpty()) {
-			getJdbcTemplate().batchUpdate(
-				" INSERT INTO data_cell (row_id, column_id, svalue, nvalue, dvalue, style_id, editable, colspan, rowspan) " +
-				" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", batchList);
+			String sql = " INSERT INTO data_cell (row_id, column_id, svalue, nvalue, dvalue, style_id, editable, colspan, rowspan) " +
+					" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			getJdbcTemplate().batchUpdate(sql, batchList);
 		}
 	}
 
