@@ -102,6 +102,8 @@ public class DeclarationDataPresenter
         void setPdfPage(int page);
 
         void showState(boolean accepted);
+
+        void showNoPdf();
     }
 
 	private final DispatchAsync dispatcher;
@@ -202,16 +204,22 @@ public class DeclarationDataPresenter
                     @Override
                     public void onSuccess(TimerReportResult result) {
                         if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
-                            if (ReportType.XML_DEC.equals(reportType)) getView().setPdf(result.getPdf());
+                            if (ReportType.XML_DEC.equals(reportType)) {
+                                getView().setPdf(result.getPdf());
+                            }
                             getView().updatePrintReportButtonName(reportType, true);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(reportType);
-                            if (ReportType.XML_DEC.equals(reportType)) getView().setPdf(new Pdf());
+                            if (ReportType.XML_DEC.equals(reportType)) {
+                                getView().showNoPdf();
+                            }
                             if (!isTimer) {
                                 getView().updatePrintReportButtonName(reportType, false);
                             }
-                        } else if (!isTimer) {
-                            if (ReportType.XML_DEC.equals(reportType)) getView().setPdf(new Pdf());
+                        } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
+                            if (ReportType.XML_DEC.equals(reportType)) {
+                                getView().showNoPdf();
+                            }
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
                         }
@@ -227,6 +235,7 @@ public class DeclarationDataPresenter
 	@Override
 	public void onRecalculateClicked(Date docDate) {
 		LogCleanEvent.fire(this);
+        getView().showNoPdf();
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);

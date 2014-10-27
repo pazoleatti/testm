@@ -332,5 +332,24 @@ alter table ifrs_data add constraint ifrs_data_fk_report_period foreign key (rep
 alter table ifrs_data add constraint ifrs_data_fk_blob_data foreign key (blob_data_id) references blob_data(id);
 
 ---------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-9254: Обновление таблиц макетов НФ/деклараций
+
+ALTER TABLE form_type ADD is_ifrs NUMBER(1) default 0 not null;
+ALTER TABLE declaration_type ADD is_ifrs NUMBER(1) default 0 not null;
+
+ALTER TABLE form_type add constraint form_type_chk_is_ifrs check ((is_ifrs in (0,1) and tax_type='I') or (is_ifrs = 0 and tax_type<>'I'));
+ALTER TABLE declaration_type add constraint declaration_type_chk_is_ifrs check ((is_ifrs in (0,1) and tax_type='I') or (is_ifrs = 0 and tax_type<>'I'));
+
+COMMENT ON COLUMN form_type.is_ifrs is 'Отчетность для МСФО" (0 - не отчетность МСФО, 1 - отчетность МСФО)';
+COMMENT ON COLUMN declaration_type.is_ifrs is 'Отчетность для МСФО" (0 - не отчетность МСФО, 1 - отчетность МСФО)';
+
+ALTER TABLE form_type ADD ifrs_name VARCHAR2(200);
+ALTER TABLE declaration_type ADD ifrs_name VARCHAR2(200);
+
+COMMENT ON COLUMN form_type.ifrs_name IS 'Наименование формы для файла данного макета, включаемого в архив с отчетностью для МСФО'; 
+COMMENT ON COLUMN declaration_type.ifrs_name IS 'Наименование формы для файла данного макета, включаемого в архив с отчетностью для МСФО'; 
+
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

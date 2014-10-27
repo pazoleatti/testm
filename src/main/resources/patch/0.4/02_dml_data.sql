@@ -119,6 +119,17 @@ WHEN NOT MATCHED THEN
 	VALUES (seq_form_style.nextval, fs2.alias, fs2.form_template_id, fs2.font_color, fs2.back_color, fs2.italic, fs2.bold);
 
 ----------------------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-9273: заполнить поле "Наименования для МСФО" макетов НФ, деклараций
+UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-25' WHERE ID=324;
+UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-26' WHERE ID=325;
+UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-27' WHERE ID=326;
+UPDATE form_type SET is_ifrs=1, ifrs_name='РСД' WHERE ID=614;
+UPDATE form_type SET is_ifrs=1, ifrs_name='Доходы простые' WHERE ID=301;
+UPDATE form_type SET is_ifrs=1, ifrs_name='Расходы простые' WHERE ID=304;
+UPDATE form_type SET is_ifrs=1, ifrs_name='Доходы сложные' WHERE ID=302;
+UPDATE form_type SET is_ifrs=1, ifrs_name='Расходы сложные' WHERE ID=303;
 
+UPDATE declaration_type SET is_ifrs=1, ifrs_name='Декларация' WHERE id=2;
+----------------------------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
