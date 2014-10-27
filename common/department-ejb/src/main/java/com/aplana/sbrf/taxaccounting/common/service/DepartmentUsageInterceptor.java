@@ -9,6 +9,6 @@ import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
 public class DepartmentUsageInterceptor extends SpringBeanAutowiringInterceptor {
     @Override
     protected String getBeanFactoryLocatorKey(Object target) {
-        return "dapartmentBeanFactory";
+        return "departmentBeanFactory";
     }
 }

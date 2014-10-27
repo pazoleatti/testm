@@ -7,9 +7,9 @@ import javax.sql.DataSource;
  * Класс для получения датасурса приложения из ejb-модуля
  *
  */
-public final class ApplicationDataSource {
+public final class AuditEjbDataSource {
 
-    private ApplicationDataSource() {}
+    private AuditEjbDataSource() {}
 
     public static DataSource getDataSource(DataSourceHolderService holder) {
         return holder.getApplicationDataSource();
