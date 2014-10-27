@@ -223,7 +223,7 @@ void generateXML() {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
+    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value?.substring(0,8)
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def taxRate = incomeParams?.TAX_RATE?.value
     def sumTax = incomeParams?.SUM_TAX?.value // вместо departmentParamIncome.externalTaxSum
@@ -777,7 +777,7 @@ void generateXML() {
                             // 0..n
                             НалПУПроц(
                                     ВидПлат : getRefBookValue(24, row.paymentType)?.CODE?.value,
-                                    ОКТМО : row.okatoCode,
+                                    ОКТМО : row.okatoCode?.substring(0,8),
                                     КБК : row.budgetClassificationCode) {
 
                                 // 0..n

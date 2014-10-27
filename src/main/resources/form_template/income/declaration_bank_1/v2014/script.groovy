@@ -85,7 +85,7 @@ void checkDeparmentParams(LogLevel logLevel) {
 /** Логические проверки. */
 void logicCheck() {
     // получение данных из xml'ки
-    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false)
+    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false, false)
     if(xmlData == null){
         return
     }
@@ -223,7 +223,7 @@ void generateXML() {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
+    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value?.substring(0,8)
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def taxRate = incomeParams?.TAX_RATE?.value
     def sumTax = incomeParams?.SUM_TAX?.value // вместо departmentParamIncome.externalTaxSum
@@ -253,7 +253,7 @@ void generateXML() {
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId)
 
     /** XML декларации за предыдущий отчетный период. */
-    def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId, false)
+    def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId, false, true)
 
     /** Налоговый период. */
     def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
@@ -280,7 +280,7 @@ void generateXML() {
     /** АвПлатМесФБ. Код строки декларации 300. */
     def avPlatMesFB9month = 0
     if (isFirstPeriod) {
-        xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true)
+        xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true, false)
         if (xmlData9month != null) {
             nalVipl311FB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311ФБ.text() ?: 0)
             nalVipl311Sub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311Суб.text() ?: 0)
@@ -777,7 +777,7 @@ void generateXML() {
                             // 0..n
                             НалПУПроц(
                                     ВидПлат : getRefBookValue(24, row.paymentType)?.CODE?.value,
-                                    ОКТМО : row.okatoCode,
+                                    ОКТМО : row.okatoCode?.substring(0,8),
                                     КБК : row.budgetClassificationCode) {
 
                                 // 0..n
@@ -1823,15 +1823,24 @@ def getOldValue(def data, def kind, def valueName) {
  * @param reportPeriodId
  * @param departmentId
  */
-def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly) {
+def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
     if (reportPeriodId != null) {
-        /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка */
+        // вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка
         def declarationTypeId = ((newDeclaration) ? 9 : 2)
         def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
         if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
             def xmlString = declarationService.getXmlData(declarationData.id)
             xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
             return new XmlSlurper().parseText(xmlString)
+        // можно поискать в прошлом периоде другую декларацию (обычную Банка)
+        } else if (newDeclaration && anyPrevDeclaration) {
+            declarationTypeId = 2
+            declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
+            if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
+                def xmlString = declarationService.getXmlData(declarationData.id)
+                xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+                return new XmlSlurper().parseText(xmlString)
+            }
         }
     }
     return null
