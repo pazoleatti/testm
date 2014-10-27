@@ -90,7 +90,8 @@ def editableColumns = ['financialYear', 'taxPeriod', 'emitent', 'decreeNumber', 
                        'dividendForgeinPersonalAll', 'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5',
                        'dividendStavkaMore10', 'dividendRussianMembersAll', 'dividendRussianOrgStavka9',
                        'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
-                       'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSumFromPeriod', 'taxSumFromPeriodAll']
+                       'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendSumForTaxAll','dividendSumForTaxStavka9',
+                       'dividendSumForTaxStavka0','taxSum', 'taxSumFromPeriod', 'taxSumFromPeriodAll']
 
 // Автозаполняемые атрибуты
 @Field
@@ -125,21 +126,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-    if (!dataRows.isEmpty()) {
-        for (def row in dataRows) {
-            // графа 21
-            row.dividendSumForTaxAll = checkOverpower(calc21(row), row, "dividendSumForTaxAll")
-            // графа 22
-            row.dividendSumForTaxStavka9 = checkOverpower(calc22(row), row, "dividendSumForTaxStavka9")
-            // графа 23
-            row.dividendSumForTaxStavka0 = checkOverpower(calc23(row), row, "dividendSumForTaxStavka0")
-            // графа 24
-            row.taxSum = checkOverpower(calc24(row), row, "taxSum")
-        }
-        dataRowHelper.update(dataRows);
-    }
+    // расчетов нет
 }
 
 def BigDecimal calc21(def row) {
