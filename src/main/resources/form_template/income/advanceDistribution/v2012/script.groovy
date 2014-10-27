@@ -102,7 +102,7 @@ def allColumns = ['number', 'regionBank', 'fix', 'regionBankDivision', 'kpp', 'p
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'minimizeTaxSum', 'amountTax']
+def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'amountTax']
 
 // Автозаполняемые атрибуты
 @Field
@@ -906,11 +906,11 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
     }
 
     // графа 21
-    if (reportPeriod.order != 3 || row.taxSum == null || row.everyMonthForThirdKvartalNextPeriod == null) {
+    if (reportPeriod.order != 3 || row.taxSum == null || row.everyMonthForThirdKvartalNextPeriod == null || row.everyMonthForSecondKvartalNextPeriod == null) {
         row.everyMonthForFourthKvartalNextPeriod = 0
     } else {
         row.everyMonthForFourthKvartalNextPeriod =
-            (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
+            ((reportPeriod.order == 3) ? (row.taxSum - row.everyMonthForThirdKvartalNextPeriod - row.everyMonthForSecondKvartalNextPeriod) : 0)
     }
 
     // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21
