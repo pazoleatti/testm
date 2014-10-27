@@ -5,10 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.ValidateService;
+import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,9 +21,9 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("ValidateServiceImplTest.xml")
-public class ValidateServiceImplTest implements Runnable {
+/*@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("ValidateServiceImplTest.xml")*/
+public class ValidateXMLServiceImplTest implements Runnable {
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -33,7 +32,7 @@ public class ValidateServiceImplTest implements Runnable {
     @Autowired
     private ReportService reportService;
     @Autowired
-    private ValidateService validateService;
+    private ValidateXMLService validateService;
 
     @Before
     public void init() throws IOException {
@@ -44,14 +43,14 @@ public class ValidateServiceImplTest implements Runnable {
         when(declarationTemplateService.get(5)).thenReturn(declarationTemplate1);
         BlobData blobDataXsd = new BlobData();
         InputStream inputStreamXsd = Thread.currentThread().getContextClassLoader().
-                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateServiceImpl.class) +
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
                         File.separator + "validate" + File.separator + "NO_NDS.12_1_003_07_05_04_01.xsd");
         blobDataXsd.setInputStream(inputStreamXsd);
 
         BlobData blobDataXml = new BlobData();
         String uuidXml = UUID.randomUUID().toString();
         InputStream inputStreamXml = Thread.currentThread().getContextClassLoader().
-                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateServiceImpl.class) +
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
                         File.separator + "validate" + File.separator + "NO_NDS.12_1_1_0212345678020012345_20140331_1.xml");
         blobDataXml.setInputStream(inputStreamXml);
         when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(ReportType.XML_DEC))).thenReturn(uuidXml);
@@ -66,14 +65,14 @@ public class ValidateServiceImplTest implements Runnable {
         when(declarationTemplateService.get(3)).thenReturn(declarationTemplate2);
         BlobData blobDataXsd2 = new BlobData();
         InputStream inputStreamXsd2 = Thread.currentThread().getContextClassLoader().
-                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateServiceImpl.class) +
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
                         File.separator + "validate" + File.separator + "1020.xsd");
         blobDataXsd2.setInputStream(inputStreamXsd2);
 
         BlobData blobDataXml2 = new BlobData();
         String uuidXml2 = UUID.randomUUID().toString();
         InputStream inputStreamXml2 = Thread.currentThread().getContextClassLoader().
-                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateServiceImpl.class) +
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
                         File.separator + "validate" + File.separator + "report.jrxml");
         blobDataXml2.setInputStream(inputStreamXml2);
         when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(ReportType.XML_DEC))).thenReturn(uuidXml2);
@@ -93,7 +92,7 @@ public class ValidateServiceImplTest implements Runnable {
         Assert.assertTrue(validateService.validate(data, userInfo));
     }
 
-    @Test
+    //@Test
     public void validateTest(){
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
@@ -104,7 +103,7 @@ public class ValidateServiceImplTest implements Runnable {
         Assert.assertTrue(validateService.validate(data, userInfo));
     }
 
-    @Test
+    //@Test
     public void validateDiffThreads(){
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
