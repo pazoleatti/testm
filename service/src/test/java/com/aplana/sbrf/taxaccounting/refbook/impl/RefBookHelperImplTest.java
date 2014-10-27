@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -126,8 +127,12 @@ public class RefBookHelperImplTest {
 
 		refBookHelper.dataRowsDereference(null, dataRows, columns);
 
-		assertEquals("Договор №1", dataRows.get(0).get(sColumn.getAlias()));
-		assertEquals("435", dataRows.get(0).get(rbColumn.getAlias()));
-		assertEquals("Россия", dataRows.get(0).get(refColumn.getAlias()));
+		assertEquals("Договор №1", dataRow.get(sColumn.getAlias()));
+		assertEquals(2L, dataRow.get(rbColumn.getAlias()));
+		assertNull(dataRow.get(refColumn.getAlias()));
+
+		assertEquals("Договор №1", dataRow.getCell(sColumn.getAlias()).getStringValue());
+		assertEquals("435", dataRow.getCell(rbColumn.getAlias()).getRefBookDereference());
+		assertEquals("Россия", dataRow.getCell(refColumn.getAlias()).getRefBookDereference());
 	}
 }
