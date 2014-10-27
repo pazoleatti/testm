@@ -1523,7 +1523,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     attributeValues.put(attribute.getUnique(), values);
                 }
             }
-            listAttributeValues.add(attributeValues);
+            if (!attributeValues.isEmpty()) {
+                listAttributeValues.add(attributeValues);
+            }
         }
         return listAttributeValues;
     }
