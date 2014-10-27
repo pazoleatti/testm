@@ -2,12 +2,10 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.ValidateService;
-import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +84,8 @@ public class ValidateServiceImplTest implements Runnable {
 
     //@Test
     public void validateTestSample(){
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
         TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
@@ -95,6 +95,8 @@ public class ValidateServiceImplTest implements Runnable {
 
     @Test
     public void validateTest(){
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
         TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
@@ -104,6 +106,8 @@ public class ValidateServiceImplTest implements Runnable {
 
     @Test
     public void validateDiffThreads(){
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
         for (int i=1; i<=3; i++){
             new Thread(this).run();
         }
