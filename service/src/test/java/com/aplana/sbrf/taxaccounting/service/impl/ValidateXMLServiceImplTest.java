@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,8 +22,8 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-/*@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("ValidateServiceImplTest.xml")*/
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("ValidateServiceImplTest.xml")
 public class ValidateXMLServiceImplTest implements Runnable {
 
     @Autowired
@@ -92,7 +93,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         Assert.assertTrue(validateService.validate(data, userInfo));
     }
 
-    //@Test
+    @Test
     public void validateTest(){
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
@@ -103,7 +104,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         Assert.assertTrue(validateService.validate(data, userInfo));
     }
 
-    //@Test
+    @Test
     public void validateDiffThreads(){
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
