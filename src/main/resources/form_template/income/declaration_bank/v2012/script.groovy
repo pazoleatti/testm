@@ -1808,9 +1808,9 @@ def getTotalFromForm(def dataRows, def columnName) {
  */
 def getOldValue(def data, def kind, def valueName) {
     if (data != null) {
-        data.Документ.Прибыль.НалДохСтав.each {
+        for (def it in data.Документ.Прибыль.НалДохСтав) {
             if (it.@ВидДоход == kind) {
-                return it.@"$valueName"
+                return getXmlValue(it.@"$valueName".text())
             }
         }
     }
