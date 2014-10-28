@@ -13,7 +13,9 @@ public class ReferenceColumn extends Column {
 	// ссылка на родительскую графу
 	private int parentId;
 
-    // только для экспорта/импорта
+	/**
+	 *  только для экспорта/импорта
+	 */
     private String parentAlias;
 
     private long refBookAttributeId;
@@ -40,10 +42,16 @@ public class ReferenceColumn extends Column {
         this.parentId = parentId;
     }
 
+	/**
+	 *  только для экспорта/импорта
+	 */
     public String getParentAlias() {
         return parentAlias;
     }
 
+	/**
+	 *  только для экспорта/импорта
+	 */
     public void setParentAlias(String parentAlias){
         this.parentAlias = parentAlias;
     }

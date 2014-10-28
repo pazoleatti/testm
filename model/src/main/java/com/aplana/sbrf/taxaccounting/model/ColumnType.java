@@ -32,4 +32,13 @@ public enum ColumnType {
 		return title;
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("ColumnType{");
+		sb.append(name());
+		sb.append(";");
+		sb.append(title);
+		sb.append('}');
+		return sb.toString();
+	}
 }
