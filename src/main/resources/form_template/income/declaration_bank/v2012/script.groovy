@@ -332,7 +332,7 @@ void generateXML() {
     def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308, FormDataKind.ADDITIONAL)
 
     /** форма «Остатки по начисленным авансовым платежам». */
-    def dataRowsRemains = getDataRows(formDataCollection, departmentId, 309, FormDataKind.PRIMARY)
+    def dataRowsRemains = getDataRows(formDataCollection, 309, FormDataKind.PRIMARY)
 
     /*
      * Получение значении декларации за предыдущий период.
@@ -710,7 +710,7 @@ void generateXML() {
                             def rowForNalPu = getDataRow(dataRowsAdvance, 'ca')
                             // налПу = строка 070, если строка 070 == 0, то строка 080, если строка 080 == 0, то 0
                             nalPu = (rowForNalPu != null ?
-                                    (rowForNalPu.taxSumToPay ?: rowForNalPu.taxSumToReduction) : 0)
+                                    (rowForNalPu.taxSumToPay ?: (- (rowForNalPu.taxSumToReduction ?: 0))) : 0)
                             if (nalPu == null) {
                                 nalPu = 0
                             }

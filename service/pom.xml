@@ -166,6 +166,7 @@
                 <includes>
                     <include>**/service.xml</include>
                     <include>**/acctax.xlsm</include>
+                    <include>**/VSAX3.exe</include>
                 </includes>
             </resource>
         </resources>

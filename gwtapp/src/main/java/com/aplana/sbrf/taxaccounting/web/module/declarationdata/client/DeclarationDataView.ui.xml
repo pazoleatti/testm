@@ -79,6 +79,11 @@
         left: 0;
         top: 104px;
     }
+    .noPdf {
+        font-size: 30px;
+        text-align: center;
+        margin-top: 200px;
+    }
 
 </ui:style>
 
@@ -197,6 +202,7 @@
                 </g:HorizontalPanel>
 
                 <pdf:PdfViewerWidget ui:field="pdfViewer" addStyleNames="{style.pdfWidget}"/>
+                <g:Label ui:field="noPdfLabel" addStyleNames="{style.noPdf}" />
 
             </fm:BodyContainer>
         </fm:body>

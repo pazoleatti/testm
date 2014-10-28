@@ -189,13 +189,13 @@ public class DataRowDaoImplTest extends Assert {
 
 		DataRow<Cell> dr = dataRows.get(0);
 		dr.setId(null);
-		
+
 		dr.put("stringColumn", "11");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
 		dr.put("dateColumn", date);
 		dataRowsForUpdate.add(dr);
-		
+
 
 		dataRowDao.updateRows(fd, dataRowsForUpdate);
 	}
@@ -263,7 +263,7 @@ public class DataRowDaoImplTest extends Assert {
 				new int[] { -2, -1, 1, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void insertRowsByIndexError() {
 
@@ -303,7 +303,7 @@ public class DataRowDaoImplTest extends Assert {
 				new int[] { 1, 11, 12, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
 	}
-	
+
 	@Test(expected=DaoException.class)
 	public void insertRowsAfterErrorRowId() {
 		FormData fd = formDataDao.get(1, false);
@@ -364,7 +364,7 @@ public class DataRowDaoImplTest extends Assert {
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
-		
+
 	}
 */
 
@@ -376,13 +376,13 @@ public class DataRowDaoImplTest extends Assert {
 				new int[] { 1, 5 },
 				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void removeRowsByIndexesError1() {
 		FormData fd = formDataDao.get(1, false);
 		dataRowDao.removeRows(fd, 0, 4);
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void removeRowsByIndexes1Error2() {
 		FormData fd = formDataDao.get(1, false);
@@ -744,5 +744,53 @@ public class DataRowDaoImplTest extends Assert {
 
         Assert.assertEquals("str", rows2t.get(0).getCell("stringColumn").getValue());
         Assert.assertEquals(BigDecimal.valueOf(1.33d), rows2t.get(0).getCell("numericColumn").getValue());
+    }
+
+    @Test
+    public void saveSortRowsWithTmpInsertRows() {
+        FormData fd = formDataDao.get(1000, false);
+        // получить 5 строк из временного среза
+        List<DataRow<Cell>> dataRows1 = dataRowDao.getRows(fd, null);
+
+        // удаленные
+        List<DataRow<Cell>> deleteRows = new ArrayList<DataRow<Cell>>();
+        deleteRows.add(dataRows1.get(0));
+        deleteRows.add(dataRows1.get(1));
+        dataRowDao.removeRows(fd, deleteRows);
+
+        // добавленные
+        List<DataRow<Cell>> insertRows = new ArrayList<DataRow<Cell>>();
+        insertRows.add(fd.createDataRow());
+        insertRows.add(fd.createDataRow());
+        dataRowDao.insertRows(fd, 3, insertRows);
+
+        // получить временный срез после изменении
+        dataRows1 = dataRowDao.getRows(fd, null);
+
+        // изменить сортировку
+        Collections.sort(dataRows1, new Comparator<DataRow<Cell>>() {
+            @Override
+            public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                return o2.getId().compareTo(o1.getId());
+            }
+        });
+
+        // сохранить сортировку
+        dataRowDao.saveSortRows(fd, dataRows1);
+
+        // получить строки из временного среза
+        List<DataRow<Cell>> dataRows2 = dataRowDao.getRows(fd, null);
+
+        // проверка - после удаления стало на одну строку меньше
+        Assert.assertEquals(dataRows1.size(), dataRows2.size());
+
+        // проверить что оставшиеся строки отсортированы в обратном порядке
+        if (dataRows2.size() == dataRows1.size()) {
+            for (int i = 0; i < dataRows2.size(); i++) {
+                int id1 = dataRows1.get(i).getId().intValue();
+                int id2 = dataRows2.get(i).getId().intValue();
+                Assert.assertEquals(id1, id2);
+            }
+        }
     }
 }

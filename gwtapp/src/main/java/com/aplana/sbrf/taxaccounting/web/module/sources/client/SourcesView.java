@@ -377,7 +377,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 if (event.getValue()) {
                     for (DepartmentAssign departmentAssign : rightTable.getVisibleItems()) {
-                        rightSM.setSelected(departmentAssign, true);
+                        if (departmentAssign.isEnabled()) {
+                            rightSM.setSelected(departmentAssign, true);
+                        }
                     }
                 } else {
                     rightSM.clear();

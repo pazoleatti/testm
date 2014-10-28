@@ -168,4 +168,9 @@ public interface DataRowDao {
      * @param formDataDestinationId НФ приемник
      */
     void copyRows(long formDataSourceId, long formDataDestinationId);
+
+    /**
+     * Сохранить отсортированные строки без учета остальных изменении. Обновятся только значения атрибута DATA_ROW.ORD
+     */
+    void saveSortRows(final FormData formData, final List<DataRow<Cell>> dataRows);
 }

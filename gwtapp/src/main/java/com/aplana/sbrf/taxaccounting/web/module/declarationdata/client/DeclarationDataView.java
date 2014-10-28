@@ -69,6 +69,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiField
 	PdfViewerView pdfViewer;
+    @UiField
+    Label noPdfLabel;
 
     @UiField
     Label dateBoxLabel;
@@ -116,6 +118,13 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             status =  isDeal ? "Создано" : "Создана";
         }
         stateLabel.setText(status);
+    }
+
+    @Override
+    public void showNoPdf(String text) {
+        pdfViewer.setVisible(false);
+        noPdfLabel.setVisible(true);
+        noPdfLabel.setText(text);
     }
 
     @Override
@@ -206,6 +215,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@Override
 	public void setPdf(Pdf pdf) {
+        pdfViewer.setVisible(true);
+        noPdfLabel.setVisible(false);
 		pdfViewer.setPages(pdf);
 	}
 
