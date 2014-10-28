@@ -11,7 +11,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Repository
 @Transactional(readOnly=true)
@@ -101,11 +102,13 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void delete(long formDataId) {
-        try{
-            getJdbcTemplate().update("DELETE FROM FORM_DATA_REPORT WHERE FORM_DATA_ID = ?",
-                    new Object[]{formDataId},
-                    new int[]{Types.INTEGER});
+    public void delete(long formDataId, Boolean manual) {
+        try {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("formDataId", formDataId);
+            params.put("manual", manual);
+            getNamedParameterJdbcTemplate().update("DELETE FROM FORM_DATA_REPORT WHERE FORM_DATA_ID = :formDataId and (:manual IS NULL OR MANUAL = :manual)",
+                    params);
         } catch (DataAccessException e){
             throw new DaoException(String.format("Не удалось удалить записи с form_data_id = %d", formDataId), e);
         }

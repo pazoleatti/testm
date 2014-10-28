@@ -47,8 +47,9 @@ public interface ReportDao {
     /**
      * Удаление всех отчетов для НФ
      * @param formDataId
+     * @param manual
      */
-    void delete(long formDataId);
+    void delete(long formDataId, Boolean manual);
 
     /**
      * Удаление всех отчетов по id декларации

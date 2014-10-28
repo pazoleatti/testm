@@ -47,6 +47,7 @@ switch (formDataEvent) {
         importData()
         calc()
         logicCheck()
+        break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
         break

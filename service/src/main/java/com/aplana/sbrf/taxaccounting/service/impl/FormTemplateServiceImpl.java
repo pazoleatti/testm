@@ -84,7 +84,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             int formTemplateId = formTemplateDao.save(formTemplate);
             List<Long> formDataIds = formDataService.getFormDataListInActualPeriodByTemplate(formTemplateId, formTemplate.getVersion());
             for(Long formDataId: formDataIds)
-                formDataService.deleteReport(formDataId);
+                formDataService.deleteReport(formDataId, null);
             return formTemplateId;
         } else
             return formTemplateDao.saveNew(formTemplate);

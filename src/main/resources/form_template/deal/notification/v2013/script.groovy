@@ -40,13 +40,22 @@ def providerCache = [:]
 @Field
 def refBookCache = [:]
 
-void checkDeparmentParams(LogLevel logLevel) {
-    def date = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
+// Дата окончания отчетного периода
+@Field
+def endDate = null
 
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(declarationData.reportPeriodId).time
+    }
+    return endDate
+}
+
+void checkDeparmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParamList = getProvider(37).getRecords(date - 1, null, "DEPARTMENT_ID = $departmentId", null)
+    def departmentParamList = getProvider(37).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
 
     if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения")
@@ -69,12 +78,10 @@ void checkDeparmentParams(LogLevel logLevel) {
  * Запуск генерации XML
  */
 void generateXML() {
-    def date = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
-
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParam = getProvider(37).getRecords(date - 1, null, "DEPARTMENT_ID = $departmentId", null).get(0)
+    def departmentParam = getProvider(37).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null).get(0)
 
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
@@ -167,8 +174,8 @@ void generateXML() {
                     def Long recYesId = null
                     // "Нет"
                     def Long recNoId = null
-                    def valYes = getProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
-                    def valNo = getProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
+                    def valYes = getProvider(38L).getRecords(getReportPeriodEndDate() - 1, null, "CODE = 1", null)
+                    def valNo = getProvider(38L).getRecords(getReportPeriodEndDate() - 1, null, "CODE = 0", null)
                     if (valYes != null && valYes.size() == 1)
                         recYesId = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
                     if (valNo != null && valNo.size() == 1)

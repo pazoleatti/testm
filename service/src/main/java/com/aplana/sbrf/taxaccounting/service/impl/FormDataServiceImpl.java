@@ -485,7 +485,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		dataRowDao.commit(formData.getId());
 
-        deleteReport(formData.getId());
+        deleteReport(formData.getId(), formData.isManual());
 
         // ЖА и история изменений
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
@@ -546,11 +546,11 @@ public class FormDataServiceImpl implements FormDataService {
         } else {
             formDataAccessService.canDelete(userInfo, formDataId);
 
-            FormData formData = formDataDao.get(formDataId, manual);
+            FormData formData = formDataDao.get(formDataId, false);
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                     null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
             formDataDao.delete(formDataId);
-            deleteReport(formDataId);
+            deleteReport(formDataId, null);
         }
 	}
 
@@ -724,7 +724,8 @@ public class FormDataServiceImpl implements FormDataService {
 
         logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
 
-        deleteReport(formData.getId());
+        //Считаем что при наличие версии ручного ввода движение о жц невозможно
+        deleteReport(formData.getId(), null);
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
@@ -951,7 +952,7 @@ public class FormDataServiceImpl implements FormDataService {
         try {
             List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
             for(Long formDataId: formDataIds)
-                deleteReport(formDataId);
+                deleteReport(formDataId, null);
             formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -965,7 +966,7 @@ public class FormDataServiceImpl implements FormDataService {
         try {
             List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
             for(Long formDataId: formDataIds)
-                deleteReport(formDataId);
+                deleteReport(formDataId, null);
             formDataDao.updateFDPerformerDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -1162,18 +1163,22 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void deleteReport(long formDataId) {
+    public void deleteReport(long formDataId, Boolean manual) {
         boolean[] b = {false, true};
         ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
-        for(ReportType reportType: reportTypes) {
-            for(boolean manual: b) {
-                for(boolean showChecked: b) {
-                    for(boolean saved: b) {
+        for (ReportType reportType: reportTypes) {
+            for (boolean showChecked : b) {
+                for(boolean saved : b) {
+                    if (manual != null) {
                         lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved), 0, true);
+                    } else {
+                        for(boolean all: b) {
+                            lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, all, saved), 0, true);
+                        }
                     }
                 }
             }
         }
-        reportService.delete(formDataId);
+        reportService.delete(formDataId, manual);
     }
 }

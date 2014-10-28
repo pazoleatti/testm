@@ -777,7 +777,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @Override
 	public void updateData() {
-		formDataTable.setVisibleRangeAndClearData(formDataTable.getVisibleRange(), true);
+        formDataTable.setVisibleRangeAndClearData(formDataTable.getVisibleRange(), true);
 	}
 
     @UiFactory
@@ -868,8 +868,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                         handlers.onSelectRow();
                     }
                     if (prevSelectedRow != null) {
-                        TableCellElement item = formDataTable.getRowElement(prevSelectedRow.getIndex() - 1).getCells().getItem(0);
-                        item.removeAttribute("style");
+                        if (formDataTable.getVisibleItemCount() > 0) {
+                            TableCellElement item = formDataTable.getRowElement(prevSelectedRow.getIndex() - 1).getCells().getItem(0);
+                            item.removeAttribute("style");
+                        }
                     }
                     DataRow<Cell> selectedRow = getSelectedRow();
                     if (selectedRow != null) {

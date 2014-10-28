@@ -67,6 +67,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -132,6 +135,8 @@ void calc() {
 
     dataRows.add(calcTotalRow(dataRows))
     dataRowHelper.save(dataRows)
+
+    sortFormDataRows()
 }
 
 void calcSubTotal(def dataRows) {
@@ -515,4 +520,17 @@ void addTransportData(def xml) {
         }
     }
     dataRowHelper.save(rows)
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getSubTotalRows(def dataRows) {
+    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
 }
