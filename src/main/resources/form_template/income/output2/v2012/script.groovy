@@ -124,13 +124,7 @@ void logicCheck() {
 
     for (row in dataRows) {
         def rowNum = row.getIndex()
-
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
-
-        String zipCode = (String) row.zipCode;
-        if (zipCode != null && (zipCode.length() != 6 || !zipCode.matches('[0-9]*'))) {
-            rowError(logger, row, "Строка $rowNum: Неправильно указан почтовый индекс!")
-        }
     }
 }
 
@@ -303,7 +297,17 @@ void addData(def xml, headRowCount) {
             xmlIndexCol++
 
             // графа 23
-            newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            def yearStr = row.cell[xmlIndexCol].text()
+            if (yearStr != null) {
+                if (yearStr.contains(".")) {
+                    newRow.reportYear = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                } else {
+                    def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                    if (yearNum != null && yearNum != 0) {
+                        newRow.reportYear = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
+                    }
+                }
+            }
 
             rows.add(newRow)
         }

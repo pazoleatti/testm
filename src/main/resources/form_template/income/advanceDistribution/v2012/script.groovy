@@ -207,6 +207,8 @@ void calc() {
         sumNal = new BigDecimal(getValue(sumTaxRecords, 'SUM_TAX').doubleValue())
     }
 
+    def prevDataRows = getPrevDataRows()
+
     // расчет графы 2..4, 8..21
     for (row in dataRows) {
         // графа 2 - название подразделения
@@ -242,7 +244,7 @@ void calc() {
         row.taxSum = calc13(row)
 
         // графа 14..21
-        calcColumnFrom14To21(row, sumNal, reportPeriod)
+        calcColumnFrom14To21(prevDataRows, row, sumNal, reportPeriod)
     }
 
     // Сортировка
@@ -393,12 +395,11 @@ def logicalCheck() {
 void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def Department department = departmentService.get(formData.departmentId)
 
     def departmentParamsDate = getReportPeriodEndDate() - 1
     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), departmentParamsDate, -1, null, false)
     if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
-        logger.error("Для подразделения «${department.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+        logger.error("Для подразделения «${formDataDepartment.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
     }
 
     def sumTaxUnpRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
@@ -466,9 +467,9 @@ void logicalCheckBeforeCalc() {
         summaryMap.each { key, value ->
             def formDataSummary = getFormDataSummary(key)
             if (formDataSummary == null) {
-                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не создана!")
+                logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не создана!")
             } else if (getData(formDataSummary) == null) {
-                logger.error("Сводная налоговая форма «$value» в подразделении «${department.name}» не находится в статусе «Принята»!")
+                logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не находится в статусе «Принята»!")
             }
         }
     }
@@ -886,7 +887,7 @@ def getTaxBase() {
  * @param sumNal значение из настроек подраздления "Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде"
  * @param reportPeriod отчетный период
  */
-void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
+void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPeriod) {
     def tmp
 
     // графа 14
@@ -912,14 +913,34 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
             (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
     }
 
+    // Значения граф этого же подразделения в форме пред. периода
+    def prev19 = null
+    def prev20 = null
+
+    if ((reportPeriod.order == 2 || reportPeriod.order == 3) && row.regionBankDivision != null && prevDataRows != null) {
+        for (def prevRow : prevDataRows) {
+            if (row.regionBankDivision.equals(prevRow.regionBankDivision)) {
+                // графа 19 пред. периода
+                prev19 = prevRow.everyMonthForSecondKvartalNextPeriod
+                // графа 20 пред. периода
+                prev20 = prevRow.everyMonthForThirdKvartalNextPeriod
+                break
+            }
+        }
+    }
+    // Если не нашлось, считаем 0
+    prev19 = prev19 == null ? 0 : prev19
+    prev20 = prev20 == null ? 0 : prev20
+
     // графа 19
-    row.everyMonthForSecondKvartalNextPeriod = (reportPeriod.order == 1 ? row.taxSum : 0)
+    row.everyMonthForSecondKvartalNextPeriod = (reportPeriod.order == 1 ? row.taxSum : prev19)
 
     // графа 20
-    if (reportPeriod.order != 2 || row.taxSum == null || row.everyMonthForSecondKvartalNextPeriod == null) {
-        row.everyMonthForThirdKvartalNextPeriod = 0
+    if (reportPeriod.order != 2 || row.taxSum == null || row.everyMonthForSecondKvartalNextPeriod == null || row.everyMonthForKvartalNextPeriod == null) {
+        row.everyMonthForThirdKvartalNextPeriod = prev20
     } else {
-        row.everyMonthForThirdKvartalNextPeriod = row.taxSum - row.everyMonthForSecondKvartalNextPeriod
+        row.everyMonthForThirdKvartalNextPeriod =
+                ((reportPeriod.order == 2) ? (row.taxSum - row.everyMonthForSecondKvartalNextPeriod - row.everyMonthForKvartalNextPeriod) : prev20)
     }
 
     // графа 21
@@ -927,7 +948,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
         row.everyMonthForFourthKvartalNextPeriod = 0
     } else {
         row.everyMonthForFourthKvartalNextPeriod =
-            (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
+            ((reportPeriod.order == 3) ? (row.taxSum - row.everyMonthForThirdKvartalNextPeriod) : 0)
     }
 
     // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21
@@ -998,4 +1019,10 @@ def getValue(def record, def alias) {
  */
 def roundValue(BigDecimal value, def precision) {
     value.setScale(precision, BigDecimal.ROUND_HALF_UP)
+}
+
+/** Получить строки за предыдущий отчетный период. */
+def getPrevDataRows() {
+    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
 }
