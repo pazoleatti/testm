@@ -34,8 +34,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void delete(long formDataId) {
-        reportDao.delete(formDataId);
+    public void delete(long formDataId, Boolean manual) {
+        reportDao.delete(formDataId, manual);
     }
 
     @Override

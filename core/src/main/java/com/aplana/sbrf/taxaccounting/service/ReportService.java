@@ -51,8 +51,9 @@ public interface ReportService {
     /**
      * Удаление всех отчетов по id НФ
      * @param formDataId
+     * @param manual
      */
-    void delete(long formDataId);
+    void delete(long formDataId, Boolean manual);
 
     /**
      * Удаление всех отчетов по id декларации

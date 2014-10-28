@@ -307,7 +307,8 @@ public interface FormDataService {
 
     /**
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с НФ
-     * @param formDataId
+     * @param formDataId идентификатор налоговой формы
+     * @param manual признак версии ручного ввода. Если null - то удаляются отчеты для обеих версий
      */
-    void deleteReport(long formDataId);
+    void deleteReport(long formDataId, Boolean manual);
 }
