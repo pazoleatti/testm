@@ -202,7 +202,7 @@
                 </g:HorizontalPanel>
 
                 <pdf:PdfViewerWidget ui:field="pdfViewer" addStyleNames="{style.pdfWidget}"/>
-                <g:Label ui:field="noPdfLabel" addStyleNames="{style.noPdf}" text="--- Выполняется формирование ---" />
+                <g:Label ui:field="noPdfLabel" addStyleNames="{style.noPdf}" />
 
             </fm:BodyContainer>
         </fm:body>

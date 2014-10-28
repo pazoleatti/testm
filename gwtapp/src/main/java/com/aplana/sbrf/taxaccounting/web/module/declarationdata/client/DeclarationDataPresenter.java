@@ -103,7 +103,7 @@ public class DeclarationDataPresenter
 
         void showState(boolean accepted);
 
-        void showNoPdf();
+        void showNoPdf(String text);
     }
 
 	private final DispatchAsync dispatcher;
@@ -211,14 +211,14 @@ public class DeclarationDataPresenter
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(reportType);
                             if (ReportType.XML_DEC.equals(reportType)) {
-                                getView().showNoPdf();
+                                getView().showNoPdf("--- Область предварительного просмотра ---");
                             }
                             if (!isTimer) {
                                 getView().updatePrintReportButtonName(reportType, false);
                             }
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (ReportType.XML_DEC.equals(reportType)) {
-                                getView().showNoPdf();
+                                getView().showNoPdf("--- Заполнение декларации данными ---");
                             }
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -235,7 +235,7 @@ public class DeclarationDataPresenter
 	@Override
 	public void onRecalculateClicked(Date docDate) {
 		LogCleanEvent.fire(this);
-        getView().showNoPdf();
+        getView().showNoPdf("--- Заполнение декларации данными ---");
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);

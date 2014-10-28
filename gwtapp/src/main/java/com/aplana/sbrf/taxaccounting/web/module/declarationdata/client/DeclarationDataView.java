@@ -121,9 +121,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void showNoPdf() {
+    public void showNoPdf(String text) {
         pdfViewer.setVisible(false);
         noPdfLabel.setVisible(true);
+        noPdfLabel.setText(text);
     }
 
     @Override
