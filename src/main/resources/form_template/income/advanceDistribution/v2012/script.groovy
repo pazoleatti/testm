@@ -898,10 +898,11 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
     row.everyMonthForSecondKvartalNextPeriod = (reportPeriod.order == 1 ? row.taxSum : 0)
 
     // графа 20
-    if (reportPeriod.order != 2 || row.taxSum == null || row.everyMonthForSecondKvartalNextPeriod == null) {
+    if (reportPeriod.order != 2 || row.taxSum == null || row.everyMonthForSecondKvartalNextPeriod == null || row.everyMonthForKvartalNextPeriod == null) {
         row.everyMonthForThirdKvartalNextPeriod = 0
     } else {
-        row.everyMonthForThirdKvartalNextPeriod = row.taxSum - row.everyMonthForSecondKvartalNextPeriod
+        row.everyMonthForThirdKvartalNextPeriod =
+                ((reportPeriod.order == 2) ? (row.taxSum - row.everyMonthForSecondKvartalNextPeriod - row.everyMonthForKvartalNextPeriod) : 0)
     }
 
     // графа 21
@@ -909,7 +910,7 @@ void calcColumnFrom14To21(def row, def sumNal, def reportPeriod) {
         row.everyMonthForFourthKvartalNextPeriod = 0
     } else {
         row.everyMonthForFourthKvartalNextPeriod =
-            (reportPeriod.order == 3 ? row.taxSum - row.everyMonthForThirdKvartalNextPeriod : 0)
+            ((reportPeriod.order == 3) ? (row.taxSum - row.everyMonthForThirdKvartalNextPeriod) : 0)
     }
 
     // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21

@@ -85,7 +85,7 @@ void checkDeparmentParams(LogLevel logLevel) {
 /** Логические проверки. */
 void logicCheck() {
     // получение данных из xml'ки
-    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false)
+    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false, false)
     if(xmlData == null){
         return
     }
@@ -223,7 +223,7 @@ void generateXML() {
     def kpp = incomeParams?.KPP?.value
     def reorgInn = incomeParams?.REORG_INN?.value
     def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value
+    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value?.substring(0,8)
     def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
     def taxRate = incomeParams?.TAX_RATE?.value
     def sumTax = incomeParams?.SUM_TAX?.value // вместо departmentParamIncome.externalTaxSum
@@ -253,7 +253,7 @@ void generateXML() {
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId)
 
     /** XML декларации за предыдущий отчетный период. */
-    def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId, false)
+    def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId, false, true)
 
     /** Налоговый период. */
     def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
@@ -280,7 +280,7 @@ void generateXML() {
     /** АвПлатМесФБ. Код строки декларации 300. */
     def avPlatMesFB9month = 0
     if (isFirstPeriod) {
-        xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true)
+        xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true, false)
         if (xmlData9month != null) {
             nalVipl311FB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311ФБ.text() ?: 0)
             nalVipl311Sub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311Суб.text() ?: 0)
@@ -298,33 +298,33 @@ void generateXML() {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
-    def dataRowsComplexIncome = getDataRows(formDataCollection, departmentId, 302, FormDataKind.SUMMARY)
+    def dataRowsComplexIncome = getDataRows(formDataCollection, 302, FormDataKind.SUMMARY)
 
     /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleIncome = getDataRows(formDataCollection, departmentId, 301, FormDataKind.SUMMARY)
+    def dataRowsSimpleIncome = getDataRows(formDataCollection, 301, FormDataKind.SUMMARY)
 
     /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
-    def dataRowsComplexConsumption = getDataRows(formDataCollection, departmentId, 303, FormDataKind.SUMMARY)
+    def dataRowsComplexConsumption = getDataRows(formDataCollection, 303, FormDataKind.SUMMARY)
 
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleConsumption = getDataRows(formDataCollection, departmentId, 304, FormDataKind.SUMMARY)
+    def dataRowsSimpleConsumption = getDataRows(formDataCollection, 304, FormDataKind.SUMMARY)
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-    def dataRowsAdvance = getDataRows(formDataCollection, departmentId, 500, FormDataKind.SUMMARY)
+    def dataRowsAdvance = getDataRows(formDataCollection, 500, FormDataKind.SUMMARY)
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, departmentId, newDeclaration ? 411 : 306, FormDataKind.ADDITIONAL)
+    def dataRowsDividend = getDataRows(formDataCollection, newDeclaration ? 411 : 306, FormDataKind.ADDITIONAL)
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, departmentId,  newDeclaration ? 413 : 307, FormDataKind.ADDITIONAL)
+    def dataRowsTaxAgent = getDataRows(formDataCollection, newDeclaration ? 413 : 307, FormDataKind.ADDITIONAL)
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
-    def dataRowsTaxSum = getDataRows(formDataCollection, departmentId,  newDeclaration ? 412 : 308, FormDataKind.ADDITIONAL)
+    def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308, FormDataKind.ADDITIONAL)
 
     /** форма «Остатки по начисленным авансовым платежам». */
-    def dataRowsRemains = getDataRows(formDataCollection, departmentId, 309, FormDataKind.PRIMARY)
+    def dataRowsRemains = getDataRows(formDataCollection, 309, FormDataKind.PRIMARY)
 
     /*
      * Получение значении декларации за предыдущий период.
@@ -777,7 +777,7 @@ void generateXML() {
                             // 0..n
                             НалПУПроц(
                                     ВидПлат : getRefBookValue(24, row.paymentType)?.CODE?.value,
-                                    ОКТМО : row.okatoCode,
+                                    ОКТМО : row.okatoCode?.substring(0,8),
                                     КБК : row.budgetClassificationCode) {
 
                                 // 0..n
@@ -1808,9 +1808,9 @@ def getTotalFromForm(def dataRows, def columnName) {
  */
 def getOldValue(def data, def kind, def valueName) {
     if (data != null) {
-        data.Документ.Прибыль.НалДохСтав.each {
+        for (def it in data.Документ.Прибыль.НалДохСтав) {
             if (it.@ВидДоход == kind) {
-                return it.@"$valueName"
+                return getXmlValue(it.@"$valueName".text())
             }
         }
     }
@@ -1823,15 +1823,24 @@ def getOldValue(def data, def kind, def valueName) {
  * @param reportPeriodId
  * @param departmentId
  */
-def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly) {
+def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
     if (reportPeriodId != null) {
-        /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка */
+        // вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка
         def declarationTypeId = ((newDeclaration) ? 9 : 2)
         def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
         if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
             def xmlString = declarationService.getXmlData(declarationData.id)
             xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
             return new XmlSlurper().parseText(xmlString)
+        // можно поискать в прошлом периоде другую декларацию (обычную Банка)
+        } else if (newDeclaration && anyPrevDeclaration) {
+            declarationTypeId = 2
+            declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
+            if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
+                def xmlString = declarationService.getXmlData(declarationData.id)
+                xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+                return new XmlSlurper().parseText(xmlString)
+            }
         }
     }
     return null
@@ -1935,11 +1944,13 @@ def getXmlValue(def value) {
 }
 
 /** Получить строки формы. */
-def getDataRows(def formDataCollection, def departmentId, def formTemplateId, def kind) {
-    def form = formDataCollection?.find(departmentId, formTemplateId, kind)
-    if (form) {
-        formDataService.getDataRowHelper(form)?.getAll()
+def getDataRows(def formDataCollection, def formTemplateId, def kind) {
+    def formList = formDataCollection?.findAllByFormTypeAndKind(formTemplateId, kind)
+    def dataRows = []
+    for (def form : formList) {
+        dataRows += (formDataService.getDataRowHelper(form)?.getAll()?:[])
     }
+    return dataRows.isEmpty() ? null : dataRows
 }
 
 /**
