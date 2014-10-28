@@ -20,6 +20,7 @@ public interface DataRowHelper {
 	 * 
 	 * @return
 	 */
+    @SuppressWarnings("unused")
 	List<DataRow<Cell>> getAllSaved();
 
 	/**
@@ -27,6 +28,7 @@ public interface DataRowHelper {
 	 * 
 	 * @return
 	 */
+    @SuppressWarnings("unused")
 	int getSavedCount();
 
 	/**
@@ -121,6 +123,7 @@ public interface DataRowHelper {
      * @param rowAlias
      * @return
      */
+    @SuppressWarnings("unused")
     DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias);
 
     /**
@@ -145,6 +148,7 @@ public interface DataRowHelper {
      * @throws IllegalArgumentException
      *             если такого алиас не существует в объекте FormData
      */
+    @SuppressWarnings("unused")
     int getDataRowIndex(List<DataRow<Cell>> dataRows, String rowAlias);
 
     /**
@@ -155,5 +159,6 @@ public interface DataRowHelper {
     /**
      * Сохранить отсортированные строки без учета остальных изменении. Обновятся только значения атрибута DATA_ROW.ORD
      */
-    void saveSort(List<DataRow<Cell>> dataRows);
+    @SuppressWarnings("unused")
+    void saveSort();
 }

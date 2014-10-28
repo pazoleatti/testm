@@ -202,9 +202,8 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
     }
 
     @Override
-    public void saveSort(List<DataRow<Cell>> dataRows) {
+    public void saveSort() {
         updateIndexes(dataRows);
-        dataRowDao.saveSortRows(fd, dataRows);
-        this.dataRows = dataRows;
+        dataRowDao.saveSortRows(dataRows);
     }
 }

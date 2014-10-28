@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 import com.aplana.sbrf.taxaccounting.model.script.range.Rect;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
+import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
 import groovy.util.XmlSlurper;
 import groovy.util.slurpersupport.GPathResult;
 import org.apache.poi.ss.util.CellReference;
@@ -477,13 +478,257 @@ public final class ScriptUtils {
     }
 
     /**
-     * Сортировка строк
+     * Сортировка строк без учета группировок и наличия итоговых строк
+     * @return список неразличимых строк (важен для подитогов)
+     */
+    static Set<DataRow<Cell>> sortRowsSimple(List<DataRow<Cell>> dataRows) {
+        final Set<DataRow<Cell>> set = new HashSet<DataRow<Cell>>();
+        if (dataRows == null) {
+            return set;
+        }
+
+        Collections.sort(dataRows, new Comparator<DataRow<Cell>>() {
+            @Override
+            public int compare(DataRow<Cell> row1, DataRow<Cell> row2) {
+                List<Cell> cellList1 = new ArrayList<Cell>(row1.size());
+                List<Cell> cellList2 = new ArrayList<Cell>(row2.size());
+
+                if (cellList1.size() != cellList2.size()) {
+                    throw new RuntimeException("Ошибка сортировки, в строках разное количество граф!");
+                }
+
+                for (String key : row1.keySet()) {
+                    cellList1.add(row1.getCell(key));
+                    cellList2.add(row2.getCell(key));
+                }
+
+                // Сравнение по графам
+                int retVal = compareCell(cellList1, cellList2);
+                if (retVal == 0) {
+                    set.add(row1);
+                    set.add(row2);
+                }
+                return retVal;
+            }
+
+            // Сравнение по графам
+            private int compareCell(List<Cell> cellList1, List<Cell> cellList2) {
+                if (cellList1.isEmpty() || cellList2.isEmpty()) {
+                    // Достигли сравнение по всем графам — строки неразличимы
+                    return 0;
+                }
+
+                Cell cell1 = cellList1.get(0);
+                Cell cell2 = cellList2.get(0);
+
+                cellList1.remove(0);
+                cellList2.remove(0);
+
+                if (cell1 == null || cell2 == null) {
+                    throw new RuntimeException("Ошибка сортировки, одна из ячеек не задана!");
+                }
+
+                Column column = cell1.getColumn();
+
+                if (column.getColumnType() == ColumnType.NUMBER
+                        || column.getColumnType() == ColumnType.STRING
+                        || column.getColumnType() == ColumnType.REFBOOK
+                        || column.getColumnType() == ColumnType.REFERENCE) {
+
+                    Comparable value1 = null;
+                    Comparable value2 = null;
+
+                    switch (column.getColumnType()) {
+                        case NUMBER:
+                            value1 = cell1.getNumericValue();
+                            value2 = cell2.getNumericValue();
+                            break;
+                        case STRING:
+                            value1 = cell1.getStringValue();
+                            value2 = cell2.getStringValue();
+                            break;
+                        case REFERENCE:
+                        case REFBOOK:
+                            value1 = cell1.getRefBookDereference();
+                            value2 = cell2.getRefBookDereference();
+                            break;
+                    }
+
+                    if (value1 != null || value2 != null) {
+                        if (value1 == null ^ value2 == null) {
+                            // Если одна из них null, то null всегда в конец
+                            return value1 == null ? 1 : -1;
+                        }
+
+                        int compareResult = value1.compareTo(value2);
+                        if (compareResult != 0) {
+                            // Если значения совпадают, то сравнение должно пойти по остальным
+                            return compareResult;
+                        }
+                    }
+                }
+
+                // Сравнение по остальным
+                return compareCell(cellList1, cellList2);
+            }
+        });
+        return set;
+    }
+
+    /**
+     * Сортировка строк НФ
      *
-     * @param dataRows
-     * @param groupColums
+     * @param refBookService Сервис работы со справочниками
+     * @param logger Логгер
+     * @param dataRows Список строк НФ
+     * @param subTotalDataRows Список подитоговых строк (может отсутствовать)
+     * @param totalRow Итоговая строка (может отсутствовать)
+     * @param subTotalLast Положение подитоговой строки, true — в конце, false — в начале (может отсутствовать)
      */
     @SuppressWarnings("unused")
-    public static void sortRows(List<DataRow<Cell>> dataRows, final List<String> groupColums) {
+    static void sortRows(RefBookService refBookService, Logger logger, List<DataRow<Cell>> dataRows,
+                                 List<DataRow<Cell>> subTotalDataRows,
+                                 DataRow<Cell> totalRow, Boolean subTotalLast) {
+        if (dataRows == null || dataRows.isEmpty()) {
+            return;
+        }
+
+        // Подитоговая строка → список строк
+        final Map<DataRow<Cell>, List<DataRow<Cell>>> rowsMap = new HashMap<DataRow<Cell>, List<DataRow<Cell>>>();
+
+        // Массовое разыменование строк НФ
+        DataRow<Cell> firstRow = dataRows.get(0);
+        List<Column> columnList = new ArrayList<Column>(firstRow.size());
+        for (String key : firstRow.keySet()) {
+            columnList.add(firstRow.getCell(key).getColumn());
+        }
+        refBookService.dataRowsDereference(logger, dataRows, columnList);
+
+        // Если есть подитоговые строки
+        if (subTotalDataRows != null) {
+            if (subTotalLast == null) {
+                throw new IllegalArgumentException("При наличии подитоговых строк необходимо указать параметр subTotalLast!");
+            }
+
+            // Сортировка подитоговых строк, после сортировки получаем список неразличимых строк
+            final Set<DataRow<Cell>> indistinguishableSet = sortRowsSimple(subTotalDataRows);
+
+            // Набор подитоговых строк
+            Set<DataRow<Cell>> subTotalDataRowSet = new HashSet<DataRow<Cell>>(subTotalDataRows);
+
+            boolean first = true;
+            List<DataRow<Cell>> restList = null;
+
+            // Подготовка групп
+            List<DataRow<Cell>> currentList = new LinkedList<DataRow<Cell>>();
+            for (DataRow<Cell> dataRow : dataRows) {
+                // Итоговая строка пропускается, она всегда последняя
+                if (totalRow == dataRow) {
+                    continue;
+                }
+                // Встретилась итоговая строка, нужно или закончить группу или начать этой строкой
+                if (subTotalDataRowSet.contains(dataRow)) {
+                    // Если подитоговые строки перед группой, то это начало группы
+                    if (!subTotalLast) {
+                        if (first && !currentList.isEmpty()) {
+                            // Остались строки без группы, их в начало, перед первой подитоговой строкой
+                            restList = currentList;
+                        }
+                        first = false;
+                        currentList = new LinkedList<DataRow<Cell>>();
+                    }
+                    rowsMap.put(dataRow, currentList);
+                    // Если подитоговые строки после группы, то это конец группы
+                    if (subTotalLast) {
+                        currentList = new LinkedList<DataRow<Cell>>();
+                    }
+                } else {
+                    // Обычная строка добавляется в текущий список
+                    currentList.add(dataRow);
+                }
+            }
+
+            // Очистка строк перед заполнением в новом порядке
+            dataRows.clear();
+
+            if (!indistinguishableSet.isEmpty()) {
+                // Досортировка по первой строке группы
+                Collections.sort(subTotalDataRows, new Comparator<DataRow<Cell>>() {
+                    @Override
+                    public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                        if (!indistinguishableSet.contains(o1) || !indistinguishableSet.contains(o2)) {
+                            return 0;
+                        }
+                        List<DataRow<Cell>> list1 = rowsMap.get(o1);
+                        List<DataRow<Cell>> list2 = rowsMap.get(o2);
+
+                        sortRowsSimple(list1);
+                        sortRowsSimple(list2);
+
+                        DataRow<Cell> firstRow1 = (list1 != null && !list1.isEmpty()) ? list1.get(0) : null;
+                        DataRow<Cell> firstRow2 = (list2 != null && !list2.isEmpty()) ? list2.get(0) : null;
+
+                        if (firstRow1 == null && firstRow2 == null) {
+                            // Если обе подитоговые строки без обычных строк, то они неразличимы
+                            return 0;
+                        }
+
+                        if (firstRow1 == null ^ firstRow2 == null) {
+                            return firstRow1 == null ? 1 : -1;
+                        }
+
+                        List<DataRow<Cell>> list = Arrays.asList(firstRow1, firstRow2);
+                        sortRowsSimple(list);
+                        return list.indexOf(firstRow1) == 0 ? -1 : 1;
+                    }
+                });
+            }
+
+            if (restList != null) {
+                // Остались строки без группы, их в начало, перед первой подитоговой строкой
+                sortRowsSimple(restList);
+                dataRows.addAll(restList);
+            }
+
+            // Заполнение по группам и сортировка внутри групп
+            for (DataRow<Cell> subTotalDataRow : subTotalDataRows) {
+                // Строки группы
+                List<DataRow<Cell>> dataRowList = rowsMap.get(subTotalDataRow);
+                // Сортировка внутри группы
+                sortRowsSimple(dataRowList);
+
+                if (subTotalLast) {
+                    dataRows.addAll(dataRowList);
+                    dataRows.add(subTotalDataRow);
+                } else {
+                    dataRows.add(subTotalDataRow);
+                    dataRows.addAll(dataRowList);
+                }
+            }
+
+            if (subTotalLast && !currentList.isEmpty()) {
+                // Остались строки без группы, их в конец, перед итоговой строкой
+                dataRows.addAll(currentList);
+            }
+        } else {
+            if (totalRow != null) {
+                dataRows.remove(totalRow);
+            }
+            // Сортировка строк
+            sortRowsSimple(dataRows);
+        }
+
+        // Итоговая строка добавляется в конец списка
+        if (totalRow != null) {
+            dataRows.add(totalRow);
+        }
+    }
+
+    /**
+     * Сортировка строк (должна использоваться только для группировки). Не разыменовывает строки, т.к. не требуется.
+     */
+    @SuppressWarnings("unused")
+    public static void sortRows(List<DataRow<Cell>> dataRows, final List<String> groupColumns) {
         Collections.sort(dataRows, new Comparator<DataRow<Cell>>() {
             @Override
             public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
@@ -497,7 +742,7 @@ public final class ScriptUtils {
                     return 0;
                 }
 
-                for (String alias : groupColums) {
+                for (String alias : groupColumns) {
                     Object v1 = o1.getCell(alias).getValue();
                     Object v2 = o2.getCell(alias).getValue();
                     if (v1 == null && v2 == null) {
@@ -525,14 +770,6 @@ public final class ScriptUtils {
 
     /**
      * Проверка итоговых строк
-     *
-     * @param dataRows
-     * @param testItogRows
-     * @param itogRows
-     * @param logger
-     * @param groupString
-     * @param checkGroupSum
-     * @param groupColums
      */
     @SuppressWarnings("unused")
     public static void checkItogRows(List<DataRow<Cell>> dataRows, List<DataRow<Cell>> testItogRows, List<DataRow<Cell>> itogRows,
@@ -593,10 +830,6 @@ public final class ScriptUtils {
 
     /**
      * Заголовок колонки по алиасу
-     *
-     * @param row
-     * @param alias
-     * @return
      */
     public static String getColumnName(DataRow<Cell> row, String alias) {
 

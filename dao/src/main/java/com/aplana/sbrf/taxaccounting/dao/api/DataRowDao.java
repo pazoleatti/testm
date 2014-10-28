@@ -172,5 +172,5 @@ public interface DataRowDao {
     /**
      * Сохранить отсортированные строки без учета остальных изменении. Обновятся только значения атрибута DATA_ROW.ORD
      */
-    void saveSortRows(final FormData formData, final List<DataRow<Cell>> dataRows);
+    void saveSortRows(List<DataRow<Cell>> dataRows);
 }

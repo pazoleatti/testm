@@ -721,12 +721,17 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
     }
 
     @Override
-    public void saveSortRows(final FormData formData, final List<DataRow<Cell>> dataRows) {
+    public void saveSortRows(final List<DataRow<Cell>> dataRows) {
+        if (dataRows == null || dataRows.isEmpty()) {
+            return;
+        }
+        final List<Long> ids = dbUtils.getNextDataRowIds((long)dataRows.size());
+
         // Обновление порядка строк
         getJdbcTemplate().batchUpdate("UPDATE data_row SET ord = ? WHERE id = ?", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, (i + 1) * DataRowDaoImplUtils.DEFAULT_ORDER_STEP);
+                ps.setLong(1, ids.get(i));
                 ps.setLong(2, dataRows.get(i).getId());
             }
 

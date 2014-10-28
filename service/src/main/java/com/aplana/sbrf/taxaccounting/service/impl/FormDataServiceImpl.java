@@ -49,6 +49,8 @@ public class FormDataServiceImpl implements FormDataService {
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
+    private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
+    private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -439,7 +441,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 	}
 
-	/**
+    /**
 	 * Сохранить данные по налоговой форме
 	 *
 	 * @param userInfo
@@ -460,17 +462,32 @@ public class FormDataServiceImpl implements FormDataService {
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
+        // Отработка скриптом события сохранения
 		formDataScriptingService.executeScript(userInfo, formData,
                 FormDataEvent.SAVE, logger, null);
 
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
+        }
+
+        // Отработка скриптом события сортировки
+        formDataScriptingService.executeScript(userInfo, formData,
+                FormDataEvent.SORT_ROWS, logger, null);
+
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
+        }
+
+        // Обновление для сквозной нумерации
         updatePreviousRowNumberAttr(formData, logger);
 
         formDataDao.save(formData);
-		
+
 		dataRowDao.commit(formData.getId());
 
         deleteReport(formData.getId());
 
+        // ЖА и история изменений
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма сохранена", null, formData.getFormType().getId());
