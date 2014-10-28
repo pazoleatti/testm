@@ -5,10 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
 /**
- * Сведения о дивидендах, выплаченных в отчетном квартале
- * formTemplateId=1413
+ * Сведения о дивидендах (доходах от долевого участия в других организациях,
+ * созданных на территории Российской Федерации), выплаченных в отчетном квартале
  *
- * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
+ * formTemplateId=1413
  */
 
 // графа 1  - rowNumber
@@ -83,9 +83,7 @@ def editableColumns = ['emitent', 'decreeNumber', 'title', 'zipCode', 'subdivisi
 
 // Проверяемые на пустые значения атрибуты 1-16, 18-25
 @Field
-def nonEmptyColumns = ['rowNumber', 'emitent', 'decreeNumber', 'title', 'zipCode', 'subdivisionRF', 'area', 'city',
-                       'region', 'street', 'homeNumber', 'corpNumber', 'apartment', 'surname', 'name', 'patronymic',
-                       'sumDividend', 'dividendDate', 'dividendNum', 'dividendSum', 'taxDate', 'taxNum', 'sumTax', 'reportYear']
+def nonEmptyColumns = ['rowNumber', 'emitent', 'decreeNumber', 'title', 'sumDividend', 'dividendDate', 'dividendSum', 'sumTax']
 
 // Дата окончания отчетного периода
 @Field
@@ -235,9 +233,9 @@ void addData(def xml, headRowCount) {
         newRow.zipCode = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
-        // графа 6 - справочник "Коды субъектов Российской Федерации"
-        newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        xmlIndexCol++
+            // графа 6 - справочник "Коды субъектов Российской Федерации"
+            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+            xmlIndexCol++
 
         // графа 7
         newRow.area = row.cell[xmlIndexCol].text()
