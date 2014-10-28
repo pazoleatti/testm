@@ -82,6 +82,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         noImport(logger)
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -307,6 +310,8 @@ void calc() {
     }
 
     dataRowHelper.save(dataRows)
+
+    sortFormDataRows()
 }
 
 // название подразделения
@@ -1030,6 +1035,14 @@ def roundValue(BigDecimal value, def precision) {
 
 /** Получить строки за предыдущий отчетный период. */
 def getPrevDataRows() {
-    def prevFormData = formDataService.getFormDataPrev(formData, formDataDepartment.id)
+    def prevFormData = formDataService.getFormDataPrev(formData)
     return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'ca')], getDataRow(dataRows, 'total'), true)
+    dataRowHelper.saveSort()
 }
