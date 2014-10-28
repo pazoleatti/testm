@@ -40,6 +40,17 @@ def providerCache = [:]
 @Field
 def refBookCache = [:]
 
+// Дата окончания отчетного периода
+@Field
+def endDate = null
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
 void checkDeparmentParams(LogLevel logLevel) {
     def date = reportPeriodService.getEndDate(declarationData.reportPeriodId).getTime()
 
@@ -167,8 +178,8 @@ void generateXML() {
                     def Long recYesId = null
                     // "Нет"
                     def Long recNoId = null
-                    def valYes = getProvider(38L).getRecords(new Date(), null, "CODE = 1", null)
-                    def valNo = getProvider(38L).getRecords(new Date(), null, "CODE = 0", null)
+                    def valYes = getProvider(38L).getRecords(getReportPeriodEndDate(), null, "CODE = 1", null)
+                    def valNo = getProvider(38L).getRecords(getReportPeriodEndDate(), null, "CODE = 0", null)
                     if (valYes != null && valYes.size() == 1)
                         recYesId = valYes.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
                     if (valNo != null && valNo.size() == 1)
