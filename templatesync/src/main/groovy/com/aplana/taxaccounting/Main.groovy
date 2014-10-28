@@ -200,7 +200,9 @@ class Main {
                     'rnu71_2': 503,
                     'rnu72': 358,
                     'rnu75': 366,
-                    'rnu8': 320
+                    'rnu8': 320,
+                    'remainsPrepayments': 309,
+                    'reserve': 614
             ],
             'vat': [
                     'declaration_audit': -1,
