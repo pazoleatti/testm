@@ -4,7 +4,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
-public interface ValidateService {
+public interface ValidateXMLService {
 
     /**
      * Адаптер для проверки xml с помощью сторонней библиотеки.

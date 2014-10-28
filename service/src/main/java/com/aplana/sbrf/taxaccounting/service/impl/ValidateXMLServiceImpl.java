@@ -8,33 +8,29 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.ValidateService;
+import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ClassUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.net.URL;
 
-public class ValidateServiceImpl implements ValidateService{
+public class ValidateXMLServiceImpl implements ValidateXMLService {
 
-    static final Log log = LogFactory.getLog(ValidateService.class);
+    static final Log log = LogFactory.getLog(ValidateXMLService.class);
 
     private static final String TEMPLATE = ClassUtils
-            .classPackageAsResourcePath(ValidateServiceImpl.class) + "/VSAX3.exe";
+            .classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
 
     private static SAXParserFactory factory = SAXParserFactory.newInstance();
 
@@ -67,7 +63,7 @@ public class ValidateServiceImpl implements ValidateService{
         }
     }
 
-    public ValidateServiceImpl() {
+    public ValidateXMLServiceImpl() {
         this.url = Thread.currentThread().getContextClassLoader().getResource(TEMPLATE);
     }
 

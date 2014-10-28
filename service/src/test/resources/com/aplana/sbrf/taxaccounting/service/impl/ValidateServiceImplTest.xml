@@ -15,6 +15,6 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ReportService" />
     </bean>
     
-    <bean id="validateService" class="com.aplana.sbrf.taxaccounting.service.impl.ValidateServiceImpl"/>
+    <bean id="validateService" class="com.aplana.sbrf.taxaccounting.service.impl.ValidateXMLServiceImpl"/>
 
 </beans>
