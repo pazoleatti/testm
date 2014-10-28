@@ -117,7 +117,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			// Values
 			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && rs.getString("alias") == null) {
 				if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
-					cell.setValue(SqlUtils.getInteger(rs, "IDX2") + previousRowNumber, rowNum);
+						cell.setValue(SqlUtils.getInteger(rs, "IDX2") + previousRowNumber, rowNum);
 				} else {
 					cell.setValue(SqlUtils.getInteger(rs, "IDX2"), rowNum);
 				}

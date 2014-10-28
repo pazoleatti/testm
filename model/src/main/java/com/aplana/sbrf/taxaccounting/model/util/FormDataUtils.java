@@ -80,7 +80,7 @@ public final class FormDataUtils {
 	 * 
 	 * @param dataRows список строк
 	 */
-	public static <T extends AbstractCell> void cleanValueOners(List<DataRow<T>> dataRows) {
+	public static <T extends AbstractCell> void cleanValueOwners(List<DataRow<T>> dataRows) {
 		for (DataRow<? extends AbstractCell> dataRow : dataRows) {
 			for (Entry<String, Object> entry : dataRow.entrySet()) {
 				@SuppressWarnings("rawtypes")

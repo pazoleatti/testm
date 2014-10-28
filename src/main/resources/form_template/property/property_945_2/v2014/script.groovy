@@ -178,7 +178,7 @@ void addPrevDataRows() {
                 if (!rightEndDate || rightEndDate > endDate) {
                     rightEndDate = endDate
                 }
-                return (rightBeginDate > endDate || rightEndDate < startDate)
+                return !(rightBeginDate > endDate || rightEndDate < startDate)
             }
         }
     }

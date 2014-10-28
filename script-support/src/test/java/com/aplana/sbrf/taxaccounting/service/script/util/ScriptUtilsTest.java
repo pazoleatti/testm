@@ -2,15 +2,20 @@ package com.aplana.sbrf.taxaccounting.service.script.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.*;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Тесты для ScriptUtils
@@ -32,8 +37,6 @@ public class ScriptUtilsTest {
     private static final String ROW2_ALIAS = "pencil";
     private static final String ROW3_ALIAS = "sampleRowAlias";
     private static final Date DATE_CONST = new Date();
-    // private static final String UNKNOWN_ALIAS = "unknown alias";
-
 
     /**
      * Возвращает таблицу с тестовыми данными
@@ -177,87 +180,6 @@ public class ScriptUtilsTest {
         Assert.assertEquals(ScriptUtils.normalize(str7), "a b c ч d");
     }
 
-/*
-    @Test
-	public void summBDTest() {
-		FormData fd = getTestFormData().get;
-		Cell A = fd.getDataRow(ROW2_ALIAS).getCell(NUMBER_ALIAS);
-		Cell B = fd.getDataRow(ROW1_ALIAS).getCell(NUMBER_ALIAS);
-		Assert.assertEquals(ScriptUtils.summ(A, B), 3.14, Constants.EPS);
-	}
-
-	@Test
-	public void substractBD() {
-		FormData fd = getTestFormData();
-		Cell A = fd.getDataRow(ROW2_ALIAS).getCell(NUMBER_ALIAS);
-		Cell B = fd.getDataRow(ROW1_ALIAS).getCell(NUMBER_ALIAS);
-		Assert.assertEquals(ScriptUtils.substract(A, B), 1.06, Constants.EPS);
-	}
-
-	@Test
-	public void summIfEqualsTest() {
-		FormData fd = getTestFormData();
-		double r = ScriptUtils.summIfEquals(fd, new ColumnRange(DATE_ALIAS, 0, 2), DATE_CONST, new ColumnRange(NUMBER_ALIAS, 0, 2));
-		Assert.assertEquals(r, 1.04, Constants.EPS);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void summIfEqualsTest2() {
-		FormData fd = getTestFormData();
-		ScriptUtils.summIfEquals(fd, new ColumnRange(DATE_ALIAS, 0, 2), DATE_CONST, new ColumnRange(NUMBER_ALIAS, 0, 0));
-	}
-
-	@Test
-	public void getCell1() {
-		FormData fd = getTestFormData();
-		Cell c = ScriptUtils.getCell(fd, NUMBER_ALIAS, ROW2_ALIAS);
-		Assert.assertEquals(c.getNumericValue().doubleValue(), 2.1, Constants.EPS);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void getCell2() {
-		FormData fd = getTestFormData();
-		ScriptUtils.getCell(fd, UNKNOWN_ALIAS, ROW2_ALIAS);
-	}
-
-	@Test
-	public void copyCellValuesTest() {
-		double value = 999.0;
-		FormData fdFrom = getTestFormData();
-		Cell cellFrom = ScriptUtils.getCell(fdFrom, NUMBER_ALIAS, ROW1_ALIAS);
-		cellFrom.setValue(value);
-
-		Range range = new Range(STRING_ALIAS, fdFrom.getDataRowIndex(ROW1_ALIAS), NUMBER_ALIAS, fdFrom.getDataRowIndex(ROW2_ALIAS));
-
-		FormData fdTo = getTestFormData();
-		ScriptUtils.copyCellValues(fdFrom, fdTo, range, range);
-		Cell cellTo = ScriptUtils.getCell(fdFrom, NUMBER_ALIAS, ROW1_ALIAS);
-		Assert.assertEquals(cellTo.getNumericValue().doubleValue(), value, Constants.EPS);
-	}
-
-	//TODO перенести методы в RangeTest
-
-	@Test
-	public void getColumnIndexTest1() {
-		Assert.assertEquals(Range.getColumnIndex(getTestFormData(), DATE_ALIAS), 2);
-	}
-
-	@Test
-	public void getColumnIndexTest2() {
-		Assert.assertEquals(Range.getColumnIndex(getTestFormData(), STRING_ALIAS), 0);
-	}
-
-	@Test
-	public void checkRangeTest1() {
-		new Range(STRING_ALIAS, 0, NUMBER_ALIAS, 2).getRangeRect(getTestFormData());
-	}
-
-	@Test(expected = IndexOutOfBoundsException.class)
-	public void checkRangeTest2() {
-		new Range(DATE_ALIAS, 0, STRING_ALIAS, 6).getRangeRect(getTestFormData());
-	}
-*/
-
     @Test
     public void checkHeaderEquals() {
         Map<Object, String> headerMapping = new HashMap<Object, String>();
@@ -314,5 +236,284 @@ public class ScriptUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void getColumnNumberFailByNegative() {
         ScriptUtils.getXLSColumnNumber(-10);
+    }
+
+    private void printRows(List<DataRow<Cell>> dataRows) {
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() != null) {
+                System.out.print("(" + row.getAlias() + ") ");
+            } else {
+                System.out.print("(" + row.getIndex() + ") ");
+            }
+            for (String key : row.keySet()) {
+                Cell cell = row.getCell(key);
+                if (cell.getColumn().getColumnType() == ColumnType.REFERENCE || cell.getColumn().getColumnType() == ColumnType.REFBOOK) {
+                    System.out.print(cell.getRefBookDereference() + ", ");
+                } else {
+                    System.out.print(cell.getValue() + ", ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    // Проверка простой сортировки
+    @Test
+    public void sortRowsSimpleTest() {
+        int[] indexesBefore = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        int[] indexesAfter = {9, 7, 8, 5, 4, 3, 10, 2, 6, 1};
+        List<DataRow<Cell>> dataRows = getTestSimpleRows();
+
+        System.out.println("Before sort:");
+        printRows(dataRows);
+
+        int index = 0;
+        for (DataRow<Cell> row : dataRows) {
+            Assert.assertEquals(indexesBefore[index++], row.getIndex().intValue());
+        }
+
+        ScriptUtils.sortRowsSimple(dataRows);
+
+        System.out.println("After sort:");
+
+        index = 0;
+        for (DataRow<Cell> row : dataRows) {
+            Assert.assertEquals(indexesAfter[index++], row.getIndex().intValue());
+        }
+
+        printRows(dataRows);
+    }
+
+    // Проверка сортировки с наличием подитоговых и итоговой строки (итоговые в начале)
+    //@Test
+    public void sortRows1Test() {
+        int[] indexesAfter = {3, 2, 1, 9, 8, 10, 7, 5, 4, 6};
+        String[] aliasesAfter = {"subtotal3", "subtotal4", "subtotal1", "subtotal2", "total"};
+
+        List<DataRow<Cell>> dataRows = getTestRows1();
+        List<DataRow<Cell>> subtotalRows = Arrays.asList(dataRows.get(3), dataRows.get(4), dataRows.get(9), dataRows.get(12));
+        DataRow<Cell> totalRow = dataRows.get(14);
+
+        System.out.println("Before:");
+        printRows(dataRows);
+
+        // Реализация не требуется, т.к. строки уже разыменованы
+        RefBookService refBookService = mock(RefBookService.class);
+
+        ScriptUtils.sortRows(refBookService, new Logger(), dataRows, subtotalRows, totalRow, true);
+
+        System.out.println("After:");
+        printRows(dataRows);
+
+        int index1 = 0;
+        int index2 = 0;
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() == null) {
+                Assert.assertEquals(indexesAfter[index1++], row.getIndex().intValue());
+            } else {
+                Assert.assertEquals(aliasesAfter[index2++], row.getAlias());
+            }
+        }
+    }
+
+    // Проверка сортировки с наличием подитоговых и итоговой строки (итоговые в конце)
+    @Test
+    public void sortRows2Test() {
+        int[] indexesAfter = {3, 2, 1, 9, 8, 10, 7, 5, 4, 6};
+        String[] aliasesAfter = {"subtotal3", "subtotal4", "subtotal2", "subtotal1", "total"};
+
+        List<DataRow<Cell>> dataRows = getTestRows1();
+        List<DataRow<Cell>> subtotalRows = Arrays.asList(dataRows.get(3), dataRows.get(4), dataRows.get(9), dataRows.get(12));
+        DataRow<Cell> totalRow = dataRows.get(14);
+
+        System.out.println("Before:");
+        printRows(dataRows);
+
+        // Реализация не требуется, т.к. строки уже разыменованы
+        RefBookService refBookService = mock(RefBookService.class);
+
+        ScriptUtils.sortRows(refBookService, new Logger(), dataRows, subtotalRows, totalRow, false);
+
+        System.out.println("After:");
+        printRows(dataRows);
+
+        int index1 = 0;
+        int index2 = 0;
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() == null) {
+                Assert.assertEquals(indexesAfter[index1++], row.getIndex().intValue());
+            } else {
+                Assert.assertEquals(aliasesAfter[index2++], row.getAlias());
+            }
+        }
+    }
+
+    private FormData getSortTestFormData() {
+        AutoNumerationColumn col1 = new AutoNumerationColumn();
+        col1.setId(1);
+        col1.setAlias("c1");
+        col1.setNumerationType(NumerationType.SERIAL);
+
+        NumericColumn col2 = new NumericColumn();
+        col2.setId(2);
+        col2.setAlias("c2");
+
+        StringColumn col3 = new StringColumn();
+        col3.setId(3);
+        col3.setAlias("c3");
+
+        RefBookColumn col4 = new RefBookColumn();
+        col4.setId(4);
+        col4.setAlias("c4");
+
+        ReferenceColumn col5 = new ReferenceColumn();
+        col5.setId(5);
+        col5.setAlias("c5");
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        formTemplate.getColumns().addAll(Arrays.asList(col1, col2, col3, col4, col5));
+
+        FormData formData = new FormData(formTemplate);
+        formData.setId(1L);
+
+        return formData;
+    }
+
+    /**
+     * Тестовые строки для проверки сортировки без учета групп
+     * с1 с2 с3 с4 с5
+     * 1) 1, -, -, -, -
+     * 2) 2, 1, -, -, -
+     * 3) 3, 1, 'F', -, -
+     * 4) 3, 1, 'F', 'G', 'H'
+     * 5) 4, 1, 'F', 'G', 'A'
+     * 6) 5, 2, -, -, -
+     * 7) 6, 1, 'B', -, -
+     * 8) 7, 1, 'B', -, -
+     * 9) 8, 1, 'B', 'G', -
+     * 10) 9, 1, 'Z', 'T', -
+     */
+    private List<DataRow<Cell>> getTestSimpleRows() {
+        List<DataRow<Cell>> list = new ArrayList<DataRow<Cell>>(10);
+
+        FormData formData = getSortTestFormData();
+
+        // 1
+        DataRow<Cell> row = formData.createDataRow();
+        row.setIndex(1);
+        list.add(row);
+        // 2
+        row = formData.createDataRow();
+        row.setIndex(2);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(1));
+        list.add(row);
+        // 3
+        row = formData.createDataRow();
+        row.setIndex(3);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(1));
+        row.getCell("c3").setStringValue("F");
+        list.add(row);
+        // 4
+        row = formData.createDataRow();
+        row.setIndex(4);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(1));
+        row.getCell("c3").setStringValue("F");
+        row.getCell("c4").setRefBookDereference("G");
+        row.getCell("c5").setRefBookDereference("H");
+        list.add(row);
+        // 5
+        row = formData.createDataRow();
+        row.setIndex(5);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(1));
+        row.getCell("c3").setStringValue("F");
+        row.getCell("c4").setRefBookDereference("G");
+        row.getCell("c5").setRefBookDereference("A");
+        list.add(row);
+        // 6
+        row = formData.createDataRow();
+        row.setIndex(6);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(2));
+        list.add(row);
+        // 7
+        row = formData.createDataRow();
+        row.setIndex(7);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(1));
+        row.getCell("c3").setStringValue("B");
+        list.add(row);
+        // 8
+        row = formData.createDataRow();
+        row.setIndex(8);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(1));
+        row.getCell("c3").setStringValue("B");
+        list.add(row);
+        // 9
+        row = formData.createDataRow();
+        row.setIndex(9);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(1));
+        row.getCell("c3").setStringValue("B");
+        row.getCell("c4").setRefBookDereference("G");
+        list.add(row);
+        // 10
+        row = formData.createDataRow();
+        row.setIndex(10);
+        row.getCell("c2").setNumericValue(BigDecimal.valueOf(1));
+        row.getCell("c3").setStringValue("Z");
+        row.getCell("c4").setRefBookDereference("T");
+        list.add(row);
+
+        return list;
+    }
+
+    /**
+     * Тестовые строки для проверки сортировки c учетом групп (итоговая в конце)
+     * с1 с2 с3 с4 с5
+     * 1) 1, -, -, -, -
+     * 2) 2, 1, -, -, -
+     * 3) 3, 1, 'F', -, -
+     * П) -, T, -, -, -
+     * П) -, T, -, -, -
+     * 4) 3, 1, 'F', 'G', 'H'
+     * 5) 4, 1, 'F', 'G', 'A'
+     * 6) 5, 2, -, -, -
+     * 7) 6, 1, 'B', -, -
+     * П) -, A, -, -, -
+     * 8) 7, 1, 'B', -, -
+     * 9) 8, 1, 'B', 'G', -
+     * П) -, K, -, -, -
+     * 10) 9, 1, 'Z', 'T', -
+     * И) -, -, -, -, -
+     */
+    private List<DataRow<Cell>> getTestRows1() {
+        List<DataRow<Cell>> list = new LinkedList<DataRow<Cell>>();
+        list.addAll(getTestSimpleRows());
+
+        FormData formData = getSortTestFormData();
+        // И
+        DataRow<Cell> row = formData.createDataRow();
+        row.setAlias("total");
+        list.add(10, row);
+        // П
+        row = formData.createDataRow();
+        row.setAlias("subtotal4");
+        row.getCell("c3").setStringValue("K");
+        list.add(9, row);
+        // П
+        row = formData.createDataRow();
+        row.setAlias("subtotal3");
+        row.getCell("c3").setStringValue("A");
+        list.add(7, row);
+        // П
+        row = formData.createDataRow();
+        row.setAlias("subtotal2");
+        row.getCell("c3").setStringValue("T");
+        list.add(3, row);
+        // П
+        row = formData.createDataRow();
+        row.setAlias("subtotal1");
+        row.getCell("c3").setStringValue("T");
+        list.add(3, row);
+
+        return list;
     }
 }

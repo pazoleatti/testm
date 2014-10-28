@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
@@ -68,7 +67,7 @@ public class FormDataServiceTest {
         formType.setName(TaxType.INCOME.getName());
         formTemplate.setType(formType);
 
-        // Налоговый периол
+        // Налоговый период
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setYear(2014);
         taxPeriod.setTaxType(TaxType.INCOME);

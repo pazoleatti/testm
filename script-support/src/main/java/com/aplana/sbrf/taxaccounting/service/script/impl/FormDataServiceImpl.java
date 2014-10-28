@@ -13,10 +13,9 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.script.TaxPeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
-import com.aplana.sbrf.taxaccounting.service.script.refbook.RefBookService;
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -71,9 +70,6 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Autowired
     private ReportPeriodService reportPeriodService;
-
-    @Autowired
-    private TaxPeriodService taxPeriodService;
 
     @Autowired
     private FormTypeDao formTypeDao;

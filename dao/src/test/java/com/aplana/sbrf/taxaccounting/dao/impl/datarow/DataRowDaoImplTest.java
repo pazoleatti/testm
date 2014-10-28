@@ -3,12 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
@@ -658,7 +653,7 @@ public class DataRowDaoImplTest extends Assert {
      * Проверить генерацию автонумеруемых граф для последовательной нумерации
      */
     @Test
-    public void getRowsWhenSerialAutoNumeration() {
+		public void getRowsWhenSerialAutoNumeration() {
         FormData fd = formDataDao.get(1000, false);
         List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
         Assert.assertTrue(Integer.valueOf(rows.get(0).get("autoNumerationColumn").toString()).equals(1));
@@ -776,7 +771,7 @@ public class DataRowDaoImplTest extends Assert {
         });
 
         // сохранить сортировку
-        dataRowDao.saveSortRows(fd, dataRows1);
+        dataRowDao.saveSortRows(dataRows1);
 
         // получить строки из временного среза
         List<DataRow<Cell>> dataRows2 = dataRowDao.getRows(fd, null);

@@ -1,4 +1,4 @@
-package refbook.parameters_of_tax_benefits
+package refbook.tax_benefits_transport
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
@@ -6,7 +6,7 @@ import groovy.transform.Field
 import java.text.SimpleDateFormat
 
 /**
- * Cкрипт справочника «Параметры налоговых льгот» (id = 7)
+ * Cкрипт справочника «Параметры налоговых льгот транспортного налога» (id = 7)
  *
  * @author Stanislav Yasinskiy
  */

@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
@@ -180,9 +182,8 @@ public class DataRowTest {
 		Column dateColumn = new DateColumn();
 		dateColumn.setName(DATE_NAME);
 		dateColumn.setAlias(DATE_ALIAS);
-		temp.getColumns()
-				.addAll(Arrays.asList(new Column[] { strColumn, numColumn,
-						dateColumn }));
+		temp.getColumns().addAll(Arrays.asList(
+			new Column[] {strColumn, numColumn, dateColumn}));
 
 		FormData fd = new FormData(temp);
 
@@ -221,33 +222,16 @@ public class DataRowTest {
 
 		dataRows.get(1).put(STRING_ALIAS, testValue);
 
-		Assert.assertNotEquals(testValue,
+		assertNotEquals(testValue,
 				dataRows.get(1).get(NUMBER_ALIAS));
 
 		FormDataUtils.setValueOwners(dataRows);
 
-		// Все ячейки диапазона должны возвращать значение главной ячейки
-		Assert.assertEquals(testValue,
-				dataRows.get(1).get(STRING_ALIAS));
-		Assert.assertEquals(testValue,
-				dataRows.get(1).get(NUMBER_ALIAS));
-		Assert.assertEquals(testValue,
-				FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS).get(STRING_ALIAS));
-		Assert.assertEquals(testValue,
-				FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS).get(NUMBER_ALIAS));
-
-		// Меняем значение в одной из перекрытых ячеек
-		FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS).put(NUMBER_ALIAS, testValueChange);
-
-		// Значение меняется в главной ячейке и во всех перекрытых ей ячейках
-		Assert.assertEquals(testValueChange,
-				dataRows.get(1).get(STRING_ALIAS));
-		Assert.assertEquals(testValueChange,
-				dataRows.get(1).get(NUMBER_ALIAS));
-		Assert.assertEquals(testValueChange, FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS)
-				.get(STRING_ALIAS));
-		Assert.assertEquals(testValueChange, FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS)
-				.get(NUMBER_ALIAS));
+		// Все ячейки диапазона должны возвращать значение главной ячейки, если их типы совпадают
+		assertEquals(testValue, dataRows.get(1).get(STRING_ALIAS));
+		assertNull(dataRows.get(1).get(NUMBER_ALIAS));
+		assertNull(FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS).get(STRING_ALIAS));
+		assertNull(FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS).get(NUMBER_ALIAS));
 
 		//
 		// Нужно проверить - не вальнется ли, если в диапазоне будет ещё один
@@ -260,34 +244,21 @@ public class DataRowTest {
 
 		// Проверяем, сбросились ли спаны для внутреннего (не используемого)
 		// диапазона
-		Assert.assertEquals(1,
-				dataRows.get(1).getCell(NUMBER_ALIAS)
-						.getColSpan());
-		Assert.assertEquals(1,
-				dataRows.get(1).getCell(NUMBER_ALIAS)
-						.getRowSpan());
+		assertEquals(1, dataRows.get(1).getCell(NUMBER_ALIAS).getColSpan());
+		assertEquals(1, dataRows.get(1).getCell(NUMBER_ALIAS).getRowSpan());
 
-		Assert.assertEquals(testValueChange,
-				dataRows.get(1).get(STRING_ALIAS));
-		Assert.assertEquals(testValueChange,
-				dataRows.get(1).get(NUMBER_ALIAS));
-		Assert.assertTrue(dataRows.get(1).getCell(NUMBER_ALIAS).hasValueOwner());
-		Assert.assertEquals(testValueChange, FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS)
-				.get(STRING_ALIAS));
-		Assert.assertEquals(testValueChange, FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS)
-				.get(NUMBER_ALIAS));
+		assertEquals(testValue, dataRows.get(1).get(STRING_ALIAS));
+		assertNull(dataRows.get(1).get(NUMBER_ALIAS));
+		assertTrue(dataRows.get(1).getCell(NUMBER_ALIAS).hasValueOwner());
+		assertNull(FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS).get(STRING_ALIAS));
+		assertNull(FormDataUtils.getDataRowByAlias(dataRows, ROW_ALIAS).get(NUMBER_ALIAS));
 
-		Assert.assertNotEquals(testValueChange,dataRows.get(1)
-				.get(DATE_ALIAS));
+		assertNotEquals(testValueChange, dataRows.get(1).get(DATE_ALIAS));
 		
-		FormDataUtils.cleanValueOners(dataRows);
+		FormDataUtils.cleanValueOwners(dataRows);
 		
-		Assert.assertNotEquals(testValueChange,
-				dataRows.get(1).get(NUMBER_ALIAS));
-		Assert.assertFalse(dataRows.get(1).getCell(NUMBER_ALIAS).hasValueOwner());
-		
-		
-
+		assertNotEquals(testValueChange, dataRows.get(1).get(NUMBER_ALIAS));
+		assertFalse(dataRows.get(1).getCell(NUMBER_ALIAS).hasValueOwner());
 	}
 	
 }
