@@ -53,6 +53,9 @@ switch (formDataEvent) {
             logicCheck()
         }
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 /**
@@ -256,6 +259,9 @@ void calc() {
     }
 
     dataRowHelper.update(dataRows);
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 /**
@@ -597,4 +603,12 @@ def getRecordId(
         logger.warn(msg)
     }
     return null
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    dataRowHelper.saveSort()
 }
