@@ -85,7 +85,7 @@ void checkDeparmentParams(LogLevel logLevel) {
 /** Логические проверки. */
 void logicCheck() {
     // получение данных из xml'ки
-    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false)
+    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false, false)
     if(xmlData == null){
         return
     }
@@ -253,7 +253,7 @@ void generateXML() {
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId)
 
     /** XML декларации за предыдущий отчетный период. */
-    def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId, false)
+    def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId, false, true)
 
     /** Налоговый период. */
     def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
@@ -280,7 +280,7 @@ void generateXML() {
     /** АвПлатМесФБ. Код строки декларации 300. */
     def avPlatMesFB9month = 0
     if (isFirstPeriod) {
-        xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true)
+        xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true, false)
         if (xmlData9month != null) {
             nalVipl311FB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311ФБ.text() ?: 0)
             nalVipl311Sub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311Суб.text() ?: 0)
@@ -1823,18 +1823,30 @@ def getOldValue(def data, def kind, def valueName) {
  * @param reportPeriodId
  * @param departmentId
  */
-def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly) {
+def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
     if (reportPeriodId != null) {
-        /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка */
+        // вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка
         def declarationTypeId = ((newDeclaration) ? 9 : 2)
-        def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
-        if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
-            def xmlString = declarationService.getXmlData(declarationData.id)
-            xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-            return new XmlSlurper().parseText(xmlString)
+        def xml = getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
+        if (xml != null) {
+            return xml
+        }
+        // для новой декларации можно поискать в прошлом периоде другую декларацию (обычную Банка)
+        if (newDeclaration && anyPrevDeclaration) {
+            declarationTypeId = 2
+            return getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         }
     }
     return null
+}
+
+def getExistedXmlData(def declarationTypeId, def departmentId, def reportPeriodId, def acceptedOnly) {
+    def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
+    if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
+        def xmlString = declarationService.getXmlData(declarationData.id)
+        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+        return new XmlSlurper().parseText(xmlString)
+    }
 }
 
 /**

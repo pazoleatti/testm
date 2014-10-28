@@ -1827,23 +1827,26 @@ def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly, def anyPr
     if (reportPeriodId != null) {
         // вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка
         def declarationTypeId = ((newDeclaration) ? 9 : 2)
-        def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
-        if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
-            def xmlString = declarationService.getXmlData(declarationData.id)
-            xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-            return new XmlSlurper().parseText(xmlString)
-        // можно поискать в прошлом периоде другую декларацию (обычную Банка)
-        } else if (newDeclaration && anyPrevDeclaration) {
+        def xml = getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
+        if (xml != null) {
+            return xml
+        }
+        // для новой декларации можно поискать в прошлом периоде другую декларацию (обычную Банка)
+        if (newDeclaration && anyPrevDeclaration) {
             declarationTypeId = 2
-            declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
-            if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
-                def xmlString = declarationService.getXmlData(declarationData.id)
-                xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-                return new XmlSlurper().parseText(xmlString)
-            }
+            return getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         }
     }
     return null
+}
+
+def getExistedXmlData(def declarationTypeId, def departmentId, def reportPeriodId, def acceptedOnly) {
+    def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
+    if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
+        def xmlString = declarationService.getXmlData(declarationData.id)
+        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+        return new XmlSlurper().parseText(xmlString)
+    }
 }
 
 /**
