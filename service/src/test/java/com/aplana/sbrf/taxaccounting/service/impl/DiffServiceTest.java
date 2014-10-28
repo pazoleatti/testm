@@ -3,9 +3,12 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DiffService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +20,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.mockito.Mockito.mock;
+
 public class DiffServiceTest {
     private final DiffService diffService = new DiffServiceImpl();
 
@@ -25,6 +30,11 @@ public class DiffServiceTest {
     private static final String ALIAS_3 = "column3";
     private static final String ALIAS_4 = "column4";
     private static final String ALIAS_5 = "column5";
+
+    @Before
+    public void init() {
+        ReflectionTestUtils.setField(diffService, "refBookHelper", mock(RefBookHelper.class));
+    }
 
     @Test
     public void computeDiffSimpleTest() throws IOException {
@@ -154,8 +164,7 @@ public class DiffServiceTest {
         Assert.assertEquals("str1;1;" + date + ";1;;", string);
     }
 
-    //@Test
-	//todo (mfayzullin 2014-10-28) отключил из-за ошибок
+    @Test
     public void getDiffTest() {
         List<FormStyle> formStyleList = new LinkedList<FormStyle>();
         FormStyle formStyle = new FormStyle();
@@ -178,11 +187,14 @@ public class DiffServiceTest {
         dataRow1.getCell(ALIAS_2).setNumericValue(BigDecimal.valueOf(1));
         dataRow1.getCell(ALIAS_3).setDateValue(date);
         dataRow1.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(1));
-        dataRow1.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(1));
+        dataRow1.getCell(ALIAS_4).setRefBookDereference("A");
+        dataRow1.getCell(ALIAS_5).setRefBookDereference("B");
         dataRow2.getCell(ALIAS_1).setStringValue("str1");
         dataRow2.getCell(ALIAS_2).setNumericValue(null);
         dataRow2.getCell(ALIAS_4).setNumericValue(BigDecimal.valueOf(2));
-        dataRow2.getCell(ALIAS_5).setNumericValue(BigDecimal.valueOf(2));
+        dataRow1.getCell(ALIAS_4).setRefBookDereference("AA");
+        dataRow2.getCell(ALIAS_5).setRefBookDereference("BB");
+
         List<DataRow<Cell>> diffList = diffService.getDiff(Arrays.asList(dataRow1), Arrays.asList(dataRow2));
         Assert.assertEquals(1, diffList.size());
         DataRow<Cell> dataRow = diffList.get(0);
@@ -190,7 +202,7 @@ public class DiffServiceTest {
         Assert.assertEquals(BigDecimal.valueOf(-1), dataRow.get(ALIAS_2));
         Assert.assertNull(dataRow.get(ALIAS_3));
         Assert.assertEquals(BigDecimal.valueOf(2).longValue(), dataRow.get(ALIAS_4));
-        Assert.assertEquals(BigDecimal.valueOf(2), dataRow.get(ALIAS_5));
+        Assert.assertEquals(null, dataRow.get(ALIAS_5));
         // Проверка стилей
         List<String> styleList = new LinkedList<String>();
         for (String key : dataRow.keySet()) {
