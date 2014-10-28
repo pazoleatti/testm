@@ -349,7 +349,17 @@ ALTER TABLE declaration_type ADD ifrs_name VARCHAR2(200);
 COMMENT ON COLUMN form_type.ifrs_name IS 'Наименование формы для файла данного макета, включаемого в архив с отчетностью для МСФО'; 
 COMMENT ON COLUMN declaration_type.ifrs_name IS 'Наименование формы для файла данного макета, включаемого в архив с отчетностью для МСФО'; 
 
+---------------------------------------------------------------------------------------------------
+-- Оптимизация удаления из BLOB_DATA устаревших данных
 
+create index i_ifrs_data_blob_data_id       on ifrs_data(blob_data_id);
+create index i_form_data_rep_blob_data_id     on form_data_report(blob_data_id);
+create index i_decl_report_blob_data_id      on declaration_report(blob_data_id);
+create index i_log_system_blob_data_id       on log_system(blob_data_id);
+create index i_ref_book_script_id         on ref_book(script_id);
+create index i_declaration_template_xsd     on declaration_template(xsd);
+create index i_declaration_template_jrxml    on declaration_template(jrxml);
+create index i_notification_blob_data_id       on notification(blob_data_id);
 ---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
