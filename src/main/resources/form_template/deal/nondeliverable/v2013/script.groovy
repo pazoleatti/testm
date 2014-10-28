@@ -490,11 +490,5 @@ void sortFormDataRows() {
 
 // Получение подитоговых строк
 def getSubTotalRows(def dataRows) {
-    def subTotalRows = []
-    dataRows.each {
-        if (it.getAlias() != null) {
-            subTotalRows.add(it)
-        }
-    }
-    return subTotalRows
+    return dataRows.findAll { it.getAlias() != null}
 }
