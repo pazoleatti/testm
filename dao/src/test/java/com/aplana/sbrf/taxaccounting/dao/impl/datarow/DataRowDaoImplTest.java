@@ -658,7 +658,7 @@ public class DataRowDaoImplTest extends Assert {
      * Проверить генерацию автонумеруемых граф для последовательной нумерации
      */
     @Test
-    public void getRowsWhenSerialAutoNumeration() {
+		public void getRowsWhenSerialAutoNumeration() {
         FormData fd = formDataDao.get(1000, false);
         List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
         Assert.assertTrue(Integer.valueOf(rows.get(0).get("autoNumerationColumn").toString()).equals(1));

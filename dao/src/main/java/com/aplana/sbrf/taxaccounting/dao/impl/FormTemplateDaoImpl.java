@@ -114,7 +114,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             String dataHeadersXml = null;
             List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
             if (headers != null && !headers.isEmpty()) {
-                FormDataUtils.cleanValueOners(headers);
+                FormDataUtils.cleanValueOwners(headers);
                 dataHeadersXml = xmlSerializationUtils.serialize(headers);
             }
 
@@ -409,7 +409,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         String dataHeadersXml = null;
         List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
         if (headers != null && !headers.isEmpty()) {
-            FormDataUtils.cleanValueOners(headers);
+            FormDataUtils.cleanValueOwners(headers);
             dataHeadersXml = xmlSerializationUtils.serialize(headers);
         }
 

@@ -71,7 +71,7 @@ public class FormTemplateHeaderPresenter
 
 
 	private void setViewData() {
-		FormDataUtils.cleanValueOners(formTemplate.getHeaders());
+		FormDataUtils.cleanValueOwners(formTemplate.getHeaders());
 		getView().setColumnsData(formTemplate.getColumns());
 		getView().setHeaderData(formTemplate.getHeaders());
 
