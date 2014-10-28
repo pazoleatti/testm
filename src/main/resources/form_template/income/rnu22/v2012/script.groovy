@@ -85,6 +85,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -284,6 +287,8 @@ void calc() {
     def DataRow totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
+
+    sortFormDataRows()
 }
 
 BigDecimal getGraph13_15(def DataRow row) {
@@ -691,4 +696,12 @@ def getTotalRow(def dataRows) {
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
     return totalRow
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
+    dataRowHelper.saveSort()
 }
