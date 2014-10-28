@@ -47,6 +47,8 @@ switch (formDataEvent) {
         importData()
         calc()
         logicCheck()
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
         break
 }
 
@@ -137,7 +139,6 @@ void logicCheck() {
         def rowNum = row.getIndex()
 
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
-
 
         def incomeSumCell = row.getCell('incomeSum')
         def outcomeSumCell = row.getCell('consumptionSum')
@@ -238,7 +239,7 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    // Сортировка
+    // Сортировка для группировки
     sortRows(dataRows, groupColumns)
 
     for (row in dataRows) {
@@ -270,6 +271,9 @@ void calc() {
 
     // Если нет сортировки и подитогов, то dataRowHelper.update(dataRows)
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 // Расчет подитогового значения
@@ -473,4 +477,23 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), null, true)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getSubTotalRows(def dataRows) {
+    def subTotalRows = []
+    dataRows.each {
+        if (it.getAlias() != null) {
+            subTotalRows.add(it)
+        }
+    }
+    return subTotalRows
 }
