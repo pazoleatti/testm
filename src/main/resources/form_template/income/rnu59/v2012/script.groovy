@@ -106,6 +106,9 @@ switch (formDataEvent){
             insert(data, total)
         }
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 @Field
@@ -255,6 +258,8 @@ def calc(){
         def totalRow = getCalcTotalRow()
         insert(data, totalRow)
     }
+
+    sortFormDataRows()
 }
 
 /**
@@ -1058,4 +1063,11 @@ void loggerError(def msg, Object... args) {
     //TODO вернуть error
     //logger.error(msg)
     logger.warn(msg, args)
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
+    dataRowHelper.saveSort()
 }

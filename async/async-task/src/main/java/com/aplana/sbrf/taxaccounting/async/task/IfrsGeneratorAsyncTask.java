@@ -1,9 +1,12 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,6 +30,9 @@ public class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private IfrsDataService ifrsDataService;
 
+    @Autowired
+    private PeriodService periodService;
+
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
@@ -44,11 +50,15 @@ public class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getNotificationMsg(Map<String, Object> params) {
-        return "";
+        Integer reportPeriodId = (Integer)params.get("reportPeriodId");
+        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+        return String.format("Сформирован архив с отчетностью для МСФО за %s %s", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
-        return "";
+        Integer reportPeriodId = (Integer)params.get("reportPeriodId");
+        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+        return String.format("Произошла непредвиденная ошибка при формировании архива с отчетностью для МСФО за %s %s. Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
     }
 }

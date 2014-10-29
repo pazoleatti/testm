@@ -45,4 +45,11 @@ public interface DeclarationDataSearchService {
      * @return
      */
     List<DeclarationData> getDeclarationData(DeclarationDataFilter declarationFilter, DeclarationDataSearchOrdering ordering, boolean asc);
+
+    /**
+     * Поиск декларации необходимых для формирования отчетности для МСФО
+     * @param reportPeriodId
+     * @return
+     */
+    List<DeclarationData> getIfrs(Integer reportPeriodId);
 }

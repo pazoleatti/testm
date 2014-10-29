@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -68,8 +69,10 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
                 params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
 
+
                 if (!ifrsDataService.check(logger, action.getReportPeriodId())) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
+                    result.setError(true);
                     result.setUuid(logEntryService.save(logger.getEntries()));
                     return result;
                 }
@@ -82,16 +85,19 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
                     lockDataService.unlock(key, userInfo.getUser().getId());
                     logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");
                 }
-                result.setUuid(logEntryService.save(logger.getEntries()));
             } catch (Exception e) {
-                if (!PropertyLoader.isProductionMode() && (e instanceof RuntimeException)) {
+                if (PropertyLoader.isProductionMode() || !(e.getClass().equals(RuntimeException.class))) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
                 }
                 throw new ActionException(e);
             }
+        } else {
+            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
         }
-        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
-        logger.info("Архив с отчетностью для МСФО за %s %s поставлен в очередь на формирование", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
+            logger.info("Архив с отчетностью для МСФО за %s %s поставлен в очередь на формирование", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
+        }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

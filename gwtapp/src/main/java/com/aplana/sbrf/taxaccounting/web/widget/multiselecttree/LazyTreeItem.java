@@ -171,7 +171,8 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
                 if (sb.toString().equals("()")) sb.delete(0, sb.length());
                 highLightedString = highLightedString + sb.toString();
             }
-            getWidget().getElement().setInnerHTML(highLightedString);
+            String newInnerHTML = getWidget().getElement().getInnerHTML().replace(getName(), highLightedString);
+            getWidget().getElement().setInnerHTML(newInnerHTML);
         }
     }
 

@@ -184,6 +184,7 @@ void generateXML() {
                     mapYesNo.put(recYesId, '1')
                     mapYesNo.put(recNoId, '0')
 
+                    def rowCounter = 0
                     for (row in dataRowHelper.getAllSaved()) {
                         if (row.getAlias() != null) {
                             continue
@@ -191,7 +192,7 @@ void generateXML() {
 
                         // Раздел 1А. Сведения о контролируемой сделке (группе однородных сделок)
                         СвКонтрСд(
-                                НомПорСд: row.dealNum1
+                                НомПорСд: ++rowCounter
                         ) {
                             def String interdependenceSing = row.interdependenceSing != null ? getRefBookValue(69, row.interdependenceSing)?.CODE?.numberValue : null
                             ОснКонтрСд(
@@ -296,7 +297,7 @@ void generateXML() {
 
                             // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
                             СвОргУчаст(
-                                    [НомПорСд: row.dealMemberNum] +
+                                    [НомПорСд: rowCounter] +
                                             [ПрОрг: organInfo] +
                                             [ОКСМ: countryCode3] +
                                             [НаимОрг: organName] +

@@ -13,6 +13,8 @@ public class DeclarationType implements Serializable {
 	private TaxType taxType;
 	private String name;
     private VersionedObjectStatus status;
+    private Boolean isIfrs;
+    private String ifrsName;
 
     public VersionedObjectStatus getStatus() {
         return status;
@@ -69,4 +71,20 @@ public class DeclarationType implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+    public Boolean getIsIfrs() {
+        return isIfrs;
+    }
+
+    public void setIsIfrs(Boolean isIfrs) {
+        this.isIfrs = isIfrs;
+    }
+
+    public String getIfrsName() {
+        return ifrsName;
+    }
+
+    public void setIfrsName(String ifrsName) {
+        this.ifrsName = ifrsName;
+    }
 }

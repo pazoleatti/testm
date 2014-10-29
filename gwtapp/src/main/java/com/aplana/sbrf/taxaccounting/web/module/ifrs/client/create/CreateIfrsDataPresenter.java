@@ -56,9 +56,7 @@ public class CreateIfrsDataPresenter extends PresenterWidget<CreateIfrsDataPrese
 
 
     public void initAndShowDialog(final HasPopupSlot slotForMe){
-        getView().init();
-        slotForMe.addToPopupSlot(CreateIfrsDataPresenter.this);
-/*        GetReportPeriodsAction action = new GetReportPeriodsAction();
+        GetReportPeriodsAction action = new GetReportPeriodsAction();
         dispatchAsync.execute(action, CallbackUtils
                 .wrongStateCallback(new AbstractCallback<GetReportPeriodsResult>() {
                     @Override
@@ -68,6 +66,6 @@ public class CreateIfrsDataPresenter extends PresenterWidget<CreateIfrsDataPrese
 
                         slotForMe.addToPopupSlot(CreateIfrsDataPresenter.this);
                     }
-                }, this));*/
+                }, this));
     }
 }

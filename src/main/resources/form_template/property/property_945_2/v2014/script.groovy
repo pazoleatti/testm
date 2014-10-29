@@ -64,6 +64,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 @Field
@@ -207,6 +210,9 @@ void calc() {
     addFixedRows(dataRows, totalRow)
 
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 def calcBasis(def recordId) {
@@ -535,4 +541,22 @@ void sort(def dataRows) {
         }
         return 0
     }
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getTotalRow(dataRows), true)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getSubTotalRows(def dataRows) {
+    return dataRows.findAll { it.getAlias() != null && !it.getAlias().equals('total')}
+}
+
+// Получение подитоговых строк
+def getTotalRow(def dataRows) {
+    return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
 }

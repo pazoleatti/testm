@@ -59,6 +59,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // 1    number                  № пп
@@ -168,6 +171,8 @@ void calc() {
 
     dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
     dataRowHelper.save(dataRows)
+
+    sortFormDataRows()
 }
 
 def getRNU(def id) {
@@ -384,7 +389,7 @@ def calcTotalRow(def dataRows) {
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
     totalRow.getCell('fix').colSpan = 2
-    nonEmptyColumns.each {
+    (nonEmptyColumns + ['number', 'fix']).each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
@@ -602,7 +607,7 @@ void addTransportData(def xml) {
         total.setAlias('total')
         total.fix = 'Итого'
         total.getCell('fix').colSpan = 2
-        nonEmptyColumns.each {
+        (nonEmptyColumns + ['number', 'fix']).each {
             total.getCell(it).setStyleAlias('Контрольные суммы')
         }
 
@@ -623,4 +628,11 @@ void addTransportData(def xml) {
     }
 
     dataRowHelper.save(rows)
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
+    dataRowHelper.saveSort()
 }

@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.shared.CheckRoleAction;
+import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.shared.CheckRoleResult;
 import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.shared.ScriptExecutionAction;
 import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.shared.ScriptExecutionResult;
 import com.google.inject.Inject;
@@ -14,6 +16,7 @@ import com.gwtplatform.mvp.client.Presenter;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyStandard;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 /**
@@ -60,6 +63,16 @@ public class ScriptExecutionPresenter extends Presenter<ScriptExecutionPresenter
                 "} catch (Exception ex) {\n" +
                 "    logger.error(\"Ошибка: ${ex.getLocalizedMessage()}\")\n" +
                 "}");
+    }
+
+    @Override
+    public void prepareFromRequest(PlaceRequest request) {
+        dispatchAsync.execute(new CheckRoleAction(), CallbackUtils.wrongStateCallback(new AbstractCallback<CheckRoleResult>() {
+            @Override
+            public void onSuccess(CheckRoleResult result) {
+            }
+        }, ScriptExecutionPresenter.this));
+        super.prepareFromRequest(request);
     }
 
     @Override

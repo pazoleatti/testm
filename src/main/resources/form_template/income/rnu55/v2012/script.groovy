@@ -61,6 +61,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -174,6 +177,8 @@ void calc() {
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
+
+    sortFormDataRows()
 }
 
 // Ресчет графы 9
@@ -652,4 +657,11 @@ void addTransportData(def xml) {
         rows.add(total)
     }
     dataRowHelper.save(rows)
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
+    dataRowHelper.saveSort()
 }

@@ -183,32 +183,15 @@ void calc() {
     def dataRows = dataRowHelper.allCached
 
     // удаляем строки-группировки по организациям
-    for (Iterator<DataRow> iter = dataRows.iterator() as Iterator<DataRow>; iter.hasNext();) {
-        row = (DataRow) iter.next()
-        if (row.getAlias() != null) {
-            iter.remove()
-            dataRowHelper.delete(row)
-        }
-    }
+    deleteAllAliased(dataRows)
+
     // сортируем по организациям
     dataRows.sort { it.organName }
 
-    def int index = 1
-    for (row in dataRows) {
-        if (row.getAlias() != null) {
-            continue
-        }
-        // Порядковый номер строки
-        row.dealNum1 = index
-        row.dealNum2 = index
-        row.dealNum3 = index
-        row.dealMemberNum = index
-        index++
-    }
-    dataRowHelper.save(dataRows)
-
     // добавляем строки-группировки по организациям
-    addAllStatic()
+    addAllStatic(dataRows)
+
+    dataRowHelper.save(dataRows)
 
     // Сортировка групп и строк
     sortFormDataRows()
@@ -223,20 +206,28 @@ void consolidation() {
     def int i = 1
     // мапа идентификаторов для группировки
     def groupStr = [:]
+
+    // row → тип формы-источника
+    def final typeMap = [:]
+    // row → класс группы
+    def final classMap = [:]
+    // row → id группы
+    def final groupMap = [:]
+
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).allCached.each { srcRow ->
                 if (srcRow.getAlias() == null) {
-                    def matrixRow = getPreRow(srcRow, source.formType.id)
+                    def matrixRow = getPreRow(srcRow, source.formType.id, typeMap, classMap)
 
                     // идентификатор для группировки
-                    String group = getGroupId(matrixRow, srcRow)
+                    String group = getGroupId(matrixRow, srcRow, typeMap)
                     if (!groupStr.containsKey(group)) {
                         groupStr.put(group, i++)
                     }
-                    matrixRow.dealNum3 = groupStr.get(group)
+                    groupMap.put(matrixRow, groupStr.get(group))
 
                     matrixRows.add(matrixRow)
                     rowsMap.put(matrixRow, srcRow)
@@ -248,40 +239,39 @@ void consolidation() {
     // итоговые строки (всё то, что в итоге попадет в сводный отчет)
     def summaryRows = []
 
-    // Сортировка по dealNum3
-    sortRows(matrixRows, ['dealNum3'])
+    // Сортировка по группам
+    matrixRows.sort { groupMap.get(it)}
 
-    def Long currentGroup
+    def Integer currentGroup
     def mapForSummary = [:]
 
     matrixRows.each { matrixRow ->
         def srcRow = rowsMap.get(matrixRow)
-        def Long reportClass = matrixRow.dealNum2.longValue()
+        def reportClass = classMap.get(matrixRow)
 
-        if ((reportClass.equals(2L) && !isGroupClass2(matrixRow, srcRow))
-                || (reportClass.equals(3L) && !getRecSWId().equals(srcRow.serviceType))
-                || reportClass.equals(4L)) { // копируем построчно
+        if ((reportClass == 2 && !isGroupClass2(matrixRow, srcRow, typeMap))
+                || (reportClass == 3 && !getRecSWId().equals(srcRow.serviceType))
+                || reportClass == 4) { // копируем построчно
             if (mapForSummary.size() > 0) {
-                summaryRows.add(getRow(mapForSummary))
+                summaryRows.add(getRow(mapForSummary, typeMap))
             }
             mapForSummary.clear()
             mapForSummary.put(matrixRow, srcRow)
-            summaryRows.add(getRow(mapForSummary))
+            summaryRows.add(getRow(mapForSummary, typeMap))
             mapForSummary.clear()
             currentGroup = null
-
         } else { // группируем перед копированием
             if (currentGroup == null) { // первая строка
-                currentGroup = matrixRow.dealNum3
+                currentGroup = groupMap.get(matrixRow)
                 mapForSummary.put(matrixRow, srcRow)
-            } else if (currentGroup.equals(matrixRow.dealNum3.longValue())) { // строка из той же группы что предыдущая
+            } else if (currentGroup.equals(groupMap.get(matrixRow))) { // строка из той же группы что предыдущая
                 mapForSummary.put(matrixRow, srcRow)
             } else { // строка из новой группы
 
                 // получаем итоговую строку для предыдущей группы
-                summaryRows.add(getRow(mapForSummary))
+                summaryRows.add(getRow(mapForSummary, typeMap))
 
-                currentGroup = matrixRow.dealNum3
+                currentGroup = groupMap.get(matrixRow)
                 mapForSummary.clear()
                 mapForSummary.put(matrixRow, srcRow)
             }
@@ -289,16 +279,17 @@ void consolidation() {
     }
 
     if (mapForSummary.size() > 0) {
-        summaryRows.add(getRow(mapForSummary))
+        summaryRows.add(getRow(mapForSummary, typeMap))
     }
 
     dataRowHelper.save(summaryRows)
 }
 
 // Строка сводного отчета из первичных и консолидированных отчетов модуля МУКС (табл. 85)
-def buildRow(def srcRow, def matrixRow) {
+def buildRow(def srcRow, def matrixRow, def typeMap) {
     def row = formData.createDataRow()
-    def BigDecimal formTypeId = matrixRow.dealNum1
+
+    def formTypeId = typeMap.get(matrixRow)
 
     // Общие значения
     // "Да"
@@ -533,11 +524,11 @@ def buildRow(def srcRow, def matrixRow) {
     row.dealMemberCount = 2
 
     // Графа 18
-    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
+    // заполняется предварительно для каждой строки getPreRow
     row.income = 0
 
     // Графа 20
-    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
+    // заполняется предварительно для каждой строки getPreRow
     row.outcome = 0
 
     // Графа 23
@@ -753,11 +744,11 @@ def buildRow(def srcRow, def matrixRow) {
     row.otherNum = 1
 
     // Графа 29
-    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
+    // заполняется предварительно для каждой строки getPreRow
     row.contractNum = matrixRow.contractNum
 
     // Графа 30
-    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
+    // заполняется предварительно для каждой строки getPreRow
     row.contractDate = matrixRow.contractDate
 
     // Графа 15
@@ -889,14 +880,14 @@ def buildRow(def srcRow, def matrixRow) {
     row.total = 0
 
     // Графа 45
-    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
+    // заполняется предварительно для каждой строки getPreRow
     row.dealDoneDate = matrixRow.dealDoneDate
 
     // Графа 49
     // countryCode3 заполняется после графы 50
 
     // Графа 50
-    // заполняется предварительно для каждой строки getPreRow(def srcRow, def BigDecimal formTypeId)
+    // заполняется предварительно для каждой строки getPreRow
     row.organName = matrixRow.organName
 
     if (row.organName != null) {
@@ -932,7 +923,7 @@ def buildRow(def srcRow, def matrixRow) {
 }
 
 // определение класса строки по типу формы
-def Long getReportClass(def BigDecimal formTypeId) {
+def getReportClass(def formTypeId) {
     switch (formTypeId) {
         case 376: // 1
         case 377: // 2
@@ -956,13 +947,14 @@ def Long getReportClass(def BigDecimal formTypeId) {
 }
 
 // значение для группировки строки (табл. 86)
-def String getGroupId(def matrixRow, def srcRow) {
+def String getGroupId(def matrixRow, def srcRow, def typeMap) {
     def StringBuilder group = new StringBuilder()
-    group.append(matrixRow.dealNum1).append("#")
+
+    group.append(typeMap.get(matrixRow)).append("#")
             .append(matrixRow.organName).append("#")
             .append(matrixRow.contractDate).append("#")
             .append(matrixRow.contractNum).append("#")
-    switch (matrixRow.dealNum1) {
+    switch (typeMap.get(matrixRow)) {
         case 376: // 1
             group.append(srcRow.incomeBankSum != null).append("#")
             group.append(srcRow.outcomeBankSum != null)
@@ -1017,13 +1009,13 @@ def String getGroupId(def matrixRow, def srcRow) {
 }
 
 // получение строки итогового отчета на основании группы строк (или одной строки) из "матрицы" и источника (табл. 87)
-def getRow(def map) {
+def getRow(def map, def typeMap) {
     // для отчетов 16..19 надо считать суммы по двум столбцам
     def totalSum = 0
     map.each { matrixRow, srcRow ->
-        if (matrixRow.dealNum1.longValue() in [391L, 394L]) {
+        if (typeMap.get(matrixRow) in [391, 394]) {
             totalSum = (srcRow.incomeSum ?: 0) - (srcRow.outcomeSum ?: 0)
-        } else if (matrixRow.dealNum1.longValue() in [392L, 393L]) {
+        } else if (typeMap.get(matrixRow) in [392, 393]) {
             totalSum = (srcRow.incomeSum ?: 0) - (srcRow.consumptionSum ?: 0)
         }
     }
@@ -1034,10 +1026,9 @@ def getRow(def map) {
         if (first) {
             first = false
 
-            row = buildRow(srcRow, matrixRow)
-
-            if (matrixRow.dealNum1.longValue()
-                    in [375L, 383L, 384L, 386L, 388L, 389L, 390L, 391L, 392L, 393L, 394L, 402L, 401L, 403L]) {
+            row = buildRow(srcRow, matrixRow, typeMap)
+            if (typeMap.get(matrixRow)
+                    in [375, 383, 384, 386, 388, 389, 390, 391, 392, 393, 394, 402, 401, 403]) {
                 if (map.size() > 1) {
                     row.similarDealGroup = getRecYesId()
                 } else {
@@ -1052,7 +1043,7 @@ def getRow(def map) {
         }
 
         // Графа 42
-        switch (matrixRow.dealNum1) {
+        switch (typeMap.get(matrixRow)) {
             case 376: // 1
             case 377: // 2
             case 381: // 6
@@ -1073,7 +1064,7 @@ def getRow(def map) {
         }
 
         // Графа 44 п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
-        switch (matrixRow.dealNum1) {
+        switch (typeMap.get(matrixRow)) {
             case 376: // 1
             case 377: // 2
             case 375: // 3
@@ -1117,7 +1108,7 @@ def getRow(def map) {
                 break
         }
 
-        switch (matrixRow.dealNum1) {
+        switch (typeMap.get(matrixRow)) {
             case 376: // 1
             case 383: // 8
             case 390: // 15
@@ -1311,9 +1302,9 @@ def Long getRecSWId() {
 }
 
 // дополнительное условие для отчетов "класс 2" на попадание в группу
-boolean isGroupClass2(def matrixRow, def srcRow) {
+boolean isGroupClass2(def matrixRow, def srcRow, def typeMap) {
     def boolean class2ext = false
-    switch (matrixRow.dealNum1) {
+    switch (typeMap.get(matrixRow)) {
         case 383: // 8
         case 392: // 17
         case 393: // 18
@@ -1340,12 +1331,12 @@ boolean isGroupClass2(def matrixRow, def srcRow) {
 }
 
 // Заполняем каждую строку полученную из источника необходимыми предварительными значениями
-def getPreRow(def srcRow, def BigDecimal formTypeId) {
+def getPreRow(def srcRow, def formTypeId, def typeMap, def classMap) {
     def row = formData.createDataRow()
     // тип отчета
-    row.dealNum1 = formTypeId
-    // класс отчет
-    row.dealNum2 = getReportClass(formTypeId)
+    typeMap.put(row, formTypeId)
+    // класс отчета
+    classMap.put(row, getReportClass(formTypeId))
 
     // Графа 18
     switch (formTypeId) {
@@ -1594,32 +1585,27 @@ def getPreRow(def srcRow, def BigDecimal formTypeId) {
 }
 
 // Проставляет статические строки
-void addAllStatic() {
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.getAllCached()
-        def int index = 1
-        for (int i = 0; i < dataRows.size(); i++) {
-            def row = dataRows.get(i)
-            def nextRow = null
-
-            if (i < dataRows.size() - 1) {
-                nextRow = dataRows.get(i + 1)
-            }
-            if (nextRow == null || row.organName != nextRow.organName) {
-
-                def newRow = formData.createDataRow()
-                newRow.getCell('groupName').colSpan = 56
-                if (row.organName != null)
-                    newRow.groupName = getRefBookValue(9, row.organName).NAME.stringValue
-                newRow.setAlias('grp#'.concat(i.toString()))
-                dataRowHelper.insert(newRow, ++i + 1 - index)
-                index = 1
-            } else {
-                index++
-            }
-        }
+void addAllStatic(def dataRows) {
+    def temp = []
+    if (logger.containsLevel(LogLevel.ERROR))  {
+        return
     }
+    for (int i = 0; i < dataRows.size(); i++) {
+        def row = dataRows.get(i)
+        def nextRow = (i < dataRows.size() - 1) ? dataRows.get(i + 1) : null
+        if (nextRow == null || row.organName != nextRow.organName) {
+            def newRow = formData.createDataRow()
+            newRow.getCell('groupName').colSpan = 56
+            if (row.organName != null) {
+                newRow.groupName = getRefBookValue(9, row.organName).NAME.stringValue
+            }
+            newRow.setAlias('grp#'.concat(i.toString()))
+            temp.add(newRow)
+        }
+        temp.add(row)
+    }
+    dataRows.clear()
+    dataRows.addAll(temp)
 }
 
 def getXML(def String startStr, def String endStr) {
@@ -1815,9 +1801,6 @@ void addData(def xml, int headRowCount) {
         // 21.	п. 311 "в том числе сумма расходов по сделкам, цены которых подлежат регулированию"
         xmlIndexCol = 19
         newRow.outcomeIncludingRegulation = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 22. п. 010 "Порядковый номер сделки по уведомлению (из раздела 1А)"
-        xmlIndexCol = 20
-        newRow.dealNum2 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         // 23. п. 020 "Тип предмета сделки"
         xmlIndexCol = 21
         newRow.dealType = getRecordIdImport(64, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -1887,9 +1870,6 @@ void addData(def xml, int headRowCount) {
         // 45. п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
         xmlIndexCol = 43
         newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 47. п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
-        xmlIndexCol = 45
-        newRow.dealMemberNum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         // 49. п. 030 "Код страны по классификатору ОКСМ"
         xmlIndexCol = 47
         newRow.countryCode3 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)

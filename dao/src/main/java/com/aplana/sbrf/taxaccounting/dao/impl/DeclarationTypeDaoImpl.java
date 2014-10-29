@@ -31,6 +31,8 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 			res.setName(rs.getString("name"));
 			res.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
             res.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
+            res.setIsIfrs(rs.getBoolean("is_ifrs"));
+            res.setIfrsName(rs.getString("ifrs_name"));
 			return res;
 		}
 		
@@ -142,6 +144,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 
     @Override
     public List<Integer> getIfrsDeclarationTypes() {
-        return getJdbcTemplate().queryForList("SELECT * FROM declaration_type where status = 0 and is_ifrs = 1", Integer.class);
+        return getJdbcTemplate().queryForList("SELECT id FROM declaration_type where status = 0 and is_ifrs = 1", Integer.class);
     }
 }

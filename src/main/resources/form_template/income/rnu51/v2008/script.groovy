@@ -2,6 +2,7 @@ package form_template.income.rnu51.v2008
 
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -83,6 +84,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.MIGRATION:
         importData()
+        break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
         break
 }
 
@@ -263,6 +267,9 @@ void calc() {
     }
 
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 // Итого по форме
@@ -915,4 +922,12 @@ void loggerError(def msg) {
     } else {
         logger.error(msg)
     }
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'itogoKvartal')], getDataRow(dataRows, 'itogo'), true)
+    dataRowHelper.saveSort()
 }
