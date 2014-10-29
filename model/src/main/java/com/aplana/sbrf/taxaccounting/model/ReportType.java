@@ -13,7 +13,9 @@ public enum ReportType {
     EXCEL_DEC(0, "Excel", 5L, 105L),
     XML_DEC(1, "XML", 6L, 116L),
     PDF_DEC(2, "PDF", 7L, 107L),
-    JASPER_DEC(3, "JASPER", 8L, 108L);
+    JASPER_DEC(3, "JASPER", 8L, 108L),
+
+    ZIP_IFRS(0, "Zip", 9L, 109L);
 
     private int id;
     private String name;

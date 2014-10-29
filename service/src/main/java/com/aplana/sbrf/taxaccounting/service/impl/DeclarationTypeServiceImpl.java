@@ -76,4 +76,9 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
 	public List<DeclarationType> getTypes(int departmentId, int reportPeriod, TaxType taxType) {
 		return declarationTypeDao.getTypes(departmentId, reportPeriodDao.get(reportPeriod), taxType);
 	}
+
+    @Override
+    public List<Integer> getIfrsDeclarationTypes() {
+        return declarationTypeDao.getIfrsDeclarationTypes();
+    }
 }

@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.client.Departme
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.DepartmentConfigPropertyTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
+import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.IfrsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
@@ -149,6 +150,12 @@ public class GetMainMenuActionHandler extends
                                                 + TYPE + "=" + menu.getMeta()));
                     }
                 }
+            }
+
+            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                MenuItem menuItem = new MenuItem("МСФО", "", "МСФО");
+                menuItem.getSubMenu().add(new MenuItem("Отчетность", NUMBER_SIGN + IfrsTokens.ifrs));
+                taxMenu.getSubMenu().add(menuItem);
             }
 
             if (currentUser.hasRole(TARole.ROLE_GARANT)) {

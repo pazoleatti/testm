@@ -138,4 +138,10 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 				new DeclarationTypeRowMapper()
 		);
 	}
+
+
+    @Override
+    public List<Integer> getIfrsDeclarationTypes() {
+        return getJdbcTemplate().queryForList("SELECT * FROM declaration_type where status = 0 and is_ifrs = 1", Integer.class);
+    }
 }
