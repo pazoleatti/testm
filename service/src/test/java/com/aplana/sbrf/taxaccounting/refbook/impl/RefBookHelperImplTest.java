@@ -125,6 +125,10 @@ public class RefBookHelperImplTest {
 		dataRow.put(rbColumn.getAlias(), 2L);
 		dataRows.add(dataRow);
 
+		DataRow<Cell> dataRow2 = createDataRow(columns);
+		dataRow2.put(sColumn.getAlias(), "Договор №1");
+		dataRows.add(dataRow2);
+
 		refBookHelper.dataRowsDereference(null, dataRows, columns);
 
 		assertEquals("Договор №1", dataRow.get(sColumn.getAlias()));
@@ -134,5 +138,7 @@ public class RefBookHelperImplTest {
 		assertEquals("Договор №1", dataRow.getCell(sColumn.getAlias()).getStringValue());
 		assertEquals("435", dataRow.getCell(rbColumn.getAlias()).getRefBookDereference());
 		assertEquals("Россия", dataRow.getCell(refColumn.getAlias()).getRefBookDereference());
+
+		assertEquals("", dataRow2.getCell(rbColumn.getAlias()).getRefBookDereference());
 	}
 }

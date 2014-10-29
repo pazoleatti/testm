@@ -140,19 +140,19 @@ public class RefBookHelperImpl implements RefBookHelper {
 		for (DataRow<Cell> dataRow : dataRows) {
 			Cell cell = dataRow.getCell(column.getAlias());
 			Cell valueCell = dataRow.getCell(valueAlias);
+			RefBookValue refBookValue = null;
 			if (!deref) {
 				BigDecimal reference = valueCell.getNumericValue();
 				if (reference != null) {
-					RefBookValue refBookValue = values.get(reference.longValue());
-					cell.setRefBookDereference(String.valueOf(refBookValue));
+					refBookValue = values.get(reference.longValue());
 				}
 			} else { // случай для разыменования второго уровня
 				String reference = valueCell.getRefBookDereference();
-				if (reference != null) {
-					RefBookValue refBookValue = values.get(Long.valueOf(reference));
-					cell.setRefBookDereference(String.valueOf(refBookValue));
+				if (reference != null && !reference.isEmpty()) {
+					refBookValue = values.get(Long.valueOf(reference));
 				}
 			}
+			cell.setRefBookDereference(refBookValue == null ? "" : String.valueOf(refBookValue));
 		}
 	}
 
@@ -202,7 +202,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 					for (DataRow<Cell> dataRow : dataRows) {
 						Cell cell = dataRow.getCell(column.getAlias());
 						String value = cell.getRefBookDereference();
-						if (value != null) {
+						if (value != null && !value.isEmpty()) {
 							recordIds.add(Long.valueOf(value));
 						}
 					}
