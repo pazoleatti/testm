@@ -282,7 +282,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "department_sbrf_code, \n" +
                     "department_region_id, \n" +
                     "department_is_active, \n" +
-                    "department_code \n" +
+                    "department_code, \n" +
                     "department_garant_use \n" +
                     // пейджинг
                     (paging ? ", rownum as row_number_over \n":"") +

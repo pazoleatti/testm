@@ -579,7 +579,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "department_region_id, \n" +
                     "department_is_active, \n" +
                     "department_code, \n" +
-                    "department_garant_use \n" +
+                    "department_garant_use, \n" +
                     "performer_id, \n" +
                     "performer_name, \n" +
                     "performer_parent_id, \n" +
