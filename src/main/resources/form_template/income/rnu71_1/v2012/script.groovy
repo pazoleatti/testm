@@ -81,6 +81,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // Все поля
@@ -300,6 +303,9 @@ void calc() {
     dataRows.add(totalRow)
 
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 // Расчет подитогового значения
@@ -713,4 +719,17 @@ void addTransportData(def xml) {
     }
 
     dataRowHelper.save(rows)
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'itg'), true)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getSubTotalRows(def dataRows) {
+    return dataRows.findAll { it.getAlias() != null && !'itg'.equals(it.getAlias())}
 }

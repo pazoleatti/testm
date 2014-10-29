@@ -40,10 +40,7 @@ public class CreateIfrsDataView extends PopupViewWithUiHandlers<CreateIfrsDataUi
 
     @Override
     public void init() {
-    }
-
-    @UiHandler("reportPeriodIds")
-    public void onReportPeriodChange(ValueChangeEvent<List<Integer>> event) {
+        reportPeriodIds.setValue(null);
     }
 
     @UiHandler("continueButton")

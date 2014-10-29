@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -30,6 +33,14 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     private FormTemplateService formTemplateService;
     @Autowired
     private FormTypeService formTypeService;
+    @Autowired
+    private DeclarationDataSearchService declarationDataSearchService;
+    @Autowired
+    private DeclarationDataService declarationDataService;
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    private DeclarationTypeService declarationTypeService;
     @Autowired
     private DepartmentService departmentService;
     @Autowired
@@ -61,8 +72,13 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
 
         List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
+        List<DeclarationData> declarationDataList = declarationDataSearchService.getIfrs(reportPeriodId);
+
         List<Integer> formTypeList = formTypeService.getIfrsFormTypes();
+        List<Integer> declarationTypeList = declarationTypeService.getIfrsDeclarationTypes();
+
         List<FormData> notAcceptedFormDataList = new ArrayList<FormData>();
+        List<DeclarationData> notAcceptedDeclarationDataList = new ArrayList<DeclarationData>();
 
         for(FormData formData: formDataList) {
             if (!formData.getState().equals(WorkflowState.ACCEPTED)) {
@@ -73,18 +89,35 @@ public class IfrsDataServiceImpl implements IfrsDataService {
             }
         }
 
-        if (!formTypeList.isEmpty()) {
+        for(DeclarationData declarationData: declarationDataList) {
+            if (!declarationData.isAccepted()) {
+                notAcceptedDeclarationDataList.add(declarationData);
+            }
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            if (declarationTypeList.contains(declarationTemplate.getType().getId())) {
+                declarationTypeList.remove(Integer.valueOf(declarationTemplate.getType().getId()));
+            }
+        }
+
+        if (!formTypeList.isEmpty() || !declarationTypeList.isEmpty()) {
             logger.error("Следующие формы за %s %s, включаемые в архив с отчетностью для МСФО, не созданы:", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
             for(Integer formType: formTypeList) {
                 logger.error("Налоговая форма: Вид: \"%s\"", formTypeService.get(formType).getName());
             }
+            for(Integer declarationType: declarationTypeList) {
+                logger.error("Декларация: Вид: \"%s\"", declarationTypeService.get(declarationType).getName());
+            }
             return false;
         }
 
-        if (!notAcceptedFormDataList.isEmpty()) {
+        if (!notAcceptedFormDataList.isEmpty() || !notAcceptedDeclarationDataList.isEmpty()) {
             logger.error("Следующие формы за %s %s, включаемые в архив с отчетностью для МСФО, не находятся в состоянии \"Принята\":", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
             for(FormData formData: notAcceptedFormDataList) {
                 logger.error("Налоговая форма: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(formData.getDepartmentId()), formData.getKind().getName(), formData.getFormType().getName());
+            }
+            for(DeclarationData declarationData: notAcceptedDeclarationDataList) {
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                logger.error("Декларация: Подразделение: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(declarationData.getDepartmentId()), declarationTemplate.getName());
             }
             return false;
         }
@@ -95,12 +128,12 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     public void calculate(Logger logger, Integer reportPeriodId) {
         ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ZipArchiveOutputStream zos = new ZipArchiveOutputStream(os);
         try {
-            ZipOutputStream zos = new ZipOutputStream(os);
-            ZipEntry ze;
-
+            ZipArchiveEntry ze;
             List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
-            if (formDataList.isEmpty()) {
+            List<DeclarationData> declarationDataList = declarationDataSearchService.getIfrs(reportPeriodId);
+            if (formDataList.isEmpty() && declarationDataList.isEmpty()) {
 
             }
 
@@ -114,7 +147,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
             }
 
             for(FormData formData: formDataList) {
-                boolean flag = (formData.getId() != 11122);
+                boolean flag = true;
                 List<DepartmentFormType> departmentImpFormTypes = sourceService.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriodId);
                 for(DepartmentFormType departmentFormType: departmentImpFormTypes) {
                     if (formTypesList.contains(departmentFormType.getFormTypeId())) {
@@ -145,16 +178,42 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 BlobData blobData = blobDataService.get(uuid);
                 FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
                 Department department = departmentsMap.get(formData.getDepartmentId());
-                String name = String.format("%s_%s_%s_%s_%s.xlsm", formTemplate.getType().getName(), department.getSbrfCode(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), formData.getKind().getId());
-                ze = new ZipEntry(name);
-                zos.putNextEntry(ze);
+                String name = String.format("%s_%s_%s_%s.xlsm", formTemplate.getType().getIfrsName(), department.getSbrfCode(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
+                ze = new ZipArchiveEntry (name);
+                zos.putArchiveEntry(ze);
                 zos.write(IOUtils.toByteArray(blobData.getInputStream()));
-                zos.closeEntry();
+                zos.closeArchiveEntry();
             }
 
-            zos.finish();
+            for(DeclarationData declarationData: declarationDataList) {
+                BlobData blobData;
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                String uuid = reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), ReportType.EXCEL_DEC);
+                if (uuid == null) {
+                    String xmlUuid = reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), ReportType.XML_DEC);
+                    if (xmlUuid != null) {
+                        blobData = new BlobData();
+                        blobData.setInputStream(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationData.getId(), userService.getSystemUserInfo())));
+                    } else {
+                        throw new ServiceException("Для декларации \"%s\" не произведен расчёт", declarationTemplate.getName());
+                    }
+                } else {
+                    blobData = blobDataService.get(uuid);
+                }
+
+                Department department = departmentsMap.get(declarationData.getDepartmentId());
+                String name = String.format("%s_%s_%s_%s.xlsx", declarationTemplate.getType().getIfrsName(), department.getSbrfCode(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
+                ze = new ZipArchiveEntry(name);
+                zos.putArchiveEntry(ze);
+                zos.write(IOUtils.toByteArray(blobData.getInputStream()));
+                zos.closeArchiveEntry();
+            }
         } catch (Exception e) {
             throw new ServiceException("Не удалось сформировать отчетность для МСФО", e);
+        } finally {
+            IOUtils.closeQuietly(zos);
+            IOUtils.closeQuietly(os);
+
         }
 
         ifrsDao.update(reportPeriodId, blobDataService.create(new ByteArrayInputStream(os.toByteArray()), String.format("Отчетность для МСФО %s %s.zip", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear())));

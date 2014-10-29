@@ -10,6 +10,7 @@ public class CalculateIfrsDataResult implements Result {
     // uuid отчетности для МСФО
     private String blobDataId;
     private String uuid;
+    private boolean isError = false;
 
     public String getBlobDataId() {
         return blobDataId;
@@ -25,5 +26,13 @@ public class CalculateIfrsDataResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public boolean isError() {
+        return isError;
+    }
+
+    public void setError(boolean isError) {
+        this.isError = isError;
     }
 }
