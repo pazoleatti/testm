@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.ui.HasHighlighting;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
 
     class CustomLabel extends Anchor {
         public CustomLabel() {
+            super();
             getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
             getElement().getStyle().setColor("#000000");
             getElement().getStyle().setCursor(Style.Cursor.POINTER);
@@ -65,8 +67,6 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
             setWidget(multiSelection ? checkBox : radioButton);
         } else {
             label.setText(name);
-            DOM.getChild(label.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
-            DOM.getChild(label.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
             setWidget(label);
         }
 

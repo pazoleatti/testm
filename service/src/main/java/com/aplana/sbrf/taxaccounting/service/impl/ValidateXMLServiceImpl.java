@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -25,6 +26,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.net.URL;
 
+@Service
 public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     static final Log log = LogFactory.getLog(ValidateXMLService.class);
