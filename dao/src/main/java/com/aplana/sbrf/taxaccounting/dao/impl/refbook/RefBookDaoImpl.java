@@ -394,30 +394,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         RefBookAttribute attribute = refBook.getAttribute(attributeId);
         String columnName = attribute.getAttributeType().name() + "_value";
-        if (rs.getObject(columnName) != null) {
-            Object value = null;
-            switch (attribute.getAttributeType()) {
-                case STRING: {
-                    value = rs.getString(columnName);
-                }
-                break;
-                case NUMBER: {
-					BigDecimal decimal = rs.getBigDecimal(columnName);
-					value = decimal == null ? decimal : decimal.setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
-                }
-                break;
-                case DATE: {
-                    value = rs.getDate(columnName);
-                }
-                break;
-                case REFERENCE: {
-                    value = SqlUtils.getLong(rs, columnName);
-                }
-                break;
-            }
-            RefBookValue attrValue = record.get(attribute.getAlias());
-            attrValue.setValue(value);
-        }
+		Object value = parseRefBookValue(rs, columnName, attribute);
+	    RefBookValue attrValue = record.get(attribute.getAlias());
+        attrValue.setValue(value);
     }
 
     // Строка справочника по идентификатору строки
@@ -993,6 +972,34 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+	/**
+	 * Разыменовывает текущую строку resultSet в графе columnName используя информацию об атрибуте справочника attribute
+	 * @param resultSet
+	 * @param attribute
+	 * @param columnName
+	 * @return
+	 * @throws SQLException
+	 */
+	private Object parseRefBookValue(ResultSet resultSet, String columnName, RefBookAttribute attribute) throws SQLException {
+		if (resultSet.getObject(columnName) != null) {
+			switch (attribute.getAttributeType()) {
+				case STRING: {
+					return resultSet.getString(columnName);
+				}
+				case NUMBER: {
+					return resultSet.getBigDecimal(columnName).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
+				}
+				case DATE: {
+					return resultSet.getDate(columnName);
+				}
+				case REFERENCE: {
+					return SqlUtils.getLong(resultSet, columnName);
+				}
+			}
+		}
+		return null;
+	}
+
     @Override
     public RefBookValue getValue(Long recordId, Long attributeId) {
         final RefBookAttribute attribute = getAttribute(attributeId);
@@ -1004,27 +1011,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     new RowMapper<RefBookValue>() {
                         @Override
                         public RefBookValue mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            Object value = null;
-                            String columnName = attribute.getAttributeType() + "_VALUE";
-                            switch (attribute.getAttributeType()) {
-                                case STRING: {
-                                    value = rs.getString(columnName);
-                                }
-                                break;
-                                case NUMBER: {
-									BigDecimal decimal = rs.getBigDecimal(columnName);
-									value = decimal == null ? decimal : decimal.setScale(attribute.getPrecision(), RoundingMode.HALF_UP);
-                                }
-                                break;
-                                case DATE: {
-                                    value = rs.getDate(columnName);
-                                }
-                                break;
-                                case REFERENCE: {
-                                    value = SqlUtils.getLong(rs, columnName);
-                                }
-                                break;
-                            }
+							String columnName = attribute.getAttributeType() + "_VALUE";
+							Object value = parseRefBookValue(rs, columnName, attribute);
                             return new RefBookValue(attribute.getAttributeType(), value);
                         }
                     }
@@ -2691,33 +2679,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 		public DereferenceMapper(RefBookAttribute attribute) {
 			this.attribute = attribute;
-			result = new HashMap<Long, RefBookValue>();
+			result = new HashMap<Long, RefBookValue>(); // все атрибуты не нужны, только справочные и ссылочные
 		}
 
 		@Override
 		public void processRow(ResultSet rs) throws SQLException {
-			final String columnName = "value";
 			Long recordId = rs.getLong("record_id");
-			Object value = null;
-			switch (attribute.getAttributeType()) {
-				case STRING: {
-					value = rs.getString(columnName);
-				}
-				break;
-				case NUMBER: {
-					BigDecimal decimal = rs.getBigDecimal(columnName);
-					value = decimal == null ? decimal : decimal.setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
-				}
-				break;
-				case DATE: {
-					value = rs.getDate(columnName);
-				}
-				break;
-				case REFERENCE: {
-					value = SqlUtils.getLong(rs, columnName);
-				}
-				break;
-			}
+			Object value = parseRefBookValue(rs, "value", attribute);
 			result.put(recordId, new RefBookValue(attribute.getAttributeType(), value));
 		}
 
