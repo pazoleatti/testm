@@ -59,6 +59,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // Редактируемые атрибуты
@@ -105,6 +108,9 @@ void calc() {
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 // Получение импортируемых данных
@@ -307,4 +313,17 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getTotalRow(dataRows), null)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getTotalRow(def dataRows) {
+    return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
 }
