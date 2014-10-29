@@ -57,6 +57,8 @@ public class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
-        return "";
+        Integer reportPeriodId = (Integer)params.get("reportPeriodId");
+        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+        return String.format("Произошла непредвиденная ошибка при формировании архива с отчетностью для МСФО за %s %s. Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
     }
 }
