@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.ifrs.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -11,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.create.CreateIfrsDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.model.IfrsRow;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -113,7 +116,7 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
 
     @Override
     public void onCalc() {
-        Integer reportPeriodId = getView().getReportPeriodId();
+        final Integer reportPeriodId = getView().getReportPeriodId();
         if (reportPeriodId != null) {
             CalculateIfrsDataAction action = new CalculateIfrsDataAction();
             action.setReportPeriodId(reportPeriodId);
@@ -124,6 +127,12 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
                         @Override
                         public void onSuccess(CalculateIfrsDataResult result) {
                             LogAddEvent.fire(IfrsPresenter.this, result.getUuid());
+                            if (result.isError()) {
+                                Dialog.errorMessage("Архив с отчетностью для МСФО не сформирован", "Обнаружены фатальные ошибки!");
+                            } else if (result.getBlobDataId() != null) {
+                                Window.open(
+                                        GWT.getHostPageBaseURL() + "download/downloadBlobController/IFRS/" + reportPeriodId, "", "");
+                            }
                         }
                     }, this).addCallback(new ManualRevealCallback<CalculateIfrsDataResult>(this)));
         }

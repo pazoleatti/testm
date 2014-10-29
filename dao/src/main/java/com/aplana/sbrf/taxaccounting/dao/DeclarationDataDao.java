@@ -85,4 +85,11 @@ public interface DeclarationDataDao {
      * Декларация созданная в последнем отчетном периоде подразделения
      */
     DeclarationData getLast(int declarationTypeId, int departmentId, int reportPeriodId);
+
+    /**
+     * Поиск декларации необходимых для формирования отчетности для МСФО
+     * @param reportPeriodId
+     * @return
+     */
+    List<DeclarationData> getIfrs(int reportPeriodId);
 }
