@@ -304,7 +304,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 "join form_template ft on ft.id = fd.form_template_id \n" +
                 "join form_type t on t.id = ft.type_id \n" +
                 "where t.is_ifrs = 1 \n" +
-                "and drp.report_period_id = :rp order by drp.id", paramMap, new FormDataWithoutRowMapperWithType());
+                "and drp.report_period_id = :rp", paramMap, new FormDataWithoutRowMapperWithType());
     }
 
     @Override
