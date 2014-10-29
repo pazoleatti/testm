@@ -69,6 +69,9 @@ switch (formDataEvent) {
             insert(data, total)
         }
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // графа 1  - tadeNumber
@@ -227,6 +230,8 @@ void calc() {
     // строка итого
     def totalRow = getCalcTotalRow()
     insert(data, totalRow)
+
+    sortFormDataRows()
 }
 
 def BigDecimal calc12(def row, def daysInYear, def course, def someDate, def reportDate) {
@@ -1187,4 +1192,11 @@ void loggerError(def msg) {
     //TODO вернуть error
     //logger.error(msg)
     logger.warn(msg)
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
+    dataRowHelper.saveSort()
 }

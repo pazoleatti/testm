@@ -85,6 +85,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -233,6 +236,9 @@ void calc() {
     calcTotalRow(monthRow, totalRow)
 
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void logicCheck() {
@@ -963,4 +969,12 @@ void loggerError(def row, def msg) {
     } else {
         rowError(logger, row, msg)
     }
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'month')], getDataRow(dataRows, 'total'), true)
+    dataRowHelper.saveSort()
 }

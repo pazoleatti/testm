@@ -70,6 +70,9 @@ switch (formDataEvent) {
         if (!hasError()) {
             addAllStatic()
         }
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 /**
@@ -454,6 +457,8 @@ void calc() {
         }
         data.save(getRows(data));
     }
+
+    sortFormDataRows()
 }
 
 /**
@@ -1008,4 +1013,11 @@ void loggerError(def msg) {
     //TODO вернуть error
     //logger.error(msg)
     logger.warn(msg)
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'itogo'), null)
+    dataRowHelper.saveSort()
 }

@@ -82,6 +82,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -234,6 +237,8 @@ void calc() {
         row.amortNorm = calc13(row)
     }
     dataRowHelper.update(dataRows);
+
+    sortFormDataRows()
 }
 
 // Ресчет графы 8
@@ -808,4 +813,11 @@ void prevPeriodCheck() {
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
         formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
     }
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    dataRowHelper.saveSort()
 }

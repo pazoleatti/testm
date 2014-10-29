@@ -70,6 +70,9 @@ switch (formDataEvent) {
             insert(data, total)
         }
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // графа 1  - tadeNumber
@@ -259,6 +262,8 @@ void calc() {
         def totalRow = getCalcTotalRow()
         insert(dataRowHelper, totalRow)
     }
+
+    sortFormDataRows()
 }
 
 /**
@@ -1137,4 +1142,11 @@ def getReportDate() {
         reportDay = reportPeriodService.getReportDate(formData.reportPeriodId)?.time
     }
     return reportDay
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
+    dataRowHelper.saveSort()
 }

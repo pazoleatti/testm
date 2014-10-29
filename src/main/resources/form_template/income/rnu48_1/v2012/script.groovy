@@ -57,6 +57,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // Все атрибуты
@@ -103,6 +106,8 @@ void calc() {
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
     dataRowHelper.update(dataRows)
+
+    sortFormDataRows()
 }
 
 void logicCheck() {
@@ -293,4 +298,11 @@ void addTransportData(def xml) {
         }
     }
     dataRowHelper.save(rows)
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
+    dataRowHelper.saveSort()
 }
