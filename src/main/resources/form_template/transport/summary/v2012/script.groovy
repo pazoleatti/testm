@@ -65,6 +65,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         noImport(logger)
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -332,6 +335,9 @@ def calc() {
     dataRows.add(totalRow)
 
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void logicCheck() {
@@ -770,4 +776,17 @@ def calc14(def row, def region, def errorMsg) {
         placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'], errorMsg)
     }
     return null
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getTotalRow(dataRows), null)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getTotalRow(def dataRows) {
+    return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
 }

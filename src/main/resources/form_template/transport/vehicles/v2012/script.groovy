@@ -56,6 +56,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // 1 № пп  -  rowNumber
@@ -141,6 +144,7 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 // Алгоритмы заполнения полей формы
 void calc() {
     // нет полей для заполнения
+    sortFormDataRows()
 }
 
 // сортировка ОКТМО - Муниципальное образование - Код вида ТС
@@ -634,4 +638,12 @@ void addTransportData(def xml) {
     }
 
     dataRowHelper.save(rows)
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    dataRowHelper.saveSort()
 }
