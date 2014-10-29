@@ -74,6 +74,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -123,6 +126,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Алгоритмы заполнения полей формы
 void calc() {
     // расчетов нет
+
+    sortFormDataRows()
 }
 
 def logicCheck() {
@@ -322,4 +327,11 @@ void addData(def xml, headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    dataRowHelper.saveSort()
 }
