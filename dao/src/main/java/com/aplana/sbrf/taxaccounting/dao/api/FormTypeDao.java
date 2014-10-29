@@ -64,4 +64,11 @@ public interface FormTypeDao {
      * Вид НФ по его уникальному коду
      */
     FormType getByCode(String code);
+
+    /**
+     * Получить список налоговых форм для отчетности МСФО
+     * @return список видов налоговых форм
+     */
+    List<Integer> getIfrsFormTypes();
+
 }

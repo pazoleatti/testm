@@ -927,6 +927,11 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
+    public List<FormData> getIfrsForm(int reportPeriodId) {
+        return formDataDao.getIfrsForm(reportPeriodId);
+    }
+
+    @Override
     public boolean existFormData(int formTypeId, FormDataKind kind, int departmentId, Logger logger) {
         // Если для удаляемого назначения нет созданных экземпляров форм
         List<Long> formDataIds = formDataDao.getFormDataIds(formTypeId, kind, departmentId);

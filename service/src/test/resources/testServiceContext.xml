@@ -116,6 +116,9 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.ReportDao"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.IfrsDao"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.FormPerformerDao"/>
     </bean>
 </beans>

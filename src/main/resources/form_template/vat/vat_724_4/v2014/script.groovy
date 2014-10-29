@@ -60,6 +60,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -171,8 +174,8 @@ void calc() {
     def dataRows = dataRowHelper.allCached
 
     for (def section : sections) {
-        def firstRow = getDataRow(dataRows, 'head' + section)
-        def lastRow = getDataRow(dataRows, 'total' + section)
+        def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
+        def lastRow = getDataRow(dataRows, getLastRowAlias(section))
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
 
@@ -188,6 +191,9 @@ void calc() {
     updateIndexes(dataRows)
 
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void logicCheck() {
@@ -220,8 +226,8 @@ void logicCheck() {
 
     // 2. Проверка итоговых значений по разделам
     for (def section : sections) {
-        def firstRow = getDataRow(dataRows, 'head' + section)
-        def lastRow = getDataRow(dataRows, 'total' + section)
+        def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
+        def lastRow = getDataRow(dataRows, getLastRowAlias(section))
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
 
@@ -256,7 +262,7 @@ void consolidation() {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 // копирование данных по разделам
                 sections.each { section ->
-                    copyRows(sourceDataRows, dataRows, 'head' + section, 'total' + section)
+                    copyRows(sourceDataRows, dataRows, getFirstRowAlias(section), getLastRowAlias(section))
                 }
             }
         }
@@ -409,7 +415,7 @@ void addData(def xml, int headRowCount) {
     sections.each { section ->
         def copyRows = mapRows[section]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(dataRows, 'total' + section).getIndex() - 1
+            def insertIndex = getDataRow(dataRows, getLastRowAlias(section)).getIndex() - 1
             dataRows.addAll(insertIndex, copyRows)
             // поправить индексы, потому что они после вставки не пересчитываются
             updateIndexes(dataRows)
@@ -432,6 +438,14 @@ def getTotalRow(sectionsRows, def index) {
         }
     }
     return newRow
+}
+
+def getFirstRowAlias(def section) {
+    return 'head' + section
+}
+
+def getLastRowAlias(def section) {
+    return 'total' + section
 }
 
 void importTransportData() {
@@ -511,7 +525,7 @@ void addTransportData(def xml) {
     sections.each { section ->
         def copyRows = mapRows[section]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(dataRows, 'total' + section).getIndex() - 1
+            def insertIndex = getDataRow(dataRows, getLastRowAlias(section)).getIndex() - 1
             dataRows.addAll(insertIndex, copyRows)
             // поправить индексы, потому что они после вставки не пересчитываются
             updateIndexes(dataRows)
@@ -549,8 +563,8 @@ void addTransportData(def xml) {
 
     // расчет итогов
     for (def section : sections) {
-        def firstRow = getDataRow(dataRows, 'head' + section)
-        def lastRow = getDataRow(dataRows, 'total' + section)
+        def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
+        def lastRow = getDataRow(dataRows, getLastRowAlias(section))
         def from = firstRow.getIndex()
         def to = lastRow.getIndex() - 1
 
@@ -561,4 +575,27 @@ void addTransportData(def xml) {
     updateIndexes(dataRows)
 
     dataRowHelper.save(dataRows)
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
+        def lastRow = getDataRow(dataRows, getLastRowAlias(section))
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+
+        // Массовое разыменование строк НФ
+        def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        refBookService.dataRowsDereference(logger, sectionsRows, columnList)
+
+        sortRowsSimple(sectionsRows)
+        dataRowHelper.saveSort()
+    }
+
+    dataRowHelper.saveSort()
 }
