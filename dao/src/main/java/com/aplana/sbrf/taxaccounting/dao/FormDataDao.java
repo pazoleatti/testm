@@ -88,6 +88,13 @@ public interface FormDataDao {
      */
     List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
 
+    /**
+     * Поиск НФ необходимых для формирования отчетности для МСФО
+     * @param reportPeriodId
+     * @return
+     */
+    List<FormData> getIfrsForm(int reportPeriodId);
+
 	/**
 	 * Обновление признака возврата
 	 */

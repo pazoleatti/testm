@@ -402,7 +402,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
                 break;
                 case NUMBER: {
-                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
+					BigDecimal decimal = rs.getBigDecimal(columnName);
+					value = decimal == null ? decimal : decimal.setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
                 }
                 break;
                 case DATE: {
@@ -1011,7 +1012,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                 }
                                 break;
                                 case NUMBER: {
-                                    value = rs.getBigDecimal(columnName).setScale(attribute.getPrecision(), RoundingMode.HALF_UP);
+									BigDecimal decimal = rs.getBigDecimal(columnName);
+									value = decimal == null ? decimal : decimal.setScale(attribute.getPrecision(), RoundingMode.HALF_UP);
                                 }
                                 break;
                                 case DATE: {
@@ -2680,7 +2682,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public void deleteVersion(String tableName, @NotNull Long uniqueRecordId) {
-        getJdbcTemplate().update(String.format("delete from %s where id=?", tableName), uniqueRecordId);
+        getJdbcTemplate().update(String.format("DELETE FROM %s WHERE id = ?", tableName), uniqueRecordId);
     }
 
 	private class DereferenceMapper implements RowCallbackHandler {
@@ -2694,23 +2696,25 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
 		@Override
 		public void processRow(ResultSet rs) throws SQLException {
+			final String columnName = "value";
 			Long recordId = rs.getLong("record_id");
 			Object value = null;
 			switch (attribute.getAttributeType()) {
 				case STRING: {
-					value = rs.getString("value");
+					value = rs.getString(columnName);
 				}
 				break;
 				case NUMBER: {
-					value = rs.getBigDecimal("value").setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
+					BigDecimal decimal = rs.getBigDecimal(columnName);
+					value = decimal == null ? decimal : decimal.setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
 				}
 				break;
 				case DATE: {
-					value = rs.getDate("value");
+					value = rs.getDate(columnName);
 				}
 				break;
 				case REFERENCE: {
-					value = SqlUtils.getLong(rs, "value");
+					value = SqlUtils.getLong(rs, columnName);
 				}
 				break;
 			}

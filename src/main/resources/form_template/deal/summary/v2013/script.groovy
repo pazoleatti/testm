@@ -109,6 +109,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -206,6 +209,9 @@ void calc() {
 
     // добавляем строки-группировки по организациям
     addAllStatic()
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 // Консолидация
@@ -1932,4 +1938,17 @@ def getYesNoByNumber(def number) {
 
     }
     return null
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), null, false)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getSubTotalRows(def dataRows) {
+    return dataRows.findAll { it.getAlias() != null}
 }

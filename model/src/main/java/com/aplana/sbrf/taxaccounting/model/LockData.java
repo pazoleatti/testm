@@ -17,7 +17,8 @@ public final class LockData {
         FORM_DATA,
         DECLARATION_TEMPLATE,
         FORM_TEMPLATE,
-        LOG_SYSTEM_BACKUP
+        LOG_SYSTEM_BACKUP,
+        IFRS
     }
 
     public static final int STANDARD_LIFE_TIME = 3600000;  // 1 час

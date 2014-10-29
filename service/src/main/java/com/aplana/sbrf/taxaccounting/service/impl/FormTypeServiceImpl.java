@@ -77,4 +77,9 @@ public class FormTypeServiceImpl implements FormTypeService {
     public FormType getByCode(String code) {
         return formTypeDao.getByCode(code);
     }
+
+    @Override
+    public List<Integer> getIfrsFormTypes() {
+        return formTypeDao.getIfrsFormTypes();
+    }
 }

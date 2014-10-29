@@ -61,6 +61,9 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     public void init(final PickerState newState) {
         if (isNeedReloadHeaders(newState)) {
             // Установка новых значений после проверки на новость основных параметров
+            if (newState.getPickerContext() == null) {
+                newState.setPickerContext(ps.getPickerContext());
+            }
             ps.setValues(newState);
             if (ps.getRefBookAttrId() == null) {
                 return;

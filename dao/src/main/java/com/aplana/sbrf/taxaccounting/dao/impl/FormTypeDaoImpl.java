@@ -31,7 +31,9 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 			result.setTaxType(TaxType.fromCode(taxCode.charAt(0)));
             result.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs, "status")));
             result.setCode(rs.getString("code"));
-			return result;
+            result.setIsIfrs(rs.getBoolean("is_ifrs"));
+            result.setIfrsName(rs.getString("ifrs_name"));
+            return result;
 		}
 	}
 
@@ -43,7 +45,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 		}		
 		try {
 			return getJdbcTemplate().queryForObject(
-				"select id, name, tax_type, status, code from form_type where id = ?",
+				"select id, name, tax_type, status, code, is_ifrs, ifrs_name from form_type where id = ?",
 				new Object[] { typeId },
 				new int[] { Types.NUMERIC },
 				new FormTypeMapper()
@@ -61,7 +63,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
     @Override
 	public List<FormType> getByTaxType(TaxType taxType){
 		return getJdbcTemplate().query(
-			"select id, name, tax_type, status, code from form_type ft where ft.tax_type = ?",
+			"select id, name, tax_type, status, code, is_ifrs, ifrs_name from form_type ft where ft.tax_type = ?",
 			new Object[]{String.valueOf(taxType.getCode())},
 			new int[]{Types.CHAR},
 			new FormTypeMapper()
@@ -91,13 +93,15 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
         try {
 
             int formTypeId = generateId("seq_form_type", Integer.class);
-            getJdbcTemplate().update("insert into form_type (id, name, tax_type, status, code) values (?,?,?,?,?)",
+            getJdbcTemplate().update("insert into form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) values (?,?,?,?,?,?,?)",
                     new Object[]{formTypeId,
                     formType.getName(),
                     formType.getTaxType().getCode(),
                     formType.getStatus().getId(),
-                    formType.getCode()},
-                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.VARCHAR, Types.NUMERIC, Types.VARCHAR});
+                    formType.getCode(),
+                    formType.getIsIfrs(),
+                    formType.getIfrsName()},
+                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.VARCHAR, Types.NUMERIC, Types.VARCHAR, Types.BOOLEAN, Types.VARCHAR});
             return formTypeId;
         } catch (DataAccessException e){
             logger.error("Ошибка при создании макета", e);
@@ -155,7 +159,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
         }
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, tax_type, status, code from form_type where code = ?",
+                    "select id, name, tax_type, status, code, is_ifrs, ifrs_name from form_type where code = ?",
                     new Object[]{code},
                     new int[]{Types.VARCHAR},
                     new FormTypeMapper()
@@ -163,5 +167,10 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    @Override
+    public List<Integer> getIfrsFormTypes() {
+        return getJdbcTemplate().queryForList("select id from form_type where status = 0 and is_ifrs = 1", Integer.class);
     }
 }

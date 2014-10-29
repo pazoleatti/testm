@@ -210,6 +210,13 @@ public interface FormDataService {
     List<FormData> find(List<Integer> departmentIds, int reportPeriodId);
 
     /**
+     * Поиск НФ необходимых для формирования отчетности для МСФО
+     * @param reportPeriodId
+     * @return
+     */
+    List<FormData> getIfrsForm(int reportPeriodId);
+
+    /**
      * Проверяет наличие налоговых форм без привязки к периоду
      * @return
      * @param formTypeId
