@@ -369,7 +369,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
                     cell.setCellValue(bd != null ? String.valueOf(bd) : "");
                 } else if (ColumnType.AUTO.equals(column.getColumnType())) {
-                    BigDecimal bd = (BigDecimal) obj;
+                    Long bd = (Long) obj;
                     cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.NUMERATION, column.getAlias());
                     cell.setCellStyle(cellStyle);
 
