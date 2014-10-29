@@ -6,7 +6,7 @@
     <ui:style>
 
         .content {
-            margin: 0 5px;
+            margin: 15px 5px;
         }
 
         .footerPanel {
@@ -22,7 +22,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание отчетности для МСФО" >
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание отчетности для МСФО" minHeight="90px">
         <g:VerticalPanel height="100%" width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
 
             <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">

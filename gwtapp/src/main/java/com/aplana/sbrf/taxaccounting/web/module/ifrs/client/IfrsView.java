@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lhaziev on 22.10.2014.
@@ -65,7 +66,6 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
             public void run() {
                 try {
                     getUiHandlers().updateStatus(records);
-                    table.redraw();
                 } catch (Exception e) {
                 }
             }
@@ -163,6 +163,17 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     @Override
     public void stopTimer() {
         timer.cancel();
+    }
+
+    @Override
+    public void updateStatus(Map<Integer, IfrsRow.StatusIfrs> statusMap) {
+        for(IfrsRow record: records) {
+            IfrsRow.StatusIfrs status = statusMap.get(record.getReportPeriodId());
+            if (status != null) {
+                record.setStatus(status);
+            }
+        }
+        table.redraw();
     }
 
     @UiHandler("search")

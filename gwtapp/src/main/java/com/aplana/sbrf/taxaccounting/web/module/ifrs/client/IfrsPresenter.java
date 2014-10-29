@@ -28,6 +28,7 @@ import com.gwtplatform.mvp.client.proxy.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lhaziev on 22.10.2014.
@@ -52,6 +53,7 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
         Integer getReportPeriodId();
         void startTimer();
         void stopTimer();
+        void updateStatus(Map<Integer, IfrsRow.StatusIfrs> statusMap);
     }
 
     @Title("Отчетность")
@@ -78,6 +80,7 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
 
+        getView().updateTable();
         getView().startTimer();
 
         dispatcher.execute(new GetReportPeriodsAction(),
@@ -127,8 +130,20 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
     }
 
     @Override
-    public void updateStatus(List<IfrsRow> records) {
-
+    public void updateStatus(final List<IfrsRow> records) {
+        UpdateStatusIfrsDataAction action = new UpdateStatusIfrsDataAction();
+        List<Integer> reportPeriodIds = new ArrayList<Integer>();
+        for(IfrsRow row: records) {
+            reportPeriodIds.add(row.getReportPeriodId());
+        }
+        action.setReportPeriodIds(reportPeriodIds);
+        dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
+                new AbstractCallback<UpdateStatusIrfsDataResult>() {
+                        @Override
+                        public void onSuccess(UpdateStatusIrfsDataResult result) {
+                                getView().updateStatus(result.getIfrsStatusMap());
+                        }
+                }, IfrsPresenter.this).addCallback(new ManualRevealCallback<GetIrfsDataResult>(IfrsPresenter.this)));
     }
 
     private class TableDataProvider extends AsyncDataProvider<IfrsRow> {
@@ -137,9 +152,9 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
         protected void onRangeChanged(HasData<IfrsRow> display) {
             final Range range = display.getVisibleRange();
             GetIfrsDataAction action = new GetIfrsDataAction();
-            action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
+            action.setPagingParams(new PagingParams(range.getStart(), range.getLength()));
             action.setReportPeriodIds(reportPeriods);
-            dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
+            dispatcher.execute(action, CallbackUtils.defaultCallback(
                     new AbstractCallback<GetIrfsDataResult>() {
                         @Override
                         public void onSuccess(GetIrfsDataResult result) {

@@ -38,8 +38,12 @@ public class IfrsDaoTest {
         blobData.setCreationDate(new Date());
         blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
 
+        Assert.assertEquals(dao.findByReportPeriod(null, null).size(), 0);
+
         dao.create(2);
         Assert.assertNull(dao.get(2).getBlobDataId());
+
+        Assert.assertEquals(dao.findByReportPeriod(null, null).size(), 1);
 
         String uuid = blobDataDao.create(blobData);
         dao.update(2, uuid);

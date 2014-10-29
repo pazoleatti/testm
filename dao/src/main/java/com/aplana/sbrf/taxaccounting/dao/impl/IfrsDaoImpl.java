@@ -99,24 +99,33 @@ public class IfrsDaoImpl extends AbstractDao implements IfrsDao {
         }
     }
 
-
     @Override
     public PagingResult<IfrsDataSearchResultItem> findByReportPeriod(List<Integer> reportPeriodIds, PagingParams pagingParams) {
         try{
             PreparedStatementData ps = new PreparedStatementData();
             ps.appendQuery("select ordDat.* from (" +
-                                "select ifrs.report_period_id, ifrs.blob_data_id, rp.name, tp.year, count(*) over() cnt " +
-                                "from ifrs_data ifrs  " +
+                                "select ifrs.report_period_id, ifrs.blob_data_id, rp.name, tp.year, rownum as rn ");
+            if (isSupportOver())
+                ps.appendQuery(", count(*) over() cnt ");
+
+            ps.appendQuery("from ifrs_data ifrs  " +
                                 "join report_period rp on rp.id = ifrs.report_period_id " +
                                 "join tax_period tp on tp.id=rp.tax_period_id ");
             if (reportPeriodIds != null && !reportPeriodIds.isEmpty()) {
-                ps.appendQuery("WHERE IFRS.REPORT_PERIOD_ID in (" + SqlUtils.preparePlaceHolders(reportPeriodIds.size()) + ") ");
-                ps.addParam(reportPeriodIds);
+                ps.appendQuery("where ifrs.report_period_id in (" + SqlUtils.preparePlaceHolders(reportPeriodIds.size()) + ") ");
+                for (Integer reportPeriodId: reportPeriodIds) {
+                    ps.addParam(reportPeriodId);
+                }
             }
-            ps.appendQuery("order by tp.year " +
-                    ") ordDat where rownum between ? and ?");
-            ps.addParam(pagingParams.getStartIndex());
-            ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
+            if (pagingParams != null) {
+                ps.appendQuery("order by tp.year " +
+                        ") ordDat where orddat.rn between ? and ?");
+                ps.addParam(pagingParams.getStartIndex() + 1);
+                ps.addParam(pagingParams.getStartIndex() + pagingParams.getCount());
+            } else {
+                ps.appendQuery(") ordDat");
+            }
+
             List<IfrsDataSearchResultItem> records = getJdbcTemplate().query(ps.getQuery().toString(),
                                         ps.getParams().toArray(),
                                         new IfrsDataSearchResultMapper());
