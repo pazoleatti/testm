@@ -656,11 +656,12 @@ public class DataRowDaoImplTest extends Assert {
 		public void getRowsWhenSerialAutoNumeration() {
         FormData fd = formDataDao.get(1000, false);
         List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
-        Assert.assertTrue(Integer.valueOf(rows.get(0).get("autoNumerationColumn").toString()).equals(1));
-        Assert.assertNull(rows.get(1).get("autoNumerationColumn"));
-        Assert.assertTrue(Integer.valueOf(rows.get(2).get("autoNumerationColumn").toString()).equals(2));
-        Assert.assertTrue(Integer.valueOf(rows.get(3).get("autoNumerationColumn").toString()).equals(3));
-        Assert.assertNull(rows.get(4).get("autoNumerationColumn"));
+        String alias = "autoNumerationColumn";
+        Assert.assertEquals(1L, rows.get(0).get(alias));
+        Assert.assertNull(rows.get(1).get(alias));
+        Assert.assertEquals(2L, rows.get(2).get(alias));
+        Assert.assertEquals(3L, rows.get(3).get(alias));
+        Assert.assertNull(rows.get(4).get(alias));
     }
 
     /**

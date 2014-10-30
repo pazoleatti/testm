@@ -70,6 +70,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -224,6 +227,8 @@ void calc() {
 
     calcTotal(dataRows)
     dataRowHelper.save(dataRows)
+
+    sortFormDataRows()
 }
 
 void calcTotal(def dataRows) {
@@ -861,4 +866,24 @@ void addTransportData(def xml) {
     calcTotal(dataRows)
 
     dataRowHelper.save(dataRows)
+}
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, section)
+        def lastRow = getDataRow(dataRows, "total$section")
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+
+        // Массовое разыменовывание граф НФ
+        def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        refBookService.dataRowsDereference(logger, sectionRows, columnNameList)
+
+        sortRowsSimple(sectionRows)
+    }
+    dataRowHelper.saveSort()
 }

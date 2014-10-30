@@ -24,6 +24,11 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowDaoImplUtils
  */
 class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
+    /**
+     * Признак участия фиксированной строки в автонумерации
+     */
+    public final static String ALIASED_WITH_AUTO_NUMERATION_AFFIX = "{wan}";
+
 	private FormData fd;
 	private DataRowRange range;
 	private TypeFlag[] types;
@@ -94,8 +99,9 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		sql.append(") table1\nLEFT JOIN \n(");
 		sql.append("SELECT ROW_NUMBER() OVER (ORDER BY sub.ord) AS idx2, sub.id AS id2\n");
 		sql.append(" FROM (SELECT d.id, d.alias, d.ord FROM data_row d\n");
-		sql.append(" WHERE d.form_data_id = :formDataId AND d.manual = :manual AND d.type IN (:types) AND d.alias IS NULL) sub\n");
-		sql.append(" GROUP BY sub.id, sub.ord, sub.alias ORDER BY sub.ord");
+		sql.append(" WHERE d.form_data_id = :formDataId AND d.manual = :manual AND d.type IN (:types)");
+        sql.append(" AND (d.alias IS NULL OR d.alias LIKE '%" + ALIASED_WITH_AUTO_NUMERATION_AFFIX + "%')) sub\n");
+        sql.append(" GROUP BY sub.id, sub.ord, sub.alias ORDER BY sub.ord");
 		sql.append(") table2\nON table1.id = table2.id2");
 
 		if (range != null) {
@@ -105,7 +111,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			params.put("to", range.getOffset() + range.getLimit() - 1);
 		}
 
-		return new Pair<String, Map<String, Object>>(sql.toString(), params);
+        return new Pair<String, Map<String, Object>>(sql.toString(), params);
 	}
 
 	@Override
@@ -113,9 +119,11 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(),
 				fd.getFormStyles());
 		Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
-		for (Cell cell : cells) {
+        String alias = rs.getString("alias");
+        for (Cell cell : cells) {
 			// Values
-			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && rs.getString("alias") == null) {
+			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && (alias == null
+                    || alias.contains(ALIASED_WITH_AUTO_NUMERATION_AFFIX))) {
 				if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
 						cell.setValue(SqlUtils.getLong(rs, "IDX2") + previousRowNumber, rowNum);
 				} else {
@@ -141,7 +149,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					.getId()));
 			cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
 		}
-		DataRow<Cell> dataRow = new DataRow<Cell>(rs.getString("alias"), cells);
+		DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
 		dataRow.setId(SqlUtils.getLong(rs,"ID"));
 		dataRow.setIndex(SqlUtils.getInteger(rs,"IDX"));
 		return dataRow;

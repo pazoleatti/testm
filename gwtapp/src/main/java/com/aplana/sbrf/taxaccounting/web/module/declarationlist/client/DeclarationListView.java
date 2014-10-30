@@ -33,8 +33,8 @@ public class DeclarationListView extends
 		ViewWithUiHandlers<DeclarationListUiHandlers> implements
 		DeclarationListPresenter.MyView {
 
-    public static final String DECLARATION_HEADER = "Cписок деклараций";
-    public static final String DECLARATION_HEADER_D = "Cписок уведомлений";
+    public static final String DECLARATION_HEADER = "Список деклараций";
+    public static final String DECLARATION_HEADER_D = "Список уведомлений";
     public static final String DECLARATION_CREATE = "Создать декларацию...";
     public static final String DECLARATION_CREATE_D = "Создать уведомление...";
     public static final String DECLARATION_CREATE_TITLE = "Создание деклараций";
