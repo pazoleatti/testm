@@ -552,6 +552,10 @@ public final class ScriptUtils {
                             value1 = cell1.getRefBookDereference();
                             value2 = cell2.getRefBookDereference();
                             break;
+                        case DATE:
+                            value1 = cell1.getDateValue();
+                            value2 = cell2.getDateValue();
+                            break;
                     }
 
                     if (value1 != null || value2 != null) {
