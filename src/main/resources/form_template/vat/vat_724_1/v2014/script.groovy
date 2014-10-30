@@ -676,7 +676,6 @@ void sortFormDataRows() {
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
         sortRowsSimple(sectionsRows)
-        dataRowHelper.saveSort()
     }
 
     dataRowHelper.saveSort()
