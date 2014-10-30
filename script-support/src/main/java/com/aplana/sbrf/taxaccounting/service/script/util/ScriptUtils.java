@@ -844,7 +844,10 @@ public final class ScriptUtils {
         if (cell == null) {
             return "";
         }
-        return cell.getColumn().getName().replace("%", "%%");
+        // убрал замену одного процента на два, так как после ввода rowError стало неактуально
+        // logger.error("%s", msg) корректно обрабатывает процента
+        // напрямую вызов logger.error("...%...") происходить не должен
+        return cell.getColumn().getName();
     }
 
     /**
@@ -876,8 +879,10 @@ public final class ScriptUtils {
             if (currentString == null || referenceString == null) {
                 continue;
             }
-            String s1 = currentString.toString().trim().replaceAll("%%", "%").replaceAll("  ", " ");
-            String s2 = referenceString.trim().replaceAll("%%", "%").replaceAll("  ", " ");
+            // замена двойного процента на одинарный приводит к равенству неравных заголовков - убрал
+            // обратное экранирование процентов неактуально
+            String s1 = currentString.toString().trim().replaceAll("  ", " ");
+            String s2 = referenceString.trim().replaceAll("  ", " ");
 
             if (s1.equalsIgnoreCase(s2)) {
                 continue;
