@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell;
 
-import static com.google.gwt.dom.client.BrowserEvents.CLICK;
-import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
-
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
@@ -28,6 +25,9 @@ import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static com.google.gwt.dom.client.BrowserEvents.CLICK;
+import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;
 
 /**
  * Ячейка для редактирования значений из справочника. 
@@ -61,7 +61,7 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 		if (template == null) {
 			template = GWT.create(Template.class);
 		}
-        refBookPiker = new RefBookPickerWidget(column.isHierarchical(), false);
+        refBookPiker = new RefBookPickerWidget(column.isHierarchical(), null);
         PickerContext context = new PickerContext();
         context.setRegionFilter(PickerContext.RegionFilter.FORM_FILTER);
         context.setFormDataId(columnContext.getFormDataId());
