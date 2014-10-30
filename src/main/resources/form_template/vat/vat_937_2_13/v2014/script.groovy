@@ -113,7 +113,7 @@ void logicCheck() {
         }
     }
     // Проверка суммы в строке 3
-    def other = getDataRow(dataRows, 'R3')
+    def other = getDataRow(dataRows, 'R3{wan}')
     if (other.sum != calcOther(dataRows)) {
         logger.error("Сумма в строке «Прочие (расшифровать):» не совпадает с расшифровкой!")
     }
@@ -142,7 +142,7 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def other = getDataRow(dataRows, 'R3')
+    def other = getDataRow(dataRows, 'R3{wan}')
     def sum = calcOther(dataRows)
     checkOverflowAlgorithm(sum, other, 'sum', other.getIndex(), sizeSum, "Сумма значений всех нефиксированных строк по Графе 3")
     other?.sum = sum
@@ -439,7 +439,7 @@ def getNewRow() {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), false)
     dataRowHelper.saveSort()
 }
 
