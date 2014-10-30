@@ -66,7 +66,6 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
             setWidget(multiSelection ? checkBox : radioButton);
         } else {
             label.setText(name);
-            label.getElement().getStyle().setCursor(Style.Cursor.POINTER);
             setWidget(label);
         }
 
@@ -107,8 +106,8 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
     public void setItemState(Boolean select){
         if (getWidget() instanceof CheckBox) {
             ((CheckBox) getWidget()).setValue(select, false);
-            setColorOnSelect(select);
         }
+        setColorOnSelect(select);
     }
 
     private void setColorOnSelect(Boolean select) {
@@ -178,7 +177,7 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("LazyTreeItem{");
+        final StringBuilder sb = new StringBuilder("LazyTreeItem{");
         sb.append("itemId=").append(itemId);
         sb.append(", multiSelect=").append(multiSelection);
         sb.append(", isChildLoaded=").append(isChildLoaded);
