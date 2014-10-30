@@ -57,6 +57,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // Редактируемые атрибуты
@@ -153,6 +156,9 @@ void calc() {
     def itog = getDataRow(dataRows, 'total')
     itog?.sum = calcItog(dataRows)
     dataRowHelper.update(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 // Расчет итога
@@ -438,4 +444,17 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     return newRow
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getSubTotalRows(def dataRows) {
+    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
 }
