@@ -2,7 +2,6 @@ package form_template.income.f7_8.v2012
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -99,6 +98,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
         break
 }
 
@@ -283,6 +285,9 @@ void calc() {
     calcOrCheckTotalForTaxPeriod(dataRows, false)
 
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void addNewRow() {
@@ -1323,4 +1328,26 @@ def getRate(def row, def Date date) {
     def record22 = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
             'CODE_NUMBER', code?.toString(), date, row.getIndex(), getColumnName(row, 'currencyCode'), logger, true)
     return record22?.RATE?.value
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    groups.each { section ->
+        def firstRow = getDataRow(dataRows, section)
+        def lastRow = getDataRow(dataRows, "$section-total")
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+
+        // Массовое разыменование строк НФ
+        def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        refBookService.dataRowsDereference(logger, sectionsRows, columnList)
+
+        sortRowsSimple(sectionsRows)
+    }
+
+    dataRowHelper.saveSort()
 }
