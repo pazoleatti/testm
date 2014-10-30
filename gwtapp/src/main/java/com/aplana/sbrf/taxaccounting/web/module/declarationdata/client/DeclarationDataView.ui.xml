@@ -79,14 +79,19 @@
         left: 0;
         top: 104px;
     }
-    .noPdf {
-        font-size: 30px;
-        text-align: center;
-        margin-top: 200px;
+
+    .title {
+        font-size: 26px;
+        text-wrap: none;
+        white-space: nowrap;
+        color: #aeaeac;
     }
 
+    .dock {
+        border-top: 1px solid #aeaeac;
+        background-color: white;
+    }
 </ui:style>
-
 
     <fm:MainContainer>
         <fm:header>
@@ -202,8 +207,16 @@
                 </g:HorizontalPanel>
 
                 <pdf:PdfViewerWidget ui:field="pdfViewer" addStyleNames="{style.pdfWidget}"/>
-                <g:Label ui:field="noPdfLabel" addStyleNames="{style.noPdf}" />
 
+                <g:DockLayoutPanel ui:field="noPdfPanel" addStyleNames="{style.pdfWidget} {style.dock}">
+                    <g:center>
+                        <g:HorizontalPanel width="100%" height="100%">
+                            <g:cell horizontalAlignment="center" verticalAlignment="middle" width="100%" height="100%">
+                                <g:HTML width="100%" ui:field="noPdfLabel" addStyleNames="{style.title} aplana-NoSelectable"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
+                    </g:center>
+                </g:DockLayoutPanel>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>
