@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.TaManualRevealCallback;
@@ -26,7 +27,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -266,12 +266,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
                             getView().updatePrintReportButtonName(reportType, true);
-                            Window.open(
+                            DownloadUtils.openInIframe(
                                     GWT.getHostPageBaseURL() + "download/downloadBlobController/"
                                             + formData.getId() + "/"
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
-                                            + absoluteView, "", "");
+                                            + absoluteView);
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -324,12 +324,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
                             getView().updatePrintReportButtonName(reportType, true);
-                            Window.open(
+                            DownloadUtils.openInIframe(
                                     GWT.getHostPageBaseURL() + "download/downloadBlobController/CSV/"
                                             + formData.getId() + "/"
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
-                                            + absoluteView, "", "");
+                                            + absoluteView);
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
