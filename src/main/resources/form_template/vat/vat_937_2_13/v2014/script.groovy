@@ -435,15 +435,17 @@ def getNewRow() {
     return newRow
 }
 
-// Сортировка групп и строк
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), false)
-    dataRowHelper.saveSort()
-}
 
-// Получение подитоговых строк
-def getSubTotalRows(def dataRows) {
-    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+    def firstRow = getDataRow(dataRows, 'R3{wan}')
+    def lastRow = getDataRow(dataRows, 'total')
+    def from = firstRow.getIndex()
+    def to = lastRow.getIndex() - 1
+    def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+
+    sortRowsSimple(sectionRows)
+
+    dataRowHelper.saveSort()
 }

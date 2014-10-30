@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 import com.aplana.sbrf.taxaccounting.model.AuditFormType;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -107,7 +108,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
 
     @Override
     public void getBlobFromServer(String uuid) {
-        Window.open(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid, "", "");
+        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid);
     }
 
     @Override

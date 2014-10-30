@@ -70,7 +70,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
 	PdfViewerView pdfViewer;
     @UiField
-    Label noPdfLabel;
+    DockLayoutPanel noPdfPanel;
+    @UiField
+    HTML noPdfLabel;
 
     @UiField
     Label dateBoxLabel;
@@ -123,7 +125,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @Override
     public void showNoPdf(String text) {
         pdfViewer.setVisible(false);
-        noPdfLabel.setVisible(true);
+        noPdfPanel.setVisible(true);
         noPdfLabel.setText(text);
     }
 
@@ -216,7 +218,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@Override
 	public void setPdf(Pdf pdf) {
         pdfViewer.setVisible(true);
-        noPdfLabel.setVisible(false);
+        noPdfPanel.setVisible(false);
 		pdfViewer.setPages(pdf);
 	}
 

@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -16,12 +17,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.google.gwt.core.client.GWT;
@@ -211,14 +207,14 @@ public class DeclarationDataPresenter
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(reportType);
                             if (ReportType.XML_DEC.equals(reportType)) {
-                                getView().showNoPdf("--- Область предварительного просмотра ---");
+                                getView().showNoPdf("Область предварительного просмотра");
                             }
                             if (!isTimer) {
                                 getView().updatePrintReportButtonName(reportType, false);
                             }
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (ReportType.XML_DEC.equals(reportType)) {
-                                getView().showNoPdf("--- Заполнение декларации данными ---");
+                                getView().showNoPdf("Заполнение декларации данными");
                             }
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -235,7 +231,7 @@ public class DeclarationDataPresenter
 	@Override
 	public void onRecalculateClicked(Date docDate) {
 		LogCleanEvent.fire(this);
-        getView().showNoPdf("--- Заполнение декларации данными ---");
+        getView().showNoPdf("Заполнение декларации данными");
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);
@@ -360,8 +356,8 @@ public class DeclarationDataPresenter
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
                             getView().updatePrintReportButtonName(reportType, true);
-                            Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
-                                    + declarationId, null, null);
+                            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
+                                    + declarationId);
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
