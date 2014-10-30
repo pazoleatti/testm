@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.ParamUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -355,8 +356,8 @@ public class DeclarationDataPresenter
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
                             getView().updatePrintReportButtonName(reportType, true);
-                            Window.open(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
-                                    + declarationId, null, null);
+                            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
+                                    + declarationId);
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);

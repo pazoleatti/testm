@@ -19,7 +19,8 @@ public class TaRootPresenter extends RootPresenter {
         GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
             @Override
             public void onUncaughtException(Throwable e) {
-                Dialog.errorMessage(e.getMessage());
+                Dialog.errorMessage(e.toString());
+                e.printStackTrace();
             }
         });
     }
