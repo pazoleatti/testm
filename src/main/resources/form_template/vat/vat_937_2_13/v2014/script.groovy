@@ -68,7 +68,7 @@ def editableColumns = ['differences', 'sum']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNum', 'differences', 'sum']
+def nonEmptyColumns = ['differences', 'sum']
 
 // Дата начала отчетного периода
 @Field
@@ -142,13 +142,6 @@ void logicCheck() {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def rowNum = 0
-    for (def row in dataRows) {
-        rowNum++
-        if (row.getAlias() == null) {
-            row.rowNum = rowNum
-        }
-    }
     def other = getDataRow(dataRows, 'R3')
     def sum = calcOther(dataRows)
     checkOverflowAlgorithm(sum, other, 'sum', other.getIndex(), sizeSum, "Сумма значений всех нефиксированных строк по Графе 3")
@@ -306,7 +299,7 @@ void addData(def xml, int headRowCount) {
         def rowIndex = xmlIndexRow - headRowCount + 1
         def isFixed = rowIndex <= 3
         if (isFixed) {
-            newRow = getDataRow(dataRows, "R$rowIndex")
+            newRow = getDataRow(dataRows, "R$rowIndex{wan}")
         } else {
             newRow = getNewRow()
             newRow.setIndex(rowIndex)
@@ -320,10 +313,9 @@ void addData(def xml, int headRowCount) {
             indexRow++
 
             def values = [:]
-            values.rowNum = parseNumber(row.cell[0].text(), xlsIndexRow, 0 + colOffset, logger, true)
             values.differences = row.cell[2].text()
 
-            ['rowNum', 'differences'].each { alias ->
+            ['differences'].each { alias ->
                 def value = values[alias]?.toString()
                 def valueExpected = dataRow.getCell(alias).value?.toString()
                 checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
@@ -379,14 +371,13 @@ void addTransportData(def xml) {
         rowIndex++
         def isFixed = (rowIndex <= 3)
         if (isFixed) {
-            newRow = getDataRow(dataRows, "R$rowIndex")
+            newRow = getDataRow(dataRows, "R$rowIndex{wan}")
             newRow.setImportIndex(rnuIndexRow)
 
             // проверка фиксированных ячеек
             def values = [:]
-            values.rowNum = parseNumber(row.cell[0].text(), rnuIndexRow, 0 + colOffset, logger, true)
             values.differences = row.cell[2].text()
-            ['rowNum', 'differences'].each { alias ->
+            ['differences'].each { alias ->
                 def value = values[alias]?.toString()
                 def valueExpected = newRow.getCell(alias).value?.toString()
                 checkFixedValue(newRow, value, valueExpected, rowIndex, alias, logger, true)
@@ -398,9 +389,6 @@ void addTransportData(def xml) {
             newRow = getNewRow()
             newRow.setIndex(rowIndex)
             newRow.setImportIndex(rnuIndexRow)
-
-            // графа 1
-            newRow.rowNum = parseNumber(row.cell[1].text(), rnuIndexRow, 1 + colOffset, logger, true)
 
             // графа 2
             newRow.differences = row.cell[2].text()
