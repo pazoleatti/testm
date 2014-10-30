@@ -107,7 +107,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s", error))
+        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
     }
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {

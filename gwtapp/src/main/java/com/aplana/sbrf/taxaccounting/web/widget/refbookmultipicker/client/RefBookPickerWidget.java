@@ -99,9 +99,9 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     DivElement glass;
 
     @UiConstructor
-    public RefBookPickerWidget(boolean isHierarchical, boolean multiSelect) {
+    public RefBookPickerWidget(boolean isHierarchical, Boolean multiSelect) {
         this.isHierarchical = isHierarchical;
-        state.setMultiSelect(multiSelect);
+        state.setMultiSelect(multiSelect != null);
 
         initWidget(binder.createAndBindUi(this));
         WidgetUtils.setMouseBehavior(clearIconButton, textBox, pickImageButton);
@@ -109,7 +109,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
         widgetWrapper.add(refBookView);
 
-        pickAll.setVisible(multiSelect && isHierarchical);
+        pickAll.setVisible(multiSelect != null && multiSelect && isHierarchical);
 
         versionDateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override

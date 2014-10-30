@@ -55,6 +55,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         noImport(logger)
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -142,6 +145,9 @@ void calc() {
     // посчитать итоги по разделам
     calcTotal(dataRows)
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void calcTotal(def dataRows) {
@@ -429,4 +435,26 @@ def getDataRowsFromSource() {
         return formDataService.getDataRowHelper(formDataSource)?.allCached
     }
     return null
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, section)
+        def lastRow = getDataRow(dataRows, 'total' + section)
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+
+        // Массовое разыменование строк НФ
+        def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        refBookService.dataRowsDereference(logger, sectionsRows, columnList)
+
+        sortRowsSimple(sectionsRows)
+    }
+
+    dataRowHelper.saveSort()
 }

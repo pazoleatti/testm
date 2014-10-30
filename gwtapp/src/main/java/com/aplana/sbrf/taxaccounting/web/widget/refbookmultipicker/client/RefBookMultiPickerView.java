@@ -89,16 +89,16 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         this(false);
     }
 
-    public RefBookMultiPickerView(final boolean multiSelect) {
+    public RefBookMultiPickerView(final Boolean multiSelect) {
         this.multiSelect = multiSelect;
 
-        selectionModel = getSelectionModel(multiSelect);
+        selectionModel = getSelectionModel(multiSelect != null && multiSelect);
 
         initWidget(binder.createAndBindUi(this));
 
         new RefBookMultiPickerPresenter(this);
 
-        if (multiSelect) {
+        if (multiSelect != null && multiSelect) {
             cellTable.setSelectionModel(selectionModel, multiSelectManager);
         } else {
             cellTable.setSelectionModel(selectionModel);
