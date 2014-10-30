@@ -45,6 +45,9 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -102,6 +105,9 @@ void calc() {
             }
         }
         dataRowHelper.update(dataRows);
+
+        // Сортировка групп и строк
+        sortFormDataRows()
     }
 }
 
@@ -195,4 +201,12 @@ void addData(def xml, headRowCount) {
         rows.add(newRow)
     }
     dataRowHelper.save(rows)
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    dataRowHelper.saveSort()
 }
