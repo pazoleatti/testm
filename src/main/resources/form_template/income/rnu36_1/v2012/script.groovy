@@ -62,6 +62,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 // все атрибуты
@@ -154,6 +157,8 @@ void calc() {
     calcTotalRows(dataRows)
 
     dataRowHelper.save(dataRows)
+
+    sortFormDataRows()
 }
 
 void logicCheck() {
@@ -624,4 +629,25 @@ void calcTotalRows(def dataRows) {
     }
     // посчитать Итого
     getDataRow(dataRows, 'total').percIncome = (totalRowA.percIncome ?: 0) - (totalRowB.percIncome ?: 0)
+}
+
+
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    for (def section : ['A', 'B']) {
+        def firstRow = getDataRow(dataRows, section)
+        def lastRow = getDataRow(dataRows, "total$section")
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+
+        // Массовое разыменовывание граф НФ
+        def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        refBookService.dataRowsDereference(logger, sectionRows, columnNameList)
+
+        sortRowsSimple(sectionRows)
+    }
+    dataRowHelper.saveSort()
 }
