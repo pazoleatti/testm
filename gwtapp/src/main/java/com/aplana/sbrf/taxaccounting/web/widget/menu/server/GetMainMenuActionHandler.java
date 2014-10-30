@@ -192,7 +192,7 @@ public class GetMainMenuActionHandler extends
         }
 
         // АДМИНИСТРИРОВАНИЕ
-        if (currentUser.hasRole(TARole.ROLE_OPER) ||currentUser.hasRole(TARole.ROLE_CONTROL)){
+        if (currentUser.hasRole(TARole.ROLE_OPER)) {
             MenuItem adminMenuItem = new MenuItem("Администрирование");
             adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
             menuItems.add(adminMenuItem);
