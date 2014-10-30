@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 
-import com.aplana.gwt.client.*;
+import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.TextBox;
-import com.aplana.gwt.client.mask.ui.TextMaskBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
@@ -14,11 +13,9 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,10 +93,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
                 }
             }
         });
-        correctionTag.addStyleName("correction");
+        correctionTag.addStyleName("l-lp");
         correctionTag.setWidth("200px");
 
-        Date date = new Date();
+        formStatePicker.setWidth("100px");
+
         taxOrganisationPicker = new TextBox();
         taxOrganisationPicker.setMaxLength(4);
         taxOrganisationPicker.setTitle("Выбор налогового органа");
@@ -173,14 +171,15 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         }
 
         Style style = separator.getElement().getStyle();
-        style.setProperty("height", taxType == TaxType.DEAL ? 22 : 65, Style.Unit.PX);
+        style.setProperty("height", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY) ? 65 : 22, Style.Unit.PX);
 
         switch (taxType) {
             case DEAL:
                 fillDeal();
                 break;
             case PROPERTY:
-                fillProperty();
+            case TRANSPORT:
+                fillTransportAndProperty();
                 break;
             default:
                 fillDefault();
@@ -194,26 +193,43 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         correctionTag.setAcceptableValues(list);
     }
 
+    private Label getLabel(String text) {
+        return getLabel(text, true);
+    }
+
+    private Label getLabel(String text, boolean leftPadding) {
+        Label label = new Label(text);
+        if (leftPadding) {
+            label.addStyleName("l-lp");
+        }
+        label.addStyleName("l-rp");
+        label.setWordWrap(false);
+        return label;
+    }
+
     private void fillDeal() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.setWidth("100%");
-        Label label =  new Label("Период:");
+
+        Label label = getLabel("Период:", false);
         horizontalPanel.add(label);
         horizontalPanel.add(reportPeriodPicker);
         horizontalPanel.add(correctionTag);
-        label = new Label("Подразделение:");
+
+        label = getLabel("Подразделение:");
         horizontalPanel.add(label);
         horizontalPanel.add(departmentPicker);
-        label = new Label("Состояние:");
+
+        label = getLabel("Состояние:");
         horizontalPanel.add(label);
         horizontalPanel.add(formStatePicker);
-        horizontalPanel.setCellWidth(departmentPicker, "25%");
-        horizontalPanel.setCellWidth(reportPeriodPicker, "25%");
-        horizontalPanel.setCellWidth(formStatePicker, "25%");
+
+        horizontalPanel.setCellWidth(departmentPicker, "50%");
+        horizontalPanel.setCellWidth(reportPeriodPicker, "50%");
         panel.add(horizontalPanel);
     }
 
-    private void fillProperty() {
+    private void fillTransportAndProperty() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.setWidth("100%");
         VerticalPanel verticalPanel1 = new VerticalPanel();
@@ -224,12 +240,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         VerticalPanel verticalPanel6 = new VerticalPanel();
         VerticalPanel verticalPanel7 = new VerticalPanel();
 
-        verticalPanel1.setWidth("100%");
         verticalPanel2.setWidth("100%");
         verticalPanel3.setWidth("100%");
-        verticalPanel4.setWidth("100%");
         verticalPanel5.setWidth("100%");
-        verticalPanel6.setWidth("100%");
         verticalPanel7.setWidth("100%");
 
         horizontalPanel.add(verticalPanel1);
@@ -244,26 +257,29 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         horizontalPanel.setCellWidth(verticalPanel5, "33%");
         horizontalPanel.setCellWidth(verticalPanel7, "33%");
 
-        Label label = new Label("Период:");
+        Label label = getLabel("Период:", false);
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel1.add(label);
-        label = new Label("Подразделение:");
+
+        label = getLabel("Подразделение:", false);
         verticalPanel1.add(label);
         verticalPanel2.add(reportPeriodPicker);
         verticalPanel2.add(departmentPicker);
         verticalPanel3.add(correctionTag);
-        label = new Label("Вид декларации:");
-        label.setWordWrap(false);
+
+        label = getLabel("Вид декларации:");
         verticalPanel4.add(label);
-        label = new Label("Состояние:");
+
+        label = getLabel("Состояние:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel4.add(label);
         verticalPanel5.add(declarationTypePicker);
         verticalPanel5.add(formStatePicker);
-        label = new Label("Налоговый орган:");
-        label.setWordWrap(false);
+
+        label = getLabel("Налоговый орган:");
         verticalPanel6.add(label);
-        label = new Label("КПП:");
+
+        label = getLabel("КПП:");
         label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         verticalPanel6.add(label);
         verticalPanel7.add(taxOrganisationPicker);
@@ -275,51 +291,28 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     private void fillDefault() {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.setWidth("100%");
-        VerticalPanel verticalPanel1 = new VerticalPanel();
-        VerticalPanel verticalPanel2 = new VerticalPanel();
-        VerticalPanel verticalPanel3 = new VerticalPanel();
-        VerticalPanel verticalPanel4 = new VerticalPanel();
-        VerticalPanel verticalPanel5 = new VerticalPanel();
-        VerticalPanel verticalPanel6 = new VerticalPanel();
-        VerticalPanel verticalPanel7 = new VerticalPanel();
 
-        verticalPanel1.setWidth("100%");
-        verticalPanel2.setWidth("100%");
-        verticalPanel3.setWidth("100%");
-        verticalPanel4.setWidth("100%");
-        verticalPanel5.setWidth("100%");
-        verticalPanel6.setWidth("100%");
-        verticalPanel7.setWidth("100%");
+        Label label = getLabel("Период:", false);
+        horizontalPanel.add(label);
+        horizontalPanel.add(reportPeriodPicker);
+        horizontalPanel.add(correctionTag);
 
-        horizontalPanel.add(verticalPanel1);
-        horizontalPanel.add(verticalPanel2);
-        horizontalPanel.add(verticalPanel3);
-        horizontalPanel.add(verticalPanel4);
-        horizontalPanel.add(verticalPanel5);
-        horizontalPanel.add(verticalPanel6);
-        horizontalPanel.add(verticalPanel7);
+        label = getLabel("Подразделение:");
+        horizontalPanel.add(label);
+        horizontalPanel.add(departmentPicker);
 
-        horizontalPanel.setCellWidth(verticalPanel2, "28%");
-        horizontalPanel.setCellWidth(verticalPanel5, "44%");
-        horizontalPanel.setCellWidth(verticalPanel7, "28%");
+        label = getLabel("Вид декларации:");
 
-        Label label = new Label("Период:");
-        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel1.add(label);
-        label = new Label("Подразделение:");
-        verticalPanel1.add(label);
-        verticalPanel2.add(reportPeriodPicker);
-        verticalPanel2.add(departmentPicker);
-        verticalPanel3.add(correctionTag);
-        label = new Label("Вид декларации:");
-        label.setWordWrap(false);
-        verticalPanel4.add(label);
-        verticalPanel5.add(declarationTypePicker);
-        label = new Label("Состояние:");
-        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-        verticalPanel6.add(label);
-        verticalPanel7.add(formStatePicker);
+        horizontalPanel.add(label);
+        horizontalPanel.add(declarationTypePicker);
 
+        label = getLabel("Состояние:");
+        horizontalPanel.add(label);
+        horizontalPanel.add(formStatePicker);
+
+        horizontalPanel.setCellWidth(departmentPicker, "30%");
+        horizontalPanel.setCellWidth(reportPeriodPicker, "30%");
+        horizontalPanel.setCellWidth(declarationTypePicker, "30%");
         panel.add(horizontalPanel);
     }
 

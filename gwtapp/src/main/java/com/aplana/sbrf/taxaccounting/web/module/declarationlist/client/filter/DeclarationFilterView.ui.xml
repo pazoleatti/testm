@@ -1,21 +1,20 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:style>
+        @external .l-lp;
+        @external .l-rp;
         .separator {
             height: 22px;
             margin: 0 9px;
             border-right: 1px solid #aeaeac;
         }
-        .right15 {
-            margin-right: 15px;
+        .right10 {
+            margin-right: 10px;
         }
-        @external .gwt-Label;
-        .pnl .gwt-Label {
+        .pnl .l-rp {
             margin-right: 5px;
-            margin-left: 10px;
         }
-        @external .correction;
-        .pnl .correction {
+        .pnl .l-lp {
             margin-left: 10px;
         }
     </ui:style>
@@ -27,7 +26,7 @@
             <g:HTML ui:field="separator" addStyleNames="{style.separator}"/>
         </g:cell>
         <g:cell verticalAlignment="middle">
-            <g:Button ui:field="apply" text="Найти" addStyleNames="{style.right15}"/>
+            <g:Button ui:field="apply" text="Найти" addStyleNames="{style.right10}"/>
         </g:cell>
     </g:HorizontalPanel>
 </ui:UiBinder>
