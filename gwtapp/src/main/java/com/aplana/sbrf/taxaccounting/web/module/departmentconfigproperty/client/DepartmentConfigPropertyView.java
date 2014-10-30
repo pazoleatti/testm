@@ -181,7 +181,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         });
 
-        table.setColumnWidth(checkColumn, 5, Style.Unit.PX);
+        table.setColumnWidth(checkColumn, 2, Style.Unit.EM);
 
         Map<String, RefBookAttribute> attributeMap = new HashMap<String, RefBookAttribute>();
 
@@ -204,7 +204,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         textColumn.setWidth(cell.getWidth());
 
                         paramColumnUI = factory.createTableColumn(textColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.PX);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
                         table.addColumn(paramColumnUI, textColumn.getName());
                         columns.add(textColumn);
                         break;
@@ -217,7 +217,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         refColumn.setWidth(cell.getWidth());
 
                         paramColumnUI = factory.createTableColumn(refColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.PX);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
                         table.addColumn(paramColumnUI, refColumn.getName());
                         columns.add(refColumn);
                         break;
