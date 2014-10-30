@@ -323,7 +323,7 @@ void sortFormDataRows() {
     dataRowHelper.saveSort()
 }
 
-// Получение подитоговых строк
+// Получение итоговых строк
 def getTotalRow(def dataRows) {
     return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
 }
