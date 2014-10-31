@@ -113,6 +113,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private IfrsDataService ifrsDataService;
 
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
@@ -257,7 +260,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
 
                     DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                    if (declarationTemplate.getType().getIsIfrs()) {
+                    if (declarationTemplate.getType().getIsIfrs() &&
+                            departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
                         IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
                         if (ifrsData.getBlobDataId() != null) {
                             ifrsDataService.deleteReport(declarationData, userInfo);

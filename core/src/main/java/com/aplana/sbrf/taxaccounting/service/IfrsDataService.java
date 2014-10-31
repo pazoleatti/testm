@@ -61,4 +61,6 @@ public interface IfrsDataService {
     void cancelTask(DeclarationData declarationData, TAUserInfo userInfo);
 
     void deleteReport(DeclarationData declarationData, TAUserInfo userInfo);
+
+    List<Integer> getIfrsUsers();
 }

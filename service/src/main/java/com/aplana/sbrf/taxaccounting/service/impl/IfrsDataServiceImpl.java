@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.common.model.UserInfo;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.IfrsDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -16,10 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Service
 @Transactional
@@ -61,7 +57,6 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     private NotificationService notificationService;
     @Autowired
     private TARoleService roleService;
-
 
     @Override
     public void create(Integer reportPeriodId) {
@@ -143,11 +138,11 @@ public class IfrsDataServiceImpl implements IfrsDataService {
             List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
             List<DeclarationData> declarationDataList = declarationDataSearchService.getIfrs(reportPeriodId);
             if (formDataList.isEmpty() && declarationDataList.isEmpty()) {
-
+                throw new ServiceException("Нет созданных НФ/декларациии");
             }
 
             List<Integer> formTypesList = formTypeService.getIfrsFormTypes();
-            List<Integer> declarationTypesList = formTypeService.getIfrsFormTypes();
+            List<Integer> declarationTypesList = declarationTypeService.getIfrsDeclarationTypes();
 
             List<Department> departments = departmentService.getAllChildren(0);
             Map<Integer, Department> departmentsMap = new HashMap<Integer, Department>();
@@ -210,8 +205,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                     blobData = blobDataService.get(uuid);
                 }
 
-                Department department = departmentsMap.get(declarationData.getDepartmentId());
-                String name = String.format("%s_%s_%s_%s.xlsx", declarationTemplate.getType().getIfrsName(), department.getSbrfCode(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
+                String name = String.format("%s_%s_%s.xlsx", declarationTemplate.getType().getIfrsName(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
                 ze = new ZipArchiveEntry(name);
                 zos.putArchiveEntry(ze);
                 zos.write(IOUtils.toByteArray(blobData.getInputStream()));
@@ -265,21 +259,13 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     @Override
     public void deleteReport(FormData formData, TAUserInfo userInfo) {
         ifrsDao.update(formData.getReportPeriodId(), null);
-        MembersFilterData membersFilterData = new MembersFilterData() {{
-            setRoleIds(Arrays.asList(Long.valueOf(roleService.getByAlias(TARole.ROLE_CONTROL_UNP).getId())));
-        }};
-        List<Integer> usersList = new ArrayList<Integer>();
-        List<TAUserView> unpList = userService.getUsersByFilter(membersFilterData);
-        for (TAUserView userView : unpList) {
-            usersList.add(userView.getId());
-        }
         ReportPeriod reportPeriod = periodService.getReportPeriod(formData.getReportPeriodId());
         FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
         Department department = departmentService.getDepartment(formData.getDepartmentId());
 
         String msg = String.format("Удален архив с отчетностью для МСФО за %s %s, так как распринят экземпляр налоговой формы с отчетом для МСФО: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\"",
                 reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), department.getName(), formData.getKind().getName(), formTemplate.getName());
-        sendNotification(usersList, msg);
+        sendNotification(getIfrsUsers(), msg);
     }
 
     @Override
@@ -299,21 +285,13 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     @Override
     public void deleteReport(DeclarationData declarationData, TAUserInfo userInfo) {
         ifrsDao.update(declarationData.getReportPeriodId(), null);
-        MembersFilterData membersFilterData = new MembersFilterData() {{
-                setRoleIds(Arrays.asList(Long.valueOf(roleService.getByAlias(TARole.ROLE_CONTROL_UNP).getId())));
-            }};
-        List<Integer> usersList = new ArrayList<Integer>();
-        List<TAUserView> unpList = userService.getUsersByFilter(membersFilterData);
-        for (TAUserView userView : unpList) {
-            usersList.add(userView.getId());
-        }
         ReportPeriod reportPeriod = periodService.getReportPeriod(declarationData.getReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         Department department = departmentService.getDepartment(declarationData.getDepartmentId());
 
         String msg = String.format("Удален архив с отчетностью для МСФО за %s %s, так как распринят экземпляр декларации с отчетом для МСФО: Подразделение: \"%s\", Вид: \"%s\"",
                 reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), department.getName(), declarationTemplate.getName());
-        sendNotification(usersList, msg);
+        sendNotification(getIfrsUsers(), msg);
     }
 
     void sendNotification(List<Integer> usersList, String msg) {
@@ -331,4 +309,16 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         }
     }
 
+    @Override
+    public List<Integer> getIfrsUsers() {
+        List<Integer> usersList = new ArrayList<Integer>();
+        MembersFilterData membersFilterData = new MembersFilterData() {{
+            setRoleIds(Arrays.asList(Long.valueOf(roleService.getByAlias(TARole.ROLE_CONTROL_UNP).getId())));
+        }};
+        List<TAUserView> unpList = userService.getUsersByFilter(membersFilterData);
+        for (TAUserView userView : unpList) {
+            usersList.add(userView.getId());
+        }
+        return usersList;
+    }
 }

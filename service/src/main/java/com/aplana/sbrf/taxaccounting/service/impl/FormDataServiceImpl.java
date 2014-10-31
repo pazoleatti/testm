@@ -707,8 +707,8 @@ public class FormDataServiceImpl implements FormDataService {
                     logEntryService.save(logger.getEntries()));
         }
 
-
-        if (formData.getFormType().getIsIfrs() && workflowMove.getFromState().equals(WorkflowState.ACCEPTED)) {
+        if (formData.getFormType().getIsIfrs() && workflowMove.getFromState().equals(WorkflowState.ACCEPTED) &&
+                departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
             IfrsData ifrsData = ifrsDataService.get(formData.getReportPeriodId());
             if (ifrsData.getBlobDataId() != null) {
                 ifrsDataService.deleteReport(formData, userInfo);

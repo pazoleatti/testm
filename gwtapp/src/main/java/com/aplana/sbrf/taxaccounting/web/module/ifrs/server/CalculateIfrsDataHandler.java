@@ -23,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -78,7 +79,10 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
 
                 try {
                     // ставим задачу в очередь
-                    lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                    List<Integer> userIds = ifrsDataService.getIfrsUsers();
+                    for(Integer userId: userIds) {
+                        lockDataService.addUserWaitingForLock(key, userId);
+                    }
                     asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
@@ -90,12 +94,12 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
                 }
                 throw new ActionException(e);
             }
-        } else {
-            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
             logger.info("Архив с отчетностью для МСФО за %s %s поставлен в очередь на формирование", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
+        } else {
+            result.setError(true);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

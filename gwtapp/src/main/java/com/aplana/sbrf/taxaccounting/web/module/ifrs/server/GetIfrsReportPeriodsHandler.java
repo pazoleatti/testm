@@ -44,13 +44,9 @@ public class GetIfrsReportPeriodsHandler extends AbstractActionHandler<GetReport
         GetReportPeriodsResult result = new GetReportPeriodsResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
-        if (action.isCreate()) {
-            periodList.addAll(periodService.getOpenForUser(userInfo.getUser(), TaxType.INCOME));
-        } else {
-            periodList.addAll(periodService.getPeriodsByTaxTypeAndDepartments(TaxType.INCOME,
-                    new ArrayList<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                            asList(TaxType.INCOME), null, null))));
-        }
+        periodList.addAll(periodService.getPeriodsByTaxTypeAndDepartments(TaxType.INCOME,
+                new ArrayList<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                        asList(TaxType.INCOME), null, null))));
         result.setReportPeriods(periodList);
         return result;
     }

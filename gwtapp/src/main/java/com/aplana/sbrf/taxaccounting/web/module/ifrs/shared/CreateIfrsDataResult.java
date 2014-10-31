@@ -10,13 +10,22 @@ import java.util.List;
  */
 public class CreateIfrsDataResult implements Result {
 
-    private List<ReportPeriod> reportPeriodList;
+    private String uuid;
+    private boolean isError = false;
 
-    public List<ReportPeriod> getReportPeriods() {
-        return reportPeriodList;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setReportPeriods(List<ReportPeriod> reportPeriods) {
-        this.reportPeriodList = reportPeriods;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public boolean isError() {
+        return isError;
+    }
+
+    public void setError(boolean isError) {
+        this.isError = isError;
     }
 }
