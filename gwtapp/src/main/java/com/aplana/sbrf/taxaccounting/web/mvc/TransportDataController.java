@@ -34,19 +34,19 @@ public class TransportDataController {
     private static final Log logger = LogFactory.getLog(TransportDataController.class);
 
     @Autowired
-    LogEntryService logEntryService;
+    private LogEntryService logEntryService;
 
     @Autowired
-    SecurityService securityService;
+    private SecurityService securityService;
 
     @Autowired
-    UploadTransportDataService uploadTransportDataService;
+    private UploadTransportDataService uploadTransportDataService;
 
     @Autowired
-    LoadFormDataService loadFormDataService;
+    private LoadFormDataService loadFormDataService;
 
     @Autowired
-    LoadRefBookDataService loadRefBookDataService;
+    private LoadRefBookDataService loadRefBookDataService;
 
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
     public void upload(HttpServletRequest request, HttpServletResponse response)

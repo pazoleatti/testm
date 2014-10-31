@@ -1,24 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 public class EditDeclarationTypeNameAction extends UnsecuredActionImpl<EditDeclarationTypeNameResult> {
-    int declarationTypeId;
-    String newDeclarationTypeName;
+    DeclarationType newDeclarationType;
 
-    public int getDeclarationTypeId() {
-        return declarationTypeId;
+    public DeclarationType getNewDeclarationType() {
+        return newDeclarationType;
     }
 
-    public void setDeclarationTypeId(int declarationTypeId) {
-        this.declarationTypeId = declarationTypeId;
-    }
-
-    public String getNewDeclarationTypeName() {
-        return newDeclarationTypeName;
-    }
-
-    public void setNewDeclarationTypeName(String newDeclarationTypeName) {
-        this.newDeclarationTypeName = newDeclarationTypeName;
+    public void setNewDeclarationType(DeclarationType newDeclarationType) {
+        this.newDeclarationType = newDeclarationType;
     }
 }

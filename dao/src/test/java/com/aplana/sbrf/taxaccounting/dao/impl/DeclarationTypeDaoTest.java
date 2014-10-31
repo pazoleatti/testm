@@ -79,4 +79,13 @@ public class DeclarationTypeDaoTest {
         reportPeriod.setEndDate(calendar.getTime());
         Assert.assertEquals(0, declarationTypeDao.getTypes(1, reportPeriod, TaxType.INCOME).size());
     }
+
+    @Test
+    public void testUpdateDT(){
+        String newName = "new_name";
+        DeclarationType dt = declarationTypeDao.get(1);
+        dt.setName(newName);
+        declarationTypeDao.updateDT(dt);
+        Assert.assertEquals(newName, declarationTypeDao.get(1).getName());
+    }
 }

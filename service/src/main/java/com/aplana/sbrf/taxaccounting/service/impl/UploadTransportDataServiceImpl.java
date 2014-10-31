@@ -58,6 +58,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     final static String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
             "в связи с чем для нее не существует каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
+    final static String U5 = "Начата загрузка транспортного файла «%s» в каталог загрузки.";
+    final static String U6_1 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s.";
+    final static String U6_2 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s";
+
     // Сообщения, которые не учтены в постановка
     final static String USER_NOT_FOUND_ERROR = "Не определен пользователь!";
     final static String ACCESS_DENIED_ERROR = "У пользователя нет прав для загрузки транспортных файлов!";
@@ -238,6 +242,16 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     }
 
     /**
+     * Вывод частей имени файла с учетом возможного null-значения
+     */
+    private String getFileNamePart(Object obj) {
+        if (obj == null) {
+            return "";
+        }
+        return obj.toString();
+    }
+
+    /**
      * Проверка имени файла и проверка доступа к соответствующим НФ
      * http://conf.aplana.com/pages/viewpage.action?pageId=13111363
      * Возвращает путь к каталогу, если проверка прошла.
@@ -270,6 +284,17 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         String reportPeriodCode = transportDataParam.getReportPeriodCode();
         Integer year = transportDataParam.getYear();
         String departmentCode = transportDataParam.getDepartmentCode();
+
+        // Вывод результата разбора имени файла
+        logger.info(U5, fileName);
+        if (transportDataParam.getMonth() == null) {
+            logger.info(U6_1, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                    getFileNamePart(reportPeriodCode), getFileNamePart(year));
+        } else {
+            logger.info(U6_2, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                    getFileNamePart(reportPeriodCode), getFileNamePart(year),
+                    getFileNamePart(transportDataParam.getMonth()));
+        }
 
         // Не задан код подразделения или код формы
         if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
