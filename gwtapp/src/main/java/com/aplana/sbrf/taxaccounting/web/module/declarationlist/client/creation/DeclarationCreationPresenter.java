@@ -149,7 +149,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         if ((filter.getReportPeriodIds() == null || filter.getReportPeriodIds().isEmpty())
                         || (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty())
                         || (filter.getDeclarationTypeId() == null)
-                        || (taxType.equals(TaxType.PROPERTY)
+                        || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT))
                                 && ((filter.getTaxOrganCode() == null || filter.getTaxOrganCode().isEmpty())
                                         || (filter.getTaxOrganKpp() == null || filter.getTaxOrganKpp().isEmpty()))
                             )){
