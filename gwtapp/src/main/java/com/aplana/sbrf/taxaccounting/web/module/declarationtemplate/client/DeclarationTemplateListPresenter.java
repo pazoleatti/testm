@@ -90,6 +90,7 @@ public class DeclarationTemplateListPresenter
         getView().setUiHandlers(this);
 	}
 
+    private TemplateFilter previousFilter;
 	/**
 	 * Здесь происходит подготовка декларации администрирования.
 	 *
@@ -97,7 +98,6 @@ public class DeclarationTemplateListPresenter
 	 *
 	 * @param request запрос
 	 */
-    private TemplateFilter previousFilter;
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
@@ -201,7 +201,7 @@ public class DeclarationTemplateListPresenter
     public void onSelectionChanged(DeclarationTypeTemplate selectedItem) {
         if (selectedItem != null) {
             editFormPresenter.setDeclarationTypeId(selectedItem.getTypeId());
-            editFormPresenter.setDeclarationTypeName(selectedItem.getTypeName());
+            editFormPresenter.setDeclarationTypeData(selectedItem.getTypeId());
         }
     }
 }

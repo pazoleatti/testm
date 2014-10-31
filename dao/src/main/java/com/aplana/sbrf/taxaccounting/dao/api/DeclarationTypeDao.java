@@ -41,7 +41,7 @@ public interface DeclarationTypeDao {
      * @param declarationTypeId идентификатор вида декларации
      * @param newName новое имя вида декларации
      */
-    void updateDeclarationTypeName(int declarationTypeId, String newName);
+    void updateDT(DeclarationType type);
 
     void delete(int typeId);
 

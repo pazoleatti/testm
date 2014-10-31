@@ -86,13 +86,17 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         }
     }
 
-    @CacheEvict(value = "DeclarationType", beforeInvocation = true ,key = "#declarationTypeId")
+    @CacheEvict(value = "DeclarationType", beforeInvocation = true ,key = "#type.id")
     @Override
-    public void updateDeclarationTypeName(int declarationTypeId, String newName) {
-        getJdbcTemplate().update(
-            "update declaration_type set name = ? where id = ?",
-                newName,
-                declarationTypeId);
+    public void updateDT(DeclarationType type) {
+        try {
+            getJdbcTemplate().update(
+                    "update declaration_type set name = ?, is_ifrs = ?, ifrs_name = ? where id = ?",
+                    type.getName(), type.getIsIfrs(), type.getIfrsName(), type.getId());
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
     @CacheEvict("DeclarationType")
