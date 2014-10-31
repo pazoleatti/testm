@@ -235,7 +235,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             modalWindowTitle.setText(DECLARATION_TITLE_D);
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE_D);
         }
-        if (!taxType.equals(TaxType.PROPERTY)) {
+        if (!taxType.equals(TaxType.PROPERTY) && !taxType.equals(TaxType.TRANSPORT)) {
             codePanel.setVisible(false);
             kppPanel.setVisible(false);
         }
