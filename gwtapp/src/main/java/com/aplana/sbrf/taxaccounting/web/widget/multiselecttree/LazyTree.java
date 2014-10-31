@@ -107,7 +107,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
         style.setTop(0, Style.Unit.PX);
         style.setRight(0, Style.Unit.PX);
         style.setBottom(0, Style.Unit.PX);
-        style.setZIndex(10); // Maximum z-index
+        style.setZIndex(1); // Maximum z-index
     }
 
     private void onSelectionChange(){
