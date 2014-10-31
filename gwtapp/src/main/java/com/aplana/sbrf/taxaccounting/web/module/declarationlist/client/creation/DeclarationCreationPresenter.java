@@ -82,42 +82,24 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		if(isFilterDataCorrect(filter)){
 			LogCleanEvent.fire(this);
 			LogShowEvent.fire(this, false);
-			CheckExistenceDeclaration checkCommand = new CheckExistenceDeclaration();
-			checkCommand.setDeclarationTypeId(filter.getDeclarationTypeId());
-			checkCommand.setDepartmentId(filter.getDepartmentIds().iterator().next());
-			checkCommand.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-            checkCommand.setTaxOrganCode(filter.getTaxOrganCode());
-            checkCommand.setTaxOrganKpp(filter.getTaxOrganKpp());
-            checkCommand.setTaxType(taxType);
-			dispatcher.execute(checkCommand, CallbackUtils
-					.defaultCallback(new AbstractCallback<CheckExistenceDeclarationResult>() {
-						@Override
-						public void onSuccess(final CheckExistenceDeclarationResult checkResult) {
-                            if (checkResult.getStatus() != CheckExistenceDeclarationResult.DeclarationStatus.NOT_EXIST) {
-                                LogAddEvent.fire(DeclarationCreationPresenter.this, checkResult.getUuid());
-                                Dialog.warningMessage("Создание декларации", "Декларация не создана");
-                            } else {
-								CreateDeclaration command = new CreateDeclaration();
-								command.setDeclarationTypeId(filter.getDeclarationTypeId());
-                                command.setDepartmentId(filter.getDepartmentIds().iterator().next());
-                                command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
-                                command.setTaxOrganCode(filter.getTaxOrganCode());
-                                command.setTaxOrganKpp(filter.getTaxOrganKpp());
-                                command.setTaxType(taxType);
-								dispatcher.execute(command, CallbackUtils
-										.defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
-											@Override
-											public void onSuccess(CreateDeclarationResult result) {
-                                                onHide();
-                                                placeManager
-                                                        .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
-                                                                .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
-                                                LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
-											}
-										}, DeclarationCreationPresenter.this));
-							}
-						}
-					}, DeclarationCreationPresenter.this));
+            CreateDeclaration command = new CreateDeclaration();
+            command.setDeclarationTypeId(filter.getDeclarationTypeId());
+            command.setDepartmentId(filter.getDepartmentIds().iterator().next());
+            command.setReportPeriodId(filter.getReportPeriodIds().iterator().next());
+            command.setTaxOrganCode(filter.getTaxOrganCode());
+            command.setTaxOrganKpp(filter.getTaxOrganKpp());
+            command.setTaxType(taxType);
+            dispatcher.execute(command, CallbackUtils
+                    .defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
+                        @Override
+                        public void onSuccess(CreateDeclarationResult result) {
+                            onHide();
+                            placeManager
+                                    .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
+                                            .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
+                            LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                        }
+                    }, DeclarationCreationPresenter.this));
 		}
 	}
 
