@@ -930,4 +930,8 @@ public class RefBookUniversal implements RefBookDataProvider {
 		return refBookDao.dereferenceValues(attributeId, recordIds);
 	}
 
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw new UnsupportedOperationException();
+    }
 }

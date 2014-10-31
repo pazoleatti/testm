@@ -72,4 +72,9 @@ public class RefBookBookerStatementPeriod extends AbstractReadOnlyRefBook {
 	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
 		throw new UnsupportedOperationException();
 	}
+
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw new UnsupportedOperationException();
+    }
 }

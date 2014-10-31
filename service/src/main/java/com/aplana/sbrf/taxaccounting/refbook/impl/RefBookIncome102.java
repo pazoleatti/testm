@@ -192,4 +192,35 @@ public class RefBookIncome102 implements RefBookDataProvider {
 	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
 		return refBookDao.dereferenceValues(TABLE_NAME, attributeId, recordIds);
 	}
+
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        Set<String> matchedRecords = new HashSet<String>();
+        Collections.sort(records, new AliasComparator());
+
+        Iterator<Map<String, RefBookValue>> iterator = records.iterator();
+
+        if (iterator.hasNext()) {
+            Map<String, RefBookValue> previous = iterator.next();
+            while (iterator.hasNext()) {
+                Map<String, RefBookValue> current = iterator.next();
+                if (current.get("OPU_CODE").equals(previous.get("OPU_CODE")) && current.get("ACCOUNT_PERIOD_ID").equals(previous.get("ACCOUNT_PERIOD_ID"))) {
+                    matchedRecords.add(current.get("OPU_CODE").getStringValue());
+                }
+            }
+        }
+
+        if (matchedRecords.size() != 0) {
+            return new ArrayList<String>(matchedRecords);
+        }
+
+        return refBookDao.getMatchedRecordsByUniqueAttributesIncome102(attributes, records, accountPeriodId);
+    }
+
+    private class AliasComparator implements Comparator<Map<String, RefBookValue>> {
+        @Override
+        public int compare(Map<String, RefBookValue> record1, Map<String, RefBookValue> record2) {
+            return record1.get("OPU_CODE").toString().compareTo(record2.get("OPU_CODE").toString());
+        }
+    }
 }

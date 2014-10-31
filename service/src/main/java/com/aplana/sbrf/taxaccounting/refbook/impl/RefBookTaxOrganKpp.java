@@ -78,4 +78,9 @@ public class RefBookTaxOrganKpp extends AbstractReadOnlyRefBook {
 		throw new UnsupportedOperationException();
 	}
 
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw new UnsupportedOperationException();
+    }
+
 }
