@@ -110,6 +110,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private ReportService reportService;
 
+    @Autowired
+    private IfrsDataService ifrsDataService;
+
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
@@ -252,6 +255,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
                     Map<String, Object> exchangeParams = new HashMap<String, Object>();
                     declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+
+                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                    if (declarationTemplate.getType().getIsIfrs()) {
+                        IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
+                        if (ifrsData.getBlobDataId() != null) {
+                            ifrsDataService.deleteReport(declarationData, userInfo);
+                        } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
+                            ifrsDataService.cancelTask(declarationData, userInfo);
+                        }
+                    }
 
                     String declarationTypeName = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getName();
                     logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);

@@ -70,7 +70,6 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
                 }
             }
         };
-        timer.scheduleRepeating(3000);
         setupTables();
     }
 
@@ -157,7 +156,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
 
     @Override
     public void startTimer() {
-        timer.run();
+        timer.scheduleRepeating(3000);
     }
 
     @Override

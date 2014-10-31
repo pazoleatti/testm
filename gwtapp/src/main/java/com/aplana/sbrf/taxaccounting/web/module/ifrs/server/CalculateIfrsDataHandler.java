@@ -69,7 +69,6 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
                 params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
 
-
                 if (!ifrsDataService.check(logger, action.getReportPeriodId())) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
                     result.setError(true);

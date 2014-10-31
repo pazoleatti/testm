@@ -57,6 +57,7 @@ public class CreateIfrsDataPresenter extends PresenterWidget<CreateIfrsDataPrese
 
     public void initAndShowDialog(final HasPopupSlot slotForMe){
         GetReportPeriodsAction action = new GetReportPeriodsAction();
+        action.setCreate(true);
         dispatchAsync.execute(action, CallbackUtils
                 .wrongStateCallback(new AbstractCallback<GetReportPeriodsResult>() {
                     @Override

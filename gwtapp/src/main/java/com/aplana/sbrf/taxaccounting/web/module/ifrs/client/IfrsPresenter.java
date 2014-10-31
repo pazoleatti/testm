@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.ifrs.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -130,8 +131,8 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
                             if (result.isError()) {
                                 Dialog.errorMessage("Архив с отчетностью для МСФО не сформирован", "Обнаружены фатальные ошибки!");
                             } else if (result.getBlobDataId() != null) {
-                                Window.open(
-                                        GWT.getHostPageBaseURL() + "download/downloadBlobController/IFRS/" + reportPeriodId, "", "");
+                                DownloadUtils.openInIframe(
+                                        GWT.getHostPageBaseURL() + "download/downloadBlobController/IFRS/" + reportPeriodId);
                             }
                         }
                     }, this).addCallback(new ManualRevealCallback<CalculateIfrsDataResult>(this)));
