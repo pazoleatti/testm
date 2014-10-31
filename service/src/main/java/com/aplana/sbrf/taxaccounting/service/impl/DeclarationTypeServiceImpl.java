@@ -38,8 +38,8 @@ public class DeclarationTypeServiceImpl implements DeclarationTypeService {
     }
 
     @Override
-    public void updateDeclarationTypeName(int typeId, String newName) {
-        declarationTypeDao.updateDeclarationTypeName(typeId, newName);
+    public void updateDT(DeclarationType type) {
+        declarationTypeDao.updateDT(type);
     }
 
     @Override

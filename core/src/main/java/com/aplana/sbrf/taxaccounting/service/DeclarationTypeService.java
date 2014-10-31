@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface DeclarationTypeService {
     int save(DeclarationType type);
-    void updateDeclarationTypeName(int typeId, String newName);
+    void updateDT(DeclarationType type);
     DeclarationType get(int typeId);
     void delete(int typeId);
     List<DeclarationType> listAll();

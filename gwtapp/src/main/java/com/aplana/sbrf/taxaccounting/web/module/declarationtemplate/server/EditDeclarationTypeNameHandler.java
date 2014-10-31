@@ -22,7 +22,7 @@ public class EditDeclarationTypeNameHandler extends AbstractActionHandler<EditDe
     private DeclarationTypeService declarationTypeService;
     @Override
     public EditDeclarationTypeNameResult execute(EditDeclarationTypeNameAction action, ExecutionContext executionContext) throws ActionException {
-        declarationTypeService.updateDeclarationTypeName(action.getDeclarationTypeId(), action.getNewDeclarationTypeName());
+        declarationTypeService.updateDT(action.getNewDeclarationType());
         return new EditDeclarationTypeNameResult();
     }
 
