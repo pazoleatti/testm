@@ -64,6 +64,11 @@ public interface DeclarationDataDao {
      */
     DeclarationData find(int declarationTypeId, int departmentReportPeriodId);
 
+    /**
+     * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган»
+     */
+    DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode);
+
 	/**
 	 * Получить количество записей, удовлетворяющих запросу
 	 * @param filter фильтр, по которому происходит поиск

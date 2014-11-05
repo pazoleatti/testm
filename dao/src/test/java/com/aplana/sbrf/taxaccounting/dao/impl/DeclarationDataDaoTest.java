@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -199,6 +198,52 @@ public class DeclarationDataDaoTest {
         DeclarationData declaration = declarationDataDao.find(1, 204);
         assertEquals(2, declaration.getId().intValue());
     }
+
+    @Test(expected = DaoException.class)
+    public void findKpp1Test() {
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setDepartmentReportPeriodId(102);
+        declarationData.setDeclarationTemplateId(1);
+        declarationData.setKpp("123456789");
+        declarationData.setTaxOrganCode("CD11");
+        declarationDataDao.saveNew(declarationData);
+
+        DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", null);
+        assertNotNull(declaration);
+        assertEquals(1, declaration.getId().intValue());
+    }
+
+    @Test(expected = DaoException.class)
+    public void findKpp2Test() {
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setDepartmentReportPeriodId(102);
+        declarationData.setDeclarationTemplateId(1);
+        declarationData.setKpp("123456789");
+        declarationData.setTaxOrganCode("CD11");
+        declarationDataDao.saveNew(declarationData);
+
+        DeclarationData  declaration = declarationDataDao.find(1, 102);
+        assertNotNull(declaration);
+        assertEquals(1, declaration.getId().intValue());
+    }
+
+    @Test
+    public void findKpp3Test() {
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setDepartmentReportPeriodId(102);
+        declarationData.setDeclarationTemplateId(1);
+        declarationData.setKpp("123456789");
+        declarationData.setTaxOrganCode("CD11");
+        declarationDataDao.saveNew(declarationData);
+
+        DeclarationData declaration = declarationDataDao.find(1, 102, "123456789", "CD12");
+        assertNotNull(declaration);
+        assertEquals(1, declaration.getId().intValue());
+        declaration = declarationDataDao.find(1, 102, null, "CD12");
+        assertNotNull(declaration);
+        assertEquals(1, declaration.getId().intValue());
+    }
+
     @Test
     public void findEmptyResultTest() {
         DeclarationData declaration = declarationDataDao.find(222, 222);
