@@ -279,7 +279,7 @@ ALTER TABLE form_data DROP COLUMN department_id;
 ALTER TABLE form_data DROP COLUMN report_period_id;
 ALTER TABLE declaration_data DROP COLUMN department_id;
 ALTER TABLE declaration_data DROP COLUMN report_period_id;
-ALTER TABLE declaration_data ADD CONSTRAINT declaration_data_uniq_template UNIQUE(department_report_period_id, declaration_template_id);
+ALTER TABLE declaration_data ADD CONSTRAINT declaration_data_uniq_template UNIQUE (department_report_period_id, declaration_template_id, tax_organ_code, kpp);
 
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-9184: Обновление таблицы NOTIFICATION для хранения ссылок на логи
