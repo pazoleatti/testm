@@ -301,7 +301,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 public void render(Context context, String value, SafeHtmlBuilder sb) {
                     if (value != null) {
                         if (filterText != null && !filterText.isEmpty()) {
-                            String link = RegExp.compile(filterText, "gi").replace(value, "<span style=\"color: #ff0000;\">$&</span>");
+                            String link = value.replaceAll("\\Q" + filterText + "\\E", "<span style=\"color: #ff0000;\">" + filterText + "</span>");
                             sb.appendHtmlConstant(link);
                         } else {
                             sb.appendHtmlConstant(value);
