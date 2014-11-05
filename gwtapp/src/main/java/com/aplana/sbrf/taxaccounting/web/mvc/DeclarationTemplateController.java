@@ -1,9 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import java.io.*;
-import java.util.Date;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -14,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -26,10 +21,19 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.List;
 
 
 @Controller
@@ -54,9 +58,9 @@ public class DeclarationTemplateController {
     LogEntryService logEntryService;
 
     private static final String RESP_CONTENT_TYPE_PLAIN = "text/plain";
-	
-	
-	@RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
+
+
+    @RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
 	public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		String fileName = "declarationTemplate_" + declarationTemplateId + ".zip";
@@ -101,19 +105,18 @@ public class DeclarationTemplateController {
 	@RequestMapping(value = "/downloadJrxml/{declarationTemplateId}",method = RequestMethod.GET)
 	public void processDownload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		if (declarationTemplateService.getJrxml(declarationTemplateId) != null) {
-			OutputStream respOut = resp.getOutputStream();
-			String fileName = "DeclarationTemplate_" + declarationTemplateId + ".jrxml";
-			resp.setContentType("application/octet-stream");
-			resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-			resp.setCharacterEncoding("UTF-8");
-			respOut.write(declarationTemplateService.getJrxml(declarationTemplateId).getBytes("UTF-8"));
-			respOut.close();
-		}
-		else {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-		}
-	}
+        String jrxml = declarationTemplateService.getJrxml(declarationTemplateId);
+        if (jrxml == null) {
+            jrxml = "";
+        }
+        OutputStream respOut = resp.getOutputStream();
+        String fileName = "DeclarationTemplate_" + declarationTemplateId + ".jrxml";
+        resp.setContentType("application/octet-stream");
+        resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        resp.setCharacterEncoding("UTF-8");
+        respOut.write(jrxml.getBytes("UTF-8"));
+        respOut.close();
+    }
 
 	@RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
 	public void processUpload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)

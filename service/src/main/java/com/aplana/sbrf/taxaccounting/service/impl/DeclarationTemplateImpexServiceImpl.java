@@ -60,12 +60,13 @@ public class DeclarationTemplateImpexServiceImpl implements
 			zos.closeEntry();
 			
 			// JasperTemplate
-			ze = new ZipEntry(REPORT_FILE);
-			zos.putNextEntry(ze);
-            String dtJrxm = declarationTemplateService.getJrxml(id);
-            if (dtJrxm != null)
-			    zos.write(dtJrxm.getBytes(ENCODING));
-			zos.closeEntry();
+            String jrxml = declarationTemplateService.getJrxml(id);
+            if (jrxml != null) {
+                ze = new ZipEntry(REPORT_FILE);
+                zos.putNextEntry(ze);
+                zos.write(jrxml.getBytes(ENCODING));
+                zos.closeEntry();
+            }
 
 			zos.finish();
 		} catch (Exception e) {
