@@ -647,10 +647,10 @@ void addData(def xml, int headRowCount) {
             curRow[it] = null
         }
 
-        knu = normalize(curRow.consumptionTypeId)
-        group = normalize(curRow.consumptionGroup)
-        type = normalize(curRow.consumptionTypeByOperation)
-        num = normalize(curRow.consumptionAccountNumber)
+        knu = normalize(getOwnerValue(curRow, 'consumptionTypeId'))
+        group = normalize(getOwnerValue(curRow, 'consumptionGroup'))
+        type = normalize(getOwnerValue(curRow, 'consumptionTypeByOperation'))
+        num = normalize(getOwnerValue(curRow, 'consumptionAccountNumber'))
 
         def xmlIndexCol = 0
 
@@ -704,6 +704,11 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+def getOwnerValue (def dataRow , def alias) {
+    def cell = dataRow.getCell(alias)
+    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
 }
 
 // для уроня Банка:	проверка наличия и принятия РНУ-14
