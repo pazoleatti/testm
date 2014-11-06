@@ -103,7 +103,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                                 ""
                 ));
 
-        ps.appendQuery("WHERE ");
+        ps.appendQuery("WHERE (");
         //Фильтрация 2а,4а
         ps.appendQuery(String.format(DEPARTMENT_SOURCES_CLAUSE,
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
@@ -125,6 +125,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_s_55_join),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
+        ps.appendQuery(" )");
         appendSelectWhereClause(ps, filter, " AND ");
 
         appendEndOrderClause(ps, filter);
@@ -158,9 +159,10 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                                 ""
                 ));
 
-        ps.appendQuery("WHERE ");
+        ps.appendQuery("WHERE (");
         ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                 eventDao.getEventCodes(TARole.ROLE_CONTROL, Arrays.asList(501, 502, 601, 701))));
+        ps.appendQuery(" )");
 
         appendSelectWhereClause(ps, filter, " AND ");
 

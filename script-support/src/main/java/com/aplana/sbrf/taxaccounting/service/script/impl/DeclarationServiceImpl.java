@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -39,6 +40,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 	private static final String DATE_FORMAT = "yyyyMMdd";
 
+    private static final String CHECK_UNIQUE_ERROR = "Декларация с заданными параметрами уже существует!";
+    private static final String CHECK_UNIQUE_NOTIFICATION_ERROR = "Уведомление с заданными параметрами уже существует!";
+
     // Тип налога -> ID справочника с параметрами подразделения
     private static final Map<TaxType, Long> TAX_TYPE_TO_REF_BOOK_MAP = new HashMap<TaxType, Long>() {
         {
@@ -56,10 +60,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private ScriptComponentContext context;
 
 	@Autowired
-	DeclarationDataDao declarationDataDao;
+	private DeclarationDataDao declarationDataDao;
 
 	@Autowired
-	DeclarationTypeDao declarationTypeDao;
+    private DeclarationTypeDao declarationTypeDao;
 	
 	@Autowired
 	private DepartmentFormTypeDao departmentFormTypeDao;
@@ -74,7 +78,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	private FormTypeDao formTypeDao;
 	
 	@Autowired
-	DeclarationTemplateDao declarationTemplateDao;
+    private DeclarationTemplateDao declarationTemplateDao;
 
     @Autowired
     private RefBookFactory factory;
@@ -86,10 +90,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Autowired
-    BlobDataService blobDataService;
+    private BlobDataService blobDataService;
 
     @Autowired
-    DeclarationDataSearchService declarationDataSearchService;
+    private DeclarationDataSearchService declarationDataSearchService;
 
     @Autowired
     private ReportService reportService;
@@ -100,6 +104,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
     public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
+    }
+
+    @Override
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode) {
+        return declarationDataDao.find(declarationTypeId, departmentReportPeriodId, kpp, taxOrganCode);
     }
 
     @Override
@@ -246,5 +255,18 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         c.setTime(date);
         c.add(Calendar.DATE, days);
         return c.getTime();
+    }
+
+    @Override
+    public boolean checkUnique(DeclarationData declarationData, Logger logger) {
+        DeclarationTemplate template = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+        DeclarationData existingDeclarationData = declarationDataDao.find(template.getType().getId(),
+                declarationData.getDepartmentReportPeriodId(), declarationData.getKpp(), declarationData.getTaxOrganCode());
+        // форма найдена
+        if (existingDeclarationData != null) {
+            logger.error(template.getType().getTaxType() == TaxType.DEAL ? CHECK_UNIQUE_NOTIFICATION_ERROR : CHECK_UNIQUE_ERROR);
+            return false;
+        }
+        return true;
     }
 }

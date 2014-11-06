@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.ifrs.server;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.GetReportPeriodsAction;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+
 /**
  * @author lhaziev
  */
@@ -27,16 +32,21 @@ public class GetIfrsReportPeriodsHandler extends AbstractActionHandler<GetReport
     PeriodService periodService;
     @Autowired
     SecurityService securityService;
+    @Autowired
+    private DepartmentService departmentService;
 
     public GetIfrsReportPeriodsHandler() {
         super(GetReportPeriodsAction.class);
     }
 
     @Override
-    public GetReportPeriodsResult execute(GetReportPeriodsAction getReportPeriodsAction, ExecutionContext executionContext) throws ActionException {
+    public GetReportPeriodsResult execute(GetReportPeriodsAction action, ExecutionContext executionContext) throws ActionException {
         GetReportPeriodsResult result = new GetReportPeriodsResult();
+        TAUserInfo userInfo = securityService.currentUserInfo();
         List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
-        periodList.addAll(periodService.getOpenForUser(securityService.currentUserInfo().getUser(), TaxType.INCOME));
+        periodList.addAll(periodService.getPeriodsByTaxTypeAndDepartments(TaxType.INCOME,
+                new ArrayList<Integer>(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                        asList(TaxType.INCOME), null, null))));
         result.setReportPeriods(periodList);
         return result;
     }

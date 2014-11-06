@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface FormTypeService {
     int save(FormType formType);
-    void updateFormType(int formTypeId, String newName, String code);
+    void updateFormType(int formTypeId, String newName, String code, Boolean isIfrs, String ifrsName);
     FormType get(int formTypeId);
     void delete(int formTypeId);
     List<FormType> getByFilter(TemplateFilter filter);

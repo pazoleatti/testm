@@ -39,8 +39,15 @@
             position: absolute !important;
             bottom: 0;
             left: 0;
-            top: 0;
-            width: 500px;
+            top: 35px;
+            width: 720px;
+        }
+
+        .btnPanel {
+            position: absolute !important;
+            padding-left: 10px;
+            height: 23px;
+            top: 6px;
         }
 
         .table {
@@ -48,7 +55,7 @@
             bottom: 30px;
             right: 10px;
             left: 10px;
-            top: 41px;
+            top: 35px;
         }
 
         .tableBG {
@@ -74,17 +81,6 @@
                         </style:LeftBar>
                     </fm:Left>
                 </fm:left>
-
-                <fm:right>
-                    <fm:Right>
-                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <style:LinkButton ui:field="calculate" text="Сформировать/Выгрузить архив"
-                                              img="resources/img/printer-16.png" title="Сформировать/Выгрузить архив отчетности для МСФО"/>
-                            <style:LinkButton ui:field="create" text="Создать отчетность"
-                                              img="resources/img/add.png" title="Создание отчетности для МСФО"/>
-                        </style:LeftBar>
-                    </fm:Right>
-                </fm:right>
                 <fm:resizable>
                     <fm:Resizable>
                         <g:Label text="Отчетность" />
@@ -94,7 +90,6 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-
                 <g:HorizontalPanel spacing="5" height="33px" width="50%" addStyleNames="{style.filterPanel}" verticalAlignment="middle">
 
                     <g:Label width="65px" text="Период:"/>
@@ -106,10 +101,16 @@
                     <g:HTML addStyleNames="{style.separator}"/>
                     <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
                 </g:HorizontalPanel>
-
                 <g:Label addStyleNames="{style.horSep}"/>
-
                 <g:HTMLPanel addStyleNames="{style.panel}">
+                    <g:HorizontalPanel addStyleNames="{style.btnPanel}">
+                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                            <style:LinkButton ui:field="create" text="Создать отчетность"
+                                              img="resources/img/add.png" title="Создание отчетности для МСФО"/>
+                            <style:LinkButton ui:field="calculate" text="Сформировать/Выгрузить архив"
+                                              img="resources/img/printer-16.png" title="Сформировать/Выгрузить архив отчетности для МСФО"/>
+                        </style:LeftBar>
+                    </g:HorizontalPanel>
                     <g:ResizeLayoutPanel addStyleNames="{style.tableBG}, {style.table}">
                         <style:GenericDataGrid ui:field="table" height="100%" width="100%"/>
                     </g:ResizeLayoutPanel>

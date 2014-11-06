@@ -3,7 +3,6 @@
 
     <ui:style>
         .editPadding {
-            padding-top: 0;
             padding: 5px;
             width: 100%;
             height: 100%;
@@ -49,25 +48,43 @@
         <g:ScrollPanel addStyleNames="{style.scrPanel}">
             <g:VerticalPanel styleName="{style.editPadding}">
                 <g:cell>
-                    <g:HorizontalPanel addStyleNames="{style.editFieldsPanel}">
-                        <g:cell horizontalAlignment="right" verticalAlignment="middle">
-                            <g:Label text="Наименование макета:" addStyleNames="{style.leftLabel}"/>
-                        </g:cell>
-                        <g:cell>
-                            <g:TextBox ui:field="formType" addStyleNames="{style.editFields}"/>
-                        </g:cell>
-                    </g:HorizontalPanel>
-                </g:cell>
+                    <g:VerticalPanel>
+                        <g:HorizontalPanel addStyleNames="{style.editFieldsPanel}">
+                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                <g:Label text="Наименование макета:" addStyleNames="{style.leftLabel}"/>
+                            </g:cell>
+                            <g:cell>
+                                <g:TextBox ui:field="formTypeName" addStyleNames="{style.editFields}"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
 
-                <g:cell>
-                    <g:HorizontalPanel addStyleNames="{style.editFieldsPanel}">
-                        <g:cell horizontalAlignment="right" verticalAlignment="middle">
-                            <g:Label text="Код формы:" addStyleNames="{style.leftLabel}"/>
-                        </g:cell>
-                        <g:cell>
-                            <g:TextBox ui:field="formTypeCode" addStyleNames="{style.editFields}"/>
-                        </g:cell>
-                    </g:HorizontalPanel>
+                        <g:HorizontalPanel addStyleNames="{style.editFieldsPanel}">
+                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                <g:Label text="Код формы:" addStyleNames="{style.leftLabel}"/>
+                            </g:cell>
+                            <g:cell>
+                                <g:TextBox ui:field="formTypeCode" addStyleNames="{style.editFields}"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
+
+                        <g:HorizontalPanel ui:field="ifrsPanel">
+                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                <g:Label text="Отчетность для МФСО:" addStyleNames="{style.leftLabel}"/>
+                            </g:cell>
+                            <g:cell>
+                                <g:CheckBox ui:field="isIfrs" addStyleNames="{style.editFields}"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
+
+                        <g:HorizontalPanel addStyleNames="{style.editFieldsPanel}" ui:field="ifrsNamePanel">
+                            <g:cell horizontalAlignment="right" verticalAlignment="middle">
+                                <g:Label text="Наименование для МСФО:" addStyleNames="{style.leftLabel}"/>
+                            </g:cell>
+                            <g:cell>
+                                <g:TextBox ui:field="ifrsName" addStyleNames="{style.editFields}"/>
+                            </g:cell>
+                        </g:HorizontalPanel>
+                    </g:VerticalPanel>
                 </g:cell>
             </g:VerticalPanel>
         </g:ScrollPanel>

@@ -259,7 +259,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         for (int i = cellTable.getColumnCount() - 1; i >= 0; i--) {
             cellTable.removeColumn(i);
         }
-        if (multiSelect) {
+        if (multiSelect != null && multiSelect) {
             // добавить колонку с чекбоксами
             Column<RefBookItem, Boolean> rowSelectColumn = new Column<RefBookItem, Boolean>(new CheckboxCell(true, false)) {
                 @Override

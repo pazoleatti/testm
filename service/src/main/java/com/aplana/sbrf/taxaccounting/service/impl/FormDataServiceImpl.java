@@ -102,6 +102,8 @@ public class FormDataServiceImpl implements FormDataService {
     private FormPerformerDao formPerformerDao;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
+    @Autowired
+    private IfrsDataService ifrsDataService;
 
     @Override
     public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder) {
@@ -703,6 +705,16 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceLoggerException(
                     "Произошли ошибки в скрипте, который выполняется перед переходом",
                     logEntryService.save(logger.getEntries()));
+        }
+
+        if (formData.getFormType().getIsIfrs() && workflowMove.getFromState().equals(WorkflowState.ACCEPTED) &&
+                departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
+            IfrsData ifrsData = ifrsDataService.get(formData.getReportPeriodId());
+            if (ifrsData.getBlobDataId() != null) {
+                ifrsDataService.deleteReport(formData, userInfo);
+            } else if (lockService.getLock(ifrsDataService.generateTaskKey(formData.getReportPeriodId())) != null) {
+                ifrsDataService.cancelTask(formData, userInfo);
+            }
         }
 
         eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);

@@ -792,9 +792,9 @@ void addData(def xml, int headRowCount) {
             curRow[it] = null
         }
 
-        knu = normalize(curRow.incomeTypeId)
-        group = normalize(curRow.incomeGroup)
-        type = normalize(curRow.incomeTypeByOperation)
+        knu = normalize(getOwnerValue(curRow, 'incomeTypeId'))
+        group = normalize(getOwnerValue(curRow, 'incomeGroup'))
+        type = normalize(getOwnerValue(curRow, 'incomeTypeByOperation'))
 
         def xmlIndexCol = 0
 
@@ -842,6 +842,11 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+def getOwnerValue (def dataRow , def alias) {
+    def cell = dataRow.getCell(alias)
+    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
 }
 
 void checkTotalSum(totalRow, sum){

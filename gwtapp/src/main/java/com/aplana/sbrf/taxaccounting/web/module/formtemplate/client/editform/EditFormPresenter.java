@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateTableEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.EditFormTypeAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.EditFormTypeResult;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemplate;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -21,17 +22,15 @@ import com.gwtplatform.mvp.client.View;
 public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView> implements EditFormUiHandlers {
 
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
-        void setFormTypeName(String formTypeName);
-        void setFormTypeCode(String formTypeCode);
-        String getFormTypeName();
-        String getFormTypeCode();
+        FormTypeTemplate getDecTypeData();
+        boolean isChangeFilter();
+        void edit(FormTypeTemplate type);
     }
 
     DispatchAsync dispatchAsync;
 
-    int formTypeId;
-    String initFormTypeName;
-    String initFormTypeCode;
+
+    FormTypeTemplate formTypeTemplate;
 
     @Inject
     public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync) {
@@ -40,32 +39,27 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         getView().setUiHandlers(this);
     }
 
-    public void setFormTypeId(int formTypeId) {
-        this.formTypeId = formTypeId;
-    }
-
-    public void setFormTypeName(String formTypeName) {
-        this.initFormTypeName = formTypeName;
-        getView().setFormTypeName(formTypeName);
-    }
-
-    public void setFormTypeCode(String formTypeCode) {
-        this.initFormTypeCode = formTypeCode;
-        getView().setFormTypeCode(formTypeCode);
+    public void setFormTypeTemplate(FormTypeTemplate formTypeTemplate) {
+        this.formTypeTemplate = formTypeTemplate;
+        if (formTypeTemplate != null) {
+            getView().edit(formTypeTemplate);
+        }
     }
 
     @Override
     public void onSave() {
         EditFormTypeAction action = new EditFormTypeAction();
-        action.setFormTypeId(formTypeId);
-        action.setNewFormTypeName(getView().getFormTypeName());
-        action.setNewFormTypeCode(getView().getFormTypeCode());
+        FormTypeTemplate formTypeTemplate1 = getView().getDecTypeData();
+        action.setFormTypeId(formTypeTemplate1.getFormTypeId());
+        action.setNewFormTypeName(formTypeTemplate1.getFormTypeName());
+        action.setNewFormTypeCode(formTypeTemplate1.getFormTypeCode());
+        action.setIsIfrs(formTypeTemplate1.getIsIfrs());
+        action.setIfrsName(formTypeTemplate1.getIfrsName());
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<EditFormTypeResult>() {
                     @Override
                     public void onSuccess(EditFormTypeResult result) {
-                        initFormTypeName = getView().getFormTypeName();
-                        initFormTypeCode = getView().getFormTypeCode();
+                        formTypeTemplate = getView().getDecTypeData();
                         UpdateTableEvent.fire(EditFormPresenter.this);
                     }
                 }, this));
@@ -81,8 +75,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
             @Override
             public void no() {
-                getView().setFormTypeName(initFormTypeName);
-                getView().setFormTypeCode(initFormTypeCode);
+                getView().edit(formTypeTemplate);
             }
         });
 

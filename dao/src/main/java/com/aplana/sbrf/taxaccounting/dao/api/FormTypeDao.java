@@ -45,8 +45,10 @@ public interface FormTypeDao {
      * @param formTypeId идентификатор типа налоговой формы
      * @param newName новое имя типа налоговой формы
      * @param code новый номер типа налоговой формы
+     * @param isIfrs признак отчетности для МСФО
+     * @param ifrsName наименование формы для отчетности МСФО
      */
-    void updateFormType(int formTypeId, String newName, String code);
+    void updateFormType(int formTypeId, String newName, String code, Boolean isIfrs, String ifrsName);
 
     void delete(int formTypeId);
 

@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.IfrsData;
-import com.aplana.sbrf.taxaccounting.model.IfrsDataSearchResultItem;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.io.IOException;
@@ -57,4 +54,13 @@ public interface IfrsDataService {
 
     String generateTaskKey(Integer reportPeriod);
 
+    void cancelTask(FormData formData, TAUserInfo userInfo);
+
+    void deleteReport(FormData formData, TAUserInfo userInfo);
+
+    void cancelTask(DeclarationData declarationData, TAUserInfo userInfo);
+
+    void deleteReport(DeclarationData declarationData, TAUserInfo userInfo);
+
+    List<Integer> getIfrsUsers();
 }

@@ -303,7 +303,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 "join department_report_period drp on drp.id = fd.department_report_period_id \n" +
                 "join form_template ft on ft.id = fd.form_template_id \n" +
                 "join form_type t on t.id = ft.type_id \n" +
-                "where t.is_ifrs = 1 \n" +
+                "where t.is_ifrs = 1 and drp.correction_date is null \n" +
                 "and drp.report_period_id = :rp", paramMap, new FormDataWithoutRowMapperWithType());
     }
 
