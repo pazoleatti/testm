@@ -120,4 +120,8 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 		return refBookDao.dereferenceValues(tableName, attributeId, recordIds);
 	}
 
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -140,6 +141,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             }
         } else {
             RefBookDataProvider provider = rbFactory.getDataProvider(RefBookIncome102Dao.REF_BOOK_ID);
+            RefBook refBook = rbFactory.get(RefBookIncome102Dao.REF_BOOK_ID);
             List<Income102> list = importIncome102(stream);
 
             if (list != null && !list.isEmpty()) {
@@ -152,6 +154,18 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                     map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, item.getItemName()));
                     map.put(I_102_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, accountPeriodId.longValue()));
                     records.add(map);
+                }
+
+                List<String> matchedRecords = provider.getMatchedRecords(refBook.getAttributes(), records, accountPeriodId);
+                StringBuilder codeOpu = new StringBuilder();
+                if (matchedRecords.size() > 0) {
+                    for (int i = 0; i < matchedRecords.size(); i++) {
+                        codeOpu.append(matchedRecords.get(i));
+                        if (i < matchedRecords.size() - 1) {
+                            codeOpu.append(", ");
+                        }
+                    }
+                    throw new ServiceException("Код ОПУ " + codeOpu + " указан в форме более одного раза! Файл не может быть загружен.");
                 }
 
                 provider.updateRecords(userInfo, getStartDate(), records);

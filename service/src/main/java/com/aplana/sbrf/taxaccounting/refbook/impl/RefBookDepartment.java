@@ -858,4 +858,9 @@ public class RefBookDepartment implements RefBookDataProvider {
 		return refBookDao.dereferenceValues(DEPARTMENT_TABLE_NAME, attributeId, recordIds);
 	}
 
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw new UnsupportedOperationException();
+    }
+
 }

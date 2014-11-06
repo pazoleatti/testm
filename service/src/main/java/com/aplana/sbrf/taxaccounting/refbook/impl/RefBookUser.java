@@ -196,4 +196,9 @@ public class RefBookUser implements RefBookDataProvider {
 		return refBookDao.dereferenceValues(TABLE_NAME, attributeId, recordIds);
 	}
 
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw  new UnsupportedOperationException();
+    }
+
 }

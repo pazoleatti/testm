@@ -240,7 +240,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         RefBook refBook = get(refBookId);
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        // Получение количества данных в справкочнике
+        // Получение количества данных в справочнике
         PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, sortAttribute, filter, null, true);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
@@ -1451,6 +1451,69 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         });
 
         return aggregateUniqueAttributeNamesByRecords(result);
+    }
+
+    @Override
+    public List<String> getMatchedRecordsByUniqueAttributesIncome102(@NotNull List<RefBookAttribute> attributes,
+                                                                     @NotNull List<Map<String, RefBookValue>> records,
+                                                                     Integer accountPeriodId) {
+        List<RefBookRecord> refBookRecords = new ArrayList<RefBookRecord>();
+        for (Map<String, RefBookValue> map : records) {
+            RefBookRecord record = new RefBookRecord();
+            record.setValues(map);
+            refBookRecords.add(record);
+        }
+
+        List<Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>>> recordsGroupsUniqueAttributesValues = aggregateUniqueAttributesAndValuesByRecords(attributes, refBookRecords);
+        recordsGroupsUniqueAttributesValues.size();
+
+        StringBuilder sql = new StringBuilder("SELECT opu_code FROM income_102 WHERE account_period_id = ? AND ");
+        List<Object> params = new ArrayList<Object>();
+        params.add(accountPeriodId);
+
+        // OR по каждой записи
+        for (int i = 0; i < records.size(); i++) {
+            Map<String, RefBookValue> recordValues = records.get(i);
+            Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues = recordsGroupsUniqueAttributesValues.get(i);
+            // OR по группам уникальности
+            for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupUniqueAttributesValues : groupsUniqueAttributesValues.entrySet()) {
+                sql.append("(");
+                List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupUniqueAttributesValues.getValue();
+                // AND по уникальным аттрибутам группы
+                for (int j = 0; j < uniqueAttributesValues.size(); j++) {
+                    Pair<RefBookAttribute, RefBookValue> pair = uniqueAttributesValues.get(j);
+                    RefBookAttribute attribute = pair.getFirst();
+                    sql.append(attribute.getAlias()).append(" = ? ");
+
+                    /*************************************Добавление параметров****************************************/
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                        params.add(recordValues.get(attribute.getAlias()).getStringValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        params.add(recordValues.get(attribute.getAlias()).getReferenceValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                        params.add(recordValues.get(attribute.getAlias()).getNumberValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                        params.add(recordValues.get(attribute.getAlias()).getDateValue());
+                    }
+                    /**************************************************************************************************/
+
+                    if (j < uniqueAttributesValues.size() - 1) {
+                        sql.append(" AND ");
+                    }
+                }
+                if (groupUniqueAttributesValues.getKey() < groupsUniqueAttributesValues.size()) {
+                    sql.append(") OR ");
+                } else {
+                    sql.append(")");
+                }
+            }
+            if (i < records.size() - 1) sql.append(" OR ");
+        }
+
+        return getJdbcTemplate().queryForList(sql.toString(), params.toArray(), String.class);
     }
 
     /**
