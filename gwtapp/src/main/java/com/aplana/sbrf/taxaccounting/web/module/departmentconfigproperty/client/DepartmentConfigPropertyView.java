@@ -223,7 +223,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         });
 
-        table.setColumnWidth(checkColumn, 2, Style.Unit.EM);
+        table.setColumnWidth(checkColumn, 2, Style.Unit.PC);
 
         Map<String, RefBookAttribute> attributeMap = new HashMap<String, RefBookAttribute>();
 
@@ -245,7 +245,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         textColumn.setWidth(cell.getWidth());
 
                         paramColumnUI = factory.createTableColumn(textColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.PC);
                         table.addColumn(paramColumnUI, textColumn.getName());
                         columns.add(textColumn);
                         break;
@@ -258,7 +258,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         refColumn.setWidth(cell.getWidth());
 
                         paramColumnUI = factory.createTableColumn(refColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.PC);
                         table.addColumn(paramColumnUI, refColumn.getName());
                         columns.add(refColumn);
                         break;
@@ -272,7 +272,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         numericColumn.setPrecision(cell.getPrecision());
 
                         paramColumnUI = factory.createTableColumn(numericColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.PC);
                         table.addColumn(paramColumnUI, numericColumn.getName());
                         columns.add(numericColumn);
                         break;
