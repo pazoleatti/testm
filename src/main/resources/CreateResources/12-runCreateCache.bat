@@ -1,5 +1,7 @@
-@echo off
+@ECHO OFF
 
-cd %~dp0
-call settings.bat
-call %rootWAS%\bin\wsadmin.bat -host %destWAShost% -port %destWASport% -user %destWASuser% -password %destWASpass% -lang jython -f 02-CreateCache.py
+CALL settings.bat
+CD "%workplace%"
+
+CALL "%rootWAS%\bin\wsadmin.bat" -javaoption -Xmx%maxHeapSize% -host %destWAShost% -port %destWASport% -user %destWASuser% -password %destWASpass% -lang jython -f "%workplace%\02-CreateCache.py" -profile "%workplace%\config_was.cfg" "%workplaceSlash%"
+PAUSE
