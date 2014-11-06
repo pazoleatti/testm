@@ -116,21 +116,18 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             if (!getView().getSelectedRow().isOpen()) {
                 Dialog.errorMessage("Закрытие периода", "Выбранный период уже закрыт!");
             } else {
+                CheckHasNotAcceptedFormAction checkHasNotAcceptedForms = new CheckHasNotAcceptedFormAction();
+                checkHasNotAcceptedForms.setDepartmentId(getView().getSelectedRow().getDepartmentId());
+                checkHasNotAcceptedForms.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
 
-                CheckHasManualEditFormAction manualEditFormAction = new CheckHasManualEditFormAction();
-                manualEditFormAction.setDepartmentId(getView().getSelectedRow().getDepartmentId());
-                manualEditFormAction.setKind(FormDataKind.SUMMARY);
-                manualEditFormAction.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
-                manualEditFormAction.setTaxType(taxType);
-
-                dispatcher.execute(manualEditFormAction, CallbackUtils
-                        .defaultCallback(new AbstractCallback<CheckHasManualEditFormResult>() {
+                dispatcher.execute(checkHasNotAcceptedForms, CallbackUtils
+                        .defaultCallback(new AbstractCallback<CheckHasNotAcceptedFormResult>() {
                             @Override
-                            public void onSuccess(CheckHasManualEditFormResult result) {
-                               if (result.hasManualInputForms()) {
+                            public void onSuccess(CheckHasNotAcceptedFormResult result) {
+                               if (result.hasNotAcceptedForms()) {
                                    LogAddEvent.fire(PeriodsPresenter.this, result.getUuid());
-                                   Dialog.confirmMessage("Закрытие периода",
-                                           "В Системе существуют налоговые формы, для которых существуют версии ручного ввода. Продолжить операцию закрытия периода?",
+                                   Dialog.confirmMessage("Подтверждение закрытия периода",
+                                           "Вы действительно хотите закрыть период?",
                                            new DialogHandler() {
                                                @Override
                                                public void yes() {
