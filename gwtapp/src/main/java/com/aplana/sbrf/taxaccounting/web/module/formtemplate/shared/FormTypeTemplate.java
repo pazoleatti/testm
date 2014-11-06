@@ -14,6 +14,8 @@ public class FormTypeTemplate implements Serializable {
     private String formTypeCode;
     private TaxType taxType;
     private int versionCount;
+    private Boolean isIfrs;
+    private String ifrsName;
 
     public int getFormTypeId() {
         return formTypeId;
@@ -53,5 +55,21 @@ public class FormTypeTemplate implements Serializable {
 
     public void setFormTypeCode(String formTypeCode) {
         this.formTypeCode = formTypeCode;
+    }
+
+    public Boolean getIsIfrs() {
+        return isIfrs;
+    }
+
+    public void setIsIfrs(Boolean isIfrs) {
+        this.isIfrs = isIfrs;
+    }
+
+    public String getIfrsName() {
+        return ifrsName;
+    }
+
+    public void setIfrsName(String ifrsName) {
+        this.ifrsName = ifrsName;
     }
 }

@@ -77,7 +77,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId, String kpp, String taxOrganCode) {
         try {
             return getJdbcTemplate().queryForObject(
                     "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
@@ -86,10 +86,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                             "from declaration_data dd, department_report_period drp " +
                             "where drp.id = dd.department_report_period_id and drp.id = ?" +
                             "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
-                            "and dt.declaration_type_id = ?)",
+                            "and dt.declaration_type_id = ?) and (? is null or dd.kpp = ?) and (? is null or dd.tax_organ_code = ?)",
                     new Object[]{
                             departmentReportPeriodId,
-                            declarationTypeId
+                            declarationTypeId,
+                            kpp, kpp,
+                            taxOrganCode, taxOrganCode
                     },
                     new DeclarationDataRowMapper()
             );
@@ -102,6 +104,11 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     departmentReportPeriodId
             );
         }
+    }
+
+    @Override
+    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
+        return find(declarationTypeId, departmentReportPeriodId, null, null);
     }
 
     @Override
@@ -171,16 +178,18 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
 
         Long id = declarationData.getId();
         if (id != null) {
-            throw new DaoException("Произведена попытка перезаписать уже сохранённую декларацию");
+            throw new DaoException("Произведена попытка перезаписать уже сохранённую декларацию!");
         }
 
         int countOfExisted = jt.queryForInt("SELECT COUNT(*) FROM declaration_data WHERE declaration_template_id = ?" +
-                " AND department_report_period_id = ?",
-                new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId()},
-                new int[]{Types.INTEGER, Types.INTEGER});
+                " AND department_report_period_id = ? and (? is null or tax_organ_code = ?) and (? is null or kpp = ?)",
+                new Object[]{declarationData.getDeclarationTemplateId(), declarationData.getDepartmentReportPeriodId(),
+                        declarationData.getTaxOrganCode(), declarationData.getTaxOrganCode(), declarationData.getKpp(),
+                        declarationData.getKpp()},
+                new int[]{Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR});
 
         if (countOfExisted != 0) {
-            throw new DaoException("Декларация с заданными параметрами уже существует");
+            throw new DaoException("Декларация с заданными параметрами уже существует!");
         }
 
         id = generateId("seq_declaration_data", Long.class);
@@ -419,5 +428,4 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             );
         }
     }
-
 }

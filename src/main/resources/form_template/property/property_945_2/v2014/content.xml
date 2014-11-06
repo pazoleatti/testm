@@ -67,7 +67,7 @@
         <name>Адрес объекта</name>
         <order>7</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
+        <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

@@ -587,10 +587,10 @@ void addData(def xml, int headRowCount) {
             curRow[it] = null
         }
 
-        knu = normalize(curRow.incomeTypeId)
+        knu = normalize(getOwnerValue(curRow, 'incomeTypeId'))
         //def group = normalize(curRow.incomeGroup)
-        type = normalize(curRow.incomeTypeByOperation)
-        num = normalize(curRow.accountNo)
+        type = normalize(getOwnerValue(curRow, 'incomeTypeByOperation'))
+        num = normalize(getOwnerValue(curRow, 'accountNo'))
 
         def xmlIndexCol = 0
 
@@ -641,6 +641,11 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+def getOwnerValue (def dataRow , def alias) {
+    def cell = dataRow.getCell(alias)
+    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
 }
 
 /** Получить сумму диапазона строк определенного столбца. */

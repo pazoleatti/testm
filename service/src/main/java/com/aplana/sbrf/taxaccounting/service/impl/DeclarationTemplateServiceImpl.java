@@ -39,6 +39,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private final static String ENCODING = "UTF-8";
+    private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -113,15 +114,16 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	@Override
 	public String getJrxml(int declarationTemplateId) {
         BlobData jrxmlBlobData = blobDataService.get(this.get(declarationTemplateId).getJrxmlBlobId());
-        if (jrxmlBlobData == null)
-            return "";
+        if (jrxmlBlobData == null) {
+            return null;
+        }
         try {
             StringWriter writer = new StringWriter();
             IOUtils.copy(jrxmlBlobData.getInputStream(), writer, ENCODING);
             return writer.toString();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
-            throw new ServiceException("Не удалось получить jrxml-шаблон декларации");
+            throw new ServiceException(JRXML_NOT_FOUND);
         }
 	}
 
@@ -129,17 +131,19 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	public InputStream getJasper(int declarationTemplateId) {
         ByteArrayOutputStream  compiledReport = new ByteArrayOutputStream();
         String jrxml = getJrxml(declarationTemplateId);
+        if (jrxml == null) {
+            throw new ServiceException(JRXML_NOT_FOUND);
+        }
         try {
             JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes(ENCODING)));
             JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
         } catch (JRException e) {
             logger.error(e.getMessage(), e);
-            throw new ServiceException("Произошли ошибки во время формирования отчета");
+            throw new ServiceException("Произошли ошибки во время формирования отчета!");
         } catch (UnsupportedEncodingException e2) {
             logger.error(e2.getMessage(), e2);
-            throw new ServiceException("Шаблон отчета имеет неправильную кодировку");
+            throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
         }
-
         return new ByteArrayInputStream(compiledReport.toByteArray());
 	}
 

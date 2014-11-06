@@ -827,10 +827,10 @@ void addData(def xml, int headRowCount) {
             curRow[it] = null
         }
 
-        knu = normalize(curRow.consumptionTypeId)
-        group = normalize(curRow.consumptionGroup)
+        knu = normalize(getOwnerValue(curRow, 'consumptionTypeId'))
+        group = normalize(getOwnerValue(curRow, 'consumptionGroup'))
         //type = normalize(curRow.consumptionTypeByOperation)
-        num = normalize(curRow.consumptionBuhSumAccountNumber)
+        num = normalize(getOwnerValue(curRow, 'consumptionBuhSumAccountNumber'))
 
         def xmlIndexCol = 0
 
@@ -881,6 +881,11 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
+}
+
+def getOwnerValue (def dataRow , def alias) {
+    def cell = dataRow.getCell(alias)
+    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
 }
 
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма

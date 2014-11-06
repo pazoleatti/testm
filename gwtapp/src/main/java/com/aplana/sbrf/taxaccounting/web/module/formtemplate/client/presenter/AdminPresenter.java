@@ -204,14 +204,10 @@ public class AdminPresenter
     @Override
     public void onSelectionChanged(FormTypeTemplate selectedItem) {
         if (selectedItem != null) {
-            editFormPresenter.setFormTypeId(selectedItem.getFormTypeId());
-            editFormPresenter.setFormTypeName(selectedItem.getFormTypeName());
-            editFormPresenter.setFormTypeCode(selectedItem.getFormTypeCode());
-        } else {
-            editFormPresenter.setFormTypeId(0);
-            editFormPresenter.setFormTypeCode("");
-            editFormPresenter.setFormTypeName("");
+            editFormPresenter.setFormTypeTemplate(selectedItem);
 
+        } else {
+            editFormPresenter.setFormTypeTemplate(new FormTypeTemplate());
         }
     }
 

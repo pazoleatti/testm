@@ -31,7 +31,7 @@ public class EditFormTypeHandler extends AbstractActionHandler<EditFormTypeActio
                 throw new ActionException("Нарушено требование к уникальности, уже существует макет с такими значениями атрибута «Код формы»!");
             }
         }
-        formTypeService.updateFormType(action.getFormTypeId(), action.getNewFormTypeName(), action.getNewFormTypeCode());
+        formTypeService.updateFormType(action.getFormTypeId(), action.getNewFormTypeName(), action.getNewFormTypeCode(), action.getIsIfrs(), action.getIfrsName() );
         return new EditFormTypeResult();
     }
 
