@@ -38,7 +38,7 @@ import java.util.*;
  * @author Stetsenko Eugene
  */
 public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentConfigPropertyUiHandlers>
-		implements DepartmentConfigPropertyPresenter.MyView {
+        implements DepartmentConfigPropertyPresenter.MyView {
 
     @Override
     public boolean isAscSorting() {
@@ -102,7 +102,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public TaxType taxType;
 
     interface Binder extends UiBinder<Widget, DepartmentConfigPropertyView> {
-	}
+    }
 
     private AsyncDataProviderWithSortableTable dataProvider;
     @UiField
@@ -159,8 +159,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     boolean isEditMode = false;
 
     @Inject
-	@UiConstructor
-	public DepartmentConfigPropertyView(final Binder uiBinder) {
+    @UiConstructor
+    public DepartmentConfigPropertyView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
 
 
@@ -223,7 +223,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         });
 
-        table.setColumnWidth(checkColumn, 2, Style.Unit.PC);
+        table.setColumnWidth(checkColumn, 2, Style.Unit.EM);
 
         Map<String, RefBookAttribute> attributeMap = new HashMap<String, RefBookAttribute>();
 
@@ -245,7 +245,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         textColumn.setWidth(cell.getWidth());
 
                         paramColumnUI = factory.createTableColumn(textColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.PC);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
                         table.addColumn(paramColumnUI, textColumn.getName());
                         columns.add(textColumn);
                         break;
@@ -258,7 +258,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         refColumn.setWidth(cell.getWidth());
 
                         paramColumnUI = factory.createTableColumn(refColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.PC);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
                         table.addColumn(paramColumnUI, refColumn.getName());
                         columns.add(refColumn);
                         break;
@@ -272,7 +272,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         numericColumn.setPrecision(cell.getPrecision());
 
                         paramColumnUI = factory.createTableColumn(numericColumn, table);
-                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.PC);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
                         table.addColumn(paramColumnUI, numericColumn.getName());
                         columns.add(numericColumn);
                         break;

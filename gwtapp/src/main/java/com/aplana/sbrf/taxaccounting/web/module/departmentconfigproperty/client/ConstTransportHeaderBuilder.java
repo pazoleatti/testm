@@ -70,11 +70,11 @@ public class ConstTransportHeaderBuilder extends AbstractHeaderOrFooterBuilder i
 
         buildHeader(tr, new TextHeader("Признак лица, подписавшего документ"), 0, 0, true);
 
-        buildHeader(tr, new TextHeader("Фамилия подписанта"), 0, 0, true);
+        buildHeader(tr, new TextHeader("Фамилия"), 0, 0, true);
 
-        buildHeader(tr, new TextHeader("Имя подписанта"), 0, 0, true);
+        buildHeader(tr, new TextHeader("Имя"), 0, 0, true);
 
-        buildHeader(tr, new TextHeader("Отчество подписанта"), 0, 0, true);
+        buildHeader(tr, new TextHeader("Отчество"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("Наименование документа представителя"), 0, 0, true);
 
