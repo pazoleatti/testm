@@ -2,29 +2,17 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client
 
 import com.aplana.gwt.client.TextBox;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
-import com.aplana.sbrf.taxaccounting.web.module.audit.client.AuditClientUIHandler;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.TableCell;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.TableRow;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.ReferenceUiColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -32,20 +20,17 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
-import com.google.gwt.view.client.Range;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.math.BigDecimal;
 import java.util.*;
-
-import static java.util.Arrays.asList;
 
 /**
  * View для формы настроек подразделений
@@ -65,23 +50,56 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     }
 
-    public static enum TABLE_HEADER {
-        TAX_ORGAN_CODE,
-        KPP,
-        TAX_PLACE_TYPE_CODE,
-        NAME,
-        OKVED_CODE,
-        PHONE,
-        REORG_FORM_CODE,
-        REORG_INN,
-        REORG_KPP,
-        SIGNATORY_ID,
-        SIGNATORY_SURNAME,
-        SIGNATORY_FIRSTNAME,
-        SIGNATORY_LASTNAME,
-        APPROVE_DOC_NAME,
-        APPROVE_ORG_NAME;
+    private TABLE_HEADER[]  TABLE_HEADER_PROPERTY = new TABLE_HEADER[] {
+            new TABLE_HEADER("TAX_ORGAN_CODE"),
+            new TABLE_HEADER("KPP"),
+            new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
+            new TABLE_HEADER("NAME"),
+            new TABLE_HEADER("OKVED_CODE"),
+            new TABLE_HEADER("PHONE"),
+            new TABLE_HEADER("REORG_FORM_CODE"),
+            new TABLE_HEADER("REORG_INN"),
+            new TABLE_HEADER("REORG_KPP"),
+            new TABLE_HEADER("SIGNATORY_ID"),
+            new TABLE_HEADER("SIGNATORY_SURNAME"),
+            new TABLE_HEADER("SIGNATORY_FIRSTNAME"),
+            new TABLE_HEADER("SIGNATORY_LASTNAME"),
+            new TABLE_HEADER("APPROVE_DOC_NAME"),
+            new TABLE_HEADER("APPROVE_ORG_NAME")
+    };
+
+    private TABLE_HEADER[]  TABLE_HEADER_TRANSPORT = new TABLE_HEADER[] {
+            new TABLE_HEADER("TAX_ORGAN_CODE"),
+            new TABLE_HEADER("KPP"),
+            new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
+            new TABLE_HEADER("NAME"),
+            new TABLE_HEADER("OKVED_CODE"),
+            new TABLE_HEADER("PHONE"),
+            new TABLE_HEADER("PREPAYMENT"),
+            new TABLE_HEADER("REORG_FORM_CODE"),
+            new TABLE_HEADER("REORG_INN"),
+            new TABLE_HEADER("REORG_KPP"),
+            new TABLE_HEADER("SIGNATORY_ID"),
+            new TABLE_HEADER("SIGNATORY_SURNAME"),
+            new TABLE_HEADER("SIGNATORY_FIRSTNAME"),
+            new TABLE_HEADER("SIGNATORY_LASTNAME"),
+            new TABLE_HEADER("APPROVE_DOC_NAME"),
+            new TABLE_HEADER("APPROVE_ORG_NAME")
+    };
+
+    public class TABLE_HEADER {
+        String name;
+
+        private TABLE_HEADER(String name) {
+            this.name = name;
+        }
+
+        public String name() {
+            return name;
+        }
     }
+
+    public TaxType taxType;
 
     interface Binder extends UiBinder<Widget, DepartmentConfigPropertyView> {
 	}
@@ -107,6 +125,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     LinkAnchor addLink;
     @UiField
     LinkAnchor delLink;
+    @UiField
+    Label taxTypeLbl;
+    @UiField
+    Panel versionBlock;
 
     @UiField
     Label editModeLabel;
@@ -141,11 +163,21 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 	public DepartmentConfigPropertyView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
 
-        ConstHeaderBuilder hb = new ConstHeaderBuilder(table);
-        hb.setNeedCheckedRow(false);
-        table.setHeaderBuilder(hb);
-        table.setSelectionModel(selectionModel);
 
+    }
+
+    private void initTable(TaxType taxType) {
+
+        if (taxType == TaxType.PROPERTY) {
+            ConstPropertyHeaderBuilder hb = new ConstPropertyHeaderBuilder(table);
+            hb.setNeedCheckedRow(false);
+            table.setHeaderBuilder(hb);
+        } else if (taxType == TaxType.TRANSPORT) {
+            ConstTransportHeaderBuilder hb = new ConstTransportHeaderBuilder(table);
+            hb.setNeedCheckedRow(false);
+            table.setHeaderBuilder(hb);
+        }
+        table.setSelectionModel(selectionModel);
 
         model = new ListDataProvider<DataRow<Cell>>();
         model.addDataDisplay(table);
@@ -156,6 +188,16 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         while (table.getColumnCount() > 0) {
             table.removeColumn(0);
         }
+    }
+
+    @Override
+    public TABLE_HEADER[] getCurrentTableHeaders() {
+        if (taxType == TaxType.PROPERTY) {
+            return TABLE_HEADER_PROPERTY;
+        } else if(taxType == TaxType.TRANSPORT) {
+            return TABLE_HEADER_TRANSPORT;
+        }
+        return new TABLE_HEADER[0];
     }
 
     @Override
@@ -188,8 +230,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         for (RefBookAttribute attr : attributes) {
             attributeMap.put(attr.getAlias(), attr);
         }
-
-        for (TABLE_HEADER h : TABLE_HEADER.values()) {
+        for (TABLE_HEADER h : getCurrentTableHeaders()) {
             if (attributeMap.containsKey(h.name())) {
                 RefBookAttribute cell = attributeMap.get(h.name());
 
@@ -220,6 +261,20 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
                         table.addColumn(paramColumnUI, refColumn.getName());
                         columns.add(refColumn);
+                        break;
+                    case NUMBER:
+                        NumericColumn numericColumn = new NumericColumn();
+                        numericColumn.setId(cell.getId().intValue());
+                        numericColumn.setAlias(h.name());
+                        numericColumn.setName(cell.getName());
+                        numericColumn.setWidth(cell.getWidth());
+                        numericColumn.setMaxLength(cell.getMaxLength());
+                        numericColumn.setPrecision(cell.getPrecision());
+
+                        paramColumnUI = factory.createTableColumn(numericColumn, table);
+                        table.setColumnWidth(paramColumnUI, cell.getWidth(), Style.Unit.EM);
+                        table.addColumn(paramColumnUI, numericColumn.getName());
+                        columns.add(numericColumn);
                         break;
                 }
             }
@@ -252,12 +307,32 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         formatVersionCell.setStringValue(formatVersion.getValue());
         params.put("FORMAT_VERSION", formatVersionCell);
 
-        TableCell versionCell = new TableCell();
-        versionCell.setType(RefBookAttributeType.STRING);
-        versionCell.setStringValue(version.getValue());
-        params.put("PREPAYMENT_VERSION", versionCell);
+        if (taxType == TaxType.PROPERTY) {
+            TableCell versionCell = new TableCell();
+            versionCell.setType(RefBookAttributeType.STRING);
+            versionCell.setStringValue(version.getValue());
+            params.put("PREPAYMENT_VERSION", versionCell);
+        }
 
         return params;
+    }
+
+    @Override
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+        initTable(taxType);
+        if (taxType == TaxType.TRANSPORT) {
+            versionBlock.setVisible(false);
+            taxTypeLbl.setText("Транспортный налог");
+        } else {
+            versionBlock.setVisible(true);
+            taxTypeLbl.setText("Налог на имущество");
+        }
+    }
+
+    @Override
+    public TaxType getTaxType() {
+        return this.taxType;
     }
 
     @Override
@@ -271,7 +346,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public void fillNotTableData(Map<String, TableCell> itemList) {
         inn.setText(itemList.get("INN").getStringValue());
         formatVersion.setText(itemList.get("FORMAT_VERSION").getStringValue());
-        version.setText(itemList.get("PREPAYMENT_VERSION").getStringValue());
+        if (taxType != TaxType.TRANSPORT) {
+            version.setText(itemList.get("PREPAYMENT_VERSION").getStringValue());
+        }
     }
 
     @Override
@@ -342,8 +419,11 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 TableCell c = row.get(col.getAlias());
                 if (c.getType() == RefBookAttributeType.STRING) {
                     paramCell.setStringValue(c.getStringValue());
-                } else if (c.getType() == RefBookAttributeType.REFERENCE){
+                } else if (c.getType() == RefBookAttributeType.REFERENCE) {
                     paramCell.setRefBookDereference(c.getDeRefValue());
+                } else if (c.getType() == RefBookAttributeType.NUMBER) {
+                    System.out.println("ADD NUMBER");
+                    paramCell.setNumericValue(c.getNumberValue() == null ? null : new BigDecimal(c.getNumberValue().longValue()));
                 }
                 cells.add(paramCell);
             }
@@ -373,6 +453,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     }
 
 
+    @Override
     public void setEditMode(boolean isEditable) {
         isEditMode = isEditable;
         editButton.setVisible(!isEditMode);
@@ -395,18 +476,24 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
 
         for (DataRow<Cell> row : model.getList()) {
-            for (TABLE_HEADER h : TABLE_HEADER.values()) {
-                row.getCell(h.name()).setEditable(isEditMode);
+            for (TABLE_HEADER h : getCurrentTableHeaders()) {
+                try {
+                    row.getCell(h.name()).setEditable(isEditMode);
+                } catch (IllegalArgumentException ex) {
+
+                }
             }
         }
 
-        if (table.getHeaderBuilder() instanceof ConstHeaderBuilder) {
+        if (table.getHeaderBuilder() instanceof TableWithCheckedColumn) {
             if (!isEditable) {
-                table.removeColumn(checkColumn);
+                if (table.getColumnIndex(checkColumn) != -1) {
+                    table.removeColumn(checkColumn);
+                }
             } else {
                 table.insertColumn(0, checkColumn);
             }
-            ((ConstHeaderBuilder)table.getHeaderBuilder()).setNeedCheckedRow(isEditable);
+            ((TableWithCheckedColumn)table.getHeaderBuilder()).setNeedCheckedRow(isEditable);
             table.getHeaderBuilder().buildHeader();
         }
         table.redraw();

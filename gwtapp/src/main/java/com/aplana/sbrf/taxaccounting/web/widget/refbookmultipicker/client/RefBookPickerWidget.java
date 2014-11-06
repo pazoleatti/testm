@@ -105,7 +105,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
         initWidget(binder.createAndBindUi(this));
         WidgetUtils.setMouseBehavior(clearIconButton, textBox, pickImageButton);
-        refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect) : new RefBookMultiPickerView(multiSelect);
+        refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect != null) : new RefBookMultiPickerView(multiSelect != null);
 
         widgetWrapper.add(refBookView);
 
