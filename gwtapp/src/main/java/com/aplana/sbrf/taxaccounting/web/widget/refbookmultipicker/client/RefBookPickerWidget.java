@@ -501,6 +501,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     }
 
     @Override
+    public void setSingleColumn(String columnAlias) {
+        refBookView.setSingleColumn(columnAlias);
+    }
+
+    @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<List<Long>> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
     }
@@ -540,4 +545,6 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     public void setPickerContext(PickerContext pickerContext) {
         state.setPickerContext(pickerContext);
     }
+
+
 }
