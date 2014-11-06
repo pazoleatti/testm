@@ -66,7 +66,13 @@ public class RefBookFactoryImpl implements RefBookFactory {
 			refBookSimple.setTableName(RefBookSimpleReadOnly.FORM_TYPE_TABLE_NAME);
 			refBookSimple.setWhereClause("STATUS = 0");
 			return refBookSimple;
-		} else if (RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Системные роли"
+		} else if (RefBookSimpleReadOnly.DECLARATION_TYPE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Виды деклараций"
+			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+			refBookSimple.setRefBookId(RefBookSimpleReadOnly.DECLARATION_TYPE_REF_BOOK_ID);
+			refBookSimple.setTableName(RefBookSimpleReadOnly.DECLARATION_TYPE_TABLE_NAME);
+			refBookSimple.setWhereClause("STATUS = 0");
+			return refBookSimple;
+		}else if (RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Системные роли"
 			RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
 			refBookSimple.setRefBookId(RefBookSimpleReadOnly.SEC_ROLE_REF_BOOK_ID);
 			refBookSimple.setTableName(RefBookSimpleReadOnly.SEC_ROLE_TABLE_NAME);
