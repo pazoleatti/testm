@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,45 +37,6 @@ public class RefBook implements Serializable {
     public static final Long DEPARTMENT_CONFIG_DEAL = 37L;
     public static final Long DEPARTMENT_CONFIG_VAT = 98L;
     public static final Long DEPARTMENT_CONFIG_PROPERTY = 99L;
-
-    /**
-     * Соотношение основной и табличной части настроек подразделений с типом налога
-      */
-    public enum WithTable {
-        TRANSPORT(TaxType.TRANSPORT, 31L, 310L),
-        PROPERTY(TaxType.PROPERTY, 99L, 206L);
-
-        private TaxType taxType;
-        private Long refBookId;
-        private Long tableRefBookId;
-
-        WithTable(TaxType taxType, Long refBookId, Long tableRefBookId) {
-            this.taxType = taxType;
-            this.refBookId = refBookId;
-            this.tableRefBookId = tableRefBookId;
-        }
-
-        public TaxType getTaxType() {
-            return taxType;
-        }
-
-        public Long getRefBookId() {
-            return refBookId;
-        }
-
-        public Long getTableRefBookId() {
-            return tableRefBookId;
-        }
-
-        public static WithTable getByTaxType(TaxType taxType) {
-            for (WithTable item : WithTable.values()) {
-                if (item.getTaxType() == taxType) {
-                    return item;
-                }
-            }
-            throw new RuntimeException("Не найдено сочетание табличной и нетабличной части настроек подразделения для указанного налога");
-        }
-    }
 
 	/** Код справочника */
 	private Long id;

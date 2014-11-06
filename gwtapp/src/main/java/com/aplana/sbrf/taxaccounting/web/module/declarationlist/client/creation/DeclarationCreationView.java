@@ -4,10 +4,12 @@ import com.aplana.gwt.client.ListBoxWithTooltipWidget;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -51,9 +53,9 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     ListBoxWithTooltipWidget<Integer> declarationTypeBox;
 
     @UiField
-    RefBookPicker taxOrganCode;
+    TextBox taxOrganCode;
     @UiField
-    RefBookPicker taxOrganKpp;
+    TextBox taxOrganKpp;
     @UiField
     HorizontalPanel codePanel;
     @UiField
@@ -71,8 +73,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
 
     final private Map<Integer, DeclarationType> declarationTypesMap = new LinkedHashMap<Integer, DeclarationType>();
-
-    private boolean refBookEnabled = false;
 
     @Inject
     public DeclarationCreationView(Binder uiBinder, EventBus eventBus) {
@@ -107,20 +107,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         correctionPanel.setVisible(false);
     }
 
-    @Override
-    public void initRefBooks(Date version, String filter) {
-        if (filter != null && !filter.isEmpty()) {
-            taxOrganKpp.setFilter(filter);
-            taxOrganCode.setFilter(filter);
-            taxOrganKpp.setPeriodDates(version, version);
-            taxOrganCode.setPeriodDates(version, version);
-        }
-
-        refBookEnabled = filter != null && !filter.isEmpty();
-    }
-
-    @Override
-    public void updateEnabled() {
+    private void updateEnabled() {
         boolean departmentSelected = departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
         boolean periodSelected = periodPicker.getValue() != null && !periodPicker.getValue().isEmpty();
         boolean correctionDateSelected = correctionDate.getText() != null && !correctionDate.getText().isEmpty();
@@ -128,8 +115,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(periodSelected);
         declarationTypeBox.setEnabled(departmentSelected);
-        taxOrganCode.setEnabled(departmentSelected && refBookEnabled);
-        taxOrganKpp.setEnabled(departmentSelected && refBookEnabled);
+        taxOrganCode.setEnabled(departmentSelected);
+        taxOrganKpp.setEnabled(departmentSelected);
         // дата корректировки
         correctionPanel.setVisible(departmentSelected && correctionDateSelected);
     }
@@ -192,6 +179,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         taxOrganCode.setValue(null);
         taxOrganKpp.setValue(null);
         getUiHandlers().onDepartmentChange();
+        updateEnabled();
     }
 
     @Override
@@ -213,12 +201,12 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public void setSelectedTaxOrganCode(String code) {
-        taxOrganCode.setDereferenceValue(code);
+        taxOrganCode.setValue(code);
     }
 
     @Override
     public void setSelectedTaxOrganKpp(String kpp) {
-        taxOrganKpp.setDereferenceValue(kpp);
+        taxOrganKpp.setValue(kpp);
     }
 
     @Override
@@ -257,11 +245,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public String getTaxOrganCode() {
-        return taxOrganCode.getDereferenceValue().trim();
+        return taxOrganCode.getValue().trim();
     }
 
     @Override
     public String getTaxOrganKpp() {
-        return taxOrganKpp.getDereferenceValue().trim();
+        return taxOrganKpp.getValue().trim();
     }
 }

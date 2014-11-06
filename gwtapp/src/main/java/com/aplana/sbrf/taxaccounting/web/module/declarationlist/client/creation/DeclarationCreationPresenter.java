@@ -20,7 +20,6 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -30,8 +29,7 @@ import java.util.Set;
 public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCreationPresenter.MyView> implements DeclarationCreationUiHandlers {
 
 	public interface MyView extends PopupView, HasUiHandlers<DeclarationCreationUiHandlers> {
-
-        void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
+		void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
 		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
 		void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds);
 		
@@ -51,9 +49,6 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         String getTaxOrganKpp();
 
         void init();
-
-        void initRefBooks(Date version, String filter);
-        void updateEnabled();
     }
 
 	private DispatchAsync dispatcher;
@@ -122,16 +117,12 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
 		dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationTypeResult>() {
 			@Override
 			public void onSuccess(GetDeclarationTypeResult result) {
-                getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
-                if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT) {
-                    getView().initRefBooks(result.getVersion(), result.getFilter());
-                }
+				getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
                 if (result.getCorrectionDate() != null) {
                     getView().setCorrectionDate(DateTimeFormat.getFormat("dd.MM.yyyy").format(result.getCorrectionDate()), result.getTaxType());
                 } else {
                     getView().setCorrectionDate(null, null);
                 }
-                getView().updateEnabled();
 			}
 		}, this) );
 	}

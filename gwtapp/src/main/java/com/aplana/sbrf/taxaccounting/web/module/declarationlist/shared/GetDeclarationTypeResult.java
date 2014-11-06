@@ -13,19 +13,10 @@ public class GetDeclarationTypeResult implements Result {
 	List<DeclarationType> declarationTypes;
     Date correctionDate;
     TaxType taxType;
-    Date version;
 
     private String filter;
 
-    public Date getVersion() {
-        return version;
-    }
-
-    public void setVersion(Date version) {
-        this.version = version;
-    }
-
-    public List<DeclarationType> getDeclarationTypes() {
+	public List<DeclarationType> getDeclarationTypes() {
 		return declarationTypes;
 	}
 
