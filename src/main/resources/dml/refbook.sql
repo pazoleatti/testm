@@ -108,6 +108,7 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (205, 'КПП налоговых органов', 0, 0, 1, null);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (206,'Параметры подразделения по налогу на имущество (таблица)',0,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (207, 'Виды деклараций', 1, 0, 1, null, 'DECLARATION_TYPE');
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (0,0,'Тестовое наименование','NAME',1,1,null,null,1,null,10,0,0,null,null,0,2000);
 
@@ -581,6 +582,9 @@ INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 964, 206,'Наименование документа представителя','APPROVE_DOC_NAME', 1, 15,null,null, 1,null, 100, 0, 0,null,null, 0, 120);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES ( 965, 206,'Наименование организации представителя','APPROVE_ORG_NAME', 1, 16,null,null, 1,null, 100, 0, 0,null,null, 0, 1000);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2062, 206,'Код подразделения','DEPARTMENT_ID', 4, 17,30,161, 1,null, 10, 1, 0,null,null, 0, null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2071, 207,'Наименование','NAME',1,1,null,null,1,null,50,1,0,0,null,0,2000);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2072, 207,'Вид налога','TAX_TYPE',1,2,null,null,1,null,10,1,0,null,null,0,2000);
 
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;
