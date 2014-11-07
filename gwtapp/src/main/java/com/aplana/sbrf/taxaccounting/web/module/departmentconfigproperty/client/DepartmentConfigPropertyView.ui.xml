@@ -89,7 +89,7 @@
                 <fm:left>
                     <fm:Left>
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <g:Label text="Налог на имущество" addStyleNames="{style.titleText}, {style.marginRight5}" />
+                            <g:Label text="" ui:field="taxTypeLbl" addStyleNames="{style.titleText}, {style.marginRight5}" />
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -169,7 +169,7 @@
                                         <aplana:TextBox ui:field="formatVersion" width="50px"  maxLength="20" enabled="false"/>
                                     </g:cell>
                                 </g:HorizontalPanel>
-                                <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
+                                <g:HorizontalPanel ui:field="versionBlock" width="100%" spacing="1" verticalAlignment="middle">
                                     <g:cell width="1%" height="22px">
                                         <g:Label text="Версия формата расчета по авансовому платежу:" addStyleNames="{style.leftLabels}"/>
                                     </g:cell>

@@ -4,11 +4,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
-public class CheckHasManualEditFormAction extends UnsecuredActionImpl<CheckHasManualEditFormResult> {
+public class CheckHasNotAcceptedFormAction extends UnsecuredActionImpl<CheckHasNotAcceptedFormResult> {
     private Integer departmentId;
     private int reportPeriodId;
-    private TaxType taxType;
-    private FormDataKind kind;
 
     public Integer getDepartmentId() {
         return departmentId;
@@ -24,21 +22,5 @@ public class CheckHasManualEditFormAction extends UnsecuredActionImpl<CheckHasMa
 
     public void setReportPeriodId(int reportPeriodId) {
         this.reportPeriodId = reportPeriodId;
-    }
-
-    public TaxType getTaxType() {
-        return taxType;
-    }
-
-    public void setTaxType(TaxType taxType) {
-        this.taxType = taxType;
-    }
-
-    public FormDataKind getKind() {
-        return kind;
-    }
-
-    public void setKind(FormDataKind kind) {
-        this.kind = kind;
     }
 }

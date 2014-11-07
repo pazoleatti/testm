@@ -90,6 +90,14 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         Map<String, TableCell> getNonTableParams();
 
+        void setTaxType(TaxType taxType);
+
+        TaxType getTaxType();
+
+        DepartmentConfigPropertyView.TABLE_HEADER[] getCurrentTableHeaders();
+
+        void setEditMode(boolean isEditable);
+
     }
 
     @Inject
@@ -105,14 +113,18 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-        reloadDepartments(TaxType.PROPERTY, null);
+        String value = request.getParameter("nType", "");
+        TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
+        getView().setTaxType(nType);
+        reloadDepartments(nType, null);
+        getView().setEditMode(false);
     }
 
     private List<Map<String, TableCell>> convert(List<DataRow<Cell>> rows) {
         List<Map<String, TableCell>> converted = new ArrayList<Map<String, TableCell>>();
         for (DataRow<Cell> row : rows) {
             Map<String, TableCell> tableRow = new HashMap<String, TableCell>();
-            for (DepartmentConfigPropertyView.TABLE_HEADER h : DepartmentConfigPropertyView.TABLE_HEADER.values()) {
+            for (DepartmentConfigPropertyView.TABLE_HEADER h : getView().getCurrentTableHeaders()) {
                 Cell cell = row.getCell(h.name());
                 Object val = cell.getValue();
                 TableCell tableCell = new TableCell();
@@ -126,6 +138,10 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                         tableCell.setRefValue((Long) val);
                         tableCell.setDeRefValue(cell.getRefBookDereference());
                         tableCell.setType(RefBookAttributeType.REFERENCE);
+                        break;
+                    case NUMBER:
+                        tableCell.setNumberValue((Number) val);
+                        tableCell.setType(RefBookAttributeType.NUMBER);
                         break;
                 }
                 tableRow.put(h.name(), tableCell);
@@ -188,8 +204,13 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private void getData() {
         GetRefBookValuesAction action = new GetRefBookValuesAction();
-        action.setRefBookId(REFBOOK_ID);
-        action.setSlaveRefBookId(TABLE_REFBOOK_ID);
+        if (getView().getTaxType() == TaxType.PROPERTY) {
+            action.setRefBookId(REFBOOK_ID);
+            action.setSlaveRefBookId(TABLE_REFBOOK_ID);
+        } else if (getView().getTaxType() == TaxType.TRANSPORT) {
+            action.setRefBookId(31L);
+            action.setSlaveRefBookId(310L);
+        }
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartmentId(getView().getDepartmentId());
 
@@ -220,8 +241,13 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private void createTableColumns() {
         GetFormAttributesAction action = new GetFormAttributesAction();
-        action.setRefBookId(REFBOOK_ID);
-        action.setTableRefBookId(TABLE_REFBOOK_ID);
+        if (getView().getTaxType() == TaxType.TRANSPORT) {
+            action.setRefBookId(31L);
+            action.setTableRefBookId(310L);
+        } else {
+            action.setRefBookId(REFBOOK_ID);
+            action.setTableRefBookId(TABLE_REFBOOK_ID);
+        }
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetFormAttributesResult>() {
                     @Override
@@ -258,8 +284,13 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartmentId(getView().getDepartmentId());
         action.setNotTableParams(getView().getNonTableParams());
-        action.setRefBookId(REFBOOK_ID);
-        action.setSlaveRefBookId(TABLE_REFBOOK_ID);
+        if (getView().getTaxType() == TaxType.TRANSPORT) {
+            action.setRefBookId(31L);
+            action.setSlaveRefBookId(310L);
+        } else {
+            action.setRefBookId(REFBOOK_ID);
+            action.setSlaveRefBookId(TABLE_REFBOOK_ID);
+        }
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<SaveDepartmentRefBookValuesResult>() {
                     @Override
@@ -325,7 +356,4 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
     }
-
-
-
 }
