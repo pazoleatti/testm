@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
@@ -39,7 +40,7 @@ import java.util.List;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
-		UpdateForm.UpdateFormHandler,  RollbackTableRowSelection.RollbackTableRowSelectionHandler{
+		UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler{
 
 	@ProxyCodeSplit
 	@NameToken(RefBookDataTokens.refBookData)
@@ -248,7 +249,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public void onBind(){
 		addRegisteredHandler(UpdateForm.getType(), this);
 		addRegisteredHandler(RollbackTableRowSelection.getType(), this);
-	}
+        addRegisteredHandler(SetFormMode.getType(), this);
+    }
 
 	private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
 
@@ -307,9 +309,19 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     }
 
     @Override
+    public void saveChanges() {
+        editFormPresenter.onSaveClicked(true);
+    }
+
+    @Override
     public void cancelChanges() {
         editFormPresenter.setIsFormModified(false);
         editFormPresenter.onCancelClicked();
+    }
+
+    @Override
+    public boolean isFormModified() {
+        return editFormPresenter.isFormModified();
     }
 
     @Override
@@ -320,5 +332,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void onReset(){
         this.dialogPresenter.getView().hide();
+    }
+
+    @Override
+    public void onSetFormMode(SetFormMode event) {
+        setMode(event.getFormMode());
     }
 }

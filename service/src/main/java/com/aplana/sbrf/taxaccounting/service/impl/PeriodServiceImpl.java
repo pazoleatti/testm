@@ -757,10 +757,15 @@ public class PeriodServiceImpl implements PeriodService {
         filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
         filter.setIsCorrection(true);
         List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
+        DepartmentReportPeriod drpLast = drpList.get(drpList.size()-1);
         for (DepartmentReportPeriod period : drpList) {
             if (period.getCorrectionDate().equals(term)) {
                 if (!period.isActive()) {
-                    return PeriodStatusBeforeOpen.CLOSE;
+                    if (drpLast.getCorrectionDate().after(term)) {
+                        return PeriodStatusBeforeOpen.INVALID;
+                    } else {
+                        return PeriodStatusBeforeOpen.CLOSE;
+                    }
                 } else {
                     return PeriodStatusBeforeOpen.OPEN;
                 }
@@ -770,8 +775,6 @@ public class PeriodServiceImpl implements PeriodService {
             }
         }
         if (!drpList.isEmpty()){
-            //проверяет статус последнего по порядку корректирующего периода (сортировка в дао)
-            DepartmentReportPeriod drpLast = drpList.get(drpList.size()-1);
             if (drpLast.isActive())
                 return PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN;
         }

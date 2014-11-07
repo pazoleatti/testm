@@ -235,12 +235,22 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @UiHandler("cancelEdit")
     void cancelEditButtonClicked(ClickEvent event) {
-        Dialog.confirmMessage("Выход из режима редактирования", "Вы подтверждаете переход к режиму просмотра?", new DialogHandler() {
-            @Override
-            public void yes() {
-                getUiHandlers().setMode(VIEW);
-            }
-        });
+        if (getUiHandlers().isFormModified()) {
+            Dialog.confirmMessage("Подтверждение изменений", "Строка была изменена. Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    getUiHandlers().saveChanges();
+                }
+
+                @Override
+                public void no() {
+                    getUiHandlers().cancelChanges();
+                    getUiHandlers().setMode(VIEW);
+                }
+            });
+        } else {
+            getUiHandlers().setMode(VIEW);
+        }
     }
 
     @UiHandler("edit")

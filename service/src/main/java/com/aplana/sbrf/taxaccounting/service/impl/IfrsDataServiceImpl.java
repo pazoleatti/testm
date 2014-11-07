@@ -174,9 +174,9 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 if (!flag)
                     continue;
 
-                String uuid = reportService.get(userService.getSystemUserInfo(), formData.getId(), ReportType.EXCEL, false, false, false);
+                String uuid = reportService.get(userService.getSystemUserInfo(), formData.getId(), ReportType.EXCEL, false, formData.isManual(), false);
                 if (uuid == null) {
-                    uuid = printingService.generateExcel(userService.getSystemUserInfo(), formData.getId(), false, false, false);
+                    uuid = printingService.generateExcel(userService.getSystemUserInfo(), formData.getId(), formData.isManual(), false, false);
                 }
 
                 BlobData blobData = blobDataService.get(uuid);
