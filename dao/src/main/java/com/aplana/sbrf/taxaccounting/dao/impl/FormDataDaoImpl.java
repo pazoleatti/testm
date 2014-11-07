@@ -562,6 +562,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "                     and FORM_DATA_PERFORMER.PRINT_DEPARTMENT_ID = :departmentId) " +
                     "SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = :newDepartmentName";
 
+    //Обновляет имена в печатных формах по частям
     private static final String UPDATE_FORM_DATA_PERFORMER_TB2 =
             "merge into FORM_DATA_PERFORMER fdp using ( " +
                     "  with depNameParts as (select (SELECT CONNECT_BY_ROOT ID as ID_ROOT FROM DEPARTMENT where id = PRINT_DEPARTMENT_ID START WITH (type = 2) CONNECT BY PRIOR id = PARENT_ID) PRINT_DEPARTMENT_TB_ID, " +
@@ -572,10 +573,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "                     join depNameParts on depNameParts.form_data_id = fd.ID " +
                     "                     where %s " +
                     "                     and depNameParts.PRINT_DEPARTMENT_TB_ID = :departmentId) " +
-                    "SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = (:newDepartmentName || '/' || b.second_dep_name)";
+                    "SELECT * FROM formDataIdsWithRegExp) b on (fdp.form_data_id = b.fd_id) WHEN MATCHED THEN UPDATE SET REPORT_DEPARTMENT_NAME = %s";
 
     @Override
-    public void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo) {
+    public void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo, boolean isChangeTB) {
+        //В случае если поменяли тип подразделения с ТБ на другой, то надо удалить наименование ТБ
+        String moveFromTB = isChangeTB? "b.second_dep_name" : "(:newDepartmentName || '/' || b.second_dep_name)";
+
         String dateTag = dateFrom != null && dateTo != null ? "(rp.CALENDAR_START_DATE between :dateFrom and :dateTo or rp.END_DATE between :dateFrom and :dateTo or :dateFrom between rp.CALENDAR_START_DATE and rp.END_DATE)"
                 : dateFrom != null ? "(rp.END_DATE >= :dateFrom)"
                 : null;
@@ -585,7 +589,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         values.put("newDepartmentName", newDepartmentName);
         values.put("departmentId", departmentId);
         try {
-            getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB2, dateTag), values);
+            getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB2, dateTag, moveFromTB), values);
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB, dateTag), values);
         } catch (DataAccessException e) {
             logger.error("Ошибка при обновлении значений.", e);

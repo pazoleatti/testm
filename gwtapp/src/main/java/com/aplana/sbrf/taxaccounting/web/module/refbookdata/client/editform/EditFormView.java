@@ -515,7 +515,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onSaveClicked();
+			getUiHandlers().onSaveClicked(false);
 		}
 	}
 

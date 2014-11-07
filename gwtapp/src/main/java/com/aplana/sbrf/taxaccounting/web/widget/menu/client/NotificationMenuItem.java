@@ -21,15 +21,15 @@ public class NotificationMenuItem extends MenuItem {
     private static final String NEW_MSG_ICON = "resources/img/attention_on_20.png";
 
     public NotificationMenuItem() {
-        super(TEMPLATES.noMsg("Нет уведомлений"));
+        super(TEMPLATES.noMsg("Нет оповещений"));
     }
 
     public void setCount(int count) {
         if (count > 0) {
             setHTML(TEMPLATES.notifyMsg(NEW_MSG_ICON,
-                    decline(count, "уведомление", "уведомления", "уведомлений")));
+                    decline(count, "оповещение", "оповещения", "оповещений")));
         } else {
-            setHTML(TEMPLATES.noMsg("Нет уведомлений"));
+            setHTML(TEMPLATES.noMsg("Нет оповещений"));
         }
     }
 
