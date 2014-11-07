@@ -21,9 +21,9 @@ public interface SourcesUiHandlers extends AplanaUiHandlers {
 
     void getFormsRight(Integer departmentId, DepartmentAssign selectedLeft);
 
-    void getFormsLeft(Integer departmentId);
+    void getFormsLeft(Integer departmentId, DepartmentAssign selectedLeftRecord);
 
-    void getDecsLeft(Integer departmentId);
+    void getDecsLeft(Integer departmentId, DepartmentAssign selectedLeftRecord);
 
     void getDecsRight(Integer departmentId, DepartmentAssign selectedLeft);
 
