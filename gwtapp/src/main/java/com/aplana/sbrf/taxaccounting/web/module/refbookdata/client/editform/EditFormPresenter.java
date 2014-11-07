@@ -56,6 +56,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private boolean canVersion= false;
     // Признак того, что справочник подразделений
     private boolean isDepartments = false;
+    //Тип подразделения
+    private long depType = 0;
     Map<String, Object> modifiedFields = new HashMap<String, Object>();
 
     public void setNeedToReload() {
@@ -103,7 +105,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	}
 
 	public void init(final Long refbookId, final boolean readOnly) {
-        if (refbookId == 30) isDepartments = true;
+        isDepartments = refbookId == 30;
         GetRefBookAttributesAction action = new GetRefBookAttributesAction();
         action.setRefBookId(refbookId);
         currentRefBookId = refbookId;
@@ -115,6 +117,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
 
                                 getView().createInputFields(result.getColumns());
+                                for (RefBookColumn column : result.getColumns()){
+                                    if (column.getAlias().equals("TYPE")){
+                                        depType = column.getId();
+                                    }
+                                }
                                 setIsFormModified(false);
                                 if (readOnly) {
                                     setMode(FormMode.READ);
@@ -284,7 +291,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
 
                 if (isDepartments) {
-                    if(modifiedFields.containsKey("NAME")){
+                    //Проверяем изменилось ли имя либо тип подразделения с типа ТБ
+                    if(modifiedFields.containsKey("NAME") || (modifiedFields.containsKey("TYPE") && depType == 2)){
                         renameDialogPresenter.open(new ConfirmButtonClickHandler() {
                             @Override
                             public void onClick(Date dateFrom, Date dateTo) {

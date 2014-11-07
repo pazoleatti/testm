@@ -1,14 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,10 +12,13 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Реализация DAO для работы с информацией об @{link FormDataPerformer исполнителе налоговой формы}
@@ -102,7 +101,8 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
 
     private static final String GET_FORM_DATA_IDS_BY_DEPARTMENT = "select fd.id\n"+
             "from form_data fd\n"+
-            "join REPORT_PERIOD rp on rp.ID = fd.REPORT_PERIOD_ID\n"+
+            "join DEPARTMENT_REPORT_PERIOD drp on drp.ID = fd.DEPARTMENT_REPORT_PERIOD_ID\n" +
+            "join REPORT_PERIOD rp on rp.ID = drp.REPORT_PERIOD_ID\n"+
             "where fd.id in (select form_data_id\n"+
             "  from form_data_performer\n"+
             "  where print_department_id = :departmentId or (SELECT CONNECT_BY_ROOT ID as ID_ROOT FROM DEPARTMENT where id = PRINT_DEPARTMENT_ID START WITH (type = 2) CONNECT BY PRIOR id = PARENT_ID) = :departmentId)\n"+
