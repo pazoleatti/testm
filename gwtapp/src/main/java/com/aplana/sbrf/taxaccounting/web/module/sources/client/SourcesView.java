@@ -973,6 +973,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
         if (isPeriodCorrect) {
             DepartmentAssign selectedLeftRecord = leftSM.getSelectedObject();
+            if (selectedLeftRecord == null && leftTable.getRowCount() > 0) {
+                selectedLeftRecord = leftTable.getVisibleItem(0);
+            }
             leftSM.clear();
             rightSM.clear();
             downSM.clear();
