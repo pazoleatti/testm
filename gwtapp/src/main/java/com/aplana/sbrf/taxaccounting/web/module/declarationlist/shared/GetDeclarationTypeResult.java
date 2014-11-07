@@ -8,21 +8,30 @@ import java.util.Date;
 import java.util.List;
 
 public class GetDeclarationTypeResult implements Result {
-	private static final long serialVersionUID = 6048433881484626479L;
+    private static final long serialVersionUID = 6048433881484626479L;
 
-	List<DeclarationType> declarationTypes;
+    List<DeclarationType> declarationTypes;
     Date correctionDate;
     TaxType taxType;
+    Date version;
 
     private String filter;
 
-	public List<DeclarationType> getDeclarationTypes() {
-		return declarationTypes;
-	}
+    public Date getVersion() {
+        return version;
+    }
 
-	public void setDeclarationTypes(List<DeclarationType> declarationTypes) {
-		this.declarationTypes = declarationTypes;
-	}
+    public void setVersion(Date version) {
+        this.version = version;
+    }
+
+    public List<DeclarationType> getDeclarationTypes() {
+        return declarationTypes;
+    }
+
+    public void setDeclarationTypes(List<DeclarationType> declarationTypes) {
+        this.declarationTypes = declarationTypes;
+    }
 
     public String getFilter() {
         return filter;

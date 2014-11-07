@@ -32,6 +32,12 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
     Set<Long> getSelectedIds();
 
     /**
+     * Определяет единственную колонку, отображаемую в виджете
+     * @param columnAlias алиас колонки
+     */
+    void setSingleColumn(String columnAlias);
+
+    /**
      * Разименновванное значение
 	 * @return строка из одного или нескольких значений через ";"
 	 */

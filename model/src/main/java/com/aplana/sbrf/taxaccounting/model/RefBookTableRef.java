@@ -4,7 +4,8 @@ package com.aplana.sbrf.taxaccounting.model;
  * Хранит отношение RefBook и его табличной части
  */
 public enum RefBookTableRef {
-    REF_BOOK_99(TaxType.PROPERTY, 99L, new long[]{206L});
+    REF_BOOK_99(TaxType.PROPERTY, 99L, new long[]{206L}),
+    REF_BOOK_31(TaxType.PROPERTY, 31L, new long[]{310L});
 
     private RefBookTableRef(TaxType taxType, long refBookId, long[] refBookTable) {
         this.taxType = taxType;

@@ -8,6 +8,7 @@ insert into ref_book(id, name, script_id, visible) values
 (3, 'Библиотека', '24af57ef-ec1c-455f-a4fa-f0fb29483066', 0);
 insert into ref_book (id, name, type, visible, read_only) values
 (4, 'Коды ОКАТО', 1, 1, 0);
+insert into ref_book (id, name) values (52, 'Бухотчетность');
 
 insert into ref_book_attribute(id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
   (4, 2, 1, 'ФИО', 'name', 1, null, null, 1, null, 10, 0, 40);
@@ -32,6 +33,15 @@ insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
   (6, 4, 'Идентификатор родительской записи', 'PARENT_ID', 4, 1, 4, 8, 1, null, 510, 0, 0, null);
 insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
   (7, 4, 'Код ОКАТО', 'OKATO', 1, 2, null, null, 1, null, 11, 1, 1, 8);
+-- Бухотчетность
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
+  (12, 52, 'Код ОПУ', 'OPU_CODE', 1, 1, null, null, 1, null, 11, 1, 1, 8);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, is_unique, max_length) values
+  (13, 52, 'Сумма', 'TOTAL_SUM', 2, 2, null, null, 1, 4, 10, 1, 5);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
+  (14, 52, 'Идентификатор', 'ITEM_NAME', 1, 3, null, null, 1, null, 11, 0, 2, 8);
+insert into ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, max_length) values
+  (15, 52, 'Идентификатор 2', 'ACCOUNT_PERIOD_ID', 4, 4, 4, 8, 1, null, 11, 0, 0, null);
 
 insert into ref_book_record(id, record_id, ref_book_id, version, status) values
   (1, 1, 1, date '2013-01-01', 0);

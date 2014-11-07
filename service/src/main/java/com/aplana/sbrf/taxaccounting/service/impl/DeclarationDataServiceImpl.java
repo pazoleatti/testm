@@ -263,7 +263,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     if (declarationTemplate.getType().getIsIfrs() &&
                             departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
                         IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
-                        if (ifrsData.getBlobDataId() != null) {
+                        if (ifrsData != null && ifrsData.getBlobDataId() != null) {
                             ifrsDataService.deleteReport(declarationData, userInfo);
                         } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
                             ifrsDataService.cancelTask(declarationData, userInfo);

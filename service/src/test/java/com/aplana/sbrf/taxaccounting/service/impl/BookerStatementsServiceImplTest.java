@@ -2,6 +2,9 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -9,10 +12,14 @@ import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,6 +43,8 @@ public class BookerStatementsServiceImplTest {
     private static final Integer DEPARTMENT_INVALID = null;
 
     private static BookerStatementsService service;
+    private static RefBookFactory refBookFactory;
+    private static RefBookDataProvider provider102;
 
     @BeforeClass
     public static void setUp() throws FileNotFoundException {
@@ -47,12 +56,15 @@ public class BookerStatementsServiceImplTest {
 //        when(periodService.isActivePeriod(REPORT_PERIOD_ID_OPEN, DEPARTMENT_ID)).thenReturn(true);
 //        when(periodService.isActivePeriod(REPORT_PERIOD_ID_CLOSED, DEPARTMENT_ID)).thenReturn(false);
 
-        RefBookFactory refBookFactory = mock(RefBookFactory.class);
+
+        refBookFactory = mock(RefBookFactory.class);
         RefBookDataProvider provider101 = mock(RefBookDataProvider.class);
         when(refBookFactory.getDataProvider(REFBOOK_INCOME_101)).thenReturn(provider101);
-        RefBookDataProvider provider102 = mock(RefBookDataProvider.class);
+        provider102 = mock(RefBookDataProvider.class);
         when(refBookFactory.getDataProvider(REFBOOK_INCOME_102)).thenReturn(provider102);
         ReflectionTestUtils.setField(service, "rbFactory", refBookFactory);
+        RefBook refBook = mock(RefBook.class);
+        when(refBookFactory.get(REFBOOK_INCOME_102)).thenReturn(refBook);
 
         AuditService auditService = mock(AuditService.class);
         ReflectionTestUtils.setField(service, "auditService", auditService);
@@ -122,5 +134,13 @@ public class BookerStatementsServiceImplTest {
     }
     private static InputStream getInvalidStream() {
         return BookerStatementsServiceImplTest.class.getClassLoader().getResourceAsStream("com/aplana/sbrf/taxaccounting/service/impl/BookerStatementsServiceImplTestInvalid.xls");
+    }
+
+    @Test(expected = ServiceException.class)
+    public void importXML() {
+        List<String> list = new ArrayList<String>();
+        list.add("string");
+        when(provider102.getMatchedRecords(Matchers.<List<RefBookAttribute>>any(), Matchers.<List<Map<String, RefBookValue>>>any(), Matchers.<Integer>any())).thenReturn(list);
+        service.importXML("test.xls", get102Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID, new TAUserInfo());
     }
 }

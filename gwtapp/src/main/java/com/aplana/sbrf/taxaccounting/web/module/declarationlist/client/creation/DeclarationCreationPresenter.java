@@ -20,6 +20,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -28,60 +29,64 @@ import java.util.Set;
  */
 public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCreationPresenter.MyView> implements DeclarationCreationUiHandlers {
 
-	public interface MyView extends PopupView, HasUiHandlers<DeclarationCreationUiHandlers> {
-		void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
-		void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
-		void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds);
-		
-		void setSelectedDeclarationType(Integer id);
-		void setSelectedReportPeriod(List<Integer> periodIds);
-		void setSelectedDepartment(List<Integer> departmentIds);
-		void setSelectedTaxOrganCode(String taxOrganCode);
-		void setSelectedTaxOrganKpp(String taxOrganKpp);
+    public interface MyView extends PopupView, HasUiHandlers<DeclarationCreationUiHandlers> {
+
+        void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
+        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
+        void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds);
+
+        void setSelectedDeclarationType(Integer id);
+        void setSelectedReportPeriod(List<Integer> periodIds);
+        void setSelectedDepartment(List<Integer> departmentIds);
+        void setSelectedTaxOrganCode(String taxOrganCode);
+        void setSelectedTaxOrganKpp(String taxOrganKpp);
         void setCorrectionDate(String correctionDate, TaxType taxType);
 
-		Integer getSelectedDeclarationType();
-		List<Integer> getSelectedReportPeriod();
-		List<Integer> getSelectedDepartment();
+        Integer getSelectedDeclarationType();
+        List<Integer> getSelectedReportPeriod();
+        List<Integer> getSelectedDepartment();
         void setTaxType(TaxType taxType);
 
         String getTaxOrganCode();
         String getTaxOrganKpp();
 
         void init();
+
+        void initRefBooks(Date version, String filter, TaxType taxType);
+        void updateEnabled();
     }
 
-	private DispatchAsync dispatcher;
-	private PlaceManager placeManager;
+    private DispatchAsync dispatcher;
+    private PlaceManager placeManager;
 
-	private TaxType taxType;
+    private TaxType taxType;
 
-	@Inject
-	public DeclarationCreationPresenter(final EventBus eventBus, final MyView view,
-										DispatchAsync dispatcher, PlaceManager placeManager) {
-		super(eventBus, view);
-		this.dispatcher = dispatcher;
-		this.placeManager = placeManager;
-		getView().setUiHandlers(this);
-	}
+    @Inject
+    public DeclarationCreationPresenter(final EventBus eventBus, final MyView view,
+                                        DispatchAsync dispatcher, PlaceManager placeManager) {
+        super(eventBus, view);
+        this.dispatcher = dispatcher;
+        this.placeManager = placeManager;
+        getView().setUiHandlers(this);
+    }
 
-	@Override
-	protected void onHide() {
-		clearValues();
-		getView().hide();
-	}
+    @Override
+    protected void onHide() {
+        clearValues();
+        getView().hide();
+    }
 
-	@Override
-	public void onContinue() {
-		final DeclarationDataFilter filter = new DeclarationDataFilter();
-		filter.setDeclarationTypeId(getView().getSelectedDeclarationType());
-		filter.setDepartmentIds(getView().getSelectedDepartment());
-		filter.setReportPeriodIds(getView().getSelectedReportPeriod());
-		filter.setTaxOrganCode(getView().getTaxOrganCode());
-		filter.setTaxOrganKpp(getView().getTaxOrganKpp());
-		if(isFilterDataCorrect(filter)){
-			LogCleanEvent.fire(this);
-			LogShowEvent.fire(this, false);
+    @Override
+    public void onContinue() {
+        final DeclarationDataFilter filter = new DeclarationDataFilter();
+        filter.setDeclarationTypeId(getView().getSelectedDeclarationType());
+        filter.setDepartmentIds(getView().getSelectedDepartment());
+        filter.setReportPeriodIds(getView().getSelectedReportPeriod());
+        filter.setTaxOrganCode(getView().getTaxOrganCode());
+        filter.setTaxOrganKpp(getView().getTaxOrganKpp());
+        if(isFilterDataCorrect(filter)){
+            LogCleanEvent.fire(this);
+            LogShowEvent.fire(this, false);
             CreateDeclaration command = new CreateDeclaration();
             command.setDeclarationTypeId(filter.getDeclarationTypeId());
             command.setDepartmentId(filter.getDepartmentIds().iterator().next());
@@ -100,59 +105,63 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                             LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
                         }
                     }, DeclarationCreationPresenter.this));
-		}
-	}
+        }
+    }
 
-	@Override
-	public void onDepartmentChange() {
-		if (getView().getSelectedDepartment().isEmpty() || getView().getSelectedReportPeriod().isEmpty()) {
-			return;
-		}
-		GetDeclarationTypeAction action = new GetDeclarationTypeAction();
-		action.setTaxType(taxType);
+    @Override
+    public void onDepartmentChange() {
+        if (getView().getSelectedDepartment().isEmpty() || getView().getSelectedReportPeriod().isEmpty()) {
+            return;
+        }
+        GetDeclarationTypeAction action = new GetDeclarationTypeAction();
+        action.setTaxType(taxType);
 
-		action.setDepartmentId(getView().getSelectedDepartment().get(0));
-		action.setReportPeriod(getView().getSelectedReportPeriod().get(0));
+        action.setDepartmentId(getView().getSelectedDepartment().get(0));
+        action.setReportPeriod(getView().getSelectedReportPeriod().get(0));
 
-		dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationTypeResult>() {
-			@Override
-			public void onSuccess(GetDeclarationTypeResult result) {
-				getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationTypeResult>() {
+            @Override
+            public void onSuccess(GetDeclarationTypeResult result) {
+                getView().setAcceptableDeclarationTypes(result.getDeclarationTypes());
+                if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT) {
+                    getView().initRefBooks(result.getVersion(), result.getFilter(), taxType);
+                }
                 if (result.getCorrectionDate() != null) {
                     getView().setCorrectionDate(DateTimeFormat.getFormat("dd.MM.yyyy").format(result.getCorrectionDate()), result.getTaxType());
                 } else {
                     getView().setCorrectionDate(null, null);
                 }
-			}
-		}, this) );
-	}
+                getView().updateEnabled();
+            }
+        }, this) );
+    }
 
-	private boolean isFilterDataCorrect(DeclarationDataFilter filter){
+    private boolean isFilterDataCorrect(DeclarationDataFilter filter){
         if ((filter.getReportPeriodIds() == null || filter.getReportPeriodIds().isEmpty())
-                        || (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty())
-                        || (filter.getDeclarationTypeId() == null)
-                        || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT))
-                                && ((filter.getTaxOrganCode() == null || filter.getTaxOrganCode().isEmpty())
-                                        || (filter.getTaxOrganKpp() == null || filter.getTaxOrganKpp().isEmpty()))
-                            )){
+                || (filter.getDepartmentIds() == null || filter.getDepartmentIds().isEmpty())
+                || (filter.getDeclarationTypeId() == null)
+                || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT))
+                && ((filter.getTaxOrganCode() == null || filter.getTaxOrganCode().isEmpty())
+                || (filter.getTaxOrganKpp() == null || filter.getTaxOrganKpp().isEmpty()))
+        )){
             Dialog.errorMessage("Создание декларации", "Заполнены не все параметры декларации");
             return false;
         }
-		return true;
-	}
-	
-	private void clearValues(){
-		getView().setSelectedDeclarationType(null);
-		getView().setSelectedReportPeriod(null);
+        return true;
+    }
+
+    private void clearValues(){
+        getView().setSelectedDeclarationType(null);
+        getView().setSelectedReportPeriod(null);
         getView().setSelectedDepartment(null);
         getView().setSelectedTaxOrganCode(null);
         getView().setSelectedTaxOrganKpp(null);
-	}
+    }
 
     public void initAndShowDialog(final DeclarationDataFilter dataFilter, final HasPopupSlot popupSlot){
         GetDeclarationFilterData action = new GetDeclarationFilterData();
         action.setTaxType(dataFilter.getTaxType());
-	    this.taxType = dataFilter.getTaxType();
+        this.taxType = dataFilter.getTaxType();
         getView().setTaxType(this.taxType);
         getView().init();
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {

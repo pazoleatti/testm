@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
@@ -62,6 +63,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     private HandlerRegistration selectionHandlerRegistration;
     private Map<RefBookItemTextColumn, Integer> sortColumns = new HashMap<RefBookItemTextColumn, Integer>();
     private String filterText;
+    private String singleColumn = null;
 
     private SetSelectionModel<RefBookItem> selectionModel;
     private AsyncDataProvider<RefBookItem> dataProvider =
@@ -250,15 +252,21 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         return longList;
     }
 
+    @Override
+    public void setSingleColumn(String columnAlias) {
+        this.singleColumn = columnAlias;
+    }
+
     private Set<RefBookItem> getSelectedSet() {
         return selectionModel.getSelectedSet();
     }
 
     @Override
-    public void setHeaders(Map<String, Integer> headers, List<Integer> unVisibleColumns) {
+    public void setAttributes(List<RefBookAttribute> attributes) {
         for (int i = cellTable.getColumnCount() - 1; i >= 0; i--) {
             cellTable.removeColumn(i);
         }
+        System.out.println("multiSelect: "+multiSelect);
         if (multiSelect != null && multiSelect) {
             // добавить колонку с чекбоксами
             Column<RefBookItem, Boolean> rowSelectColumn = new Column<RefBookItem, Boolean>(new CheckboxCell(true, false)) {
@@ -295,27 +303,29 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
         }
 
         int i = 0;
-        for (Map.Entry<String, Integer> entry : headers.entrySet()) {
-            Cell<String> cell = new AbstractCell<String>() {
-                @Override
-                public void render(Context context, String value, SafeHtmlBuilder sb) {
-                    if (value != null) {
-                        if (filterText != null && !filterText.isEmpty()) {
-                            String link = RegExp.compile(filterText, "gi").replace(value, "<span style=\"color: #ff0000;\">$&</span>");
-                            sb.appendHtmlConstant(link);
+        for (RefBookAttribute attribute : attributes) {
+            if (singleColumn == null || attribute.getAlias().equals(singleColumn)) {
+                Cell<String> cell = new AbstractCell<String>() {
+                    @Override
+                    public void render(Context context, String value, SafeHtmlBuilder sb) {
+                        if (value != null) {
+                            if (filterText != null && !filterText.isEmpty()) {
+                                String link = value.replaceAll("\\Q" + filterText + "\\E", "<span style=\"color: #ff0000;\">" + filterText + "</span>");
+                                sb.appendHtmlConstant(link);
+                            } else {
+                                sb.appendHtmlConstant(value);
+                            }
                         } else {
-                            sb.appendHtmlConstant(value);
+                            sb.append(SafeHtmlUtils.EMPTY_SAFE_HTML);
                         }
-                    } else {
-                        sb.append(SafeHtmlUtils.EMPTY_SAFE_HTML);
                     }
+                };
+                if (attribute.isVisible()) {
+                    RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true, cell);
+                    sortColumns.put(refBookItemTextColumn, i);
+                    cellTable.addResizableColumn(refBookItemTextColumn, attribute.getName());
+                    cellTable.setColumnWidth(refBookItemTextColumn, attribute.getWidth(), Style.Unit.PC);
                 }
-            };
-            if (!unVisibleColumns.contains(i)) {
-                RefBookItemTextColumn refBookItemTextColumn = new RefBookItemTextColumn(i, true, cell);
-                sortColumns.put(refBookItemTextColumn, i);
-                cellTable.addResizableColumn(refBookItemTextColumn, entry.getKey());
-                cellTable.setColumnWidth(refBookItemTextColumn, entry.getValue(), Style.Unit.PC);
             }
             i++;
         }

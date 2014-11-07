@@ -56,7 +56,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             String approveDocName = row.get("APPROVE_DOC_NAME").getStringValue();
             String approveOrgName = row.get("APPROVE_ORG_NAME").getStringValue();
 
-            if (signatoryId == 1
+            if (signatoryId != null && signatoryId == 1
                     && approveDocName != null && !approveDocName.isEmpty()
                     && approveOrgName != null && !approveOrgName.isEmpty()) {
                 logger.error("Поля \"Наименование документа представителя\", " +

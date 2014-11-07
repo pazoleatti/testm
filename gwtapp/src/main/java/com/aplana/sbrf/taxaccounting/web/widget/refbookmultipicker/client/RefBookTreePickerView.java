@@ -296,6 +296,11 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         return longList;
     }
 
+    @Override
+    public void setSingleColumn(String columnAlias) {
+        //do nothing
+    }
+
     private Set<RefBookUiTreeItem> getSelectedSet() {
         return tree.getSelectedItems();
     }
