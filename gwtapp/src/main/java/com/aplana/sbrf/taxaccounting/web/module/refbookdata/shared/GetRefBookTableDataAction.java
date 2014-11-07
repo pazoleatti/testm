@@ -13,8 +13,11 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 	Date relevanceDate;
     private String searchPattern;
     private Long recordId;
+    private int sortColumnIndex;
 
-	public long getRefBookId() {
+    private boolean ascSorting;
+
+    public long getRefBookId() {
 		return refBookId;
 	}
 
@@ -52,6 +55,22 @@ public class GetRefBookTableDataAction extends UnsecuredActionImpl<GetRefBookTab
 
     public void setRecordId(Long recordId) {
         this.recordId = recordId;
+    }
+
+    public int getSortColumnIndex() {
+        return sortColumnIndex;
+    }
+
+    public void setSortColumnIndex(int sortColumnIndex) {
+        this.sortColumnIndex = sortColumnIndex;
+    }
+
+    public void setAscSorting(boolean ascSorting) {
+        this.ascSorting = ascSorting;
+    }
+
+    public boolean isAscSorting() {
+        return ascSorting;
     }
 
     @Override

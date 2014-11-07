@@ -89,6 +89,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void updateSendQuery(boolean isAvailable);
         //Показывает/скрывает поля, которые необходимы только для версионирования
         void setVersionedFields(boolean isVisible);
+        // Номер столбца, по которому осуществляется сортировка
+        int getSortColumnIndex();
+        // Признак сортировки по-возрастанию
+        boolean isAscSorting();
     }
 
 	@Inject
@@ -264,6 +268,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 			action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
 			action.setRelevanceDate(getView().getRelevanceDate());
             action.setSearchPattern(getView().getSearchPattern());
+            action.setSortColumnIndex(getView().getSortColumnIndex());
+            action.setAscSorting(getView().isAscSorting());
 			dispatcher.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<GetRefBookTableDataResult>() {
