@@ -963,14 +963,14 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo) {
+    public void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo, boolean isChangeTB) {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
             List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
             for(Long formDataId: formDataIds)
                 deleteReport(formDataId, null);
-            formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo);
+            formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo, isChangeTB);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
         }

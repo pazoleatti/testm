@@ -188,9 +188,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
         RefBookRecordVersion version = new RefBookRecordVersion();
         version.setRecordId(uniqueRecordId);
-        Date d = new Date(0);
-        version.setVersionStart(d);
-        version.setVersionEnd(d);
+        version.setVersionStart(null);
+        version.setVersionEnd(null);
         return version;
     }
 
@@ -400,11 +399,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                 //7
                 if (versionFrom != null){
                     if (oldType != TERR_BANK){
-                        //11А.3.1
+                        //Обновляем имена подразделений в печатных формах
                         formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
                     }else {
-                        //11А.3.1А
-                        formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
+                        //Обновляем имена ТБ в печатных формах
+                        formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo, oldType == TERR_BANK && isChangeType);
                     }
                 }
 
@@ -678,14 +677,14 @@ public class RefBookDepartment implements RefBookDataProvider {
     private void createPeriods(int depId, DepartmentType newDepartmentType, int terrBankId){
         //1
         if (newDepartmentType != DepartmentType.TERR_BANK){
-            if (departmentService.getParentTB((int) depId) != null){
+            if (departmentService.getParentTB(depId) != null){
                 //1А.1.1
                 List<DepartmentReportPeriod> listDRP =
                         periodService.getDRPByDepartmentIds(null, Arrays.asList(terrBankId));
                 if (!listDRP.isEmpty()){
                     for (DepartmentReportPeriod drp : listDRP)
                         //1А.1.1.1
-                        if (periodService.existForDepartment((int) depId, drp.getReportPeriod().getId()))
+                        if (periodService.existForDepartment(depId, drp.getReportPeriod().getId()))
                             return;
                     //1А.1.1.1А
                     for (DepartmentReportPeriod drp : listDRP){
@@ -708,7 +707,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (!listDRP.isEmpty()){
             for (DepartmentReportPeriod drp : listDRP)
                 //1А.1.1.1
-                if (periodService.existForDepartment((int) depId, drp.getReportPeriod().getId()))
+                if (periodService.existForDepartment(depId, drp.getReportPeriod().getId()))
                     return;
             for (DepartmentReportPeriod drp : listDRP){
                 DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
