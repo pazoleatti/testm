@@ -32,10 +32,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -570,46 +567,6 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
      * Создание и настройка верхних виджетов
      */
     private void setupControlWidgets() {
-
-        ValueChangeHandler periodsValueHandler = new ValueChangeHandler() {
-            @Override
-            public void onValueChange(ValueChangeEvent event) {
-                if (periodTo.getValue() == null) {
-                    yearTo.setValue(null);
-                }
-                boolean isPeriodCorrect = SourcesUtils.isCorrectPeriod(getPeriodInterval());
-                //Фикс какой то странной ошибки - если таблицы уже активны и попытаться сделать их активными снова, то гвт падает
-                if (leftDepPicker.isEnabled() && !isPeriodCorrect) {
-                    leftDepPicker.setEnabled(false);
-                    rightDepPicker.setEnabled(false);
-                    leftTable.setEnabled(false);
-                    rightTable.setEnabled(false);
-                    downTable.setEnabled(false);
-                }
-
-                if (!leftDepPicker.isEnabled() && isPeriodCorrect) {
-                    leftDepPicker.setEnabled(true);
-                    rightDepPicker.setEnabled(true);
-                    leftTable.setEnabled(true);
-                    rightTable.setEnabled(true);
-                    downTable.setEnabled(true);
-                }
-
-                if (isPeriodCorrect) {
-                    leftSM.clear();
-                    rightSM.clear();
-                    downSM.clear();
-                    loadLeftData();
-                    loadRightData();
-                }
-            }
-        };
-
-        periodFrom.addValueChangeHandler(periodsValueHandler);
-        periodTo.addValueChangeHandler(periodsValueHandler);
-        yearFrom.addValueChangeHandler(periodsValueHandler);
-        yearTo.addValueChangeHandler(periodsValueHandler);
-
         ValueChangeHandler<PeriodInfo> periodTitleChanger = new ValueChangeHandler<PeriodInfo>() {
             @Override
             public void onValueChange(ValueChangeEvent<PeriodInfo> event) {
@@ -734,7 +691,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         rightTable.redrawHeaders();
         downTable.redrawHeaders();
 
-        loadLeftData();
+        loadLeftData(null);
         loadRightData();
     }
 
@@ -750,10 +707,15 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     @Override
-    public void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes) {
+    public void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes, DepartmentAssign selectedLeftRecord) {
         clearLeftTable();
         leftTable.setRowData(0, departmentFormTypes);
         leftTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
+        if (selectedLeftRecord != null) {
+            leftSM.setSelected(selectedLeftRecord, true);
+            getUiHandlers().getCurrentAssigns(selectedLeftRecord);
+            loadRightData();
+        }
     }
 
     @Override
@@ -768,10 +730,15 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     @Override
-    public void setAvailableDecsLeft(List<DepartmentAssign> departmentDeclarationTypes) {
+    public void setAvailableDecsLeft(List<DepartmentAssign> departmentDeclarationTypes, DepartmentAssign selectedLeftRecord) {
         clearLeftTable();
         leftTable.setRowData(departmentDeclarationTypes);
         leftTable.setVisibleRange(new Range(0, departmentDeclarationTypes.size()));
+        if (selectedLeftRecord != null) {
+            leftSM.setSelected(selectedLeftRecord, true);
+            getUiHandlers().getCurrentAssigns(selectedLeftRecord);
+            loadRightData();
+        }
     }
 
     @Override
@@ -934,23 +901,23 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
      */
     @UiHandler("leftDepPicker")
     public void leftChangeDep(ValueChangeEvent<List<Integer>> event) {
-        loadLeftData();
+        loadLeftData(null);
         loadRightData();
     }
 
     @Override
-    public final void loadLeftData() {
+    public final void loadLeftData(DepartmentAssign selectedLeftRecord) {
         clearLeftTable();
         clearDownTable();
-        Integer selected = leftDepPicker.getSingleValue();
-        if (selected != null) {
+        Integer selectedDepartment = leftDepPicker.getSingleValue();
+        if (selectedDepartment != null) {
             if (isForm) {
-                getUiHandlers().getFormsLeft(selected);
+                getUiHandlers().getFormsLeft(selectedDepartment, selectedLeftRecord);
             } else {
                 if (isSource()) {
-                    getUiHandlers().getDecsLeft(selected);
+                    getUiHandlers().getDecsLeft(selectedDepartment, selectedLeftRecord);
                 } else {
-                    getUiHandlers().getFormsLeft(selected);
+                    getUiHandlers().getFormsLeft(selectedDepartment, selectedLeftRecord);
                 }
             }
         }
@@ -978,6 +945,39 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                     getUiHandlers().getDecsRight(selected, leftSM.getSelectedObject());
                 }
             }
+        }
+    }
+
+    @UiHandler("apply")
+    void onApplyButtonClicked(ClickEvent event) {
+        if (periodTo.getValue() == null) {
+            yearTo.setValue(null);
+        }
+        boolean isPeriodCorrect = SourcesUtils.isCorrectPeriod(getPeriodInterval());
+        //Фикс какой то странной ошибки - если таблицы уже активны и попытаться сделать их активными снова, то гвт падает
+        if (leftDepPicker.isEnabled() && !isPeriodCorrect) {
+            leftDepPicker.setEnabled(false);
+            rightDepPicker.setEnabled(false);
+            leftTable.setEnabled(false);
+            rightTable.setEnabled(false);
+            downTable.setEnabled(false);
+        }
+
+        if (!leftDepPicker.isEnabled() && isPeriodCorrect) {
+            leftDepPicker.setEnabled(true);
+            rightDepPicker.setEnabled(true);
+            leftTable.setEnabled(true);
+            rightTable.setEnabled(true);
+            downTable.setEnabled(true);
+        }
+
+        if (isPeriodCorrect) {
+            DepartmentAssign selectedLeftRecord = leftSM.getSelectedObject();
+            leftSM.clear();
+            rightSM.clear();
+            downSM.clear();
+            loadLeftData(selectedLeftRecord);
+            loadRightData();
         }
     }
 
