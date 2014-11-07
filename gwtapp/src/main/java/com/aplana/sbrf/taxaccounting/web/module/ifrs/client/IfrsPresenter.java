@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.create.CreateIfrsDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.create.CreateIfrsDataSuccessHandler;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.model.IfrsRow;
 import com.google.gwt.core.client.GWT;
@@ -111,7 +112,16 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
 
     @Override
     public void onClickCreate() {
-        dialogPresenter.initAndShowDialog(this);
+        dialogPresenter.initAndShowDialog(this, new CreateIfrsDataSuccessHandler() {
+            @Override
+            public void onSuccess(CreateIfrsDataResult createResult) {
+                getView().updateTable();
+                LogAddEvent.fire(IfrsPresenter.this, createResult.getUuid());
+                if (createResult.isError()) {
+                    Dialog.errorMessage("Архив с отчетностью для МСФО не сформирован", "Обнаружены фатальные ошибки!");
+                }
+            }
+        });
     }
 
 
