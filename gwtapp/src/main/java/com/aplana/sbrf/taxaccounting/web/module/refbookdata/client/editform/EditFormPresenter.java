@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.ConfirmButtonClickHandler;
@@ -223,7 +224,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     }
 
 	@Override
-	public void onSaveClicked() {
+	public void onSaveClicked(boolean isEditButtonClicked) {
 		try {
             LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
@@ -275,6 +276,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         recordChanges.setId(newId);
                                         currentUniqueRecordId = newId;
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
+                                        SetFormMode.fire(EditFormPresenter.this, FormMode.VIEW);
                                         if (isDepartments) refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
                                     }
                                 }, this));
@@ -314,6 +316,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
                                                         } else {
                                                             setIsFormModified(false);
+                                                            SetFormMode.fire(EditFormPresenter.this, FormMode.VIEW);
                                                         }
                                                     }
                                                 }, EditFormPresenter.this));
@@ -340,6 +343,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
                                         } else {
                                             setIsFormModified(false);
+                                            SetFormMode.fire(EditFormPresenter.this, FormMode.VIEW);
                                         }
                                     }
                                 }, this));
@@ -387,7 +391,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 @Override
                 public void yes() {
                     setIsFormModified(false);
-                    onSaveClicked();
+                    onSaveClicked(false);
                 }
 
                 @Override
@@ -417,6 +421,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             modifiedFields.clear();
             placeManager.setOnLeaveConfirmation(null);
         }
+    }
+
+    public boolean isFormModified() {
+        return isFormModified;
     }
 
     public void setVersionMode(boolean versionMode) {
