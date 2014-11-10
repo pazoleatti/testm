@@ -323,6 +323,11 @@ delete from ref_book_value where attribute_id in (select id from ref_book_attrib
 delete from ref_book_attribute where ref_book_id = 31 and id not in (170, 179, 224);
 UPDATE ref_book_attribute SET ord = 1 WHERE id = 224;
 UPDATE ref_book_attribute SET ord = 2 WHERE id = 179;
+
+-- http://jira.aplana.com/browse/SBRFACCTAX-9333: модификации длины
+update ref_book_attribute set width = 6 where id = 953;
+update ref_book_attribute set width = 6 where id = 3104;
+update ref_book_attribute set width = 6 where id = 3108;
 ---------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-9356: Справочник Виды деклараций
 
