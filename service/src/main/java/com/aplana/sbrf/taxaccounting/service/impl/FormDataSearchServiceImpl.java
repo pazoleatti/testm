@@ -60,12 +60,14 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         formDataDaoFilter.setDepartmentIds(formDataFilter.getDepartmentIds());
         // Отчетные периоды
         formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
-        formDataDaoFilter.setFormDataKind((List<FormDataKind>)CollectionUtils.collect(formDataFilter.getFormDataKind(), new Transformer() {
-            @Override
-            public Object transform(Object input) {
-                return FormDataKind.fromId((Integer)input);
-            }
-        }));
+        if (formDataFilter.getFormDataKind() != null) {
+            formDataDaoFilter.setFormDataKind((List<FormDataKind>) CollectionUtils.collect(formDataFilter.getFormDataKind(), new Transformer() {
+                @Override
+                public Object transform(Object input) {
+                    return FormDataKind.fromId((Integer) input);
+                }
+            }));
+        }
         formDataDaoFilter.setFormTypeIds(formDataFilter.getFormTypeId());
         // Состояние
         if (formDataFilter.getFormState() != null) {
@@ -75,6 +77,7 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         formDataDaoFilter.setReturnState(formDataFilter.getReturnState());
         // Признак корректирующего периорда
         formDataDaoFilter.setCorrectionTag(formDataFilter.getCorrectionTag());
+        formDataDaoFilter.setCorrectionDate(formDataFilter.getCorrectionDate());
         // Вид налога
         if (formDataFilter.getTaxType() != null) {
             formDataDaoFilter.setTaxTypes(asList(formDataFilter.getTaxType()));
