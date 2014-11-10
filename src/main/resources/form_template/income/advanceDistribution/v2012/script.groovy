@@ -115,7 +115,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'regionBank', 'regionBankDivision',
+def nonEmptyColumns = ['regionBank', 'regionBankDivision',
         'divisionName', 'kpp', 'propertyPrice', 'workersCount',
         'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
         'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
@@ -263,12 +263,6 @@ void calc() {
             return (regionBankDivisionA <=> regionBankDivisionB)
         }
         return (regionBankA <=> regionBankB)
-    }
-
-    // расчет графы 1 после сортировки
-    def index = 0
-    for (row in dataRows) {
-        row.number = ++index
     }
 
     // добавить строку ЦА (скорректрированный) (графа 1..22)
@@ -1043,6 +1037,9 @@ def getPrevDataRows() {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'ca')], getDataRow(dataRows, 'total'), true)
-    dataRowHelper.saveSort()
+    // есть итоговые строки
+    if (dataRows.size() > 2) {
+        sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'ca')], getDataRow(dataRows, 'total'), true)
+        dataRowHelper.saveSort()
+    }
 }
