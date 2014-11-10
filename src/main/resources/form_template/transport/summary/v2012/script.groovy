@@ -734,7 +734,7 @@ def calc14(def row, def region, def errorMsg) {
                 "and (MAX_POWER is null or MAX_POWER > " + row.taxBase + " or MAX_POWER = " + row.taxBase + "))" +
                 "and (UNIT_OF_POWER is null or UNIT_OF_POWER = " + row.taxBaseOkeiUnit + ")" +
                 "and ((MIN_AGE is null or MIN_AGE < " + row.years + ") " +
-                "and (MAX_AGE is null or MAX_AGE > " + row.years + "))";
+                "and (MAX_AGE is null or MAX_AGE > " + row.years + " or MAX_AGE = " + row.years + "))"
 
         /**
          * Переберем варианты
