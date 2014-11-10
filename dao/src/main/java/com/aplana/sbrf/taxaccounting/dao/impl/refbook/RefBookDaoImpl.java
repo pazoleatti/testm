@@ -52,13 +52,20 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Repository
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
-    private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
+	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
 
     public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
 
     private static final String DELETE_VERSION = "delete from %s where %s";
+	private static final String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
+	private static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
+	private static final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
+	private static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
+	private static final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
+	private static final String REFBOOK_NAME_ALIAS = "refbookName";
+	private static final String VERSION_START_ALIAS = "versionStart";
 
-    @Autowired
+	@Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
@@ -618,13 +625,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         String postfix;
         switch (sortFinalAttribute.getAttributeType()) {
             case NUMBER:
-                postfix = "number_value";
+                postfix = NUMBER_VALUE_COLUMN_ALIAS;
                 break;
             case STRING:
-                postfix = "string_value";
+                postfix = STRING_VALUE_COLUMN_ALIAS;
                 break;
             case DATE:
-                postfix = "date_value";
+                postfix = DATE_VALUE_COLUMN_ALIAS;
                 break;
             default:
                 throw new ServiceException("Ошибка подготовки условия сортировки. Непредусмотренный тип атрибута "
@@ -1866,22 +1873,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
                     if (recordValues == null) {
                         recordValues = new HashMap<String, String>();
-                        recordValues.put("refbookName", rs.getString("refbookName"));
-                        recordValues.put("versionStart", rs.getDate("versionStart").toString());
+                        recordValues.put(REFBOOK_NAME_ALIAS, rs.getString(REFBOOK_NAME_ALIAS));
+                        recordValues.put(VERSION_START_ALIAS, rs.getDate(VERSION_START_ALIAS).toString());
 
                         if (is_unique != 0) {
                             StringBuilder attr = new StringBuilder();
                             concatAttrs(rs, attr);
-                            recordValues.put("uniqueAttributes", attr.toString());
+                            recordValues.put(UNIQUE_ATTRIBUTES_ALIAS, attr.toString());
                         }
                         records.put(id, recordValues);
                     } else if (is_unique != 0) {
                         StringBuilder attr = new StringBuilder();
-                        if (recordValues.get("uniqueAttributes") != null) {
-                            attr.append(recordValues.get("uniqueAttributes"));
+                        if (recordValues.get(UNIQUE_ATTRIBUTES_ALIAS) != null) {
+                            attr.append(recordValues.get(UNIQUE_ATTRIBUTES_ALIAS));
                         }
                         concatAttrs(rs, attr);
-                        recordValues.put("uniqueAttributes", attr.toString());
+                        recordValues.put(UNIQUE_ATTRIBUTES_ALIAS, attr.toString());
                         records.put(id, recordValues);
                     }
 
@@ -1889,11 +1896,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
 
                 public void concatAttrs(ResultSet rs, StringBuilder attr) throws SQLException {
-                    attr.append(rs.getString("string_value") != null ? rs.getString("string_value") + ", " : "");
-                    attr.append(rs.getString("number_value") != null ? rs.getFloat("number_value") + ", " : "");
-                    attr.append(rs.getDate("date_value") != null ? rs.getDate("date_value") + ", " : "");
+                    attr.append(rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ? rs.getString(STRING_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getFloat(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null ? rs.getDate(DATE_VALUE_COLUMN_ALIAS) + ", " : "");
                     // TODO - разыменовать и добавить значение аттрибута ссылки
-                    attr.append(rs.getString("reference_value") != null ? rs.getInt("reference_value") + ", " : "");
+                    attr.append(rs.getString(REFERENCE_VALUE_COLUMN_ALIAS) != null ? rs.getInt(REFERENCE_VALUE_COLUMN_ALIAS) + ", " : "");
                 }
             });
 
@@ -1924,16 +1931,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         List<String> msgs = new ArrayList<String>();
         for (Map.Entry<Integer, Map<String, String>> map : records.entrySet()) {
             Map<String, String> value = map.getValue();
-            StringBuilder msg = new StringBuilder("Существует ссылка на запись справочника. Справочник ");
-            msg.append(value.get("refbookName"));
-            msg.append(", ");
-            if (value.get("uniqueAttributes") != null && !value.get("uniqueAttributes").isEmpty()) {
-                msg.append("запись: ");
-                msg.append(value.get("uniqueAttributes"));
+            StringBuilder msg = new StringBuilder("Существует ссылка на запись справочника. Справочник \"");
+            msg.append(value.get(REFBOOK_NAME_ALIAS));
+            msg.append("\", ");
+            if (value.get(UNIQUE_ATTRIBUTES_ALIAS) != null && !value.get(UNIQUE_ATTRIBUTES_ALIAS).isEmpty()) {
+                msg.append("запись id = \"");
+                msg.append(value.get(UNIQUE_ATTRIBUTES_ALIAS));
+				msg.append('\"');
             }
-            msg.append("действует с ");
-            msg.append(value.get("versionStart"));
-            msg.append(".");
+            msg.append("действует с \"");
+            msg.append(value.get(VERSION_START_ALIAS));
+            msg.append("\".");
             msgs.add(msg.toString());
         }
         return msgs;
