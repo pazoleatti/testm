@@ -129,7 +129,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         TextColumn<FormToFormRelation> performerColumn = new TextColumn<FormToFormRelation>() {
             @Override
             public String getValue(FormToFormRelation object) {
-                return object.getPerformer().getName();
+                return object.getPerformer() != null ? object.getPerformer().getName() : "";
             }
         };
 

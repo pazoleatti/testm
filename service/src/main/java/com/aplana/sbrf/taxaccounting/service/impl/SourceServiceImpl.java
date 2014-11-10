@@ -1221,7 +1221,7 @@ public class SourceServiceImpl implements SourceService {
         FormToFormRelation formToFormRelation = new FormToFormRelation();
         formToFormRelation.setSource(isSource);
         formToFormRelation.setFormDataKind(departmentFormType.getKind());
-        formToFormRelation.setPerformer(departmentDao.getDepartment(departmentFormType.getPerformerId()));
+        formToFormRelation.setPerformer(departmentFormType.getPerformerId() != null ? departmentDao.getDepartment(departmentFormType.getPerformerId()) : null);
         formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
         if (departmentreportPeriod != null && departmentreportPeriod.getCorrectionDate() != null) {
             formToFormRelation.setCorrectionDate(departmentreportPeriod.getCorrectionDate());

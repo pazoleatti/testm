@@ -40,7 +40,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             departmentFormType.setFormTypeId(rs.getInt("form_type_id"));
             departmentFormType.setDepartmentId(rs.getInt("department_id"));
             departmentFormType.setKind(FormDataKind.fromId(rs.getInt("kind")));
-            departmentFormType.setPerformerId(rs.getInt("performer_dep_id"));
+            departmentFormType.setPerformerId(SqlUtils.getInteger(rs, "performer_dep_id"));
             departmentFormType.setPeriodStart(rs.getDate("period_start"));
             departmentFormType.setPeriodEnd(rs.getDate("period_end"));
             return departmentFormType;
