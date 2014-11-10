@@ -72,7 +72,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     for (String error : errorList) {
         def name = departmentParam.NAME.stringValue
         name = name == null ? "!" : " для $name!"
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s!", error, name))
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s", error, name))
     }
 }
 

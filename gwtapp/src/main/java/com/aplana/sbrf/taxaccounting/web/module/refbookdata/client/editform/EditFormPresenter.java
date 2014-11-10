@@ -91,6 +91,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     protected final RenameDialogPresenter renameDialogPresenter;
 
+    //TODO: взаимодействие в зависимом виджете д.б. через события, а не через "левое" view
     private RefBookHierDataPresenter.MyView refBookHierDataPresenterMyView;
 
 	@Inject
