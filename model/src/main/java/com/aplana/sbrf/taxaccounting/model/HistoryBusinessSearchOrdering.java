@@ -15,5 +15,6 @@ public enum HistoryBusinessSearchOrdering {
     FORM_TYPE,
     USER,
     USER_ROLE,
+    USER_DEPARTMENT,
     IP_ADDRESS
 }
