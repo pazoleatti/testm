@@ -758,16 +758,16 @@ public class PeriodServiceImpl implements PeriodService {
         filter.setIsCorrection(true);
         List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
         DepartmentReportPeriod drpLast = drpList.get(drpList.size()-1);
-        for (DepartmentReportPeriod period : drpList) {
+        //7А. Система проверяет наличие корректирующего периода для выбранного подразделения, созданного для выбранного периода корректировки.
+        for (int i = 0; i<drpList.size(); i++) {
+            DepartmentReportPeriod period = drpList.get(i);
+            //7А.1А.1 Система проверяет найденный период (с совпадающим сроком подачи корректировки).
             if (period.getCorrectionDate().equals(term)) {
+                // Период открыт/закрыт и является/не является последним по порядку из корректирующих периодов.
                 if (!period.isActive()) {
-                    if (drpLast.getCorrectionDate().after(term)) {
-                        return PeriodStatusBeforeOpen.INVALID;
-                    } else {
-                        return PeriodStatusBeforeOpen.CLOSE;
-                    }
+                    return i == drpList.size()-1 ? PeriodStatusBeforeOpen.CLOSE : PeriodStatusBeforeOpen.INVALID;
                 } else {
-                    return PeriodStatusBeforeOpen.OPEN;
+                    return i == drpList.size()-1 ? PeriodStatusBeforeOpen.OPEN : PeriodStatusBeforeOpen.INVALID;
                 }
             } else if (period.getCorrectionDate().after(term)) {
                 return PeriodStatusBeforeOpen.INVALID;
@@ -776,7 +776,7 @@ public class PeriodServiceImpl implements PeriodService {
         }
         if (!drpList.isEmpty()){
             if (drpLast.isActive())
-                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN;
+                return PeriodStatusBeforeOpen.INVALID;
         }
 
         //Система проверяет статус периода корректировки (конкретный период ищем, т.е. д.б. одно значение)

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.periods.client.opencorrectdialo
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.gwt.client.mask.parser.DMDateParser;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
@@ -168,9 +169,10 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                                                 "Корректирующий период уже открыт!");
                                         break;
                                     case INVALID:
-                                        Dialog.errorMessage( "Корректирование периода",
-                                                "Указанный период корректировки должен быть больше " +
-                                                "последнего корректирующего периода для указанного отчётного периода!");
+                                        Dialog.errorMessage("Корректирование периода",
+                                                "Корректирующий период с датой корректировки " +
+                                                        DMDateParser.formatDMY.format(getView().getTerm()) +
+                                                        " не может быть открыт, т.к. открыт более ранний корректирующий период!");
                                         break;
                                     case CORRECTION_PERIOD_LAST_OPEN:
                                         Dialog.errorMessage( "Корректирование периода", "Корректирующий период не может быть открыт, т.к. открыт предыдущий корректирующий период!");
