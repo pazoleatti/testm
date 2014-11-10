@@ -457,9 +457,7 @@ public class PeriodServiceImpl implements PeriodService {
         }
 		List<Integer> departments = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, drp.getDepartmentId());
 
-		if (checkBeforeRemove(departments, drp.getReportPeriod().getId(), logger.getEntries())) {
-			removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
-		}
+        removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
 	}
 
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
