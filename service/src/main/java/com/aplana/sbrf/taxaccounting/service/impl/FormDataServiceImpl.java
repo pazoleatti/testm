@@ -585,7 +585,8 @@ public class FormDataServiceImpl implements FormDataService {
 
         if (workflowMove == WorkflowMove.CREATED_TO_PREPARED
                 || workflowMove == WorkflowMove.PREPARED_TO_APPROVED
-                || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED) {
+                || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED
+                || workflowMove == WorkflowMove.PREPARED_TO_ACCEPTED) {
             //Устанавливаем блокировку на текущую нф
             List<String> lockedObjects = new ArrayList<String>();
             int userId = userInfo.getUser().getId();
