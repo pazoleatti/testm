@@ -272,22 +272,22 @@
 	</subDataset>
 	<subDataset name="str4" uuid="8148ebe4-9ab4-4a37-86bb-e09a8d5d85be">
 		<queryString language="xPath">
-			<![CDATA[/Файл/Документ/Прибыль/НалПУ/НалПУПроц]]>
+			<![CDATA[/Файл/Документ/Прибыль/НалПУ/НалПУПроц/УплСрок]]>
 		</queryString>
 		<field name="ВидПлат" class="java.lang.String">
-			<fieldDescription><![CDATA[@ВидПлат]]></fieldDescription>
+			<fieldDescription><![CDATA[../@ВидПлат]]></fieldDescription>
 		</field>
 		<field name="КБК" class="java.lang.String">
-			<fieldDescription><![CDATA[@КБК]]></fieldDescription>
+			<fieldDescription><![CDATA[../@КБК]]></fieldDescription>
 		</field>
 		<field name="ОКТМО" class="java.lang.String">
-			<fieldDescription><![CDATA[@ОКТМО]]></fieldDescription>
+			<fieldDescription><![CDATA[../@ОКТМО]]></fieldDescription>
 		</field>
 		<field name="НалПУ" class="java.lang.String">
-			<fieldDescription><![CDATA[УплСрок/@НалПУ]]></fieldDescription>
+			<fieldDescription><![CDATA[@НалПУ]]></fieldDescription>
 		</field>
 		<field name="Срок" class="java.lang.String">
-			<fieldDescription><![CDATA[УплСрок/@Срок]]></fieldDescription>
+			<fieldDescription><![CDATA[@Срок]]></fieldDescription>
 		</field>
 		<variable name="ВидПлат" class="java.lang.String" resetType="Group" resetGroup="group1">
 			<variableExpression><![CDATA[$F{ВидПлат} == null ?
@@ -339,66 +339,9 @@
 :
 ($F{Срок}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
-		<variable name="null_rows" class="java.util.List">
-			<variableExpression><![CDATA[$V{PAGE_COUNT}.equals(1)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(2)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(3)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(4)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(5)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(6)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(7)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(8)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(9)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(10)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(11)?
-Arrays.asList(1,1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(12)?
-Arrays.asList(1,1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(13)?
-Arrays.asList(1,1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(14)?
-Arrays.asList(1,1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(15)?
-Arrays.asList(1,1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(16)?
-Arrays.asList(1,1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(17)?
-Arrays.asList(1,1,1,1)
-:
-$V{PAGE_COUNT}.equals(18)?
-Arrays.asList(1,1,1)
-:
-$V{PAGE_COUNT}.equals(19)?
-Arrays.asList(1,1)
-:
-Arrays.asList(1)]]></variableExpression>
-			<initialValueExpression><![CDATA[]]></initialValueExpression>
+		<variable name="null_rows" class="java.lang.Integer" resetType="Group" resetGroup="group1">
+			<variableExpression><![CDATA[21-($V{group1_COUNT} % 21) ]]></variableExpression>
+			<initialValueExpression><![CDATA[21-($V{group1_COUNT} % 21) ]]></initialValueExpression>
 		</variable>
 		<group name="group1" isStartNewPage="true">
 			<groupExpression><![CDATA[$F{ВидПлат}.concat($F{ОКТМО}).concat($F{КБК})]]></groupExpression>
@@ -2838,14 +2781,8 @@ Arrays.asList(1)]]></variableExpression>
 ($F{КодВидРасход}+"---").substring(0,3)]]></initialValueExpression>
 		</variable>
 		<variable name="SumRas" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумРасход}.equals("0") || $F{СумРасход} == null?
-"---------------"
-:
-($F{СумРасход}+"---------------").substring(0,15)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумРасход}.equals("0") || $F{СумРасход} == null?
-"---------------"
-:
-($F{СумРасход}+"---------------").substring(0,15)]]></initialValueExpression>
+			<variableExpression><![CDATA[($F{СумРасход} == null || $F{СумРасход}.equals("0")) ? "---------------" : ($F{СумРасход}+"---------------").substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[($F{СумРасход} == null || $F{СумРасход}.equals("0")) ? "---------------" : ($F{СумРасход}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="Str17" uuid="c6dbb2c1-2418-4b6b-b41c-b8aa4b26e993">
@@ -3140,6 +3077,10 @@ Arrays.asList(1)]]></variableExpression>
 "---------------"
 :
 ($F{НалДивПосл}+"---------------").substring(0,15)]]></initialValueExpression>
+		</variable>
+		<variable name="VidDiv" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ВидДив} == null ? "-" : $F{ВидДив}  ]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ВидДив} == null ? "-" : $F{ВидДив} ]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="Str18" uuid="3212e31d-3bea-44c2-ba04-944a6f9fbd6d">
@@ -3506,6 +3447,18 @@ Arrays.asList(1)]]></variableExpression>
 	</field>
 	<field name="КБК" class="java.lang.String">
 		<fieldDescription><![CDATA[ТрНалНД/СумНалПУ/@КБК]]></fieldDescription>
+	</field>
+	<field name="str17_numrows" class="java.lang.Integer">
+		<fieldDescription><![CDATA[count(/Файл/Документ/Прибыль/НалУдНА/НалДохДив)]]></fieldDescription>
+	</field>
+	<field name="str18_numrows" class="java.lang.Integer">
+		<fieldDescription><![CDATA[count(/Файл/Документ/Прибыль/НалУдНА/НалДохЦБ)]]></fieldDescription>
+	</field>
+	<field name="str19_numrows" class="java.lang.Integer">
+		<fieldDescription><![CDATA[count(/Файл/Документ/Прибыль/НалУдНА/РеестрСумДив)]]></fieldDescription>
+	</field>
+	<field name="str26_numrows" class="java.lang.Integer">
+		<fieldDescription><![CDATA[count(/Файл/Документ/Прибыль/ДохНеУчНБ_РасхУчОКН/СвЦелСред)]]></fieldDescription>
 	</field>
 	<variable name="ИННЮЛ" class="java.lang.String">
 		<variableExpression><![CDATA[$F{ИННЮЛ} == null ?
@@ -16833,9 +16786,9 @@ Arrays.asList(1)]]></variableExpression>
 			</image>
 			<componentElement>
 				<reportElement key="table" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="60" width="600" height="782" isPrintInFirstWholeBand="true" uuid="c2cd0736-d6a0-4841-8982-e69c1636b973"/>
-				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
 					<datasetRun subDataset="str4" uuid="91665370-45a8-465d-ab63-0eb3a10468c6">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалПУ/НалПУПроц")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалПУ/НалПУПроц/УплСрок")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:columnGroup width="600" uuid="fe70dcec-c60f-4eca-98d5-c893b0e07f8e">
 						<jr:groupFooter groupName="group1">
@@ -16843,8 +16796,8 @@ Arrays.asList(1)]]></variableExpression>
 								<componentElement>
 									<reportElement x="0" y="0" width="600" height="25" uuid="ab0a625d-6f5e-4338-95f4-11d91e8a767b"/>
 									<jr:list printOrder="Vertical">
-										<datasetRun subDataset="nullrows" uuid="00274389-4999-4567-b0b3-87ef33b8989b">
-											<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($V{null_rows})]]></dataSourceExpression>
+										<datasetRun subDataset="str4" uuid="00274389-4999-4567-b0b3-87ef33b8989b">
+											<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource($V{null_rows})]]></dataSourceExpression>
 										</datasetRun>
 										<jr:listContents height="25" width="600">
 											<staticText>
@@ -39946,7 +39899,7 @@ Arrays.asList(1)]]></variableExpression>
 				<reportElement x="2" y="47" width="598" height="775" uuid="0a650fed-d45a-4de4-910e-a05f822e7ecc"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Str17" uuid="4833beb6-0e15-430d-8938-041c20606f69">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалУдНА/НалДохДив")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[$F{str17_numrows}==0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) : ((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалУдНА/НалДохДив")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="775" width="598">
 						<staticText>
@@ -40034,7 +39987,7 @@ Arrays.asList(1)]]></variableExpression>
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ВидДив}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{VidDiv}]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement x="377" y="183" width="219" height="10" uuid="c703b60d-4673-4225-afde-f2acab8094cb"/>
@@ -45070,7 +45023,7 @@ Arrays.asList(1)]]></variableExpression>
 				<reportElement x="2" y="48" width="596" height="752" uuid="1a630851-9150-4fc9-94f6-c2ef4bce477c"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Str18" uuid="6dfe4bde-e5c0-4a56-833e-787565b8b576">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалУдНА/НалДохЦБ")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[$F{str18_numrows}==0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) : ((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалУдНА/НалДохЦБ")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="752" width="596">
 						<staticText>
@@ -46500,7 +46453,7 @@ $F{ВидДоход}]]></textFieldExpression>
 				<reportElement x="2" y="48" width="596" height="760" uuid="11fd24a0-f315-4c21-ac51-1862e84bbd03"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Str19" uuid="8487444a-8d13-4566-be57-30b48f065d67">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалУдНА/РеестрСумДив")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[$F{str19_numrows}==0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) : ((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалУдНА/РеестрСумДив")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="760" width="596">
 						<staticText>
@@ -66588,7 +66541,7 @@ $F{ВидОпер}]]></textFieldExpression>
 				<reportElement mode="Opaque" x="0" y="230" width="594" height="561" uuid="c612486e-60bd-4ea8-991d-58ba288364b4"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="Str26" uuid="2d7a7c05-3e17-4f84-872a-dd9c8b2a37f8">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/ДохНеУчНБ_РасхУчОКН/СвЦелСред")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[$F{str26_numrows}==0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) : ((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/ДохНеУчНБ_РасхУчОКН/СвЦелСред")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="28" width="594">
 						<staticText>
