@@ -107,6 +107,11 @@ public class GetMainMenuActionHandler extends
                                 + TYPE + "=" + menu.getMeta()));
                     }
 
+                    // отчетность МСФО
+                    if (menu.getMeta().equals(TaxType.INCOME.name()) && currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        menu.getSubMenu().add(new MenuItem("Отчетность МСФО", NUMBER_SIGN + IfrsTokens.ifrs));
+                    }
+
                     // ведение периодов
                     if (currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
@@ -151,12 +156,6 @@ public class GetMainMenuActionHandler extends
                                                 + TYPE + "=" + menu.getMeta()));
                     }
                 }
-            }
-
-            if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                MenuItem menuItem = new MenuItem("МСФО", "", "МСФО");
-                menuItem.getSubMenu().add(new MenuItem("Отчетность", NUMBER_SIGN + IfrsTokens.ifrs));
-                taxMenu.getSubMenu().add(menuItem);
             }
 
             if (currentUser.hasRole(TARole.ROLE_GARANT)) {
