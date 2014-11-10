@@ -522,7 +522,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery("\",\n");
         }
 
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending, false, "frb.");
+        // Для видимых линейных справочников сортировка учитывает разыменование
+        if (sortAttribute != null && sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE
+                && !refBook.isHierarchic() && refBook.getTableName() == null) {
+            appendReferenceSortClause(ps, sortAttribute, isSortAscending);
+        } else {
+            appendSortClause(ps, refBook, sortAttribute, isSortAscending, false, "frb.");
+        }
 
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
@@ -549,6 +555,24 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         fromSql.append("\n");
         if (filterPS.getJoinPartsOfQuery() != null) {
             fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
+        // left loin's для сортировки
+        if (sortAttribute != null && sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE
+                && refBook.getTableName() == null) {
+            RefBookAttribute sortFinalAttribute = getAttribute(sortAttribute.getRefBookAttributeId());
+            int index = 0;
+            fromSql.append("left join ref_book_value srt" + index + " on srt" + index + ".record_id = a"
+                    + sortAttribute.getAlias() + ".reference_value and srt" + index + ".attribute_id = "
+                    + sortAttribute.getRefBookAttributeId());
+            // Для вложенных зависимостей
+            while (sortFinalAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                index++;
+                fromSql.append("left join ref_book_value srt" + index + " on srt" + index + ".record_id = "
+                        + sortFinalAttribute.getAlias() + ".reference_value and srt" + index + ".attribute_id = "
+                        + sortFinalAttribute.getRefBookAttributeId());
+                sortFinalAttribute = getAttribute(sortFinalAttribute.getRefBookAttributeId());
+            }
         }
 
         ps.appendQuery(fromSql.toString());
@@ -582,6 +606,34 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         return ps;
+    }
+
+    private int appendReferenceSortClause(PreparedStatementData ps, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        RefBookAttribute sortFinalAttribute = getAttribute(sortAttribute.getRefBookAttributeId());
+        int index = 0;
+        while (sortFinalAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+            index++;
+            sortFinalAttribute = getAttribute(sortFinalAttribute.getRefBookAttributeId());
+        }
+        String postfix;
+        switch (sortFinalAttribute.getAttributeType()) {
+            case NUMBER:
+                postfix = "number_value";
+                break;
+            case STRING:
+                postfix = "string_value";
+                break;
+            case DATE:
+                postfix = "date_value";
+                break;
+            default:
+                throw new ServiceException("Ошибка подготовки условия сортировки. Непредусмотренный тип атрибута "
+                        + sortFinalAttribute.getAttributeType().name() + "!");
+        }
+
+        String filterStrParam = "srt" + index + "." + postfix;
+        ps.appendQuery("row_number() over (order by " + filterStrParam + " " + (isSortAscending ? "ASC" : "DESC") + ") as row_number_over");
+        return index;
     }
 
     private PreparedStatementData getChildrenStatement(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
@@ -2669,6 +2721,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    // TODO Левыкин: можно вынести в сервис
     @Override
     public String buildUniqueRecordName(RefBook refBook, Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupValues) {
         RefBookFactory refBookFactory = applicationContext.getBean("refBookFactory", RefBookFactory.class);

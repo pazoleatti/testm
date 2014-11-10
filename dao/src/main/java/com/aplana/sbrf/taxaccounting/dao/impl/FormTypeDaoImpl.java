@@ -99,9 +99,9 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
                     formType.getTaxType().getCode(),
                     formType.getStatus().getId(),
                     formType.getCode(),
-                    formType.getIsIfrs(),
+                    formType.getIsIfrs()?1:0,
                     formType.getIfrsName()},
-                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.VARCHAR, Types.NUMERIC, Types.VARCHAR, Types.BOOLEAN, Types.VARCHAR});
+                    new int[]{Types.NUMERIC,  Types.VARCHAR, Types.VARCHAR, Types.NUMERIC, Types.VARCHAR, Types.NUMERIC, Types.VARCHAR});
             return formTypeId;
         } catch (DataAccessException e){
             logger.error("Ошибка при создании макета", e);

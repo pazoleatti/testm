@@ -83,8 +83,9 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
          * Обновляет на форме таблицу с доступными для выбора типами НФ (НФ назначениями) (левая)
          *
          * @param departmentFormTypes назначения НФ подразделениям
+         * @param selectedLeftRecord
          */
-        void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes);
+        void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes, DepartmentAssign selectedLeftRecord);
 
         /**
          * Обновляет на форме таблицу с доступными для выбора типами НФ (НФ назначениями) (правая)
@@ -97,8 +98,9 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
          * Обновляет на форме таблицу с доступными для выбора типами назначений деклараций подразделению (левая)
          *
          * @param departmentDeclarationTypes назначения деклараций подразделениям
+         * @param selectedLeftRecord
          */
-        void setAvailableDecsLeft(List<DepartmentAssign> departmentDeclarationTypes);
+        void setAvailableDecsLeft(List<DepartmentAssign> departmentDeclarationTypes, DepartmentAssign selectedLeftRecord);
 
         /**
          * Обновляет на форме таблицу с доступными для добавления приемнику/источнику (которая справа)
@@ -136,7 +138,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
         SourcesView.Table getTable();
 
-        void loadLeftData();
+        void loadLeftData(DepartmentAssign leftSelectedRecord);
 
         void loadRightData();
     }
@@ -230,9 +232,9 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 	}
 
 	@Override
-	public void getFormsLeft(Integer departmentId) {
+	public void getFormsLeft(Integer departmentId, final DepartmentAssign selectedLeftRecord) {
         if (departmentId == null) {
-            getView().setAvailableFormsLeft(new ArrayList<DepartmentAssign>(0));
+            getView().setAvailableFormsLeft(new ArrayList<DepartmentAssign>(0), selectedLeftRecord);
             return;
         }
 
@@ -247,15 +249,15 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 				.defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
 					@Override
 					public void onSuccess(GetDepartmentAssignsResult result) {
-						getView().setAvailableFormsLeft(result.getDepartmentAssigns());
+						getView().setAvailableFormsLeft(result.getDepartmentAssigns(), selectedLeftRecord);
 					}
 				}, this));
 	}
 
     @Override
-    public void getDecsLeft(Integer departmentId) {
+    public void getDecsLeft(Integer departmentId, final DepartmentAssign selectedLeftRecord) {
         if (departmentId == null) {
-            getView().setAvailableDecsLeft(new ArrayList<DepartmentAssign>(0));
+            getView().setAvailableDecsLeft(new ArrayList<DepartmentAssign>(0), selectedLeftRecord);
             return;
         }
 
@@ -270,7 +272,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                 .defaultCallback(new AbstractCallback<GetDepartmentAssignsResult>() {
                     @Override
                     public void onSuccess(GetDepartmentAssignsResult result) {
-                        getView().setAvailableDecsLeft(result.getDepartmentAssigns());
+                        getView().setAvailableDecsLeft(result.getDepartmentAssigns(), selectedLeftRecord);
                     }
                 }, this));
     }
@@ -434,7 +436,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 
         switch (table) {
             case LEFT:
-                getView().loadLeftData();
+                getView().loadLeftData(null);
                 break;
             case RIGHT:
                 getView().loadRightData();
