@@ -230,10 +230,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckManualResult>() {
                 @Override
                 public void onSuccess(CheckManualResult result) {
+                    modifiedRows.clear();
                     revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
                 }
             }, this));
         } else {
+            modifiedRows.clear();
             revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
         }
 	}
