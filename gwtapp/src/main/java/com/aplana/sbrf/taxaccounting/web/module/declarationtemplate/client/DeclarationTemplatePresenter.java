@@ -86,7 +86,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-        String ERROR_RESP = "errorUuid ";
+        String ERROR_RESP = "erroruuid ";
         String SUCCESS_RESP = "uuid ";
         String ERROR = "error ";
 
@@ -169,7 +169,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                     getView().activateButton(true);
                 }
             }, this));
-        } else if (declarationTemplate.getId() == null && declarationTemplate.getType().getId() != 0){
+        } else if (declarationTemplate.getId() == null){
             CreateNewDTVersionAction action = new CreateNewDTVersionAction();
             action.setDeclarationTemplateExt(declarationTemplateExt);
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CreateNewDTVersionResult>() {
@@ -250,17 +250,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		Window.open(GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId(), null, null);		
 	}
 
-	@Override
-	public void uploadJrxmlFail(String error) {
-        Dialog.infoMessage("Не удалось загрузить файл. Ошибка: " + error);
-	}
-
-    @Override
-    public void uploadFormTemplateSuccess() {
-        Dialog.infoMessage("Форма сохранена");
-        setDeclarationTemplate();
-    }
-
     private void setDeclarationTemplate() {
         final int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
 		if (declarationId != 0) {
@@ -312,9 +301,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void uploadDectResponseWithUuid(String uuid) {
         if (uuid != null && !uuid.isEmpty() && !uuid.contains("<pre")){
             LogAddEvent.fire(this, uuid);
-        }else {
-            Dialog.infoMessage("Форма сохранена");
         }
+        Dialog.infoMessage("Файл jrxml сохранен");
 		setDeclarationTemplate();
 	}
 

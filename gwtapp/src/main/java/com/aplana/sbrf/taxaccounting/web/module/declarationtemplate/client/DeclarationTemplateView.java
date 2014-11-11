@@ -126,9 +126,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                 if (resultString.contains(ERROR_RESP)) {
                     String errorUuid = resultString.replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
+                    uploadDectForm.reset();
                 }else if (resultString.toLowerCase().contains(ERROR)) {
                     String errorText = resultString.replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectFail(errorText.replaceFirst(ERROR, ""));
+                    uploadDectForm.reset();
                 } else {
                     String uuid = resultString.replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));
@@ -136,18 +138,26 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 			}
 		});
 
-		uploadJrxmlForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-				if (!event.getResults().toLowerCase().contains(ERROR)) {
-					getUiHandlers().save();
-				}
-				else {
+        uploadJrxmlForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                if(event.getResults() == null){
+                    getUiHandlers().uploadDectFail("Ошибки при импорте формы.");
+                    return;
+                }
+                String resultString = event.getResults().toLowerCase();
+                String uuid = resultString.replaceAll(respPattern, "$2");
+                if (resultString.contains(ERROR_RESP)) {
+                    getUiHandlers().uploadDectResponseWithErrorUuid(uuid.replaceFirst(ERROR_RESP, ""));
                     uploadJrxmlForm.reset();
-					getUiHandlers().uploadJrxmlFail(event.getResults().replaceFirst(ERROR, ""));
-				}
-			}
-		});
+                }else if (resultString.toLowerCase().contains(ERROR)) {
+                    getUiHandlers().uploadDectFail(uuid.replaceFirst(ERROR, ""));
+                    uploadJrxmlForm.reset();
+                } else {
+                    getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));
+                }
+            }
+        });
 	}
 
 	@Override
@@ -210,12 +220,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiHandler("saveButton")
 	public void onSave(ClickEvent event){
 		driver.flush();
-		if (uploadJrxml.getFilename().isEmpty()) {
-			getUiHandlers().save();
-		}
-		else {
-			uploadJrxmlForm.submit();
-		}
+        getUiHandlers().save();
 	}
 
 	

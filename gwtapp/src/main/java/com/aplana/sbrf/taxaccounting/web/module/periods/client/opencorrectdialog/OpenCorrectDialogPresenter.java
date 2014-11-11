@@ -150,7 +150,8 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                                         openCorrectionPeriod();
                                         break;
                                     case CLOSE:
-                                        Dialog.confirmMessage("Корректирование периода", "Корректирующий период закрыт, выполнить переоткрытие?",
+                                        Dialog.confirmMessage("Корректирование периода", "Корректирующий период с датой корректировки " +
+                                                DMDateParser.formatDMY.format(getView().getTerm()) + " закрыт, выполнить переоткрытие?",
                                                 new DialogHandler() {
                                                     @Override
                                                     public void yes() {
@@ -166,19 +167,23 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                                         break;
                                     case OPEN:
                                         Dialog.errorMessage("Корректирование периода",
-                                                "Корректирующий период уже открыт!");
+                                                "Корректирующий период с датой корректировки " +
+                                                        DMDateParser.formatDMY.format(getView().getTerm()) + " уже открыт!");
                                         break;
                                     case INVALID:
                                         Dialog.errorMessage("Корректирование периода",
                                                 "Корректирующий период с датой корректировки " +
                                                         DMDateParser.formatDMY.format(getView().getTerm()) +
-                                                        " не может быть открыт, т.к. открыт более ранний корректирующий период!");
+                                                        " не может быть открыт, т.к. есть более поздний корректирующий период!");
                                         break;
                                     case CORRECTION_PERIOD_LAST_OPEN:
-                                        Dialog.errorMessage( "Корректирование периода", "Корректирующий период не может быть открыт, т.к. открыт предыдущий корректирующий период!");
+                                        Dialog.errorMessage( "Корректирование периода", "Корректирующий период с датой корректировки " +
+                                                DMDateParser.formatDMY.format(getView().getTerm()) +
+                                                " не может быть открыт, т.к. открыт более ранний корректирующий период!");
                                         break;
                                     case CORRECTION_PERIOD_NOT_CLOSE:
-                                        Dialog.errorMessage( "Корректирование периода", "Корректирующий период не может быть открыт, т.к. период корректировки не закрыт!");
+                                        Dialog.errorMessage( "Корректирование периода", "Корректирующий период с датой корректировки " +
+                                                DMDateParser.formatDMY.format(getView().getTerm()) + " не может быть открыт, т.к. период корректировки не закрыт!");
                                         break;
                                 }
                             }

@@ -3,10 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,9 +21,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Реализация Dao для работы с шаблонами деклараций
@@ -109,7 +111,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 	public int save(DeclarationTemplate declarationTemplate) {
         try {
             int count = getJdbcTemplate().update(
-                    "UPDATE declaration_template SET name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ? WHERE id = ?",
+                    "UPDATE declaration_template SET " +
+                            "name = ?, version = ?, create_script = ?, declaration_type_id = ?, xsd = ?, status = ?, jrxml = ? " +
+                            "WHERE id = ?",
                     new Object[]{
                             declarationTemplate.getName(),
                             declarationTemplate.getVersion(),
@@ -117,6 +121,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             declarationTemplate.getType().getId(),
                             declarationTemplate.getXsdId(),
                             declarationTemplate.getStatus().getId(),
+                            declarationTemplate.getJrxmlBlobId(),
                             declarationTemplate.getId()
                     },
                     new int[]{
@@ -126,6 +131,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                             Types.NUMERIC,
                             Types.VARCHAR,
                             Types.NUMERIC,
+                            Types.VARCHAR,
                             Types.NUMERIC
                     }
             );

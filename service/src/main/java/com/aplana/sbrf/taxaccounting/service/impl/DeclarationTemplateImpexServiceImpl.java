@@ -1,9 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import org.apache.commons.io.IOUtils;
@@ -26,12 +26,11 @@ import java.util.zip.ZipOutputStream;
 @Transactional
 public class DeclarationTemplateImpexServiceImpl implements
 		DeclarationTemplateImpexService {
-
-	@Autowired
-	DeclarationTemplateDao declarationTemplateDao;
 	
 	@Autowired
 	DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    BlobDataService blobDataService;
 
     public final static String VERSION_FILE = "version";
     public final static String SCRIPT_FILE = "script.groovy";
@@ -53,8 +52,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 			// Script
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
-            declarationTemplateDao.getDeclarationTemplateScript(id);
-            String dtScript = declarationTemplateDao.getDeclarationTemplateScript(id);
+            String dtScript = declarationTemplateService.getDeclarationTemplateScript(id);
             if (dtScript != null)
 			    zos.write(dtScript.getBytes(ENCODING));
 			zos.closeEntry();
@@ -95,15 +93,15 @@ public class DeclarationTemplateImpexServiceImpl implements
             }
 			
             if ("1.0".equals(version)){
-            	DeclarationTemplate dt = declarationTemplateDao.get(id);
+            	DeclarationTemplate dt = declarationTemplateService.get(id);
 
 				if (files.get("script.groovy").length != 0) {
                     byte[] bytes = files.get("script.groovy");
 					dt.setCreateScript(new String(bytes, 0, bytes.length, Charset.forName("UTF-8")));
 				}
-            	declarationTemplateDao.save(dt);
 				if (files.get("report.jrxml").length != 0) {
-					declarationTemplateService.setJrxml(id, new ByteArrayInputStream(files.get("report.jrxml")));
+                    String uuid = blobDataService.create(new ByteArrayInputStream(files.get("report.jrxml")), "report.jrxml");
+                    dt.setJrxmlBlobId(uuid);
 				}
                 return dt;
             } else {

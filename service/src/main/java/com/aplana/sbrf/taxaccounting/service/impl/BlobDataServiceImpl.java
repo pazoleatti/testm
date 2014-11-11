@@ -33,7 +33,11 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public void delete(String blobId) {
-        blobDataDao.delete(blobId);
+        try {
+            blobDataDao.delete(blobId);
+        }catch (DaoException e){
+            throw new ServiceException("Ошибка при удалении записи.", e);
+        }
     }
 
     @Override
