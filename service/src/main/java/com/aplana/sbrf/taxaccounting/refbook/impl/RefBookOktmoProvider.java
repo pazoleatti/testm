@@ -86,7 +86,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
-        throw new UnsupportedOperationException();
+        return dao.getRecordIdPairs(getTableName(), OKTMO_REF_BOOK_ID, version, null, filter);
     }
 
     @Override
