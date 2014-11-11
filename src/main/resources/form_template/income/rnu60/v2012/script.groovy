@@ -1018,6 +1018,6 @@ void loggerError(def msg) {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'itogo'), null)
+    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'itogo' }, null)
     dataRowHelper.saveSort()
 }

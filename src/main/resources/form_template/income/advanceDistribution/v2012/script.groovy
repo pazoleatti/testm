@@ -1042,7 +1042,7 @@ void sortFormDataRows() {
     def dataRows = dataRowHelper.allCached
     // есть итоговые строки
     if (dataRows.size() > 2) {
-        sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'ca')], getDataRow(dataRows, 'total'), true)
+        sortRows(refBookService, logger, dataRows, [dataRows.find { it.getAlias() == 'ca' }], dataRows.find { it.getAlias() == 'total' }, true)
         dataRowHelper.saveSort()
     }
 }
