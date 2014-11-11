@@ -250,7 +250,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onRelevanceDateChanged() {
-        editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
         editFormPresenter.show(null);
         editFormPresenter.setNeedToReload();
         getView().load();
