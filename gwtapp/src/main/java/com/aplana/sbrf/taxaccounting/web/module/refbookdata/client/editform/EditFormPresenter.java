@@ -293,7 +293,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 action.setVersionTo(getView().getVersionTo());
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
-                final Long newDepType = map.get("TYPE").getReferenceValue();
+                final Long newDepType;
+                if (map.containsKey("TYPE")) {
+                    newDepType = map.get("TYPE").getReferenceValue();
+                } else {
+                    newDepType = 0L;
+                }
                 if (isDepartments) {
                     //Проверяем изменилось ли имя либо тип подразделения с типа ТБ
                     if(modifiedFields.containsKey("NAME") || (modifiedFields.containsKey("TYPE") && depType == 2)){
