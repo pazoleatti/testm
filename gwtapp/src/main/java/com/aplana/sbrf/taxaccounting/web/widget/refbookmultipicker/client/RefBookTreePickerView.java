@@ -247,7 +247,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
                 scrollPanel.setVerticalScrollPosition(offsetTop);
 
-                boolean isScrolled = (absTop != 0) && (offsetTop == scroll || (offsetTop > maxScroll && scroll == maxScroll));
+                boolean isScrolled = (absTop != 0 || absTop == offsetTop) && (offsetTop == scroll || (offsetTop > maxScroll && scroll == maxScroll));
                 return !isScrolled;
             }
         }, 500);
