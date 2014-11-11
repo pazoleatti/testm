@@ -64,19 +64,16 @@ void checkDepartmentParams(LogLevel logLevel) {
 
     // Параметры подразделения
     def departmentParam = getProvider(99).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
-
     if (departmentParam == null ||  departmentParam.size() ==0 || departmentParam.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения!")
     }
-
     departmentParam = departmentParam.get(0)
 
+    // Параметры подразделения (таблица)
     def departmentParamAdd = getProvider(206).getRecords(getEndDate() - 1, null, "LINK = ${departmentParam.record_id.value} AND LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') AND LOWER(KPP) = LOWER('${declarationData.kpp}')", null)
-
     if (departmentParamAdd == null ||  departmentParamAdd.size() ==0 || departmentParamAdd.get(0) == null) {
         throw new Exception("Ошибка при получении настроек обособленного подразделения!")
     }
-
     departmentParamAdd = departmentParamAdd.get(0)
 
     // Проверки подразделения
@@ -87,6 +84,14 @@ void checkDepartmentParams(LogLevel logLevel) {
     errorList = getErrorAcceptable(departmentParam, departmentParamAdd)
     for (String error : errorList) {
         logger.log(logLevel, String.format("Для параметров текущего экземпляра декларации неверно указано значение атрибута %s на форме настроек подразделений", error))
+    }
+
+    // Справочник "Параметры представления деклараций по налогу на имущество"
+    def regionId = getProvider(30).getRecordData(departmentId).REGION_ID.value
+    def String filter = String.format("DECLARATION_REGION_ID = ${regionId} and LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') and LOWER(KPP) = LOWER('${declarationData.kpp}')")
+    records = refBookFactory.getDataProvider(200).getRecords(getEndDate() - 1, null, filter, null)
+    if (records.size() == 0) {
+        throw new Exception("В справочнике \"Параметры представления деклараций по налогу на имущество\" отсутствует запись по выбранным параметрам декларации (период, регион подразделения, налоговый орган, КПП)!")
     }
 }
 
