@@ -119,11 +119,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
 
                                 getView().createInputFields(result.getColumns());
-                                for (RefBookColumn column : result.getColumns()){
-                                    if (column.getAlias().equals("TYPE")){
-                                        depType = column.getId();
-                                    }
-                                }
                                 setIsFormModified(false);
                                 if (readOnly) {
                                     setMode(FormMode.READ);
@@ -218,6 +213,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
                                 getView().fillInputFields(result.getRecord());
+                                if (result.getRecord().containsKey("TYPE")) {
+                                    RefBookValueSerializable v = result.getRecord().get("TYPE");
+                                    if (v.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                                        depType = v.getReferenceValue();
+                                    }
+                                }
                                 currentUniqueRecordId = refBookRecordId;
                                 updateMode();
                             }
@@ -292,7 +293,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 action.setVersionTo(getView().getVersionTo());
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
-
+                final Long newDepType;
+                if (map.containsKey("TYPE")) {
+                    newDepType = map.get("TYPE").getReferenceValue();
+                } else {
+                    newDepType = 0L;
+                }
                 if (isDepartments) {
                     //Проверяем изменилось ли имя либо тип подразделения с типа ТБ
                     if(modifiedFields.containsKey("NAME") || (modifiedFields.containsKey("TYPE") && depType == 2)){
@@ -316,6 +322,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                         if (result.isException()) {
                                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
                                                         } else {
+                                                            depType = newDepType;
                                                             setIsFormModified(false);
                                                             SetFormMode.fire(EditFormPresenter.this, FormMode.VIEW);
                                                         }
@@ -343,6 +350,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         if (result.isException()) {
                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
                                         } else {
+                                            depType = newDepType;
                                             setIsFormModified(false);
                                             SetFormMode.fire(EditFormPresenter.this, FormMode.VIEW);
                                         }

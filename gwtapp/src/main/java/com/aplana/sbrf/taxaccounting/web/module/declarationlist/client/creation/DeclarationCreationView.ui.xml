@@ -48,7 +48,8 @@
                     <g:Label ui:field="declarationTypeLabel" width="140px" wordWrap="false" text="Вид декларации:" height="16px"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <dw:ListBoxWithTooltipWidget width="100%" ui:field="declarationTypeBox" showTooltip="true"/>
+                    <r:RefBookPickerWidget ui:field="declarationTypeId" attributeIdInt="2071" isHierarchical="false"  versionEnabled="false"
+                                           multiSelect="false"  width="100%" />
                 </g:cell>
             </g:HorizontalPanel>
 
