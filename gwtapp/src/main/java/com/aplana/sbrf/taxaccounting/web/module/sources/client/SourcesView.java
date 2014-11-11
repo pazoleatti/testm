@@ -713,11 +713,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         leftTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
         if (selectedLeftRecord != null) {
             leftSM.setSelected(selectedLeftRecord, true);
-        }
-        if (leftSM.getSelectedObject() == null && leftTable.getRowCount() > 0) {
-            leftSM.setSelected(leftTable.getVisibleItem(0), true);
-        }
-        if (leftSM.getSelectedObject() == null) {
+            if (leftSM.getSelectedObject() == null && leftTable.getRowCount() > 0) {
+                leftSM.setSelected(leftTable.getVisibleItem(0), true);
+            }
             getUiHandlers().getCurrentAssigns(selectedLeftRecord);
             loadRightData();
         }
@@ -741,11 +739,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         leftTable.setVisibleRange(new Range(0, departmentDeclarationTypes.size()));
         if (selectedLeftRecord != null) {
             leftSM.setSelected(selectedLeftRecord, true);
-        }
-        if (leftSM.getSelectedObject() == null && leftTable.getRowCount() > 0) {
-            leftSM.setSelected(leftTable.getVisibleItem(0), true);
-        }
-        if (leftSM.getSelectedObject() == null) {
+            if (leftSM.getSelectedObject() == null && leftTable.getRowCount() > 0) {
+                leftSM.setSelected(leftTable.getVisibleItem(0), true);
+            }
             getUiHandlers().getCurrentAssigns(selectedLeftRecord);
             loadRightData();
         }
