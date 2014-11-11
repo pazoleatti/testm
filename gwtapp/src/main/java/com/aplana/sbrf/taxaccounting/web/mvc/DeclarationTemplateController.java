@@ -5,10 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -21,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +53,9 @@ public class DeclarationTemplateController {
     private MainOperatingService mainOperatingService;
 
     @Autowired
+    BlobDataService blobDataService;
+
+    @Autowired
     LogEntryService logEntryService;
 
     private static final String RESP_CONTENT_TYPE_PLAIN = "text/plain";
@@ -83,6 +84,7 @@ public class DeclarationTemplateController {
         declarationTemplateService.checkLockedByAnotherUser(declarationTemplateId, userInfo);
         declarationTemplateService.lock(declarationTemplateId, userInfo);
 
+        String jrxmBlobIdOld = declarationTemplateService.get(declarationTemplateId).getJrxmlBlobId();
         req.setCharacterEncoding("UTF-8");
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload upload = new ServletFileUpload(factory);
@@ -96,6 +98,15 @@ public class DeclarationTemplateController {
         Logger customLog = new Logger();
         mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
 		IOUtils.closeQuietly(items.get(0).getInputStream());
+
+        if (jrxmBlobIdOld != null && !jrxmBlobIdOld.isEmpty()) {
+            try {
+                blobDataService.delete(jrxmBlobIdOld);
+            } catch (ServiceException e){
+                //Если вдруг не удаоось удалить старую запись
+                customLog.warn(e.toString());
+            }
+        }
         if (!customLog.getEntries().isEmpty()){
             resp.setContentType(RESP_CONTENT_TYPE_PLAIN);
             resp.getWriter().printf("uuid %s", logEntryService.save(customLog.getEntries()));
@@ -119,8 +130,9 @@ public class DeclarationTemplateController {
     }
 
 	@RequestMapping(value = "uploadJrxml/{declarationTemplateId}",method = RequestMethod.POST)
+    @Transactional
 	public void processUpload(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-			throws FileUploadException, UnsupportedEncodingException {
+            throws FileUploadException, IOException {
         if (declarationTemplateId == 0)
             throw new ServiceException("Сначала сохраните шаблон.");
         req.setCharacterEncoding("UTF-8");
@@ -129,16 +141,37 @@ public class DeclarationTemplateController {
 		List<FileItem> items = upload.parseRequest(req);
         resp.setContentType("text/plain");
         resp.setCharacterEncoding("UTF-8");
+        InputStream inputStream = null;
         try {
             if (items.get(0) != null && items.get(0).getSize() == 0)
                 throw new ServiceException("Файл jrxml пустой.");
-            InputStream inputStream = items.get(0).getInputStream();
-            declarationTemplateService.setJrxml(declarationTemplateId, inputStream);
-            inputStream.close();
-        } catch (ServiceException e){
-            exceptionHandler(e, resp);
-        } catch (IOException e) {
-            exceptionHandler(e, resp);
+            inputStream = items.get(0).getInputStream();
+            Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
+            Logger customLog = new Logger();
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+
+            String jrxmBlobIdOld = declarationTemplate.getJrxmlBlobId();
+            String jrxmBlobId = blobDataService.create(inputStream,
+                    declarationTemplate.getType().getName() +"_jrxml");
+            declarationTemplate.setJrxmlBlobId(jrxmBlobId);
+            mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
+            if (jrxmBlobIdOld != null && !jrxmBlobIdOld.isEmpty()) {
+                try {
+                    blobDataService.delete(jrxmBlobIdOld);
+                } catch (ServiceException e){
+                    //Если вдруг не удаоось удалить старую запись
+                    customLog.warn(e.toString());
+                }
+            }
+            if (!customLog.getEntries().isEmpty()){
+                resp.setContentType(RESP_CONTENT_TYPE_PLAIN);
+                resp.getWriter().printf("uuid %s", logEntryService.save(customLog.getEntries()));
+            }
+        }  finally {
+            if (inputStream!= null){
+                IOUtils.closeQuietly(inputStream);
+            }
+
         }
     }
 

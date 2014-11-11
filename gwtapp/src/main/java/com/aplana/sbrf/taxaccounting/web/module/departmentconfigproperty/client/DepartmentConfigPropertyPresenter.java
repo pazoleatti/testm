@@ -203,6 +203,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
 
     private void getData() {
+        LogCleanEvent.fire(DepartmentConfigPropertyPresenter.this);
         GetRefBookValuesAction action = new GetRefBookValuesAction();
         if (getView().getTaxType() == TaxType.PROPERTY) {
             action.setRefBookId(REFBOOK_ID);

@@ -890,4 +890,44 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         result.removeAll(existRecords);
         return new ArrayList<Long>(result);
     }
+
+    @Override
+    public List<Pair<Long, Long>> getRecordIdPairs(String tableName, @NotNull Long refBookId, Date version, Boolean needAccurateVersion, String filter) {
+        // TODO сейчас параметры version и needAccurateVersion игнорируются
+        RefBook refBook = refBookDao.get(refBookId);
+
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("SELECT ");
+        ps.appendQuery("id, RECORD_ID ");
+        ps.appendQuery(RefBook.RECORD_ID_ALIAS);
+        ps.appendQuery(" FROM ");
+        ps.appendQuery(tableName);
+        ps.appendQuery(" frb");
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        SimpleFilterTreeListener simpleFilterTreeListener = applicationContext.getBean("simpleFilterTreeListener", SimpleFilterTreeListener.class);
+        simpleFilterTreeListener.setRefBook(refBook);
+        simpleFilterTreeListener.setPs(filterPS);
+
+        Filter.getFilterQuery(filter, simpleFilterTreeListener);
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" WHERE ");
+            ps.appendQuery(filterPS.getQuery().toString());
+            if (filterPS.getParams().size() > 0) {
+                ps.addParam(filterPS.getParams());
+            }
+        }
+
+        try {
+            return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
+                    new RowMapper<Pair<Long, Long>>() {
+                        @Override
+                        public Pair<Long, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return new Pair<Long, Long>(SqlUtils.getLong(rs, "ID"), SqlUtils.getLong(rs, "RECORD_ID"));
+                        }
+                    });
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

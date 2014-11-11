@@ -51,6 +51,8 @@ public class PeriodServiceImpl implements PeriodService {
 	@Autowired
 	private FormDataService formDataService;
     @Autowired
+    private FormDataSearchService formDataSearchService;
+    @Autowired
     private DeclarationDataService declarationDataService;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -455,9 +457,7 @@ public class PeriodServiceImpl implements PeriodService {
         }
 		List<Integer> departments = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, drp.getDepartmentId());
 
-		if (checkBeforeRemove(departments, drp.getReportPeriod().getId(), logger.getEntries())) {
-			removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
-		}
+        removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
 	}
 
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
@@ -757,26 +757,27 @@ public class PeriodServiceImpl implements PeriodService {
         filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
         filter.setIsCorrection(true);
         List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
-        DepartmentReportPeriod drpLast = drpList.get(drpList.size()-1);
-        for (DepartmentReportPeriod period : drpList) {
-            if (period.getCorrectionDate().equals(term)) {
-                if (!period.isActive()) {
-                    if (drpLast.getCorrectionDate().after(term)) {
-                        return PeriodStatusBeforeOpen.INVALID;
+        if (!drpList.isEmpty()) {
+            DepartmentReportPeriod drpLast = drpList.get(drpList.size()-1);
+            //7А. Система проверяет наличие корректирующего периода для выбранного подразделения, созданного для выбранного периода корректировки.
+            for (int i = 0; i<drpList.size(); i++) {
+                DepartmentReportPeriod period = drpList.get(i);
+                //7А.1А.1 Система проверяет найденный период (с совпадающим сроком подачи корректировки).
+                if (period.getCorrectionDate().equals(term)) {
+                    // Период открыт/закрыт и является/не является последним по порядку из корректирующих периодов.
+                    if (!period.isActive()) {
+                        return i == drpList.size()-1 ? PeriodStatusBeforeOpen.CLOSE : PeriodStatusBeforeOpen.INVALID;
                     } else {
-                        return PeriodStatusBeforeOpen.CLOSE;
+                        return i == drpList.size()-1 ? PeriodStatusBeforeOpen.OPEN : PeriodStatusBeforeOpen.INVALID;
                     }
-                } else {
-                    return PeriodStatusBeforeOpen.OPEN;
+                } else if (period.getCorrectionDate().after(term)) {
+                    return PeriodStatusBeforeOpen.INVALID;
+    
                 }
-            } else if (period.getCorrectionDate().after(term)) {
-                return PeriodStatusBeforeOpen.INVALID;
-
             }
-        }
-        if (!drpList.isEmpty()){
+        
             if (drpLast.isActive())
-                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN;
+                return PeriodStatusBeforeOpen.INVALID;
         }
 
         //Система проверяет статус периода корректировки (конкретный период ищем, т.е. д.б. одно значение)
