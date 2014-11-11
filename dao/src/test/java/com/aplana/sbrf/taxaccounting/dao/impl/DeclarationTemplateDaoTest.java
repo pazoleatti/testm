@@ -3,8 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +22,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"DeclarationTemplateDaoTest.xml"})
@@ -108,7 +109,6 @@ public class DeclarationTemplateDaoTest {
 		declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
 		declarationTemplate.setVersion(new Date());
 		declarationTemplate.setCreateScript("MyScript");
-        declarationTemplate.setJrxmlBlobId("1");
 		DeclarationType declarationType = declarationTypeDao.get(1);
 		declarationTemplate.setType(declarationType);
 
@@ -189,7 +189,6 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
-        declarationTemplate.setJrxmlBlobId("1");
         DeclarationType declarationType = declarationTypeDao.get(1);
         declarationTemplate.setType(declarationType);
 
