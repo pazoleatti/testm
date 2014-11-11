@@ -48,7 +48,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     private static final String EVENT_COLUMN_HEADER = "Событие";
     private static final String NOTE_COLUMN_HEADER = "Текст события";
     private static final String REPORT_PERIOD_COLUMN_HEADER = "Период";
-    private static final String DEPARTMENT_COLUMN_HEADER = "Наименование подразделения";
+    private static final String DEPARTMENT_COLUMN_HEADER = "Подразделение";
     private static final String TYPE_COLUMN_HEADER = "Тип формы";
     private static final String FORM_DATA_KIND_COLUMN_HEADER = "Тип налоговой формы";
     private static final String FORM_TYPE_COLUMN_HEADER = "Вид налоговой формы/декларации";
