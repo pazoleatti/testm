@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.editform;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemplate;
 import com.google.gwt.editor.client.Editor;
@@ -71,6 +72,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
 
     @UiHandler("save")
     public void onSave(ClickEvent event) {
+        if (getDecTypeData().getIfrsName() == null || getDecTypeData().getIfrsName().isEmpty()) {
+            Dialog.errorMessage("Макет не сохранен", "При установке признака \"Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
+            return;
+        }
         if (getUiHandlers() != null) {
             getUiHandlers().onSave();
         }
