@@ -268,12 +268,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
     @Override
-    public void setReadOnlyMode(boolean readOnly) {
-        addRow.setVisible(!readOnly);
-        deleteRow.setVisible(!readOnly);
-    }
-
-    @Override
     public int getPage(){
         return pager.getPage();
     }
