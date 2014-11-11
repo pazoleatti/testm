@@ -1,4 +1,4 @@
-﻿---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8333: Уничтожить ограничение ref_book_attr_chk_is_unique
 ALTER TABLE ref_book_attribute DROP CONSTRAINT ref_book_attr_chk_is_unique;
 

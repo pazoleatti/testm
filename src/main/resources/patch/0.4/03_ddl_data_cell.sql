@@ -10,23 +10,23 @@ CREATE TABLE data_cell (
   rowspan NUMBER(3)
 );
 
-COMMENT ON TABLE data_cell IS 'Значения налоговых форм типа дата';
-COMMENT ON COLUMN data_cell.column_id IS 'Идентификатор столбца';
-COMMENT ON COLUMN data_cell.row_id IS 'Идентификатор строки';
-COMMENT ON COLUMN data_cell.svalue IS 'Строковое значение';
-COMMENT ON COLUMN data_cell.nvalue IS 'Числовое значение (в том числе и для ссылок)';
-COMMENT ON COLUMN data_cell.dvalue IS 'Значение для даты-времени';
-COMMENT ON COLUMN data_cell.style_id IS 'Идентификатор стиля ячейки';
-COMMENT ON COLUMN data_cell.editable IS 'Признак редактируемости ячейки (0 - только чтение, 1 - доступна на запись)';
-COMMENT ON COLUMN data_cell.colspan IS 'Количество объединяемых по горизонтали ячеек';
-COMMENT ON COLUMN data_cell.rowspan IS 'Количество объединяемых по вертикали ячеек';
+COMMENT ON TABLE data_cell IS 'Р—РЅР°С‡РµРЅРёСЏ РЅР°Р»РѕРіРѕРІС‹С… С„РѕСЂРј С‚РёРїР° РґР°С‚Р°';
+COMMENT ON COLUMN data_cell.column_id IS 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚РѕР»Р±С†Р°';
+COMMENT ON COLUMN data_cell.row_id IS 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚СЂРѕРєРё';
+COMMENT ON COLUMN data_cell.svalue IS 'РЎС‚СЂРѕРєРѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ';
+COMMENT ON COLUMN data_cell.nvalue IS 'Р§РёСЃР»РѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ (РІ С‚РѕРј С‡РёСЃР»Рµ Рё РґР»СЏ СЃСЃС‹Р»РѕРє)';
+COMMENT ON COLUMN data_cell.dvalue IS 'Р—РЅР°С‡РµРЅРёРµ РґР»СЏ РґР°С‚С‹-РІСЂРµРјРµРЅРё';
+COMMENT ON COLUMN data_cell.style_id IS 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‚РёР»СЏ СЏС‡РµР№РєРё';
+COMMENT ON COLUMN data_cell.editable IS 'РџСЂРёР·РЅР°Рє СЂРµРґР°РєС‚РёСЂСѓРµРјРѕСЃС‚Рё СЏС‡РµР№РєРё (0 - С‚РѕР»СЊРєРѕ С‡С‚РµРЅРёРµ, 1 - РґРѕСЃС‚СѓРїРЅР° РЅР° Р·Р°РїРёСЃСЊ)';
+COMMENT ON COLUMN data_cell.colspan IS 'РљРѕР»РёС‡РµСЃС‚РІРѕ РѕР±СЉРµРґРёРЅСЏРµРјС‹С… РїРѕ РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё СЏС‡РµРµРє';
+COMMENT ON COLUMN data_cell.rowspan IS 'РљРѕР»РёС‡РµСЃС‚РІРѕ РѕР±СЉРµРґРёРЅСЏРµРјС‹С… РїРѕ РІРµСЂС‚РёРєР°Р»Рё СЏС‡РµРµРє';
 
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_pk PRIMARY KEY (row_id, column_id);
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_fk_column_id FOREIGN KEY (column_id) REFERENCES form_column(id);
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_fk_data_row FOREIGN KEY (row_id) REFERENCES data_row(id) ON DELETE CASCADE;
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_chk_editable CHECK (editable IN (0, 1));
 
---предварительная очистка таблицы
+--РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅР°СЏ РѕС‡РёСЃС‚РєР° С‚Р°Р±Р»РёС†С‹
 DELETE FROM data_cell;
 INSERT INTO data_cell (row_id, column_id, svalue, nvalue, dvalue, style_id, editable, colspan, rowspan) 
 (SELECT row_id, column_id, MAX(sv) svalue, MAX(nv) nvalue, MAX(dv) dvalue, MAX(style_id) style_id, MAX(edit) editable, MAX(colspan) colspan, MAX(rowspan) rowspan FROM
@@ -48,7 +48,7 @@ INSERT INTO data_cell (row_id, column_id, svalue, nvalue, dvalue, style_id, edit
         SELECT column_id, row_id, NULL, NULL, NULL, NULL, NULL, NULL, value
         FROM string_value n join data_row rr on rr.id = n.row_id)
 GROUP BY column_id, row_id);
---чистка пустых ячеек
+--С‡РёСЃС‚РєР° РїСѓСЃС‚С‹С… СЏС‡РµРµРє
 DELETE FROM data_cell WHERE svalue IS NULL AND dvalue IS NULL AND nvalue IS NULL AND style_id IS NULL AND colspan IS NULL AND rowspan IS NULL AND editable IS NULL;
 
 DROP TABLE string_value;
@@ -57,3 +57,6 @@ DROP TABLE date_value;
 DROP TABLE cell_span_info;
 DROP TABLE cell_editable;
 DROP TABLE cell_style;
+
+COMMIT;
+EXIT;
