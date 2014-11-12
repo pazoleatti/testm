@@ -26,8 +26,6 @@ ALTER TABLE data_cell ADD CONSTRAINT data_cell_fk_column_id FOREIGN KEY (column_
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_fk_data_row FOREIGN KEY (row_id) REFERENCES data_row(id) ON DELETE CASCADE;
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_chk_editable CHECK (editable IN (0, 1));
 
---предварительная очистка таблицы
-DELETE FROM data_cell;
 INSERT INTO data_cell (row_id, column_id, svalue, nvalue, dvalue, style_id, editable, colspan, rowspan) 
 (SELECT row_id, column_id, MAX(sv) svalue, MAX(nv) nvalue, MAX(dv) dvalue, MAX(style_id) style_id, MAX(edit) editable, MAX(colspan) colspan, MAX(rowspan) rowspan FROM
 (SELECT column_id, row_id, style_id, NULL as edit, NULL as colspan, NULL as rowspan, NULL as nv, NULL as dv, NULL as sv
