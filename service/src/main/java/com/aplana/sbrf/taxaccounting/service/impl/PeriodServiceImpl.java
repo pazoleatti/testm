@@ -232,7 +232,7 @@ public class PeriodServiceImpl implements PeriodService {
 		if (savedDepartmentReportPeriod == null) { //не существует
 			departmentReportPeriodService.save(departmentReportPeriod);
 		} else if (!savedDepartmentReportPeriod.isActive()) { // существует и не открыт
-            departmentReportPeriodService.updateActive(savedDepartmentReportPeriod.getId(), true);
+            departmentReportPeriodService.updateActive(savedDepartmentReportPeriod.getId(), true, departmentReportPeriod.isBalance());
 		} else { // уже открыт
 			return;
 		}
@@ -367,26 +367,23 @@ public class PeriodServiceImpl implements PeriodService {
                 }
 
                 if (drp != null) {
-                    if (drp.isBalance() == balancePeriod) {
-                        if (drp.isActive()) {
+
+                    if (drp.isActive()) {
+                        if (drp.isBalance() == balancePeriod) {
                             return PeriodStatusBeforeOpen.OPEN;
                         } else {
-                            filter = new DepartmentReportPeriodFilter();
-                            filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
-                            filter.setDepartmentIdList(Arrays.asList(departmentId));
-                            filter.setIsCorrection(true);
-                            departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
-                            if (!departmentReportPeriodList.isEmpty()){
-                                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
-                            }
-                            return PeriodStatusBeforeOpen.CLOSE;
+                            return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
                         }
                     } else {
-                        if (drp.isActive()) {
-                            return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
-                        } else {
-                            return PeriodStatusBeforeOpen.CLOSE;
+                        filter = new DepartmentReportPeriodFilter();
+                        filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
+                        filter.setDepartmentIdList(Arrays.asList(departmentId));
+                        filter.setIsCorrection(true);
+                        departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+                        if (!departmentReportPeriodList.isEmpty()){
+                            return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
                         }
+                        return PeriodStatusBeforeOpen.CLOSE;
                     }
                 }
 			}

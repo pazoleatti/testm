@@ -33,7 +33,7 @@ public interface DepartmentReportPeriodDao {
     /**
      * Открытие/закрытие отчетного периода подразделения
      */
-    void updateActive(int id, boolean active);
+    void updateActive(int id, boolean active, boolean isBalance);
 
     /**
      * Открытие/закрытие отчетного периода подразделения (batch)
