@@ -26,6 +26,7 @@
         <module>gwt-widget</module>
         <module>async</module>
         <module>common</module>
+        <module>script-test</module>
     </modules>
 
 	<properties>

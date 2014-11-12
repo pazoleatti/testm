@@ -21,8 +21,7 @@ import groovy.transform.Field
  *      - включить логическую проверку 16 после того как будет добавлен справочник «Повышающие коэффициенты транспортного налога» http://jira.aplana.com/browse/SBRFACCTAX-9316
  *      - включить логические проверки 17, 18, 19 после того как будет добавлен справочник «Средняя стоимость транспортных средств» http://jira.aplana.com/browse/SBRFACCTAX-9316
  *      - при импорте поправить графу 25, после того как будет добавлен справочник «Средняя стоимость транспортных средств» http://jira.aplana.com/browse/SBRFACCTAX-9316
- *      - при импорте не возможно получить значение для графы 23 http://jira.aplana.com/browse/SBRFACCTAX-9436
- *      - отладить метод copyData() при создании формы
+ *      - при импорте невозможно получить значение для графы 23 http://jira.aplana.com/browse/SBRFACCTAX-9436
  *
  * @author ivildanov
  * @author Stanislav Yasinskiy
@@ -145,6 +144,10 @@ def currentReportPeriod = null
 @Field
 def sections = ['A', 'B', 'C']
 
+// регион подразделения формы
+@Field
+def regionId = null
+
 @Field
 def copyColumns = ['codeOKATO', 'tsTypeCode', 'model', 'ecoClass', 'identNumber', 'regNumber', 'regDate',
         'regDateEnd', 'taxBase', 'baseUnit', 'year', 'pastYear', 'stealDateStart', 'stealDateEnd', 'share',
@@ -153,10 +156,6 @@ def copyColumns = ['codeOKATO', 'tsTypeCode', 'model', 'ecoClass', 'identNumber'
 @Field
 def copyColumns201 = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber',
         'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd']
-
-
-@Field
-def copyColumns202 = ['taxBenefitCode', 'benefitStartDate', 'benefitEndDate']
 
 // общее графы между фомрами 201 и 22
 @Field
@@ -261,7 +260,7 @@ def logicCheck() {
     def List<DataRow<Cell>> checkedRows = new ArrayList<DataRow<Cell>>()
 
     // регион из подразделения формы для проверки 10
-    def regionId = getRefBookValue(30L, formData.departmentId)?.REGION_ID
+    def regionId = getRegionId()
 
     def sectionTsTypeCodeMap = ['A' : '50000', 'B' : '40200', 'C' : '40100']
     def sectionTsTypeCode = null
@@ -344,7 +343,7 @@ def logicCheck() {
                 // 10. Проверка наличия параметров представления декларации для кода ОКТМО
                 def filter = "КодСубъектаРФпредставителяДекларации = $regionId and КодОКТМО = $row.codeOKATO"
                 // справочник «Параметры представления деклараций по транспортному налогу»
-                records = getProovider(0L).getRecords(dTo, null, filter, null);
+                records = getProvider(0L).getRecords(dTo, null, filter, null);
                 if (records == null || records.isEmpty()) {
                     rowError(logger, row, errorMsg + "Для выбранного кода ОКТМО отсутствует запись в справочнике «Параметры представления деклараций по транспортному налогу»!")
                 }
@@ -359,7 +358,7 @@ def logicCheck() {
                         "TAX_BENEFIT_ID in ('30200', '20200', '20210', '20220', '20230') and " +
                         "КодСубъектаРФ in ($oktmo)"
                 // справочник «Параметры налоговых льгот транспортного налога»
-                def records7 =  getProovider(7L).getRecords(dTo, null, filter, null);
+                def records7 =  getProvider(7L).getRecords(dTo, null, filter, null);
                 if (records7 == null || records7.isEmpty()) {
                     def columnName = getColumnName(row, 'taxBenefitCode')
                     rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
@@ -395,7 +394,7 @@ def logicCheck() {
                 def averageCost = getRefBookValue(NN, row.version)?.СредняяСтоимость?.value
                 def filter = "СредняяСтоимость = $averageCost"
                 // справочник «Повышающие коэффициенты транспортного налога»
-                def records = getProovider(0L).getRecords(dTo, null, filter, null); // TODO (Ramil Timerbaev)
+                def records = getProvider(0L).getRecords(dTo, null, filter, null); // TODO (Ramil Timerbaev)
                 if (records == null || !records.isEmpty()) {
                     rowError(logger, row, errorMsg + "Для средней стоимости выбранной модели (версии) из перечня, утвержденного на налоговый период, отсутствует запись в справочнике «Повышающие коэффициенты транспортного налога»!")
                 }
@@ -542,19 +541,21 @@ def getNewRow() {
 // Получить строки для копирования за предыдущий отчетный период
 def getPrevRowsForCopy(def reportPeriod, def dataRows) {
     if (reportPeriod != null) {
-        def formDataPrev = formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, reportPeriod.order)
+        // получить форму за предыдущий отчетный период
+        def formDataPrev = formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, null)
         def dataRowsPrev = (formDataPrev != null ? formDataService.getDataRowHelper(formDataPrev)?.allCached : null)
         if (dataRowsPrev != null && !dataRowsPrev.isEmpty()) {
             dataRows = copyFromOursForm(dataRows, dataRowsPrev)
         } else {
-            def formData201Old = formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, reportPeriod.order)
-            def dataRows201Old = (formData201Old != null ? formDataService.getDataRowHelper(formData201Old)?.allCached : null)
+            // получить нет формы за предыдущий отчетный период, то попытаться найти старые формы 201 и 202
+            def formData201 = formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, null)
+            def dataRows201 = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allCached : null)
 
-            def formData202Old = formDataService.getLast(202, formData.kind, formDataDepartment.id, reportPeriod.id, reportPeriod.order)
-            def dataRows202Old = (formData202Old != null ? formDataService.getDataRowHelper(formData202Old)?.allCached : null)
+            def formData202 = formDataService.getLast(202, formData.kind, formDataDepartment.id, reportPeriod.id, null)
+            def dataRows202 = (formData202 != null ? formDataService.getDataRowHelper(formData202)?.allCached : null)
 
-            if (dataRows201Old != null && !dataRows201Old.isEmpty()) {
-                dataRows = copyFromOldForm(dataRows, dataRows201Old, dataRows202Old)
+            if (dataRows201 != null && !dataRows201.isEmpty()) {
+                dataRows = copyFromOldForm(dataRows, dataRows201, dataRows202)
             }
         }
     }
@@ -606,6 +607,9 @@ def copyFromOursForm(def dataRows, def dataRowsPrev) {
         // исключаем дубли
         def need = true
         for (def rowOld in rowsOld) {
+            if (rowOld.getAlias() != null) {
+                continue
+            }
             if (isEquals(row, rowOld, columnsForEquals)) {
                 need = false
                 break
@@ -637,6 +641,7 @@ def copyFromOursForm(def dataRows, def dataRowsPrev) {
 def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
     def rowsOld = []
     rowsOld.addAll(dataRows)
+    def tmpRows = []
 
     def dFrom = getReportPeriodStartDate()
     def dTo = getReportPeriodEndDate()
@@ -677,11 +682,11 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
             }
         }
         if (need) {
-            row.setIndex(rowsOld.size())
             newRow = copyRow(row, copyColumns201)
             def tsTypeCode = getParentTsTypeCode(row.tsTypeCode)
             sectionRows[sectionMap[tsTypeCode]].add(newRow)
             rowsOld.add(newRow)
+            tmpRows.add(newRow)
         }
     }
     sections.each {
@@ -690,43 +695,63 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
     }
 
     // получение данных из 202
-    for (def row : dataRows202Old) {
-        if ((row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
-            continue
-        }
+    if (!tmpRows.isEmpty()) {
+        def regionId = getRegionId()
+        for (def row : dataRows202Old) {
+            if ((row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
+                continue
+            }
 
-        // эта часть вроде как лишняя
-        def benefitEndDate = row.benefitEndDate
-        if (benefitEndDate == null || benefitEndDate > dTo) {
-            benefitEndDate = dTo
-        }
-        def benefitStartDate = row.benefitStartDate
-        if (benefitStartDate < dFrom) {
-            benefitStartDate = dFrom
-        }
-        if (benefitStartDate > dTo || benefitEndDate < dFrom) {
-            continue
-        }
+            // эта часть вроде как лишняя
+            def benefitEndDate = row.benefitEndDate
+            if (benefitEndDate == null || benefitEndDate > dTo) {
+                benefitEndDate = dTo
+            }
+            def benefitStartDate = row.benefitStartDate
+            if (benefitStartDate < dFrom) {
+                benefitStartDate = dFrom
+            }
+            if (benefitStartDate > dTo || benefitEndDate < dFrom) {
+                continue
+            }
 
-        // находим среди заполненых строк соответствующие тукущей строке
-        for (def rowOur in dataRows) {
-            if (isEquals(row, rowOur, commonBetween201and202)) {
-                // строка из 201 соответствует строке из 202
-                copyRow(row, copyColumns202)
-                copyColumns202.each {
-                    rowOur.getCell(it).setValue(row.getCell(it).value, null)
+            // находим среди заполненых строк соответствующие тукущей строке
+            for (def tmpRow in tmpRows) {
+                if (isEquals(row, tmpRow, commonBetween201and202)) {
+                    // строка из 201 соответствует строке из 202
+                    ['benefitStartDate', 'benefitEndDate'].each {
+                        tmpRow.getCell(it).setValue(row.getCell(it).value, null)
+                    }
+                    // графа "Код налоговой льготы" в форме 202 и в текущей имеют разные справочники
+                    // в форме 202 - справочник 6, в текущей - справочник 7
+                    def record6Id = row.getCell('taxBenefitCode').value
+                    if (record6Id != null) {
+                        def filter = "TAX_BENEFIT_ID = $record6Id and DECLARATION_REGION_ID = $regionId"
+                        def records = getProvider(7L).getRecords(dTo, null, filter, null);
+                        def id = (records != null && !records.isEmpty() ? records.get(0)?.record_id?.value : null)
+                        if (id != null) {
+                            tmpRow.getCell('taxBenefitCode').setValue(id, null)
+                        }
+                    }
+                    break
                 }
-                break
             }
         }
     }
+
     return dataRows
 }
 
 
 def isEquals(def row1, def row2, def columns) {
     for (def column : columns) {
-        if (row1[column] != null && row1[column].equals(row2[column])) {
+        if (row1[column] == null) {
+            return true
+        }
+    }
+
+    for (def column : columns) {
+        if (!row1[column].equals(row2[column])) {
             return false
         }
     }
@@ -1238,13 +1263,21 @@ void copyRows(def sourceDataRows, def destinationDataRows, def section) {
  */
 def getParentTsTypeCode(def tsTypeCode) {
     // справочник 42 «Коды видов транспортных средств»
-    def ids = getProovider(42L).getParentsHierarchy(tsTypeCode)
+    def ids = getProvider(42L).getParentsHierarchy(tsTypeCode)
     if (ids != null && !ids.isEmpty()) {
         return getRefBookValue(42L, ids.get(0))?.CODE?.value
     }
     return null
 }
 
-def getProovider(def id) {
+def getProvider(def id) {
     return formDataService.getRefBookProvider(refBookFactory, id, providerCache)
+}
+
+/** Получить идентификатор региона из подразделения формы. */
+def getRegionId() {
+    if (regionId == null) {
+        regionId = getRefBookValue(30L, formData.departmentId)?.REGION_ID?.value
+    }
+    return regionId
 }
