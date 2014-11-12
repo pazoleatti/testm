@@ -3,7 +3,7 @@
     <row alias="">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="2" value="КНУ"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="2" value="Группа расхода"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="2" value="Вид расхода по операции"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="2" value="Вид расхода по операциям"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="4" rowSpan="1"
               value="Расход по данным бухгалтерского учёта"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1" value="Расход по данным бухгалтерского учёта"/>
@@ -23,7 +23,7 @@
     <row alias="">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" value="КНУ"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1" value="Группа расходов"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" value="Вид расхода по операции"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" value="Вид расхода по операциям"/>
         <cell alias="consumptionBuhSumAccountNumber" colSpan="1" rowSpan="1" value="номер счёта учёта"/>
         <cell alias="consumptionBuhSumRnuSource" colSpan="1" rowSpan="1" value="источник информации в РНУ"/>
         <cell alias="consumptionBuhSumAccepted" colSpan="1" rowSpan="1" value="сумма"/>
