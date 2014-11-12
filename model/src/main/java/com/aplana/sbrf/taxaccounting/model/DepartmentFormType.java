@@ -22,7 +22,7 @@ public class DepartmentFormType implements Serializable {
     /** Период действия назначения. Может быть null */
     private Date periodStart;
     private Date periodEnd;
-    private int performerId;
+    private Integer performerId;
 	
 	/**
 	 * Получить идентификатор записи
@@ -104,11 +104,11 @@ public class DepartmentFormType implements Serializable {
         this.periodEnd = periodEnd;
     }
 
-    public int getPerformerId() {
+    public Integer getPerformerId() {
         return performerId;
     }
 
-    public void setPerformerId(int performerId) {
+    public void setPerformerId(Integer performerId) {
         this.performerId = performerId;
     }
 

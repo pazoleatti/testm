@@ -794,20 +794,6 @@ void generateXML() {
                                         НалПУ : getLong(row.sumTax))
                             }
                         }
-                    } else {
-                        // костыль: пустые данные при отсутствии нф или данных в нф
-
-                        // 0..n
-                        НалПУПроц(
-                                ВидПлат :	emptyNull,
-                                ОКТМО :		emptyNull,
-                                КБК :		emptyNull) {
-
-                            // 0..n
-                            УплСрок(
-                                    Срок :	emptyNull,
-                                    НалПУ :	emptyNull)
-                        }
                     }
                     // Раздел 1. Подраздел 1.3 - конец
                 }
@@ -1024,7 +1010,10 @@ void generateXML() {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
                                 obRasch = getRefBookValue(26, row.calcFlag)?.CODE?.value
-                                naimOP = getRefBookValue(30, row.regionBankDivision)?.NAME?.value
+                                def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
+                                if (record33 != null) {
+                                    naimOP = record33?.ADDITIONAL_NAME?.value
+                                }
                                 kppop = row.kpp
                                 obazUplNalOP = getRefBookValue(25, row.obligationPayTax)?.CODE?.value
                                 dolaNalBaz = row.baseTaxOf
@@ -1133,57 +1122,6 @@ void generateXML() {
                                     НалНачислПосл : empty)
                             // Лист 03 Б - конец
                         }
-                    } else {
-                        // костыль: пустые данные при отсутствии нф или данных в нф
-
-                        // Лист 03 А
-                        // 0..n
-                        НалДохДив(
-                                ВидДив :		emptyNull,
-                                НалПер :		emptyNull,
-                                ОтчетГод :		emptyNull,
-                                ДивВсего :		emptyNull,
-                                НалИсчисл :		emptyNull,
-                                НалДивПред :	emptyNull,
-                                НалДивПосл :	emptyNull) {
-
-                            // 0..1
-                            ДивИОФЛНеРез(
-                                    ДивИнОрг :		emptyNull,
-                                    ДивФЛНеРез :	emptyNull,
-                                    ДивИсч0 :		emptyNull,
-                                    ДивИсч5 :		emptyNull,
-                                    ДивИсч10 :		emptyNull,
-                                    ДивИсчСв10 :	emptyNull)
-                            // 0..1
-                            ДивРА(
-                                    ДивРАВс :	emptyNull,
-                                    ДивРО9 :	emptyNull,
-                                    ДивРО0 :	emptyNull,
-                                    ДивФЛРез :	emptyNull,
-                                    ДивНеНП :	emptyNull)
-                            // 0..1
-                            ДивНА(
-                                    ДивНАдоРас :	emptyNull,
-                                    ДивНАдоРас0 :	emptyNull)
-                            // 0..1
-                            ДивНал(
-                                    ДивНалВс :	emptyNull,
-                                    ДивНал9 :	emptyNull,
-                                    ДивНал0 :	emptyNull)
-                        }
-                        // Лист 03 А - конец
-
-                        // Лист 03 Б
-                        // 0..n
-                        НалДохЦБ(
-                                ВидДоход : '1',
-                                НалБаза : empty,
-                                СтавНал : empty,
-                                НалИсчисл : empty,
-                                НалНачислПред : empty,
-                                НалНачислПосл : empty)
-                        // Лист 03 Б - конец
                     }
 
                     // Лист 03 В
@@ -1214,34 +1152,6 @@ void generateXML() {
                                                     [Имя : row.name] +
                                                     (row.patronymic ? [Отчество : row.patronymic] : [:]))
                                 }
-                            }
-                        }
-                    } else {
-                        // костыль: пустые данные при отсутствии нф или данных в нф
-                        // 0..n
-                        РеестрСумДив(
-                                ДатаПерДив :	emptyNull,
-                                СумДив :		emptyNull,
-                                СумНал :		emptyNull) {
-
-                            СвПолуч(
-                                    НаимПолуч :	emptyNull,
-                                    Тлф :		emptyNull) {
-                                МНПолуч(
-                                        Индекс :		emptyNull,
-                                        КодРегион :		emptyNull,
-                                        Район :			emptyNull,
-                                        Город :			emptyNull,
-                                        НаселПункт :	emptyNull,
-                                        Улица :			emptyNull,
-                                        Дом :			emptyNull,
-                                        Корпус :		emptyNull,
-                                        Кварт :			emptyNull)
-                                // 0..1
-                                ФИОРук(
-                                        Фамилия :	emptyNull,
-                                        Имя :		emptyNull,
-                                        Отчество :	emptyNull)
                             }
                         }
                     }
@@ -1351,14 +1261,6 @@ void generateXML() {
                                     КодВидРасход : id,
                                     СумРасход : getLong(svCelSred[id]))
                         }
-                    }
-                } else {
-                    // костыль: пустые данные при отсутствии нф или данных в нф
-                    ДохНеУчНБ_РасхУчОКН() {
-                        // 1..n
-                        СвЦелСред(
-                                КодВидРасход :	emptyNull,
-                                СумРасход :		emptyNull)
                     }
                 }
                 // Приложение к налоговой декларации - конец
@@ -1851,6 +1753,7 @@ def getExistedXmlData(def declarationTypeId, def departmentId, def reportPeriodI
     def declarationData = declarationService.getLast(declarationTypeId, departmentId, reportPeriodId)
     if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
         def xmlString = declarationService.getXmlData(declarationData.id)
+        if (xmlString == null) return null
         xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
         return new XmlSlurper().parseText(xmlString)
     }

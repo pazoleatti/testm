@@ -159,10 +159,12 @@ public class DeclarationDataPresenter
 								getView().setReportPeriod(periodStr);
 								getView().setDocDate(result.getDocDate());
                                 getView().setDepartment(result.getDepartment());
-                                if(taxType.equals(TaxType.PROPERTY)){
+                                if(taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT)){
                                     getView().setPropertyBlockVisible(true);
                                     getView().setTaxOrganCode(result.getTaxOrganCode());
                                     getView().setKpp(result.getKpp());
+                                } else {
+                                    getView().setPropertyBlockVisible(false);
                                 }
 								getView()
 										.setBackButton(

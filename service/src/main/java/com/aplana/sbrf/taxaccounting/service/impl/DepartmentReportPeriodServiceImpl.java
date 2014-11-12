@@ -42,8 +42,8 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
-    public void updateActive(int id, boolean active) {
-        departmentReportPeriodDao.updateActive(id, active);
+    public void updateActive(int id, boolean active, boolean isBalance) {
+        departmentReportPeriodDao.updateActive(id, active, isBalance);
     }
 
     @Override

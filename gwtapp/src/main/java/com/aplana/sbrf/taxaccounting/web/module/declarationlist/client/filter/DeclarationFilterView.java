@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.filter;
 import com.aplana.gwt.client.ListBoxWithTooltip;
 import com.aplana.gwt.client.TextBox;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.text.shared.AbstractRenderer;
@@ -16,9 +18,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterUIHandlers>
         implements DeclarationFilterPresenter.MyView {
@@ -37,7 +37,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private DepartmentPickerPopupWidget departmentPicker;
 
-    private ListBoxWithTooltip<Integer> declarationTypePicker;
+    private RefBookPickerWidget declarationTypePicker;
 
     private ValueListBox<WorkflowState> formStatePicker;
 
@@ -69,17 +69,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         });
         formStatePicker.setWidth("100%");
 
-		declarationTypePicker = new ListBoxWithTooltip<Integer>(new AbstractRenderer<Integer>() {
-			@Override
-			public String render(Integer object) {
-				if (object == null) {
-					return "";
-				}
-				return declarationTypeMap.get(object);
-			}
-		});
-        declarationTypePicker.setShowTooltip(true);
+        declarationTypePicker = new RefBookPickerWidget(false, false);
+        declarationTypePicker.setVersionEnabled(false);
+        declarationTypePicker.setAttributeId(2071L);
         declarationTypePicker.setWidth("100%");
+        declarationTypePicker.setPeriodDates(new Date(), new Date());
 
         correctionTag = new ListBoxWithTooltip<Boolean>(new AbstractRenderer<Boolean>() {
             @Override
@@ -125,7 +119,11 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         this.formDataFilter = formDataFilter;
         departmentPicker.setValue(formDataFilter.getDepartmentIds());
         reportPeriodPicker.setValue(formDataFilter.getReportPeriodIds());
-        declarationTypePicker.setValue(formDataFilter.getDeclarationTypeId());
+        if (formDataFilter.getDeclarationTypeId() != null) {
+            declarationTypePicker.setValue(Arrays.asList(formDataFilter.getDeclarationTypeId().longValue()));
+        } else {
+            declarationTypePicker.setValue(null);
+        }
         formStatePicker.setValue(formDataFilter.getFormState());
         correctionTag.setValue(formDataFilter.getCorrectionTag());
     }
@@ -134,7 +132,12 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	public DeclarationDataFilter getFilterData() {
         formDataFilter.setDepartmentIds(departmentPicker.getValue());
         formDataFilter.setReportPeriodIds(reportPeriodPicker.getValue());
-        formDataFilter.setDeclarationTypeId(declarationTypePicker.getValue());
+        List<Long> values = declarationTypePicker.getValue();
+        if (values != null && !values.isEmpty()) {
+            formDataFilter.setDeclarationTypeId(values.get(0).intValue());
+        } else {
+            formDataFilter.setDeclarationTypeId(null);
+        }
         formDataFilter.setFormState(formStatePicker.getValue());
         formDataFilter.setTaxOrganCode(taxOrganisationPicker.getValue());
         formDataFilter.setTaxOrganKpp(kppPicker.getValue());
@@ -151,7 +154,21 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 	public void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap){
 		this.declarationTypeMap = declarationTypeMap;
 		declarationTypePicker.setValue(null);
-		declarationTypePicker.setAcceptableValues(declarationTypeMap.keySet());
+        if ((declarationTypeMap == null) || declarationTypeMap.isEmpty()) {
+            /**
+             * TODO продумать как сделать правильней,
+             * на текущий момент синтаксис IN (..) не реализован в парсере фильтра,
+             * так же нет варианта остановить подрузку на самом фронтенде
+             */
+            declarationTypePicker.setFilter("2 = 1");
+            return;
+        }
+        StringBuilder str = new StringBuilder();
+        for (Integer dtId : declarationTypeMap.keySet()) {
+            if (dtId != null) str.append(RefBook.RECORD_ID_ALIAS + "=" + dtId + " or ");
+        }
+        str.delete(str.length() - 3, str.length() - 1);
+        declarationTypePicker.setFilter(str.toString());
 	}
 
 	@UiHandler("apply")

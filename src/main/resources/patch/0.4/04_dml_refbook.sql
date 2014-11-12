@@ -1,4 +1,4 @@
-﻿---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8357: Завести справочники по налогу на имущество
 -- -- http://jira.aplana.com/browse/SBRFACCTAX-8359: Переименовать существующие справочники «Коды налоговых льгот» и «Параметры налоговых льгот»
 UPDATE ref_book SET name = 'Коды налоговых льгот транспортного налога' WHERE ID = 6;
@@ -323,6 +323,17 @@ delete from ref_book_value where attribute_id in (select id from ref_book_attrib
 delete from ref_book_attribute where ref_book_id = 31 and id not in (170, 179, 224);
 UPDATE ref_book_attribute SET ord = 1 WHERE id = 224;
 UPDATE ref_book_attribute SET ord = 2 WHERE id = 179;
+
+-- http://jira.aplana.com/browse/SBRFACCTAX-9333: модификации длины
+update ref_book_attribute set width = 6 where id = 953;
+update ref_book_attribute set width = 6 where id = 3104;
+update ref_book_attribute set width = 6 where id = 3108;
+---------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-9356: Справочник Виды деклараций
+
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (207, 'Виды деклараций', 1, 0, 1, null, 'DECLARATION_TYPE');
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2071, 207,'Наименование','NAME',1,1,null,null,1,null,50,1,0,0,null,0,2000);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2072, 207,'Вид налога','TAX_TYPE',1,2,null,null,1,null,10,1,0,null,null,0,2000);
 ---------------------------------------------------------------------------------------------------
 
 COMMIT;

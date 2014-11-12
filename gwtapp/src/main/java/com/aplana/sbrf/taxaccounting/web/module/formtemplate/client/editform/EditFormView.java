@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.editform;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemplate;
 import com.google.gwt.editor.client.Editor;
@@ -58,6 +59,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 ifrsNamePanel.setVisible(event.getValue());
+                if (!event.getValue()) ifrsName.setValue("");
             }
         });
     }
@@ -71,13 +73,17 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
 
     @UiHandler("save")
     public void onSave(ClickEvent event) {
+        if (getTypeData().getIsIfrs() && (getTypeData().getIfrsName() == null || getTypeData().getIfrsName().isEmpty())) {
+            Dialog.errorMessage("Макет не сохранен", "При установке признака \"Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
+            return;
+        }
         if (getUiHandlers() != null) {
             getUiHandlers().onSave();
         }
     }
 
     @Override
-    public FormTypeTemplate getDecTypeData() {
+    public FormTypeTemplate getTypeData() {
         return driver.flush();
     }
 

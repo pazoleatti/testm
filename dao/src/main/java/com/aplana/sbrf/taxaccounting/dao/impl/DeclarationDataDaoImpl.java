@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -34,6 +35,8 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
 
     private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
+
+    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
         @Override
@@ -259,8 +262,12 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         }
 
         if (filter.getCorrectionTag() != null) {
-            sql.append(" and drp.correction_date is " +
-                    (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");
+            if (filter.getCorrectionDate() != null) {
+                sql.append(" and drp.correction_date = '" + sdf.format(filter.getCorrectionDate()) + "\'");
+            } else {
+                sql.append(" and drp.correction_date is " +
+                        (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");
+            }
         }
 
         if (filter.getTaxType() == TaxType.PROPERTY) {

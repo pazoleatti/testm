@@ -6,19 +6,21 @@ import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.cell.client.Cell.Context;
 
-public class ConstHeaderBuilder extends AbstractHeaderOrFooterBuilder {
+public class ConstPropertyHeaderBuilder extends AbstractHeaderOrFooterBuilder implements TableWithCheckedColumn {
 
-    public ConstHeaderBuilder(DataGrid table) {
+    public ConstPropertyHeaderBuilder(DataGrid table) {
         super(table, false);
     }
 
     boolean needCheckedRow = true;
 
 
+    @Override
     public boolean isNeedCheckedRow() {
         return needCheckedRow;
     }
 
+    @Override
     public void setNeedCheckedRow(boolean needCheckedRow) {
         this.needCheckedRow = needCheckedRow;
     }

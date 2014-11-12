@@ -52,13 +52,20 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Repository
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
-    private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
+	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
 
     public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
 
     private static final String DELETE_VERSION = "delete from %s where %s";
+	private static final String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
+	private static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
+	private static final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
+	private static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
+	private static final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
+	private static final String REFBOOK_NAME_ALIAS = "refbookName";
+	private static final String VERSION_START_ALIAS = "versionStart";
 
-    @Autowired
+	@Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
@@ -240,7 +247,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         RefBook refBook = get(refBookId);
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        // Получение количества данных в справкочнике
+        // Получение количества данных в справочнике
         PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, sortAttribute, filter, null, true);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
@@ -522,7 +529,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery("\",\n");
         }
 
-        appendSortClause(ps, refBook, sortAttribute, isSortAscending, false, "frb.");
+        // Для видимых линейных справочников сортировка учитывает разыменование
+        if (sortAttribute != null && sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE
+                && !refBook.isHierarchic() && refBook.getTableName() == null) {
+            appendReferenceSortClause(ps, sortAttribute, isSortAscending);
+        } else {
+            appendSortClause(ps, refBook, sortAttribute, isSortAscending, false, "frb.");
+        }
 
         for (int i = 0; i < attributes.size(); i++) {
             RefBookAttribute attribute = attributes.get(i);
@@ -549,6 +562,24 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         fromSql.append("\n");
         if (filterPS.getJoinPartsOfQuery() != null) {
             fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
+        // left loin's для сортировки
+        if (sortAttribute != null && sortAttribute.getAttributeType() == RefBookAttributeType.REFERENCE
+                && refBook.getTableName() == null) {
+            RefBookAttribute sortFinalAttribute = getAttribute(sortAttribute.getRefBookAttributeId());
+            int index = 0;
+            fromSql.append("left join ref_book_value srt" + index + " on srt" + index + ".record_id = a"
+                    + sortAttribute.getAlias() + ".reference_value and srt" + index + ".attribute_id = "
+                    + sortAttribute.getRefBookAttributeId());
+            // Для вложенных зависимостей
+            while (sortFinalAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                index++;
+                fromSql.append("left join ref_book_value srt" + index + " on srt" + index + ".record_id = "
+                        + sortFinalAttribute.getAlias() + ".reference_value and srt" + index + ".attribute_id = "
+                        + sortFinalAttribute.getRefBookAttributeId());
+                sortFinalAttribute = getAttribute(sortFinalAttribute.getRefBookAttributeId());
+            }
         }
 
         ps.appendQuery(fromSql.toString());
@@ -582,6 +613,34 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         return ps;
+    }
+
+    private int appendReferenceSortClause(PreparedStatementData ps, RefBookAttribute sortAttribute, boolean isSortAscending) {
+        RefBookAttribute sortFinalAttribute = getAttribute(sortAttribute.getRefBookAttributeId());
+        int index = 0;
+        while (sortFinalAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+            index++;
+            sortFinalAttribute = getAttribute(sortFinalAttribute.getRefBookAttributeId());
+        }
+        String postfix;
+        switch (sortFinalAttribute.getAttributeType()) {
+            case NUMBER:
+                postfix = NUMBER_VALUE_COLUMN_ALIAS;
+                break;
+            case STRING:
+                postfix = STRING_VALUE_COLUMN_ALIAS;
+                break;
+            case DATE:
+                postfix = DATE_VALUE_COLUMN_ALIAS;
+                break;
+            default:
+                throw new ServiceException("Ошибка подготовки условия сортировки. Непредусмотренный тип атрибута "
+                        + sortFinalAttribute.getAttributeType().name() + "!");
+        }
+
+        String filterStrParam = "srt" + index + "." + postfix;
+        ps.appendQuery("row_number() over (order by " + filterStrParam + " " + (isSortAscending ? "ASC" : "DESC") + ") as row_number_over");
+        return index;
     }
 
     private PreparedStatementData getChildrenStatement(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
@@ -1453,6 +1512,69 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return aggregateUniqueAttributeNamesByRecords(result);
     }
 
+    @Override
+    public List<String> getMatchedRecordsByUniqueAttributesIncome102(@NotNull List<RefBookAttribute> attributes,
+                                                                     @NotNull List<Map<String, RefBookValue>> records,
+                                                                     Integer accountPeriodId) {
+        List<RefBookRecord> refBookRecords = new ArrayList<RefBookRecord>();
+        for (Map<String, RefBookValue> map : records) {
+            RefBookRecord record = new RefBookRecord();
+            record.setValues(map);
+            refBookRecords.add(record);
+        }
+
+        List<Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>>> recordsGroupsUniqueAttributesValues = aggregateUniqueAttributesAndValuesByRecords(attributes, refBookRecords);
+        recordsGroupsUniqueAttributesValues.size();
+
+        StringBuilder sql = new StringBuilder("SELECT opu_code FROM income_102 WHERE account_period_id = ? AND ");
+        List<Object> params = new ArrayList<Object>();
+        params.add(accountPeriodId);
+
+        // OR по каждой записи
+        for (int i = 0; i < records.size(); i++) {
+            Map<String, RefBookValue> recordValues = records.get(i);
+            Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupsUniqueAttributesValues = recordsGroupsUniqueAttributesValues.get(i);
+            // OR по группам уникальности
+            for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupUniqueAttributesValues : groupsUniqueAttributesValues.entrySet()) {
+                sql.append("(");
+                List<Pair<RefBookAttribute, RefBookValue>> uniqueAttributesValues = groupUniqueAttributesValues.getValue();
+                // AND по уникальным аттрибутам группы
+                for (int j = 0; j < uniqueAttributesValues.size(); j++) {
+                    Pair<RefBookAttribute, RefBookValue> pair = uniqueAttributesValues.get(j);
+                    RefBookAttribute attribute = pair.getFirst();
+                    sql.append(attribute.getAlias()).append(" = ? ");
+
+                    /*************************************Добавление параметров****************************************/
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                        params.add(recordValues.get(attribute.getAlias()).getStringValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        params.add(recordValues.get(attribute.getAlias()).getReferenceValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
+                        params.add(recordValues.get(attribute.getAlias()).getNumberValue());
+                    }
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
+                        params.add(recordValues.get(attribute.getAlias()).getDateValue());
+                    }
+                    /**************************************************************************************************/
+
+                    if (j < uniqueAttributesValues.size() - 1) {
+                        sql.append(" AND ");
+                    }
+                }
+                if (groupUniqueAttributesValues.getKey() < groupsUniqueAttributesValues.size()) {
+                    sql.append(") OR ");
+                } else {
+                    sql.append(")");
+                }
+            }
+            if (i < records.size() - 1) sql.append(" OR ");
+        }
+
+        return getJdbcTemplate().queryForList(sql.toString(), params.toArray(), String.class);
+    }
+
     /**
      * Агрегировать названия уникальных аттрибутов по записям
      *
@@ -1751,22 +1873,22 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
                     if (recordValues == null) {
                         recordValues = new HashMap<String, String>();
-                        recordValues.put("refbookName", rs.getString("refbookName"));
-                        recordValues.put("versionStart", rs.getDate("versionStart").toString());
+                        recordValues.put(REFBOOK_NAME_ALIAS, rs.getString(REFBOOK_NAME_ALIAS));
+                        recordValues.put(VERSION_START_ALIAS, rs.getDate(VERSION_START_ALIAS).toString());
 
                         if (is_unique != 0) {
                             StringBuilder attr = new StringBuilder();
                             concatAttrs(rs, attr);
-                            recordValues.put("uniqueAttributes", attr.toString());
+                            recordValues.put(UNIQUE_ATTRIBUTES_ALIAS, attr.toString());
                         }
                         records.put(id, recordValues);
                     } else if (is_unique != 0) {
                         StringBuilder attr = new StringBuilder();
-                        if (recordValues.get("uniqueAttributes") != null) {
-                            attr.append(recordValues.get("uniqueAttributes"));
+                        if (recordValues.get(UNIQUE_ATTRIBUTES_ALIAS) != null) {
+                            attr.append(recordValues.get(UNIQUE_ATTRIBUTES_ALIAS));
                         }
                         concatAttrs(rs, attr);
-                        recordValues.put("uniqueAttributes", attr.toString());
+                        recordValues.put(UNIQUE_ATTRIBUTES_ALIAS, attr.toString());
                         records.put(id, recordValues);
                     }
 
@@ -1774,11 +1896,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
 
                 public void concatAttrs(ResultSet rs, StringBuilder attr) throws SQLException {
-                    attr.append(rs.getString("string_value") != null ? rs.getString("string_value") + ", " : "");
-                    attr.append(rs.getString("number_value") != null ? rs.getFloat("number_value") + ", " : "");
-                    attr.append(rs.getDate("date_value") != null ? rs.getDate("date_value") + ", " : "");
+                    attr.append(rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ? rs.getString(STRING_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getFloat(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null ? rs.getDate(DATE_VALUE_COLUMN_ALIAS) + ", " : "");
                     // TODO - разыменовать и добавить значение аттрибута ссылки
-                    attr.append(rs.getString("reference_value") != null ? rs.getInt("reference_value") + ", " : "");
+                    attr.append(rs.getString(REFERENCE_VALUE_COLUMN_ALIAS) != null ? rs.getInt(REFERENCE_VALUE_COLUMN_ALIAS) + ", " : "");
                 }
             });
 
@@ -1809,16 +1931,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         List<String> msgs = new ArrayList<String>();
         for (Map.Entry<Integer, Map<String, String>> map : records.entrySet()) {
             Map<String, String> value = map.getValue();
-            StringBuilder msg = new StringBuilder("Существует ссылка на запись справочника. Справочник ");
-            msg.append(value.get("refbookName"));
-            msg.append(", ");
-            if (value.get("uniqueAttributes") != null && !value.get("uniqueAttributes").isEmpty()) {
-                msg.append("запись: ");
-                msg.append(value.get("uniqueAttributes"));
+            StringBuilder msg = new StringBuilder("Существует ссылка на запись справочника. Справочник \"");
+            msg.append(value.get(REFBOOK_NAME_ALIAS));
+            msg.append("\", ");
+            if (value.get(UNIQUE_ATTRIBUTES_ALIAS) != null && !value.get(UNIQUE_ATTRIBUTES_ALIAS).isEmpty()) {
+                msg.append("запись id = \"");
+                msg.append(value.get(UNIQUE_ATTRIBUTES_ALIAS));
+				msg.append('\"');
             }
-            msg.append("действует с ");
-            msg.append(value.get("versionStart"));
-            msg.append(".");
+            msg.append("действует с \"");
+            msg.append(value.get(VERSION_START_ALIAS));
+            msg.append("\".");
             msgs.add(msg.toString());
         }
         return msgs;
@@ -2606,6 +2729,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    // TODO Левыкин: можно вынести в сервис
     @Override
     public String buildUniqueRecordName(RefBook refBook, Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> groupValues) {
         RefBookFactory refBookFactory = applicationContext.getBean("refBookFactory", RefBookFactory.class);

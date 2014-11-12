@@ -354,7 +354,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                             if (fractionalPart > precision || integerPart > (maxLength - precision)) {
 								BadValueException badValueException = new BadValueException();
 								badValueException.setFieldName(field.getKey().getName());
-								badValueException.setDescription("значение атрибута не соответствует формату: максимальное количество цифр " + maxLength + ", максимальная точность " + precision);
+								badValueException.setDescription("значение не соответствует формату. Максимальное количество цифр = " + maxLength + ", максимальная точность = " + precision);
 								throw badValueException;
 							}
 						}
@@ -370,7 +370,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						if (string!= null && string.length() > maxLength) {
 							BadValueException badValueException = new BadValueException();
 							badValueException.setFieldName(field.getKey().getName());
-							badValueException.setDescription("значение атрибута превышает максимально допустимое " + maxLength + "!");
+							badValueException.setDescription("количество символов превышает максимально допустимое = " + maxLength);
 							throw badValueException;
 						}
 						value.setAttributeType(RefBookAttributeType.STRING);
@@ -396,12 +396,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			} catch (NumberFormatException nfe) {
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
-                badValueException.setDescription("значение некорректно!");
+                badValueException.setDescription("значение некорректно. Неправильный формат числа");
 				throw badValueException;
 			} catch (ClassCastException cce) {
 				BadValueException badValueException = new BadValueException();
 				badValueException.setFieldName(field.getKey().getName());
-                badValueException.setDescription("значение некорректно!");
+                badValueException.setDescription("значение некорректно");
 				throw badValueException;
 			}
 		}
@@ -412,7 +412,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (attr.isRequired() && (val == null)) {
 			BadValueException badValueException = new BadValueException();
 			badValueException.setFieldName(attr.getName());
-			badValueException.setDescription("Обязательно для заполнения");
+			badValueException.setDescription("обязателен для заполнения");
 			throw badValueException;
 		}
 	}
@@ -515,7 +515,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @UiHandler("save")
 	void saveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onSaveClicked();
+			getUiHandlers().onSaveClicked(false);
 		}
 	}
 

@@ -151,11 +151,15 @@ public interface FormDataDao {
      * @param newDepartmentName новое имя подразделеия ТБ
      * @param dateFrom дата начала периода, с которой искать НФ
      * @param dateTo дата окончания периода, до которой искать НФ
+     * @param isChangeTB смена типа ТБ, влечет за собой изменения в печатных формах. Меняются первая часть имени
+     *                   печ.форм, во всех НФ в которых есть этот ТБ и в формах принадлежащих этому ТБ.
+     *                   true - меняется на "", а в НФ этого ТБ на новое имя, false-меняется на новое имя
      */
-    void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo);
+    void updateFDPerformerTBDepartmentNames(int departmentId, String newDepartmentName, Date dateFrom, Date dateTo, boolean isChangeTB);
 
     /**
-     * Обноляет "вторую часть" имени подразделения. Вторая часть строки - если символ "/" в строке есть, то все символы после символа "/", иначе вся строка.
+     * Обноляет "вторую часть" имени подразделения. Вторая часть строки - если символ "/" в строке есть, то все символы
+     * после символа "/", иначе вся строка.
      * @param departmentId идентификатор обновляемого подразделения
      * @param newDepartmentName новое имя подразделения ТБ
      * @param dateFrom дата начала периода, с которой искать НФ

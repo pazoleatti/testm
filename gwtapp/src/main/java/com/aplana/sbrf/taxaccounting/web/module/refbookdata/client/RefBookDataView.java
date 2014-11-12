@@ -22,6 +22,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
@@ -104,7 +105,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		});
         refbookDataTable.setPageSize(pager.getPageSize());
         refbookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-		pager.setDisplay(refbookDataTable);
+        refbookDataTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(refbookDataTable));
+        refbookDataTable.getColumnSortList().setLimit(1);
+        pager.setDisplay(refbookDataTable);
         filterText.addKeyPressHandler(new HandlesAllKeyEvents() {
             @Override
             public void onKeyDown(KeyDownEvent event) {}
@@ -173,7 +176,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
                 column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
             }
-
+            column.setSortable(true);
 			refbookDataTable.addResizableSortableColumn(column, header.getName());
 			refbookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
@@ -265,12 +268,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
     @Override
-    public void setReadOnlyMode(boolean readOnly) {
-        addRow.setVisible(!readOnly);
-        deleteRow.setVisible(!readOnly);
-    }
-
-    @Override
     public int getPage(){
         return pager.getPage();
     }
@@ -290,13 +287,22 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @UiHandler("cancelEdit")
     void cancelEditButtonClicked(ClickEvent event) {
-        Dialog.confirmMessage("Выход из режима редактирования", "Вы подтверждаете переход к режиму просмотра?", new DialogHandler() {
-            @Override
-            public void yes() {
-                getUiHandlers().setMode(FormMode.VIEW);
-                getUiHandlers().cancelChanges();
-            }
-        });
+        if (getUiHandlers().isFormModified()) {
+            Dialog.confirmMessage("Подтверждение изменений", "Строка была изменена. Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    getUiHandlers().saveChanges();
+                }
+
+                @Override
+                public void no() {
+                    getUiHandlers().cancelChanges();
+                    getUiHandlers().setMode(FormMode.VIEW);
+                }
+            });
+        } else {
+            getUiHandlers().setMode(FormMode.VIEW);
+        }
     }
 
     @UiHandler("search")
@@ -401,6 +407,22 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     public void setVersionedFields(boolean isVisible) {
         relevanceDate.setVisible(isVisible);
         relevanceDateLabel.setVisible(isVisible);
+    }
+
+    @Override
+    public int getSortColumnIndex() {
+        if (refbookDataTable.getColumnSortList().size() == 0) {
+            return 0;
+        }
+        return refbookDataTable.getColumnIndex((Column<RefBookDataRow,?>) refbookDataTable.getColumnSortList().get(0).getColumn());
+    }
+
+    @Override
+    public boolean isAscSorting() {
+        if (refbookDataTable.getColumnSortList().size() == 0) {
+            return true;
+        }
+        return refbookDataTable.getColumnSortList().get(0).isAscending();
     }
 
     @Override

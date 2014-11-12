@@ -12,9 +12,11 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataMo
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.inject.Inject;
@@ -39,7 +41,7 @@ import java.util.Date;
  */
 public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter.MyView,
         RefBookHierDataPresenter.MyProxy> implements RefBookHierDataUiHandlers,
-        UpdateForm.UpdateFormHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler {
+        UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler {
 
     @ProxyCodeSplit
     @NameToken(RefBookDataTokens.refBookHierData)
@@ -109,6 +111,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     public void onBind() {
         addRegisteredHandler(UpdateForm.getType(), this);
         addRegisteredHandler(RollbackTableRowSelection.getType(), this);
+        addRegisteredHandler(SetFormMode.getType(), this);
     }
 
     @Override
@@ -185,7 +188,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                 Dialog.errorMessage("Удаление всех версий элемента справочника",
                                         "Обнаружены фатальные ошибки!");
                             } else {
-                                editFormPresenter.show(null);
+                                //editFormPresenter.show(null);
                                 editFormPresenter.setNeedToReload();
                                 getView().deleteItem(selected);
                             }
@@ -214,9 +217,11 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                     @Override
                                     public void onSuccess(DeleteNonVersionRefBookRowResult result) {
                                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
-                                        editFormPresenter.show(null);
+                                        //editFormPresenter.show(null);
                                         editFormPresenter.setNeedToReload();
+                                        RefBookItem parentRefBookItem = getView().getSelectedItem().getParent();
                                         getView().deleteItem(selected);
+                                        getView().setSelected(parentRefBookItem!=null?parentRefBookItem.getId():0);
                                     }
                                 }, RefBookHierDataPresenter.this));
                             }
@@ -228,7 +233,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         });
                     } else {
                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
-                        editFormPresenter.show(null);
+                        //editFormPresenter.show(null);
                         editFormPresenter.setNeedToReload();
                         getView().deleteItem(selected);
                     }
@@ -248,7 +253,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onRelevanceDateChanged() {
-        editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
         editFormPresenter.show(null);
         editFormPresenter.setNeedToReload();
         getView().load();
@@ -351,5 +355,26 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     public void setMode(FormMode mode){
         this.mode = mode;
         updateMode();
+    }
+
+    @Override
+    public void saveChanges() {
+        editFormPresenter.onSaveClicked(true);
+    }
+
+    @Override
+    public void cancelChanges() {
+        editFormPresenter.setIsFormModified(false);
+        editFormPresenter.onCancelClicked();
+    }
+
+    @Override
+    public boolean isFormModified() {
+        return editFormPresenter.isFormModified();
+    }
+
+    @Override
+    public void onSetFormMode(SetFormMode event) {
+        setMode(event.getFormMode());
     }
 }

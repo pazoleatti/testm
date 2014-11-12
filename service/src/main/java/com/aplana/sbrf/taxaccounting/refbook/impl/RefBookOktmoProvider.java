@@ -86,7 +86,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public List<Pair<Long, Long>> checkRecordExistence(Date version, String filter) {
-        throw new UnsupportedOperationException();
+        return dao.getRecordIdPairs(getTableName(), OKTMO_REF_BOOK_ID, version, null, filter);
     }
 
     @Override
@@ -320,4 +320,9 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
 		return refBookDao.dereferenceValues(tableName, attributeId, recordIds);
 	}
+
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw new UnsupportedOperationException();
+    }
 }

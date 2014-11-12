@@ -54,6 +54,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     private static final String FORM_TYPE_COLUMN_HEADER = "Вид налоговой формы/декларации";
     private static final String USER_LOGIN_COLUMN_HEADER = "Пользователь";
     private static final String USER_ROLES_COLUMN_HEADER = "Роль пользователя";
+    private static final String USER_DEPARTMENT_COLUMN_HEADER = "Подразделение пользователя";
     private static final String USER_IP_COLUMN_HEADER = "IP пользователя";
     @UiField
     GenericDataGrid<LogSearchResultItem> table;
@@ -265,6 +266,13 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
             }
         };
 
+        TextColumn<LogSearchResultItem> userDepartmentColumn = new TextColumn<LogSearchResultItem>() {
+            @Override
+            public String getValue(LogSearchResultItem object) {
+                return object.getUserDepartmentName();
+            }
+        };
+
         TextColumn<LogSearchResultItem> userRolesColumn = new TextColumn<LogSearchResultItem>() {
             @Override
             public String getValue(LogSearchResultItem object) {
@@ -295,8 +303,9 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         table.setColumnWidth(userLoginColumn, 9, Style.Unit.EM);
         table.addColumn(userRolesColumn, USER_ROLES_COLUMN_HEADER);
         table.setColumnWidth(userRolesColumn, 7, Style.Unit.EM);
+        table.addColumn(userDepartmentColumn, USER_DEPARTMENT_COLUMN_HEADER);
         table.addColumn(userIpColumn, USER_IP_COLUMN_HEADER);
-        table.setColumnWidth(userIpColumn, 8, Style.Unit.EM);
+        table.setColumnWidth(userIpColumn, 7.5, Style.Unit.EM);
         table.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
             @Override
             public void onCellPreview(CellPreviewEvent<LogSearchResultItem> event) {
@@ -325,6 +334,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         formDeclTypeColumn.setDataStoreName(HistoryBusinessSearchOrdering.FORM_TYPE.name());
         userLoginColumn.setDataStoreName(HistoryBusinessSearchOrdering.USER.name());
         userRolesColumn.setDataStoreName(HistoryBusinessSearchOrdering.USER_ROLE.name());
+        userDepartmentColumn.setDataStoreName(HistoryBusinessSearchOrdering.USER_DEPARTMENT.name());
         userIpColumn.setDataStoreName(HistoryBusinessSearchOrdering.IP_ADDRESS.name());
 
         table.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>(){

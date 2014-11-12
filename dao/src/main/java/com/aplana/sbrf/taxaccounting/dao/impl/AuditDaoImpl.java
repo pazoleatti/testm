@@ -410,6 +410,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             case USER_ROLE:
                 column = "ls.roles";
                 break;
+            case USER_DEPARTMENT:
+                column = "ls.user_department_name";
+                break;
             case IP_ADDRESS:
                 column = "ls.ip";
                 break;

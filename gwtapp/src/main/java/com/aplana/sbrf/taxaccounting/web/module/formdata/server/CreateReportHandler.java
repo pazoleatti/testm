@@ -53,7 +53,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     public CreateReportResult execute(CreateReportAction action, ExecutionContext executionContext) throws ActionException {
         CreateReportResult result = new CreateReportResult();
         Map<String, Object> params = new HashMap<String, Object>();
-        String key = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + action.getFormDataId() + "_" + action.getType().getName() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual() + "_saved_" + action.isSaved();
+        String key = LockData.LockObjects.FORM_DATA.name() + "_" + action.getFormDataId() + "_" + action.getType().getName() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual() + "_saved_" + action.isSaved();
         TAUserInfo userInfo = securityService.currentUserInfo();
         params.put("formDataId", action.getFormDataId());
         params.put("isShowChecked", action.isShowChecked());

@@ -107,4 +107,24 @@ public final class TextUtils {
         return title;
     }
 
+    /**
+     * Экранирование маски для регулярных выражений
+     * @param mask
+     * @param st
+     * @return
+     */
+    public static String quote(String mask, String st) {
+        if (st == null) st = "\\[]^.|?*+(){}";
+        String result = mask;
+        for(char ch:  st.toCharArray()) {
+            result = result.replaceAll("\\"+ch, "\\\\"+ch);
+        }
+        return result;
+    }
+
+
+    public static String quote(String mask) {
+        return quote(mask, null);
+    }
+
 }

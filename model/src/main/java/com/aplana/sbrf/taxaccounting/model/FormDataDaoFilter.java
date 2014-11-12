@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model;
 
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,6 +52,8 @@ public class FormDataDaoFilter implements Serializable {
 	private Boolean returnState;
 
     private Boolean correctionTag;
+
+    private Date correctionDate;
 
 	public List<Integer> getReportPeriodIds() {
 		return reportPeriodIds;
@@ -165,5 +168,17 @@ public class FormDataDaoFilter implements Serializable {
      */
     public void setCorrectionTag(Boolean correctionTag) {
         this.correctionTag = correctionTag;
+    }
+
+    public Date getCorrectionDate() {
+        return correctionDate;
+    }
+
+    /**
+     * Устанавливает дату корректировки. Действительно только при установленом {@link #correctionTag}
+     * @param correctionDate Дата корректировки
+     */
+    public void setCorrectionDate(Date correctionDate) {
+        this.correctionDate = correctionDate;
     }
 }

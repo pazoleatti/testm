@@ -115,7 +115,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['number', 'regionBank', 'regionBankDivision',
+def nonEmptyColumns = ['regionBank', 'regionBankDivision',
         'divisionName', 'kpp', 'propertyPrice', 'workersCount',
         'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
         'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
@@ -248,6 +248,9 @@ void calc() {
         // графа 13
         row.subjectTaxStavka = calc13(row)
 
+        // графа 14
+        row.taxSum = calc14(row)
+
         // графа 14..21
         calcColumnFrom14To21(prevDataRows, row, sumNal, reportPeriod)
     }
@@ -263,12 +266,6 @@ void calc() {
             return (regionBankDivisionA <=> regionBankDivisionB)
         }
         return (regionBankA <=> regionBankB)
-    }
-
-    // расчет графы 1 после сортировки
-    def index = 0
-    for (row in dataRows) {
-        row.number = ++index
     }
 
     // добавить строку ЦА (скорректрированный) (графа 1..22)
@@ -902,14 +899,14 @@ def getTaxBase() {
 void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPeriod) {
     def tmp
 
-    // графа 14
+    // графа 15
     if (sumNal == null || row.baseTaxOf == null) {
         row.taxSumOutside = 0
     } else {
         row.taxSumOutside = roundValue(sumNal * 0.9 * row.baseTaxOf / 100, 0)
     }
 
-    // графа 15
+    // графа 16
     if (row.taxSum == null || row.subjectTaxCredit == null || row.taxSumOutside == null) {
         row.taxSumToPay = 0
     } else {
@@ -917,7 +914,7 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
             row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
     }
 
-    // графа 16
+    // графа 17
     if (row.taxSum == null || row.subjectTaxCredit == null || row.taxSumOutside == null) {
         row.taxSumToReduction = 0
     } else {
@@ -932,9 +929,9 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
     if ((reportPeriod.order == 2 || reportPeriod.order == 3) && row.regionBankDivision != null && prevDataRows != null) {
         for (def prevRow : prevDataRows) {
             if (row.regionBankDivision.equals(prevRow.regionBankDivision)) {
-                // графа 19 пред. периода
-                prev19 = prevRow.everyMonthForSecondKvartalNextPeriod
                 // графа 20 пред. периода
+                prev19 = prevRow.everyMonthForSecondKvartalNextPeriod
+                // графа 21 пред. периода
                 prev20 = prevRow.everyMonthForThirdKvartalNextPeriod
                 break
             }
@@ -944,10 +941,10 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
     prev19 = prev19 == null ? 0 : prev19
     prev20 = prev20 == null ? 0 : prev20
 
-    // графа 19
+    // графа 20
     row.everyMonthForSecondKvartalNextPeriod = (reportPeriod.order == 1 ? row.taxSum : prev19)
 
-    // графа 20
+    // графа 21
     if (reportPeriod.order != 2 || row.taxSum == null || row.everyMonthForSecondKvartalNextPeriod == null || row.everyMonthForKvartalNextPeriod == null) {
         row.everyMonthForThirdKvartalNextPeriod = prev20
     } else {
@@ -955,7 +952,7 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
                 ((reportPeriod.order == 2) ? (row.taxSum - row.everyMonthForSecondKvartalNextPeriod - row.everyMonthForKvartalNextPeriod) : prev20)
     }
 
-    // графа 21
+    // графа 22
     if (reportPeriod.order != 3 || row.taxSum == null || row.everyMonthForThirdKvartalNextPeriod == null) {
         row.everyMonthForFourthKvartalNextPeriod = 0
     } else {
@@ -963,8 +960,8 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
             ((reportPeriod.order == 3) ? (row.taxSum - row.everyMonthForThirdKvartalNextPeriod) : 0)
     }
 
-    // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21
-    // графа 17
+    // графа 18 и 19 расчитывается в конце потому что требует значения графы 20, 21, 22
+    // графа 18
     switch (reportPeriod.order) {
         case 1:
             tmp = row.everyMonthForSecondKvartalNextPeriod
@@ -981,7 +978,7 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
     }
     row.everyMontherPaymentAfterPeriod = tmp
 
-    // графа 18
+    // графа 19
     row.everyMonthForKvartalNextPeriod = (reportPeriod.order == 3 ? row.everyMontherPaymentAfterPeriod : 0)
 }
 
@@ -1043,6 +1040,9 @@ def getPrevDataRows() {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'ca')], getDataRow(dataRows, 'total'), true)
-    dataRowHelper.saveSort()
+    // есть итоговые строки
+    if (dataRows.size() > 2) {
+        sortRows(refBookService, logger, dataRows, [dataRows.find { it.getAlias() == 'ca' }], dataRows.find { it.getAlias() == 'total' }, true)
+        dataRowHelper.saveSort()
+    }
 }

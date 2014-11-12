@@ -16,6 +16,8 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -52,6 +54,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     CheckBox destination;
     @UiField
     CheckBox uncreated;
+    private ListDataProvider<FormToFormRelation> dataProvider = new ListDataProvider<FormToFormRelation>();
 
     @Inject
     public SourcesView(Binder uiBinder, EventBus eventBus) {
@@ -129,7 +132,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         TextColumn<FormToFormRelation> performerColumn = new TextColumn<FormToFormRelation>() {
             @Override
             public String getValue(FormToFormRelation object) {
-                return object.getPerformer().getName();
+                return object.getPerformer() != null ? object.getPerformer().getName() : "";
             }
         };
 
@@ -186,6 +189,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(stateColumn, "Состояние формы");
         table.setColumnWidth(stateColumn, 120, Style.Unit.PX);
         table.setRowCount(0);
+        dataProvider.addDataDisplay(table);
     }
 
     private void initCheckboxes() {
@@ -215,8 +219,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
                     filteredData.add(formToFormRelation);
                 }
             }
+            dataProvider.setList(filteredData);
+            table.setVisibleRange(new Range(0, filteredData.size()));
+            table.flush();
         }
-        table.setRowCount(filteredData.size());
-        table.setRowData(0, filteredData);
     }
 }

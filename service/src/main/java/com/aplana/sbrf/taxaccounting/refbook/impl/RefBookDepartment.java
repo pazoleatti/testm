@@ -188,9 +188,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
         RefBookRecordVersion version = new RefBookRecordVersion();
         version.setRecordId(uniqueRecordId);
-        Date d = new Date(0);
-        version.setVersionStart(d);
-        version.setVersionEnd(d);
+        version.setVersionStart(null);
+        version.setVersionEnd(null);
         return version;
     }
 
@@ -216,7 +215,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBook.getId();
+        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
             try {
@@ -227,7 +226,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attributeRefBook.getId();
+                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                             if (referenceLockData == null) {
@@ -293,7 +292,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
@@ -305,7 +304,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attributeRefBook.getId();
+                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                             if (referenceLockData == null) {
@@ -400,11 +399,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                 //7
                 if (versionFrom != null){
                     if (oldType != TERR_BANK){
-                        //11А.3.1
+                        //Обновляем имена подразделений в печатных формах
                         formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
                     }else {
-                        //11А.3.1А
-                        formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
+                        //Обновляем имена ТБ в печатных формах
+                        formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo, oldType == TERR_BANK && isChangeType);
                     }
                 }
 
@@ -461,7 +460,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
@@ -473,7 +472,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                             if (referenceLockData == null) {
@@ -678,14 +677,14 @@ public class RefBookDepartment implements RefBookDataProvider {
     private void createPeriods(int depId, DepartmentType newDepartmentType, int terrBankId){
         //1
         if (newDepartmentType != DepartmentType.TERR_BANK){
-            if (departmentService.getParentTB((int) depId) != null){
+            if (departmentService.getParentTB(depId) != null){
                 //1А.1.1
                 List<DepartmentReportPeriod> listDRP =
                         periodService.getDRPByDepartmentIds(null, Arrays.asList(terrBankId));
                 if (!listDRP.isEmpty()){
                     for (DepartmentReportPeriod drp : listDRP)
                         //1А.1.1.1
-                        if (periodService.existForDepartment((int) depId, drp.getReportPeriod().getId()))
+                        if (periodService.existForDepartment(depId, drp.getReportPeriod().getId()))
                             return;
                     //1А.1.1.1А
                     for (DepartmentReportPeriod drp : listDRP){
@@ -708,7 +707,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (!listDRP.isEmpty()){
             for (DepartmentReportPeriod drp : listDRP)
                 //1А.1.1.1
-                if (periodService.existForDepartment((int) depId, drp.getReportPeriod().getId()))
+                if (periodService.existForDepartment(depId, drp.getReportPeriod().getId()))
                     return;
             for (DepartmentReportPeriod drp : listDRP){
                 DepartmentReportPeriod drpCopy = new DepartmentReportPeriod();
@@ -857,5 +856,10 @@ public class RefBookDepartment implements RefBookDataProvider {
 	public Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds) {
 		return refBookDao.dereferenceValues(DEPARTMENT_TABLE_NAME, attributeId, recordIds);
 	}
+
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw new UnsupportedOperationException();
+    }
 
 }

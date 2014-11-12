@@ -300,5 +300,8 @@ void addData(def xml, int headRowCount) {
 
 // Сортировка групп и строк
 void sortFormDataRows() {
-    return dataRows.findAll { it.getAlias() != null}
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    dataRowHelper.saveSort()
 }

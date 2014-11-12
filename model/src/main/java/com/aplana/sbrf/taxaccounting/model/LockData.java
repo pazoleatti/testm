@@ -11,10 +11,11 @@ import java.util.Date;
 
 public final class LockData {
 
-    public enum LOCK_OBJECTS {
+    public enum LockObjects {
         REF_BOOK,
         DECLARATION_DATA,
         FORM_DATA,
+        FORM_DATA_IMPORT,
         DECLARATION_TEMPLATE,
         FORM_TEMPLATE,
         LOG_SYSTEM_BACKUP,

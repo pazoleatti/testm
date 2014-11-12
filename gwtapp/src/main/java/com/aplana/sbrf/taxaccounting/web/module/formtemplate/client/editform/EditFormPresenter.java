@@ -22,7 +22,7 @@ import com.gwtplatform.mvp.client.View;
 public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView> implements EditFormUiHandlers {
 
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
-        FormTypeTemplate getDecTypeData();
+        FormTypeTemplate getTypeData();
         boolean isChangeFilter();
         void edit(FormTypeTemplate type);
     }
@@ -49,7 +49,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     @Override
     public void onSave() {
         EditFormTypeAction action = new EditFormTypeAction();
-        FormTypeTemplate formTypeTemplate1 = getView().getDecTypeData();
+        FormTypeTemplate formTypeTemplate1 = getView().getTypeData();
         action.setFormTypeId(formTypeTemplate1.getFormTypeId());
         action.setNewFormTypeName(formTypeTemplate1.getFormTypeName());
         action.setNewFormTypeCode(formTypeTemplate1.getFormTypeCode());
@@ -59,7 +59,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 .defaultCallback(new AbstractCallback<EditFormTypeResult>() {
                     @Override
                     public void onSuccess(EditFormTypeResult result) {
-                        formTypeTemplate = getView().getDecTypeData();
+                        formTypeTemplate = getView().getTypeData();
                         UpdateTableEvent.fire(EditFormPresenter.this);
                     }
                 }, this));

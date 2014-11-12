@@ -57,7 +57,9 @@ public class FormTypeDaoTest {
 
     @Test
     public void testSave(){
-        FormType type = formTypeDao.get(1);
+        FormType type = new FormType();
+        type.setName("");
+        type.setTaxType(TaxType.DEAL);
         type.setStatus(VersionedObjectStatus.DRAFT);
 		type.setCode("code_5");
         Assert.assertEquals(10000, formTypeDao.save(type));

@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.ifrs.client.create;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.*;
@@ -18,6 +20,8 @@ import java.util.List;
 
 public class CreateIfrsDataPresenter extends PresenterWidget<CreateIfrsDataPresenter.MyView> implements CreateIfrsDataUiHandlers {
     private final DispatchAsync dispatchAsync;
+
+    CreateIfrsDataSuccessHandler createIfrsDataSuccessHandler;
 
     public interface MyView extends PopupView, HasUiHandlers<CreateIfrsDataUiHandlers> {
         void init();
@@ -49,13 +53,15 @@ public class CreateIfrsDataPresenter extends PresenterWidget<CreateIfrsDataPrese
                     @Override
                     public void onSuccess(final CreateIfrsDataResult createResult) {
                         getView().hide();
+                        createIfrsDataSuccessHandler.onSuccess(createResult);
                     }
                 }, CreateIfrsDataPresenter.this)
         );
     }
 
 
-    public void initAndShowDialog(final HasPopupSlot slotForMe){
+    public void initAndShowDialog(final HasPopupSlot slotForMe, CreateIfrsDataSuccessHandler createIfrsDataSuccessHandler){
+        this.createIfrsDataSuccessHandler = createIfrsDataSuccessHandler;
         GetReportPeriodsAction action = new GetReportPeriodsAction();
         dispatchAsync.execute(action, CallbackUtils
                 .wrongStateCallback(new AbstractCallback<GetReportPeriodsResult>() {

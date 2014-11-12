@@ -15,7 +15,7 @@ public class FormType implements Serializable {
 	private TaxType taxType;
     private VersionedObjectStatus status;
     private String code;
-    private Boolean isIfrs;
+    private boolean isIfrs;
     private String ifrsName;
 
     /**
@@ -85,11 +85,11 @@ public class FormType implements Serializable {
         this.code = code;
     }
 
-    public Boolean getIsIfrs() {
+    public boolean getIsIfrs() {
         return isIfrs;
     }
 
-    public void setIsIfrs(Boolean isIfrs) {
+    public void setIsIfrs(boolean isIfrs) {
         this.isIfrs = isIfrs;
     }
 

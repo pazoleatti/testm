@@ -103,7 +103,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	@Override
 	public void checkLockedByAnotherUser(Integer formTemplateId, TAUserInfo userInfo){
 		if (formTemplateId!=null){
-            LockData objectLock = lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId);
+            LockData objectLock = lockDataService.getLock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId);
 			if (objectLock != null && objectLock.getUserId() != userInfo.getUser().getId()) {
 				throw new AccessDeniedException("Шаблон формы заблокирован другим пользователем");
 			}
@@ -116,7 +116,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData executeWithReturn() {
-                return lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId);
+                return lockDataService.getLock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId);
             }
 
             @Override
@@ -312,14 +312,14 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
 	public boolean lock(int formTemplateId, TAUserInfo userInfo){
-        LockData objectLock = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId,
+        LockData objectLock = lockDataService.lock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId,
                 userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
 	}
 
 	@Override
 	public boolean unlock(int formTemplateId, TAUserInfo userInfo){
-        lockDataService.unlock(LockData.LOCK_OBJECTS.FORM_TEMPLATE.name() + "_" + formTemplateId,
+        lockDataService.unlock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId,
                 userInfo.getUser().getId());
         return true;
 	}

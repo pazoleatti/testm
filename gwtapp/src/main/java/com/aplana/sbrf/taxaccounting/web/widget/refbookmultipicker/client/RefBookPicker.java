@@ -108,4 +108,10 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
     boolean isVisible();
 
     void setVisible(boolean visible);
+
+    /**
+     * Определяет единственную колонку, отображаемую в виджете
+     * @param columnAlias алиас колонки
+     */
+    void setSingleColumn(String columnAlias);
 }

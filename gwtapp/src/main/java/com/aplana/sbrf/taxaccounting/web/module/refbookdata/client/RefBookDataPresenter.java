@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
@@ -39,7 +40,7 @@ import java.util.List;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
-		UpdateForm.UpdateFormHandler,  RollbackTableRowSelection.RollbackTableRowSelectionHandler{
+		UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler{
 
 	@ProxyCodeSplit
 	@NameToken(RefBookDataTokens.refBookData)
@@ -75,7 +76,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void resetRefBookElements();
 		RefBookDataRow getSelectedRow();
 		Date getRelevanceDate();
-        void setReadOnlyMode(boolean readOnly);
         int getPage();
         void setPage(int page);
         /** Метод для получения строки с поля фильтрации*/
@@ -88,6 +88,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void updateSendQuery(boolean isAvailable);
         //Показывает/скрывает поля, которые необходимы только для версионирования
         void setVersionedFields(boolean isVisible);
+        // Номер столбца, по которому осуществляется сортировка
+        int getSortColumnIndex();
+        // Признак сортировки по-возрастанию
+        boolean isAscSorting();
     }
 
 	@Inject
@@ -181,7 +185,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onRelevanceDateChanged() {
 		getView().updateTable();
-		editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
 		editFormPresenter.show(null);
 		editFormPresenter.setMode(mode);
 	}
@@ -248,7 +251,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public void onBind(){
 		addRegisteredHandler(UpdateForm.getType(), this);
 		addRegisteredHandler(RollbackTableRowSelection.getType(), this);
-	}
+        addRegisteredHandler(SetFormMode.getType(), this);
+    }
 
 	private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
 
@@ -262,6 +266,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 			action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
 			action.setRelevanceDate(getView().getRelevanceDate());
             action.setSearchPattern(getView().getSearchPattern());
+            action.setSortColumnIndex(getView().getSortColumnIndex());
+            action.setAscSorting(getView().isAscSorting());
 			dispatcher.execute(action,
 					CallbackUtils.defaultCallback(
 							new AbstractCallback<GetRefBookTableDataResult>() {
@@ -307,9 +313,19 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     }
 
     @Override
+    public void saveChanges() {
+        editFormPresenter.onSaveClicked(true);
+    }
+
+    @Override
     public void cancelChanges() {
         editFormPresenter.setIsFormModified(false);
         editFormPresenter.onCancelClicked();
+    }
+
+    @Override
+    public boolean isFormModified() {
+        return editFormPresenter.isFormModified();
     }
 
     @Override
@@ -320,5 +336,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void onReset(){
         this.dialogPresenter.getView().hide();
+    }
+
+    @Override
+    public void onSetFormMode(SetFormMode event) {
+        setMode(event.getFormMode());
     }
 }
