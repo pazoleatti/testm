@@ -239,7 +239,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
 
     @Override
     public String generateTaskKey(Integer reportPeriod) {
-        return LockData.LOCK_OBJECTS.IFRS.name() + "_" + reportPeriod;
+        return LockData.LockObjects.IFRS.name() + "_" + reportPeriod;
     }
 
     @Override

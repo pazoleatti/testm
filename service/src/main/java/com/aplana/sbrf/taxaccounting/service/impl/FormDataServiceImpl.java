@@ -132,6 +132,13 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
         loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, FormDataEvent.IMPORT);
+        if (lockService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual)) {
+            lockService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual, userInfo.getUser().getId());
+        } else {
+            //Если блокировка уже не существует, значит загружаемые данные не актуальны - откатываем их
+            //Т.к она снимается только при закрытии страницы, то этот эксепшен все равно никто не увидит
+            throw new ServiceException("Загружаемые данные уже не актуальны. Изменения были отменены.");
+        }
     }
 
     @Override
@@ -144,7 +151,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId), userInfo.getUser());
+        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId), userInfo.getUser());
 
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
 
@@ -347,7 +354,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void addRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
 
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 		
@@ -371,7 +378,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
 
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 		
@@ -405,7 +412,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
@@ -422,7 +429,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
-		checkLockAnotherUser(lockService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId()), logger, userInfo.getUser());
+		checkLockAnotherUser(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), logger, userInfo.getUser());
 		// Временный срез формы должен быть в актуальном состоянии
 		// Если не заблокировано то откат среза на всякий случай
 		if (getObjectLock(formData.getId(), userInfo)==null){
@@ -460,7 +467,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
@@ -539,7 +546,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
-        checkLockAnotherUser(lockService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId),
+        checkLockAnotherUser(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId),
                 logger,  userInfo.getUser());
 
         if (manual) {
@@ -566,7 +573,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         // Форма не должна быть заблокирована даже текущим пользователем
-        String lockKey = LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId;
+        String lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + formDataId;
         checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
         // Временный срез формы должен быть в актуальном состоянии
         dataRowDao.rollback(formDataId);
@@ -602,7 +609,7 @@ public class FormDataServiceImpl implements FormDataService {
                             Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
                             if (attributeId != null) {
                                 RefBook refBook = refBookDao.getByAttribute(attributeId);
-                                String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBook.getId();
+                                String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
                                 if (!lockedObjects.contains(referenceLockKey)) {
                                     LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                                     if (referenceLockData == null) {
@@ -887,7 +894,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
-        checkLockAnotherUser(lockService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId,
+        checkLockAnotherUser(lockService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId,
                 userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), null,  userInfo.getUser());
 		dataRowDao.rollback(formDataId);
 	}
@@ -898,7 +905,7 @@ public class FormDataServiceImpl implements FormDataService {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
-                lockService.unlock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId());
+                lockService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId());
                 dataRowDao.rollback(formDataId);
             }
 
@@ -915,7 +922,7 @@ public class FormDataServiceImpl implements FormDataService {
         return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData executeWithReturn() {
-                return lockService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId);
+                return lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId);
             }
 
             @Override
@@ -1188,10 +1195,10 @@ public class FormDataServiceImpl implements FormDataService {
             for (boolean showChecked : b) {
                 for(boolean saved : b) {
                     if (manual != null) {
-                        lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved), 0, true);
+                        lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved), 0, true);
                     } else {
                         for(boolean all: b) {
-                            lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LOCK_OBJECTS.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, all, saved), 0, true);
+                            lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, all, saved), 0, true);
                         }
                     }
                 }

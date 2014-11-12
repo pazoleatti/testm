@@ -149,11 +149,11 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public LockData lock(TAUserInfo userInfo) {
-        return lockDataService.lock(LockData.LOCK_OBJECTS.LOG_SYSTEM_BACKUP.name(), userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        return lockDataService.lock(LockData.LockObjects.LOG_SYSTEM_BACKUP.name(), userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
     }
 
     @Override
     public void unlock(TAUserInfo userInfo) {
-        lockDataService.unlock(LockData.LOCK_OBJECTS.LOG_SYSTEM_BACKUP.name(), userInfo.getUser().getId());
+        lockDataService.unlock(LockData.LockObjects.LOG_SYSTEM_BACKUP.name(), userInfo.getUser().getId());
     }
 }

@@ -49,7 +49,7 @@ public class DataRowServiceImpl implements DataRowService {
 	@Override
 	@Transactional(readOnly = false)
 	public void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows, boolean manual) {
-        checkLockedMe(lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formDataId), userInfo.getUser());
+        checkLockedMe(lockDataService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId), userInfo.getUser());
 		if ((dataRows != null) && (!dataRows.isEmpty())) {
 			FormData fd = formDataDao.get(formDataId, manual);
 			dataRowDao.updateRows(fd, dataRows);
