@@ -200,6 +200,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
             action.setRecordsId(Arrays.asList(selected));
             action.setOkDelete(false);
             action.setRefBookId(refBookDataId);
+            final RefBookItem parentRefBookItem = getView().getSelectedItem().getParent();
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteNonVersionRefBookRowResult>() {
                 @Override
                 public void onSuccess(DeleteNonVersionRefBookRowResult result) {
@@ -219,7 +220,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                                         //editFormPresenter.show(null);
                                         editFormPresenter.setNeedToReload();
-                                        RefBookItem parentRefBookItem = getView().getSelectedItem().getParent();
                                         getView().deleteItem(selected);
                                         getView().setSelected(parentRefBookItem!=null?parentRefBookItem.getId():0);
                                     }
@@ -236,6 +236,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         //editFormPresenter.show(null);
                         editFormPresenter.setNeedToReload();
                         getView().deleteItem(selected);
+                        getView().setSelected(parentRefBookItem!=null?parentRefBookItem.getId():0);
                     }
                 }
             }, RefBookHierDataPresenter.this));
