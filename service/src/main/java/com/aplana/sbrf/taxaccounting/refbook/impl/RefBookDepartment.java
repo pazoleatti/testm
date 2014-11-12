@@ -215,7 +215,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + refBook.getId();
+        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
             try {
@@ -226,7 +226,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attributeRefBook.getId();
+                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                             if (referenceLockData == null) {
@@ -292,7 +292,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
@@ -304,7 +304,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attributeRefBook.getId();
+                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                             if (referenceLockData == null) {
@@ -460,7 +460,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
         List<String> lockedObjects = new ArrayList<String>();
         int userId = logger.getTaUserInfo().getUser().getId();
-        String lockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + REF_BOOK_ID;
+        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
         if (lockData == null) {
@@ -472,7 +472,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LOCK_OBJECTS.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
                             if (referenceLockData == null) {
