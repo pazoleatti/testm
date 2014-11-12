@@ -36,6 +36,7 @@ public abstract class ScriptTestBase {
             testHelper = new TestScriptHelper(getFolderPath(), getFormData(), getMockHelper());
         }
         testHelper.getLogger().clear();
+        testHelper.initRowData();
     }
 
     /**
@@ -64,9 +65,14 @@ public abstract class ScriptTestBase {
     }
 
     /**
-     * Файл для импорта
+     * Файл для импорта из Excel-файлов (из интерфейса)
      */
-    protected abstract InputStream getImportInputStream();
+    protected abstract InputStream getImportXlsInputStream();
+
+    /**
+     * Файл для импорта из .rnu-файлов (загрузка ТФ)
+     */
+    protected abstract InputStream getImportRnuInputStream();
 
     /**
      * Хэлпер с заглушками других сервисов
@@ -78,7 +84,7 @@ public abstract class ScriptTestBase {
      */
     protected ScriptTestMockHelper getDefaultScriptTestMockHelper(Class clazz) {
         try {
-            return new DefaultScriptTestMockHelper(RefBookReadHelper.readFile(clazz.getResource(".")));
+            return new DefaultScriptTestMockHelper(RefBookReadHelper.readFromFolder(clazz.getResource(".")));
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
