@@ -1010,7 +1010,10 @@ void generateXML() {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
                                 obRasch = getRefBookValue(26, row.calcFlag)?.CODE?.value
-                                naimOP = getRefBookValue(30, row.regionBankDivision)?.NAME?.value
+                                def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
+                                if (record33 != null) {
+                                    naimOP = record33?.ADDITIONAL_NAME?.value
+                                }
                                 kppop = row.kpp
                                 obazUplNalOP = getRefBookValue(25, row.obligationPayTax)?.CODE?.value
                                 dolaNalBaz = row.baseTaxOf
