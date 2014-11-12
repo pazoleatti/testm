@@ -57,7 +57,7 @@ public class GetPeriodIntervalHandler extends AbstractActionHandler<GetPeriodInt
             if (currentAssign.getStartDateAssign().before(minStartDate)) {
                 minStartDate = currentAssign.getStartDateAssign();
             }
-            if (currentAssign.getEndDateAssign() == null || currentAssign.getEndDateAssign().after(maxEndDate)) {
+            if (currentAssign.getEndDateAssign() == null || (maxEndDate != null && currentAssign.getEndDateAssign().after(maxEndDate))) {
                 maxEndDate = currentAssign.getEndDateAssign();
             }
 
