@@ -77,10 +77,6 @@ switch (formDataEvent) {
         prevPeriodCheck()
         logicCheck()
         break
-    case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED: // после принятия из подготовлена
-        prevPeriodCheck()
-        logicCheck()
-        break
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, logger)
         calc()
