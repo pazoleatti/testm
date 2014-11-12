@@ -614,7 +614,7 @@ void generateXML() {
     }
     if (dataRowsSimpleConsumption != null) {
         // 780, 811, 812, 813, 940, 950
-        [780: [20530], 811: [20700], 812: [20698], 813: [20690], 940: [23040], 950: [23050]].each { id, codes ->
+        [780:[20530], 811:[20700], 812:[20698], 813:[20690], 940:[23040], 950:[23050]].each { id, codes ->
             def result = getLong(getCalculatedSimpleConsumption(dataRowsSimpleConsumption, codes))
             if (result != 0) {
                 svCelSred[id] = result
@@ -976,88 +976,29 @@ void generateXML() {
                     // Приложение № 3 к Листу 02 - конец
 
                     // Приложение № 5 к Листу 02
-                    /** ОбРасч. Столбец «Признак расчёта». */
-                    def obRasch = emptyNull
-                    /** НаимОП. Столбец «Подразделение территориального банка». */
-                    def naimOP = emptyNull
-                    /** КППОП. Столбец «КПП». */
-                    def kppop = emptyNull
-                    /** ОбязУплНалОП. Столбец «Обязанность по уплате налога». */
-                    def obazUplNalOP = emptyNull
-                    /** ДоляНалБаз. Столбец «Доля налоговой базы (%)». */
-                    def dolaNalBaz = emptyNull
-                    /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.)». */
-                    def nalBazaDola = emptyNull
-                    /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
-                    def stavNalSubRF = emptyNull
-                    /** СумНал. Столбец «Сумма налога». */
-                    def sumNal = emptyNull
-                    /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
-                    def nalNachislSubRF = emptyNull
-                    /** СумНалП. Столбец «Сумма налога к доплате». */
-                    def sumNalP = emptyNull
-                    /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога». */
-                    def nalViplVneRF = emptyNull
-                    /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)». */
-                    def mesAvPlat = emptyNull
-                    /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
-                    def mesAvPlat1CvSled = emptyNull
-
                     if (dataRowsAdvance != null && !dataRowsAdvance.isEmpty()) {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
-                                obRasch = getRefBookValue(26, row.calcFlag)?.CODE?.value
-                                naimOP = getDepartmentCorrectName(row)
-                                kppop = row.kpp
-                                obazUplNalOP = getRefBookValue(25, row.obligationPayTax)?.CODE?.value
-                                dolaNalBaz = row.baseTaxOf
-                                nalBazaDola = row.baseTaxOfRub
-                                stavNalSubRF = row.subjectTaxStavka
-                                sumNal = row.taxSum
-                                nalNachislSubRF = row.subjectTaxCredit
-                                sumNalP = (row.taxSumToPay != 0) ? row.taxSumToPay : (- row.taxSumToReduction)
-                                nalViplVneRF = row.taxSumOutside
-                                mesAvPlat = row.everyMontherPaymentAfterPeriod
-                                mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
-
                                 // 0..n
                                 РаспрНалСубРФ(
-                                        ТипНП : typeNP,
-                                        ОбРасч : obRasch,
-                                        НаимОП : naimOP,
-                                        КППОП : kppop,
-                                        ОбязУплНалОП : obazUplNalOP,
-                                        НалБазаОрг : nalBazaIsch,
-                                        НалБазаБезЛиквОП : empty,
-                                        ДоляНалБаз : dolaNalBaz,
-                                        НалБазаДоля : nalBazaDola,
-                                        СтавНалСубРФ : stavNalSubRF,
-                                        СумНал : sumNal,
-                                        НалНачислСубРФ : nalNachislSubRF,
-                                        НалВыплВнеРФ : nalViplVneRF,
-                                        СумНалП : sumNalP,
-                                        МесАвПлат : mesAvPlat,
-                                        МесАвПлат1КвСлед : mesAvPlat1CvSled)
+                                        ТипНП: typeNP,
+                                        ОбРасч: getRefBookValue(26, row.calcFlag)?.CODE?.value,
+                                        НаимОП: getDepartmentCorrectName(row),
+                                        КППОП: row.kpp,
+                                        ОбязУплНалОП: getRefBookValue(25, row.obligationPayTax)?.CODE?.value,
+                                        НалБазаОрг: nalBazaIsch,
+                                        НалБазаБезЛиквОП: empty,
+                                        ДоляНалБаз: row.baseTaxOf,
+                                        НалБазаДоля: row.baseTaxOfRub,
+                                        СтавНалСубРФ: row.subjectTaxStavka,
+                                        СумНал: row.taxSum,
+                                        НалНачислСубРФ: row.subjectTaxCredit,
+                                        НалВыплВнеРФ: row.taxSumOutside,
+                                        СумНалП: (row.taxSumToPay != 0) ? row.taxSumToPay : (-row.taxSumToReduction),
+                                        МесАвПлат: row.everyMontherPaymentAfterPeriod,
+                                        МесАвПлат1КвСлед: row.everyMonthForKvartalNextPeriod)
                             }
                         }
-                    } else {
-                        РаспрНалСубРФ(
-                                ТипНП : typeNP,
-                                ОбРасч : obRasch,
-                                НаимОП : naimOP,
-                                КППОП : kppop,
-                                ОбязУплНалОП : obazUplNalOP,
-                                НалБазаОрг : nalBazaIsch,
-                                НалБазаБезЛиквОП : empty,
-                                ДоляНалБаз : dolaNalBaz,
-                                НалБазаДоля : nalBazaDola,
-                                СтавНалСубРФ : stavNalSubRF,
-                                СумНал : sumNal,
-                                НалНачислСубРФ : nalNachislSubRF,
-                                НалВыплВнеРФ : nalViplVneRF,
-                                СумНалП : sumNalP,
-                                МесАвПлат : mesAvPlat,
-                                МесАвПлат1КвСлед : mesAvPlat1CvSled)
                     }
                     // Приложение № 5 к Листу 02 - конец
                 }
