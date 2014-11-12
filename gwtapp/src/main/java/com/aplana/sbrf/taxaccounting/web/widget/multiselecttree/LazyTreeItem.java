@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookRecordDereferenceValue;
 import com.aplana.sbrf.taxaccounting.web.widget.ui.HasHighlighting;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.DOM;
@@ -154,7 +155,7 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
     @Override
     public void highLightText(String textToHighLight) {
         if(textToHighLight!= null && !textToHighLight.isEmpty()) {
-            String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getName(),
+            String highLightedString = RegExp.compile(TextUtils.quote(textToHighLight), "gi").replace(getName(),
                     "<span style=\"color: #ff0000;\">$&</span>");
             //http://conf.aplana.com/pages/viewpage.action?pageId=9597422#id-Формавыбораизсправочника-Элементыформы.1
             if (!getAdditionalAttributeMatches().isEmpty()){
@@ -162,7 +163,7 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
                 for (RefBookRecordDereferenceValue value : getAdditionalAttributeMatches()){
                     if (value.getValueAttrAlias().equals("PARENT_ID") || !value.getDereferenceValue().contains(textToHighLight))
                         continue;
-                    sb.append(value.getAttrName()).append(": ").append(RegExp.compile(textToHighLight, "gi").replace(value.getDereferenceValue(),
+                    sb.append(value.getAttrName()).append(": ").append(RegExp.compile(TextUtils.quote(textToHighLight), "gi").replace(value.getDereferenceValue(),
                             "<span style=\"color: #ff0000;\">$&</span>")).append("; ");
                 }
                 if (sb.length()>3) sb.delete(sb.length() - 2, sb.length());
