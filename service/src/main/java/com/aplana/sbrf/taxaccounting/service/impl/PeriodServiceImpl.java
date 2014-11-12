@@ -414,7 +414,16 @@ public class PeriodServiceImpl implements PeriodService {
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
 
         //Check forms
-        List<FormData> formDatas = formDataService.find(departmentIds, drp.getReportPeriod().getId());
+        FormDataFilter dataFilter = new FormDataFilter();
+        if (drp.getCorrectionDate() != null) {
+            dataFilter.setCorrectionTag(true);
+            dataFilter.setCorrectionDate(drp.getCorrectionDate());
+        } else {
+            dataFilter.setCorrectionTag(false);
+        }
+        dataFilter.setDepartmentIds(departmentIds);
+        dataFilter.setReportPeriodIds(Arrays.asList(drp.getReportPeriod().getId()));
+        List<FormData> formDatas = formDataSearchService.findDataByFilter(dataFilter);
         for (FormData fd : formDatas) {
             logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
                     fd.getFormType().getName(), fd.getKind().getName(),
@@ -424,6 +433,12 @@ public class PeriodServiceImpl implements PeriodService {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDepartmentIds(departmentIds);
         filter.setReportPeriodIds(Collections.singletonList(drp.getReportPeriod().getId()));
+        if (drp.getCorrectionDate() != null) {
+            filter.setCorrectionTag(true);
+            filter.setCorrectionDate(drp.getCorrectionDate());
+        } else {
+            filter.setCorrectionTag(false);
+        }
         List<Long> declarations = declarationDataSearchService.getDeclarationIds(filter, DeclarationDataSearchOrdering.ID, true);
         for (Long id : declarations) {
             DeclarationData dd = declarationDataService.get(id, user);
