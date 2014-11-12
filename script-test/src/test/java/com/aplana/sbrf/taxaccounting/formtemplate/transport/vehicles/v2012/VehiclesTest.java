@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
+import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,6 +30,7 @@ public class VehiclesTest extends ScriptTestBase {
         FormData formData = new FormData();
         FormType formType = new FormType();
         formType.setId(TYPE_ID);
+        formData.setId(TestScriptHelper.CURRENT_FORM_DATA_ID);
         formData.setFormType(formType);
         formData.setFormTemplateId(TYPE_ID);
         formData.setKind(KIND);
@@ -45,8 +47,14 @@ public class VehiclesTest extends ScriptTestBase {
     }
 
     @Override
-    protected InputStream getImportInputStream() {
+    protected InputStream getImportXlsInputStream() {
         return VehiclesTest.class.getResourceAsStream("importFile.xlsm");
+    }
+
+    @Override
+    protected InputStream getImportRnuInputStream() {
+        // Не требуется
+        return null;
     }
 
     @Override
@@ -83,8 +91,7 @@ public class VehiclesTest extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        InputStream importInputStream = getImportInputStream();
-        testHelper.setImportFileInputStream(importInputStream);
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.importExcel();
         Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
         checkLogger();

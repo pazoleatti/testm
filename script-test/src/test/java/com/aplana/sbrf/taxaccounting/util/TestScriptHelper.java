@@ -6,6 +6,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
+import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
+import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 
@@ -21,6 +25,9 @@ import java.io.*;
  * @author Levykin
  */
 public class TestScriptHelper {
+    // Id текущего для теста экземпляра НФ
+    public final static long CURRENT_FORM_DATA_ID = 1;
+
     // Пкть к скрипту
     private String path;
     // Текст скрипта
@@ -41,9 +48,13 @@ public class TestScriptHelper {
     private final static String HEADERS_FILE_NAME = "headers.xml";
     // Сервис работы со скриптами
     private static ScriptingService scriptingService = new ScriptingService();
+    // Mock-сервисы
+    private FormDataService formDataService;
+    private DepartmentFormTypeService departmentFormTypeService;
+    private ReportPeriodService reportPeriodService;
+    private RefBookService refBookService;
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
-    private DataRowHelper dataRowHelper;
 
     // Заданы константно
     private Logger logger = new Logger();
@@ -67,19 +78,35 @@ public class TestScriptHelper {
         super();
         this.formData = formData;
         this.mockHelper = mockHelper;
+        // Id подразделения пользователя совпадает c Id подразделения НФ
+        userDepartment.setId(formData.getDepartmentId());
         // Шаблон НФ из файла
+        FormType formType = formData.getFormType();
         formData.initFormTemplateParams(getTemplate(SCRIPT_PATH_PREFIX + path));
+        formData.setFormType(formType); // Сбрасывается в FormData#initFormTemplateParams
         this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;
         try {
             script = readFile(this.path, charsetName);
         } catch (IOException e) {
             throw new ServiceException("Can't load script with path \"" + this.path + "\".", e);
         }
+        // Моск сервисов
+        initMock();
+    }
+
+    /**
+     * Моск сервисов
+     */
+    private void initMock() {
+        formDataService = mockHelper.mockFormDataService();
+        departmentFormTypeService = mockHelper.mockDepartmentFormTypeService();
+        reportPeriodService = mockHelper.mockReportPeriodService();
+        refBookService = mockHelper.mockRefBookService();
     }
 
     /**
      * Получение шаблона НФ из файлов content.xml, headers.xml, rows.xml
-     * Затратная по времени операция
+     * Затратная по времени операция, выполняется один раз для одного скрипта
      */
     private FormTemplate getTemplate(String path) {
         try {
@@ -123,10 +150,24 @@ public class TestScriptHelper {
     }
 
     /**
+     * Событие FormDataEvent.CREATE
+     */
+    public void create() {
+        execute(FormDataEvent.CREATE);
+    }
+
+    /**
      * Событие FormDataEvent.CHECK
      */
     public void check() {
         execute(FormDataEvent.CHECK);
+    }
+
+    /**
+     * Событие FormDataEvent.AFTER_CREATE
+     */
+    public void afterCreate() {
+        execute(FormDataEvent.AFTER_CREATE);
     }
 
     /**
@@ -151,10 +192,39 @@ public class TestScriptHelper {
     }
 
     /**
+     * Событие FormDataEvent.SORT_ROWS
+     */
+    public void sortRows() {
+        execute(FormDataEvent.SORT_ROWS);
+    }
+
+    /**
+     * Событие FormDataEvent.COMPOSE
+     */
+    public void compose() {
+        execute(FormDataEvent.COMPOSE);
+    }
+
+    /**
      * Событие FormDataEvent.IMPORT
      */
     public void importExcel() {
         execute(FormDataEvent.IMPORT);
+    }
+
+    /**
+     * Событие FormDataEvent.IMPORT_TRANSPORT_FILE
+     */
+    public void importTransportFile() {
+        execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+    }
+
+    /**
+     * Инициализация строк НФ. Строки подтягиваются из макета.
+     */
+    public void initRowData() {
+        // Строки из шаблона
+        mockHelper.getDataRowHelper().save(formTemplate.getRows());
     }
 
     /**
@@ -163,9 +233,11 @@ public class TestScriptHelper {
     private void execute(FormDataEvent formDataEvent) {
         Bindings bindings = scriptingService.getEngine().createBindings();
         bindings.put("formDataEvent", formDataEvent);
-        bindings.put("formDataService", mockHelper.mockFormDataService());
-        bindings.put("reportPeriodService", mockHelper.mockReportPeriodService());
-        bindings.put("refBookService", mockHelper.mockRefBookService());
+        bindings.put("formDataService", formDataService);
+        bindings.put("reportPeriodService", reportPeriodService);
+        bindings.put("refBookService", refBookService);
+        bindings.put("departmentFormTypeService", departmentFormTypeService);
+        bindings.put("formDataDepartment", userDepartment);
         bindings.put("formData", formData);
         bindings.put("logger", logger);
         bindings.put("user", user);
@@ -179,15 +251,11 @@ public class TestScriptHelper {
             bindings.put("UploadFileName", "test-file-name.xlsm");
         }
 
-        // Начальные строки
-        mockHelper.getDataRowHelper().save(formTemplate.getRows());
-
         try {
             scriptingService.getEngine().eval(script, bindings);
         } catch (ScriptException e) {
             scriptingService.logScriptException(e, logger);
         }
-        dataRowHelper = mockHelper.getDataRowHelper();
     }
 
     /**
@@ -228,11 +296,52 @@ public class TestScriptHelper {
         }
     }
 
+    /**
+     * Логгер
+     */
     public Logger getLogger() {
         return logger;
     }
 
+    /**
+     * DataRowHelper НФ
+     */
     public DataRowHelper getDataRowHelper() {
-        return dataRowHelper;
+        return mockHelper.getDataRowHelper();
+    }
+
+    /**
+     * Макет НФ
+     */
+    public FormTemplate getFormTemplate() {
+        return formTemplate;
+    }
+
+    /**
+     * Mock RefBookService для реализации mock-логики внутри теста
+     */
+    public RefBookService getRefBookService() {
+        return refBookService;
+    }
+
+    /**
+     * Mock ReportPeriodService для реализации mock-логики внутри теста
+     */
+    public ReportPeriodService getReportPeriodService() {
+        return reportPeriodService;
+    }
+
+    /**
+     * Mock DepartmentFormTypeService для реализации mock-логики внутри теста
+     */
+    public DepartmentFormTypeService getDepartmentFormTypeService() {
+        return departmentFormTypeService;
+    }
+
+    /**
+     * Mock FormDataService для реализации mock-логики внутри теста
+     */
+    public FormDataService getFormDataService() {
+        return formDataService;
     }
 }

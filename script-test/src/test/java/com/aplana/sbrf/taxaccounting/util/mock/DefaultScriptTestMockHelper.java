@@ -6,11 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.script.ImportService;
-import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import org.mockito.invocation.InvocationOnMock;
@@ -31,7 +29,8 @@ import static org.mockito.Mockito.when;
  * @author Levykin
  */
 public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
-    private DataRowHelper dataRowHelper;
+    // DataRowHelper для тестируемой НФ
+    private DataRowHelper currentDataRowHelper = new DataRowHelperStub();
     private Map<Long, Map<Long, Map<String, RefBookValue>>> refBookMap;
     public static Calendar PERIOD_START_DATE = Calendar.getInstance();
     public static Calendar PERIOD_END_DATE = Calendar.getInstance();
@@ -51,10 +50,11 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
 
     @Override
     public FormDataService mockFormDataService() {
-        FormDataService formDataService = mock(FormDataService.class);
-        dataRowHelper = new DataRowHelperStub();
+        // Mock имплементации из-за обращения к реальным методам (addRow())
+        FormDataService formDataService = mock(FormDataServiceImpl.class);
         // DataRowHelper
-        when(formDataService.getDataRowHelper(any(FormData.class))).thenReturn(dataRowHelper);
+        when(formDataService.getDataRowHelper(any(FormData.class))).thenReturn(currentDataRowHelper);
+
         // Работа со справочниками
         when(formDataService.getRefBookRecordIdImport(anyLong(), anyMap(), anyMap(), anyString(), anyString(),
                 any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Object>() {
@@ -81,16 +81,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
             }
         });
         // Работа со строками НФ
-        when(formDataService.addRow(any(FormData.class), any(DataRow.class), anyList(), anyList())).thenAnswer(new Answer<DataRow<Cell>>() {
-            @Override
-            public DataRow<Cell> answer(InvocationOnMock invocation) throws Throwable {
-                DataRow<Cell> dataRow = (DataRow<Cell>) invocation.getArguments()[1];
-                // Не учитываются стили и редактируемость как в FormDataServiceImpl
-                dataRowHelper.getAll().add(dataRow);
-                return null;
-            }
-        });
-
+        when(formDataService.addRow(any(FormData.class), any(DataRow.class), anyList(), anyList())).thenCallRealMethod();
         return formDataService;
     }
 
@@ -169,6 +160,12 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return refBookService;
     }
 
+    @Override
+    public DepartmentFormTypeService mockDepartmentFormTypeService() {
+        DepartmentFormTypeService departmentFormTypeService = mock(DepartmentFormTypeService.class);
+        return departmentFormTypeService;
+    }
+
     /**
      * Получение всех значений записи справочника по Id
      */
@@ -194,6 +191,6 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
 
     @Override
     public DataRowHelper getDataRowHelper() {
-        return dataRowHelper;
+        return currentDataRowHelper;
     }
 }

@@ -26,9 +26,10 @@ public class RefBookReadHelper {
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.mm.yyyy");
 
     /**
+     * Получение структуры:
      * Id справочника → record_id → Записи справочника
      */
-    public static Map<Long, Map<Long, Map<String, RefBookValue>>> readFile(URL folderUrl) throws IOException, ParseException {
+    public static Map<Long, Map<Long, Map<String, RefBookValue>>> readFromFolder(URL folderUrl) throws IOException, ParseException {
         Map<Long, Map<Long, Map<String, RefBookValue>>> retVal = new HashMap<Long, Map<Long, Map<String, RefBookValue>>>();
         File folder = new File(folderUrl.getPath());
         for (String fileName : folder.list()) {

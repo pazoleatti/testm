@@ -37,18 +37,20 @@ public class DataRowHelperStub implements DataRowHelper {
 
     @Override
     public void save(List<DataRow<Cell>> dataRows) {
-        rowList.clear();
-        rowList.addAll(dataRows);
+        rowList = new LinkedList(dataRows);
+        updateIndexes();
     }
 
     @Override
     public void insert(DataRow<Cell> dataRow, int index) {
-        rowList.add(index, dataRow);
+        rowList.add(index - 1, dataRow);
+        updateIndexes();
     }
 
     @Override
     public void insert(List<DataRow<Cell>> dataRows, int index) {
-        rowList.addAll(index, dataRows);
+        rowList.addAll(index - 1, dataRows);
+        updateIndexes();
     }
 
     @Override
@@ -63,12 +65,18 @@ public class DataRowHelperStub implements DataRowHelper {
 
     @Override
     public void delete(DataRow<Cell> dataRow) {
-        rowList.remove(dataRow);
+        if (dataRow != null) {
+            rowList.remove(dataRow);
+            updateIndexes();
+        }
     }
 
     @Override
     public void delete(List<DataRow<Cell>> dataRows) {
-        rowList.removeAll(dataRows);
+        if (dataRows != null) {
+            rowList.removeAll(dataRows);
+            updateIndexes();
+        }
     }
 
     @Override
@@ -126,5 +134,15 @@ public class DataRowHelperStub implements DataRowHelper {
     @Override
     public void saveSort() {
         // Не требуется
+    }
+
+    /**
+     * Пересчет индексов строк
+     */
+    private void updateIndexes() {
+        int counter = 0;
+        for (DataRow<Cell> row : rowList) {
+            row.setIndex(++counter);
+        }
     }
 }
