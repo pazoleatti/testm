@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.multiselecttree;
 
 import com.aplana.sbrf.taxaccounting.web.widget.ui.HasHighlighting;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -98,7 +99,7 @@ public class MultiSelectTreeItem extends TreeItem implements HasClickHandlers,
     @Override
     public void highLightText(String textToHighLight) {
         if(textToHighLight!= null && !textToHighLight.isEmpty()) {
-            String highLightedString = RegExp.compile(textToHighLight, "gi").replace(getText(), "<span style=\"color: #ff0000;\">$&</span>");
+            String highLightedString = RegExp.compile(TextUtils.quote(textToHighLight), "gi").replace(getText(), "<span style=\"color: #ff0000;\">$&</span>");
             label.getElement().setInnerHTML(highLightedString);
             DOM.getChild(checkBox.getElement(), 1).setInnerHTML(highLightedString);
             DOM.getChild(radioButton.getElement(), 1).setInnerHTML(highLightedString);
