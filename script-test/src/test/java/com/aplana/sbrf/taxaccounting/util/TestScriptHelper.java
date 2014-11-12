@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
@@ -53,6 +54,7 @@ public class TestScriptHelper {
     private DepartmentFormTypeService departmentFormTypeService;
     private ReportPeriodService reportPeriodService;
     private RefBookService refBookService;
+    private RefBookFactory refBookFactory;
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -102,6 +104,7 @@ public class TestScriptHelper {
         departmentFormTypeService = mockHelper.mockDepartmentFormTypeService();
         reportPeriodService = mockHelper.mockReportPeriodService();
         refBookService = mockHelper.mockRefBookService();
+        refBookFactory = mockHelper.mockRefBookFactory();
     }
 
     /**
@@ -237,6 +240,7 @@ public class TestScriptHelper {
         bindings.put("reportPeriodService", reportPeriodService);
         bindings.put("refBookService", refBookService);
         bindings.put("departmentFormTypeService", departmentFormTypeService);
+        bindings.put("refBookFactory", refBookFactory);
         bindings.put("formDataDepartment", userDepartment);
         bindings.put("formData", formData);
         bindings.put("logger", logger);
@@ -343,5 +347,12 @@ public class TestScriptHelper {
      */
     public FormDataService getFormDataService() {
         return formDataService;
+    }
+
+    /**
+     * Mock RefBookFactory для реализации mock-логики внутри теста
+     */
+    public RefBookFactory getRefBookFactory() {
+        return refBookFactory;
     }
 }

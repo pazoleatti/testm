@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.util.mock;
 
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 
@@ -14,6 +15,7 @@ public interface ScriptTestMockHelper {
     ImportService mockImportService();
     RefBookService mockRefBookService();
     DepartmentFormTypeService mockDepartmentFormTypeService();
+    RefBookFactory mockRefBookFactory();
 
     DataRowHelper getDataRowHelper();
 }

@@ -161,17 +161,17 @@ public class Vehicles1Test extends ScriptTestBase {
 
     //@Test TODO Добавить тест для импорта
     public void importTransportFileTest() {
-        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.importTransportFile();
         Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
 
-    //@Test TODO Добавить тест для импорта
+    @Test
     public void importExcelTest() {
-        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.importExcel();
-        Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
 }

@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
@@ -80,6 +82,8 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
                 return getRecord(refBookId, alias, value);
             }
         });
+        RefBookDataProvider refBookDataProvider = mockRefBookDataProvider();
+        when(formDataService.getRefBookProvider(any(RefBookFactory.class), anyLong(), anyMap())).thenReturn(refBookDataProvider);
         // Работа со строками НФ
         when(formDataService.addRow(any(FormData.class), any(DataRow.class), anyList(), anyList())).thenCallRealMethod();
         return formDataService;
@@ -166,6 +170,12 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return departmentFormTypeService;
     }
 
+    @Override
+    public RefBookFactory mockRefBookFactory() {
+        RefBookFactory refBookFactory = mock(RefBookFactory.class);
+        return refBookFactory;
+    }
+
     /**
      * Получение всех значений записи справочника по Id
      */
@@ -187,6 +197,11 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
             return null;
         }
         return valueMap.get(invocation.getArguments()[2]);
+    }
+
+    private RefBookDataProvider mockRefBookDataProvider() {
+        RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
+        return  refBookDataProvider;
     }
 
     @Override
