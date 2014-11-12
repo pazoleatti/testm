@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.inject.Inject;
@@ -187,7 +188,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                 Dialog.errorMessage("Удаление всех версий элемента справочника",
                                         "Обнаружены фатальные ошибки!");
                             } else {
-                                editFormPresenter.show(null);
+                                //editFormPresenter.show(null);
                                 editFormPresenter.setNeedToReload();
                                 getView().deleteItem(selected);
                             }
@@ -216,9 +217,11 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                     @Override
                                     public void onSuccess(DeleteNonVersionRefBookRowResult result) {
                                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
-                                        editFormPresenter.show(null);
+                                        //editFormPresenter.show(null);
                                         editFormPresenter.setNeedToReload();
+                                        RefBookItem parentRefBookItem = getView().getSelectedItem().getParent();
                                         getView().deleteItem(selected);
+                                        getView().setSelected(parentRefBookItem!=null?parentRefBookItem.getId():0);
                                     }
                                 }, RefBookHierDataPresenter.this));
                             }
@@ -230,7 +233,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         });
                     } else {
                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
-                        editFormPresenter.show(null);
+                        //editFormPresenter.show(null);
                         editFormPresenter.setNeedToReload();
                         getView().deleteItem(selected);
                     }

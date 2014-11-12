@@ -89,11 +89,10 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
                             uniqueValues.append("undefined");
                             break;
                     }
-                    if (i < values.size() - 1) {
-                        uniqueValues.append("/");
-                    }
+                    uniqueValues.append("/");
                 }
             }
+            uniqueValues.delete(uniqueValues.length() - 1, uniqueValues.length());
             result.setUniqueAttributeValues(uniqueValues.toString());
             Long recordId = refBookDataProvider.getRecordId(action.getUniqueRecordId());
             result.setRecordId(recordId);
