@@ -709,16 +709,18 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @Override
     public void setAvailableFormsLeft(List<DepartmentAssign> departmentFormTypes, DepartmentAssign selectedLeftRecord) {
         clearLeftTable();
-        leftTable.setRowData(0, departmentFormTypes);
+        leftTable.setRowData(departmentFormTypes);
         leftTable.setVisibleRange(new Range(0, departmentFormTypes.size()));
         if (selectedLeftRecord != null) {
             leftSM.setSelected(selectedLeftRecord, true);
-            if (leftSM.getSelectedObject() == null && leftTable.getRowCount() > 0) {
-                leftSM.setSelected(leftTable.getVisibleItem(0), true);
-            }
             getUiHandlers().getCurrentAssigns(selectedLeftRecord);
-            loadRightData();
+        } else {
+            if (leftTable.getRowCount() > 0) {
+                leftSM.setSelected(leftTable.getVisibleItem(0), true);
+                getUiHandlers().getCurrentAssigns(leftTable.getVisibleItem(0));
+            }
         }
+        loadRightData();
     }
 
     @Override
@@ -739,12 +741,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         leftTable.setVisibleRange(new Range(0, departmentDeclarationTypes.size()));
         if (selectedLeftRecord != null) {
             leftSM.setSelected(selectedLeftRecord, true);
-            if (leftSM.getSelectedObject() == null && leftTable.getRowCount() > 0) {
-                leftSM.setSelected(leftTable.getVisibleItem(0), true);
-            }
             getUiHandlers().getCurrentAssigns(selectedLeftRecord);
-            loadRightData();
+        } else {
+            if (leftTable.getRowCount() > 0) {
+                leftSM.setSelected(leftTable.getVisibleItem(0), true);
+                getUiHandlers().getCurrentAssigns(leftTable.getVisibleItem(0));
+            }
         }
+        loadRightData();
     }
 
     @Override
