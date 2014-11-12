@@ -76,7 +76,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void resetRefBookElements();
 		RefBookDataRow getSelectedRow();
 		Date getRelevanceDate();
-        void setReadOnlyMode(boolean readOnly);
         int getPage();
         void setPage(int page);
         /** Метод для получения строки с поля фильтрации*/
@@ -186,7 +185,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onRelevanceDateChanged() {
 		getView().updateTable();
-		editFormPresenter.setRelevanceDate(getView().getRelevanceDate());
 		editFormPresenter.show(null);
 		editFormPresenter.setMode(mode);
 	}

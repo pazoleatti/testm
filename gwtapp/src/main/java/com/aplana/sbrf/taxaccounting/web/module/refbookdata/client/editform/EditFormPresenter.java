@@ -40,7 +40,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
 	private boolean isFormModified = false;
-	private Date relevanceDate;
 	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны. Продолжить?";
 
     /** Идентификатор справочника */
@@ -128,18 +127,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             }
                         }, this));
     }
-
-	// TODO: отрефакторить, чтобы дата была общая с com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataView.getRelevanceDate() (Marat Fayzullin 2013-09-15)
-	public Date getRelevanceDate() {
-		if (relevanceDate == null) {
-			relevanceDate = new Date();
-		}
-		return relevanceDate;
-	}
-
-	public void setRelevanceDate(Date relevanceDate) {
-		this.relevanceDate = relevanceDate;
-	}
 
 	public void show(Long refBookRecordId) {
         show(refBookRecordId, null);
@@ -278,8 +265,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         recordChanges.setId(newId);
                                         currentUniqueRecordId = newId;
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
-                                        SetFormMode.fire(EditFormPresenter.this, FormMode.VIEW);
-                                        if (isDepartments) refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
+                                        SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+
                                     }
                                 }, this));
 			} else {
@@ -293,7 +280,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 action.setVersionTo(getView().getVersionTo());
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
-                final Long newDepType = map.get("TYPE").getReferenceValue();
+                final Long newDepType;
+                if (map.containsKey("TYPE")) {
+                    newDepType = map.get("TYPE").getReferenceValue();
+                } else {
+                    newDepType = 0L;
+                }
                 if (isDepartments) {
                     //Проверяем изменилось ли имя либо тип подразделения с типа ТБ
                     if(modifiedFields.containsKey("NAME") || (modifiedFields.containsKey("TYPE") && depType == 2)){
@@ -319,7 +311,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                         } else {
                                                             depType = newDepType;
                                                             setIsFormModified(false);
-                                                            SetFormMode.fire(EditFormPresenter.this, FormMode.VIEW);
+                                                            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                                         }
                                                     }
                                                 }, EditFormPresenter.this));
@@ -347,7 +339,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         } else {
                                             depType = newDepType;
                                             setIsFormModified(false);
-                                            SetFormMode.fire(EditFormPresenter.this, FormMode.VIEW);
+                                            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                         }
                                     }
                                 }, this));

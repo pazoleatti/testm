@@ -61,7 +61,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @UiHandler("save")
     public void onSave(ClickEvent event) {
         if (isIfrs.getValue() && ifrsName.getValue().isEmpty()){
-            Dialog.errorMessage("Макет не сохранен", "Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
+            Dialog.errorMessage("Макет не сохранен", "При установке признака \"Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
             return;
         }
         if (getUiHandlers() != null) {
