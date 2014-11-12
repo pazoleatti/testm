@@ -367,7 +367,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Locale.setDefault(new Locale("ru", "RU"));
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid == null) {
-            throw new ServiceException("В декларации отсутствуют данные (не был выполнен расчет). Операция \"Принять\" не может быть выполнена");
+            TaxType taxType = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
+            String declarationName = (taxType == TaxType.DEAL ? "уведомлении" : "декларации");
+            String operationName = (operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle());
+            String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
+            throw new ServiceException(msg);
         }
         String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
