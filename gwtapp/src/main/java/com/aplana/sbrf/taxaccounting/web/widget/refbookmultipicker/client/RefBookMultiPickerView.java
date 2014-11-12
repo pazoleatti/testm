@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -33,6 +34,7 @@ import com.google.gwt.view.client.*;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static com.google.gwt.view.client.DefaultSelectionEventManager.*;
 
@@ -310,7 +312,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                     public void render(Context context, String value, SafeHtmlBuilder sb) {
                         if (value != null) {
                             if (filterText != null && !filterText.isEmpty()) {
-                                String link = value.replaceAll("\\Q" + filterText + "\\E", "<span style=\"color: #ff0000;\">" + filterText + "</span>");
+                                String link = RegExp.compile(TextUtils.quote(filterText), "gi").replace(value, "<span style=\"color: #ff0000;\">$&</span>");
                                 sb.appendHtmlConstant(link);
                             } else {
                                 sb.appendHtmlConstant(value);
