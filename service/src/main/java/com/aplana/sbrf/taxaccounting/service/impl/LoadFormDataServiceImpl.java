@@ -353,7 +353,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
 
         // Блокировка
-        LockData lockData = lockDataService.lock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(),
+        LockData lockData = lockDataService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(),
                 userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
         if (lockData!=null)
             throw new ServiceException(String.format(LockDataService.LOCK_DATA, userInfo.getUser().getName(),
@@ -395,7 +395,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         } finally {
             // Снимаем блокировку
-            lockDataService.unlock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + formData.getId(), userInfo.getUser().getId());
+            lockDataService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(), userInfo.getUser().getId());
         }
 
         // Загрузка формы завершена

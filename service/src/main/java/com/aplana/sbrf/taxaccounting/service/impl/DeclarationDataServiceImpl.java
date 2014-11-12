@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -564,7 +563,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String generateAsyncTaskKey(long declarationDataId, ReportType reportType) {
-        return LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + reportType.getName();
+        return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + reportType.getName();
     }
 
     @Override
