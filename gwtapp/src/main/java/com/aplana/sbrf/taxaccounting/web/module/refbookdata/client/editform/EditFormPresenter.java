@@ -347,7 +347,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		} catch (BadValueException bve) {
             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\": " + bve.getDescription()));
+            logEntries.add(new LogEntry(LogLevel.ERROR, bve.toString()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
             action.setLogEntries(logEntries);
 

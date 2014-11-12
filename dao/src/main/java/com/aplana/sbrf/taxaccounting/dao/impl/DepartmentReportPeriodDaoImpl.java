@@ -173,11 +173,11 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
-    public void updateActive(int id, boolean active) {
+    public void updateActive(int id, boolean active, boolean isBalance) {
         getJdbcTemplate().update(
-                "update department_report_period set is_active = ? where id = ?",
-                new Object[]{active ? 1 : 0, id},
-                new int[]{Types.NUMERIC, Types.NUMERIC}
+                "update department_report_period set is_active = ?, is_balance_period = ? where id = ?",
+                new Object[]{active ? 1 : 0, isBalance ? 1 : 0, id},
+                new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC}
         );
     }
 

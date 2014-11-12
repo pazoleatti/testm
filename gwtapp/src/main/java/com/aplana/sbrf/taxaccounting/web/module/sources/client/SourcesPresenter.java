@@ -454,7 +454,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         if (periodInterval.getYearTo() != null) {
             int yearTo = periodInterval.getYearTo();
             if (yearFrom > yearTo || (yearFrom == yearTo && periodFrom.getStartDate().after(periodTo.getStartDate()))) {
-                Dialog.errorMessage("Создание назначения", "Интервал периода указан неверно!");
+                Dialog.errorMessage("Создание назначения", "Неверно задан период!");
                 return false;
             }
         }

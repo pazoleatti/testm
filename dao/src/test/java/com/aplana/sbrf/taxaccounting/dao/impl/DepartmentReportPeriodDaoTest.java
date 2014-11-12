@@ -163,9 +163,11 @@ public class DepartmentReportPeriodDaoTest {
     public void updateActiveTest() {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(101);
         Assert.assertTrue(departmentReportPeriod.isActive());
-        departmentReportPeriodDao.updateActive(101, false);
+        Assert.assertFalse(departmentReportPeriod.isBalance());
+        departmentReportPeriodDao.updateActive(101, false, true);
         departmentReportPeriod = departmentReportPeriodDao.get(101);
         Assert.assertFalse(departmentReportPeriod.isActive());
+        Assert.assertTrue(departmentReportPeriod.isBalance());
     }
 
     @Test
