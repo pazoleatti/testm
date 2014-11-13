@@ -136,7 +136,7 @@
         <checking>false</checking>
         <name>Код налоговой льготы</name>
         <order>15</order>
-        <width>5</width>
+        <width>6</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>2033</nameAttributeId>
         <refBookAttributeId>2033</refBookAttributeId>
