@@ -407,8 +407,34 @@
 ($F{200_КодЛгПНС}+"-------------------------").substring(0,20)]]></initialValueExpression>
 		</variable>
 		<variable name="210_НалСтав" class="java.lang.String">
-			<variableExpression><![CDATA[$F{210_НалСтав} == null ? "-------------------------" : ($F{210_НалСтав}+"-------------------------").substring(0,4)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{210_НалСтав} == null ? "-------------------------" : ($F{210_НалСтав}+"-------------------------").substring(0,4)]]></initialValueExpression>
+			<variableExpression><![CDATA[((($F{210_НалСтав} == null)
+?
+"-" :
+(
+	$F{210_НалСтав}.indexOf(".") == 0 ? "-" : $F{210_НалСтав}).substring(0, 1)
+)
++ "." +
+(($F{210_НалСтав} == null)
+?
+"--" :
+(
+	$F{210_НалСтав}.indexOf(".") < 0 ? "--" :
+	($F{210_НалСтав}.substring(($F{210_НалСтав}.indexOf("."))+1, $F{210_НалСтав}.length())+"--").substring(0,2)
+))).substring(0,4)]]></variableExpression>
+			<initialValueExpression><![CDATA[((($F{210_НалСтав} == null)
+?
+"-" :
+(
+	$F{210_НалСтав}.indexOf(".") == 0 ? "-" : $F{210_НалСтав}).substring(0, 1)
+)
++ "." +
+(($F{210_НалСтав} == null)
+?
+"--" :
+(
+	$F{210_НалСтав}.indexOf(".") < 0 ? "--" :
+	($F{210_НалСтав}.substring(($F{210_НалСтав}.indexOf("."))+1, $F{210_НалСтав}.length())+"--").substring(0,2)
+))).substring(0,4)]]></initialValueExpression>
 		</variable>
 		<variable name="220_СумНалИсчисл" class="java.lang.String">
 			<variableExpression><![CDATA[$F{220_СумНалИсчисл} == null ? "-------------------------" : ($F{220_СумНалИсчисл}+"-------------------------").substring(0,15)]]></variableExpression>
@@ -442,7 +468,7 @@
 			<groupExpression><![CDATA[1]]></groupExpression>
 		</group>
 	</subDataset>
-	<subDataset name="РасОбНедИО_Раздел3" whenResourceMissingType="Empty" uuid="0e21974d-0110-46d1-9d36-01411b641781">
+	<subDataset name="РасОБНедИО_Раздел3" whenResourceMissingType="Empty" uuid="0e21974d-0110-46d1-9d36-01411b641781">
 		<parameter name="КБК_константа" class="java.lang.String" isForPrompting="false"/>
 		<queryString language="xPath">
 			<![CDATA[/Файл/Документ/ИмущНД/СумНалПУ/РасОбНедИО/РасОб]]>
@@ -539,8 +565,34 @@
 ($F{КодЛгПНС}+"-------------------------").substring(0,20)]]></initialValueExpression>
 		</variable>
 		<variable name="НалСтав" class="java.lang.String">
-			<variableExpression><![CDATA[$F{НалСтав} == null ? "-------------------------" : ($F{НалСтав}+"-------------------------").substring(0,4)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{НалСтав} == null ? "-------------------------" : ($F{НалСтав}+"-------------------------").substring(0,4)]]></initialValueExpression>
+			<variableExpression><![CDATA[((($F{НалСтав} == null)
+?
+"-" :
+(
+	$F{НалСтав}.indexOf(".") == 0 ? "-" : $F{НалСтав}).substring(0, 1)
+)
++ "." +
+(($F{НалСтав} == null)
+?
+"--" :
+(
+	$F{НалСтав}.indexOf(".") < 0 ? "--" :
+	($F{НалСтав}.substring(($F{НалСтав}.indexOf("."))+1, $F{НалСтав}.length())+"--").substring(0,2)
+))).substring(0,4)]]></variableExpression>
+			<initialValueExpression><![CDATA[((($F{НалСтав} == null)
+?
+"-" :
+(
+	$F{НалСтав}.indexOf(".") == 0 ? "-" : $F{НалСтав}).substring(0, 1)
+)
++ "." +
+(($F{НалСтав} == null)
+?
+"--" :
+(
+	$F{НалСтав}.indexOf(".") < 0 ? "--" :
+	($F{НалСтав}.substring(($F{НалСтав}.indexOf("."))+1, $F{НалСтав}.length())+"--").substring(0,2)
+))).substring(0,4)]]></initialValueExpression>
 		</variable>
 		<variable name="КоэфК" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КоэфК} == null ? "-------------------------" : ($F{КоэфК}+"-------------------------").substring(0,5)]]></variableExpression>
@@ -662,8 +714,8 @@
 	<field name="КоличествоЗаписей_РасОбДеятРФ" class="java.lang.Integer">
 		<fieldDescription><![CDATA[count(ИмущНД/СумНалПУ/РасОбДеятРФ/РасОб)]]></fieldDescription>
 	</field>
-	<field name="КоличествоЗаписей_РасОбНедИО" class="java.lang.Integer">
-		<fieldDescription><![CDATA[count(ИмущНД/СумНалПУ/РасОбНедИО/РасОб)]]></fieldDescription>
+	<field name="КоличествоЗаписей_РасОБНедИО" class="java.lang.Integer">
+		<fieldDescription><![CDATA[count(ИмущНД/СумНалПУ/РасОБНедИО/РасОб)]]></fieldDescription>
 	</field>
 	<variable name="ИННЮЛ" class="java.lang.String">
 		<variableExpression><![CDATA[$F{ИННЮЛ} == null ?
@@ -903,8 +955,8 @@
 		<variableExpression><![CDATA[$F{КоличествоЗаписей_РасОбДеятРФ}]]></variableExpression>
 		<initialValueExpression><![CDATA[0]]></initialValueExpression>
 	</variable>
-	<variable name="КоличествоЗаписей_РасОбНедИО" class="java.lang.Integer">
-		<variableExpression><![CDATA[$F{КоличествоЗаписей_РасОбНедИО}]]></variableExpression>
+	<variable name="КоличествоЗаписей_РасОБНедИО" class="java.lang.Integer">
+		<variableExpression><![CDATA[$F{КоличествоЗаписей_РасОБНедИО}]]></variableExpression>
 		<initialValueExpression><![CDATA[0]]></initialValueExpression>
 	</variable>
 	<detail>
@@ -21662,9 +21714,9 @@
 			<componentElement>
 				<reportElement uuid="bd17634d-c651-4fb3-9178-d14c7864d733" x="0" y="85" width="600" height="726"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
-					<datasetRun subDataset="РасОбНедИО_Раздел3" uuid="1fad4a89-a232-460a-90a0-47e09b18b6ba">
-						<dataSourceExpression><![CDATA[$V{КоличествоЗаписей_РасОбНедИО}== 0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) :
-((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/ИмущНД/СумНалПУ/РасОбНедИО/РасОб")]]></dataSourceExpression>
+					<datasetRun subDataset="РасОБНедИО_Раздел3" uuid="1fad4a89-a232-460a-90a0-47e09b18b6ba">
+						<dataSourceExpression><![CDATA[$V{КоличествоЗаписей_РасОБНедИО}== 0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) :
+((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/ИмущНД/СумНалПУ/РасОБНедИО/РасОб")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="726" width="600">
 						<staticText>
