@@ -12,7 +12,6 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.mockito.Matchers.*;
@@ -111,8 +110,6 @@ public class Vehicles1Test extends ScriptTestBase {
 
     @Test
     public void afterCreateTest() {
-        // TODO Проверить перенос данных в copyData()
-        // Для этого нужен mock reportPeriodService#getPrevReportPeriod и др.
         testHelper.afterCreate();
         checkLogger();
     }
@@ -141,15 +138,16 @@ public class Vehicles1Test extends ScriptTestBase {
         DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
         when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
 
-        // Данные НФ-источника TODO Заполнить импортом, иначе сложно обойти лог. проверки
-        List<DataRow<Cell>> dataRowList = new LinkedList<DataRow<Cell>>();
-        // Фиксированные строки
-        dataRowList.addAll(testHelper.getFormTemplate().getRows());
-        // Новые строки
-        dataRowList.addAll(Arrays.asList(sourceFormData.createDataRow(), sourceFormData.createDataRow()));
-        sourceDataRowHelper.save(dataRowList);
+        // Данные НФ-источника, формируются импортом
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.importExcel();
+        sourceDataRowHelper.save(testHelper.getDataRowHelper().getAll());
+        testHelper.initRowData();
+
         // Консолидация
-        // testHelper.compose();
+        testHelper.compose();
+        Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
+
         checkLogger();
     }
 
@@ -159,7 +157,7 @@ public class Vehicles1Test extends ScriptTestBase {
         checkLogger();
     }
 
-    //@Test TODO Добавить тест для импорта
+    //@Test TODO Добавить тест для импорта, пока .rnu файла нет
     public void importTransportFileTest() {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.importTransportFile();
@@ -172,6 +170,12 @@ public class Vehicles1Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.importExcel();
         Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
+        // Проверка расчетных данных
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        Assert.assertEquals(6, dataRows.get(1).getCell("pastYear").getNumericValue().intValue());
+        Assert.assertEquals(2, dataRows.get(2).getCell("pastYear").getNumericValue().intValue());
+        Assert.assertEquals(13, dataRows.get(4).getCell("pastYear").getNumericValue().intValue());
+        Assert.assertEquals(3, dataRows.get(6).getCell("pastYear").getNumericValue().intValue());
         checkLogger();
     }
 }
