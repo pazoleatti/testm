@@ -33,6 +33,10 @@ public abstract class ScriptTestBase {
     @Before
     public void init() {
         if (testHelper == null) {
+            String path = getFolderPath();
+            if (path == null) {
+                throw new ServiceException("Test folder path is null!");
+            }
             testHelper = new TestScriptHelper(getFolderPath(), getFormData(), getMockHelper());
         }
         testHelper.getLogger().clear();
@@ -55,7 +59,11 @@ public abstract class ScriptTestBase {
     /**
      * Путь к каталогу НФ
      */
-    protected abstract String getFolderPath();
+    protected String getFolderPath() {
+        // Путь вычисляется из пути к классу теста
+        String classPath = this.getClass().getResource(".").toString();
+        return classPath.substring(classPath.indexOf("/form_template/"));
+    }
 
     /**
      * Проверка логгера на наличие ошибок

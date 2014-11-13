@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.formtemplate.transport.vehicles.v2012;
+package com.aplana.sbrf.taxaccounting.form_template.transport.vehicles.v2012;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
@@ -18,7 +18,6 @@ import java.io.InputStream;
  * @author Levykin
 */
 public class VehiclesTest extends ScriptTestBase {
-    private static final String PATH = "/form_template/transport/vehicles/v2012/";
     private static final int TYPE_ID = 201;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
@@ -39,11 +38,6 @@ public class VehiclesTest extends ScriptTestBase {
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         return formData;
-    }
-
-    @Override
-    protected String getFolderPath() {
-        return PATH;
     }
 
     @Override
