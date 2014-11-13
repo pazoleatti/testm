@@ -174,7 +174,7 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                                         Dialog.errorMessage("Корректирование периода",
                                                 "Корректирующий период с датой корректировки " +
                                                         DMDateParser.formatDMY.format(getView().getTerm()) +
-                                                        " не может быть открыт, т.к. есть более поздний корректирующий период!");
+                                                        " не может быть открыт, т.к. существует более поздний корректирующий период!");
                                         break;
                                     case CORRECTION_PERIOD_LAST_OPEN:
                                         Dialog.errorMessage( "Корректирование периода", "Корректирующий период с датой корректировки " +
