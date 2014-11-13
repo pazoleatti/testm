@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
+import com.aplana.gwt.client.*;
+import com.aplana.gwt.client.TextBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -264,17 +266,21 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	@Override
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {
 		if (record == null) {
-			for (HasValue w : widgets.values()) {
+            int i =1;
+			for (final HasValue w : widgets.values()) {
 				w.setValue(null);
-				if (w instanceof UIObject) {
-                    if (w instanceof RefBookPickerWidget) {
-                        if (isNeedToReload) {
-                            isNeedToReload = false;
-                            ((RefBookPickerWidget) w).reload();
-                        }
-                        ((RefBookPickerWidget)w).setDereferenceValue("");
-					}
-				}
+                if (w instanceof RefBookPickerWidget) {
+                    if (isNeedToReload) {
+                        isNeedToReload = false;
+                        ((RefBookPickerWidget) w).reload();
+                    }
+                    ((RefBookPickerWidget)w).setDereferenceValue("");
+                }
+                //Первый по порядку текстовый атрибут справочника принимает значение "Новая запись" (если текстовые атрибуты отсутствуют, то шаг не выполняется)
+                else if (w instanceof com.aplana.gwt.client.TextBox && i==1){
+                    i++;
+                    ((TextBox) w).setValue("Новая запись");
+                }
 			}
 		} else {
 			for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
