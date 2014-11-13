@@ -125,7 +125,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public void updateEnabled() {
-        boolean departmentSelected = refBookEnabled && departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
+        boolean departmentSelected =  departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
         boolean taxOrganCodeSelected = departmentSelected && taxOrganCode.getValue() != null && !taxOrganCode.getValue().isEmpty();
         boolean periodSelected = periodPicker.getValue() != null && !periodPicker.getValue().isEmpty();
         boolean correctionDateSelected = correctionDate.getText() != null && !correctionDate.getText().isEmpty();
@@ -133,8 +133,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(periodSelected);
         declarationTypeId.setEnabled(departmentSelected);
-        taxOrganCode.setEnabled(departmentSelected);
-        taxOrganKpp.setEnabled(taxOrganCodeSelected);
+        taxOrganCode.setEnabled(refBookEnabled && departmentSelected);
+        taxOrganKpp.setEnabled(refBookEnabled && taxOrganCodeSelected);
         // дата корректировки
         correctionPanel.setVisible(departmentSelected && correctionDateSelected);
     }
