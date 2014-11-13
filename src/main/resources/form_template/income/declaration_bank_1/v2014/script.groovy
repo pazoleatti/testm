@@ -982,6 +982,7 @@ void generateXML() {
                     if (dataRowsAdvance != null && !dataRowsAdvance.isEmpty()) {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
+                                def naimOP = null
                                 def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
                                 if (record33 != null) {
                                     naimOP = record33?.ADDITIONAL_NAME?.value
