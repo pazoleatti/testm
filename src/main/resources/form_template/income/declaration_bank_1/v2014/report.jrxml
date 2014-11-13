@@ -2316,27 +2316,41 @@
 		<field name="ТипНП" class="java.lang.String">
 			<fieldDescription><![CDATA[@ТипНП]]></fieldDescription>
 		</field>
+		<variable name="ДоляНалБаз_ЦелаяЧасть" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")
+?
+"---" :
+(
+	$F{ДоляНалБаз}.indexOf(".") < 0 ? ($F{ДоляНалБаз} + "---").substring(0, 3) :
+	($F{ДоляНалБаз}.substring(0, ($F{ДоляНалБаз}.indexOf(".")))+"---").substring(0, 3)
+)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")
+?
+"---" :
+(
+	$F{ДоляНалБаз}.indexOf(".") < 0 ? ($F{ДоляНалБаз} + "---").substring(0, 3) :
+	($F{ДоляНалБаз}.substring(0, ($F{ДоляНалБаз}.indexOf(".")))+"---").substring(0, 3)
+)]]></initialValueExpression>
+		</variable>
+		<variable name="ДоляНалБаз_ДробнаяЧасть" class="java.lang.String">
+			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")
+?
+"-----------" :
+(
+	$F{ДоляНалБаз}.indexOf(".") < 0 ? "-----------" :
+	($F{ДоляНалБаз}.substring(($F{ДоляНалБаз}.indexOf("."))+1, $F{ДоляНалБаз}.length())+"-----------").substring(0,11)
+)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")
+?
+"-----------" :
+(
+	$F{ДоляНалБаз}.indexOf(".") < 0 ? "-----------" :
+	($F{ДоляНалБаз}.substring(($F{ДоляНалБаз}.indexOf("."))+1, $F{ДоляНалБаз}.length())+"-----------").substring(0,11)
+)]]></initialValueExpression>
+		</variable>
 		<variable name="ДоляНалБаз" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
-"---------------"
-:
-($F{ДоляНалБаз}.indexOf(".")==2?
-("-"+$F{ДоляНалБаз}+"--------------").substring(0,15)
-:
-($F{ДоляНалБаз}.indexOf(".")==1?
-("--"+$F{ДоляНалБаз}+"-------------").substring(0,15)
-:
-($F{ДоляНалБаз}+"---------------").substring(0,15)))]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
-"---------------"
-:
-($F{ДоляНалБаз}.indexOf(".")==2?
-("-"+$F{ДоляНалБаз}+"--------------").substring(0,15)
-:
-($F{ДоляНалБаз}.indexOf(".")==1?
-("--"+$F{ДоляНалБаз}+"-------------").substring(0,15)
-:
-($F{ДоляНалБаз}+"---------------").substring(0,15)))]]></initialValueExpression>
+			<variableExpression><![CDATA[($V{ДоляНалБаз_ЦелаяЧасть}+"."+$V{ДоляНалБаз_ДробнаяЧасть}).substring(0,15)]]></variableExpression>
+			<initialValueExpression><![CDATA[($V{ДоляНалБаз_ЦелаяЧасть}+"."+$V{ДоляНалБаз_ДробнаяЧасть}).substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="КППОП" class="java.lang.String">
 			<variableExpression><![CDATA[$F{КППОП} == null ?
@@ -2448,15 +2462,41 @@
 :
 ($F{ОбязУплНалОП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
+		<variable name="СтавНалСубРФ_ЦелаяЧасть" class="java.lang.String">
+			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")
+?
+"-----" :
+(
+	$F{СтавНалСубРФ}.indexOf(".") < 0 ? ($F{СтавНалСубРФ} + "------").substring(0, 2) :
+	($F{СтавНалСубРФ}.substring(0, ($F{СтавНалСубРФ}.indexOf(".")))+"--").substring(0, 2)
+)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")
+?
+"-----" :
+(
+	$F{СтавНалСубРФ}.indexOf(".") < 0 ? ($F{СтавНалСубРФ} + "------").substring(0, 2) :
+	($F{СтавНалСубРФ}.substring(0, ($F{СтавНалСубРФ}.indexOf(".")))+"--").substring(0,2)
+)]]></initialValueExpression>
+		</variable>
+		<variable name="СтавНалСубРФ_ДробнаяЧасть" class="java.lang.String">
+			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")
+?
+"--" :
+(
+	$F{СтавНалСубРФ}.indexOf(".") < 0 ? "--" :
+	($F{СтавНалСубРФ}.substring(($F{СтавНалСубРФ}.indexOf("."))+1, $F{СтавНалСубРФ}.length())+"--").substring(0,2)
+)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")
+?
+"--" :
+(
+	$F{СтавНалСубРФ}.indexOf(".") < 0 ? "--" :
+	($F{СтавНалСубРФ}.substring(($F{СтавНалСубРФ}.indexOf("."))+1, $F{СтавНалСубРФ}.length())+"--").substring(0,2)
+)]]></initialValueExpression>
+		</variable>
 		<variable name="СтавНалСубРФ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
-"-----"
-:
-($F{СтавНалСубРФ}+"-----").substring(0,5)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
-"-----"
-:
-($F{СтавНалСубРФ}+"-----").substring(0,5)]]></initialValueExpression>
+			<variableExpression><![CDATA[($V{СтавНалСубРФ_ЦелаяЧасть}+"."+$V{СтавНалСубРФ_ДробнаяЧасть}).substring(0, 5)]]></variableExpression>
+			<initialValueExpression><![CDATA[($V{СтавНалСубРФ_ЦелаяЧасть}+"."+$V{СтавНалСубРФ_ДробнаяЧасть}).substring(0, 5)]]></initialValueExpression>
 		</variable>
 		<variable name="СумНал" class="java.lang.String">
 			<variableExpression><![CDATA[$F{СумНал} == null || $F{СумНал}.equals("0")?
@@ -2469,8 +2509,8 @@
 ($F{СумНал}+"---------------").substring(0,15)]]></initialValueExpression>
 		</variable>
 		<variable name="СумНалПД" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумНалП} < 0 || $F{СумНалП} == null?"-------------------------":($F{СумНалП}.toString()+"-------------------------").substring(0,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумНалП} < 0 || $F{СумНалП} == null?"-------------------------":($F{СумНалП}.toString()+"-------------------------").substring(0,25)]]></initialValueExpression>
+			<variableExpression><![CDATA[$F{СумНалП} == null || $F{СумНалП} < 0 ? "-------------------------":($F{СумНалП}.toString()+"-------------------------").substring(0,25)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумНалП} == null || $F{СумНалП} < 0 ?"-------------------------":($F{СумНалП}.toString()+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="ТипНП" class="java.lang.String">
 			<variableExpression><![CDATA[$F{ТипНП} == null ?
@@ -2483,8 +2523,8 @@
 ($F{ТипНП}+"-------------------------").substring(0,25)]]></initialValueExpression>
 		</variable>
 		<variable name="СумНалПУ" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СумНалП} > 0 || $F{СумНалП} == null?"--------------------------":($F{СумНалП}.toString()+"--------------------------").substring(1,25)]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СумНалП} > 0 || $F{СумНалП} == null?"--------------------------":($F{СумНалП}.toString()+"--------------------------").substring(1,25)]]></initialValueExpression>
+			<variableExpression><![CDATA[$F{СумНалП} == null || $F{СумНалП} > 0 ?"--------------------------":($F{СумНалП}.toString()+"--------------------------").substring(1,25)]]></variableExpression>
+			<initialValueExpression><![CDATA[$F{СумНалП} == null || $F{СумНалП} > 0 ?"--------------------------":($F{СумНалП}.toString()+"--------------------------").substring(1,25)]]></initialValueExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="Str20" uuid="e1cfd42c-3e43-4acf-8238-6aee44a1f5a6">
@@ -3447,6 +3487,9 @@
 	</field>
 	<field name="КБК" class="java.lang.String">
 		<fieldDescription><![CDATA[ТрНалНД/СумНалПУ/@КБК]]></fieldDescription>
+	</field>
+	<field name="str14_numrows" class="java.lang.Integer">
+		<fieldDescription><![CDATA[count(/Файл/Документ/Прибыль/РасчНал/РаспрНалСубРФ)]]></fieldDescription>
 	</field>
 	<field name="str17_numrows" class="java.lang.Integer">
 		<fieldDescription><![CDATA[count(/Файл/Документ/Прибыль/НалУдНА/НалДохДив)]]></fieldDescription>
@@ -36859,7 +36902,7 @@
 				<reportElement x="0" y="65" width="600" height="710" uuid="1569e3e0-7c2a-4d51-9abb-6f712abdf4e1"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="str14" uuid="6ed645c5-684e-40e1-84e8-a8c9469fc390">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/РасчНал/РаспрНалСубРФ")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[$F{str14_numrows}==0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) : ((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/РасчНал/РаспрНалСубРФ")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="710" width="600">
 						<staticText>
@@ -38255,7 +38298,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ОбРасч}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОбРасч}]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement x="132" y="140" width="468" height="60" uuid="c78e9f59-21ac-4789-a2c7-cadba63755e9"/>
@@ -38280,7 +38323,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ТипНП}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ТипНП}.charAt(0)]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement x="264" y="99" width="293" height="40" uuid="d6e4c22b-9319-4c22-95bc-814796fdb264"/>
@@ -38341,7 +38384,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ОбязУплНалОП}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ОбязУплНалОП}]]></textFieldExpression>
 						</textField>
 						<staticText>
 							<reportElement x="2" y="312" width="127" height="17" uuid="2da9e3ac-5f9d-47cb-bae0-4d621d687db4"/>
