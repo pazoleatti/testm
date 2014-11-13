@@ -1,11 +1,15 @@
 package com.aplana.gwt.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
 import com.aplana.gwt.client.modal.OpenModalWindowEvent;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ClientBundle;
@@ -56,20 +60,36 @@ public class ModalWindow extends DialogBox implements CanHide {
     private Image close;
     private Label title;
 
+    private String closeDialogTitle, closeDialogText;
+
     private boolean bDragDrop = false;
     protected boolean isResizable = false;
     private List<ModalWindowResizeListener> panelResizedListeners = new ArrayList<ModalWindowResizeListener>();
 
     private OnHideHandler<CanHide> hideHandler = new OnHideHandler<CanHide>() {
         @Override
-        public void onHide(CanHide modalWindow) {
-            modalWindow.hide();
+        public void onHide(final CanHide modalWindow) {
+            if (getCloseDialogText() != null) {
+                Dialog.confirmMessage(getCloseDialogTitle(), getCloseDialogText(), new DialogHandler() {
+                    @Override
+                    public void yes() {
+                        Dialog.hideMessage();
+                        modalWindow.hide();
+                        hide();
+                    }
+                });
+            } else {
+                modalWindow.hide();
+            }
         }
     };
 
     public ModalWindow() {
         super(false, true);
         this.setGlassEnabled(true);
+
+        closeDialogTitle = null;
+        closeDialogText = null;
 
         title = new Label();
         close = new Image(mwRes.closeImage());
@@ -83,6 +103,13 @@ public class ModalWindow extends DialogBox implements CanHide {
         icon.getElement().getStyle().setFloat(Style.Float.LEFT);
         icon.getElement().getStyle().setMargin(4, Style.Unit.PX);
         close.setTitle(CLOSE_ICON_TITLE);
+
+        close.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Dialog.infoMessage("close");
+            }
+        });
 
         HTMLPanel caption = new HTMLPanel("");
         caption.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
@@ -174,6 +201,19 @@ public class ModalWindow extends DialogBox implements CanHide {
     @Override
     public void setText(String text) {
         this.title.setText(text);
+    }
+
+    public String getCloseDialogTitle() {
+        return closeDialogTitle;
+    }
+
+    public String getCloseDialogText() {
+        return closeDialogText;
+    }
+
+    public void setCloseDialogText(String closeDialogTitle, String closeDialogText) {
+        this.closeDialogTitle = closeDialogTitle;
+        this.closeDialogText = closeDialogText;
     }
 
     @Override

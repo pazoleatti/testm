@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.AuditDao.SAMPLE_NUMBER;
@@ -98,13 +99,24 @@ public class AuditServiceImpl implements AuditService {
     @Override
     @Transactional(readOnly = false)
     public void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo) {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        Date startDate = null;
+        Date endDate = null;
         if (!items.isEmpty()){
             List<Long> listIds = new ArrayList<Long>();
-            for (LogSearchResultItem item : items)
+            for (LogSearchResultItem item : items){
                 listIds.add(item.getId());
+                if (startDate == null || item.getLogDate().compareTo(startDate) == -1) {
+                    startDate = item.getLogDate();
+                }
+                if (endDate == null || item.getLogDate().compareTo(endDate) == 1) {
+                    endDate = item.getLogDate();
+                }
+            }
             auditDao.removeRecords(listIds);
         }
-        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, "Архивация ЖА", null, null);
+        StringBuilder message = new StringBuilder("Архивация событий ЖА за период: ").append(format.format(startDate)).append(" - ").append(format.format(endDate));
+        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, message.toString(), null, null);
     }
 
     @Override
