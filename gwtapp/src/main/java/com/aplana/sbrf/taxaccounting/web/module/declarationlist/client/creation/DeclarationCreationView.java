@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBoo
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -89,6 +90,12 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         taxOrganKpp.setEnabled(false);
         correctionPanel.setVisible(false);
         declarationTypeId.setPeriodDates(new Date(), new Date());
+        taxOrganCode.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Long>> event) {
+                updateEnabled();
+            }
+        });
     }
 
     @Override
@@ -118,15 +125,16 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public void updateEnabled() {
-        boolean departmentSelected = departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
+        boolean departmentSelected = refBookEnabled && departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
+        boolean taxOrganCodeSelected = departmentSelected && taxOrganCode.getValue() != null && !taxOrganCode.getValue().isEmpty();
         boolean periodSelected = periodPicker.getValue() != null && !periodPicker.getValue().isEmpty();
         boolean correctionDateSelected = correctionDate.getText() != null && !correctionDate.getText().isEmpty();
 
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(periodSelected);
         declarationTypeId.setEnabled(departmentSelected);
-        taxOrganCode.setEnabled(departmentSelected && refBookEnabled);
-        taxOrganKpp.setEnabled(departmentSelected && refBookEnabled);
+        taxOrganCode.setEnabled(departmentSelected);
+        taxOrganKpp.setEnabled(taxOrganCodeSelected);
         // дата корректировки
         correctionPanel.setVisible(departmentSelected && correctionDateSelected);
     }

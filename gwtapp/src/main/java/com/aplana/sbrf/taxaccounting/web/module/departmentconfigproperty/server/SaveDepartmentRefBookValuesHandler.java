@@ -50,15 +50,17 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         logger.setTaUserInfo(securityService.currentUserInfo());
 
         for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
-            Integer signatoryId = row.get("SIGNATORY_ID").getDeRefValue() == null ?
+            String sig = row.get("SIGNATORY_ID").getDeRefValue();
+            Integer signatoryId = (sig == null || sig.isEmpty()) ?
                     null :
                     Integer.parseInt(row.get("SIGNATORY_ID").getDeRefValue().trim());
             String approveDocName = row.get("APPROVE_DOC_NAME").getStringValue();
             String approveOrgName = row.get("APPROVE_ORG_NAME").getStringValue();
 
-            if (signatoryId != null && signatoryId == 1
-                    && approveDocName != null && !approveDocName.isEmpty()
-                    && approveOrgName != null && !approveOrgName.isEmpty()) {
+            if ((signatoryId != null && signatoryId == 1)
+                    && ((approveDocName != null && !approveDocName.isEmpty())
+                    ||  (approveOrgName != null && !approveOrgName.isEmpty()))
+               ) {
                 logger.error("Поля \"Наименование документа представителя\", " +
                         "\"Наименование организации представителя\" " +
                         "должны заполняться только в том случае, если " +

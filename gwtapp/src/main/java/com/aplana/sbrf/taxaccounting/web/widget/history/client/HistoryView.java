@@ -29,7 +29,7 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
 
     public static final String MODAL_WINDOW_TITLE = "Информация по налоговой форме/декларации";
     public static final String MODAL_WINDOW_TITLE_D = "Информация по форме/уведомлению";
-    private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm");
+    private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
     private static final String DECLARATION_SAVE_EVENT = "Обновление";
     @UiField
     ModalWindow modalWindowTitle;
