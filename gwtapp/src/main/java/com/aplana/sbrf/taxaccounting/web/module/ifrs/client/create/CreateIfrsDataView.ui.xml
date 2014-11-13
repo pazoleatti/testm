@@ -22,7 +22,7 @@
         }
     </ui:style>
 
-    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание отчетности для МСФО" minHeight="90px">
+    <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание отчетности для МСФО" minHeight="90px" ui:field="modalWindow">
         <g:VerticalPanel height="100%" width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
 
             <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
