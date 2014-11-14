@@ -87,11 +87,14 @@ void checkDepartmentParams(LogLevel logLevel) {
     }
 
     // Справочник "Параметры представления деклараций по налогу на имущество"
-    def regionId = getProvider(30).getRecordData(departmentId).REGION_ID.value
+    def regionId = getProvider(30).getRecordData(departmentId).REGION_ID?.value
+    if (regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
     def String filter = String.format("DECLARATION_REGION_ID = ${regionId} and LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') and LOWER(KPP) = LOWER('${declarationData.kpp}')")
     records = refBookFactory.getDataProvider(200).getRecords(getEndDate() - 1, null, filter, null)
     if (records.size() == 0) {
-        throw new Exception("В справочнике \"Параметры представления деклараций по налогу на имущество\" отсутствует запись по выбранным параметрам декларации (период, регион подразделения, налоговый орган, КПП)!")
+        throw new Exception("В справочнике «Параметры представления деклараций по налогу на имущество» отсутствует запись по выбранным параметрам декларации (период, регион подразделения, налоговый орган, КПП)!")
     }
 }
 
@@ -305,7 +308,7 @@ void generateXML() {
                             }
                         }
                         // Лист 04 (Раздел 3)
-                        РасОбНедИО() {
+                        РасОБНедИО() {
                             rowsCadastreOKTMO.each { row ->
                                 // НомКадЗдан 014 Заполняется значением атрибута «Кадастровый номер. Здание» налоговой формы источника (Форма 945.4)
                                 def nomKadZdan = row.cadastreNumBuilding
