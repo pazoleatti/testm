@@ -374,28 +374,24 @@ def calc() {
 }
 
 void fillTaKpp(def row, def errorMsg) {
-    // TODO справочник и окато
-    String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKATO = lower('" + row.okato?.toString() + "')"
-//    def records = refBookFactory.getDataProvider(201).getRecords(getReportPeriodEndDate(), null, filter, null)
-//    if (records.size() == 1) {
-//        // TODO
-//        row.taxAuthority = records[0].CODE_NA?.value
-//        row.kpp = records[0].KPP?.value
-//    } else {
-//        // TODO графы не заполняются и выводится сообщение
-//        logger.error(errorMsg + "Для кода ОКТМО «${row.okato}» нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
-//    }
+    String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = " + row.okato?.toString()
+    def records = refBookFactory.getDataProvider(210).getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (records.size() == 1) {
+        row.taxAuthority = records[0].TAX_ORGAN_CODE?.value
+        row.kpp = records[0].KPP?.value
+    } else {
+        logger.error(errorMsg + "Для кода ОКТМО «${row.okato}» нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
+    }
 }
 
 def checkTaKpp(def row, def errorMsg) {
-    // TODO справочник и окато
-    String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKATO = lower('" +
-            row.okato?.toString() + "') and CODE_NA = lower('" + row.taxAuthority?.toString() +
+    String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = lower('" +
+            row.okato?.toString() + "') and TAX_ORGAN_CODE = lower('" + row.taxAuthority?.toString() +
             "') and KPP = lower('" + row.kpp?.toString() + "')"
-//    def records = refBookFactory.getDataProvider(201).getRecords(getReportPeriodEndDate(), null, filter, null)
-//    if (records.size() != 1) {
-//        logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
-//    }
+    def records = refBookFactory.getDataProvider(210).getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (records.size() != 1) {
+        logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
+    }
 }
 
 def getCodeRecord (def recordId, def region) {
@@ -669,24 +665,18 @@ def formNewRow(def sRow) {
     // «Графа 36»
     // Если «Графа 25» формы-источника имеет пустое значение, то «Графа 36» не заполняется
     if (sRow.version != null) {
-        //TODO filter Поле «Средняя стоимость» равно значению поля «Средняя стоимость» записи справочника «Средняя стоимость транспортных средств», которая соответствует «Графе 25» формы-источника
-        String filter = "VERSION_ID = " + sRow.version
-        //TODO id В справочнике «Повышающие коэффициенты транспортного налога» найти записи
-        def records = refBookFactory.getDataProvider(201).getRecords(getReportPeriodEndDate(), null, filter, null)
-        if (records.isEmpty()) {
-            //TODO
-            logger.error("Для средней стоимости <Значение поля «Средняя стоимость» (наименование, а не код) записи справочника «Средняя стоимость транспортных средств», которая соответствует «Графе 25» формы-источника> нет данных в справочнике «Повышающие коэффициенты транспортного налога»!")
+        // "Средняя стоимость транспортных средст"
+        def avgPriceRecord = getRefBookValue(208, sRow.version)
+        // В справочнике «Повышающие коэффициенты транспортного налога» найти записи
+        def filter = "(YEAR_FROM < " + sRow.pastYear + " OR YEAR_FROM = " + sRow.pastYear + ") and (YEAR_TO > " + sRow.pastYear + " or YEAR_TO = " + sRow.pastYear + ") and AVG_COST = " + avgPriceRecord.AVG_COST.value
+        def records = refBookFactory.getDataProvider(209).getRecords(getReportPeriodEndDate(), null, filter, null)
+        if (records.size() == 0) {
+            // "Категории средней стоимости транспортных средств"
+            logger.error("Для средней стоимости ${getRefBookValue(211, avgPriceRecord.AVG_COST.value).NAME.value} нет данных в справочнике «Повышающие коэффициенты транспортного налога»!")
+        } else if (records.size() == 1) {
+            newRow.koefKp = records[0].COEF.value
         } else {
-            def validRecords = records.findAll { record ->
-                //TODO
-                def periodBegin = record.LOW.value
-                def periodEnd = record.HIGH.value
-                sRow.pastYears in (periodBegin..periodEnd)
-            }
-            if (validRecords.size() == 1) {
-                //TODO
-                newRow.koefKp = validRecords[0].COEF_UP.value
-            }
+            newRow.koefKp = null
         }
     } else {
         newRow.koefKp = null
@@ -857,9 +847,8 @@ def calc24(def row, def region, def errorMsg) {
         tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
 
         // запрос по выборке данных из справочника
-        //TODO
-        //def query = " and DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString()
-        def query = " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") " +
+        def query = " and DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() +
+                " and ((MIN_POWER is null or MIN_POWER < " + row.taxBase + ") " +
                 "and (MAX_POWER is null or MAX_POWER > " + row.taxBase + " or MAX_POWER = " + row.taxBase + "))" +
                 "and (UNIT_OF_POWER is null or UNIT_OF_POWER = " + row.taxBaseOkeiUnit + ")" +
                 "and ((MIN_AGE is null or MIN_AGE < " + row.years + ") " +
