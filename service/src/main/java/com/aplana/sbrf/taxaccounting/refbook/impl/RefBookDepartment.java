@@ -735,7 +735,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     setFormDataKind(new ArrayList<Long>(0));
                 }});
         for (FormData formData : formDatas){
-            logger.error(String.format("Существует экземпляр формы %s типа %s в подразделении %s в периоде %s!",
+            logger.error(String.format("Существует экземпляр формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
                     formTemplateService.get(formData.getFormTemplateId()).getName(),
                     formData.getKind().getName(),
                     department.getName(),
@@ -747,7 +747,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 declarationDataSearchService.getDeclarationData(new DeclarationDataFilter(){{setDepartmentIds(Arrays.asList(department.getId()));}},
                 DeclarationDataSearchOrdering.ID, true);
         for (DeclarationData decData : declarationDatas){
-            logger.error(String.format("Существует экземпляр декларации %s в подразделении %s в периоде %s!",
+            logger.error(String.format("Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
                     declarationTemplateService.get(decData.getDeclarationTemplateId()).getName(),
                     department.getName(),
                     periodService.getReportPeriod(decData.getReportPeriodId()).getName()));

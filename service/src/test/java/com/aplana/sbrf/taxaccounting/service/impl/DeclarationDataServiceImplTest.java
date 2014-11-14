@@ -165,8 +165,8 @@ public class DeclarationDataServiceImplTest {
         when(departmentDao.getDepartment(1)).thenReturn(department);
 
         assertTrue(service.existDeclaration(1, 1, logger.getEntries()));
-        assertEquals("Существует экземпляр Тестовый тип декларации в подразделении Тестовое подразделение периоде Тестовый период 2014", logger.getEntries().get(0).getMessage());
-        assertEquals("Существует экземпляр Тестовый тип декларации в подразделении Тестовое подразделение периоде Второй тестовый период 2014", logger.getEntries().get(1).getMessage());
+        assertEquals("Существует экземпляр \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\"", logger.getEntries().get(0).getMessage());
+        assertEquals("Существует экземпляр \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\"", logger.getEntries().get(1).getMessage());
     }
 
     @Test
