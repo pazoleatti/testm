@@ -98,6 +98,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     private ConfigurationService configurationService;
     @Autowired
     private LockDataService lockService;
+    @Autowired
+    private DepartmentFormTypeService departmentFormTypeService;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -373,12 +375,12 @@ public class RefBookDepartment implements RefBookDataProvider {
                         case MANAGEMENT:
                             if (newType.equals(CSKO_PCP) || newType.equals(MANAGEMENT))
                                 break;
-                            List<TAUserFull> users = taUserService.getByFilter(new MembersFilterData(){{
+                            List<TAUserView> users = taUserService.getUsersByFilter(new MembersFilterData() {{
                                 setDepartmentIds(new HashSet<Integer>(Arrays.asList(uniqueRecordId.intValue())));
                             }});
                             if (!users.isEmpty()){
-                                for (TAUserFull user : users)
-                                    logger.error("Пользователь %s назначен подразделению %s", user.getUser().getName(), dep.getName());
+                                for (TAUserView user : users)
+                                    logger.error("Пользователь %s назначен подразделению %s", user.getName(), dep.getName());
                                 throw new ServiceLoggerException("Невозможно изменить тип \"Управление\", если подразделению назначены пользователи!", logEntryService.save(logger.getEntries()));
                             }
                             break;
@@ -495,6 +497,10 @@ public class RefBookDepartment implements RefBookDataProvider {
                 isInUsed(departmentService.getDepartment(depId), logger);
                 if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING) && !force)
                     return;
+
+                //Удаление назначений НФ, у которых совпадает исполнитель с подразделением
+                List<Long> dftIds = departmentFormTypeService.getIdsByPerformerId(depId);
+                departmentFormTypeService.deleteByIds(dftIds);
 
                 List<Long> income101Ids =  refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, depId));
                 if (!income101Ids.isEmpty())
@@ -735,7 +741,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     setFormDataKind(new ArrayList<Long>(0));
                 }});
         for (FormData formData : formDatas){
-            logger.error(String.format("Существует экземпляр формы %s типа %s в подразделении %s в периоде %s!",
+            logger.error(String.format("Существует экземпляр формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
                     formTemplateService.get(formData.getFormTemplateId()).getName(),
                     formData.getKind().getName(),
                     department.getName(),
@@ -747,7 +753,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 declarationDataSearchService.getDeclarationData(new DeclarationDataFilter(){{setDepartmentIds(Arrays.asList(department.getId()));}},
                 DeclarationDataSearchOrdering.ID, true);
         for (DeclarationData decData : declarationDatas){
-            logger.error(String.format("Существует экземпляр декларации %s в подразделении %s в периоде %s!",
+            logger.error(String.format("Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
                     declarationTemplateService.get(decData.getDeclarationTemplateId()).getName(),
                     department.getName(),
                     periodService.getReportPeriod(decData.getReportPeriodId()).getName()));
@@ -775,7 +781,17 @@ public class RefBookDepartment implements RefBookDataProvider {
                     declarationType.getName(), department.getName()));
         }
 
-        //6 точка запроса
+        //6 точка запроса(Связь "назначение макета НФ подразделению - исполнитель")
+        List<DepartmentFormType> dftList = departmentFormTypeService.getByPerformerId(department.getId());
+        for (DepartmentFormType type : dftList) {
+            logger.warn(String.format("Существует назначение подразделения %s в качестве исполнителя для формы %s типа %s в подразделении %s",
+                    department.getName(),
+                    formTypeService.get(type.getFormTypeId()),
+                    type.getKind().getName(),
+                    departmentService.getDepartment(type.getDepartmentId()).getName()));
+        }
+
+        //7 точка запроса
         List<Long> ref101 = refBookIncome101.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         List<Long> ref102 = refBookIncome102.getUniqueRecordIds(null, String.format(FILTER_BY_DEPARTMENT, department.getId()));
         for (Long id : ref101){
@@ -787,18 +803,18 @@ public class RefBookDepartment implements RefBookDataProvider {
                     department.getName(), refBookIncome102Dao.getPeriodNameFromRefBook(id)));
         }
 
-        //7 точка запроса
-        List<TAUserFull> users = taUserService.getByFilter(new MembersFilterData(){{
+        //8 точка запроса
+        List<TAUserView> users = taUserService.getUsersByFilter(new MembersFilterData() {{
             setDepartmentIds(new HashSet<Integer>(Arrays.asList(department.getId())));
         }});
-        for (TAUserFull taUserFull : users)
-            logger.error(String.format("Подразделению %s назначен пользовател с логином %s!", department.getName(), taUserFull.getUser().getName()));
+        for (TAUserView taUser : users)
+            logger.error(String.format("Подразделению %s назначен пользовател с логином %s!", department.getName(), taUser.getName()));
 
-        //8 точка запроса
+        //9 точка запроса
         List<DepartmentFormType> departmentFormTypesDest = sourceService.getFormDestinations(department.getId(), 0, null, null, null);
         List<DepartmentDeclarationType> departmentDeclarationTypesDest = sourceService.getDeclarationDestinations(department.getId(), 0, null, null, null);
         List<DepartmentFormType> depFTSources = sourceService.getDFTSourcesByDFT(department.getId(), 0 , null, null, null);
-        //TODO : Доделать после того как Денис сделает источники-приемники
+
         for (DepartmentFormType departmentFormType : departmentFormTypesDest){
             logger.warn(String.format("назначение является источником для %s - %s - %s приемника",
                     department.getName(),
@@ -817,7 +833,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     formTypeService.get(departmentFormType.getFormTypeId()).getName()));
         }
 
-        //9 точка запроса
+        //10 точка запроса
         ConfigurationParamModel model = configurationService.getByDepartment(department.getId(), logger.getTaUserInfo());
         if (!model.isEmpty())
             logger.warn("Заданы пути к каталогам транспортных файлов для %s!", department.getName());

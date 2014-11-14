@@ -115,7 +115,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
                                                        Date periodEnd) {
-        QueryParams filter = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> filter = getSearchOrderingDefaultFilter();
         return getDFTSourcesByDFT(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
     }
 
@@ -127,7 +127,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId) {
-        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDFTSourcesByDFT(departmentId, formTypeId, kind, reportPeriodId, queryParams);
     }
 
@@ -140,7 +140,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDFTSourceByDDT(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
     }
 
@@ -364,7 +364,6 @@ public class SourceServiceImpl implements SourceService {
      * @param sourceDepartmentName      подразделение-источник. Необходимо только для формирования уведомлений
      * @param destinationDepartmentName подразделение-приемник. Необходимо только для формирования уведомлений
      * @param declaration    признак того, что идет обработка в режиме "Декларации"
-     * @return обрезанный входной список связок источников-приемников, для которых не найдены экземпляры нф
      */
     public void checkFormInstances(Logger logger, List<SourcePair> sourcePairs, Date newPeriodStart, Date newPeriodEnd,
                                     String sourceDepartmentName,
@@ -952,7 +951,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDFTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
@@ -963,7 +962,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Long> getDFTByPerformerDep(int performerDepId, TaxType taxType, List<FormDataKind> kinds) {
-        return departmentFormTypeDao.getByPerformerId(performerDepId, taxType, kinds);
+        return departmentFormTypeDao.getByPerformerId(performerDepId, Arrays.asList(taxType), kinds);
     }
 
     @Override
@@ -1047,7 +1046,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart,
                                                               Date periodEnd) {
-        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDDTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
@@ -1306,8 +1305,8 @@ public class SourceServiceImpl implements SourceService {
     /**
      * Фильтр по умолчанию
      */
-    private QueryParams getSearchOrderingDefaultFilter() {
-        QueryParams queryParams = new QueryParams();
+    private QueryParams<SourcesSearchOrdering> getSearchOrderingDefaultFilter() {
+        QueryParams<SourcesSearchOrdering> queryParams = new QueryParams<SourcesSearchOrdering>();
         queryParams.setSearchOrdering(SourcesSearchOrdering.TYPE);
         queryParams.setAscending(true);
         return queryParams;

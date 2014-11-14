@@ -1772,9 +1772,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     result.append(FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getName()).append("\" типа \"");
                     result.append(rs.getString("formType")).append("\" в подразделении \"");
                     if (SqlUtils.getInteger(rs, "departmentType") != 1) {
-                        result.append(rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1)).append("\" периоде \"");
+                        result.append(rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1)).append("\" в периоде \"");
                     } else {
-                        result.append(rs.getString("departmentPath")).append("\" периоде \"");
+                        result.append(rs.getString("departmentPath")).append("\" в периоде \"");
                     }
                     result.append(rs.getString("reportPeriodName")).append(" ").append(rs.getString("year")).append("\", который содержит ссылку на версию!");
                     return result.toString();

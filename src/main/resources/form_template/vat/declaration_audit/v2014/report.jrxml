@@ -1096,7 +1096,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 		<initialValueExpression><![CDATA["------------------------"]]></initialValueExpression>
 	</variable>
 	<variable name="КоличествоСтрокXML" class="java.lang.Integer">
-		<variableExpression><![CDATA[$F{КоличествоЗаписей_раздел7} == null ? 0 : $F{КоличествоЗаписей_раздел7}]]></variableExpression>
+		<variableExpression><![CDATA[$F{КоличествоЗаписей_раздел7}]]></variableExpression>
 		<initialValueExpression><![CDATA[0]]></initialValueExpression>
 	</variable>
 	<variable name="Раздел7_paging" class="java.lang.Integer">
@@ -1104,7 +1104,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 		<initialValueExpression><![CDATA[0]]></initialValueExpression>
 	</variable>
 	<variable name="КоличествоФиктивныхСтрок" class="java.lang.Integer">
-		<variableExpression><![CDATA[$V{КоличествоСтрокXML} == 0 ? 21 :
+		<variableExpression><![CDATA[$V{КоличествоСтрокXML} == 0 ? 20 :
 ($V{КоличествоСтрокXML}<=21 ? 21-$V{КоличествоСтрокXML}:
 ($V{Раздел7_paging}>0 ? 21-$V{Раздел7_paging}: 0))]]></variableExpression>
 		<initialValueExpression><![CDATA[0]]></initialValueExpression>
@@ -32134,14 +32134,14 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 			<componentElement>
 				<reportElement uuid="be43326d-e09b-4788-8dfd-4eccad807f8c" key="table" x="0" y="185" width="600" height="657"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="ОперНеНал_СумОпер7" uuid="6b12aa44-8ed7-4b25-b87d-085ed8ddb296">
+					<datasetRun subDataset="ОперНеНал_СумОпер7" uuid="44bb633b-789f-4874-a865-7597cc3b998c">
 						<datasetParameter name="ОплПостСв6Мес">
 							<datasetParameterExpression><![CDATA[$V{ОплПостСв6Мес}]]></datasetParameterExpression>
 						</datasetParameter>
 						<datasetParameter name="КоличествоФиктивныхСтрок">
 							<datasetParameterExpression><![CDATA[$V{КоличествоФиктивныхСтрок}]]></datasetParameterExpression>
 						</datasetParameter>
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/НДС/ОперНеНал/СумОпер7")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[$F{КоличествоЗаписей_раздел7}==0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) : ((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/НДС/ОперНеНал/СумОпер7")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="600" uuid="5e57f22e-902a-4816-9453-20d49aae9e76">
 						<jr:groupFooter groupName="group1">
