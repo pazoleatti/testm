@@ -114,6 +114,7 @@ public class LogAreaPresenter extends
                 PagingResult<LogEntry> logEntries = result.getLogEntries();
                 if (logEntries.isEmpty()) {
                     clean();
+                    hide();
                     return;
                 }
                 getView().getLogEntriesView().setLogEntries(start, logEntries.getTotalCount(), logEntries);
