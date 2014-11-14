@@ -79,6 +79,17 @@ void checkDepartmentParams(LogLevel logLevel) {
         name = name == null ? "!" : " для $name!"
         logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s", error, name))
     }
+
+    // Справочник "Параметры представления деклараций по налогу на имущество"
+    def regionId = getProvider(30).getRecordData(departmentId).REGION_ID?.value
+    if (regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
+    def String filter = String.format("DECLARATION_REGION_ID = ${regionId} and LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') and LOWER(KPP) = LOWER('${declarationData.kpp}')")
+    records = refBookFactory.getDataProvider(210).getRecords(getEndDate() - 1, null, filter, null)
+    if (records.size() == 0) {
+        throw new Exception("В справочнике «Параметры представления деклараций по транспортному налогу» отсутствует запись по выбранным параметрам декларации (период, регион подразделения, налоговый орган, КПП)!")
+    }
 }
 
 /** Осуществление проверк при создании + генерация xml. */
