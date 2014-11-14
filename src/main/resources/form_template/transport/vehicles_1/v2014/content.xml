@@ -19,7 +19,7 @@
         <columnType>STRING</columnType>
         <name>fix</name>
         <order>2</order>
-        <width>5</width>
+        <width>0</width>
         <maxLength>100</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -265,8 +265,8 @@
         <order>26</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>0</nameAttributeId>
-        <refBookAttributeId>0</refBookAttributeId>
+        <nameAttributeId>2082</nameAttributeId>
+        <refBookAttributeId>2082</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <styles>

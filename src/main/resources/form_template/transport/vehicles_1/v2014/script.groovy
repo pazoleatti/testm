@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
@@ -15,12 +17,6 @@ import groovy.transform.Field
  * форма действует с 1 октября 2014
  *
  * TODO:
- *      - графа 25 - указать правильный справочник, после того как его добавят http://jira.aplana.com/browse/SBRFACCTAX-9316
- *      - включить логическую проверку 10 после того как будут добавлен справочник «Параметры представления деклараций по транспортному налогу» http://jira.aplana.com/browse/SBRFACCTAX-9316
- *      - включить логическую проверку 14 после того как будут дополнен справочник «Параметры налоговых льгот транспортного налога» http://jira.aplana.com/browse/SBRFACCTAX-9316
- *      - включить логическую проверку 16 после того как будет добавлен справочник «Повышающие коэффициенты транспортного налога» http://jira.aplana.com/browse/SBRFACCTAX-9316
- *      - включить логические проверки 17, 18, 19 после того как будет добавлен справочник «Средняя стоимость транспортных средств» http://jira.aplana.com/browse/SBRFACCTAX-9316
- *      - при импорте поправить графу 25, после того как будет добавлен справочник «Средняя стоимость транспортных средств» http://jira.aplana.com/browse/SBRFACCTAX-9316
  *      - при импорте невозможно получить значение для графы 23 http://jira.aplana.com/browse/SBRFACCTAX-9436
  *
  * @author ivildanov
@@ -52,8 +48,7 @@ import groovy.transform.Field
 // графа 22 - benefitEndDate
 // графа 23 - taxBenefitCode    - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
 // графа 24 - base
-                                // TODO (Ramil Timerbaev) справочник «Средняя стоимость транспортных средств» еще не добавлен http://jira.aplana.com/browse/SBRFACCTAX-9316
-// графа 25 - version           - атрибут NNN - NAME - «Модель (версия)», справочник NN «Средняя стоимость транспортных средств»
+// графа 25 - version           - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -143,10 +138,6 @@ def currentReportPeriod = null
 // список алиасов подразделов
 @Field
 def sections = ['A', 'B', 'C']
-
-// регион подразделения формы
-@Field
-def regionId = null
 
 @Field
 def copyColumns = ['codeOKATO', 'tsTypeCode', 'model', 'ecoClass', 'identNumber', 'regNumber', 'regDate',
@@ -260,7 +251,7 @@ def logicCheck() {
     def List<DataRow<Cell>> checkedRows = new ArrayList<DataRow<Cell>>()
 
     // регион из подразделения формы для проверки 10
-    def regionId = getRegionId()
+    def regionId = formDataDepartment.regionId
 
     def sectionTsTypeCodeMap = ['A' : '50000', 'B' : '40200', 'C' : '40100']
     def sectionTsTypeCode = null
@@ -336,32 +327,32 @@ def logicCheck() {
             rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
         }
 
-        if (false) {
-            def records = null
-            if (row.codeOKATO != null) {
-                // TODO (Ramil Timerbaev) справочник «Параметры представления деклараций по транспортному налогу» еще не добавлен http://jira.aplana.com/browse/SBRFACCTAX-9316
-                // 10. Проверка наличия параметров представления декларации для кода ОКТМО
-                def filter = "КодСубъектаРФпредставителяДекларации = $regionId and КодОКТМО = $row.codeOKATO"
-                // справочник «Параметры представления деклараций по транспортному налогу»
-                records = getProvider(0L).getRecords(dTo, null, filter, null);
-                if (records == null || records.isEmpty()) {
-                    rowError(logger, row, errorMsg + "Для выбранного кода ОКТМО отсутствует запись в справочнике «Параметры представления деклараций по транспортному налогу»!")
-                }
+        if (row.codeOKATO != null) {
+            // 10. Проверка наличия параметров представления декларации для кода ОКТМО
+            def filter = "DECLARATION_REGION_ID = $regionId and OKTMO = $row.codeOKATO"
+            // справочник «Параметры представления деклараций по транспортному налогу»
+            def records = getProvider(210L).getRecords(dTo, null, filter, null)
+            if (records == null || records.isEmpty()) {
+                rowError(logger, row, errorMsg + "Для выбранного кода ОКТМО отсутствует запись в справочнике «Параметры представления деклараций по транспортному налогу»!")
             }
 
             // 14. Проверка допустимых значений «Графы 23»
-            // TODO (Ramil Timerbaev) включить логическую проверку 14 после того как будут добавлен дополнен справочник «Параметры налоговых льгот транспортного налога» http://jira.aplana.com/browse/SBRFACCTAX-9316
-            // Атрибут «Код субъекта РФ» равен хотя бы одному из значений, определенному согласно алгоритму раздела 1.1.1.5.4.1;
-            if (row.codeOKATO != null && row.taxBenefitCode != null && records != null && !records.isEmpty()) {
-                def oktmo = records.collect { it.кодОКТМО.value }.join(', ')
-                def filter = "КодСубъектаРФпредставителяДекларации = $regionId and " +
-                        "TAX_BENEFIT_ID in ('30200', '20200', '20210', '20220', '20230') and " +
-                        "КодСубъектаРФ in ($oktmo)"
-                // справочник «Параметры налоговых льгот транспортного налога»
-                def records7 =  getProvider(7L).getRecords(dTo, null, filter, null);
-                if (records7 == null || records7.isEmpty()) {
-                    def columnName = getColumnName(row, 'taxBenefitCode')
-                    rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
+            if (row.taxBenefitCode != null && records != null && !records.isEmpty()) {
+                filter = "CODE = '30200' or CODE = '20200' or CODE = '20210' or CODE = '20220' or CODE = '20230'"
+                // справочник «Коды налоговых льгот транспортного налога»
+                def records6 =  getProvider(6L).getRecords(dTo, null, filter, null)
+                if (records6 != null && !records6.isEmpty()) {
+                    def regionIds = records.collect { it.REGION_ID.value }.join(' or DICT_REGION_ID = ')
+                    def taxBenefitCodeIds = records6.collect { it.record_id.value }.join(' or TAX_BENEFIT_ID = ')
+                    filter = "DECLARATION_REGION_ID = $regionId and " +
+                            "(DICT_REGION_ID = $regionIds) and " +
+                            "(TAX_BENEFIT_ID = $taxBenefitCodeIds)"
+                    // справочник «Параметры налоговых льгот транспортного налога»
+                    def records7 =  getProvider(7L).getRecords(dTo, null, filter, null)
+                    if (records7 == null || records7.isEmpty()) {
+                        def columnName = getColumnName(row, 'taxBenefitCode')
+                        rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
+                    }
                 }
             }
         }
@@ -387,17 +378,14 @@ def logicCheck() {
             rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
         }
 
-        // TODO (Ramil Timerbaev) включить логическую проверку 16 после того как будет добавлен справочники «Средняя стоимость транспортных средств» и «Повышающие коэффициенты транспортного налога» http://jira.aplana.com/browse/SBRFACCTAX-9316
-        if (false) {
-            // 16. Проверка наличия повышающего коэффициента для ТС дороже 3 млн. руб.
-            if (row.version != null) {
-                def averageCost = getRefBookValue(NN, row.version)?.СредняяСтоимость?.value
-                def filter = "СредняяСтоимость = $averageCost"
-                // справочник «Повышающие коэффициенты транспортного налога»
-                def records = getProvider(0L).getRecords(dTo, null, filter, null); // TODO (Ramil Timerbaev)
-                if (records == null || !records.isEmpty()) {
-                    rowError(logger, row, errorMsg + "Для средней стоимости выбранной модели (версии) из перечня, утвержденного на налоговый период, отсутствует запись в справочнике «Повышающие коэффициенты транспортного налога»!")
-                }
+        // 16. Проверка наличия повышающего коэффициента для ТС дороже 3 млн. руб.
+        if (row.version != null) {
+            def averageCost = getRefBookValue(208L, row.version)?.AVG_COST?.value
+            def filter = "AVG_COST = $averageCost"
+            // справочник «Повышающие коэффициенты транспортного налога»
+            def records = getProvider(209L).getRecords(dTo, null, filter, null)
+            if (records == null || records.isEmpty()) {
+                rowError(logger, row, errorMsg + "Для средней стоимости выбранной модели (версии) из перечня, утвержденного на налоговый период, отсутствует запись в справочнике «Повышающие коэффициенты транспортного налога»!")
             }
         }
 
@@ -512,14 +500,6 @@ def copyData() {
 def copyRow(def row, def columns) {
     def newRow = getNewRow()
     columns.each {
-        newRow.getCell(it).setValue(row.getCell(it).value, null)
-    }
-    return newRow
-}
-
-def copyRow201(def row) {
-    def newRow = getNewRow()
-    copyColumns201.each {
         newRow.getCell(it).setValue(row.getCell(it).value, null)
     }
     return newRow
@@ -646,7 +626,6 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
     def dFrom = getReportPeriodStartDate()
     def dTo = getReportPeriodEndDate()
 
-    def section = null
     def sectionRows = [:]
     sections.each {
         sectionRows[it] = []
@@ -696,7 +675,7 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
 
     // получение данных из 202
     if (!tmpRows.isEmpty()) {
-        def regionId = getRegionId()
+        def regionId = formDataDepartment.regionId
         for (def row : dataRows202Old) {
             if ((row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
                 continue
@@ -727,7 +706,7 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
                     def record6Id = row.getCell('taxBenefitCode').value
                     if (record6Id != null) {
                         def filter = "TAX_BENEFIT_ID = $record6Id and DECLARATION_REGION_ID = $regionId"
-                        def records = getProvider(7L).getRecords(dTo, null, filter, null);
+                        def records = getProvider(7L).getRecords(dTo, null, filter, null)
                         def id = (records != null && !records.isEmpty() ? records.get(0)?.record_id?.value : null)
                         if (id != null) {
                             tmpRow.getCell('taxBenefitCode').setValue(id, null)
@@ -837,6 +816,9 @@ void addData(def xml, int headRowCount) {
     def sectionNumber = 0
     def sectionAlias = null
     def mapRows = [:]
+
+    def dTo = getReportPeriodEndDate()
+    def regionId = formDataDepartment.regionId
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -970,19 +952,21 @@ void addData(def xml, int headRowCount) {
         newRow.benefitEndDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
-        // TODO (Ramil Timerbaev) вернуть когда поправится баг http://jira.aplana.com/browse/SBRFACCTAX-9436
         // графа 23 - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
-        // def recordId = getRecordIdImport(6, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // newRow.taxBenefitCode = getRecordIdImport(7, 'TAX_BENEFIT_ID', recordId.toString(), xlsIndexRow, xmlIndexCol + colOffset)
+        if (row.cell[xmlIndexCol].text()) {
+            def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+            def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
+            def columnName = getColumnName(newRow, 'taxBenefitCode')
+            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, xlsIndexRow, xmlIndexCol + colOffset, true)
+        }
         xmlIndexCol++
 
         // графа 24
         newRow.base = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
-        // TODO (Ramil Timerbaev) вернуть когда будет готов справочник «Средняя стоимость транспортных средств» http://jira.aplana.com/browse/SBRFACCTAX-9316
-        // графа 25 - атрибут NNN - NAME - «Модель (версия)», справочник NN «Средняя стоимость транспортных средств»
-        // newRow.version = getRecordIdImport(NN, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // графа 25 - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
+        newRow.version = getRecordIdImport(208L, 'MODEL', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         mapRows[sectionAlias].add(newRow)
     }
@@ -1010,38 +994,25 @@ void importTransportData() {
 
 void addTransportData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
 
     def int rnuIndexRow = 2
     def int colOffset = 1
-    def rows = []
-    def sectionNumber = 0
+
     def mapRows = [:]
+
+    def dTo = getReportPeriodEndDate()
+    def regionId = formDataDepartment.regionId
 
     for (def row : xml.row) {
         rnuIndexRow++
-        def int xlsIndexRow = rnuIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (rnuIndexRow <= headRowCount) {
-            continue
-        }
 
         if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
 
-        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
-        def firstValue = row.cell[1].text()
-        if (firstValue != null && firstValue != '') {
-            sectionAlias = sections[sectionNumber]
-            sectionNumber++
-            mapRows.put(sectionAlias, [])
-            continue
-        }
-
         def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
+        newRow.setImportIndex(rnuIndexRow)
 
         def int xmlIndexCol = 1
 
@@ -1049,25 +1020,25 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 2 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
-        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         newRow.codeOKATO = record?.record_id?.value
         xmlIndexCol++
 
         // графа 3 - зависит от графы 2 - атрибут 841 - NAME - «Наименование», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
         if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
         // графа 4 - атрибут 422 - CODE - «Код вида ТС», справочник 42 «Коды видов транспортных средств»
         // http://jira.aplana.com/browse/SBRFACCTAX-8572 исправить загрузку Кода Вида ТС (убираю пробелы)
-        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text().replace(' ', ''), xlsIndexRow, xmlIndexCol + colOffset, true)
+        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text().replace(' ', ''), rnuIndexRow, xmlIndexCol + colOffset, true)
         newRow.tsTypeCode = record?.record_id?.value
         xmlIndexCol++
 
         // графа 5 - зависит от графы 4 - атрибут 423 - NAME - «Наименование вида транспортного средства», справочник 42 «Коды видов транспортных средств»
         if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         }
         xmlIndexCol++
 
@@ -1076,7 +1047,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 7
-        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
         // графа 8
@@ -1088,28 +1059,28 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 10
-        newRow.regDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.regDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 11
-        newRow.regDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.regDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 12
-        newRow.taxBase = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.taxBase = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 13 - атрибут 57 - CODE - «Код единицы измерения», справочник 12 «Коды единиц измерения налоговой базы на основании ОКЕИ»
-        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
         // графа 14
         def yearStr = row.cell[xmlIndexCol].text()
         if (yearStr != null) {
             if (yearStr.contains(".")) {
-                newRow.year = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                newRow.year = parseDate(yearStr, "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
             } else {
-                def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                def yearNum = parseNumber(yearStr, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
                 if (yearNum != null && yearNum != 0) {
                     newRow.year = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
                 }
@@ -1118,15 +1089,15 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 15
-        newRow.pastYear = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.pastYear = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 16
-        newRow.stealDateStart = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.stealDateStart = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 17
-        newRow.stealDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.stealDateEnd = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 18
@@ -1134,39 +1105,44 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 19
-        newRow.costOnPeriodBegin = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.costOnPeriodBegin = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 20
-        newRow.costOnPeriodEnd = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.costOnPeriodEnd = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 21
-        newRow.benefitStartDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.benefitStartDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 22
-        newRow.benefitEndDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.benefitEndDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
-        // TODO (Ramil Timerbaev) вернуть когда поправится баг http://jira.aplana.com/browse/SBRFACCTAX-9436
         // графа 23 - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
-        // def recordId = getRecordIdImport(6, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // newRow.taxBenefitCode = getRecordIdImport(7, 'TAX_BENEFIT_ID', recordId.toString(), xlsIndexRow, xmlIndexCol + colOffset)
+        if (row.cell[xmlIndexCol].text()) {
+            def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+            def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
+            def columnName = getColumnName(newRow, 'taxBenefitCode')
+            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, rnuIndexRow, xmlIndexCol + colOffset, true)
+        }
         xmlIndexCol++
 
         // графа 24
         newRow.base = row.cell[xmlIndexCol].text()
         xmlIndexCol++
 
-        // TODO (Ramil Timerbaev) вернуть когда будет готов справочник «Средняя стоимость транспортных средств» http://jira.aplana.com/browse/SBRFACCTAX-9316
-        // графа 25 - атрибут NNN - NAME - «Модель (версия)», справочник NN «Средняя стоимость транспортных средств»
-        // newRow.version = getRecordIdImport(NN, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // графа 25 - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
+        newRow.version = getRecordIdImport(208L, 'MODEL', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         xmlIndexCol++
 
         // Техническое поле(группа)
         def sectionAlias = row.cell[xmlIndexCol].text()
 
+        if (!mapRows[sectionAlias]) {
+            mapRows[sectionAlias] = []
+        }
         mapRows[sectionAlias].add(newRow)
     }
 
@@ -1274,10 +1250,44 @@ def getProvider(def id) {
     return formDataService.getRefBookProvider(refBookFactory, id, providerCache)
 }
 
-/** Получить идентификатор региона из подразделения формы. */
-def getRegionId() {
-    if (regionId == null) {
-        regionId = getRefBookValue(30L, formData.departmentId)?.REGION_ID?.value
+@Field
+String REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» не найдена запись для графы «%s» актуальная на дату %s!";
+
+@Field
+ REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» найдено более одной записи для графы «%s» актуальная на дату %s!";
+
+/**
+ * Получить id записи из справочника по фильтру.
+ * Не используется унифицированный метод formDataService.getRefBookRecordIdImport потому что в нем нет возможности
+ * искать запись по фильтру.
+ *
+ * @param refBookId идентификатор справочника
+ * @param date дата актуальности записи
+ * @param filter фильтр для поиска
+ * @param columnName название графы формы для которого ищется значение
+ * @param rowIndex номер строки в файле
+ * @param colIndex номер колонки в файле
+ * @param required фатальность
+ */
+Long getRefBookRecordIdImport(Long refBookId, Date date, String filter, String columnName,
+                              int rowIndex, int colIndex, boolean required) {
+    if (refBookId == null) {
+        return null
     }
-    return regionId
+    def records = getProvider(refBookId).getRecords(date, null, filter, null)
+    if (records != null && records.size() == 1) {
+        return records.get(0).record_id.value
+    }
+
+    def tooManyValue = (records != null && records.size() > 1)
+    RefBook rb = refBookFactory.get(refBookId)
+
+    String msg = String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR_NEW : REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW,
+            rowIndex, getXLSColumnName(colIndex), rb.getName(), columnName, date.format('dd.MM.yyyy'))
+    if (required) {
+        throw new ServiceException("%s", msg)
+    } else {
+        logger.warn("%s", msg)
+    }
+    return null
 }
