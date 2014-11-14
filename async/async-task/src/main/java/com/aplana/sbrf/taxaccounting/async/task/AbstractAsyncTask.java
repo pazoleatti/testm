@@ -83,7 +83,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     @Override
                     public void execute() {
                         if (e instanceof ServiceLoggerException) {
-                            sendNotifications(lock, getErrorMsg(params), ((ServiceLoggerException) e).getUuid());
+                            sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), ((ServiceLoggerException) e).getUuid());
                         } else {
                             sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), null);
                         }

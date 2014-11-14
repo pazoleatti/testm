@@ -75,11 +75,17 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     public boolean check(Logger logger, Integer reportPeriodId) {
         ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
 
+        List<Integer> formTypeList = formTypeService.getIfrsFormTypes();
+        List<Integer> declarationTypeList = declarationTypeService.getIfrsDeclarationTypes();
+
+        if (formTypeList.isEmpty() && declarationTypeList.isEmpty()) {
+            logger.error("Отсутствуют макеты налоговых форм/деклараций с признаком \"Отчетность для МСФО\"");
+            return false;
+        }
+
         List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
         List<DeclarationData> declarationDataList = declarationDataSearchService.getIfrs(reportPeriodId);
 
-        List<Integer> formTypeList = formTypeService.getIfrsFormTypes();
-        List<Integer> declarationTypeList = declarationTypeService.getIfrsDeclarationTypes();
 
         List<FormData> notAcceptedFormDataList = new ArrayList<FormData>();
         List<DeclarationData> notAcceptedDeclarationDataList = new ArrayList<DeclarationData>();
@@ -136,14 +142,17 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         zos.setEncoding("cp866");
         try {
             ZipArchiveEntry ze;
+            List<Integer> formTypeList = formTypeService.getIfrsFormTypes();
+            List<Integer> declarationTypeList = declarationTypeService.getIfrsDeclarationTypes();
+            if (formTypeList.isEmpty() && declarationTypeList.isEmpty()) {
+                throw new ServiceException("Отсутствуют макеты налоговых форм/деклараций с признаком \"Отчетность для МСФО\"");
+            }
+
             List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
             List<DeclarationData> declarationDataList = declarationDataSearchService.getIfrs(reportPeriodId);
             if (formDataList.isEmpty() && declarationDataList.isEmpty()) {
                 throw new ServiceException("Нет созданных НФ/декларациии");
             }
-
-            List<Integer> formTypesList = formTypeService.getIfrsFormTypes();
-            List<Integer> declarationTypesList = declarationTypeService.getIfrsDeclarationTypes();
 
             List<Department> departments = departmentService.getAllChildren(0);
             Map<Integer, Department> departmentsMap = new HashMap<Integer, Department>();
@@ -155,7 +164,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 boolean flag = true;
                 List<DepartmentFormType> departmentImpFormTypes = sourceService.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriodId);
                 for(DepartmentFormType departmentFormType: departmentImpFormTypes) {
-                    if (formTypesList.contains(departmentFormType.getFormTypeId())) {
+                    if (formTypeList.contains(departmentFormType.getFormTypeId())) {
                         flag = false;
                         break;
                     }
@@ -166,7 +175,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
 
                 List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriodId);
                 for(DepartmentDeclarationType departmentDeclarationType: departmentDeclarationTypes) {
-                    if (declarationTypesList.contains(departmentDeclarationType.getDeclarationTypeId())) {
+                    if (declarationTypeList.contains(departmentDeclarationType.getDeclarationTypeId())) {
                         flag = false;
                         break;
                     }
@@ -212,6 +221,8 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 zos.write(IOUtils.toByteArray(blobData.getInputStream()));
                 zos.closeArchiveEntry();
             }
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
             throw new ServiceException("Не удалось сформировать отчетность для МСФО", e);
         } finally {
