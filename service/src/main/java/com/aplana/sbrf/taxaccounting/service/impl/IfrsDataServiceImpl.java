@@ -133,6 +133,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ZipArchiveOutputStream zos = new ZipArchiveOutputStream(os);
+        zos.setEncoding("cp866");
         try {
             ZipArchiveEntry ze;
             List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
