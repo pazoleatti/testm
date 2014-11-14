@@ -2,9 +2,10 @@ package form_template.property.property_945_3.v2014
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
@@ -40,10 +41,12 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        checkPrevForm()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        checkPrevForm()
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
@@ -52,6 +55,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        checkPrevForm()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
@@ -116,6 +120,9 @@ def endDate = null
 
 @Field
 ReportPeriod reportPeriod = null
+
+@Field
+def prevReportPeriods = null
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
@@ -592,4 +599,38 @@ def calcBasis(def recordId) {
 def getBenefitCode(def parentRecordId) {
     def recordId = getRefBookValue(203, parentRecordId).TAX_BENEFIT_ID.value
     return  getRefBookValue(202, recordId).CODE.value
+}
+
+def checkPrevForm() {
+    // 2. Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
+
+    // 1. Проверить существование и принятость форм, а также наличие данных в них.
+    if (getReportPeriod()?.order != 4) {
+        return
+    }
+    def reportPeriods = getPrevReportPeriods()
+
+    for (def reportPeriod : reportPeriods) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.SUMMARY, formDataDepartment.id, reportPeriod.id, false, logger, true)
+    }
+}
+
+/** Получить предыдущие преиоды за год. */
+def getPrevReportPeriods() {
+    if (prevReportPeriods == null) {
+        prevReportPeriods = []
+        def yearStartDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+        // получить периоды за год
+        def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.PROPERTY, yearStartDate, getReportPeriodEndDate())
+        for (def reportPeriod : reportPeriods) {
+            if (reportPeriod.id == formData.reportPeriodId) {
+                continue
+            }
+            prevReportPeriods.add(reportPeriod)
+        }
+    }
+    return prevReportPeriods
 }
