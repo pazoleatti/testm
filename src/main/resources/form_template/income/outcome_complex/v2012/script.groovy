@@ -883,11 +883,6 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.update(rows)
 }
 
-def getOwnerValue (def dataRow , def alias) {
-    def cell = dataRow.getCell(alias)
-    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
-}
-
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
 def getIncome102Data(def row) {
     // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"

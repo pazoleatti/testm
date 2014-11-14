@@ -706,11 +706,6 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.update(rows)
 }
 
-def getOwnerValue (def dataRow , def alias) {
-    def cell = dataRow.getCell(alias)
-    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
-}
-
 // для уроня Банка:	проверка наличия и принятия РНУ-14
 void checkRnu14Accepted() {
     if (!isBank()) {
