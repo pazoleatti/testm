@@ -7,8 +7,6 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.InputStream;
-
 /**
  * Базовый класс для тестов МУКС
  *
@@ -38,7 +36,7 @@ public abstract class DealBaseTest extends ScriptTestBase {
 
     @Test
     public void create() {
-        testHelper.create();
+        testHelper.execute(FormDataEvent.CREATE);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
@@ -46,21 +44,21 @@ public abstract class DealBaseTest extends ScriptTestBase {
     // Проверка пустой
     @Test
     public void checkTest() {
-        testHelper.check();
+        testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
     }
 
     // Расчет пустой
     @Test
     public void calcTest() {
-        testHelper.calc();
+        testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
     }
 
     @Test
     public void addDelRowTest() {
         // Добавление
-        testHelper.addRow();
+        testHelper.execute(FormDataEvent.ADD_ROW);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size() + 1, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
         // Удаление
@@ -73,14 +71,14 @@ public abstract class DealBaseTest extends ScriptTestBase {
         }
         Assert.assertNotNull(addDataRow);
         testHelper.setCurrentDataRow(addDataRow);
-        testHelper.delRow();
+        testHelper.execute(FormDataEvent.DELETE_ROW);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
 
     @Test
     public void sortRowsTest() {
-        testHelper.sortRows();
+        testHelper.execute(FormDataEvent.SORT_ROWS);
         checkLogger();
     }
 
@@ -92,20 +90,16 @@ public abstract class DealBaseTest extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
         // TODO
+        checkLogger();
     }
 
+    /**
+     * Вид тестируемой НФ
+     */
     protected abstract int getFormTypeId();
-
-    @Override
-    protected InputStream getImportXlsInputStream() {
-        return this.getClass().getResourceAsStream("importFile.xlsm");
-    }
-
-    @Override
-    protected InputStream getImportRnuInputStream() {
-        return null;
-    }
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {

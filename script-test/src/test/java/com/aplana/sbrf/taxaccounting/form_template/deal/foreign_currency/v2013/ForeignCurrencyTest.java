@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.form_template.deal.foreign_currency.v2013;
 import com.aplana.sbrf.taxaccounting.form_template.deal.DealBaseTest;
 
 /**
- * Предоставление гарантий
+ * Купля-продажа иностранной валюты
  *
  * @author Levykin
  */

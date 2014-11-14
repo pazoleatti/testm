@@ -54,6 +54,9 @@ public class RefBookReadHelper {
         String[] attributes = firstRow.split(";");
         Map<Integer, RefBookAttributeType> typeMap = new HashMap<Integer, RefBookAttributeType>();
         for (int i = 0; i < attributes.length; i++) {
+            if (attributes[i].indexOf("(") == -1 || attributes[i].indexOf("(") == -1) {
+                throw new ServiceException("Wrong reference book format in file \"" + path + "\"");
+            }
             String nameStr = attributes[i].substring(0, attributes[i].indexOf("("));
             char typeChar = attributes[i].charAt(attributes[i].indexOf("(") + 1);
             RefBookAttributeType type;

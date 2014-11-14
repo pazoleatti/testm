@@ -1,18 +1,22 @@
 package com.aplana.sbrf.taxaccounting.form_template.transport.vehicles_1.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -46,23 +50,34 @@ public class Vehicles1Test extends ScriptTestBase {
     }
 
     @Override
-    protected InputStream getImportXlsInputStream() {
-        return Vehicles1Test.class.getResourceAsStream("importFile.xlsm");
-    }
-
-    @Override
-    protected InputStream getImportRnuInputStream() {
-        return Vehicles1Test.class.getResourceAsStream("importFile.rnu");
-    }
-
-    @Override
     protected ScriptTestMockHelper getMockHelper() {
         return getDefaultScriptTestMockHelper(Vehicles1Test.class);
     }
 
+    @Before
+    public void mockRefBookDataProvider() {
+        // Для работы логических проверок
+        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        String filter = (String)invocation.getArguments()[2];
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+                        if (filter.equals("DECLARATION_REGION_ID = 1 and OKTMO = 1")) {
+                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            result.add(map);
+                        }
+                        return result;
+                    }
+                });
+    }
+
     @Test
     public void create() {
-        testHelper.create();
+        testHelper.execute(FormDataEvent.CREATE);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
@@ -70,21 +85,21 @@ public class Vehicles1Test extends ScriptTestBase {
     // Проверка пустой
     @Test
     public void checkTest() {
-        testHelper.check();
+        testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
     }
 
     // Расчет пустой
     @Test
     public void calcTest() {
-        testHelper.calc();
+        testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
     }
 
     @Test
     public void addDelRowTest() {
         // Добавление
-        testHelper.addRow();
+        testHelper.execute(FormDataEvent.ADD_ROW);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size() + 1, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
         // Удаление
@@ -97,14 +112,14 @@ public class Vehicles1Test extends ScriptTestBase {
         }
         Assert.assertNotNull(addDataRow);
         testHelper.setCurrentDataRow(addDataRow);
-        testHelper.delRow();
+        testHelper.execute(FormDataEvent.DELETE_ROW);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
 
     @Test
     public void afterCreateTest() {
-        testHelper.afterCreate();
+        testHelper.execute(FormDataEvent.AFTER_CREATE);
         checkLogger();
     }
 
@@ -134,12 +149,12 @@ public class Vehicles1Test extends ScriptTestBase {
 
         // Данные НФ-источника, формируются импортом
         testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.importExcel();
+        testHelper.execute(FormDataEvent.IMPORT);
         sourceDataRowHelper.save(testHelper.getDataRowHelper().getAll());
         testHelper.initRowData();
 
         // Консолидация
-        testHelper.compose();
+        testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
 
         checkLogger();
@@ -147,14 +162,14 @@ public class Vehicles1Test extends ScriptTestBase {
 
     @Test
     public void sortRowsTest() {
-        testHelper.sortRows();
+        testHelper.execute(FormDataEvent.SORT_ROWS);
         checkLogger();
     }
 
     //@Test TODO Добавить тест для импорта, пока .rnu файла нет
     public void importTransportFileTest() {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
-        testHelper.importTransportFile();
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
@@ -162,7 +177,7 @@ public class Vehicles1Test extends ScriptTestBase {
     @Test
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.importExcel();
+        testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
         // Проверка расчетных данных
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
@@ -28,6 +29,7 @@ import java.io.*;
 public class TestScriptHelper {
     // Id текущего для теста экземпляра НФ
     public final static long CURRENT_FORM_DATA_ID = 1;
+    public final static long DEPARTMENT_REGION_ID = 1;
 
     // Пкть к скрипту
     private String path;
@@ -55,6 +57,7 @@ public class TestScriptHelper {
     private ReportPeriodService reportPeriodService;
     private RefBookService refBookService;
     private RefBookFactory refBookFactory;
+    private RefBookDataProvider refBookDataProvider;
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -82,6 +85,7 @@ public class TestScriptHelper {
         this.mockHelper = mockHelper;
         // Id подразделения пользователя совпадает c Id подразделения НФ
         userDepartment.setId(formData.getDepartmentId());
+        userDepartment.setRegionId(DEPARTMENT_REGION_ID);
         // Шаблон НФ из файла
         FormType formType = formData.getFormType();
         formData.initFormTemplateParams(getTemplate(SCRIPT_PATH_PREFIX + path));
@@ -105,6 +109,7 @@ public class TestScriptHelper {
         reportPeriodService = mockHelper.mockReportPeriodService();
         refBookService = mockHelper.mockRefBookService();
         refBookFactory = mockHelper.mockRefBookFactory();
+        refBookDataProvider = mockHelper.getRefBookDataProvider();
     }
 
     /**
@@ -153,76 +158,6 @@ public class TestScriptHelper {
     }
 
     /**
-     * Событие FormDataEvent.CREATE
-     */
-    public void create() {
-        execute(FormDataEvent.CREATE);
-    }
-
-    /**
-     * Событие FormDataEvent.CHECK
-     */
-    public void check() {
-        execute(FormDataEvent.CHECK);
-    }
-
-    /**
-     * Событие FormDataEvent.AFTER_CREATE
-     */
-    public void afterCreate() {
-        execute(FormDataEvent.AFTER_CREATE);
-    }
-
-    /**
-     * Событие FormDataEvent.CALCULATE
-     */
-    public void calc() {
-        execute(FormDataEvent.CALCULATE);
-    }
-
-    /**
-     * Событие FormDataEvent.ADD_ROW
-     */
-    public void addRow() {
-        execute(FormDataEvent.ADD_ROW);
-    }
-
-    /**
-     * Событие FormDataEvent.DELETE_ROW
-     */
-    public void delRow() {
-        execute(FormDataEvent.DELETE_ROW);
-    }
-
-    /**
-     * Событие FormDataEvent.SORT_ROWS
-     */
-    public void sortRows() {
-        execute(FormDataEvent.SORT_ROWS);
-    }
-
-    /**
-     * Событие FormDataEvent.COMPOSE
-     */
-    public void compose() {
-        execute(FormDataEvent.COMPOSE);
-    }
-
-    /**
-     * Событие FormDataEvent.IMPORT
-     */
-    public void importExcel() {
-        execute(FormDataEvent.IMPORT);
-    }
-
-    /**
-     * Событие FormDataEvent.IMPORT_TRANSPORT_FILE
-     */
-    public void importTransportFile() {
-        execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-    }
-
-    /**
      * Инициализация строк НФ. Строки подтягиваются из макета.
      */
     public void initRowData() {
@@ -231,9 +166,18 @@ public class TestScriptHelper {
     }
 
     /**
+     * Сброс состояния хэлпера в исходное состояние.
+     * Удаляются все строки, кроме строк из макета и чистятся логи
+     */
+    public void reset() {
+        initRowData();
+        getLogger().clear();
+    }
+
+    /**
      * Выполнение части скрипта, связанного с указанным событием
      */
-    private void execute(FormDataEvent formDataEvent) {
+    public void execute(FormDataEvent formDataEvent) {
         Bindings bindings = scriptingService.getEngine().createBindings();
         bindings.put("formDataEvent", formDataEvent);
         bindings.put("formDataService", formDataService);
@@ -249,16 +193,24 @@ public class TestScriptHelper {
         bindings.put("userDepartment", userDepartment);
         bindings.put("currentDataRow", currentDataRow);
 
-        if (formDataEvent == FormDataEvent.IMPORT) {
+        if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
             bindings.put("ImportInputStream", importFileInputStream);
             bindings.put("importService", mockHelper.mockImportService());
-            bindings.put("UploadFileName", "test-file-name.xlsm");
+            bindings.put("UploadFileName", "test-file-name." + (formDataEvent == FormDataEvent.IMPORT ? "xlsm" : "rnu"));
         }
 
         try {
             scriptingService.getEngine().eval(script, bindings);
         } catch (ScriptException e) {
             scriptingService.logScriptException(e, logger);
+        } finally {
+            if (importFileInputStream != null) {
+                try {
+                    importFileInputStream.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
         }
     }
 
@@ -354,5 +306,12 @@ public class TestScriptHelper {
      */
     public RefBookFactory getRefBookFactory() {
         return refBookFactory;
+    }
+
+    /**
+     * Mock RefBookDataProvider для реализации mock-логики внутри теста
+     */
+    public RefBookDataProvider getRefBookDataProvider() {
+        return refBookDataProvider;
     }
 }

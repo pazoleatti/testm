@@ -24,6 +24,7 @@ public abstract class ScriptTestBase {
 
     @BeforeClass
     public static void initClass() {
+        // Т.к. это поле базового класса статично, то его необходимо сбрасывать перед тестом отдельного скрипта
         testHelper = null;
     }
 
@@ -32,6 +33,7 @@ public abstract class ScriptTestBase {
      */
     @Before
     public void init() {
+        // Хэлпер хранится статично для оптимизации, чтобы он был один для всех тестов отдельного скрипта
         if (testHelper == null) {
             String path = getFolderPath();
             if (path == null) {
@@ -39,12 +41,11 @@ public abstract class ScriptTestBase {
             }
             testHelper = new TestScriptHelper(getFolderPath(), getFormData(), getMockHelper());
         }
-        testHelper.getLogger().clear();
-        testHelper.initRowData();
+        testHelper.reset();
     }
 
     /**
-     * Печать вывода скрипта
+     * Печать вывода скрипта после каждого теста
      */
     @After
     public void printLog() {
@@ -75,12 +76,16 @@ public abstract class ScriptTestBase {
     /**
      * Файл для импорта из Excel-файлов (из интерфейса)
      */
-    protected abstract InputStream getImportXlsInputStream();
+    protected InputStream getImportXlsInputStream() {
+        return this.getClass().getResourceAsStream("importFile.xlsm");
+    }
 
     /**
      * Файл для импорта из .rnu-файлов (загрузка ТФ)
      */
-    protected abstract InputStream getImportRnuInputStream();
+    protected InputStream getImportRnuInputStream() {
+        return this.getClass().getResourceAsStream("importFile.rnu");
+    }
 
     /**
      * Хэлпер с заглушками других сервисов

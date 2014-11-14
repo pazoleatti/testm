@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     // DataRowHelper для тестируемой НФ
     private DataRowHelper currentDataRowHelper = new DataRowHelperStub();
+    private RefBookDataProvider refBookDataProvider = mockRefBookDataProvider();
     private Map<Long, Map<Long, Map<String, RefBookValue>>> refBookMap;
     public static Calendar PERIOD_START_DATE = Calendar.getInstance();
     public static Calendar PERIOD_END_DATE = Calendar.getInstance();
@@ -59,9 +60,37 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
 
         // Работа со справочниками
         when(formDataService.getRefBookRecordIdImport(anyLong(), anyMap(), anyMap(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Object>() {
+                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Long>() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Long answer(InvocationOnMock invocation) throws Throwable {
+                Long refBookId = (Long) invocation.getArguments()[0];
+                String alias = (String) invocation.getArguments()[3];
+                String value = (String) invocation.getArguments()[4];
+                Map<String, RefBookValue> map = getRecord(refBookId, alias, value);
+                if (map == null) {
+                    return null;
+                }
+                Number number = map.get(RefBook.RECORD_ID_ALIAS).getNumberValue();
+                if (number == null) {
+                    throw new ServiceException("Wrong reference book " + refBookId + " format!");
+                }
+                return number.longValue();
+            }
+        });
+        when(formDataService.getRefBookRecordImport(anyLong(), anyMap(), anyMap(), anyMap(), anyString(), anyString(),
+                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Map<String, RefBookValue> >() {
+            @Override
+            public Map<String, RefBookValue>  answer(InvocationOnMock invocation) throws Throwable {
+                Long refBookId = (Long) invocation.getArguments()[0];
+                String alias = (String) invocation.getArguments()[4];
+                String value = (String) invocation.getArguments()[5];
+                return getRecord(refBookId, alias, value);
+            }
+        });
+        when(formDataService.getRefBookRecordId(anyLong(), anyMap(), anyMap(), anyString(), anyString(),
+                any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Long>() {
+            @Override
+            public Long answer(InvocationOnMock invocation) throws Throwable {
                 Long refBookId = (Long) invocation.getArguments()[0];
                 String alias = (String) invocation.getArguments()[3];
                 String value = (String) invocation.getArguments()[4];
@@ -72,17 +101,19 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
                 return map.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
             }
         });
-        when(formDataService.getRefBookRecordImport(anyLong(), anyMap(), anyMap(), anyMap(), anyString(), anyString(),
-                any(Date.class), anyInt(), anyInt(), any(Logger.class), anyBoolean())).thenAnswer(new Answer<Object>() {
+        when(formDataService.getRefBookValue(anyLong(), anyLong(), anyMap())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
+            public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
                 Long refBookId = (Long) invocation.getArguments()[0];
-                String alias = (String) invocation.getArguments()[4];
-                String value = (String) invocation.getArguments()[5];
-                return getRecord(refBookId, alias, value);
+                Long recordId = (Long) invocation.getArguments()[1];
+                Map<Long, Map<String, RefBookValue>> map = refBookMap.get(refBookId);
+                if (map == null) {
+                    return null;
+                }
+                return map.get(recordId);
             }
         });
-        RefBookDataProvider refBookDataProvider = mockRefBookDataProvider();
+
         when(formDataService.getRefBookProvider(any(RefBookFactory.class), anyLong(), anyMap())).thenReturn(refBookDataProvider);
         // Работа со строками НФ
         when(formDataService.addRow(any(FormData.class), any(DataRow.class), anyList(), anyList())).thenCallRealMethod();
@@ -98,12 +129,20 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
             throw new ServiceException("Not found reference book with id = %d!", refBookId);
         }
 
+        // Поиск по значению
         for (Map.Entry<Long, Map<String, RefBookValue>> entry : map.entrySet()) {
-            String refBookValue = entry.getValue().get(alias).getStringValue();
-            if (entry.getValue().get(alias).getAttributeType() == RefBookAttributeType.NUMBER) {
-                refBookValue = String.valueOf(entry.getValue().get(alias).getNumberValue().longValue());
+            RefBookValue refBookValue = entry.getValue().get(alias);
+            if (refBookValue == null) {
+                throw new ServiceException("Not found %s = \"%s\" in reference book with id = %d!", alias, value,
+                        refBookId);
             }
-            if (refBookValue.equals(value)) {
+            // Поиск производится только по числовому и строковому значению, другой поиск не требуется
+            String refBookStringValue = refBookValue.getStringValue();
+            if (entry.getValue().get(alias).getAttributeType() == RefBookAttributeType.NUMBER) {
+                refBookStringValue = String.valueOf(entry.getValue().get(alias).getNumberValue().longValue());
+            }
+
+            if (refBookStringValue != null && refBookStringValue.equals(value)) {
                 return entry.getValue();
             }
         }
@@ -207,5 +246,10 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     @Override
     public DataRowHelper getDataRowHelper() {
         return currentDataRowHelper;
+    }
+
+    @Override
+    public RefBookDataProvider getRefBookDataProvider() {
+        return refBookDataProvider;
     }
 }

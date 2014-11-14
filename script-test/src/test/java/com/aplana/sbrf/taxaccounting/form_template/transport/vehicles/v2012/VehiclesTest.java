@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.transport.vehicles.v2012;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -41,11 +38,6 @@ public class VehiclesTest extends ScriptTestBase {
     }
 
     @Override
-    protected InputStream getImportXlsInputStream() {
-        return VehiclesTest.class.getResourceAsStream("importFile.xlsm");
-    }
-
-    @Override
     protected InputStream getImportRnuInputStream() {
         // Не требуется
         return null;
@@ -59,26 +51,26 @@ public class VehiclesTest extends ScriptTestBase {
     // Проверка пустой
     @Test
     public void checkTest() {
-        testHelper.check();
+        testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
     }
 
     // Расчет пустой
     @Test
     public void calcTest() {
-        testHelper.calc();
+        testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
     }
 
     @Test
     public void addDelRowTest() {
         // Добавление
-        testHelper.addRow();
+        testHelper.execute(FormDataEvent.ADD_ROW);
         Assert.assertEquals(1, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
         // Удаление
         testHelper.setCurrentDataRow(testHelper.getDataRowHelper().getAll().get(0));
-        testHelper.delRow();
+        testHelper.execute(FormDataEvent.DELETE_ROW);
         Assert.assertEquals(0, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
@@ -86,7 +78,7 @@ public class VehiclesTest extends ScriptTestBase {
     @Test
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.importExcel();
+        testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
