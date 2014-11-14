@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
@@ -116,7 +115,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
                                                        Date periodEnd) {
-        QueryParams filter = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> filter = getSearchOrderingDefaultFilter();
         return getDFTSourcesByDFT(departmentId, formTypeId, kind, periodStart, periodEnd, filter);
     }
 
@@ -128,7 +127,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, int reportPeriodId) {
-        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDFTSourcesByDFT(departmentId, formTypeId, kind, reportPeriodId, queryParams);
     }
 
@@ -141,7 +140,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTSourceByDDT(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd) {
-        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDFTSourceByDDT(departmentId, declarationTypeId, periodStart, periodEnd, queryParams);
     }
 
@@ -177,7 +176,6 @@ public class SourceServiceImpl implements SourceService {
      * @param logger                   логгер
      * @param sourcePairs              оригинальный список пар источников-приемников
      * @param errorPairs               список назначений, которые должны быть исключены
-     * @param mode                     режим работы
      * @param isDeclaration            признак того, что идет обработка в режиме "Декларации"
      * @param emptyIsOk                признак того, что если в результате выполнения входной список оказывается пуст - это нормальная ситуация.
      *                                 Например в случае пересечения версий, дополнительная обработка не требуется - версии склеиваются на стадии проверки пересечений
@@ -187,7 +185,7 @@ public class SourceServiceImpl implements SourceService {
      */
     public List<SourcePair> truncateSources(Logger logger, List<SourcePair> sourcePairs,
                                             List<SourcePair> errorPairs,
-                                            SourceMode mode, boolean isDeclaration, boolean emptyIsOk, LOG_LEVEL level,
+                                            boolean isDeclaration, boolean emptyIsOk, LOG_LEVEL level,
                                             MessageBuilder messageBuilder) {
         List<SourcePair> sourcePairsOut = new LinkedList<SourcePair>(sourcePairs);
         for (SourcePair error : errorPairs) {
@@ -360,7 +358,7 @@ public class SourceServiceImpl implements SourceService {
                 notExistingPairs.add(pair);
             }
         }
-        return truncateSources(logger, sourcePairs, notExistingPairs, mode, isDeclaration, false, LOG_LEVEL.ERROR,
+        return truncateSources(logger, sourcePairs, notExistingPairs, isDeclaration, false, LOG_LEVEL.ERROR,
                 new MessageBuilder() {
                     @Override
                     public List<String> getSourceMessage(SourcePair sourcePair) {
@@ -392,7 +390,6 @@ public class SourceServiceImpl implements SourceService {
      * @param sourceDepartmentName      подразделение-источник. Необходимо только для формирования уведомлений
      * @param destinationDepartmentName подразделение-приемник. Необходимо только для формирования уведомлений
      * @param declaration    признак того, что идет обработка в режиме "Декларации"
-     * @return обрезанный входной список связок источников-приемников, для которых не найдены экземпляры нф
      */
     public void checkFormInstances(Logger logger, List<SourcePair> sourcePairs, Date newPeriodStart, Date newPeriodEnd,
                                     String sourceDepartmentName,
@@ -461,7 +458,7 @@ public class SourceServiceImpl implements SourceService {
             }
             //Получаем данные о назначениях-причинах зацикливания для вывода в сообщениях
             final Map<Long, String> objectNames = sourceDao.getSourceNames(new ArrayList<Long>(circleCauses));
-            return truncateSources(logger, sourcePairs, loopedSources, mode, isDeclaration, false, LOG_LEVEL.ERROR,
+            return truncateSources(logger, sourcePairs, loopedSources, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
                         @Override
                         public List<String> getSourceMessage(SourcePair sourcePair) {
@@ -585,7 +582,7 @@ public class SourceServiceImpl implements SourceService {
             }
 
             /** Убираем назначения с пересечениями из обработки */
-            return truncateSources(logger, sourcePairs, intersectingPairs, mode, isDeclaration, true, LOG_LEVEL.INFO,
+            return truncateSources(logger, sourcePairs, intersectingPairs, isDeclaration, true, LOG_LEVEL.INFO,
                     new MessageBuilder() {
                         @Override
                         public List<String> getSourceMessage(SourcePair sourcePair) {
@@ -990,7 +987,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<DepartmentFormType> getDFTByDepartment(int departmentId, TaxType taxType, Date periodStart, Date periodEnd) {
-        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDFTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
@@ -1001,7 +998,7 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Long> getDFTByPerformerDep(int performerDepId, TaxType taxType, List<FormDataKind> kinds) {
-        return departmentFormTypeDao.getByPerformerId(performerDepId, taxType, kinds);
+        return departmentFormTypeDao.getByPerformerId(performerDepId, Arrays.asList(taxType), kinds);
     }
 
     @Override
@@ -1085,7 +1082,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DepartmentDeclarationType> getDDTByDepartment(int departmentId, TaxType taxType, Date periodStart,
                                                               Date periodEnd) {
-        QueryParams queryParams = getSearchOrderingDefaultFilter();
+        QueryParams<SourcesSearchOrdering> queryParams = getSearchOrderingDefaultFilter();
         return getDDTByDepartment(departmentId, taxType, periodStart, periodEnd, queryParams);
     }
 
@@ -1344,8 +1341,8 @@ public class SourceServiceImpl implements SourceService {
     /**
      * Фильтр по умолчанию
      */
-    private QueryParams getSearchOrderingDefaultFilter() {
-        QueryParams queryParams = new QueryParams();
+    private QueryParams<SourcesSearchOrdering> getSearchOrderingDefaultFilter() {
+        QueryParams<SourcesSearchOrdering> queryParams = new QueryParams<SourcesSearchOrdering>();
         queryParams.setSearchOrdering(SourcesSearchOrdering.TYPE);
         queryParams.setAscending(true);
         return queryParams;

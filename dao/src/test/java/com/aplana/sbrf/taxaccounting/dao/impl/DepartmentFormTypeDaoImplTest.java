@@ -14,10 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -141,5 +138,17 @@ public class DepartmentFormTypeDaoImplTest {
     @Test
     public void getDFTByFTTest(){
         assertEquals(3, departmentFormTypeDao.getDFTByFormType(1).size());
+    }
+
+    @Test
+    public void getByPerformerIdTest(){
+        assertEquals(1, departmentFormTypeDao.getDFTByPerformerId(1,
+                Arrays.asList(TaxType.values()),
+                Arrays.asList(FormDataKind.values())).size());
+    }
+
+    @Test
+    public void getByListIdsTest(){
+        assertEquals(3, departmentFormTypeDao.getByListIds(Arrays.asList(1l,2l,3l)).size());
     }
 }
