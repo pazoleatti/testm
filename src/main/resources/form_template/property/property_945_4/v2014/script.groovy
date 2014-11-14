@@ -468,11 +468,17 @@ def getPrevReportPeriods() {
 }
 
 def checkPrevForm() {
+    // 2. Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
+
+    // 1. Проверить существование и принятость форм, а также наличие данных в них.
     if (!isPeriodYear()) {
         return
     }
     def reportPeriods = getPrevReportPeriods()
-    // проверить существование и принятость форм, а также наличие данных в них.
+
     for (def reportPeriod : reportPeriods) {
         formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.SUMMARY, formDataDepartment.id, reportPeriod.id, false, logger, true)
     }
@@ -514,7 +520,7 @@ def getRecords(def row, def is201) {
         return Arrays.asList(getRefBookValue(203, row.taxBenefitCode))
     } else {
         def provider = formDataService.getRefBookProvider(refBookFactory, 201, providerCache)
-        def filter = "REGION_ID = ${row.subject}"
+        def filter = "DECLARATION_REGION_ID = ${formDataDepartment.regionId} and REGION_ID = ${row.subject}"
         if (recordsMap[filter] == null) {
             recordsMap[filter] = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
         }

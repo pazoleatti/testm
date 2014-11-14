@@ -427,6 +427,11 @@ def roundValue(def value, int newScale) {
 }
 
 def checkPrevForm() {
+    // 3. Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
+
     // 1. Проверка наличия форм-источников 945.1 в статусе «Принята»
     def periodsMap = getSourcesPeriodMap()
     periodsMap.each { period, monthOrders ->
