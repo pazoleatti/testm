@@ -1,6 +1,5 @@
 package form_template.property.property_945_1.v2014
 
-import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -25,10 +24,12 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        checkRegionId()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -45,9 +46,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
+        checkRegionId()
         importData()
         calc()
         logicCheck()
@@ -135,9 +138,6 @@ def Map<String, Integer> aliasNums = ['priceSubject' : 1, // №1 строка 1
                  'totalCorrection4' : 20_1, // строка 21 если всё имущество подразделения льготируемое
                  'totalUsingCorrection4' : 21_1 // строка 22 если всё имущество подразделения льготируемое
 ]
-
-@Field
-def startDate = null
 
 @Field
 def endDate = null
@@ -909,4 +909,11 @@ void loggerError(def row, def msg) {
 
 def extractValue(Object row, int count) {
     return row.name.toLowerCase().replaceAll(getTitlePattern(row).toLowerCase(), "\$$count")
+}
+
+// Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+void checkRegionId() {
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
 }
