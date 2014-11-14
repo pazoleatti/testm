@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
+
 /**
  * Базовый класс для тестов МУКС
  *
@@ -85,16 +87,27 @@ public abstract class DealBaseTest extends ScriptTestBase {
     // Консолидация
     @Test
     public void composeTest() {
-        // TODO
+        // Кроме простого выполнения события других проверок нет, т.к. для МУКС-отчетов консолидация выполняется сервисом
+        testHelper.execute(FormDataEvent.COMPOSE);
+        checkLogger();
     }
 
     @Test
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
+        int sizeBefore = testHelper.getDataRowHelper().getAll().size();
         testHelper.execute(FormDataEvent.IMPORT);
-        // TODO
+        int sizeAfter = testHelper.getDataRowHelper().getAll().size();
+        // Строк должно стать больше, чем было
+        Assert.assertTrue(sizeBefore < sizeAfter);
+        calcCheckAfterImport(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
+
+    /**
+     * Проверка расчетов
+     */
+    protected abstract void calcCheckAfterImport(List<DataRow<Cell>> dataRows);
 
     /**
      * Вид тестируемой НФ

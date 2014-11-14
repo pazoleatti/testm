@@ -117,6 +117,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         when(formDataService.getRefBookProvider(any(RefBookFactory.class), anyLong(), anyMap())).thenReturn(refBookDataProvider);
         // Работа со строками НФ
         when(formDataService.addRow(any(FormData.class), any(DataRow.class), anyList(), anyList())).thenCallRealMethod();
+
         return formDataService;
     }
 
@@ -163,6 +164,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         reportPeriod.setId(1);
         reportPeriod.setTaxPeriod(taxPeriod);
         when(reportPeriodService.get(anyInt())).thenReturn(reportPeriod);
+        when(reportPeriodService.getCalendarStartDate(anyInt())).thenReturn(PERIOD_START_DATE);
         return reportPeriodService;
     }
 
