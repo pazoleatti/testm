@@ -287,6 +287,7 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    def subject
     def subjectId = null
     def oktmo = null
     def propertyCategory = null
