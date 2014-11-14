@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
@@ -143,24 +142,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                     setIsFormModified(false);
                     showRecord(refBookRecordId, parentRefBookRecordId);
                 }
-
-                @Override
-                public void no() {
-                    rollbackIfNo();
-                }
-
-                @Override
-                public void close() {
-                    no();
-                }
             });
         } else {
             showRecord(refBookRecordId, parentRefBookRecordId);
         }
-    }
-
-    private void rollbackIfNo(){
-        RollbackTableRowSelection.fire(this, currentUniqueRecordId);
     }
 
 	private void showRecord(Long refBookRecordId) {
