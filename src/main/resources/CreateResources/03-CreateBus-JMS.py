@@ -308,7 +308,7 @@ if SIBJMSActivationSpecsId[0] != '':
 			break
 if SIBJMSActivationSpecNotFound:
 	print 'Initiated the creation of an service integration bus activation specifications'
-	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSShortAsyncActivationSpecName, '-jndiName', SIBJMSShortAsyncActivationSpecJndi, '-destinationJndiName', SIBJMSQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
+	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSShortAsyncActivationSpecName, '-jndiName', SIBJMSShortAsyncActivationSpecJndi, '-destinationJndiName', SIBJMSShortAsyncQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
@@ -325,7 +325,7 @@ if SIBJMSActivationSpecsId[0] != '':
 			break
 if SIBJMSActivationSpecNotFound:
 	print 'Initiated the creation of an service integration bus activation specifications'
-	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSLongAsyncActivationSpecName, '-jndiName', SIBJMSLongAsyncActivationSpecJndi, '-destinationJndiName', SIBJMSQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
+	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSLongAsyncActivationSpecName, '-jndiName', SIBJMSLongAsyncActivationSpecJndi, '-destinationJndiName', SIBJMSLongAsyncQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
