@@ -30,7 +30,7 @@ public class GenericAccountInfoAssembler extends SpringBeanAutowiringSupport {
 		for (GenericAttribute item : gai.getAttributes().getItem()) {
 			switch (fieldNames.get(item.getName())) {
 			case LOGIN:
-				user.setLogin(item.getValues().getItem().get(0).toLowerCase());
+				user.setLogin(item.getValues().getItem().get(0));
 				break;
 			case NAME:
 				StringBuilder sb = new StringBuilder();
