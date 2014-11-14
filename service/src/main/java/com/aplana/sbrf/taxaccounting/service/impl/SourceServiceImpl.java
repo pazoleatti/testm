@@ -159,15 +159,7 @@ public class SourceServiceImpl implements SourceService {
          * @param sourcePair обрабатываемая пара источник-приемник
          * @return сообщение
          */
-        List<String> getSourceMessage(SourcePair sourcePair);
-
-        /**
-         * Возвращает сообщение при обнаружении вхождения исключаемого назначения в списке приемников
-         *
-         * @param sourcePair обрабатываемая пара источник-приемник
-         * @return сообщение
-         */
-        List<String> getDestinationMessage(SourcePair sourcePair);
+        List<String> getMessage(SourcePair sourcePair);
     }
 
     /**
@@ -193,17 +185,7 @@ public class SourceServiceImpl implements SourceService {
                 SourcePair pair = it.next();
                 /** Исключаем связку из обработки */
                 if (pair.equals(error)) {
-                    if (isDeclaration) {
-                        if (pair.getDestination().equals(error)) {
-                            printMsgs(logger, messageBuilder.getDestinationMessage(pair), level);
-                        }
-                    } else {
-                        if (pair.getSource().equals(error)) {
-                            printMsgs(logger, messageBuilder.getSourceMessage(pair), level);
-                        } else {
-                            printMsgs(logger, messageBuilder.getDestinationMessage(pair), level);
-                        }
-                    }
+                    printMsgs(logger, messageBuilder.getMessage(pair), level);
                     it.remove();
                 }
                 /** Если единственное назначение было удалено, то продолжать нет смысла */
@@ -361,18 +343,10 @@ public class SourceServiceImpl implements SourceService {
         return truncateSources(logger, sourcePairs, notExistingPairs, isDeclaration, false, LOG_LEVEL.ERROR,
                 new MessageBuilder() {
                     @Override
-                    public List<String> getSourceMessage(SourcePair sourcePair) {
+                    public List<String> getMessage(SourcePair sourcePair) {
                         return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
                                 sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
                                 sourceDepartmentName));
-                    }
-
-                    @Override
-                    public List<String> getDestinationMessage(SourcePair sourcePair) {
-                        return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
-                                isDeclaration ? sourcePair.getDestinationType() :
-                                        sourcePair.getDestinationKind() + ": " + sourcePair.getDestinationType(),
-                                destinationDepartmentName));
                     }
                 });
     }
@@ -461,17 +435,12 @@ public class SourceServiceImpl implements SourceService {
             return truncateSources(logger, sourcePairs, loopedSources, isDeclaration, false, LOG_LEVEL.ERROR,
                     new MessageBuilder() {
                         @Override
-                        public List<String> getSourceMessage(SourcePair sourcePair) {
+                        public List<String> getMessage(SourcePair sourcePair) {
                             SourcePair errorPair = loopsMap.get(sourcePair);
                             return Arrays.asList(String.format(CIRCLE_MSG,
                                     objectNames.get(errorPair.getSource()),
                                     objectNames.get(errorPair.getDestination())
                             ));
-                        }
-
-                        @Override
-                        public List<String> getDestinationMessage(SourcePair sourcePair) {
-                            return getSourceMessage(sourcePair);
                         }
                     });
         }
@@ -585,7 +554,7 @@ public class SourceServiceImpl implements SourceService {
             return truncateSources(logger, sourcePairs, intersectingPairs, isDeclaration, true, LOG_LEVEL.INFO,
                     new MessageBuilder() {
                         @Override
-                        public List<String> getSourceMessage(SourcePair sourcePair) {
+                        public List<String> getMessage(SourcePair sourcePair) {
                             String period;
                             if (excludedPeriodStart == null) {
                                 //Идет создание назначений
@@ -603,11 +572,6 @@ public class SourceServiceImpl implements SourceService {
                             msgs.addAll(intersectionParts);
                             msgs.add(String.format(INTERSECTION_MSG_END, period));
                             return msgs;
-                        }
-
-                        @Override
-                        public List<String> getDestinationMessage(SourcePair sourcePair) {
-                            return getSourceMessage(sourcePair);
                         }
                     });
         } else {

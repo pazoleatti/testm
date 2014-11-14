@@ -150,11 +150,10 @@ void generateXML() {
     def dataRowsSummary = getDataRows(taxOrganCode, kpp, 10640, formDataCollection)
 
     // разделим строки по субъектам и октмо
-    def dataRowsAverageMap = splitDataRows(dataRowsAverage)
     def dataRowsSummaryMap = splitDataRows(dataRowsSummary)
 
     // Период.
-    def period = reorgFormCode ? 50 : 34 // TODO
+    def period = reorgFormCode ? 50 : 34
 
     // ПрПодп.
     def prPodp = signatoryId
@@ -229,6 +228,7 @@ void generateXML() {
                     ) {
                         // Лист 03 (Раздел 2)
                         РасОбДеятРФ() {
+                            def summaryIndex
                             // строка из 945.3
                             rowsAverageOKTMO.each{ row ->
                                 // СтИмущ 150 Значение атрибута «Средняя/среднегодовая стоимость имущества» налоговой формы источника (Форма 945.3)
@@ -255,21 +255,21 @@ void generateXML() {
                                 def stOstVs = row.residualValue
 
                                 def key = row.subject + '#' + row.oktmo
-                                def rowsAverage = dataRowsAverageMap[key]
                                 def rowsSummary = dataRowsSummaryMap[key]
                                 // строки из 945.5 по коду субъекта, коду НО, КПП и Коду ОКТМО соотвествующие строке из 945.3
                                 def rows = getSubjectOktmoRows(rowsSummary, row)
-                                def taRow = null
-                                def specialRow = null
-                                if (rowsAverage.indexOf(row) == 0) {
-                                    taRow = rows[0]
+                                def commonRow = null
+                                def benefitRow = null
+                                if (rowsAverageOKTMO.indexOf(row) == 0) {
+                                    commonRow = rows[0]
+                                    summaryIndex = 1
                                     if (getBenefitCode(row.taxBenefitCode) == '2012000') {
-                                        specialRow = rows[2]
+                                        benefitRow = rows[2]
+                                        summaryIndex = 2
                                     }
                                 } else {
-                                    taRow = specialRow = rows[2]
+                                    commonRow = benefitRow = rows[++summaryIndex]
                                 }
-
                                 РасОб(  ВидИмущ : vidImush ) {
                                     ДанРас(
                                             [СтИмущ : stImush] +
@@ -278,22 +278,23 @@ void generateXML() {
                                             (kodLgPNS ? [КодЛгПНС : kodLgPNS] : [:]) +
                                             [НалСтав : nalStav]
                                     ) {
-                                        СтоимМес( СтОстВс : stOstVs) {
+                                        СтоимМес() {
                                             for (int i = 1; i <= 12; i++) {
                                                 def elemName = "ОстСтом01" + String.valueOf(i).padLeft(2, '0')
                                                 "$elemName" (
-                                                        СтОстОН : taRow.getCell("cost$i").value,
-                                                        СтЛьгИмущ: specialRow ? specialRow.getCell("cost$i").value : 0
+                                                        СтОстОН : commonRow ? commonRow.getCell("cost$i").value : 0,
+                                                        СтЛьгИмущ: benefitRow ? benefitRow.getCell("cost$i").value : 0
                                                 )
                                             }
                                             ОстСтом3112(
-                                                    СтОстОН: taRow.getCell("cost13").value,
-                                                    СтЛьгИмущ: specialRow ? specialRow.getCell("cost13").value : 0
+                                                    СтОстОН: commonRow ? commonRow.getCell("cost13").value : 0,
+                                                    СтЛьгИмущ: benefitRow ? benefitRow.getCell("cost13").value : 0
                                             )
                                             ВтчНедИм(
-                                                    СтОстОН: taRow.getCell("cost31_12").value,
-                                                    СтЛьгИмущ: specialRow ? specialRow.getCell("cost31_12").value : 0
+                                                    СтОстОН: commonRow ? commonRow.getCell("cost31_12").value : 0,
+                                                    СтЛьгИмущ: benefitRow ? benefitRow.getCell("cost31_12").value : 0
                                             )
+                                            СтОстВс(stOstVs)
                                         }
                                     }
                                     НалПер(
@@ -424,12 +425,12 @@ def getProvider(def long providerId) {
 }
 
 // Получить строки формы.
-def getDataRows(def taxOrganCode, def kpp, def formTemplateId, def formDataCollection) {
-    def formList = formDataCollection?.findAllByFormTypeAndKind(formTemplateId, FormDataKind.SUMMARY)
+def getDataRows(def taxOrganCode, def kpp, def formTypeId, def formDataCollection) {
+    def formList = formDataCollection?.findAllByFormTypeAndKind(formTypeId, FormDataKind.SUMMARY)
     def dataRows = []
     for (def form : formList) {
         dataRows += (formDataService.getDataRowHelper(form)?.getAll()?.findAll() { row ->
-            !row.getAlias()?.contains('total') && row.taxAuthority == taxOrganCode && row.kpp == kpp
+            row.getAlias() == null && taxOrganCode.equals(getOwnerValue(row, 'taxAuthority')) && kpp.equals(getOwnerValue(row,'kpp'))
         } ?: [])
     }
     return dataRows.isEmpty() ? null : dataRows
@@ -438,12 +439,13 @@ def getDataRows(def taxOrganCode, def kpp, def formTemplateId, def formDataColle
 def splitDataRows(def dataRows) {
     def rowsMap = [:]
     dataRows.each { row ->
-        def complexKey = row.subject + '#' + row.oktmo
+        def subject = getOwnerValue(row, 'subject')
+        def oktmo = getOwnerValue(row, 'oktmo')
+        def complexKey = subject + '#' + oktmo
         if (rowsMap[complexKey] == null) {
             rowsMap.put(complexKey, [])
-        } else {
-            rowsMap[complexKey].add(row)
         }
+        rowsMap[complexKey].add(row)
     }
     return rowsMap
 }
@@ -462,6 +464,6 @@ def getBenefitCode(def parentRecordId) {
 
 def getSubjectOktmoRows(def rows, def exampleRow) {
     return rows.findAll { row ->
-        row.subject == exampleRow.subject && row.oktmo == exampleRow.oktmo
+        getOwnerValue(row, 'subject') == exampleRow.subject && getOwnerValue(row, 'oktmo') == exampleRow.oktmo
     }
 }
