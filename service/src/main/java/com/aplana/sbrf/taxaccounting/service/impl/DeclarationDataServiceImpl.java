@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -263,7 +262,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     if (declarationTemplate.getType().getIsIfrs() &&
                             departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
                         IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
-                        if (ifrsData.getBlobDataId() != null) {
+                        if (ifrsData != null && ifrsData.getBlobDataId() != null) {
                             ifrsDataService.deleteReport(declarationData, userInfo);
                         } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
                             ifrsDataService.cancelTask(declarationData, userInfo);
@@ -368,7 +367,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Locale.setDefault(new Locale("ru", "RU"));
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid == null) {
-            throw new ServiceException("В декларации отсутствуют данные (не был выполнен расчет). Операция \"Принять\" не может быть выполнена");
+            TaxType taxType = declarationTemplateDao.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
+            String declarationName = (taxType == TaxType.DEAL ? "уведомлении" : "декларации");
+            String operationName = (operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle());
+            String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
+            throw new ServiceException(msg);
         }
         String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
@@ -564,7 +567,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String generateAsyncTaskKey(long declarationDataId, ReportType reportType) {
-        return LockData.LOCK_OBJECTS.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + reportType.getName();
+        return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + reportType.getName();
     }
 
     @Override

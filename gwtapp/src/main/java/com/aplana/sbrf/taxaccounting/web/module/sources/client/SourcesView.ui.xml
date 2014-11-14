@@ -26,7 +26,11 @@
             bottom: 0;
             right: 10px;
             left: 10px;
-            top: 41px;
+            top: 5px;
+        }
+
+        .left10 {
+            margin-left: 10px;
         }
 
         .marginRight5 {
@@ -106,7 +110,7 @@
             bottom: 5px !important;
             right: 5px !important;
             left: 5px !important;
-            top: 28px !important;
+            top: 60px !important;
         }
 
     </ui:style>
@@ -121,48 +125,35 @@
                             <g:Label ui:field="taxTypeLabel" addStyleNames="{style.titleText}, {style.marginRight5}"
                                      text="Налог на прибыль"/>
                             <g:Label text="—" addStyleNames="{style.titleText}, {style.marginRight5}"/>
+                            <g:Label ui:field="titleLabel" text="Указание источников/приемников" />
+                            <g:Label text="—" addStyleNames="{style.titleText}, {style.marginRight5}"/>
                         </style:LeftBar>
-                    </fm:Left>
-                </fm:left>
-                <fm:right>
-                    <fm:Right>
-                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
+                        <style:RightBar childValign="middle" height="100%">
                             <g:Label ui:field="formDecLabel" text="Налоговые формы" addStyleNames="{style.formDecLabel}"/>
                             <g:HTML addStyleNames="{style.verSep}"/>
                             <style:LinkButton ui:field="formDecAnchor" text="Декларации"
                                               disableImage="true" addStyleNames="{style.titleText}"/>
-                        </style:LeftBar>
+                        </style:RightBar>
+                    </fm:Left>
+                </fm:left>
+                <fm:right>
+                    <fm:Right>
+                        <style:RightBar>
+                            <g:HorizontalPanel spacing="3" verticalAlignment="middle">
+                                <g:cell width="100%" horizontalAlignment="right">
+                                    <g:Label addStyleNames="{style.searchLabel}" text="Назначение:"/>
+                                </g:cell>
+                                <g:cell horizontalAlignment="right">
+                                    <g:ValueListBox ui:field="appointmentTypePicker" addStyleNames="{style.marginRight5}"/>
+                                </g:cell>
+                            </g:HorizontalPanel>
+                        </style:RightBar>
                     </fm:Right>
                 </fm:right>
-                <fm:resizable>
-                    <fm:Resizable>
-                        <g:Label ui:field="titleLabel" text="Указание источников/приемников"/>
-                    </fm:Resizable>
-                </fm:resizable>
             </fm:HeaderContainer>
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-
-                <g:HorizontalPanel spacing="3" addStyleNames="{style.btnPanel}" verticalAlignment="middle">
-                    <g:Label text="Период: с" wordWrap="false" addStyleNames="{style.marginRight5}"/>
-                    <g:ValueListBox ui:field="periodFrom" width="200px" addStyleNames="{style.marginRight5}"/>
-                    <w:Spinner ui:field="yearFrom" minValue="1900" maxValue="2100" width="60px" height="18px" addStyleNames="{style.marginRight5}, {style.marginBottom2}"/>
-                    <g:Label text="по" wordWrap="false" addStyleNames="{style.marginRight5}"/>
-                    <g:ValueListBox ui:field="periodTo" width="200px" addStyleNames="{style.marginRight5}"/>
-                    <w:Spinner ui:field="yearTo" minValue="1900" maxValue="2100" width="60px" height="18px"
-                               addStyleNames="{style.marginRight5}, {style.marginBottom2}"/>
-
-                    <g:cell width="100%" horizontalAlignment="right">
-                        <g:Label addStyleNames="{style.searchLabel}" text="Назначение:"/>
-                    </g:cell>
-                    <g:cell horizontalAlignment="right">
-                        <g:ValueListBox ui:field="appointmentTypePicker" addStyleNames="{style.marginRight5}"/>
-                    </g:cell>
-                </g:HorizontalPanel>
-
-                <g:HTML addStyleNames="{style.horSep}"/>
-
                 <g:SplitLayoutPanel addStyleNames="{style.table}">
                     <g:center>
                         <g:ResizeLayoutPanel addStyleNames="{style.upWrapper}">
@@ -208,7 +199,7 @@
                         </g:ResizeLayoutPanel>
 
                     </g:center>
-                    <g:south size="200">
+                    <g:south size="300">
                         <!--Нижняя-->
                         <g:HTMLPanel height="100%" width="100%">
                             <g:HorizontalPanel width="100%" spacing="4">
@@ -218,6 +209,16 @@
                                 <style:LinkButton ui:field="editButton" text="Редактировать назначение" img="resources/img/edit.png"/>
                                 <style:LinkButton ui:field="cancelButton" text="Удалить назначение"
                                                   img="resources/img/row-delete.png"/>
+                            </g:HorizontalPanel>
+                            <g:HorizontalPanel addStyleNames="{style.btnPanel}" verticalAlignment="middle">
+                                <g:Label text="Период: с" wordWrap="false" addStyleNames="{style.marginRight5}"/>
+                                <g:ValueListBox ui:field="periodFrom" width="200px" addStyleNames="{style.marginRight5}"/>
+                                <w:Spinner ui:field="yearFrom" minValue="1900" maxValue="2100" width="60px" height="18px" addStyleNames="{style.marginRight5}, {style.marginBottom2}"/>
+                                <g:Label text="по" wordWrap="false" addStyleNames="{style.marginRight5}"/>
+                                <g:ValueListBox ui:field="periodTo" width="200px" addStyleNames="{style.marginRight5}"/>
+                                <w:Spinner ui:field="yearTo" minValue="1900" maxValue="2100" width="60px" height="18px"
+                                           addStyleNames="{style.marginRight5}, {style.marginBottom2}"/>
+                                <g:Button ui:field="apply" text="Найти" addStyleNames="{style.left10}"/>
                             </g:HorizontalPanel>
                             <g:ResizeLayoutPanel addStyleNames="{style.tableBG}, {style.downMar}">
                                 <style:GenericDataGrid ui:field="downTable" width="100%" height="100%"/>

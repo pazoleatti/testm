@@ -1,18 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.creation;
 
-import com.aplana.gwt.client.ListBoxWithTooltipWidget;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -34,7 +32,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public static final String DECLARATION_TITLE_D = "Создание уведомления";
     public static final String DECLARATION_TYPE_TITLE = "Вид декларации:";
     public static final String DECLARATION_TYPE_TITLE_D = "Вид:";
-    public static final String DECLARATION_CORRECTION = "Форма будет создана в корректирующем периоде, дата сдачи корректировки: ";
+    public static final String DECLARATION_CORRECTION = "Декларация будет создана в корректирующем периоде, дата сдачи корректировки: ";
     public static final String NOTIFICATION_CORRECTION = "Уведомление будет создано в корректирующем периоде, дата сдачи корректировки: ";
 
     @UiField
@@ -49,13 +47,13 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @UiField
     Label declarationTypeLabel;
 
-    @UiField(provided = true)
-    ListBoxWithTooltipWidget<Integer> declarationTypeBox;
+    @UiField
+    RefBookPickerWidget declarationTypeId;
 
     @UiField
-    TextBox taxOrganCode;
+    RefBookPicker taxOrganCode;
     @UiField
-    TextBox taxOrganKpp;
+    RefBookPicker taxOrganKpp;
     @UiField
     HorizontalPanel codePanel;
     @UiField
@@ -74,26 +72,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     final private Map<Integer, DeclarationType> declarationTypesMap = new LinkedHashMap<Integer, DeclarationType>();
 
+    private boolean refBookEnabled = false;
+
     @Inject
     public DeclarationCreationView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
-
-        declarationTypeBox = new ListBoxWithTooltipWidget<Integer>(new AbstractRenderer<Integer>() {
-
-            @Override
-            public String render(Integer object) {
-                if (object == null) {
-                    return "";
-                }
-                DeclarationType declarationType = declarationTypesMap.get(object);
-                if (declarationType != null) {
-                    return declarationType.getName();
-                } else {
-                    return String.valueOf(object);
-                }
-            }
-        });
-
         initWidget(uiBinder.createAndBindUi(this));
         init();
     }
@@ -101,22 +84,49 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @Override
     public void init() {
         departmentPicker.setEnabled(false);
-        declarationTypeBox.setEnabled(false);
+        declarationTypeId.setEnabled(false);
         taxOrganCode.setEnabled(false);
         taxOrganKpp.setEnabled(false);
         correctionPanel.setVisible(false);
+        declarationTypeId.setPeriodDates(new Date(), new Date());
     }
 
-    private void updateEnabled() {
+    @Override
+    public void initRefBooks(Date version, String filter, TaxType taxType) {
+        taxOrganCode.setMultiSelect(false);
+        taxOrganKpp.setMultiSelect(false);
+        if (taxType == TaxType.TRANSPORT) {
+            taxOrganCode.setAttributeId(3102L);
+            taxOrganKpp.setAttributeId(3103L);
+        }
+        if (taxType == TaxType.PROPERTY) {
+            taxOrganCode.setAttributeId(951L);
+            taxOrganKpp.setAttributeId(952L);
+        }
+
+        if (filter != null && !filter.isEmpty()) {
+            taxOrganKpp.setFilter(filter);
+            taxOrganCode.setFilter(filter);
+            taxOrganKpp.setPeriodDates(version, version);
+            taxOrganCode.setPeriodDates(version, version);
+        }
+        taxOrganCode.setSingleColumn("TAX_ORGAN_CODE");
+        taxOrganKpp.setSingleColumn("KPP");
+
+        refBookEnabled = filter != null && !filter.isEmpty();
+    }
+
+    @Override
+    public void updateEnabled() {
         boolean departmentSelected = departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
         boolean periodSelected = periodPicker.getValue() != null && !periodPicker.getValue().isEmpty();
         boolean correctionDateSelected = correctionDate.getText() != null && !correctionDate.getText().isEmpty();
 
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(periodSelected);
-        declarationTypeBox.setEnabled(departmentSelected);
-        taxOrganCode.setEnabled(departmentSelected);
-        taxOrganKpp.setEnabled(departmentSelected);
+        declarationTypeId.setEnabled(departmentSelected);
+        taxOrganCode.setEnabled(departmentSelected && refBookEnabled);
+        taxOrganKpp.setEnabled(departmentSelected && refBookEnabled);
         // дата корректировки
         correctionPanel.setVisible(departmentSelected && correctionDateSelected);
     }
@@ -124,12 +134,23 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public void setAcceptableDeclarationTypes(List<DeclarationType> declarationTypes) {
-        declarationTypesMap.clear();
-        for (DeclarationType declarationType : declarationTypes) {
-            declarationTypesMap.put(declarationType.getId(), declarationType);
+        declarationTypeId.setValue(null);
+
+        if ((declarationTypes == null) || declarationTypes.isEmpty()) {
+            /**
+             * TODO продумать как сделать правильней,
+             * на текущий момент синтаксис IN (..) не реализован в парсере фильтра,
+             * так же нет варианта остановить подрузку на самом фронтенде
+             */
+            declarationTypeId.setFilter("2 = 1");
+            return;
         }
-        declarationTypeBox.setValue(null);
-        declarationTypeBox.setAcceptableValues(declarationTypesMap.keySet());
+        StringBuilder str = new StringBuilder();
+        for (DeclarationType dt : declarationTypes) {
+            str.append(RefBook.RECORD_ID_ALIAS + "=" + dt.getId() + " or ");
+        }
+        str.delete(str.length() - 3, str.length() - 1);
+        declarationTypeId.setFilter(str.toString());
     }
 
     @Override
@@ -175,16 +196,19 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @UiHandler("departmentPicker")
     public void onDepartmentPickerChange(ValueChangeEvent<List<Integer>> event) {
-        declarationTypeBox.setValue(null);
+        declarationTypeId.setValue(null);
         taxOrganCode.setValue(null);
         taxOrganKpp.setValue(null);
         getUiHandlers().onDepartmentChange();
-        updateEnabled();
     }
 
     @Override
     public void setSelectedDeclarationType(Integer id) {
-        declarationTypeBox.setValue(id);
+        if (id == null) {
+            declarationTypeId.setValue(null);
+        } else {
+            declarationTypeId.setValue(Arrays.asList(id.longValue()));
+        }
     }
 
 
@@ -201,17 +225,20 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public void setSelectedTaxOrganCode(String code) {
-        taxOrganCode.setValue(code);
+        taxOrganCode.setDereferenceValue(code);
     }
 
     @Override
     public void setSelectedTaxOrganKpp(String kpp) {
-        taxOrganKpp.setValue(kpp);
+        taxOrganKpp.setDereferenceValue(kpp);
     }
 
     @Override
     public Integer getSelectedDeclarationType() {
-        return declarationTypeBox.getValue();
+        List<Long> values = declarationTypeId.getValue();
+        if (values != null && !values.isEmpty())
+            return values.get(0).intValue();
+        return null;
     }
 
 
@@ -240,16 +267,16 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         codePanel.setVisible(isCodeKppVisible);
         kppPanel.setVisible(isCodeKppVisible);
 
-        declarationTypeBox.setVisible(true);
+        declarationTypeId.setVisible(true);
     }
 
     @Override
     public String getTaxOrganCode() {
-        return taxOrganCode.getValue().trim();
+        return taxOrganCode.getDereferenceValue().trim();
     }
 
     @Override
     public String getTaxOrganKpp() {
-        return taxOrganKpp.getValue().trim();
+        return taxOrganKpp.getDereferenceValue().trim();
     }
 }

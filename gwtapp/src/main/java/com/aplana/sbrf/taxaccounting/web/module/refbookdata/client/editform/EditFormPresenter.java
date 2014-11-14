@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.ConfirmButtonClickHandler;
@@ -39,7 +40,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
 	private boolean isFormModified = false;
-	private Date relevanceDate;
 	private static final String DIALOG_MESSAGE = "Строка была изменена. Все не сохраненные данные будут потеряны. Продолжить?";
 
     /** Идентификатор справочника */
@@ -56,6 +56,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private boolean canVersion= false;
     // Признак того, что справочник подразделений
     private boolean isDepartments = false;
+    //Тип подразделения
+    private long depType = 0;
     Map<String, Object> modifiedFields = new HashMap<String, Object>();
 
     public void setNeedToReload() {
@@ -88,6 +90,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     protected final RenameDialogPresenter renameDialogPresenter;
 
+    //TODO: взаимодействие в зависимом виджете д.б. через события, а не через "левое" view
     private RefBookHierDataPresenter.MyView refBookHierDataPresenterMyView;
 
 	@Inject
@@ -103,7 +106,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	}
 
 	public void init(final Long refbookId, final boolean readOnly) {
-        if (refbookId == 30) isDepartments = true;
+        isDepartments = refbookId == 30;
         GetRefBookAttributesAction action = new GetRefBookAttributesAction();
         action.setRefBookId(refbookId);
         currentRefBookId = refbookId;
@@ -124,18 +127,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             }
                         }, this));
     }
-
-	// TODO: отрефакторить, чтобы дата была общая с com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataView.getRelevanceDate() (Marat Fayzullin 2013-09-15)
-	public Date getRelevanceDate() {
-		if (relevanceDate == null) {
-			relevanceDate = new Date();
-		}
-		return relevanceDate;
-	}
-
-	public void setRelevanceDate(Date relevanceDate) {
-		this.relevanceDate = relevanceDate;
-	}
 
 	public void show(Long refBookRecordId) {
         show(refBookRecordId, null);
@@ -209,6 +200,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
                                 getView().fillInputFields(result.getRecord());
+                                if (result.getRecord().containsKey("TYPE")) {
+                                    RefBookValueSerializable v = result.getRecord().get("TYPE");
+                                    if (v.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                                        depType = v.getReferenceValue();
+                                    }
+                                }
                                 currentUniqueRecordId = refBookRecordId;
                                 updateMode();
                             }
@@ -216,7 +213,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     }
 
 	@Override
-	public void onSaveClicked() {
+	public void onSaveClicked(boolean isEditButtonClicked) {
 		try {
             LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
@@ -268,7 +265,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         recordChanges.setId(newId);
                                         currentUniqueRecordId = newId;
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
-                                        if (isDepartments) refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
+                                        SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+
                                     }
                                 }, this));
 			} else {
@@ -282,9 +280,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 action.setVersionTo(getView().getVersionTo());
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
-
+                final Long newDepType;
+                if (map.containsKey("TYPE")) {
+                    newDepType = map.get("TYPE").getReferenceValue();
+                } else {
+                    newDepType = 0L;
+                }
                 if (isDepartments) {
-                    if(modifiedFields.containsKey("NAME")){
+                    //Проверяем изменилось ли имя либо тип подразделения с типа ТБ
+                    if(modifiedFields.containsKey("NAME") || (modifiedFields.containsKey("TYPE") && depType == 2)){
                         renameDialogPresenter.open(new ConfirmButtonClickHandler() {
                             @Override
                             public void onClick(Date dateFrom, Date dateTo) {
@@ -305,7 +309,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                         if (result.isException()) {
                                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
                                                         } else {
+                                                            depType = newDepType;
                                                             setIsFormModified(false);
+                                                            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                                         }
                                                     }
                                                 }, EditFormPresenter.this));
@@ -331,7 +337,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         if (result.isException()) {
                                             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
                                         } else {
+                                            depType = newDepType;
                                             setIsFormModified(false);
+                                            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                         }
                                     }
                                 }, this));
@@ -339,7 +347,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		} catch (BadValueException bve) {
             Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            logEntries.add(new LogEntry(LogLevel.ERROR, "\" " + bve.getFieldName() + "\": " + bve.getDescription()));
+            logEntries.add(new LogEntry(LogLevel.ERROR, bve.toString()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
             action.setLogEntries(logEntries);
 
@@ -379,7 +387,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 @Override
                 public void yes() {
                     setIsFormModified(false);
-                    onSaveClicked();
+                    onSaveClicked(false);
                 }
 
                 @Override
@@ -409,6 +417,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             modifiedFields.clear();
             placeManager.setOnLeaveConfirmation(null);
         }
+    }
+
+    public boolean isFormModified() {
+        return isFormModified;
     }
 
     public void setVersionMode(boolean versionMode) {

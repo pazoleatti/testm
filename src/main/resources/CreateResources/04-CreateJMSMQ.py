@@ -3,11 +3,6 @@ print '********************************************'
 print '* Start create JMS for MQ script'
 print '********************************************'
 print ''
-print '- Load settings'
-
-import settings
-
-print ''
 print '--------------------------------------------'
 print '- System init'
 
@@ -16,7 +11,7 @@ import java
 lineSeparator = java.lang.System.getProperty('line.separator')
 
 # server info
-resourceRootLocation   = '/Server:'+ settings.serverName
+resourceRootLocation   = '/Server:'+ serverName
 resourceRootLocationId = AdminConfig.getid(resourceRootLocation)
 print 'Found resource root location ID = '+ resourceRootLocationId
 nodeName               = AdminControl.getNode()
@@ -26,11 +21,11 @@ print ''
 print '--------------------------------------------'
 
 # MQ messaging provider
-MQQueueName                 = 'TAX Rate Queue MQ'+ settings.suffixForResources
-MQQueueJndi                 = 'jms/rateQueue'+ settings.suffixForResources
-MQActivationSpecName        = 'TAX Activation specifications MQ'+ settings.suffixForResources
-MQActivationSpecJndi        = 'jms/transportMQ'+ settings.suffixForResources
-MQActivationSpecDest        = 'jms/transportQueueMQ'+ settings.suffixForResources
+MQQueueName                 = 'TAX Rate Queue MQ'+ suffixForResources
+MQQueueJndi                 = 'jms/rateQueue'+ suffixForResources
+MQActivationSpecName        = 'TAX Activation specifications MQ'+ suffixForResources
+MQActivationSpecJndi        = 'jms/transportMQ'+ suffixForResources
+MQActivationSpecDest        = 'jms/transportQueueMQ'+ suffixForResources
 
 print '- MQ messaging provider'
 
@@ -44,7 +39,7 @@ if MQQueuesId[0] != '':
 			break
 if MQQueueNotFound:
 	print 'Initiated the creation of an MQ queue'
-	print 'id='+ AdminTask.createWMQQueue(resourceRootLocationId, ['-name', MQQueueName, '-jndiName', MQQueueJndi, '-queueName', settings.MQServerQueueName, '-qmgr', settings.MQServerQueueManager])
+	print 'id='+ AdminTask.createWMQQueue(resourceRootLocationId, ['-name', MQQueueName, '-jndiName', MQQueueJndi, '-queueName', MQServerQueueName, '-qmgr', MQServerQueueManager])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
@@ -60,7 +55,7 @@ if MQActivationSpecsId[0] != '':
 			break
 if MQActivationSpecNotFound:
 	print 'Initiated the creation of an MQ activation specifications'
-	MQActivationSpecsId = AdminTask.createWMQActivationSpec(resourceRootLocationId, ['-name', MQActivationSpecName, '-jndiName', MQActivationSpecJndi, '-qmgrName', settings.MQServerQueueManager, '-wmqTransportType', 'BINDINGS_THEN_CLIENT', '-qmgrHostname', settings.MQServerHost, '-qmgrPortNumber', settings.MQServerPort, '-qmgrSvrconnChannel', settings.MQServerChanel, '-destinationJndiName', MQQueueJndi, '-destinationType', 'javax.jms.Queue'])
+	MQActivationSpecsId = AdminTask.createWMQActivationSpec(resourceRootLocationId, ['-name', MQActivationSpecName, '-jndiName', MQActivationSpecJndi, '-qmgrName', MQServerQueueManager, '-wmqTransportType', 'BINDINGS_THEN_CLIENT', '-qmgrHostname', MQServerHost, '-qmgrPortNumber', MQServerPort, '-qmgrSvrconnChannel', MQServerChanel, '-destinationJndiName', MQQueueJndi, '-destinationType', 'javax.jms.Queue'])
 	print 'id='+MQActivationSpecsId
 	AdminTask.modifyWMQActivationSpec(MQActivationSpecsId, ['-sslType', 'CENTRAL', '-maxPoolSize', '1', '-stopEndpointIfDeliveryFails', 'false'])
 	AdminConfig.save()

@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.search;
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -141,7 +142,7 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
                 String key = filterText.getText();
                 String link =
                     "<p style=\"color: #0000CD\">" +
-                            RegExp.compile(key, "gi").replace(object.getStringFound(), "<span style=\"color: #ff0000;\">$&</span>") +
+                            RegExp.compile(TextUtils.quote(key), "gi").replace(object.getStringFound(), "<span style=\"color: #ff0000;\">$&</span>") +
                     "<p>";
                 sb.appendHtmlConstant(link);
             }

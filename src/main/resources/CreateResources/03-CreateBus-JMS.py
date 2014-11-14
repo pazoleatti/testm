@@ -3,11 +3,6 @@ print '********************************************'
 print '* Start create JMS and Bus script'
 print '********************************************'
 print ''
-print '- Load settings'
-
-import settings
-
-print ''
 print '--------------------------------------------'
 print '- System init'
 
@@ -16,7 +11,7 @@ import java
 lineSeparator = java.lang.System.getProperty('line.separator')
 
 # server info
-resourceRootLocation   = '/Server:'+ settings.serverName
+resourceRootLocation   = '/Server:'+ serverName
 resourceRootLocationId = AdminConfig.getid(resourceRootLocation)
 print 'Found resource root location ID = '+ resourceRootLocationId
 nodeName               = AdminControl.getNode()
@@ -26,39 +21,39 @@ print ''
 print '--------------------------------------------'
 
 # Service integration bus
-SIBusName                   	= 'TAX JMS Bus'+ settings.suffixForResources
-SIBDestinationName          	= 'transportQueue'+ settings.suffixForResources
-SIBDummyDestinationName	    	= 'transportQueueDummy'+ settings.suffixForResources
-SIBShortAsyncDestinationName   	= 'shortAsyncQueue'+ settings.suffixForResources
-SIBLongAsyncDestinationName    	= 'longAsyncQueue'+ settings.suffixForResources
+SIBusName                   	= 'TAX JMS Bus'+ suffixForResources
+SIBDestinationName          	= 'transportQueue'+ suffixForResources
+SIBDummyDestinationName	    	= 'transportQueueDummy'+ suffixForResources
+SIBShortAsyncDestinationName   	= 'shortAsyncQueue'+ suffixForResources
+SIBLongAsyncDestinationName    	= 'longAsyncQueue'+ suffixForResources
 
 # Connection factories
-SIBJMSConnectionFactoryName 			= 'TAX Connection factories'+ settings.suffixForResources
-SIBJMSConnectionFactoryJndi 			= 'jms/transportConnectionFactory'+ settings.suffixForResources
-SIBJMSShortAsyncConnectionFactoryName 	= 'TAX Connection factories Async short'+ settings.suffixForResources
-SIBJMSShortAsyncConnectionFactoryJndi 	= 'jms/shortAsyncConnectionFactory'+ settings.suffixForResources
-SIBJMSLongAsyncConnectionFactoryName 	= 'TAX Connection factories Async long'+ settings.suffixForResources
-SIBJMSLongAsyncConnectionFactoryJndi 	= 'jms/longAsyncConnectionFactory'+ settings.suffixForResources
+SIBJMSConnectionFactoryName 			= 'TAX Connection factories'+ suffixForResources
+SIBJMSConnectionFactoryJndi 			= 'jms/transportConnectionFactory'+ suffixForResources
+SIBJMSShortAsyncConnectionFactoryName 	= 'TAX Connection factories Async short'+ suffixForResources
+SIBJMSShortAsyncConnectionFactoryJndi 	= 'jms/shortAsyncConnectionFactory'+ suffixForResources
+SIBJMSLongAsyncConnectionFactoryName 	= 'TAX Connection factories Async long'+ suffixForResources
+SIBJMSLongAsyncConnectionFactoryJndi 	= 'jms/longAsyncConnectionFactory'+ suffixForResources
 
 # Queue
-SIBJMSQueueName             	= 'TAX Queue'+ settings.suffixForResources
-SIBJMSQueueJndi             	= 'jms/transportQueue'+ settings.suffixForResources
-SIBJMSDummyQueueName        	= 'TAX Queue dummy'+ settings.suffixForResources
-SIBJMSDummyQueueJndi        	= 'jms/transportQueueDummy'+ settings.suffixForResources
-SIBJMSShortAsyncQueueName      	= 'TAX Queue Async short'+ settings.suffixForResources
-SIBJMSShortAsyncQueueJndi      	= 'jms/shortAsyncQueue'+ settings.suffixForResources
-SIBJMSLongAsyncQueueName       	= 'TAX Queue Async long'+ settings.suffixForResources
-SIBJMSLongAsyncQueueJndi       	= 'jms/longAsyncQueue'+ settings.suffixForResources
+SIBJMSQueueName             	= 'TAX Queue'+ suffixForResources
+SIBJMSQueueJndi             	= 'jms/transportQueue'+ suffixForResources
+SIBJMSDummyQueueName        	= 'TAX Queue dummy'+ suffixForResources
+SIBJMSDummyQueueJndi        	= 'jms/transportQueueDummy'+ suffixForResources
+SIBJMSShortAsyncQueueName      	= 'TAX Queue Async short'+ suffixForResources
+SIBJMSShortAsyncQueueJndi      	= 'jms/shortAsyncQueue'+ suffixForResources
+SIBJMSLongAsyncQueueName       	= 'TAX Queue Async long'+ suffixForResources
+SIBJMSLongAsyncQueueJndi       	= 'jms/longAsyncQueue'+ suffixForResources
 
 # Activation specifications
-SIBJMSActivationSpecName    			= 'TAX Activation specifications'+ settings.suffixForResources
-SIBJMSActivationSpecJndi    			= 'jms/transportAS'+ settings.suffixForResources
-SIBJMSDummyActivationSpecName   		= 'TAX Activation specifications dummy'+ settings.suffixForResources
-SIBJMSDummyActivationSpecJndi   		= 'jms/transportASDummy'+ settings.suffixForResources
-SIBJMSShortAsyncActivationSpecName    	= 'TAX Activation specifications Async short'+ settings.suffixForResources
-SIBJMSShortAsyncActivationSpecJndi    	= 'jms/shortAsyncAS'+ settings.suffixForResources
-SIBJMSLongAsyncActivationSpecName    	= 'TAX Activation specifications Async long'+ settings.suffixForResources
-SIBJMSLongAsyncActivationSpecJndi    	= 'jms/longAsyncAS'+ settings.suffixForResources
+SIBJMSActivationSpecName    			= 'TAX Activation specifications'+ suffixForResources
+SIBJMSActivationSpecJndi    			= 'jms/transportAS'+ suffixForResources
+SIBJMSDummyActivationSpecName   		= 'TAX Activation specifications dummy'+ suffixForResources
+SIBJMSDummyActivationSpecJndi   		= 'jms/transportASDummy'+ suffixForResources
+SIBJMSShortAsyncActivationSpecName    	= 'TAX Activation specifications Async short'+ suffixForResources
+SIBJMSShortAsyncActivationSpecJndi    	= 'jms/shortAsyncAS'+ suffixForResources
+SIBJMSLongAsyncActivationSpecName    	= 'TAX Activation specifications Async long'+ suffixForResources
+SIBJMSLongAsyncActivationSpecJndi    	= 'jms/longAsyncAS'+ suffixForResources
 
 
 print '- Service integration bus'
@@ -82,8 +77,8 @@ SIBusMemberId = AdminTask.listSIBusMembers('[-bus "'+ SIBusName +'"]')
 if len(SIBusMemberId):
 	print 'Found existing service integration bus members id='+ SIBusMemberId
 else:
-	print 'Initiated the creation of an service integration bus member '+ nodeName +':'+ settings.serverName
-	AdminTask.addSIBusMember('[-bus "'+ SIBusName +'" -node "'+ nodeName +'" -server "'+ settings.serverName +'" -fileStore]')
+	print 'Initiated the creation of an service integration bus member '+ nodeName +':'+ serverName
+	AdminTask.addSIBusMember('[-bus "'+ SIBusName +'" -node "'+ nodeName +'" -server "'+ serverName +'" -fileStore]')
 	print 'id='+ AdminTask.listSIBusMembers('[-bus "'+ SIBusName +'"]')
 	AdminConfig.save()
 	print 'Configuration is saved.'
@@ -103,7 +98,7 @@ if SIBDestinationsId[0] != '':
 			break
 if SIBDestinationNotFound:
 	print 'Initiated the creation of an service integration bus destinations'
-	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ settings.serverName +'"]')
+	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ serverName +'"]')
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
@@ -122,7 +117,7 @@ if SIBDestinationsId[0] != '':
 			break
 if SIBDestinationNotFound:
 	print 'Initiated the creation of an service integration bus destinations'
-	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBShortAsyncDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ settings.serverName +'"]')
+	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBShortAsyncDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ serverName +'"]')
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
@@ -141,7 +136,7 @@ if SIBDestinationsId[0] != '':
 			break
 if SIBDestinationNotFound:
 	print 'Initiated the creation of an service integration bus destinations'
-	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBLongAsyncDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ settings.serverName +'"]')
+	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBLongAsyncDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ serverName +'"]')
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
@@ -160,7 +155,7 @@ if SIBDestinationsId[0] != '':
 			break
 if SIBDestinationNotFound:
 	print 'Initiated the creation of an service integration bus destinations'
-	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBDummyDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ settings.serverName +'"]')
+	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBDummyDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ serverName +'"]')
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
@@ -245,7 +240,7 @@ if SIBJMSQueuesId[0] != '':
 			break
 if SIBJMSQueueNotFound:
 	print 'Initiated the creation of an service integration bus queue'
-	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSShortAsyncQueueName, '-jndiName', SIBJMSShortAsyncQueueJndi, '-queueName', SIBDestinationName, '-busName', SIBusName])
+	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSShortAsyncQueueName, '-jndiName', SIBJMSShortAsyncQueueJndi, '-queueName', SIBShortAsyncDestinationName, '-busName', SIBusName])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
@@ -262,7 +257,7 @@ if SIBJMSQueuesId[0] != '':
 			break
 if SIBJMSQueueNotFound:
 	print 'Initiated the creation of an service integration bus queue'
-	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSLongAsyncQueueName, '-jndiName', SIBJMSLongAsyncQueueJndi, '-queueName', SIBDestinationName, '-busName', SIBusName])
+	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSLongAsyncQueueName, '-jndiName', SIBJMSLongAsyncQueueJndi, '-queueName', SIBLongAsyncDestinationName, '-busName', SIBusName])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
@@ -313,7 +308,7 @@ if SIBJMSActivationSpecsId[0] != '':
 			break
 if SIBJMSActivationSpecNotFound:
 	print 'Initiated the creation of an service integration bus activation specifications'
-	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSShortAsyncActivationSpecName, '-jndiName', SIBJMSShortAsyncActivationSpecJndi, '-destinationJndiName', SIBJMSQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
+	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSShortAsyncActivationSpecName, '-jndiName', SIBJMSShortAsyncActivationSpecJndi, '-destinationJndiName', SIBJMSShortAsyncQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
@@ -330,7 +325,7 @@ if SIBJMSActivationSpecsId[0] != '':
 			break
 if SIBJMSActivationSpecNotFound:
 	print 'Initiated the creation of an service integration bus activation specifications'
-	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSLongAsyncActivationSpecName, '-jndiName', SIBJMSLongAsyncActivationSpecJndi, '-destinationJndiName', SIBJMSQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
+	print 'id='+ AdminTask.createSIBJMSActivationSpec(resourceRootLocationId, ['-name', SIBJMSLongAsyncActivationSpecName, '-jndiName', SIBJMSLongAsyncActivationSpecJndi, '-destinationJndiName', SIBJMSLongAsyncQueueJndi, '-busName', SIBusName, '-maxBatchSize', 1, '-maxConcurrency', 1]) 
 	AdminConfig.save()
 	print 'Configuration is saved.'
 

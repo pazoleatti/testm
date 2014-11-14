@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
@@ -24,6 +25,8 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearchDao {
 
 	private static final Log logger = LogFactory.getLog(FormDataSearchDaoImpl.class);
+
+    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     private void appendFromClause(StringBuilder sql){
         sql.append(" FROM form_data fd, department_report_period drp, form_type ft, department dp, report_period rp, tax_period tp, log_business lb")
@@ -67,8 +70,12 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		}
 
         if (filter.getCorrectionTag() != null) {
-            sql.append(" and drp.correction_date is " +
-                    (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");
+            if (filter.getCorrectionDate() != null) {
+                sql.append(" and drp.correction_date = '" + sdf.format(filter.getCorrectionDate()) + "\'");
+            } else {
+                sql.append(" and drp.correction_date is " +
+                        (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");
+            }
         }
 
 		// Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа

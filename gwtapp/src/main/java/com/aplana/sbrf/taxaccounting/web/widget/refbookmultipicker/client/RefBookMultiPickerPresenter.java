@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 import java.util.*;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -34,7 +35,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
     interface MyView extends View, HasUiHandlers<RefBookMultiPickerUiHandlers> {
 
-        void setHeaders(Map<String, Integer> headers, List<Integer> unVisibleColumns);
+        void setAttributes(List<RefBookAttribute> attributes);
 
         void setRowData(int start, List<RefBookItem> values, int size);
 
@@ -59,11 +60,11 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
 
     @Override
     public void init(final PickerState newState) {
+        if (newState.getPickerContext() == null) {
+            newState.setPickerContext(ps.getPickerContext());
+        }
         if (isNeedReloadHeaders(newState)) {
             // Установка новых значений после проверки на новость основных параметров
-            if (newState.getPickerContext() == null) {
-                newState.setPickerContext(ps.getPickerContext());
-            }
             ps.setValues(newState);
             if (ps.getRefBookAttrId() == null) {
                 return;
@@ -75,7 +76,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                     CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookMultiResult>() {
                         @Override
                         public void onSuccess(InitRefBookMultiResult result) {
-                            getView().setHeaders(result.getHeaders(), result.getUnVisibleColumns());
+                            getView().setAttributes(result.getAttributes());
                             getView().refresh(true);
 
                             trySelect(ps);

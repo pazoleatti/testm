@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -20,7 +21,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Vitalii Samolovskikh
@@ -60,7 +64,14 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
         formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId(), logger));
         formTemplateExt.setFormTemplate(formTemplate);
         result.setForm(formTemplateExt);
-        result.setRefBookList(refBookFactory.getAll(false));
+        List<RefBook> refBookList = refBookFactory.getAll(false);
+        Collections.sort(refBookList, new Comparator<RefBook>() {
+            @Override
+            public int compare(RefBook o1, RefBook o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        result.setRefBookList(refBookList);
 
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));

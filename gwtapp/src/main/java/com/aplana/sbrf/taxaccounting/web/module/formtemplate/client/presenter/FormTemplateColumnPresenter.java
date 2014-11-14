@@ -16,6 +16,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.*;
 import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class FormTemplateColumnPresenter
     private Map<Long, RefBook> refBookMap = new HashMap<Long, RefBook>();
     private Map<Long, RefBookAttribute> refBookAttributeMap = new HashMap<Long, RefBookAttribute>();
     private Map<Long, Long> refBookAttributeToRefBookMap = new HashMap<Long, Long>();
+    private List<RefBook> refBookList = new ArrayList<RefBook>();
     private int generatedColumnId = -1;
 
 	@Title("Шаблоны налоговых форм")
@@ -78,8 +80,9 @@ public class FormTemplateColumnPresenter
         refBookAttributeMap.clear();
         refBookMap.clear();
 
-        if (event.getRefBookList() != null) {
-            for (RefBook refBook : event.getRefBookList()) {
+        refBookList = event.getRefBookList();
+        if (refBookList != null) {
+            for (RefBook refBook : refBookList) {
                 refBookMap.put(refBook.getId(), refBook);
                 for (RefBookAttribute refBookAttribute : refBook.getAttributes()) {
                     refBookAttributeMap.put(refBookAttribute.getId(), refBookAttribute);
@@ -88,7 +91,7 @@ public class FormTemplateColumnPresenter
             }
         }
 
-        getView().setRefBookList(event.getRefBookList());
+        getView().setRefBookList(refBookList);
 		getView().setColumnList(formTemplate.getColumns(), isFormChanged);
 	}
 
@@ -155,8 +158,10 @@ public class FormTemplateColumnPresenter
     }
 
     @Override
-    public Long getRefBookByAttributeId(Long refBookAttributeId) {
-        return refBookAttributeToRefBookMap.get(refBookAttributeId);
+    public Long getRefBookByAttributeId(Long refBookAttributeId, boolean selectFirstWhenNull) {
+        return (selectFirstWhenNull && refBookAttributeId == null) ?
+                refBookList.get(0).getId() :
+                refBookAttributeToRefBookMap.get(refBookAttributeId);
     }
 
     @Override

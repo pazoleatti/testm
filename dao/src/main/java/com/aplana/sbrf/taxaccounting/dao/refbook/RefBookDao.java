@@ -271,6 +271,18 @@ public interface RefBookDao {
                                                                 @NotNull List<RefBookRecord> records);
 
     /**
+     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми
+     * Обеспечение соблюдения уникальности атрибутов в пределах справочника
+     *
+     * @param attributes      атрибуты справочника
+     * @param records         новые значения полей элемента справочника
+     * @param accountPeriodId идентификатор периода и подразделения БО
+     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
+     */
+    List<String> getMatchedRecordsByUniqueAttributesIncome102(@NotNull List<RefBookAttribute> attributes,
+                                                              @NotNull List<Map<String, RefBookValue>> records, Integer accountPeriodId);
+
+    /**
      * Поиск существующих версий, которые могут пересекаться с новой версией
      * @param refBookId идентификатор справочника
      * @param recordId идентификатор записи справочника (без учета версий)

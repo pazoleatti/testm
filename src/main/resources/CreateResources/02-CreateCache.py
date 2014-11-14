@@ -3,11 +3,6 @@ print '********************************************'
 print '* Start create Cache script'
 print '********************************************'
 print ''
-print '- Load settings'
-
-import settings
-
-print ''
 print '--------------------------------------------'
 print '- System init'
 
@@ -16,7 +11,7 @@ import java
 lineSeparator = java.lang.System.getProperty('line.separator')
 
 # server info
-resourceRootLocation   = '/Server:'+ settings.serverName
+resourceRootLocation   = '/Server:'+ serverName
 resourceRootLocationId = AdminConfig.getid(resourceRootLocation)
 print 'Found resource root location ID = '+ resourceRootLocationId
 nodeName               = AdminControl.getNode()
@@ -28,22 +23,22 @@ print ''
 print '--------------------------------------------'
 
 # cache instance
-declarationTemplateName = 'TaxAccounting - DeclarationTemplate'+ settings.suffixForResources
-declarationTemplateJndi = 'services/cache/aplana/taxaccounting/DeclarationTemplate'+ settings.suffixForResources
-declarationTypeName     = 'TaxAccounting - DeclarationType'+ settings.suffixForResources
-declarationTypeJndi     = 'services/cache/aplana/taxaccounting/DeclarationType'+ settings.suffixForResources
-departmentName          = 'TaxAccounting - Department'+ settings.suffixForResources
-departmentJndi          = 'services/cache/aplana/taxaccounting/Department'+ settings.suffixForResources
-formTemplateName        = 'TaxAccounting - FormTemplate'+ settings.suffixForResources
-formTemplateJndi        = 'services/cache/aplana/taxaccounting/FormTemplate'+ settings.suffixForResources
-formTypeName            = 'TaxAccounting - FormType'+ settings.suffixForResources
-formTypeJndi            = 'services/cache/aplana/taxaccounting/FormType'+ settings.suffixForResources
-userCacheName           = 'TaxAccounting - User'+ settings.suffixForResources
-userCacheJndi           = 'services/cache/aplana/taxaccounting/User'+ settings.suffixForResources
-dataBlobsCacheName      = 'TaxAccounting - DataBlobsCache'+ settings.suffixForResources
-dataBlobsCacheJndi      = 'services/cache/aplana/taxaccounting/DataBlobsCache'+ settings.suffixForResources
-permanentDataName      = 'TaxAccounting - PermanentData'+ settings.suffixForResources
-permanentDataJndi      = 'services/cache/aplana/taxaccounting/PermanentData'+ settings.suffixForResources
+declarationTemplateName = 'TaxAccounting - DeclarationTemplate'+ suffixForResources
+declarationTemplateJndi = 'services/cache/aplana/taxaccounting/DeclarationTemplate'+ suffixForResources
+declarationTypeName     = 'TaxAccounting - DeclarationType'+ suffixForResources
+declarationTypeJndi     = 'services/cache/aplana/taxaccounting/DeclarationType'+ suffixForResources
+departmentName          = 'TaxAccounting - Department'+ suffixForResources
+departmentJndi          = 'services/cache/aplana/taxaccounting/Department'+ suffixForResources
+formTemplateName        = 'TaxAccounting - FormTemplate'+ suffixForResources
+formTemplateJndi        = 'services/cache/aplana/taxaccounting/FormTemplate'+ suffixForResources
+formTypeName            = 'TaxAccounting - FormType'+ suffixForResources
+formTypeJndi            = 'services/cache/aplana/taxaccounting/FormType'+ suffixForResources
+userCacheName           = 'TaxAccounting - User'+ suffixForResources
+userCacheJndi           = 'services/cache/aplana/taxaccounting/User'+ suffixForResources
+dataBlobsCacheName      = 'TaxAccounting - DataBlobsCache'+ suffixForResources
+dataBlobsCacheJndi      = 'services/cache/aplana/taxaccounting/DataBlobsCache'+ suffixForResources
+permanentDataName      = 'TaxAccounting - PermanentData'+ suffixForResources
+permanentDataJndi      = 'services/cache/aplana/taxaccounting/PermanentData'+ suffixForResources
 
 print '- Cache instance'
 declarationTemplateId = AdminConfig.getid('/ObjectCacheInstance:'+ declarationTemplateName +'/')

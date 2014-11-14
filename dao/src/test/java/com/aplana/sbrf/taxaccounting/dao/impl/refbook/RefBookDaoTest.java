@@ -23,9 +23,6 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 
 //TODO: Необходимо добавить тесты для getRecords с фильтром (Marat Fayzullin 2013-08-31)
@@ -45,6 +42,9 @@ public class RefBookDaoTest {
 
 	@Autowired
     RefBookDao refBookDao;
+
+    @Autowired
+    RefBookIncome102DaoImpl refBookIncome102Dao;
 
     @Before
     public void init() {
@@ -156,18 +156,18 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetAll() {
 		List<RefBook> refBooks = refBookDao.getAll(RefBookType.LINEAR.getId());
-		assertEquals(3, refBooks.size());
+		assertEquals(4, refBooks.size());
 		refBooks = refBookDao.getAll(RefBookType.HIERARCHICAL.getId());
 		assertEquals(1, refBooks.size());
 		refBooks = refBookDao.getAll(null);
-		assertEquals(4, refBooks.size());
+		assertEquals(5, refBooks.size());
 	}
 
 	@Test
 	public void testGetAllVisible() {
-		assertEquals(2, refBookDao.getAllVisible(RefBookType.LINEAR.getId()).size());
+		assertEquals(3, refBookDao.getAllVisible(RefBookType.LINEAR.getId()).size());
 		assertEquals(1, refBookDao.getAllVisible(RefBookType.HIERARCHICAL.getId()).size());
-		assertEquals(3, refBookDao.getAllVisible(null).size());
+		assertEquals(4, refBookDao.getAllVisible(null).size());
 	}
 
 	@Test
@@ -594,7 +594,7 @@ public class RefBookDaoTest {
     public void hasChildren() {
         List<Date> versions = refBookDao.hasChildren(4L, asList(8L));
         assertEquals(1, versions.size());
-        assertEquals(getZeroTimeDate(getDate(1,1,2013)), getZeroTimeDate(versions.get(0)));
+        assertEquals(getZeroTimeDate(getDate(1, 1, 2013)), getZeroTimeDate(versions.get(0)));
     }
 
     @Test
@@ -655,4 +655,24 @@ public class RefBookDaoTest {
 		assertEquals(0, result.size());
 	}
 
+    @Test
+    public void getMatchedRecordsByUniqueAttributesIncome102() {
+        String opuCode = "code";
+        List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
+
+        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+        map.put("OPU_CODE", new RefBookValue(RefBookAttributeType.STRING, opuCode));
+        map.put("TOTAL_SUM", new RefBookValue(RefBookAttributeType.NUMBER, 1));
+        map.put("ITEM_NAME", new RefBookValue(RefBookAttributeType.STRING, "identifier"));
+        map.put("ACCOUNT_PERIOD_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+        records.add(map);
+
+        refBookIncome102Dao.updateRecords(records);
+
+        RefBook refBook = refBookDao.get(52L);
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+        List<String> matchedRecordsCount = refBookDao.getMatchedRecordsByUniqueAttributesIncome102(attributes, records, 1);
+        assertEquals(1, matchedRecordsCount.size());
+        assertEquals(opuCode, matchedRecordsCount.get(0));
+    }
 }

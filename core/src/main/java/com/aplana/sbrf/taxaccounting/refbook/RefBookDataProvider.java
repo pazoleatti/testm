@@ -291,4 +291,14 @@ public interface RefBookDataProvider {
 	 * @return data_row.id - ref_book_value
 	 */
 	Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds);
+
+    /**
+     * Получить записи с одинаковыми значениями уникальных атрибутов
+     *
+     * @param attributes      атрибуты
+     * @param records         записи
+     * @param accountPeriodId идентификатор периода и подразделения БО
+     * @return значения уникальных атрибутов
+     */
+    List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId);
 }

@@ -9,4 +9,7 @@ public interface RefBookHierDataUiHandlers extends UiHandlers {
 	void onSelectionChanged();
 	void onRelevanceDateChanged();
     void setMode(FormMode mode);
+    void saveChanges();
+    void cancelChanges();
+    boolean isFormModified();
 }

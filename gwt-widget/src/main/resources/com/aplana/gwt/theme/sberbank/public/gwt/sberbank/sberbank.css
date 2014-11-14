@@ -257,6 +257,7 @@ a, a:visited, a:hover {
 }
 
 .gwt-ListBox {
+    border: 1px solid #008000;
 }
 
 .gwt-MenuBar {

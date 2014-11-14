@@ -27,6 +27,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 	// Справочник "Виды налоговых форм"
 	public static final Long FORM_TYPE_REF_BOOK_ID = 93L;
 	public static final String FORM_TYPE_TABLE_NAME = "FORM_TYPE";
+	// Справочник "Виды деклараций"
+	public static final Long DECLARATION_TYPE_REF_BOOK_ID = 207L;
+	public static final String DECLARATION_TYPE_TABLE_NAME = "DECLARATION_TYPE";
 	// Справочник "Системные роли"
 	public static final Long SEC_ROLE_REF_BOOK_ID = 95L;
 	public static final String SEC_ROLE_TABLE_NAME = "SEC_ROLE";
@@ -117,4 +120,8 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 		return refBookDao.dereferenceValues(tableName, attributeId, recordIds);
 	}
 
+    @Override
+    public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
+        throw new UnsupportedOperationException();
+    }
 }

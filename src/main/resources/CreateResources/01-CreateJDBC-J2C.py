@@ -3,11 +3,6 @@ print '********************************************'
 print '* Start create JDBC resources and J2C script'
 print '********************************************'
 print ''
-print '- Load settings'
-
-import settings
-
-print ''
 print '--------------------------------------------'
 print '- System init'
 
@@ -16,16 +11,16 @@ import java
 lineSeparator = java.lang.System.getProperty('line.separator')
 
 # server info
-resourceRootLocation   = '/Server:'+ settings.serverName
+resourceRootLocation   = '/Server:'+ serverName
 resourceRootLocationId = AdminConfig.getid(resourceRootLocation)
 print 'Found resource root location ID = '+ resourceRootLocationId
 nodeName               = AdminControl.getNode()
 print 'Found node name = '+ nodeName
-scope = 'Node='+nodeName+',Server='+settings.serverName
+scope = 'Node='+nodeName+',Server='+serverName
 print 'Scope="'+scope+'"'
 
 # auth alias
-jaasAlias             = 'TAX'+ settings.suffixForResources
+jaasAlias             = 'TAX'+ suffixForResources
 migrationJaasAlias    = 'TAX_MIGRATION'
 
 print ''
@@ -45,7 +40,7 @@ if jassAuthDataIds[0] != '':
 			break
 if jassAuthDataNotFound:
 	print 'Initiated the creation of an JAASAuthData'
-	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', jaasAlias], ['userId', settings.jassUserId], ['password', settings.jassUserPass]])
+	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', jaasAlias], ['userId', jassUserId], ['password', jassUserPass]])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
@@ -64,13 +59,13 @@ if jassAuthDataIds[0] != '':
 			break
 if jassAuthDataNotFound:
 	print 'Initiated the creation of an JAASAuthData'
-	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', migrationJaasAlias], ['userId', settings.migrationJassUserId], ['password', settings.migrationJassUserPass]])
+	print 'id='+ AdminConfig.create('JAASAuthData', AdminConfig.getid('/Security:/'), [['alias', migrationJaasAlias], ['userId', migrationJassUserId], ['password', migrationJassUserPass]])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
 
 # JDBC provider
-jdbcProviderName = 'Oracle JDBC Driver (XA)'+ settings.suffixForResources
+jdbcProviderName = 'Oracle JDBC Driver (XA)'+ suffixForResources
 
 
 print ''
@@ -81,20 +76,20 @@ if len(jdbcProviderId):
 	print 'Found existing JDBC Provider id='+ jdbcProviderId
 else:
 	print "Initiated the creation of an JDBC Provider"
-	jdbcProviderId = AdminTask.createJDBCProvider(['-scope', scope, '-databaseType', 'Oracle' ,'-providerType', 'Oracle JDBC Driver' ,'-implementationType', 'XA data source', '-name', jdbcProviderName, '-description', "Oracle JDBC Driver (XA)", '-classpath', settings.jdbcDriverPath, '-nativePath', "" ])
+	jdbcProviderId = AdminTask.createJDBCProvider(['-scope', scope, '-databaseType', 'Oracle' ,'-providerType', 'Oracle JDBC Driver' ,'-implementationType', 'XA data source', '-name', jdbcProviderName, '-description', "Oracle JDBC Driver (XA)", '-classpath', jdbcDriverPath, '-nativePath', "" ])
 	print 'id='+ jdbcProviderId
 	AdminConfig.save()
 	print 'Configuration is saved.'	
 	
 # datasource info
-dataSuorceName               = 'TAX Datasource'+ settings.suffixForResources
-dataSourceJndi               = 'jdbc/TaxAccDS'+ settings.suffixForResources
+dataSuorceName               = 'TAX Datasource'+ suffixForResources
+dataSourceJndi               = 'jdbc/TaxAccDS'+ suffixForResources
 dataSourceHelpClass          = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
-dataSourceUrl                = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ settings.dataBaseHost +')(PORT='+ settings.dataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ settings.dataBaseSvcName +')))'
-migrationDataSuorceName      = 'TAX Datasource Migration'+ settings.suffixForResources
-migrationDataSourceJndi      = 'jdbc/TaxAccDS_MIGRATION'+ settings.suffixForResources
+dataSourceUrl                = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ dataBaseHost +')(PORT='+ dataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ dataBaseSvcName +')))'
+migrationDataSuorceName      = 'TAX Datasource Migration'+ suffixForResources
+migrationDataSourceJndi      = 'jdbc/TaxAccDS_MIGRATION'+ suffixForResources
 migrationDataSourceHelpClass = 'com.ibm.websphere.rsadapter.Oracle11gDataStoreHelper'
-migrationDataSourceUrl       = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ settings.migrationDataBaseHost +')(PORT='+ settings.migrationDataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ settings.migrationDataBaseSvcName +')))'
+migrationDataSourceUrl       = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST='+ migrationDataBaseHost +')(PORT='+ migrationDataBasePort +'))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME='+ migrationDataBaseSvcName +')))'
 
 print ''
 print '--------------------------------------------'
@@ -129,8 +124,8 @@ else:
 	print 'Configuration is saved.'
 	
 # scheduler
-taskSchedulerName = 'TAX Scheduler'+ settings.suffixForResources
-taskSchedulerJndi = 'sched/TaskScheduler'+ settings.suffixForResources
+taskSchedulerName = 'TAX Scheduler'+ suffixForResources
+taskSchedulerJndi = 'sched/TaskScheduler'+ suffixForResources
 
 print ''
 print '--------------------------------------------'

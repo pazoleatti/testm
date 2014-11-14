@@ -54,6 +54,9 @@
             margin: 4px 9px;
             border-top: 1px solid #aeaeac;
         }
+        .submit {
+            margin-top: 2px;;
+        }
     </ui:style>
 
     <ui:style field="lock">
@@ -166,7 +169,10 @@
                             <g:Label width="150px" text="Файл jrxml"/>
                             <!--TODO (Ramil Timerbaev) нужно допилить виджеты загрузки на подобие "загрузить"-->
                             <g:FormPanel ui:field="uploadJrxmlForm" encoding="multipart/form-data" method="post">
-                                <g:FileUpload name="uploadJrxmlFile" ui:field="uploadJrxml"/>
+                                <style:LeftBar>
+                                    <g:FileUpload name="uploadJrxmlFile" ui:field="uploadJrxml"/>
+                                    <g:SubmitButton text="Импорт" addStyleNames="{style.submit}"/>
+                                </style:LeftBar>
                             </g:FormPanel>
                             <style:LinkAnchor text="Скачать jrxml" ui:field="downloadJrxmlButton"
                                               title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>

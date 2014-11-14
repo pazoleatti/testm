@@ -51,6 +51,8 @@ public class PeriodServiceImpl implements PeriodService {
 	@Autowired
 	private FormDataService formDataService;
     @Autowired
+    private FormDataSearchService formDataSearchService;
+    @Autowired
     private DeclarationDataService declarationDataService;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -201,7 +203,7 @@ public class PeriodServiceImpl implements PeriodService {
 		boolean allGood = true;
         List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
         for (FormData fd : formDataList) {
-            LockData lock = lockDataService.getLock(LockData.LOCK_OBJECTS.FORM_DATA.name() + "_" + fd.getId());
+            LockData lock = lockDataService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + fd.getId());
             if (lock != null) {
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +
@@ -230,7 +232,7 @@ public class PeriodServiceImpl implements PeriodService {
 		if (savedDepartmentReportPeriod == null) { //не существует
 			departmentReportPeriodService.save(departmentReportPeriod);
 		} else if (!savedDepartmentReportPeriod.isActive()) { // существует и не открыт
-            departmentReportPeriodService.updateActive(savedDepartmentReportPeriod.getId(), true);
+            departmentReportPeriodService.updateActive(savedDepartmentReportPeriod.getId(), true, departmentReportPeriod.isBalance());
 		} else { // уже открыт
 			return;
 		}
@@ -365,26 +367,23 @@ public class PeriodServiceImpl implements PeriodService {
                 }
 
                 if (drp != null) {
-                    if (drp.isBalance() == balancePeriod) {
-                        if (drp.isActive()) {
+
+                    if (drp.isActive()) {
+                        if (drp.isBalance() == balancePeriod) {
                             return PeriodStatusBeforeOpen.OPEN;
                         } else {
-                            filter = new DepartmentReportPeriodFilter();
-                            filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
-                            filter.setDepartmentIdList(Arrays.asList(departmentId));
-                            filter.setIsCorrection(true);
-                            departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
-                            if (!departmentReportPeriodList.isEmpty()){
-                                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
-                            }
-                            return PeriodStatusBeforeOpen.CLOSE;
+                            return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
                         }
                     } else {
-                        if (drp.isActive()) {
-                            return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
-                        } else {
-                            return PeriodStatusBeforeOpen.CLOSE;
+                        filter = new DepartmentReportPeriodFilter();
+                        filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
+                        filter.setDepartmentIdList(Arrays.asList(departmentId));
+                        filter.setIsCorrection(true);
+                        departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+                        if (!departmentReportPeriodList.isEmpty()){
+                            return PeriodStatusBeforeOpen.CORRECTION_PERIOD_ALREADY_EXIST;
                         }
+                        return PeriodStatusBeforeOpen.CLOSE;
                     }
                 }
 			}
@@ -415,7 +414,16 @@ public class PeriodServiceImpl implements PeriodService {
         DepartmentReportPeriod drp = departmentReportPeriodService.get(drpId);
 
         //Check forms
-        List<FormData> formDatas = formDataService.find(departmentIds, drp.getReportPeriod().getId());
+        FormDataFilter dataFilter = new FormDataFilter();
+        if (drp.getCorrectionDate() != null) {
+            dataFilter.setCorrectionTag(true);
+            dataFilter.setCorrectionDate(drp.getCorrectionDate());
+        } else {
+            dataFilter.setCorrectionTag(false);
+        }
+        dataFilter.setDepartmentIds(departmentIds);
+        dataFilter.setReportPeriodIds(Arrays.asList(drp.getReportPeriod().getId()));
+        List<FormData> formDatas = formDataSearchService.findDataByFilter(dataFilter);
         for (FormData fd : formDatas) {
             logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
                     fd.getFormType().getName(), fd.getKind().getName(),
@@ -425,6 +433,12 @@ public class PeriodServiceImpl implements PeriodService {
         DeclarationDataFilter filter = new DeclarationDataFilter();
         filter.setDepartmentIds(departmentIds);
         filter.setReportPeriodIds(Collections.singletonList(drp.getReportPeriod().getId()));
+        if (drp.getCorrectionDate() != null) {
+            filter.setCorrectionTag(true);
+            filter.setCorrectionDate(drp.getCorrectionDate());
+        } else {
+            filter.setCorrectionTag(false);
+        }
         List<Long> declarations = declarationDataSearchService.getDeclarationIds(filter, DeclarationDataSearchOrdering.ID, true);
         for (Long id : declarations) {
             DeclarationData dd = declarationDataService.get(id, user);
@@ -455,9 +469,7 @@ public class PeriodServiceImpl implements PeriodService {
         }
 		List<Integer> departments = getAvailableDepartments(taxType, user.getUser(), Operation.DELETE, drp.getDepartmentId());
 
-		if (checkBeforeRemove(departments, drp.getReportPeriod().getId(), logger.getEntries())) {
-			removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
-		}
+        removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
 	}
 
 	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
@@ -757,23 +769,27 @@ public class PeriodServiceImpl implements PeriodService {
         filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
         filter.setIsCorrection(true);
         List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
-        for (DepartmentReportPeriod period : drpList) {
-            if (period.getCorrectionDate().equals(term)) {
-                if (!period.isActive()) {
-                    return PeriodStatusBeforeOpen.CLOSE;
-                } else {
-                    return PeriodStatusBeforeOpen.OPEN;
-                }
-            } else if (period.getCorrectionDate().after(term)) {
-                return PeriodStatusBeforeOpen.INVALID;
-
-            }
-        }
-        if (!drpList.isEmpty()){
-            //проверяет статус последнего по порядку корректирующего периода (сортировка в дао)
+        if (!drpList.isEmpty()) {
             DepartmentReportPeriod drpLast = drpList.get(drpList.size()-1);
+            //7А. Система проверяет наличие корректирующего периода для выбранного подразделения, созданного для выбранного периода корректировки.
+            for (int i = 0; i<drpList.size(); i++) {
+                DepartmentReportPeriod period = drpList.get(i);
+                //7А.1А.1 Система проверяет найденный период (с совпадающим сроком подачи корректировки).
+                if (period.getCorrectionDate().equals(term)) {
+                    // Период открыт/закрыт и является/не является последним по порядку из корректирующих периодов.
+                    if (!period.isActive()) {
+                        return i == drpList.size()-1 ? PeriodStatusBeforeOpen.CLOSE : PeriodStatusBeforeOpen.INVALID;
+                    } else {
+                        return i == drpList.size()-1 ? PeriodStatusBeforeOpen.OPEN : PeriodStatusBeforeOpen.INVALID;
+                    }
+                } else if (period.getCorrectionDate().after(term)) {
+                    return PeriodStatusBeforeOpen.INVALID;
+    
+                }
+            }
+        
             if (drpLast.isActive())
-                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN;
+                return PeriodStatusBeforeOpen.INVALID;
         }
 
         //Система проверяет статус периода корректировки (конкретный период ищем, т.е. д.б. одно значение)

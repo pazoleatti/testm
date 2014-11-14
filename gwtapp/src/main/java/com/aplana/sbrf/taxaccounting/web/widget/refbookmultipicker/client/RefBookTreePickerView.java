@@ -247,7 +247,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
                 scrollPanel.setVerticalScrollPosition(offsetTop);
 
-                boolean isScrolled = (absTop != 0) && (offsetTop == scroll || (offsetTop > maxScroll && scroll == maxScroll));
+                boolean isScrolled = (absTop != 0 || absTop == offsetTop) && (offsetTop == scroll || (offsetTop > maxScroll && scroll == maxScroll));
                 return !isScrolled;
             }
         }, 500);
@@ -294,6 +294,11 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             longList.add(item.getRefBookTreeItem().getId());
         }
         return longList;
+    }
+
+    @Override
+    public void setSingleColumn(String columnAlias) {
+        //do nothing
     }
 
     private Set<RefBookUiTreeItem> getSelectedSet() {

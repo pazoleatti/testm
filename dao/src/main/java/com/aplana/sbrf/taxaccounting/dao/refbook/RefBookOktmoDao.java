@@ -265,4 +265,13 @@ public interface RefBookOktmoDao {
      * @return все записи действуют в указанном периоде?
      */
     List<Long> isRecordsActiveInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
+
+    /**
+     * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру
+     * @param version дата актуальности. Может быть null - тогда не учитывается
+     * @param needAccurateVersion признак того, что нужно точное совпадение по дате начала действия записи
+     * @param filter фильтр для отбора записей
+     * @return пары идентификатор версии элемента - идентификатор элемента справочника
+     */
+    List<Pair<Long, Long>> getRecordIdPairs(String tableName, @NotNull Long refBookId, Date version, Boolean needAccurateVersion, String filter);
 }

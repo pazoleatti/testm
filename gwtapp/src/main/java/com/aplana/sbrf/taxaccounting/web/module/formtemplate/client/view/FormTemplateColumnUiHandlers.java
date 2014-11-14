@@ -19,7 +19,7 @@ public interface FormTemplateColumnUiHandlers extends UiHandlers {
 
     RefBookAttribute getRefBookAttribute(Long refBookAttributeId);
 
-    Long getRefBookByAttributeId(Long refBookAttributeId);
+    Long getRefBookByAttributeId(Long refBookAttributeId, boolean selectFirstWhenNull);
 
     int getNextGeneratedColumnId();
 }
