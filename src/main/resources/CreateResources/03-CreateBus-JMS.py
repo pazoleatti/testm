@@ -240,7 +240,7 @@ if SIBJMSQueuesId[0] != '':
 			break
 if SIBJMSQueueNotFound:
 	print 'Initiated the creation of an service integration bus queue'
-	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSShortAsyncQueueName, '-jndiName', SIBJMSShortAsyncQueueJndi, '-queueName', SIBDestinationName, '-busName', SIBusName])
+	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSShortAsyncQueueName, '-jndiName', SIBJMSShortAsyncQueueJndi, '-queueName', SIBShortAsyncDestinationName, '-busName', SIBusName])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
@@ -257,7 +257,7 @@ if SIBJMSQueuesId[0] != '':
 			break
 if SIBJMSQueueNotFound:
 	print 'Initiated the creation of an service integration bus queue'
-	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSLongAsyncQueueName, '-jndiName', SIBJMSLongAsyncQueueJndi, '-queueName', SIBDestinationName, '-busName', SIBusName])
+	print 'id='+ AdminTask.createSIBJMSQueue(resourceRootLocationId, ['-name', SIBJMSLongAsyncQueueName, '-jndiName', SIBJMSLongAsyncQueueJndi, '-queueName', SIBLongAsyncDestinationName, '-busName', SIBusName])
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
