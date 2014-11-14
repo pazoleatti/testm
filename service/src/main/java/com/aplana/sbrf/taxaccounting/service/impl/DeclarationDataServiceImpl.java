@@ -63,7 +63,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 
-    public static final String MSG_IS_EXIST_DECLARATION = "Существует экземпляр %s в подразделении %s периоде %s";
+    public static final String MSG_IS_EXIST_DECLARATION = "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"";
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
