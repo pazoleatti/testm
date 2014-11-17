@@ -34,6 +34,7 @@ public class SourceServiceImpl implements SourceService {
 
     private static final String CHECK_EXISTENCE_MSG = "Невозможно назначить источники / приемники: Форма \"%s\" не назначена подразделению %s";
     private static final String FATAL_SAVE_MSG = "Назначение источников-приёмников не выполнено";
+    private static final String FATAL_DELETE_MSG = "Удаление назначения источников-приёмников не выполнено";
     private static final String SOURCES_LIST_IS_EMPTY_MSG = "Все назначения были исключены в результате проверок. Продолжение операции невозможно.";
     private static final String EMPTY_END_PERIOD_INFO = "дата окончания периода не задана";
     private static final String INTERSECTION_PART = "\"%s\" в качестве %s для \"%s\" в периоде %s";
@@ -663,7 +664,7 @@ public class SourceServiceImpl implements SourceService {
                             StringUtils.join(acceptedSource.getValue(), ", ")));
                 }
                 logger.error(DELETE_FATAL_ERROR_END);
-                throw new ServiceLoggerException(FATAL_SAVE_MSG,
+                throw new ServiceLoggerException(FATAL_DELETE_MSG,
                         logEntryService.save(logger.getEntries()));
             }
 
