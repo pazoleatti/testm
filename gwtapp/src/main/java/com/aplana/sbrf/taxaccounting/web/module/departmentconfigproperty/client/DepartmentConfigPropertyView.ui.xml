@@ -43,7 +43,7 @@
         .scrolPanelStyle {
             background-color: white;
             position: absolute !important;
-            top: 34px;
+            top: 45px;
             bottom: 35px;
             left: 0;
             right: 0;
@@ -110,7 +110,7 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="5" height="33px" addStyleNames="{style.filterPanel}" verticalAlignment="middle">
+                <g:HorizontalPanel spacing="5" height="44px" addStyleNames="{style.filterPanel}" verticalAlignment="middle">
                     <g:cell horizontalAlignment="right">
                         <g:Label width="100px" text="Подразделение:"/>
                     </g:cell>
