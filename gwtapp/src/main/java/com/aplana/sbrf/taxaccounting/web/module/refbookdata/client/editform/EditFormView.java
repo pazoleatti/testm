@@ -266,20 +266,22 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	@Override
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {
 		if (record == null) {
-            int i =1;
-			for (final HasValue w : widgets.values()) {
-				w.setValue(null);
-                if (w instanceof RefBookPickerWidget) {
+            boolean textFieldFound = false;
+			for (Map.Entry<RefBookColumn, HasValue> entry : widgets.entrySet()) {
+                HasValue widget = entry.getValue();
+                RefBookColumn column = entry.getKey();
+                widget.setValue(null);
+                if (widget instanceof RefBookPickerWidget) {
                     if (isNeedToReload) {
                         isNeedToReload = false;
-                        ((RefBookPickerWidget) w).reload();
+                        ((RefBookPickerWidget) widget).reload();
                     }
-                    ((RefBookPickerWidget)w).setDereferenceValue("");
+                    ((RefBookPickerWidget) widget).setDereferenceValue("");
                 }
                 //Первый по порядку текстовый атрибут справочника принимает значение "Новая запись" (если текстовые атрибуты отсутствуют, то шаг не выполняется)
-                else if (w instanceof com.aplana.gwt.client.TextBox && i==1){
-                    i++;
-                    ((TextBox) w).setValue("Новая запись");
+                if (column.getAttributeType() == RefBookAttributeType.STRING && !textFieldFound){
+                    textFieldFound = true;
+                    ((TextBox) widget).setValue("Новая запись");
                 }
 			}
 		} else {
