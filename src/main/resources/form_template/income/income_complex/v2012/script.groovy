@@ -844,11 +844,6 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.update(rows)
 }
 
-def getOwnerValue (def dataRow , def alias) {
-    def cell = dataRow.getCell(alias)
-    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
-}
-
 void checkTotalSum(totalRow, sum){
     if (totalRow[totalColumn] != sum) {
         logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графе \"" + getColumnName(totalRow, totalColumn) + "\"")

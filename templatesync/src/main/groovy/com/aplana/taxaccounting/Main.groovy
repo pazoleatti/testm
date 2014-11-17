@@ -20,7 +20,7 @@ class Main {
     def static DB_PASSWORD = 'TAX'
 
     // Схема для сравнения макетов, null если сравнение не требуется
-    def static DB_USER_COMPARE = 'TAX_0_3_9'
+    def static DB_USER_COMPARE = 'TAX_TEST'
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'
@@ -231,7 +231,7 @@ class Main {
                     'property_945_2': 611,
                     'property_945_3': 613,
                     'property_945_4': 612,
-                    'property_945_5': 10640
+                    'property_945_5': 615
             ]
     ]
 

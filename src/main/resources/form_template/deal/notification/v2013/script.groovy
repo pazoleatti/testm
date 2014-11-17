@@ -170,6 +170,7 @@ void generateXML() {
 
             // По строкам матрицы
             УвКонтрСд() {
+                boolean hasRows = false
                 if (!matrixRecords.isEmpty()) {
                     def dataRowHelper = formDataService.getDataRowHelper(matrixRecords.get(0))
                     // "Да"
@@ -191,7 +192,7 @@ void generateXML() {
                         if (row.getAlias() != null) {
                             continue
                         }
-
+                        hasRows = true
                         // Раздел 1А. Сведения о контролируемой сделке (группе однородных сделок)
                         СвКонтрСд(
                                 НомПорСд: ++rowCounter
@@ -311,6 +312,9 @@ void generateXML() {
                             )
                         }
                     }
+                }
+                if(!hasRows){
+                    СвКонтрСд() {}
                 }
             }
         }

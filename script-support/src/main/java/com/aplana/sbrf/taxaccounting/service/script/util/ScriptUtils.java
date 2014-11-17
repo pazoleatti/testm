@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -964,6 +965,14 @@ public final class ScriptUtils {
         }
         throw new IllegalArgumentException("Wrong row alias requested: "
                 + rowAlias);
+    }
+
+    /**
+     * Получает значение самой ячейки или главной, если она в объединении
+     */
+    public static Object getOwnerValue (DataRow<Cell> dataRow , String alias) {
+        Cell cell = dataRow.getCell(alias);
+        return ((cell.hasValueOwner()) ? cell.getValueOwner().getValue() : cell.getValue());
     }
 
     /**
