@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.editform;
 
-import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateTableEvent;
@@ -23,7 +21,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
         FormTypeTemplate getTypeData();
-        boolean isChangeFilter();
         void edit(FormTypeTemplate type);
     }
 
@@ -67,17 +64,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     @Override
     public void onCancel() {
-        Dialog.confirmMessage("Редактирование макета", "Сохранить изменения?", new DialogHandler() {
-            @Override
-            public void yes() {
-                onSave();
-            }
-
-            @Override
-            public void no() {
-                getView().edit(formTypeTemplate);
-            }
-        });
-
+        getView().edit(formTypeTemplate);
     }
 }
