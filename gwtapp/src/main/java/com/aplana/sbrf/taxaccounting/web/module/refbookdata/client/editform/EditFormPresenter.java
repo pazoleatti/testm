@@ -202,10 +202,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 	@Override
 	public void onSaveClicked(boolean isEditButtonClicked) {
+        String title = (currentUniqueRecordId != null ? "Версия не сохранена" : "Версия не создана");
 		try {
             LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
-                Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
+                Dialog.warningMessage(title, "Не указана дата начала актуальности");
                 return;
             }
             Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
@@ -338,7 +339,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 }, this));
 			}
 		} catch (BadValueException bve) {
-            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+            Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
             logEntries.add(new LogEntry(LogLevel.ERROR, bve.toString()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
