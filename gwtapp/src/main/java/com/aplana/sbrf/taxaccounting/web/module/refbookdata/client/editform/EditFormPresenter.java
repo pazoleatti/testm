@@ -252,6 +252,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
                                         recordChanges.setId(newId);
                                         currentUniqueRecordId = newId;
+                                        RefBookRecordVersionData data = new RefBookRecordVersionData();
+                                        data.setVersionStart(getView().getVersionFrom());
+                                        data.setVersionEnd(getView().getVersionTo());
+                                        data.setVersionCount(1);
+                                        getView().fillVersionData(data, currentRefBookId, newId);
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                         SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
 
