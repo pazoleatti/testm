@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -30,6 +31,7 @@ public class RegionSecurityServiceImplTest {
     private final Long USER_REGION = 182L;
 
     private final Long UNIQUE_RECORD_ID = 1L;
+    private final Long UNIQUE_RECORD_ID_BAD_VERSION = 2L;
     private final Long COMMON_RECORD_ID = 1L;
     private final Long PREV_RECORD_ID = 2L;
 
@@ -82,6 +84,24 @@ public class RegionSecurityServiceImplTest {
         Map<Long, Date> versionDateMap = new HashMap<Long, Date>();
         versionDateMap.put(PREV_RECORD_ID, START);
 
+        // версии записи - правильные (принадлежат к одному региону и их можнет удалить один контролер НС)
+        // и неправильные (контролер НС можнет удалить только некоторые версии, но не всю запись со всеми версиями записи)
+        PagingResult<Map<String, RefBookValue>> versionsGood = new PagingResult<Map<String, RefBookValue>>();
+        PagingResult<Map<String, RefBookValue>> versionsBad = new PagingResult<Map<String, RefBookValue>>();
+        Map<String, RefBookValue> version1 = new HashMap<String, RefBookValue>();
+        Map<String, RefBookValue> version2 = new HashMap<String, RefBookValue>();
+        Map<String, RefBookValue> versionBad = new HashMap<String, RefBookValue>();
+        RefBookValue regionTmp1 = new RefBookValue(RefBookAttributeType.REFERENCE, USER_REGION);
+        RefBookValue regionTmp2 = new RefBookValue(RefBookAttributeType.REFERENCE, USER_REGION);
+        RefBookValue regionTmpBad = new RefBookValue(RefBookAttributeType.REFERENCE, USER_REGION + 1);
+        version1.put(REGION_ALIAS, regionTmp1);
+        version2.put(REGION_ALIAS, regionTmp2);
+        versionBad.put(REGION_ALIAS, regionTmpBad);
+        versionsGood.add(version1);
+        versionsGood.add(version2);
+        versionsBad.add(version1);
+        versionsBad.add(versionBad);
+
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
         ReflectionTestUtils.setField(regionSecurityService, "refBookFactory", refBookFactory);
 
@@ -99,6 +119,9 @@ public class RegionSecurityServiceImplTest {
 
         when(provider.getRecordIdPairs(REGION_REF_BOOK_ID, START, false, null)).thenReturn(pairs);
         when(provider.getRecordsVersionStart(list)).thenReturn(versionDateMap);
+
+        when(provider.getRecordVersions(UNIQUE_RECORD_ID, null, null, null)).thenReturn(versionsGood);
+        when(provider.getRecordVersions(UNIQUE_RECORD_ID_BAD_VERSION, null, null, null)).thenReturn(versionsBad);
     }
 
     @Test
@@ -107,11 +130,11 @@ public class RegionSecurityServiceImplTest {
         TAUser user = getUser(TARole.ROLE_CONTROL_UNP);
         Long regionRefBook = REGION_REF_BOOK_ID;
         Long uniqueRecord = UNIQUE_RECORD_ID;
-        boolean result = regionSecurityService.check(user, regionRefBook, uniqueRecord);
+        boolean result = regionSecurityService.checkDelete(user, regionRefBook, uniqueRecord, true);
         Assert.assertTrue(result);
 
         Long notRegionRefBook = NOT_REGION_REF_BOOK_ID;
-        result = regionSecurityService.check(user, notRegionRefBook, uniqueRecord);
+        result = regionSecurityService.checkDelete(user, notRegionRefBook, uniqueRecord, true);
         Assert.assertTrue(result);
     }
 
@@ -121,11 +144,11 @@ public class RegionSecurityServiceImplTest {
         TAUser user = getUser(TARole.ROLE_CONTROL);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID;
-        boolean result = regionSecurityService.check(user, regionRefBookId, uniqueRecordId);
+        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, true);
         Assert.assertFalse(result);
 
         Long notRegionRefBookId = NOT_REGION_REF_BOOK_ID;
-        result = regionSecurityService.check(user, notRegionRefBookId, uniqueRecordId);
+        result = regionSecurityService.checkDelete(user, notRegionRefBookId, uniqueRecordId, true);
         Assert.assertFalse(result);
     }
 
@@ -135,11 +158,11 @@ public class RegionSecurityServiceImplTest {
         TAUser user = getUser(TARole.ROLE_CONTROL_NS);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID;
-        boolean result = regionSecurityService.check(user, regionRefBookId, uniqueRecordId);
+        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, true);
         Assert.assertTrue(result);
 
         regionRefBookId = NOT_REGION_REF_BOOK_ID;
-        result = regionSecurityService.check(user, regionRefBookId, uniqueRecordId);
+        result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, true);
         Assert.assertFalse(result);
     }
 
@@ -149,7 +172,27 @@ public class RegionSecurityServiceImplTest {
         TAUser user = getUser(TARole.ROLE_CONTROL_NS, false);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID;
-        boolean result = regionSecurityService.check(user, regionRefBookId, uniqueRecordId);
+        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, true);
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void deleteRecordForNsGoodVersions() {
+        // для ролей NS можно править только региональные записи относящиеся к его региону
+        TAUser user = getUser(TARole.ROLE_CONTROL_NS);
+        Long regionRefBookId = REGION_REF_BOOK_ID;
+        Long uniqueRecordId = UNIQUE_RECORD_ID;
+        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, false);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void deleteRecordFailForNsBadVersions() {
+        // для ролей NS можно править только региональные записи относящиеся к его региону
+        TAUser user = getUser(TARole.ROLE_CONTROL_NS);
+        Long regionRefBookId = REGION_REF_BOOK_ID;
+        Long uniqueRecordId = UNIQUE_RECORD_ID_BAD_VERSION;
+        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, false);
         Assert.assertFalse(result);
     }
 
