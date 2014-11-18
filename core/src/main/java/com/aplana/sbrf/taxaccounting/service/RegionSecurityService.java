@@ -33,6 +33,7 @@ public interface RegionSecurityService {
      * @param user пользователь
      * @param refBookId идентификатор споравочника
      * @param uniqueRecordId идентификатор версии записи
+     * @param isDeleteVersion признак удаления версии записи (true) или записи (false)
      */
-    boolean check(TAUser user, Long refBookId, Long uniqueRecordId);
+    boolean checkDelete(TAUser user, Long refBookId, Long uniqueRecordId, boolean isDeleteVersion);
 }

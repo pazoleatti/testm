@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -26,13 +27,19 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
     RefBookFactory refBookFactory;
 
     @Override
-    public boolean check(TAUser user, Long refBookId, Long uniqueRecordId) {
-        return check(user, refBookId, uniqueRecordId, null, null, null, null);
+    public boolean checkDelete(TAUser user, Long refBookId, Long uniqueRecordId, boolean isDeleteVersion) {
+        return check(user, refBookId, uniqueRecordId, null, null, null, null, isDeleteVersion);
     }
 
     @Override
     public boolean check(TAUser user, Long refBookId, Long uniqueRecordId, Long recordCommonId,
                          Map<String, RefBookValue> values, Date start, Date end) {
+        return check(user, refBookId, uniqueRecordId, recordCommonId, values, start, end, null);
+    }
+
+    /** Общий метод для проврки. */
+    private boolean check(TAUser user, Long refBookId, Long uniqueRecordId, Long recordCommonId,
+                         Map<String, RefBookValue> values, Date start, Date end, Boolean isDeleteVersion) {
         // если роль пользователя "контролер УНП", то завершить разрешив изменения
         if (user.hasRole(TARole.ROLE_CONTROL_UNP)) {
             return true;
@@ -96,7 +103,7 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
             }
         }
 
-        // если запись редактируется, получить старые значения и проверить регион
+        // если запись редактируется или удаляется, получить старые значения и проверить регион
         if (uniqueRecordId != null) {
             Long recordRegionId = getRegionId(uniqueRecordId, refBook.getRegionAttribute().getAlias(), provider);
             if (recordRegionId == null) {
@@ -104,7 +111,26 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
             }
 
             // проверить соответствие региона старой записи региону пользователя
-            return userRegionId.equals(recordRegionId);
+            boolean isAllowed = userRegionId.equals(recordRegionId);
+
+            if (isDeleteVersion != null && !isDeleteVersion) {
+                // удаление записи - проверить все версии записи
+                if (!isAllowed) {
+                    return isAllowed;
+                }
+                PagingResult<Map<String, RefBookValue>> versions = provider.getRecordVersions(uniqueRecordId, null, null, null);
+                for (Map<String, RefBookValue> version : versions) {
+                    RefBookValue region = version.get(refBook.getRegionAttribute().getAlias());
+                    // если регион версии не указан или он не равен региону пользователя, то проверка не проходит
+                    if (region == null || region.getReferenceValue() == null || !region.getReferenceValue().equals(userRegionId)) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                // редактрирование или удаление версии - вернуть результат
+                return isAllowed;
+            }
         } else {
             // запись новая, не имеет версии
             return true;
