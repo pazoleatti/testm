@@ -29,7 +29,7 @@
         <columnType>NUMBER</columnType>
         <name>Задолженность от 45 до 90 дней. Сумма долга</name>
         <order>3</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -49,7 +49,7 @@
         <columnType>NUMBER</columnType>
         <name>Задолженность от 45 до 90 дней. Расчетный резерв</name>
         <order>5</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -59,7 +59,7 @@
         <columnType>NUMBER</columnType>
         <name>Задолженность свыше 90 дней. Сумма долга</name>
         <order>6</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -79,7 +79,7 @@
         <columnType>NUMBER</columnType>
         <name>Задолженность свыше 90 дней. Расчетный резерв</name>
         <order>8</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -89,7 +89,7 @@
         <columnType>NUMBER</columnType>
         <name>Итого расчетный резерв гр.9=гр.5+гр.8</name>
         <order>9</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -99,7 +99,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма доходов за отчетный период</name>
         <order>10</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -109,7 +109,7 @@
         <columnType>NUMBER</columnType>
         <name>Норматив отчислений от суммы доходов 10%</name>
         <order>11</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -119,7 +119,7 @@
         <columnType>NUMBER</columnType>
         <name>Величина созданного резерва в отчетном периоде</name>
         <order>12</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -129,7 +129,7 @@
         <columnType>NUMBER</columnType>
         <name>Резерв на предыдущую отчетную дату</name>
         <order>13</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -139,7 +139,7 @@
         <columnType>NUMBER</columnType>
         <name>Резерв на отчетную дату</name>
         <order>14</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -149,7 +149,7 @@
         <columnType>NUMBER</columnType>
         <name>Изменение фактического резерва. Доначисление резерва с отнесением на расходы код 22670</name>
         <order>15</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -159,7 +159,7 @@
         <columnType>NUMBER</columnType>
         <name>Изменение фактического резерва. Восстановление резерва на доходах код 13091</name>
         <order>16</order>
-        <width>7</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -171,7 +171,7 @@
             отчетном периоде
         </name>
         <order>17</order>
-        <width>7</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>

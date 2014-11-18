@@ -156,7 +156,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 							public void onSuccess(DeleteRefBookRowResult result) {
                                 if (!result.isCheckRegion()) {
                                     String title = "Удаление элемента справочника";
-                                    String msg = "Отсутствуют права доступ на удаление записи для указанного региона!";
+                                    String msg = "Отсутствуют права доступа на удаление записи для указанного региона!";
                                     Dialog.errorMessage(title, msg);
                                     return;
                                 }
