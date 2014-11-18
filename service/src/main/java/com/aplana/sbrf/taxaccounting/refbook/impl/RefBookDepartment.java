@@ -786,7 +786,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         for (DepartmentFormType type : dftList) {
             logger.warn(String.format("Существует назначение подразделения %s в качестве исполнителя для формы %s типа %s в подразделении %s",
                     department.getName(),
-                    formTypeService.get(type.getFormTypeId()),
+                    formTypeService.get(type.getFormTypeId()).getName(),
                     type.getKind().getName(),
                     departmentService.getDepartment(type.getDepartmentId()).getName()));
         }
