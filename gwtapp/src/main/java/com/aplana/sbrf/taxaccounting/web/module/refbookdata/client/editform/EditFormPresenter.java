@@ -242,8 +242,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         if (!result.isCheckRegion()) {
                                             String title = (isVersionMode ? "Создание записи справочника" : "Создание элемента справочника");
                                             String msg = (isVersionMode ?
-                                                    "Отсутствуют права доступ на создание записи для указанного региона!" :
-                                                    "Отсутствуют права доступ на редактирование записи для указанного региона!");
+                                                    "Отсутствуют права доступа на создание записи для указанного региона!" :
+                                                    "Отсутствуют права доступа на редактирование записи для указанного региона!");
                                             Dialog.errorMessage(title, msg);
                                             return;
                                         }
@@ -316,7 +316,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                         if (!result.isCheckRegion()) {
                                             String title = "Редактирование записи справочника";
-                                            String msg = "Отсутствуют права доступ на редактирование записи для указанного региона!";
+                                            String msg = "Отсутствуют права доступа на редактирование записи для указанного региона!";
                                             Dialog.errorMessage(title, msg);
                                             return;
                                         }
