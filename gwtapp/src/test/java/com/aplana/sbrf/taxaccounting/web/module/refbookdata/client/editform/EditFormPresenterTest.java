@@ -39,7 +39,7 @@ public class EditFormPresenterTest {
     public void testOnCancelClickedWhenNotDepartments(RefBookHierDataPresenter.MyView myView) {
         presenter.init(eq(anyLong()), true);
         presenter.onCancelClicked();
-        verify(myView, never()).updateMode(FormMode.EDIT);
+        verify(myView, atLeastOnce()).updateMode(FormMode.EDIT);
     }
 
     /**

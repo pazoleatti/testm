@@ -44,7 +44,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     /** Идентификатор справочника */
     private Long currentRefBookId;
     /** Уникальный идентификатор версии записи справочника */
-    Long currentUniqueRecordId;
+    Long currentUniqueRecordId, parentUniqueRecordId;
     /** Идентификатор записи справочника без учета версий */
     private Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
@@ -135,6 +135,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
             return;
         }
+        parentUniqueRecordId = parentRefBookRecordId != null?parentRefBookRecordId.getId():null;
         if (isFormModified) {
             Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
@@ -166,7 +167,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 getView().fillInputFields(field);
             }
             if (!isVersionMode && mode == FormMode.EDIT) {
-                getView().updateMode(FormMode.CREATE);
+                setMode(FormMode.CREATE);
+            } else if(!isVersionMode && mode == FormMode.CREATE){
+                setMode(FormMode.EDIT);
             } else {
                 setMode(mode);
             }
@@ -378,14 +381,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 @Override
                 public void no() {
                     setIsFormModified(false);
-                    showRecord(currentUniqueRecordId);
+                    showRecord(parentUniqueRecordId != null?parentUniqueRecordId:currentUniqueRecordId);
                 }
             });
         } else {
-            showRecord(currentUniqueRecordId);
+            //Показать родительскую запись
+            showRecord(parentUniqueRecordId != null?parentUniqueRecordId:currentUniqueRecordId);
         }
 
-        if (isDepartments) refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
+        refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
     }
 
 	@Override
