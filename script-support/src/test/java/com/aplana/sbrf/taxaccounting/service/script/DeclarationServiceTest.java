@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -59,6 +60,7 @@ public class DeclarationServiceTest {
         declarationData.setDeclarationTemplateId(1);
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(101);
+        declarationData.setDepartmentReportPeriodId(1);
 
         List<DepartmentFormType> sourcesInfo = new ArrayList<DepartmentFormType>();
         sourcesInfo.add(new DepartmentFormType());
@@ -118,6 +120,21 @@ public class DeclarationServiceTest {
 
     @Test
     public void getAcceptedFormDataSources() {
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(48);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        departmentReportPeriod.setDepartmentId(2);
+
+        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setDepartmentIdList(Arrays.asList(1));
+        filter.setReportPeriodIdList(Arrays.asList(101));
+
+        when(departmentReportPeriodDao.getListByFilter(filter)).thenReturn(Arrays.asList(departmentReportPeriod));
+        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+
+        ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
         assertTrue(service.getAcceptedFormDataSources(declarationData) != null);
     }
 
