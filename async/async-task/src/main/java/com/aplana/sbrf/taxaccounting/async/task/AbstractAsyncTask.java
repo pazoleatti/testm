@@ -61,10 +61,12 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
     @Override
     public void execute(final Map<String, Object> params) {
+        log.debug("AbstractAsyncTask has been started");
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
         try {
             if (lockService.isLockExists(lock, lockDateEnd)) {
+                log.debug("Async task lock exists");
                 Logger logger = new Logger();
                 //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                 executeBusinessLogic(params, logger);
@@ -105,6 +107,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * @param lock ключ блокировки
      */
     private void sendNotifications(String lock, String msg, String uuid) {
+        log.debug("Sending notification has been started");
         if (msg != null && !msg.isEmpty()) {
             //Получаем список пользователей-подписчиков, для которых надо сформировать оповещение
             List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
@@ -122,5 +125,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 notificationService.saveList(notifications);
             }
         }
+        log.debug("Sending notification has been finished");
     }
 }

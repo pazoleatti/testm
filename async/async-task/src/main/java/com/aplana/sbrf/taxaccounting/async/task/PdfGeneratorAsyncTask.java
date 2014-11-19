@@ -18,6 +18,7 @@ public class PdfGeneratorAsyncTask extends AbstractAsyncTask {
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         //TODO
+        log.debug("PdfGeneratorAsyncTask has been started");
     }
 
     @Override
