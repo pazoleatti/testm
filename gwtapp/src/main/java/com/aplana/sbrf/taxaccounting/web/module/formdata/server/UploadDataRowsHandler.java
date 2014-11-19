@@ -78,7 +78,7 @@ public class UploadDataRowsHandler extends
                 try {
                     lockDataService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual(), userInfo.getUser().getId());
                 } catch (Exception e2) {}
-                throw new ActionException("Не удалось выпполнить операцию импорта данных в налоговую форму", e);
+                throw new ActionException("Не удалось выполнить операцию импорта данных в налоговую форму", e);
             }
         } else {
             throw new ActionException("Операция импорта данных в текущую налоговую форму уже выполняется другим пользователем!");
