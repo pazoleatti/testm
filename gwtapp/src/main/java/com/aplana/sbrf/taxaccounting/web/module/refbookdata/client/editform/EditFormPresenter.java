@@ -188,7 +188,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
                                 getView().fillInputFields(result.getRecord());
-                                if (result.getRecord().containsKey("TYPE")) {
+                                if (isDepartments && result.getRecord().containsKey("TYPE")) {
                                     RefBookValueSerializable v = result.getRecord().get("TYPE");
                                     if (v.getAttributeType() == RefBookAttributeType.REFERENCE) {
                                         depType = v.getReferenceValue();
