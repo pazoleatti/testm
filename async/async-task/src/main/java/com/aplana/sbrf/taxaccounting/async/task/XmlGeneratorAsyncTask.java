@@ -38,6 +38,7 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+        log.debug("XmlGeneratorAsyncTask has been started");
         Date docDate = (Date)params.get("docDate");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
@@ -45,6 +46,7 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         userInfo.setUser(userService.getUser(userId));
 
         declarationDataService.calculate(logger, declarationDataId, userInfo, docDate);
+        log.debug("XmlGeneratorAsyncTask has been finished");
     }
 
     @Override
