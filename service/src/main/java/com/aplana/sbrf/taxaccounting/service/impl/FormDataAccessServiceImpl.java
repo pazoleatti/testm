@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.logging.Log;
@@ -20,10 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -693,8 +691,19 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         if (departmentFormTypes != null) {
             for (DepartmentFormType departmentFormType : departmentFormTypes) {
                 // Экземпляр приемника в том же отчетном периоде подразделения
+                DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+                filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
+                filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
+                filter.setIsActive(departmentReportPeriod.isActive());
+                filter.setIsBalance(departmentReportPeriod.isBalance());
+                filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+                List<Integer> ids = departmentReportPeriodDao.getListIdsByFilter(filter);
+                if (ids.size() > 1) {
+                    throw new ServiceException("Не удалось получить приемники");
+                }
+
                 FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(),
-                        departmentFormType.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                        departmentFormType.getKind(), ids.get(0), formData.getPeriodOrder());
                 // Если форма существует и ее статус отличен от «Создана»
                 if (form != null && form.getState() != WorkflowState.CREATED) {
                     throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
