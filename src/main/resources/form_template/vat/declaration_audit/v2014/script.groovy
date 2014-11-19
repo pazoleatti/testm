@@ -117,19 +117,19 @@ void checkDeparmentParams(LogLevel logLevel) {
 
 List<String> getErrorDepartment(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
+    if (record.NAME?.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.OKTMO?.referenceValue == null) {
         errorList.add("«Код по ОКТМО»")
     }
-    if (record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
+    if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
     }
-    if (record.KPP.stringValue == null || record.KPP.stringValue.isEmpty()) {
+    if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
         errorList.add("«КПП»")
     }
-    if (record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
+    if (record.TAX_ORGAN_CODE?.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
         errorList.add("«Код налогового органа»")
     }
     if (record.OKVED_CODE?.referenceValue == null) {
@@ -138,14 +138,14 @@ List<String> getErrorDepartment(record) {
     if (record.SIGNATORY_ID?.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
-    if (record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
+    if (record.SIGNATORY_SURNAME?.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
         errorList.add("«Фамилия подписанта»")
     }
-    if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
+    if (record.SIGNATORY_FIRSTNAME?.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
     //Если ПрПодп (не пусто или не 1) и значение атрибута на форме настроек подразделений не задано
-    if ((record.SIGNATORY_ID?.referenceValue != null && getRefBookValue(35, record.SIGNATORY_ID?.value)?.CODE?.value != 1) && (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty())) {
+    if ((record.SIGNATORY_ID?.referenceValue != null && getRefBookValue(35, record.SIGNATORY_ID?.value)?.CODE?.value != 1) && (record.APPROVE_DOC_NAME?.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
     if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {

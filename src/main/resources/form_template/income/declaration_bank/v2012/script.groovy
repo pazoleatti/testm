@@ -1715,53 +1715,53 @@ def roundValue(def value, def precision) {
 
 List<String> getErrorDepartment(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.NAME == null || record.NAME.value == null || record.NAME.value.isEmpty()) {
+    if (record.NAME?.value == null || record.NAME.value.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.OKTMO == null || record.OKTMO.value == null) {
         errorList.add("«Код по ОКТМО»")
     }
-    if (record.INN == null || record.INN.value == null || record.INN.value.isEmpty()) {
+    if (record.INN?.value == null || record.INN.value.isEmpty()) {
         errorList.add("«ИНН»")
     }
-    if (record.KPP == null || record.KPP.value == null || record.KPP.value.isEmpty()) {
+    if (record.KPP?.value == null || record.KPP.value.isEmpty()) {
         errorList.add("«КПП»")
     }
-    if (record.TAX_ORGAN_CODE == null || record.TAX_ORGAN_CODE.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
+    if (record.TAX_ORGAN_CODE?.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
         errorList.add("«Код налогового органа»")
     }
-    if (record.OKVED_CODE == null || record.OKVED_CODE.value == null) {
+    if (record.OKVED_CODE?.value == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
     def reorgFormCode = getRefBookValue(5, record?.REORG_FORM_CODE?.value)?.CODE?.value
     if (reorgFormCode != null && reorgFormCode != '0') {
-        if (record.REORG_INN == null || record.REORG_INN.value == null || record.REORG_INN.value.isEmpty()) {
+        if (record.REORG_INN?.value == null || record.REORG_INN.value.isEmpty()) {
             errorList.add("«ИНН реорганизованного обособленного подразделения»")
         }
-        if (record.REORG_KPP == null || record.REORG_KPP.value == null || record.REORG_KPP.value.isEmpty()) {
+        if (record.REORG_KPP?.value == null || record.REORG_KPP.value.isEmpty()) {
             errorList.add("«КПП реорганизованного обособленного подразделения»")
         }
     }
-    if (record.SIGNATORY_ID == null || record.SIGNATORY_ID.value == null) {
+    if (record.SIGNATORY_ID?.value == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
-    if (record.SIGNATORY_SURNAME == null || record.SIGNATORY_SURNAME.value == null || record.SIGNATORY_SURNAME.value.isEmpty()) {
+    if (record.SIGNATORY_SURNAME?.value == null || record.SIGNATORY_SURNAME.value.isEmpty()) {
         errorList.add("«Фамилия подписанта»")
     }
-    if (record.SIGNATORY_FIRSTNAME == null || record.SIGNATORY_FIRSTNAME.value == null || record.SIGNATORY_FIRSTNAME.value.isEmpty()) {
+    if (record.SIGNATORY_FIRSTNAME?.value == null || record.SIGNATORY_FIRSTNAME.value.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
     def signatoryId = getRefBookValue(35, record?.SIGNATORY_ID?.value)?.CODE?.value
-    if ((signatoryId != null && signatoryId != 1) && (record.APPROVE_DOC_NAME == null || record.APPROVE_DOC_NAME.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
+    if ((signatoryId != null && signatoryId != 1) && (record.APPROVE_DOC_NAME?.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
-    if (record.TAX_PLACE_TYPE_CODE == null || record.TAX_PLACE_TYPE_CODE.value == null) {
+    if (record.TAX_PLACE_TYPE_CODE?.value == null) {
         errorList.add("«Код места, по которому представляется документ»")
     }
-    if (record.TAX_RATE == null || record.TAX_RATE.value == null) {
+    if (record.TAX_RATE?.value == null) {
         errorList.add("«Ставка налога»")
     }
-    if (record.SUM_TAX == null || record.SUM_TAX.value == null) {
+    if (record.SUM_TAX?.value == null) {
         errorList.add("«Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»")
     }
     errorList
