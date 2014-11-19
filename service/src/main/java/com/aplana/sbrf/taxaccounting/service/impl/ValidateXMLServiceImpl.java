@@ -83,7 +83,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             vsax3File = File.createTempFile("VSAX3",".exe");
             outputStream = new FileOutputStream(vsax3File);
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
-            log.info("Exec copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+            log.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
             inputStream.close();
             outputStream.close();
             params[0] = vsax3File.getAbsolutePath();
@@ -116,7 +116,6 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
             try {
                 String s = reader.readLine();
-                System.out.println(s);
                 if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
                     process.waitFor();
                     return true;
