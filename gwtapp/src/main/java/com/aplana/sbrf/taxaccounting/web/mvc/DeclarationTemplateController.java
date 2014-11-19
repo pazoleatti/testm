@@ -154,6 +154,7 @@ public class DeclarationTemplateController {
             String jrxmBlobId = blobDataService.create(inputStream,
                     declarationTemplate.getType().getName() +"_jrxml");
             declarationTemplate.setJrxmlBlobId(jrxmBlobId);
+            declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
             mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
             if (jrxmBlobIdOld != null && !jrxmBlobIdOld.isEmpty()) {
                 try {
