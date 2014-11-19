@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -84,24 +85,26 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
     //@Test
     public void validateTestSample(){
+        Logger logger = new Logger();
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
         TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
         data.setId(3l);
-        Assert.assertTrue(validateService.validate(data, userInfo));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true));
     }
 
     @Test
     public void validateTest(){
+        Logger logger = new Logger();
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
         TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
-        Assert.assertTrue(validateService.validate(data, userInfo));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true));
     }
 
     @Test
@@ -115,6 +118,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
     @Override
     public void run() {
+        Logger logger = new Logger();
         try {
             init();
         } catch (IOException e) {
@@ -124,6 +128,6 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
-        Assert.assertTrue(validateService.validate(data, userInfo));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true));
     }
 }

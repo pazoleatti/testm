@@ -116,6 +116,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private ValidateXMLService validateXMLService;
+
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
@@ -462,6 +465,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     }
                 });
                 validator.validate(new StreamSource(xmlStream));
+                validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal);
             } catch (Exception e) {
                 log.error(VALIDATION_ERR_MSG, e);
                 logger.error(e);
