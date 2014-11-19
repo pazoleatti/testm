@@ -276,9 +276,7 @@ void calc() {
 
     calcCheckSubjects(dataRows, true)
     dataRows.each { row ->
-        if (getTitleAlias(row) != getTitle(13)) {
-            row.taxBaseSum = (row.taxBase1?:0) - (row.taxBase2?:0) + (row.taxBase3?:0) - (row.taxBase4?:0) - (row.taxBase5?:0)
-        }
+        row.taxBaseSum = (row.taxBase1?:0) - (row.taxBase2?:0) + (row.taxBase3?:0) - (row.taxBase4?:0) - (row.taxBase5?:0)
     }
     dataRowHelper.save(dataRows)
 }
@@ -402,7 +400,7 @@ void logicCheck() {
         }
         // Проверка итоговых значений Графы 7
         if (row.taxBaseSum != null && row.taxBase1 != null && row.taxBase2 != null && row.taxBase3 != null && row.taxBase4 != null && row.taxBase5 != null &&
-                row.taxBaseSum != row.taxBase1 - row.taxBase2 + row.taxBase3 - row.taxBase4 - row.taxBase5 && getTitleAlias(row) != getTitle(13)) {
+                row.taxBaseSum != row.taxBase1 - row.taxBase2 + row.taxBase3 - row.taxBase4 - row.taxBase5) {
             loggerError(row, errorMsg + "Итоговые значения рассчитаны неверно в графе «${getColumnName(row, 'taxBaseSum')}»!")
         }
     }
