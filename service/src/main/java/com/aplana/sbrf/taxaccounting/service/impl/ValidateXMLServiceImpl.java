@@ -5,11 +5,11 @@ import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.ValidateXMLService;
-import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,17 +70,24 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     }
 
     @Override
-    public boolean validate(DeclarationData data,  TAUserInfo userInfo) {
+    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal) {
         String[] params = new String[4];
         assert url != null;
-        params[0] = ResourceUtils.getSharedResource(url.getPath()).getPath();
         DeclarationTemplate template = declarationTemplateService.get(data.getDeclarationTemplateId());
 
         FileOutputStream outputStream;
         InputStream inputStream;
         BufferedReader reader;
-        File xsdFile = null, xmlFile = null;
+        File xsdFile = null, xmlFile = null, vsax3File = null;
         try {
+            vsax3File = File.createTempFile("VSAX3",".exe");
+            outputStream = new FileOutputStream(vsax3File);
+            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
+            log.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+            inputStream.close();
+            outputStream.close();
+            params[0] = vsax3File.getAbsolutePath();
+
             //Получаем xml
             xmlFile = File.createTempFile("file_for_validate",".xml");
             outputStream = new FileOutputStream(xmlFile);
@@ -105,19 +112,26 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             factory.newSAXParser().parse(inputSource, handler);
             params[3] = handler.fileName;
 
-            Process process = new ProcessBuilder(params).start();
+            Process process = (new ProcessBuilder(params)).start();
             reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
             try {
-                process.waitFor();
-                StringBuilder sb = new StringBuilder();
-                String s;
-                while ((s =reader.readLine()) != null){
-                    sb.append(s);
+                String s = reader.readLine();
+                if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
+                    process.waitFor();
+                    return true;
+                } else {
+                    while ((s = reader.readLine()) != null) {
+                        if (!s.startsWith("Execution time:")) {
+                            if (isErrorFatal) {
+                                logger.error(s);
+                            } else {
+                                logger.warn(s);
+                            }
+                        }
+                    }
+                    process.waitFor();
+                    return false;
                 }
-                if (!sb.toString().contains(SUCCESS_FLAG)){
-                    log.error(sb.toString());
-                }
-                return sb.toString().contains(SUCCESS_FLAG);
             } catch (InterruptedException e) {
                 log.error("", e);
                 return false;
@@ -135,11 +149,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             log.error("", e);
             throw new ServiceException("Ошибка при разборе xml.", e);
         } finally {
-            assert xsdFile!= null;
-            if (!xsdFile.delete()){
+            //assert xsdFile!= null;
+            if (xsdFile != null && !vsax3File.delete()){
+                log.warn(String.format("Файл %s не был удален", vsax3File.getName()));
+            }
+            if (xsdFile != null && !xsdFile.delete()){
                 log.warn(String.format("Файл %s не был удален", xsdFile.getName()));
             }
-            if (!xmlFile.delete()){
+            if (xmlFile != null && !xmlFile.delete()){
                 log.warn(String.format("Файл %s не был удален", xmlFile.getName()));
             }
         }

@@ -116,6 +116,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private ValidateXMLService validateXMLService;
+
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
@@ -419,49 +422,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
             throw new ServiceException(msg);
         }
-        String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
-            InputStreamReader xsdStream = new InputStreamReader(
-                    blobDataService.get(declarationTemplate.getXsdId()).getInputStream(), Charset.forName("windows-1251"));
-            InputStreamReader xmlStream = new InputStreamReader(
-                    new ByteArrayInputStream(xml.getBytes()), Charset.forName("windows-1251"));
-
             try {
-                SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                Schema schema = factory.newSchema(new StreamSource(xsdStream));
-                Validator validator = schema.newValidator();
-                validator.setErrorHandler(new ErrorHandler() {
-                    @Override
-                    public void warning(SAXParseException e) throws SAXException {
-                        logger.info(getMessage(e));
-                    }
-
-                    @Override
-                    public void error(SAXParseException e) throws SAXException {
-                        if (isErrorFatal){
-                            logger.error(getMessage(e));
-                        } else {
-                            logger.warn(getMessage(e));
-                        }
-                    }
-
-                    @Override
-                    public void fatalError(SAXParseException e) throws SAXException {
-                        if (isErrorFatal){
-                            logger.error(getMessage(e));
-                        } else {
-                            logger.warn(getMessage(e));
-                        }
-                    }
-
-                    private String getMessage(SAXParseException e) throws SAXException {
-                        return String.format(e.getLocalizedMessage() + " Строка: %s; Столбец: %s",
-                                e.getLineNumber(), e.getColumnNumber());
-                    }
-                });
-                validator.validate(new StreamSource(xmlStream));
+                validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal);
             } catch (Exception e) {
                 log.error(VALIDATION_ERR_MSG, e);
                 logger.error(e);
