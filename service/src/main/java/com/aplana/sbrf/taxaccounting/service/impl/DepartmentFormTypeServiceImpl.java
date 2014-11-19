@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentFormTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,6 +25,8 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
     public List<DepartmentFormType> getByPerformerId(int performerDepId) {
         List<Long> dftIds = departmentFormTypeDao.getDFTByPerformerId(performerDepId,
                 Arrays.asList(TaxType.values()), Arrays.asList(FormDataKind.values()));
+        if (dftIds.isEmpty())
+            return new ArrayList<DepartmentFormType>(0);
         return departmentFormTypeDao.getByListIds(dftIds);
     }
 
