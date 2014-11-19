@@ -250,7 +250,7 @@ public class DeclarationListView extends
         } else {
             declarationTable.addColumn(declarationTypeColumn, declarationTypeHeader);
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
-            if (taxType == TaxType.PROPERTY) {
+            if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT) {
                 declarationTable.addColumn(declarationTaxOrganColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
                 declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
             }
