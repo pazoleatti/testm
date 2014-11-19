@@ -70,6 +70,11 @@ def sumCAColumns = ['sum45', 'reserve45', 'sum90', 'reserve90', 'totalReserve', 
                     'reserveCurrent', 'addChargeReserve', 'restoreReserve', 'usingReserve']
 
 @Field
+def Map<String, Integer> departmentRowMap = [2 : 103, 3 : 98, 4 : 5, 5: 17, 6 : 60, 7 : 89, 8 : 9, 9 : 83, 10 : 33,
+                                              11 : 110, 12 : 45, 13 : 65, 14 : 73, 15 : 28, 16 : 21, 17 : 53, 20 : 176,
+                                                21 : 131, 22 : 115, 23 : 117]
+
+@Field
 def startDate = null
 
 @Field
@@ -134,16 +139,28 @@ void calc() {
 }
 
 void preCalcLogicCheck() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.getAllCached()
     def sourceFormTypeId = 329 // РНУ-30
+    def sourceFormType = formTypeService.get(sourceFormTypeId)
 
-    for (def departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate())) {
-        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
-        if (departmentFormType.formTypeId == sourceFormTypeId && (child == null || child.state != WorkflowState.ACCEPTED)) {
-            def cause = child == null ? "не создана" : "не находится в статусе «Принята»"
-            def childDepartment = departmentService.get(departmentFormType.departmentId)
-            def formType = formTypeService.get(departmentFormType.formTypeId)
-            logger.error("${departmentFormType.kind.name} налоговая форма «${formType.name}» в подразделении ${childDepartment.name} $cause!")
+    def departmentFormTypes = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate())
+    departmentRowMap.each { index, departmentId ->
+        def row = dataRows[index.toInteger()]
+        def departmentFormType = departmentFormTypes.find {
+            // совпадает подразделение и тип формы
+            it.departmentId == departmentId && it.formTypeId == sourceFormTypeId
+        }
+        if (departmentFormType == null) {
+            logger.error ("Строка ${row.getIndex()}: " + "Не назначена источником налоговая форма «${sourceFormType.name}» для ${row.bankName}!")
+        } else {
+            def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+            if (departmentFormType.formTypeId == sourceFormTypeId && (child == null || child.state != WorkflowState.ACCEPTED)) {
+                def cause = child == null ? "не создана" : "не находится в статусе «Принята»"
+                def childDepartment = departmentService.get(departmentFormType.departmentId)
+                logger.error("Строка ${row.getIndex()}: " + "${departmentFormType.kind.name} налоговая форма «${sourceFormType.name}» в подразделении ${childDepartment.name} $cause!")
+            }
         }
     }
 }
@@ -160,7 +177,7 @@ void logicCheck() {
     }
     for (int i in ((24..31))) {
         def row = dataRows[i]
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, row.getIndex(), ['reservePrev', 'reserveCurrent', 'usingReserve'], logger, true)
     }
     def rowCAWriteoff = dataRows[32]
     checkNonEmptyColumns(rowCAWriteoff, rowCAWriteoff.getIndex(), nonEmptyColumns - ['norm45', 'norm90'], logger, true)
@@ -188,15 +205,11 @@ void consolidation() {
             def childRows = childData.all
             def rowTotal = getDataRow(childRows, 'total')
             def childDepartmentId = child.departmentId
-            def dataRow = null
-            for (def row : dataRows) {
-                if (row.getAlias() == "bank$childDepartmentId") {
-                    dataRow = row
-                    break
-                }
+            def entry = departmentRowMap.find {index, departmentId ->
+                departmentId == childDepartmentId
             }
-            if (dataRow != null) {
-                fillRow(dataRow, rowTotal)
+            if (entry?.key != null) {
+                fillRow(dataRows[entry.key.toInteger()], rowTotal)
             }
         }
     }
