@@ -70,7 +70,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                 if (uuid == null) {
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                     asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);
-                    logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
+                    logger.info(String.format("%s отчет текущей налоговой формы (%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
                 } else {
                     result.setExistReport(true);
                     lockDataService.unlock(key, userInfo.getUser().getId());
@@ -92,7 +92,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                 } catch(ServiceException e) {
                 }
             }
-            logger.info(String.format("%s отчет текущей налоговой формы(%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual() ? "версия ручного ввода" : "автоматическая версия"));
+            logger.info(String.format("%s отчет текущей налоговой формы (%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual() ? "версия ручного ввода" : "автоматическая версия"));
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
