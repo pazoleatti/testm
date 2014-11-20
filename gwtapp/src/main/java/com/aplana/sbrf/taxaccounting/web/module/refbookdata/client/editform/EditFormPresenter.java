@@ -387,7 +387,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 @Override
                 public void no() {
                     setIsFormModified(false);
-                    showRecord(parentUniqueRecordId != null?parentUniqueRecordId:currentUniqueRecordId);
+                    showRecord(parentUniqueRecordId != null ? parentUniqueRecordId : currentUniqueRecordId);
                 }
             });
         } else {

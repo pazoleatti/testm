@@ -134,4 +134,49 @@ public class RefBookColumn implements Serializable{
     public void setPrecision(Integer precision) {
         this.precision = precision;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RefBookColumn column = (RefBookColumn) o;
+
+        if (isHierarchical != column.isHierarchical) return false;
+        if (readOnly != column.readOnly) return false;
+        if (required != column.required) return false;
+        if (width != column.width) return false;
+        if (alias != null ? !alias.equals(column.alias) : column.alias != null) return false;
+        if (alignment != column.alignment) return false;
+        if (attributeType != column.attributeType) return false;
+        if (format != column.format) return false;
+        if (id != null ? !id.equals(column.id) : column.id != null) return false;
+        if (maxLength != null ? !maxLength.equals(column.maxLength) : column.maxLength != null) return false;
+        if (name != null ? !name.equals(column.name) : column.name != null) return false;
+        if (precision != null ? !precision.equals(column.precision) : column.precision != null) return false;
+        if (refBookAttributeId != null ? !refBookAttributeId.equals(column.refBookAttributeId) : column.refBookAttributeId != null)
+            return false;
+        if (refBookName != null ? !refBookName.equals(column.refBookName) : column.refBookName != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (alias != null ? alias.hashCode() : 0);
+        result = 31 * result + (refBookName != null ? refBookName.hashCode() : 0);
+        result = 31 * result + width;
+        result = 31 * result + (attributeType != null ? attributeType.hashCode() : 0);
+        result = 31 * result + (refBookAttributeId != null ? refBookAttributeId.hashCode() : 0);
+        result = 31 * result + (alignment != null ? alignment.hashCode() : 0);
+        result = 31 * result + (format != null ? format.hashCode() : 0);
+        result = 31 * result + (isHierarchical ? 1 : 0);
+        result = 31 * result + (readOnly ? 1 : 0);
+        result = 31 * result + (maxLength != null ? maxLength.hashCode() : 0);
+        result = 31 * result + (precision != null ? precision.hashCode() : 0);
+        result = 31 * result + (required ? 1 : 0);
+        return result;
+    }
 }
