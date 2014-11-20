@@ -105,7 +105,7 @@
 
                 <g:HorizontalPanel verticalAlignment="middle" width="100%" addStyleNames="{style.btnPanel}">
                     <g:HorizontalPanel verticalAlignment="middle">
-                        <style:LinkButton title="Добавить строку" text="Добавить строку" ui:field="addRow"
+                        <style:LinkButton title="Добавить запись" text="Добавить запись" ui:field="addRow"
                                           img="resources/img/row-add.png" addStyleNames="{style.marginRight5}"/>
                         <style:LinkButton title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
                                           img="resources/img/row-delete.png" addStyleNames="{style.marginRight5}"/>
@@ -121,7 +121,7 @@
                         <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
                             <g:HTML addStyleNames="{style.verSep}"/>
                             <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}"/>
-                            <g:Button title="Найти" width="70px" text="Найти" ui:field="search"/>
+                            <g:Button title="Поиск" width="70px" text="Поиск" ui:field="search"/>
                         </g:HorizontalPanel>
                     </g:cell>
 

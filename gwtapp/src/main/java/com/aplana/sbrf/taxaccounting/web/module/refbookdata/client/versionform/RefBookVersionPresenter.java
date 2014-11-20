@@ -171,7 +171,6 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
         editFormPresenter.setVersionMode(true);
         editFormPresenter.setCurrentUniqueRecordId(null);
-        editFormPresenter.setRecordId(null);
 
         GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		action.setRefBookId(refBookId);
@@ -207,7 +206,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                         RefBookDataTokens.refBookHierData
                                 ) + ";id=" + refBookId + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + uniqueRecordId;
                                 getView().setBackAction(href);
-                                editFormPresenter.setRecordId(result.getRecordId());
+                                //editFormPresenter.setRecordId(result.getRecordId());
 							}
 						}, this));
 

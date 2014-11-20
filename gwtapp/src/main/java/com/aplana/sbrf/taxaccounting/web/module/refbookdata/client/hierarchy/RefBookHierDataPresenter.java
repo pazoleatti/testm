@@ -249,6 +249,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         if (getView().getSelectedId() != null) {
             recordId = getView().getSelectedId();
             editFormPresenter.show(recordId);
+            editFormPresenter.setRecordId(recordId);
         }
     }
 
