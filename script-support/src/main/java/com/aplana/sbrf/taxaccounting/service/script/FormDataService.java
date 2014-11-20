@@ -61,7 +61,7 @@ public interface FormDataService {
      * @param refBookCache
      */
     @SuppressWarnings("unused")
-    void fillRefBookCache(Long formDataId, Map<Long, Map<String, RefBookValue>> refBookCache);
+    void fillRefBookCache(Long formDataId, Map<String, Map<String, RefBookValue>> refBookCache);
 
     /**
      * Консолидация формы
@@ -136,7 +136,7 @@ public interface FormDataService {
     Map<String, RefBookValue> getRefBookRecordImport(Long refBookId,
                                   Map<Long, Map<String, Long>> recordCache,
                                   Map<Long, RefBookDataProvider> providerCache,
-                                  Map<Long, Map<String, RefBookValue>> refBookCache,
+                                  Map<String, Map<String, RefBookValue>> refBookCache,
                                   String alias, String value, Date date,
                                   int rowIndex, int colIndex, Logger logger, boolean required);
 
@@ -167,7 +167,7 @@ public interface FormDataService {
      */
     @SuppressWarnings("unused")
     Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
-                                              Map<Long, Map<String, RefBookValue>> refBookCache);
+                                              Map<String, Map<String, RefBookValue>> refBookCache);
 
     /**
      * Получение формы за предыдущий отчетный период.
@@ -181,7 +181,7 @@ public interface FormDataService {
      */
     Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                                Map<Long, RefBookDataProvider> providerCache,
-                                               Map<Long, Map<String, RefBookValue>> refBookCache,
+                                               Map<String, Map<String, RefBookValue>> refBookCache,
                                                String alias, String value, Date date,
                                                int rowIndex, String columnName, Logger logger, boolean required);
 

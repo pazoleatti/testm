@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
@@ -30,6 +31,12 @@ public class DeclarationDataController {
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private ReportService reportService;
+
+    @Autowired
+    private BlobDataService blobDataService;
+
     private static final String ENCODING = "UTF-8";
 
 
@@ -38,13 +45,25 @@ public class DeclarationDataController {
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        byte[] xlsxData = declarationService.getXlsxData(id, userInfo);
         String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
 
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
-        response.getOutputStream().write(xlsxData);
+        String uuid = reportService.getDec(userInfo, id, ReportType.EXCEL_DEC);
+        if (uuid != null) {
+            BlobData blobData = blobDataService.get(uuid);
+            DataInputStream in = new DataInputStream(blobData.getInputStream());
+            OutputStream out = response.getOutputStream();
+            int count = 0;
+            try {
+                count = IOUtils.copy(in, out);
+            } finally {
+                in.close();
+                out.close();
+            }
+            response.setContentLength(count);
+        }
     }
 
 
