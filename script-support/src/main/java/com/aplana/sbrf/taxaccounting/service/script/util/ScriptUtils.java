@@ -107,6 +107,9 @@ public final class ScriptUtils {
 
     private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
 
+    // разделитель между идентификаторами в ключе для кеширования записей справочника
+    private static final String SEPARATOR = "_";
+
     /**
      * Интерфейс для переопределения алгоритма расчета
      */
@@ -1380,5 +1383,15 @@ public final class ScriptUtils {
             throw new IllegalArgumentException(WRONG_XLS_COLUMN_INDEX);
         }
         return CellReference.convertNumToColString(index - 1);
+    }
+
+    /**
+     * Получить ключ для кешированых записей по идентикатору справочника и записи.
+     *
+     * @param refBookId идентикатор справочника
+     * @param recordId идентикатор записи
+     */
+    public static String getRefBookCacheKey(Long refBookId, Long recordId) {
+        return refBookId + SEPARATOR + recordId;
     }
 }

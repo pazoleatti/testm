@@ -45,15 +45,14 @@ public class FormDataCacheDaoTest {
 
     @Test
     public void getRefBookMapTest1() {
-        Map<Long, Map<String, RefBookValue>> map = dao.getRefBookMap(1L);
-
-        Map<String, RefBookValue> data = map.get(1L);
+        Map<String, Map<String, RefBookValue>> map = dao.getRefBookMap(1L);
+        Map<String, RefBookValue> data = map.get("1_1");
         Assert.assertEquals(data.get("author").getReferenceValue().longValue(), 5L);
         Assert.assertEquals(data.get("weight").getNumberValue().doubleValue(), 0.25d, 0);
         Assert.assertEquals(data.get("order").getNumberValue().doubleValue(), 1113d, 0);
         Assert.assertEquals(data.get("name").getStringValue(), "Алиса в стране чудес");
 
-        data = map.get(7L);
+        data = map.get("2_7");
         Assert.assertEquals(data.get("name").getStringValue(), "Петренко П.П.");
     }
 
@@ -68,15 +67,15 @@ public class FormDataCacheDaoTest {
         dataRowDao.saveRows(formData, rows);
         dataRowDao.commit(formData.getId());
 
-        Map<Long, Map<String, RefBookValue>> map = dao.getRefBookMap(1L);
+        Map<String, Map<String, RefBookValue>> map = dao.getRefBookMap(1L);
 
-        Map<String, RefBookValue> data = map.get(4L);
+        Map<String, RefBookValue> data = map.get("1_4");
         Assert.assertEquals(data.get("author").getReferenceValue().longValue(), 6L);
         Assert.assertEquals(data.get("weight").getNumberValue().doubleValue(), 2.399d, 0);
         Assert.assertEquals(data.get("order").getNumberValue().doubleValue(), 425d, 0);
         Assert.assertEquals(data.get("name").getStringValue(), "Вий");
 
-        data = map.get(5L);
+        data = map.get("2_5");
         Assert.assertEquals(data.get("name").getStringValue(), "Иванов И.И.");
     }
 
