@@ -9,5 +9,5 @@ import java.util.Map;
  * @author Dmitriy Levykin
  */
 public interface FormDataCacheDao {
-    Map<Long, Map<String, RefBookValue>> getRefBookMap(Long formDataId);
+    Map<String, Map<String, RefBookValue>> getRefBookMap(Long formDataId);
 }

@@ -32,7 +32,6 @@ public class ReportController {
     @Autowired
     private ReportService reportService;
 
-
     @Autowired
     private IfrsDataService ifrsDataService;
 

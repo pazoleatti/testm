@@ -24,15 +24,15 @@ import java.util.Map;
 public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDao {
 
     private static final String REF_BOOK_VALUE_FOR_FORM_DATA = "select v.record_id, v.number_value, v.string_value, " +
-            "v.date_value, v.reference_value, a.type, a.precision, a.alias from ref_book_value v, ref_book_attribute a " +
+            "v.date_value, v.reference_value, a.type, a.precision, a.alias, a.ref_book_id from ref_book_value v, ref_book_attribute a " +
             "where record_id in (select distinct nvalue from data_cell where row_id in (select id from data_row " +
             "where form_data_id = ? and type = 0) and column_id in (select id from form_column where form_template_id = " +
             "(select form_template_id from form_data where id = ?) and type = 'R')) and a.id = v.attribute_id";
 
-    private class RefBookCacheMapper implements RowMapper<Pair<Long, Pair<String, RefBookValue>>> {
+    private class RefBookCacheMapper implements RowMapper<Pair<String, Pair<String, RefBookValue>>> {
 
         @Override
-        public Pair<Long, Pair<String, RefBookValue>> mapRow(ResultSet rs, int rowNum) throws SQLException {
+        public Pair<String, Pair<String, RefBookValue>> mapRow(ResultSet rs, int rowNum) throws SQLException {
 
             RefBookAttributeType type = null;
             Object value = null;
@@ -61,19 +61,20 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
 
             RefBookValue rbValue = new RefBookValue(type, value);
 
-            return new Pair<Long, Pair<String, RefBookValue>>(SqlUtils.getLong(rs,"record_id"), new Pair<String, RefBookValue>(rs.getString("alias"), rbValue));
+            String key = SqlUtils.getLong(rs,"ref_book_id") + "_" + SqlUtils.getLong(rs,"record_id");
+            return new Pair<String, Pair<String, RefBookValue>>(key, new Pair<String, RefBookValue>(rs.getString("alias"), rbValue));
         }
     }
 
     @Override
-    public Map<Long, Map<String, RefBookValue>> getRefBookMap(Long formDataId) {
-        List<Pair<Long, Pair<String, RefBookValue>>> valuesList = getJdbcTemplate().query(REF_BOOK_VALUE_FOR_FORM_DATA,
+    public Map<String, Map<String, RefBookValue>> getRefBookMap(Long formDataId) {
+        List<Pair<String, Pair<String, RefBookValue>>> valuesList = getJdbcTemplate().query(REF_BOOK_VALUE_FOR_FORM_DATA,
                 new Long[]{formDataId, formDataId}, new int[]{Types.NUMERIC, Types.NUMERIC},
                 new RefBookCacheMapper());
 
-        Map<Long, Map<String, RefBookValue>> retVal = new HashMap<Long, Map<String, RefBookValue>>();
+        Map<String, Map<String, RefBookValue>> retVal = new HashMap<String, Map<String, RefBookValue>>();
 
-        for (Pair<Long, Pair<String, RefBookValue>> pair : valuesList) {
+        for (Pair<String, Pair<String, RefBookValue>> pair : valuesList) {
             if (retVal.containsKey(pair.getFirst())) {
                 retVal.get(pair.getFirst()).put(pair.getSecond().getFirst(), pair.getSecond().getSecond());
             } else {

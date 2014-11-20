@@ -387,10 +387,7 @@ def getProvider(def long providerId) {
  * @return
  */
 def getRefBookValue(def long refBookId, def long recordId) {
-    if (!refBookCache.containsKey(recordId)) {
-        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
-    }
-    return refBookCache.get(recordId)
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 def getOkato(def id) {
