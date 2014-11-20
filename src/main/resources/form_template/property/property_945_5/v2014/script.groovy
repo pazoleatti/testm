@@ -1090,8 +1090,7 @@ def getRowBenefitCodes(def row) {
             "and REGION_ID = $subjectId " +
             "and PARAM_DESTINATION = $paramDestination"
     if (hasCategory) {
-        def category = row.title
-        filter = filter + " and ASSETS_CATEGORY = '$category'"
+        filter = filter + " and LOWER(ASSETS_CATEGORY) = LOWER('${row.title}')"
     }
     def provider = formDataService.getRefBookProvider(refBookFactory, 203, providerCache)
     def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
@@ -1099,7 +1098,8 @@ def getRowBenefitCodes(def row) {
         // если записей нет, то ошибка
         def subject = getRefBookValue(4, subjectId)?.CODE?.value
         def refBookName = getRefBookName(200L)
-        throw new Exception("Для кода субъекта $subject не предусмотрена налоговая льгота без категории " +
+        def categoryMessage = hasCategory ? "с категорией «${row.title}» " : "без категории "
+        throw new Exception("Для кода субъекта $subject не предусмотрена налоговая льгота " + categoryMessage +
                 "(в справочнике «$refBookName» отсутствует необходимая запись)!")
     }
 

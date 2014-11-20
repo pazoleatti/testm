@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
-import com.aplana.gwt.client.*;
 import com.aplana.gwt.client.TextBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Formats;
@@ -531,6 +530,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	void cancelButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCancelClicked();
+            for (Map.Entry<RefBookColumn, HasValue> widget : widgets.entrySet()){
+                ((Widget)widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
+                        .getStyle().setBackgroundColor("");
+            }
 		}
     }
 }
