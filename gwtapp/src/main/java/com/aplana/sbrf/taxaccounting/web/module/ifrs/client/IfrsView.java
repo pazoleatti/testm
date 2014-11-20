@@ -6,30 +6,44 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
 
 /**
  * Created by lhaziev on 22.10.2014.
  */
 public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements IfrsPresenter.MyView {
 
+    private static final String TABLE_ROW_ID_PREFIX = "tableRP";
     private SingleSelectionModel<IfrsRow> selectionModel;
 
     interface Binder extends UiBinder<Widget, IfrsView> {
@@ -42,13 +56,20 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     Button search;
 
     @UiField
-    LinkButton create, calculate;
+    LinkButton create;
 
     @UiField
     FlexiblePager pager;
 
     @UiField
     GenericDataGrid<IfrsRow> table;
+
+    @UiField
+    HTMLPanel htmlPanel;
+
+    private HandlerRegistration handlerRegistration;
+
+    private Map<Integer, Anchor> mapAnchor;
 
     private Timer timer;
     private List<IfrsRow> records;
@@ -74,9 +95,9 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     }
 
     private void setupTables() {
+        mapAnchor =  new HashMap<Integer, Anchor>();
         selectionModel = new SingleSelectionModel<IfrsRow>();
         table.setSelectionModel(selectionModel);
-
         TextColumn<IfrsRow> yearColumn = new TextColumn<IfrsRow>() {
             @Override
             public String getValue(IfrsRow object) {
@@ -89,10 +110,15 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
                 return object.getPeriodName();
             }
         };
-        TextColumn<IfrsRow> statusColumn = new TextColumn<IfrsRow>() {
+        Column<IfrsRow, IfrsRow> statusColumn = new Column<IfrsRow, IfrsRow>(new AbstractCell<IfrsRow>() {
             @Override
-            public String getValue(IfrsRow object) {
-                return object.getStatus().getName();
+            public void render(Context context, IfrsRow value, SafeHtmlBuilder sb) {
+                sb.appendHtmlConstant("<span id='" + TABLE_ROW_ID_PREFIX + value.getReportPeriodId() + "'></span>");
+            }
+        }) {
+            @Override
+            public IfrsRow getValue(IfrsRow object) {
+                return object;
             }
         };
 
@@ -109,14 +135,48 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
 
         table.setPageSize(pager.getPageSize());
         pager.setDisplay(table);
+
+        //добавляем ссылки, нажатие на которые можно отловить
+        table.addHandler(new ValueChangeHandler<IfrsRow>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<IfrsRow> event) {
+                addAnchor(((List<IfrsRow>) event.getValue()));
+            }
+        }, ValueChangeEvent.getType());
     }
 
     @Override
     public void setIfrsTableData(int start, int totalCount, List<IfrsRow> records) {
         this.records = records;
         selectionModel.clear();
+        mapAnchor.clear();
+        for(IfrsRow ifrsRow: records) {
+            Anchor anchor = new Anchor();
+            anchor.getElement().setId(TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
+            anchor.setText(ifrsRow.getStatus().getName());
+            anchor.setHref("javascript:void(0)");
+            anchor.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    timer.run();
+                    Element element = event.getRelativeElement();
+                    Integer id = new Integer(element.getId().replaceFirst(TABLE_ROW_ID_PREFIX, ""));
+                    getUiHandlers().onClickCalc(id);
+                }
+            });
+            mapAnchor.put(ifrsRow.getReportPeriodId(), anchor);
+        }
         table.setRowCount(totalCount);
         table.setRowData(start, records);
+    }
+
+    private void addAnchor(List<IfrsRow> ifrsRows) {
+        ifrsRows.size();
+        for(IfrsRow ifrsRow: ifrsRows) {
+            Anchor anchor = mapAnchor.get(ifrsRow.getReportPeriodId());
+            anchor.setText(ifrsRow.getStatus().getName());
+            htmlPanel.addAndReplaceElement(anchor, TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
+        }
     }
 
     @Override
@@ -184,11 +244,4 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     public void onCreateClick(ClickEvent event) {
         getUiHandlers().onClickCreate();
     }
-
-
-    @UiHandler("calculate")
-    public void onCalcClick(ClickEvent event) {
-        getUiHandlers().onCalc();
-    }
-
 }

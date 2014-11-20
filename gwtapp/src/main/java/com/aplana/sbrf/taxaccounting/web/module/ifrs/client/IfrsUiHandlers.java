@@ -11,6 +11,6 @@ import java.util.List;
 public interface IfrsUiHandlers extends UiHandlers {
     void reloadTable();
     void onClickCreate();
-    void onCalc();
+    void onClickCalc(Integer id);
     void updateStatus(List<IfrsRow> records);
 }

@@ -15,7 +15,6 @@ import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.create.CreateIfrsDat
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.model.IfrsRow;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -124,10 +123,8 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
         });
     }
 
-
     @Override
-    public void onCalc() {
-        final Integer reportPeriodId = getView().getReportPeriodId();
+    public void onClickCalc(final Integer reportPeriodId) {
         if (reportPeriodId != null) {
             CalculateIfrsDataAction action = new CalculateIfrsDataAction();
             action.setReportPeriodId(reportPeriodId);
