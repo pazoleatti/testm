@@ -139,14 +139,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         // Откат при возникновении фатальных ошибок в скрипте
         if (scriptLogger.containsLevel(LogLevel.ERROR)) {
-            String firstError = null;
-            for (LogEntry logEntry : logger.getEntries()) {
-                if (logEntry.getLevel() == LogLevel.ERROR) {
-                    firstError = logEntry.getMessage();
-                    break;
-                }
-            }
-            throw new ServiceLoggerException("Произошли ошибки в скрипте. " + firstError, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("Проверка не пройдена (присутствуют фатальные ошибки)", logEntryService.save(logger.getEntries()));
         }
     }
 

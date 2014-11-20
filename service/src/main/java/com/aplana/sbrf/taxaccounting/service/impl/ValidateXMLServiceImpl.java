@@ -111,6 +111,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             SAXHandler handler = new SAXHandler();
             factory.newSAXParser().parse(inputSource, handler);
             params[3] = handler.fileName;
+            log.info("File name: " + handler.fileName);
 
             Process process = (new ProcessBuilder(params)).start();
             reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
