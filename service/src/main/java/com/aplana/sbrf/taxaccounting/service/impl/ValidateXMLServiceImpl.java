@@ -55,12 +55,8 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             if (qName.equals(TAG_FILE)){
-                for (int i=0;i<attributes.getLength();i++){
-                    if (attributes.getLocalName(i).equals(ATTR_FILE_ID)){
-                        fileName = attributes.getValue(i);
-                        return;
-                    }
-                }
+                fileName = attributes.getValue(ATTR_FILE_ID);
+                return;
             }
         }
     }
@@ -111,6 +107,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             SAXHandler handler = new SAXHandler();
             factory.newSAXParser().parse(inputSource, handler);
             params[3] = handler.fileName;
+            log.info("File name: " + handler.fileName);
 
             Process process = (new ProcessBuilder(params)).start();
             reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,9 +59,9 @@ public class UploadDataRowsHandler extends
         //Пытаемся установить блокировку на операцию импорта в текущую нф
         LockData lockData = lockDataService.lock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual(),
                 userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        Logger logger = new Logger();
         if (lockData == null) {
             try {
-                Logger logger = new Logger();
                 FormData formData = action.getFormData();
 
                 dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
@@ -78,7 +79,7 @@ public class UploadDataRowsHandler extends
                 try {
                     lockDataService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual(), userInfo.getUser().getId());
                 } catch (Exception e2) {}
-                throw new ActionException("Не удалось выполнить операцию импорта данных в налоговую форму", e);
+                throw new ServiceLoggerException("Не удалось выполнить операцию импорта данных в налоговую форму", logEntryService.save(logger.getEntries()));
             }
         } else {
             throw new ActionException("Операция импорта данных в текущую налоговую форму уже выполняется другим пользователем!");
