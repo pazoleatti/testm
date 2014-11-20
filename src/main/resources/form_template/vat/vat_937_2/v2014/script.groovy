@@ -213,7 +213,8 @@ void logicCheck() {
     }
     // 9. «Графа N» строки 6 = Графа N строки 4 - Графа N строки 5, где N = 2, 3, 4, 5, 6, 7, 8, 9, 10 или 11
     calcColumns.each {
-        if (totalB[it] != totalPeriod[it] - totalAnnul[it] + totalFix[it]) {
+        if (totalPeriod[it] != null && totalAnnul[it] != null && totalFix[it] != null &&
+                totalB[it] != totalPeriod[it] - totalAnnul[it] + totalFix[it]) {
             logger.error("Строка ${totalB.getIndex()}: " + "Итоговые значения рассчитаны неверно в графе «${getColumnName(totalB, it)}»!")
         }
     }
