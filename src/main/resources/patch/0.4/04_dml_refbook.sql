@@ -209,6 +209,9 @@ UPDATE ref_book_attribute SET is_unique=1 WHERE id = 414;
 UPDATE ref_book_attribute SET is_unique=1 WHERE id = 415;
 UPDATE ref_book_attribute SET is_unique=1 WHERE id = 418;
 UPDATE ref_book_attribute SET is_unique=1 WHERE id = 417;
+
+-- http://jira.aplana.com/browse/SBRFACCTAX-9575: Требования к уникальности справочника "Параметры налоговых льгот налога на имущество"
+update ref_book_attribute set is_unique = 1 where id in (2031, 2032, 2030, 2033, 2034, 2035, 2036, 2037);
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-8906: Справочник "Параметры подразделений по налогу на имущество",
 -- включая изменения http://jira.aplana.com/browse/SBRFACCTAX-9038 
