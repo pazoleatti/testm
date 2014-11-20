@@ -188,7 +188,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
                                 getView().fillInputFields(result.getRecord());
-                                if (result.getRecord().containsKey("TYPE")) {
+                                if (isDepartments && result.getRecord().containsKey("TYPE")) {
                                     RefBookValueSerializable v = result.getRecord().get("TYPE");
                                     if (v.getAttributeType() == RefBookAttributeType.REFERENCE) {
                                         depType = v.getReferenceValue();
@@ -321,7 +321,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                         if (!result.isCheckRegion()) {
-                                            String title = "Редактирование записи справочника";
+                                            String title = "Создание записи справочника";
                                             String msg = "Отсутствуют права доступа на редактирование записи для указанного региона!";
                                             Dialog.errorMessage(title, msg);
                                             return;
@@ -377,7 +377,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onCancelClicked() {
         if (isFormModified) {
-            Dialog.confirmMessage("Редактирование версии", "Сохранить изменения?", new DialogHandler() {
+            Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);
