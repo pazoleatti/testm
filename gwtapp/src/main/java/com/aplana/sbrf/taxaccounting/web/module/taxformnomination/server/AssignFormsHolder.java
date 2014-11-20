@@ -54,7 +54,7 @@ public class AssignFormsHolder extends AbstractActionHandler<AssignFormsAction, 
                     // сообщение в лог
                     Department department = departmentService.getDepartment(departmentId);
                     FormType formType = formTypeService.get(formTypeId.intValue());
-                    logger.warn("Для "+department.getName()+" уже существует назначение "+action.getFormDataKind().getName()+" - "+formType.getName());
+                    logger.warn("Для \""+department.getName()+"\" уже существует назначение \""+action.getFormDataKind().getName()+"\" - \""+formType.getName() + "\"");
                 } else {
                     // сохранение
                     departmentFormTypeService.saveDFT(departmentId.longValue(), formTypeId.intValue(), action.getFormDataKind().getId(), action.getPerformer());

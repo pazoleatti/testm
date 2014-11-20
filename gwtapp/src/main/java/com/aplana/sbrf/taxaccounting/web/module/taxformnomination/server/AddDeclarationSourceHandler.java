@@ -48,8 +48,8 @@ public class AddDeclarationSourceHandler extends AbstractActionHandler<AddDeclar
 				for (DepartmentDeclarationType ddt : departmentFormTypeService.getDDTByDepartment(depId.intValue(), action.getTaxType(), new Date(), new Date())) {
 					if (ddt.getDeclarationTypeId() == dt) {
 						canAssign = false;
-						logs.add(new LogEntry(LogLevel.WARNING, "Для " + departmentService.getDepartment(depId).getName() +
-								" уже существует назначение " + declarationTypeService.get(ddt.getDeclarationTypeId()).getName()));
+						logs.add(new LogEntry(LogLevel.WARNING, "Для \"" + departmentService.getDepartment(depId).getName() +
+								"\" уже существует назначение \"" + declarationTypeService.get(ddt.getDeclarationTypeId()).getName() + "\""));
 					}
 				}
 				if (canAssign) {

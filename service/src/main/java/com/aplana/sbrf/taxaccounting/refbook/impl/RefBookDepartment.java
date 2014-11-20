@@ -768,7 +768,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<DepartmentFormType> departmentFormTypes = sourceService.getDFTByDepartment(department.getId(), null, null, null);
         for (DepartmentFormType dft : departmentFormTypes){
             FormType formType =  formTypeService.get(dft.getFormTypeId());
-            logger.warn(String.format("Существует назначение формы %s типа %s подразделению %s!",
+            logger.warn(String.format("Существует назначение формы \"%s\" типа \"%s\" подразделению \"%s\"!",
                     formType.getName(), dft.getKind().getName(), department.getName())
             );
         }
@@ -777,14 +777,14 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDDTByDepartment(department.getId(), null, null, null);
         for (DepartmentDeclarationType ddt : departmentDeclarationTypes){
             DeclarationType declarationType = declarationTypeService.get(ddt.getDeclarationTypeId());
-            logger.warn(String.format("Существует назначение декларации %s подразделению %s!",
+            logger.warn(String.format("Существует назначение декларации \"%s\" подразделению \"%s\"!",
                     declarationType.getName(), department.getName()));
         }
 
         //6 точка запроса(Связь "назначение макета НФ подразделению - исполнитель")
         List<DepartmentFormType> dftList = departmentFormTypeService.getByPerformerId(department.getId());
         for (DepartmentFormType type : dftList) {
-            logger.warn(String.format("Существует назначение подразделения %s в качестве исполнителя для формы %s типа %s в подразделении %s",
+            logger.warn(String.format("Существует назначение подразделения \"%s\" в качестве исполнителя для формы \"%s\" типа \"%s\" в подразделении \"%s\"",
                     department.getName(),
                     formTypeService.get(type.getFormTypeId()).getName(),
                     type.getKind().getName(),
