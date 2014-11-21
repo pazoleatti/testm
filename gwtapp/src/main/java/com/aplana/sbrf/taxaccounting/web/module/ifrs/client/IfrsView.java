@@ -13,7 +13,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -21,12 +20,9 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.gwt.view.client.Range;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.*;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -36,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
+
 
 /**
  * Created by lhaziev on 22.10.2014.
@@ -44,6 +40,7 @@ import static com.google.gwt.view.client.DefaultSelectionEventManager.createCust
 public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements IfrsPresenter.MyView {
 
     private static final String TABLE_ROW_ID_PREFIX = "tableRP";
+
     private SingleSelectionModel<IfrsRow> selectionModel;
 
     interface Binder extends UiBinder<Widget, IfrsView> {
@@ -67,9 +64,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     @UiField
     HTMLPanel htmlPanel;
 
-    private HandlerRegistration handlerRegistration;
-
-    private Map<Integer, Anchor> mapAnchor;
+    private Map<Integer, LinkButton> mapLinkButton;
 
     private Timer timer;
     private List<IfrsRow> records;
@@ -95,7 +90,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     }
 
     private void setupTables() {
-        mapAnchor =  new HashMap<Integer, Anchor>();
+        mapLinkButton =  new HashMap<Integer, LinkButton>();
         selectionModel = new SingleSelectionModel<IfrsRow>();
         table.setSelectionModel(selectionModel);
         TextColumn<IfrsRow> yearColumn = new TextColumn<IfrsRow>() {
@@ -113,7 +108,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
         Column<IfrsRow, IfrsRow> statusColumn = new Column<IfrsRow, IfrsRow>(new AbstractCell<IfrsRow>() {
             @Override
             public void render(Context context, IfrsRow value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span id='" + TABLE_ROW_ID_PREFIX + value.getReportPeriodId() + "'></span>");
+                sb.appendHtmlConstant(mapLinkButton.get(value.getReportPeriodId()).getElement().toString());
             }
         }) {
             @Override
@@ -145,38 +140,37 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
         }, ValueChangeEvent.getType());
     }
 
+    private void addAnchor(List<IfrsRow> ifrsRows) {
+        for(IfrsRow ifrsRow: ifrsRows) {
+            LinkButton linkButton = mapLinkButton.get(ifrsRow.getReportPeriodId());
+            htmlPanel.addAndReplaceElement(linkButton, TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
+        }
+    }
+
     @Override
     public void setIfrsTableData(int start, int totalCount, List<IfrsRow> records) {
         this.records = records;
         selectionModel.clear();
-        mapAnchor.clear();
+        mapLinkButton.clear();
         for(IfrsRow ifrsRow: records) {
-            Anchor anchor = new Anchor();
-            anchor.getElement().setId(TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
-            anchor.setText(ifrsRow.getStatus().getName());
-            anchor.setHref("javascript:void(0)");
-            anchor.addClickHandler(new ClickHandler() {
+            LinkButton linkButton = new LinkButton();
+            linkButton.getElement().setId(TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
+            linkButton.setDisableImage(true);
+            linkButton.setText(ifrsRow.getStatus().getName());
+            linkButton.getElement().getStyle().setDisplay(Style.Display.INLINE);
+            linkButton.getElement().getFirstChildElement().getStyle().setDisplay(Style.Display.INLINE);
+            linkButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    timer.run();
                     Element element = event.getRelativeElement();
                     Integer id = new Integer(element.getId().replaceFirst(TABLE_ROW_ID_PREFIX, ""));
                     getUiHandlers().onClickCalc(id);
                 }
             });
-            mapAnchor.put(ifrsRow.getReportPeriodId(), anchor);
+            mapLinkButton.put(ifrsRow.getReportPeriodId(), linkButton);
         }
         table.setRowCount(totalCount);
         table.setRowData(start, records);
-    }
-
-    private void addAnchor(List<IfrsRow> ifrsRows) {
-        ifrsRows.size();
-        for(IfrsRow ifrsRow: ifrsRows) {
-            Anchor anchor = mapAnchor.get(ifrsRow.getReportPeriodId());
-            anchor.setText(ifrsRow.getStatus().getName());
-            htmlPanel.addAndReplaceElement(anchor, TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
-        }
     }
 
     @Override
@@ -230,6 +224,9 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
             IfrsRow.StatusIfrs status = statusMap.get(record.getReportPeriodId());
             if (status != null) {
                 record.setStatus(status);
+                LinkButton linkButton = mapLinkButton.get(record.getReportPeriodId());
+                linkButton.setText(status.getName());
+                linkButton.getElement().getFirstChildElement().getStyle().setDisplay(Style.Display.INLINE);
             }
         }
         table.redraw();
