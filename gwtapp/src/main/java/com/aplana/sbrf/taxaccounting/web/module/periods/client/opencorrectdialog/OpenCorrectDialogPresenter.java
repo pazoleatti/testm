@@ -146,6 +146,9 @@ public class OpenCorrectDialogPresenter extends PresenterWidget<OpenCorrectDialo
                             @Override
                             public void onSuccess(CheckCorrectionPeriodStatusResult result) {
                                 switch (result.getStatus()) {
+                                    case CLOSE_AND_BALANCE:
+                                        Dialog.errorMessage("Корректирование периода", "Корректирующий период не может быть открыт для периода ввода остатков!");
+                                        break;
                                     case NOT_EXIST:
                                         openCorrectionPeriod();
                                         break;

@@ -784,6 +784,8 @@ public class PeriodServiceImpl implements PeriodService {
             throw new ServiceException("Найдено больше одного периода корректировки с заданной датой корректировки.");
         } else if (onePeriod.size() == 1 && onePeriod.get(0).isActive()){
             return PeriodStatusBeforeOpen.CORRECTION_PERIOD_NOT_CLOSE;
+        } else if (!onePeriod.get(0).isActive() && onePeriod.get(0).isBalance()) {
+            return PeriodStatusBeforeOpen.CLOSE_AND_BALANCE;
         }
 
         return PeriodStatusBeforeOpen.NOT_EXIST;
