@@ -1587,13 +1587,16 @@ def getPreRow(def srcRow, def formTypeId, def typeMap, def classMap) {
 // Проставляет статические строки
 void addAllStatic(def dataRows) {
     def temp = []
-    if (logger.containsLevel(LogLevel.ERROR))  {
+    if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
+    def prevOrganName = null
+    def boolean firstRow = true
     for (int i = 0; i < dataRows.size(); i++) {
         def row = dataRows.get(i)
-        def nextRow = (i < dataRows.size() - 1) ? dataRows.get(i + 1) : null
-        if (nextRow == null || row.organName != nextRow.organName) {
+        if (firstRow || row.organName != prevOrganName) {
+            firstRow = false
+            prevOrganName = row.organName
             def newRow = formData.createDataRow()
             newRow.getCell('groupName').colSpan = 56
             if (row.organName != null) {
