@@ -75,8 +75,8 @@ void save() {
             def Number reductionSum = it.REDUCTION_SUM?.numberValue
             def Number reductionPct = it.REDUCTION_PCT?.numberValue
             if (reductionSum == null && reductionPct == null) {
-                logger.error("Для налоговой льготы «${tax}» обязателено к заполнению " +
-                        "«Уменьшение суммы исчисленного налога, руб.» или «Уменьшение суммы исчисленного налога, %»!")
+                logger.error("Для налоговой льготы «${tax}» обязателен к заполнению один из атрибутов " +
+                        "«Уменьшение суммы исчисленного налога, руб.» или «Уменьшение суммы исчисленного налога, %%»!")
             }
         }
 
