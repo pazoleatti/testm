@@ -202,7 +202,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 	@Override
 	public void onSaveClicked(boolean isEditButtonClicked) {
-        String title = (currentUniqueRecordId != null ? "Версия не сохранена" : "Версия не создана");
+        final String title = (currentUniqueRecordId != null ? "Версия не сохранена" : "Версия не создана");
 		try {
             LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
@@ -236,7 +236,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 final RecordChanges recordChanges = fillRecordChanges(recordId, map, action.getVersionFrom(), action.getVersionTo());
 
                 dispatchAsync.execute(action,
-                        CallbackUtils.defaultCallback(
+                        CallbackUtils.defaultCallbackNoModalError(
                                 new AbstractCallback<AddRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(AddRefBookRowVersionResult result) {
@@ -261,6 +261,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                         SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
 
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
                                     }
                                 }, this));
 			} else {
@@ -294,7 +299,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 renameDialogPresenter.getView().cleanDates();
 
                                 dispatchAsync.execute(action,
-                                        CallbackUtils.defaultCallback(
+                                        CallbackUtils.defaultCallbackNoModalError(
                                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                                     @Override
                                                     public void onSuccess(SaveRefBookRowVersionResult result) {
@@ -308,6 +313,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                                         }
                                                     }
+
+                                                    @Override
+                                                    public void onFailure(Throwable caught) {
+                                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
+                                                    }
                                                 }, EditFormPresenter.this));
                             }
                         });
@@ -316,7 +326,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 }
 
                 dispatchAsync.execute(action,
-                        CallbackUtils.defaultCallback(
+                        CallbackUtils.defaultCallbackNoModalError(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
@@ -335,6 +345,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                             setIsFormModified(false);
                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                         }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
                                     }
                                 }, this));
 			}
