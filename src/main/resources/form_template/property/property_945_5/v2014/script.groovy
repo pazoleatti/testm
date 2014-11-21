@@ -299,12 +299,12 @@ void logicCheck() {
 
         // 1. Обязательность заполнения полей
         def columns = nonEmptyColumnsMap[periodOrder]
-        checkNonEmptyColumns(row, index, columns, logger, true)
+        checkNonEmptyColumns(row, index, columns - first5Columns, logger, true)// TODO исправить в ScriptUtils на getOwnerValue
 
         // 2. Проверка на не заполнение поля
         columns = allColumns - columns
         columns.each { alias ->
-            if (row.getCell(alias).value) {
+            if (getOwnerValue(row, alias)) {
                 String msg = String.format(errorMsg + "В текущем периоде формы графа «%s» должна быть не заполнена!", getColumnName(row, alias))
                 logger.error(msg)
             }
@@ -344,6 +344,7 @@ void logicCheck() {
     newDataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
+    newGroupsMap = getGroupsMap(newDataRows)//TODO упростить
 
     // 4. Проверка корректности разбития пользователем сумм по группам строк с одинаковым значением параметров «Код субъекта», «Код ОКТМО» (для строки вида «Признаваемых объектом налогообложения»)
     // По каждой группе строк с одинаковым значением Граф 1, 4:
@@ -372,8 +373,8 @@ void logicCheck() {
                 }
                 def title = row.title
                 if (!list.isEmpty()) {
-                    def subject = getRefBookValue(4, row.subject)?.CODE?.value
-                    def oktmo = getRefBookValue(96, row.oktmo)?.CODE?.value
+                    def subject = getRefBookValue(4, getOwnerValue(row, 'subject'))?.CODE?.value
+                    def oktmo = getRefBookValue(96, getOwnerValue(row, 'oktmo'))?.CODE?.value
                     def msgColumnNames = list.join(', ')
                     logger.error("По группам строк с параметрами декларации «Код субъекта» = $subject, «Код ОКТМО» = $oktmo: " +
                             "остаточная стоимость основных средств" +
@@ -979,8 +980,14 @@ void addPrevData(def dataRows) {
         // найти строки группы из предыдущего года
         def prevGroupRows = []
         for (def prevRow : prevRows) {
-            if (prevRow.subject == row.subject && prevRow.taxAuthority == row.taxAuthority &&
-                    prevRow.kpp == row.kpp && prevRow.oktmo == row.oktmo) {
+            def addFlag = true
+            for (def alias : groupColumns) {
+                if (getOwnerValue(prevRow, alias) != getOwnerValue(row, alias)) {
+                    addFlag = false
+                    break
+                }
+            }
+            if (addFlag) {
                 prevGroupRows.add(prevRow)
             }
         }
@@ -1083,7 +1090,7 @@ def getRowBenefitCodes(def row) {
 
     // получение данных их справочника 203 "Параметры налоговых льгот налога на имущество"
     def regionId = formDataDepartment.regionId
-    def subjectId = row.subject
+    def subjectId = getOwnerValue(row, 'subject')
     def paramDestination = (hasCategory ? 1 : 0)
 
     def filter = "DECLARATION_REGION_ID = $regionId " +
@@ -1131,17 +1138,17 @@ def getNewGroupsMap(def groupsMap, def tmpGroupsMap) {
         def row = groupsMap[key][0]
         if (tmpGroupRows) {
             // ключ (Код субъекта, Код ОКТМО)
-            def subjectAndOktmoKey = row.subject + SEPARATOR + row.oktmo
+            def subjectAndOktmoKey = getOwnerValue(row,'subject') + SEPARATOR + getOwnerValue(row,'oktmo')
             if (!checkGroupsMap[subjectAndOktmoKey]) {
                 checkGroupsMap[subjectAndOktmoKey] = []
             }
             checkGroupsMap[subjectAndOktmoKey].add(tmpGroupRows)
         } else {
             // среди временных обновленных строк нет такой группы - удалить ее (пропустить)
-            def subject = getRefBookValue(4L, row.subject)?.CODE?.value
-            def taxAuthority = row.taxAuthority
-            def kpp = row.kpp
-            def oktmo = getRefBookValue(96L, row.oktmo)?.CODE?.value
+            def subject = getRefBookValue(4L, getOwnerValue(row,'subject'))?.CODE?.value
+            def taxAuthority = getOwnerValue(row,'taxAuthority')
+            def kpp = getOwnerValue(row,'kpp')
+            def oktmo = getRefBookValue(96L, getOwnerValue(row,'oktmo'))?.CODE?.value
             logger.info("Удалена группа строк по параметрам декларации «Код субъекта» = $subject, " +
                     "«Код НО» = $taxAuthority, «КПП» = $kpp, «Код ОКТМО» = $oktmo")
         }
@@ -1199,9 +1206,9 @@ def getNewGroupsMap(def groupsMap, def tmpGroupsMap) {
 
 /** Получить ключ группы (Код субъекта, Код НО, КПП, Код ОКТМО). */
 def getGroupKey(def row) {
-    def subject = getRefBookValue(4L, row.subject)?.CODE?.value
-    def oktmo = getRefBookValue(96L, row.oktmo)?.CODE?.value
-    return subject + SEPARATOR + row.taxAuthority + SEPARATOR + row.kpp + SEPARATOR + oktmo
+    def subject = getRefBookValue(4L, getOwnerValue(row, 'subject'))?.CODE?.value
+    def oktmo = getRefBookValue(96L, getOwnerValue(row, 'oktmo'))?.CODE?.value
+    return subject + SEPARATOR + getOwnerValue(row, 'taxAuthority') + SEPARATOR + getOwnerValue(row, 'kpp') + SEPARATOR + oktmo
 }
 
 /**
