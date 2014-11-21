@@ -128,7 +128,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
         table.addResizableColumn(periodNameColumn, "Период");
         table.setColumnWidth(periodNameColumn, 5.5, Style.Unit.EM);
 
-        table.addResizableColumn(statusColumn, "Состояние архива");
+        table.addResizableColumn(statusColumn, "Архив");
         table.setColumnWidth(statusColumn, 40, Style.Unit.EM);
 
         table.redrawHeaders();
