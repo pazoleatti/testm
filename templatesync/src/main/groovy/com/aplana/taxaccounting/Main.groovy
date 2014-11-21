@@ -61,6 +61,7 @@ class Main {
                         .td_error {
                            color: #FF0000;
                            cursor: pointer;
+                           background-color: #FFFF7F;
                         }
                         .td_gr {
                             cursor: pointer;
