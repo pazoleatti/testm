@@ -10,7 +10,7 @@ import groovy.transform.Field
 
 /**
  * "(945.5) Сводная форма данных бухгалтерского учета для расчета налога на имущество".
- * formTemplateId=10640
+ * formTemplateId=615
  *
  * @author Ramil Timerbaev
  */
@@ -19,7 +19,7 @@ import groovy.transform.Field
 // графа 2  - taxAuthority
 // графа 3  - kpp
 // графа 4  - oktmo             - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
-// графа    - title             // TODO (Ramil Timerbaev) возможно эта графа будет справочной
+// графа    - title
 // графа 5  - cost1
 // графа 6  - cost2
 // графа 7  - cost3
@@ -135,6 +135,9 @@ def columnsFromPrimary945_5 = ['taxBase1', 'taxBase2', 'taxBase3', 'taxBase4', '
 def endDate = null
 
 @Field
+def startDate = null
+
+@Field
 def reportPeriod = null
 
 // Признак периода ввода остатков
@@ -219,11 +222,22 @@ def prevDataRows = null
 @Field
 def infoMessagesRowMap = [:]
 
+// источники 945.1 (важны только подразделения и тип формы)
+@Field
+def formSources945_1 = null
+
 def getReportPeriodEndDate() {
     if (endDate == null) {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
 }
 
 // Разыменование записи справочника
@@ -435,10 +449,13 @@ def checkPrevForm() {
 
     // 1. Проверка наличия форм-источников 945.1 в статусе «Принята»
     def periodsMap = getSourcesPeriodMap()
+    def formSources945_1 = getFormSources()
     periodsMap.each { period, monthOrders ->
         monthOrders.each { monthOrder ->
-            formDataService.checkMonthlyFormExistAndAccepted(sourceFormTypeId, FormDataKind.PRIMARY,
-                    formDataDepartment.id, period.id, monthOrder,false, logger, true)
+            formSources945_1.each { formSource ->
+                formDataService.checkMonthlyFormExistAndAccepted(sourceFormTypeId, formSource.kind,
+                        formSource.departmentId, period.id, monthOrder,false, logger, true)
+            }
         }
     }
 
@@ -888,17 +905,22 @@ def getFormDataSources() {
         // найти все ежемесячные источники за текущий периоде и за первый месяц следующего периода
         def periodsMap = getSourcesPeriodMap()
         periodsMap.each { period, monthOrders ->
+            // получить источники (важны только тип формы и подразделение)
+            def formSources945_1 = getFormSources()
+            // получить данные источников
             monthOrders.each { monthOrder ->
-                FormData source = formDataService.getLast(sourceFormTypeId, FormDataKind.PRIMARY, formDataDepartment.id, period.id, monthOrder)
-                if (source != null && source.getState() == WorkflowState.ACCEPTED) {
-                    def alias = 'cost' + monthOrder
-                    // если форма за январь следующего года, то заполняется графа 17 (cost13)
-                    if (period.taxPeriod.id != getReportPeriod().taxPeriod.id) {
-                        alias = 'cost13'
+                formSources945_1.each { formSource ->
+                    FormData source = formDataService.getLast(sourceFormTypeId, formSource.kind, formSource.departmentId, period.id, monthOrder)
+                    if (source != null && source.getState() == WorkflowState.ACCEPTED) {
+                        def alias = 'cost' + monthOrder
+                        // если форма за январь следующего года, то заполняется графа 17 (cost13)
+                        if (period.taxPeriod.id != getReportPeriod().taxPeriod.id) {
+                            alias = 'cost13'
+                        }
+                        aliasMap[source.id] = alias
+                        periodNameMap[source.id] = Formats.getRussianMonthNameWithTier(monthOrder) + ' ' + period.taxPeriod.year
+                        formDataSources.add(source)
                     }
-                    aliasMap[source.id] = alias
-                    periodNameMap[source.id] = Formats.getRussianMonthNameWithTier(monthOrder) + ' ' + period.taxPeriod.year
-                    formDataSources.add(source)
                 }
             }
         }
@@ -1224,4 +1246,22 @@ def containCategory(def rows, def value) {
         }
     }
     return false
+}
+
+/** Получить источники (важны только тип формы и подразделение). */
+def getFormSources() {
+    if (formSources945_1 == null) {
+        // получить источники (важны только тип формы и подразделение)
+        formSources945_1 = []
+        def formSources = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+                getReportPeriodStartDate(), getReportPeriodEndDate())
+        if (formSources != null && !formSources.isEmpty()) {
+            for (def source : formSources) {
+                if (source.formTypeId == sourceFormTypeId) {
+                    formSources945_1.add(source)
+                }
+            }
+        }
+    }
+    return formSources945_1
 }
