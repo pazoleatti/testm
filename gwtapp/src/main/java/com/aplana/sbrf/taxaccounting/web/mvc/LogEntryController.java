@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import org.apache.commons.io.IOUtils;
@@ -30,6 +32,8 @@ public class LogEntryController {
     @Autowired
     private PrintingService printingService;
     @Autowired
+    private BlobDataService blobDataService;
+    @Autowired
     private LogEntryService logEntryService;
 
     @RequestMapping(value = "/logEntry/{uuid}", method = RequestMethod.GET)
@@ -49,18 +53,13 @@ public class LogEntryController {
             return;
         }
         // Построение отчета
-        String filePath = printingService.generateExcelLogEntry(logEntryList);
+        String fileUuid = printingService.generateExcelLogEntry(logEntryList);
         // Получение файла
-        File file = new File(filePath);
-        InputStream fis = new FileInputStream(file);
+        InputStream fis = blobDataService.get(fileUuid).getInputStream();
         // Выдача файла
-        ServletContext context = req.getSession().getServletContext();
-        String mimeType = context.getMimeType(filePath);
-
         resp.setCharacterEncoding("UTF-8");
-        resp.setContentType(mimeType == null ?
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8" : mimeType);
-        resp.setContentLength((int) file.length());
+        resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
+        //resp.setContentLength((int) file.length());
         resp.setHeader("Content-Disposition", "attachment; filename=\"messages.xlsx\"");
 
         OutputStream out = resp.getOutputStream();

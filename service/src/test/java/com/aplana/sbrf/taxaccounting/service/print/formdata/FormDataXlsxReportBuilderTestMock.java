@@ -234,6 +234,6 @@ public class FormDataXlsxReportBuilderTestMock {
 	@Test
 	public void testReport() throws IOException{
 		FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,true, dataRows, refBookValue);
-        builder.createReport();
+        builder.createBlobData();
 	}
 }

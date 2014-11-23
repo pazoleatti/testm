@@ -41,17 +41,10 @@ public class PrintHandler  extends AbstractActionHandler<PrintAction, PrintResul
 
         PagingResult<TAUserView> usersByFilter = taUserService.getUsersByFilter(printAction.getMembersFilterData());
 
-		String filePath = printingService.generateExcelUsers(usersByFilter);
-		try {
-			InputStream fileInputStream = new FileInputStream(filePath);
-
-			PrintResult result = new PrintResult();
-			result.setUuid(blobDataService.create(fileInputStream, "Список_пользователей.xlsx"));
-			return result;
-		} catch (FileNotFoundException e) {
-			throw new ServiceException("Проблема при генерации списка пользователей." , e);
-		}
-	}
+        PrintResult result = new PrintResult();
+        result.setUuid(printingService.generateExcelUsers(usersByFilter));
+        return result;
+    }
 
 	@Override
 	public void undo(PrintAction printAction, PrintResult printResult, ExecutionContext executionContext) throws ActionException {}

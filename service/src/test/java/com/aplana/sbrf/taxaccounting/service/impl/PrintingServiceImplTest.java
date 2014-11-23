@@ -65,10 +65,4 @@ public class PrintingServiceImplTest {
 
         items.add(item);
     }
-
-    @Test
-    public void generateCsvTest(){
-        File file = new File(printingService.generateAuditCsv(items));
-        file.delete();
-    }
 }
