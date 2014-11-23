@@ -153,6 +153,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
+    public void clearSelected() {
+        refbookDataTree.clearSelected(true);
+    }
+
+    @Override
     public Long getSelectedId() {
         if (refbookDataTree.getSelectedIds().size() > 0) {
             return refbookDataTree.getSelectedIds().iterator().next();
