@@ -191,7 +191,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
     @UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
-        selectionModel.clear();
+        //selectionModel.clear();
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}
