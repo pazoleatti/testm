@@ -182,8 +182,8 @@ public class PeriodServiceImpl implements PeriodService {
                 filter.setIsCorrection(false);
             else
                 filter.setCorrectionDate(drp.getCorrectionDate());
-            List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
             departmentReportPeriodService.updateActive(departmentReportPeriodService.getListIdsByFilter(filter), false);
+            List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
             for (DepartmentReportPeriod item : drpList){
                 if (item.isActive())
                     continue;
