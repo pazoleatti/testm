@@ -108,7 +108,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
         Column<IfrsRow, IfrsRow> statusColumn = new Column<IfrsRow, IfrsRow>(new AbstractCell<IfrsRow>() {
             @Override
             public void render(Context context, IfrsRow value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant(mapLinkButton.get(value.getReportPeriodId()).getElement().toString());
+                sb.appendHtmlConstant("<div id=\""+ TABLE_ROW_ID_PREFIX + value.getReportPeriodId() + "\"/>");
             }
         }) {
             @Override

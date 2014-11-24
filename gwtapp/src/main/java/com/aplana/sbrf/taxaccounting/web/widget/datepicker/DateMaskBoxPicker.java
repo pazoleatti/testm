@@ -215,6 +215,7 @@ public class DateMaskBoxPicker extends DoubleStateComposite implements HasEnable
     @Override
     public final void setValue(Date value) {
         this.setValue(value, false);
+        setLabelValue(dateBox.getText());
     }
 
     @Override

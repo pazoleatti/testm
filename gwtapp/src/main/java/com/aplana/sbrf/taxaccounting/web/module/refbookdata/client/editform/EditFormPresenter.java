@@ -5,7 +5,6 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -17,7 +16,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.ConfirmButtonClickHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
@@ -44,7 +42,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     /** Идентификатор справочника */
     private Long currentRefBookId;
     /** Уникальный идентификатор версии записи справочника */
-    Long currentUniqueRecordId, parentUniqueRecordId;
+    Long currentUniqueRecordId, previousURId;
     /** Идентификатор записи справочника без учета версий */
     private Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
@@ -68,10 +66,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
 		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
 
-        void setHierarchy(boolean isHierarchy);
-
-        boolean isHierarchy();
-
 		void fillVersionData(RefBookRecordVersionData versionData, Long currentRefBookId, Long refBookRecordId);
         void setVersionMode(boolean versionMode);
         Date getVersionFrom();
@@ -89,42 +83,21 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     protected final RenameDialogPresenter renameDialogPresenter;
 
-    //TODO: взаимодействие в зависимом виджете д.б. через события, а не через "левое" view
-    private RefBookHierDataPresenter.MyView refBookHierDataPresenterMyView;
-
 	@Inject
 	public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync,
-                             PlaceManager placeManager, RenameDialogPresenter renameDialogPresenter,
-                             RefBookHierDataPresenter.MyView refBookHierDataPresenterMyView) {
+                             PlaceManager placeManager, RenameDialogPresenter renameDialogPresenter) {
 		super(eventBus, view);
 		this.placeManager = placeManager;
 		this.dispatchAsync = dispatchAsync;
         this.renameDialogPresenter = renameDialogPresenter;
-        this.refBookHierDataPresenterMyView = refBookHierDataPresenterMyView;
         getView().setUiHandlers(this);
 	}
 
-	public void init(final Long refbookId, final boolean readOnly) {
+	public void init(final Long refbookId, List<RefBookColumn> columns) {
         isDepartments = refbookId == 30;
-        GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-        action.setRefBookId(refbookId);
         currentRefBookId = refbookId;
-        dispatchAsync.execute(action,
-                CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetRefBookAttributesResult>() {
-                            @Override
-                            public void onSuccess(GetRefBookAttributesResult result) {
-                                getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
-
-                                getView().createInputFields(result.getColumns());
-                                setIsFormModified(false);
-                                if (readOnly) {
-                                    setMode(FormMode.READ);
-                                } else {
-                                    updateMode();
-                                }
-                            }
-                        }, this));
+        getView().createInputFields(columns);
+        setIsFormModified(false);
     }
 
 	public void show(Long refBookRecordId) {
@@ -135,49 +108,55 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
             return;
         }
-        parentUniqueRecordId = parentRefBookRecordId != null?parentRefBookRecordId.getId():null;
         if (isFormModified) {
             Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);
-                    showRecord(refBookRecordId, parentRefBookRecordId);
+                    showRecord(refBookRecordId);
+                    if (refBookRecordId == null && parentRefBookRecordId != null){
+                        RefBookValueSerializable refBookParent = new RefBookValueSerializable();
+                        refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
+                        refBookParent.setDereferenceValue(parentRefBookRecordId.getDereferenceValue());
+                        refBookParent.setReferenceValue(parentRefBookRecordId.getId());
+                        HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
+                        field.put("PARENT_ID", refBookParent);
+                        getView().fillInputFields(field);
+                    }
                 }
             });
         } else {
-            showRecord(refBookRecordId, parentRefBookRecordId);
-        }
-    }
-
-	private void showRecord(Long refBookRecordId) {
-        showRecord(refBookRecordId, null);
-	}
-
-    private void showRecord(final Long refBookRecordId, RefBookTreeItem parentRefBook) {
-        if (refBookRecordId == null) {
-            currentUniqueRecordId = null;
-            getView().fillInputFields(null);
-            if (parentRefBook != null){
+            showRecord(refBookRecordId);
+            if (refBookRecordId == null && parentRefBookRecordId != null){
                 RefBookValueSerializable refBookParent = new RefBookValueSerializable();
                 refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
-                refBookParent.setDereferenceValue(parentRefBook.getDereferenceValue());
-                refBookParent.setReferenceValue(parentRefBook.getId());
+                refBookParent.setDereferenceValue(parentRefBookRecordId.getDereferenceValue());
+                refBookParent.setReferenceValue(parentRefBookRecordId.getId());
                 HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
                 field.put("PARENT_ID", refBookParent);
                 getView().fillInputFields(field);
             }
-            if (!isVersionMode && mode == FormMode.EDIT) {
+        }
+    }
+
+    private void showRecord(final Long refBookRecordId) {
+        if (refBookRecordId == null) {
+            currentUniqueRecordId = null;
+            getView().fillInputFields(null);
+
+            /*if (!isVersionMode && mode == FormMode.EDIT) {
                 setMode(FormMode.CREATE);
             } else if(!isVersionMode && mode == FormMode.CREATE){
                 setMode(FormMode.EDIT);
             } else {
                 setMode(mode);
-            }
+            } */
             getView().setVersionFrom(null);
             getView().setVersionTo(null);
             getView().updateRefBookPickerPeriod();
             return;
         }
+        previousURId = refBookRecordId;
         GetRefBookRecordAction action = new GetRefBookRecordAction();
         action.setRefBookId(currentRefBookId);
         action.setRefBookRecordId(refBookRecordId);
@@ -195,7 +174,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     }
                                 }
                                 currentUniqueRecordId = refBookRecordId;
-                                updateMode();
+                                //updateMode();
                             }
                         }, this));
     }
@@ -397,20 +376,23 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 public void yes() {
                     setIsFormModified(false);
                     onSaveClicked(false);
+                    showRecord(currentUniqueRecordId);
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
 
                 @Override
                 public void no() {
                     setIsFormModified(false);
-                    showRecord(parentUniqueRecordId != null ? parentUniqueRecordId : currentUniqueRecordId);
+                    showRecord(previousURId);
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
             });
         } else {
             //Показать родительскую запись
-            showRecord(parentUniqueRecordId != null?parentUniqueRecordId:currentUniqueRecordId);
+            setMode(FormMode.EDIT);
+            showRecord(previousURId);
+            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
         }
-
-        refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
     }
 
 	@Override
@@ -458,10 +440,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     @Override
     public void setMode(FormMode mode){
         this.mode = mode;
-        getView().updateMode(mode);
-    }
-
-    private void updateMode() {
         getView().updateMode(mode);
     }
 

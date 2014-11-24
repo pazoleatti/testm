@@ -11,9 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
@@ -41,7 +39,7 @@ import java.util.Date;
  */
 public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter.MyView,
         RefBookHierDataPresenter.MyProxy> implements RefBookHierDataUiHandlers,
-        UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler {
+        UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler{
 
     @ProxyCodeSplit
     @NameToken(RefBookDataTokens.refBookHierData)
@@ -161,6 +159,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onAddRowClicked() {
+        editFormPresenter.setMode(FormMode.CREATE);
         editFormPresenter.show(null, getView().getSelectedItem());
         getView().updateMode(FormMode.CREATE);
     }
@@ -271,12 +270,9 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         /** Очищаем поле поиска если перешли со страницы списка справочников */
         if (!request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
-            if (mode == FormMode.EDIT) mode = FormMode.VIEW;
-            updateMode();
             getView().clearFilterInputBox();
             recordId = null;
         } else {
-            updateMode();
             recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
         }
 
@@ -294,7 +290,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                             }
                         }
                         getView().setAttributeId(attrId);
-                        editFormPresenter.init(refBookDataId, result.isReadOnly());
+                        editFormPresenter.init(refBookDataId, result.getColumns());
                         if (recordId == null) {
                             getView().clearSelected();
                             getView().load();
@@ -305,8 +301,9 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         getProxy().manualReveal(RefBookHierDataPresenter.this);
                         if (result.isReadOnly()){
                             mode = FormMode.READ;
-                            updateMode();
+                            //updateMode();
                         }
+                        updateMode();
                     }
                 }, this));
 

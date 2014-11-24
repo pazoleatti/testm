@@ -9,12 +9,13 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.user.client.ui.CustomScrollPanel;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HeaderPanel;
 
 
 import static com.google.gwt.dom.client.Style.Unit;
 
-public class GenericDataGrid<T> extends DataGrid<T>{
+public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
 
     private DivElement glassElement;
     private boolean enabled;
@@ -78,16 +79,17 @@ public class GenericDataGrid<T> extends DataGrid<T>{
         setColumnWidth(col, width, unit);
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+        getElement().appendChild(glassElement);
         if (enabled) {
             getElement().removeChild(glassElement);
-        } else {
-            getElement().appendChild(glassElement);
         }
     }
 
-    public boolean getEnabled(){
+    @Override
+    public boolean isEnabled(){
         return enabled;
     }
 

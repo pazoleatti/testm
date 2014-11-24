@@ -9,9 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -40,9 +38,9 @@ import java.util.List;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
-		UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler{
+		UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler {
 
-	@ProxyCodeSplit
+    @ProxyCodeSplit
 	@NameToken(RefBookDataTokens.refBookData)
 	public interface MyProxy extends ProxyPlace<RefBookDataPresenter>, Place {
 	}
@@ -137,6 +135,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onAddRowClicked() {
+        getView().updateMode(FormMode.CREATE);
+        editFormPresenter.setMode(FormMode.CREATE);
 		editFormPresenter.show(null);
 	}
 
@@ -164,8 +164,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 if (result.isException()) {
                                     Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!");
                                 }
+                                editFormPresenter.setMode(mode);
 								editFormPresenter.show(null);
-								editFormPresenter.setMode(mode);
 								getView().updateTable();
 							}
 						}, this));
@@ -174,7 +174,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
-            Long recordId = getView().getSelectedRow().getRefBookRowId();
+            recordId = getView().getSelectedRow().getRefBookRowId();
             editFormPresenter.setRecordId(recordId);
             editFormPresenter.show(recordId);
         } else {
@@ -185,8 +185,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onRelevanceDateChanged() {
 		getView().updateTable();
+        editFormPresenter.setMode(mode);
 		editFormPresenter.show(null);
-		editFormPresenter.setMode(mode);
 	}
 
     @Override
@@ -204,17 +204,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         editFormPresenter.setRecordId(null);
 		GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 		refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-        if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
-            recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
-            if (mode == null) {
-                mode = FormMode.VIEW;
-            }
-            setMode(mode);
-        } else {
-            recordId = null;
-            getView().resetSearchInputBox();
-            setMode(FormMode.VIEW);
-        }
+
 		action.setRefBookId(refBookDataId);
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
@@ -224,11 +214,22 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 getView().resetRefBookElements();
 								getView().setTableColumns(result.getColumns());
 								getView().setRange(new Range(0, getView().getPageSize()));
+                                getView().updateSendQuery(result.isSendQuery());
+                                editFormPresenter.init(refBookDataId, result.getColumns());
                                 if (result.isReadOnly()){
                                     setMode(FormMode.READ);
                                 }
-                                getView().updateSendQuery(result.isSendQuery());
-                                editFormPresenter.init(refBookDataId, result.isReadOnly());
+                                if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
+                                    recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+                                    if (mode == null) {
+                                        mode = FormMode.VIEW;
+                                    }
+                                    setMode(mode);
+                                } else {
+                                    recordId = null;
+                                    getView().resetSearchInputBox();
+                                    setMode(FormMode.VIEW);
+                                }
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}
 						}, this));
@@ -245,6 +246,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 						}, this));
         getView().setVersionedFields(!Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId));
         editFormPresenter.setCanVersion(!Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId));
+        versionPresenter.setHierarchy(false);
 	}
 
 	@Override
