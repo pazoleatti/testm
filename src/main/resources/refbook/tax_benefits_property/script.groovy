@@ -139,5 +139,5 @@ def int getRecordsCount(def filter) {
     }
     recordsCountCache.get(refBookId).put(filter, count)
 
-    return records.size()
+    return count
 }

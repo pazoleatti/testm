@@ -387,7 +387,7 @@ def getPrevRowsMap() {
         def List<ReportPeriod> errorPeriods = []
         periodList.each{ period ->
             if (period.order != 4) {
-                def fd = formDataService.getLast(formData.formTypeId, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+                def fd = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (fd != null && fd.state == WorkflowState.ACCEPTED) {
                     prevRowsMap.put(period.order, formDataService.getDataRowHelper(fd).allCached)
                 } else {
@@ -509,39 +509,41 @@ void updateRowFromPrev(def newRow, def row, def prevRowsMap, List<String> benefi
     def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
     def sum = 0
     // если используется "Без категории"/"Категория К"
-    if (! row.title in [TAX_AUTHORITY_APPROVED, BENEFIT_PRICE]) {
-        for (Map.Entry entry : prevRowsMap) {
-            def order = entry.key
-            def dataRows = entry.value
-            def record1 = getBenefitRecordId(row, benefitCodes, '2012000', getRecordDate(periodList, order))
-            def record2 = getBenefitRecordId(row, benefitCodes, '2012400', getRecordDate(periodList, order))
-            def record3 = getBenefitRecordId(row, benefitCodes, '2012500', getRecordDate(periodList, order))
-            def selectedRow = dataRows.find{
-                it.subject == getOwnerValue(row, 'subject') && it.taxAuthority == getOwnerValue(row, 'taxAuthority') &&
-                        it.kpp == getOwnerValue(row, 'kpp') && it.oktmo == getOwnerValue(row, 'oktmo') &&
-                        it.taxBenefitCode == record1 && it.taxBenefitCodeReduction == record2 && it.taxBenefitCodeDecrease == record3
+    if (row != null) {
+        if (! row.title in [TAX_AUTHORITY_APPROVED, BENEFIT_PRICE]) {
+            for (Map.Entry entry : prevRowsMap) {
+                def order = entry.key
+                def dataRows = entry.value
+                def record1 = getBenefitRecordId(row, benefitCodes, '2012000', getRecordDate(periodList, order))
+                def record2 = getBenefitRecordId(row, benefitCodes, '2012400', getRecordDate(periodList, order))
+                def record3 = getBenefitRecordId(row, benefitCodes, '2012500', getRecordDate(periodList, order))
+                def selectedRow = dataRows.find{
+                    it.subject == getOwnerValue(row, 'subject') && it.taxAuthority == getOwnerValue(row, 'taxAuthority') &&
+                            it.kpp == getOwnerValue(row, 'kpp') && it.oktmo == getOwnerValue(row, 'oktmo') &&
+                            it.taxBenefitCode == record1 && it.taxBenefitCodeReduction == record2 && it.taxBenefitCodeDecrease == record3
+                }
+                if (selectedRow) {
+                    // суммируем 14-ые графы строк
+                    sum += selectedRow.cost10
+                } else {
+                    sourceRowError(newRow, row, periodList, order)
+                }
             }
-            if (selectedRow) {
-                // суммируем 14-ые графы строк
-                sum += selectedRow.cost10
-            } else {
-                sourceRowError(newRow, row, periodList, order)
-            }
-        }
-    } else {
-        for (Map.Entry entry : prevRowsMap) {
-            def order = entry.key
-            def dataRows = entry.value
-            // ищем строки по совпадению 4-х граф
-            def selectedRow = dataRows.find{
-                it.subject == getOwnerValue(row, 'subject') && it.taxAuthority == getOwnerValue(row, 'taxAuthority') &&
-                        it.kpp == getOwnerValue(row, 'kpp') && it.oktmo == getOwnerValue(row, 'oktmo')
-            }
-            if (selectedRow) {
-                // суммируем 14-ые графы строк
-                sum += selectedRow.cost10
-            } else {
-                sourceRowError(newRow, row, periodList, order)
+        } else {
+            for (Map.Entry entry : prevRowsMap) {
+                def order = entry.key
+                def dataRows = entry.value
+                // ищем строки по совпадению 4-х граф
+                def selectedRow = dataRows.find{
+                    it.subject == getOwnerValue(row, 'subject') && it.taxAuthority == getOwnerValue(row, 'taxAuthority') &&
+                            it.kpp == getOwnerValue(row, 'kpp') && it.oktmo == getOwnerValue(row, 'oktmo')
+                }
+                if (selectedRow) {
+                    // суммируем 14-ые графы строк
+                    sum += selectedRow.cost10
+                } else {
+                    sourceRowError(newRow, row, periodList, order)
+                }
             }
         }
     }

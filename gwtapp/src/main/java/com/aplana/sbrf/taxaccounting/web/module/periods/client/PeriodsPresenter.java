@@ -40,6 +40,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, PeriodsPresenter.MyProxy>
 								implements PeriodsUiHandlers, PeriodCreated.OpenPeriodHandler, UpdateForm.UpdateFormHandler {
@@ -59,7 +60,8 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setTitle(String title);
         void setTaxTitle(String title);
         void setTableData(List<TableRow> data);
-		void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments, int yearFrom, int yearTo);
+		void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments,
+                           Set<Integer> avalDepartments, int yearFrom, int yearTo);
 		void setYear(int year);
 		Integer getFromYear();
 		Integer getToYear();
@@ -389,7 +391,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                         getView().setTaxTitle(taxType.getName());
 						getView().setTitle("Ведение периодов");
 						PeriodsPresenter.this.openDialogPresenter.setTaxType(result.getTaxType());
-                        getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getYearFrom(), result.getYearTo());
+                        getView().setFilterData(result.getDepartments(), Arrays.asList(result.getSelectedDepartment()), result.getAvalDepartments(), result.getYearFrom(), result.getYearTo());
                         getView().setCanChangeDepartment(result.canChangeDepartment());
                         PeriodsPresenter.this.canEdit = result.isCanEdit();
 						getView().setCanEdit(PeriodsPresenter.this.canEdit);
