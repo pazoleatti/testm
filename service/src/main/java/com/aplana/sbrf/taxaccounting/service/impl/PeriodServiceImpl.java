@@ -771,7 +771,7 @@ public class PeriodServiceImpl implements PeriodService {
             }
         
             if (drpLast.isActive())
-                return PeriodStatusBeforeOpen.INVALID;
+                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN;
         }
 
         //Система проверяет статус периода корректировки (конкретный период ищем, т.е. д.б. одно значение)
