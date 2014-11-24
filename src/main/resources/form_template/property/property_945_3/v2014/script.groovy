@@ -110,7 +110,7 @@ String WITHOUT_CATEGORY = 'Без категории'
 
 // форма 945.5
 @Field
-def sourceFormTypeId = 10640
+def sourceFormTypeId = 615
 
 @Field
 def startDate = null
@@ -214,13 +214,17 @@ void calc() {
             // графа 18
             if (isTaxPeriod) {
                 if (decreaseProc != null) {
-                    row.sumDecrease = (row.taxSum - row.sumPayment) * decreaseProc / 100
+                    if (row.taxSum != null && row.sumPayment != null) {
+                        row.sumDecrease = (row.taxSum - row.sumPayment) * decreaseProc / 100
+                    }
                 } else if (decreaseRub != null) {
                     row.sumDecrease = decreaseRub
                 }
             } else {
                 if (decreaseProc != null) {
-                    row.sumDecrease = (row.taxSum * decreaseProc / 100) / 4
+                    if (row.taxSum != null) {
+                        row.sumDecrease = (row.taxSum * decreaseProc / 100) / 4
+                    }
                 } else if (decreaseRub != null) {
                     row.sumDecrease = decreaseRub / 4
                 }
@@ -364,7 +368,7 @@ def getSourceRowsGroups() {
     }
     def Map<String, List> sourceGroups = [:]
     sourceRows.each { row ->
-        String key = String.format("%s %s %s %s", row.subject.toString(), row.taxAuthority, row.kpp, row.oktmo)
+        String key = String.format("%s %s %s %s", getOwnerValue(row, 'subject').toString(), getOwnerValue(row, 'taxAuthority'), getOwnerValue(row, 'kpp'), getOwnerValue(row, 'oktmo'))
         if (sourceGroups.get(key) == null) {
             sourceGroups.put(key, new ArrayList())
         }
@@ -379,11 +383,11 @@ def getPrevRowsMap() {
     def ReportPeriod reportPeriod = getReportPeriod()
     // только для годичной получаем формы предыдущих периодов
     if (reportPeriod.order == 4) {
-        def List<ReportPeriod> periodList = periodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
+        def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
         def List<ReportPeriod> errorPeriods = []
         periodList.each{ period ->
             if (period.order != 4) {
-                def fd = formDataService.getLast(formData.formTypeId, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+                def fd = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (fd != null && fd.state == WorkflowState.ACCEPTED) {
                     prevRowsMap.put(period.order, formDataService.getDataRowHelper(fd).allCached)
                 } else {
@@ -416,7 +420,7 @@ void unite(def dataRows, def sourceRowsGroups, def prevRowsMap) {
             // если "Без категории"/"Категория"
             if (! (row.title in [TAX_AUTHORITY_APPROVED, BENEFIT_PRICE])) {
                 def categoryFilter = (row.title == WITHOUT_CATEGORY)? " and PARAM_DESTINATION = 0" : " and PARAM_DESTINATION = 1 and LOWER(ASSETS_CATEGORY) = LOWER('${row.title}')"
-                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + categoryFilter
+                String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + getOwnerValue(row, 'subject')?.toString() + categoryFilter
                 def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
                 if (records.size() == 0) {
                     benefitError(row)
@@ -474,11 +478,11 @@ void updateRowCategory(def newRow, def row, def taApprovedRow, List<String> bene
         case 1: columns += ['cost1', 'cost2', 'cost3', 'cost4']
     }
     def isTA = (taApprovedRow != null)
-    ['subject', 'taxAuthority', 'kpp', 'oktmo'].each { newRow[it] = (isTA? taApprovedRow : row)[it]}
+    ['subject', 'taxAuthority', 'kpp', 'oktmo'].each { newRow[it] = getOwnerValue((isTA? taApprovedRow : row), it)}
     // графа 6
     def sum = 0
     if (taApprovedRow || row) {
-        sum = columns.sum { (taApprovedRow ?: row)[it] }
+        sum = columns.sum { getOwnerValue((taApprovedRow ?: row), it) }
     }
     newRow.priceAverage = sum / columns.size()
     // row == null, только если отсутствует строка с кодом 2012000
@@ -502,39 +506,44 @@ void updateRowFromPrev(def newRow, def row, def prevRowsMap, List<String> benefi
         return
     }
     def ReportPeriod reportPeriod = getReportPeriod()
-    def List<ReportPeriod> periodList = periodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
+    def List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id)
     def sum = 0
     // если используется "Без категории"/"Категория К"
-    if (! row.title in [TAX_AUTHORITY_APPROVED, BENEFIT_PRICE]) {
-        for (Map.Entry entry : prevRowsMap) {
-            def order = entry.key
-            def dataRows = entry.value
-            def record1 = getBenefitRecordId(row, benefitCodes, '2012000', getRecordDate(periodList, order))
-            def record2 = getBenefitRecordId(row, benefitCodes, '2012400', getRecordDate(periodList, order))
-            def record3 = getBenefitRecordId(row, benefitCodes, '2012500', getRecordDate(periodList, order))
-            def selectedRow = dataRows.find{
-                it.subject == row.subject && it.taxAuthority == row.taxAuthority && it.kpp == row.kpp && it.oktmo == row.oktmo && it.taxBenefitCode == record1 && it.taxBenefitCodeReduction == record2 && it.taxBenefitCodeDecrease == record3
+    if (row != null) {
+        if (! row.title in [TAX_AUTHORITY_APPROVED, BENEFIT_PRICE]) {
+            for (Map.Entry entry : prevRowsMap) {
+                def order = entry.key
+                def dataRows = entry.value
+                def record1 = getBenefitRecordId(row, benefitCodes, '2012000', getRecordDate(periodList, order))
+                def record2 = getBenefitRecordId(row, benefitCodes, '2012400', getRecordDate(periodList, order))
+                def record3 = getBenefitRecordId(row, benefitCodes, '2012500', getRecordDate(periodList, order))
+                def selectedRow = dataRows.find{
+                    it.subject == getOwnerValue(row, 'subject') && it.taxAuthority == getOwnerValue(row, 'taxAuthority') &&
+                            it.kpp == getOwnerValue(row, 'kpp') && it.oktmo == getOwnerValue(row, 'oktmo') &&
+                            it.taxBenefitCode == record1 && it.taxBenefitCodeReduction == record2 && it.taxBenefitCodeDecrease == record3
+                }
+                if (selectedRow) {
+                    // суммируем 14-ые графы строк
+                    sum += selectedRow.cost10
+                } else {
+                    sourceRowError(newRow, row, periodList, order)
+                }
             }
-            if (selectedRow) {
-                // суммируем 14-ые графы строк
-                sum += selectedRow.cost10
-            } else {
-                sourceRowError(newRow, row, periodList, order)
-            }
-        }
-    } else {
-        for (Map.Entry entry : prevRowsMap) {
-            def order = entry.key
-            def dataRows = entry.value
-            // ищем строки по совпадению 4-х граф
-            def selectedRow = dataRows.find{
-                it.subject == row.subject && it.taxAuthority == row.taxAuthority && it.kpp == row.kpp && it.oktmo == row.oktmo
-            }
-            if (selectedRow) {
-                // суммируем 14-ые графы строк
-                sum += selectedRow.cost10
-            } else {
-                sourceRowError(newRow, row, periodList, order)
+        } else {
+            for (Map.Entry entry : prevRowsMap) {
+                def order = entry.key
+                def dataRows = entry.value
+                // ищем строки по совпадению 4-х граф
+                def selectedRow = dataRows.find{
+                    it.subject == getOwnerValue(row, 'subject') && it.taxAuthority == getOwnerValue(row, 'taxAuthority') &&
+                            it.kpp == getOwnerValue(row, 'kpp') && it.oktmo == getOwnerValue(row, 'oktmo')
+                }
+                if (selectedRow) {
+                    // суммируем 14-ые графы строк
+                    sum += selectedRow.cost10
+                } else {
+                    sourceRowError(newRow, row, periodList, order)
+                }
             }
         }
     }
@@ -545,7 +554,7 @@ def getBenefitRecordId(DataRow row, List<String> benefitCodes, String benefitCod
     if (row && benefitCodes && benefitCodes.contains(benefitCode)) {
         def benefitId = getRefBookRecordId(202, 'CODE', benefitCode, recordDate)
         def categoryFilter = (row.title == WITHOUT_CATEGORY)? " and PARAM_DESTINATION = 0" : " and PARAM_DESTINATION = 1 and LOWER(ASSETS_CATEGORY) = LOWER('${row.title}')"
-        String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + row.subject?.toString() + categoryFilter + " and TAX_BENEFIT_ID = " + benefitId.toString()
+        String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + getOwnerValue(row, 'subject')?.toString() + categoryFilter + " and TAX_BENEFIT_ID = " + benefitId.toString()
         def records = refBookFactory.getDataProvider(203).getRecords(recordDate, null, filter, null)
         if (records.size() == 1) {
             return records.get(0).record_id.value
@@ -565,21 +574,21 @@ void loggerError(def row, def msg) {
 }
 
 void benefitError(def row) {
-    def subjectCode = getRefBookValue(4, row.subject).CODE.value
+    def subjectCode = getRefBookValue(4, getOwnerValue(row, 'subject')).CODE.value
     def catFilter = (row.title == WITHOUT_CATEGORY) ? "без категории " : ("с категорией «" + row.title + "» ")
     loggerError(null, "Для кода субъекта " + subjectCode + " не предусмотрена налоговая  льгота " + catFilter + " (в справочнике «Параметры налоговых льгот налога на имущество» отсутствует необходимая запись)!")
 }
 
 void sourceRowError(def newRow, def row, def periodList, def order) {
     def reportPeriod = periodList.find { it.order == order }
-    def subject = getRefBookValue(4, row.subject).CODE.value
-    def oktmo = getRefBookValue(96, row.oktmo).CODE.value
+    def subject = getRefBookValue(4, getOwnerValue(row, 'subject')).CODE.value
+    def oktmo = getRefBookValue(96, getOwnerValue(row, 'oktmo')).CODE.value
     def benefitBasis = getRefBookValue(203, newRow.benefitCode).CODE.value + '/' + calcBasis(newRow.benefitCode)
     def benefitReduction = getRefBookValue(203, newRow.benefitReductionBasis).CODE.value + '/' + calcBasis(newRow.benefitReductionBasis)
     def benefitDecrease = getRefBookValue(203, newRow.benefitDecreaseBasis).CODE.value + '/' + calcBasis(newRow.benefitDecreaseBasis)
     loggerError(null, "В налоговой форме-источнике «${formData.formType.name}» за ${reportPeriod.name} " +
             "${reportPeriod.taxPeriod.year} отсутствует строка со значениями граф «Код субъекта» = ${subject}, " +
-            "«Код НО» = ${row.taxAuthority}, «КПП» = ${row.kpp}, «Код ОКТМО» = ${oktmo}, " +
+            "«Код НО» = ${getOwnerValue(row, 'taxAuthority')}, «КПП» = ${getOwnerValue(row, 'kpp')}, «Код ОКТМО» = ${oktmo}, " +
             "«Код налоговой льготы и основание» = $benefitBasis, " +
             "«Код налоговой льготы и основание (понижение налоговой ставки)» = $benefitReduction, " +
             "«Код налоговой льготы и основание (в виде уменьшения суммы налога)» = $benefitDecrease!")

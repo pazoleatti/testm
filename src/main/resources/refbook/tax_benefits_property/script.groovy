@@ -85,7 +85,7 @@ void save() {
         def String assetsCategory = it.ASSETS_CATEGORY?.stringValue
         def boolean categoryIsEmpty = (assetsCategory == null || assetsCategory == '')
         if ((paramDestination == 1 && categoryIsEmpty) || (paramDestination != 1 && !categoryIsEmpty)) {
-            logger.error("Категория имущества: атрибут должен быть заполнен только в том случае, если атрибут «Категория имущества» равен значению «1»!")
+            logger.error("Категория имущества: атрибут должен быть заполнен только в том случае, если атрибут «Назначение параметра (0 – по средней, 1 – категория, 2 – по кадастровой)» равен значению «1»!")
         }
 
         // 2. проверка уникальности записи
@@ -139,5 +139,5 @@ def int getRecordsCount(def filter) {
     }
     recordsCountCache.get(refBookId).put(filter, count)
 
-    return records.size()
+    return count
 }

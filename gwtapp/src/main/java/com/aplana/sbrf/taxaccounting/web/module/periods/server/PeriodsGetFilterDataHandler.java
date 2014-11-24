@@ -44,6 +44,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 
         TaxType taxType = action.getTaxType();
 	    List<Department> departments = new ArrayList<Department>();
+        Set<Integer> ad = new HashSet<Integer>();
         if (userInfo.getUser().hasRole("ROLE_CONTROL_UNP")) {
 	        res.setCanEdit(true);
             switch (taxType) {
@@ -56,8 +57,27 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		                depIds.add(dep.getId());
 	                }
 	                res.setDepartments(new ArrayList<Department>(departmentService.getRequiredForTreeDepartments(depIds).values()));
-	                Department bank = departmentService.getBankDepartment();
-	                res.setSelectedDepartment(new DepartmentPair(bank.getId(), bank.getParentId(), bank.getName()));
+
+
+                    Collections.sort(departments, new Comparator<Department>() {
+                        @Override
+                        public int compare(Department o1, Department o2) {
+                            return o1.getName().compareTo(o2.getName());
+                        }
+                    });
+                    for (Department dep : departments) {
+                        if (dep.getType() != DepartmentType.ROOT_BANK) {
+                            ad.add(dep.getId());
+                        }
+                    }
+                    res.setAvalDepartments(ad);
+                    for (Department dep : departments) {
+                        if (dep.getType() == DepartmentType.TERR_BANK && dep.isActive()) {
+                            res.setSelectedDepartment(new DepartmentPair(dep.getId(), dep.getParentId(), dep.getName()));
+                            break;
+                        }
+                    }
+
                     break;
                 case INCOME:
                 case DEAL:
@@ -93,10 +113,11 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 			        break;
 	        }
         }
-	    Set<Integer> ad = new HashSet<Integer>();
-	    for (Department dep : res.getDepartments()) {
-		    ad.add(dep.getId());
-	    }
+	    if (ad.isEmpty()) { // default all available
+            for (Department dep : res.getDepartments()) {
+                ad.add(dep.getId());
+            }
+        }
 	    res.setAvalDepartments(ad);
         // TODO Левыкин: указанный метод всегда возвращает null!
 	    DepartmentReportPeriod rp = reportPeriodService.getLastReportPeriod(taxType, action.getDepartmentId());

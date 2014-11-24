@@ -23,7 +23,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.List;
+import java.util.*;
 
 
 public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
@@ -177,8 +177,8 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	}
 
 	@Override
-	public void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments, int yearFrom, int yearTo) {
-        departmentPicker.setAvalibleValues(departments, null);
+	public void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments, Set<Integer> avalDepartments, int yearFrom, int yearTo) {
+        departmentPicker.setAvalibleValues(departments, avalDepartments);
         departmentPicker.setValueByDepartmentPair(selectedDepartments, false);
 		fromBox.setValue(yearFrom);
 		toBox.setValue(yearTo);
