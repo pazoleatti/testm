@@ -804,7 +804,7 @@ public class PeriodServiceImpl implements PeriodService {
             throw new ServiceException(ex.getMessage());
         }
 
-        String strBalance = isBalance ? " ввод остатков" : "";
+        String strBalance = isBalance ? " \"ввод остатков\"" : "";
         List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, departmentId);
         if ((rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
 
@@ -815,7 +815,7 @@ public class PeriodServiceImpl implements PeriodService {
             departmentReportPeriodService.updateBalance(departmentReportPeriodService.getListIdsByFilter(filter), isBalance);
             for (Integer depId : depIds) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() +
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + (!isBalance ? " \"ввод остатков\"" : "") +
                                 " был изменён на " + rp.getName() + strBalance + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
 
@@ -824,7 +824,7 @@ public class PeriodServiceImpl implements PeriodService {
             open(newYear, newDictTaxPeriodId, taxType, user, departmentId, null, isBalance, null);
             for (Integer depId : depIds) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " +
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + (!isBalance ? " \"ввод остатков\"" : "") + " был изменён на " +
                                 dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + strBalance + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
         }
