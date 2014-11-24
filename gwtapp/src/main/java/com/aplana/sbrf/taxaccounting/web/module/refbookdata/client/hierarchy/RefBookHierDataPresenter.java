@@ -250,6 +250,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
             recordId = getView().getSelectedId();
             editFormPresenter.show(recordId);
             editFormPresenter.setRecordId(recordId);
+            versionPresenter.setParentElement(getView().getSelectedItem());
         }
     }
 
@@ -317,6 +318,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
         getView().setVersionedFields(canVersion);
         editFormPresenter.setCanVersion(canVersion);
+        versionPresenter.setHierarchy(true);
     }
 
     private void checkRecord() {
