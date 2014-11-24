@@ -212,6 +212,7 @@ def sourceFormName = null
 @Field
 def refBookNameMap = [:]
 
+// мапа с иточниками (ключ -период, значение - список месяцев)
 @Field
 def sourcesPeriodMap = null
 
@@ -448,8 +449,12 @@ def checkPrevForm() {
     }
 
     // 1. Проверка наличия форм-источников 945.1 в статусе «Принята»
-    def periodsMap = getSourcesPeriodMap()
     def formSources945_1 = getFormSources()
+    if (formSources945_1.isEmpty()) {
+        def sourceFormType = formTypeService.get(sourceFormTypeId)
+        throw new Exception("Не назначена источником налоговая форма «${sourceFormType.name}» в текущем периоде!")
+    }
+    def periodsMap = getSourcesPeriodMap()
     periodsMap.each { period, monthOrders ->
         monthOrders.each { monthOrder ->
             formSources945_1.each { formSource ->
@@ -956,7 +961,7 @@ def getSourcesPeriodMap() {
         def to = getNextMonthEndDate()
         def nextPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.PROPERTY, from, to)
         if (nextPeriods != null && nextPeriods.size() == 1) {
-            nextTaxPeriod = nextPeriods.get(0)
+            def nextTaxPeriod = nextPeriods.get(0)
             nextMonthNumber = monthMap[nextTaxPeriod?.order].get(0)
             sourcesPeriodMap[nextTaxPeriod] = [nextMonthNumber]
         } else {
@@ -1013,8 +1018,8 @@ void addPrevData(def dataRows) {
                 prevGroupRows.add(prevRow)
             }
         }
-        // скопировать если текущая форма: 1кв - не надо копировать, полгода - 5..8 графа, 9 месяцев 9..11, год - 12..14
-        def someColumns = editableColumnsMap[getReportPeriod().order - 1]
+        // скопировать если текущая форма: 1кв - не надо копировать, полгода - 5..8 графа, 9 месяцев 5..11, год - 5..14
+        def someColumns = nonEmptyColumnsMap[getReportPeriod().order - 1] - first5Columns
         def prevCategoryRow = getRowByName(prevGroupRows, 'title', row.title)
         if (prevCategoryRow) {
             someColumns.each { column ->
