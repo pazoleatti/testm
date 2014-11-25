@@ -133,7 +133,7 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
 
         formTemplateTable.addResizableColumn(linkColumn, "Наименование", 80, Style.Unit.PCT);
         formTemplateTable.addResizableColumn(typeTaxColumn, "Вид налога", 15, Style.Unit.PCT);
-		formTemplateTable.addResizableColumn(versionColumn, "Количество версий", 5, Style.Unit.PCT);
+		formTemplateTable.addResizableColumn(versionColumn, "Версий", 5, Style.Unit.PCT);
 
         dataProvider.addDataDisplay(formTemplateTable);
         formTemplateTable.addColumnSortHandler(sortHandler);
