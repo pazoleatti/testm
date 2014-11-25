@@ -210,36 +210,13 @@ void logicCheck() {
             logger.error(errorMsg + "Графа «${getColumnName(row, 'benefitBasis')}» заполнена неверно!")
         }
 
-        def has201Error = false
-        def has203Error = false
-
         // для графы 16
         def is201 = isRefBook201ForCalc16(row)
         def records = getRecords(row, is201)
         if (records == null || records.isEmpty()) {
             if (is201) {
                 // 1. Проверка существования налоговой ставки по заданному субъекту
-                logger.error(errorMsg + 'Для текущего субъекта в справочнике «Ставки налога на имущество» не найдена налоговая ставка!')
-                has201Error = true
-            } else {
-                // 2. Проверка существования параметров для заданного субъекта и льготы
-                logger.error(errorMsg + 'Для текущего субъекта не предусмотрена заданная налоговая льгота (в справочнике «Параметры налоговых льгот налога на имущество» отсутствует запись по текущему субъекту и льготе, в которой категория имущества не заполнена)!')
-                has203Error = true
-            }
-        }
-
-        // для графы 19
-        is201 = isRefBook201ForCalc19(row)
-        records = getRecords(row, is201)
-        if (records == null || records.isEmpty()) {
-            if (is201) {
-                if (!has201Error) {
-                    // 1. Проверка существования налоговой ставки по заданному субъекту
-                    logger.error(errorMsg + 'Для текущего субъекта в справочнике «Ставки налога на имущество» не найдена налоговая ставка!')
-                }
-            } else if (!has203Error) {
-                // 2. Проверка существования параметров для заданного субъекта и льготы
-                logger.error(errorMsg + 'Для текущего субъекта не предусмотрена заданная налоговая льгота (в справочнике «Параметры налоговых льгот налога на имущество» отсутствует запись по текущему субъекту и льготе, в которой категория имущества не заполнена)!')
+                logger.error(errorMsg + "В справочнике «Ставки налога на имущество» не найдена налоговая ставка (дата актуальности записи = ${getReportPeriodEndDate().format('dd.MM.yyyy')}, код субъекта РФ представителя декларации = «${getRefBookValue(30, formDataDepartment.regionId)?.NAME?.value?:''}», код субъекта РФ = «${getRefBookValue(4, row.subject)?.CODE?.value}»)!")
             }
         }
     }
@@ -382,8 +359,8 @@ def calc18(def row, def isYear) {
         return null
     }
     def tmp = BigDecimal.ZERO
-    // алиасы для поиска нужных строк (графа 2, 3, 4, 5, 7, 8)
-    def searchAliases = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'sign', 'cadastreNum']
+    // алиасы для поиска нужных строк (графа 2, 3, 4, 5, 7, 8, 9)
+    def searchAliases = ['subject', 'taxAuthority', 'kpp', 'oktmo', 'sign', 'cadastreNumBuilding', 'cadastreNumRoom']
 
     // получить формы за 1 кв, полгода, 9 месяцев
     def forms = getPrevForms()
@@ -402,10 +379,9 @@ def calc18(def row, def isYear) {
 }
 
 def calc19(def row, def isYear) {
-    if (!isRefBook201ForCalc19(row)) {
+    if (!isCalc19(row)) {
         records = getRecords(row, false)
         if (records == null || records.isEmpty()) {
-            logger.error("Не найдены записи в справочниках для графы 19")
             return null
         }
         def record = records?.get(0)
@@ -578,7 +554,7 @@ def isRefBook201ForCalc16(row) {
 /**
  * Условие при расчете граф 17 для получения данных из справочника 203 "Параметры налоговых льгот налога на имущество".
  */
-def isRefBook201ForCalc19(row) {
+def isCalc19(row) {
     return row.taxBenefitCode == null || getTaxBenefitCode(row.taxBenefitCode) != '2012500'
 }
 

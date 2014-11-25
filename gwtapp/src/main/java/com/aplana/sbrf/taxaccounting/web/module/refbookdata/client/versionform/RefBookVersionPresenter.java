@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -55,6 +56,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     private Long uniqueRecordId;
     private FormMode mode;
     private boolean isHierarchy = false;
+    private RefBookTreeItem parentRefBookRecordItem;
 
     public void setHierarchy(boolean hierarchy) {
         isHierarchy = hierarchy;
@@ -65,9 +67,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 
-	private final TableDataProvider dataProvider = new TableDataProvider();
-
-	public interface MyView extends View, HasUiHandlers<RefBookVersionUiHandlers> {
+    public interface MyView extends View, HasUiHandlers<RefBookVersionUiHandlers> {
 		void setTableColumns(final List<RefBookColumn> columns);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void setSelected(Long recordId);
@@ -91,9 +91,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		this.placeManager = placeManager;
 		this.editFormPresenter = editFormPresenter;
 		getView().setUiHandlers(this);
-		getView().assignDataProvider(getView().getPageSize(), dataProvider);
-        mode = FormMode.READ;
-        getView().updateMode(mode);
+        TableDataProvider dataProvider = new TableDataProvider();
+        getView().assignDataProvider(getView().getPageSize(), dataProvider);
+        setMode(FormMode.READ);
 	}
 
 	@Override
@@ -123,7 +123,10 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	@Override
 	public void onAddRowClicked() {
         setMode(FormMode.CREATE);
-        editFormPresenter.show(null);
+        if (isHierarchy)
+            editFormPresenter.show(null, parentRefBookRecordItem);
+        else
+            editFormPresenter.show(null);
 	}
 
 	@Override
@@ -169,8 +172,6 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
             editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
-        } else {
-            editFormPresenter.show(null);
         }
 	}
 
@@ -266,5 +267,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     public void setMode(FormMode mode) {
         this.mode = mode;
         getView().updateMode(mode);
+    }
+
+    public void setParentElement(RefBookTreeItem parentRefBookRecordId){
+        this.parentRefBookRecordItem = parentRefBookRecordId;
     }
 }
