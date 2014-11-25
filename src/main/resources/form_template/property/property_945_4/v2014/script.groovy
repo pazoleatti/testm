@@ -216,7 +216,7 @@ void logicCheck() {
         if (records == null || records.isEmpty()) {
             if (is201) {
                 // 1. Проверка существования налоговой ставки по заданному субъекту
-                logger.error(errorMsg + "В справочнике «Ставки налога на имущество» не найдена налоговая ставка (дата актуальности записи = ${getReportPeriodEndDate().format('dd.MM.yyyy')}, код субъекта РФ представителя декларации = «${getRefBookValue(30, formDataDepartment.regionId)?.NAME?.value}», код субъекта РФ = «${getRefBookValue(4, row.subject)?.CODE?.value}»!")
+                logger.error(errorMsg + "В справочнике «Ставки налога на имущество» не найдена налоговая ставка (дата актуальности записи = ${getReportPeriodEndDate().format('dd.MM.yyyy')}, код субъекта РФ представителя декларации = «${getRefBookValue(30, formDataDepartment.regionId)?.NAME?.value?:''}», код субъекта РФ = «${getRefBookValue(4, row.subject)?.CODE?.value}»)!")
             }
         }
     }
