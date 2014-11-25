@@ -191,7 +191,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
     @UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
-        selectionModel.clear();
+        //selectionModel.clear();
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}
@@ -229,12 +229,17 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
             case EDIT:
                 addRow.setVisible(true);
                 deleteRow.setVisible(true);
-
+                refbookDataTable.setEnabled(true);
                 break;
             case READ:
             case VIEW:
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
+                break;
+            case CREATE:
+                addRow.setVisible(false);
+                deleteRow.setVisible(false);
+                refbookDataTable.setEnabled(false);
                 break;
         }
     }

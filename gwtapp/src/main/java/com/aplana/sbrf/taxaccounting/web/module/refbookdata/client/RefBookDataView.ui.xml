@@ -107,7 +107,7 @@
                     <g:HorizontalPanel verticalAlignment="middle">
                         <style:LinkButton title="Добавить запись" text="Добавить запись" ui:field="addRow"
                                           img="resources/img/row-add.png" addStyleNames="{style.marginRight5}"/>
-                        <style:LinkButton title="Удалить строку" text="Удалить строку" ui:field="deleteRow"
+                        <style:LinkButton title="Удалить запись" text="Удалить запись" ui:field="deleteRow"
                                           img="resources/img/row-delete.png" addStyleNames="{style.marginRight5}"/>
                         <g:HTML ui:field="separator" addStyleNames="{style.verSep}"/>
                     </g:HorizontalPanel>
@@ -141,7 +141,7 @@
                     <g:center>
                         <g:HTMLPanel>
                             <g:ResizeLayoutPanel addStyleNames="{style.table}">
-                                <style:GenericDataGrid ui:field="refbookDataTable" width="100%" height="100%"/>
+                                <style:GenericDataGrid ui:field="refBookDataTable" width="100%" height="100%" enabled="true"/>
                             </g:ResizeLayoutPanel>
                             <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
                                                  showFastForwardButton="false" fastForwardRows="0"

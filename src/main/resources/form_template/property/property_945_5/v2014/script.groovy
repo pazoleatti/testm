@@ -10,7 +10,7 @@ import groovy.transform.Field
 
 /**
  * "(945.5) Сводная форма данных бухгалтерского учета для расчета налога на имущество".
- * formTemplateId=10640
+ * formTemplateId=615
  *
  * @author Ramil Timerbaev
  */
@@ -19,7 +19,7 @@ import groovy.transform.Field
 // графа 2  - taxAuthority
 // графа 3  - kpp
 // графа 4  - oktmo             - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
-// графа    - title             // TODO (Ramil Timerbaev) возможно эта графа будет справочной
+// графа    - title
 // графа 5  - cost1
 // графа 6  - cost2
 // графа 7  - cost3
@@ -135,6 +135,9 @@ def columnsFromPrimary945_5 = ['taxBase1', 'taxBase2', 'taxBase3', 'taxBase4', '
 def endDate = null
 
 @Field
+def startDate = null
+
+@Field
 def reportPeriod = null
 
 // Признак периода ввода остатков
@@ -209,6 +212,7 @@ def sourceFormName = null
 @Field
 def refBookNameMap = [:]
 
+// мапа с иточниками (ключ -период, значение - список месяцев)
 @Field
 def sourcesPeriodMap = null
 
@@ -219,11 +223,22 @@ def prevDataRows = null
 @Field
 def infoMessagesRowMap = [:]
 
+// источники 945.1 (важны только подразделения и тип формы)
+@Field
+def formSources945_1 = null
+
 def getReportPeriodEndDate() {
     if (endDate == null) {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
 }
 
 // Разыменование записи справочника
@@ -299,12 +314,12 @@ void logicCheck() {
 
         // 1. Обязательность заполнения полей
         def columns = nonEmptyColumnsMap[periodOrder]
-        checkNonEmptyColumns(row, index, columns, logger, true)
+        checkNonEmptyColumns(row, index, columns - first5Columns, logger, true)// TODO исправить в ScriptUtils на getOwnerValue
 
         // 2. Проверка на не заполнение поля
         columns = allColumns - columns
         columns.each { alias ->
-            if (row.getCell(alias).value) {
+            if (getOwnerValue(row, alias)) {
                 String msg = String.format(errorMsg + "В текущем периоде формы графа «%s» должна быть не заполнена!", getColumnName(row, alias))
                 logger.error(msg)
             }
@@ -344,6 +359,7 @@ void logicCheck() {
     newDataRows.eachWithIndex { row, i ->
         row.setIndex(i + 1)
     }
+    newGroupsMap = getGroupsMap(newDataRows)//TODO упростить
 
     // 4. Проверка корректности разбития пользователем сумм по группам строк с одинаковым значением параметров «Код субъекта», «Код ОКТМО» (для строки вида «Признаваемых объектом налогообложения»)
     // По каждой группе строк с одинаковым значением Граф 1, 4:
@@ -372,8 +388,8 @@ void logicCheck() {
                 }
                 def title = row.title
                 if (!list.isEmpty()) {
-                    def subject = getRefBookValue(4, row.subject)?.CODE?.value
-                    def oktmo = getRefBookValue(96, row.oktmo)?.CODE?.value
+                    def subject = getRefBookValue(4, getOwnerValue(row, 'subject'))?.CODE?.value
+                    def oktmo = getRefBookValue(96, getOwnerValue(row, 'oktmo'))?.CODE?.value
                     def msgColumnNames = list.join(', ')
                     logger.error("По группам строк с параметрами декларации «Код субъекта» = $subject, «Код ОКТМО» = $oktmo: " +
                             "остаточная стоимость основных средств" +
@@ -433,11 +449,18 @@ def checkPrevForm() {
     }
 
     // 1. Проверка наличия форм-источников 945.1 в статусе «Принята»
+    def formSources945_1 = getFormSources()
+    if (formSources945_1.isEmpty()) {
+        def sourceFormType = formTypeService.get(sourceFormTypeId)
+        throw new Exception("Не назначена источником налоговая форма «${sourceFormType.name}» в текущем периоде!")
+    }
     def periodsMap = getSourcesPeriodMap()
     periodsMap.each { period, monthOrders ->
         monthOrders.each { monthOrder ->
-            formDataService.checkMonthlyFormExistAndAccepted(sourceFormTypeId, FormDataKind.PRIMARY,
-                    formDataDepartment.id, period.id, monthOrder,false, logger, true)
+            formSources945_1.each { formSource ->
+                formDataService.checkMonthlyFormExistAndAccepted(sourceFormTypeId, formSource.kind,
+                        formSource.departmentId, period.id, monthOrder,false, logger, true)
+            }
         }
     }
 
@@ -887,17 +910,22 @@ def getFormDataSources() {
         // найти все ежемесячные источники за текущий периоде и за первый месяц следующего периода
         def periodsMap = getSourcesPeriodMap()
         periodsMap.each { period, monthOrders ->
+            // получить источники (важны только тип формы и подразделение)
+            def formSources945_1 = getFormSources()
+            // получить данные источников
             monthOrders.each { monthOrder ->
-                FormData source = formDataService.getLast(sourceFormTypeId, FormDataKind.PRIMARY, formDataDepartment.id, period.id, monthOrder)
-                if (source != null && source.getState() == WorkflowState.ACCEPTED) {
-                    def alias = 'cost' + monthOrder
-                    // если форма за январь следующего года, то заполняется графа 17 (cost13)
-                    if (period.taxPeriod.id != getReportPeriod().taxPeriod.id) {
-                        alias = 'cost13'
+                formSources945_1.each { formSource ->
+                    FormData source = formDataService.getLast(sourceFormTypeId, formSource.kind, formSource.departmentId, period.id, monthOrder)
+                    if (source != null && source.getState() == WorkflowState.ACCEPTED) {
+                        def alias = 'cost' + monthOrder
+                        // если форма за январь следующего года, то заполняется графа 17 (cost13)
+                        if (period.taxPeriod.id != getReportPeriod().taxPeriod.id) {
+                            alias = 'cost13'
+                        }
+                        aliasMap[source.id] = alias
+                        periodNameMap[source.id] = Formats.getRussianMonthNameWithTier(monthOrder) + ' ' + period.taxPeriod.year
+                        formDataSources.add(source)
                     }
-                    aliasMap[source.id] = alias
-                    periodNameMap[source.id] = Formats.getRussianMonthNameWithTier(monthOrder) + ' ' + period.taxPeriod.year
-                    formDataSources.add(source)
                 }
             }
         }
@@ -933,7 +961,7 @@ def getSourcesPeriodMap() {
         def to = getNextMonthEndDate()
         def nextPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.PROPERTY, from, to)
         if (nextPeriods != null && nextPeriods.size() == 1) {
-            nextTaxPeriod = nextPeriods.get(0)
+            def nextTaxPeriod = nextPeriods.get(0)
             nextMonthNumber = monthMap[nextTaxPeriod?.order].get(0)
             sourcesPeriodMap[nextTaxPeriod] = [nextMonthNumber]
         } else {
@@ -979,13 +1007,19 @@ void addPrevData(def dataRows) {
         // найти строки группы из предыдущего года
         def prevGroupRows = []
         for (def prevRow : prevRows) {
-            if (prevRow.subject == row.subject && prevRow.taxAuthority == row.taxAuthority &&
-                    prevRow.kpp == row.kpp && prevRow.oktmo == row.oktmo) {
+            def addFlag = true
+            for (def alias : groupColumns) {
+                if (getOwnerValue(prevRow, alias) != getOwnerValue(row, alias)) {
+                    addFlag = false
+                    break
+                }
+            }
+            if (addFlag) {
                 prevGroupRows.add(prevRow)
             }
         }
-        // скопировать если текущая форма: 1кв - не надо копировать, полгода - 5..8 графа, 9 месяцев 9..11, год - 12..14
-        def someColumns = editableColumnsMap[getReportPeriod().order - 1]
+        // скопировать если текущая форма: 1кв - не надо копировать, полгода - 5..8 графа, 9 месяцев 5..11, год - 5..14
+        def someColumns = nonEmptyColumnsMap[getReportPeriod().order - 1] - first5Columns
         def prevCategoryRow = getRowByName(prevGroupRows, 'title', row.title)
         if (prevCategoryRow) {
             someColumns.each { column ->
@@ -1083,7 +1117,7 @@ def getRowBenefitCodes(def row) {
 
     // получение данных их справочника 203 "Параметры налоговых льгот налога на имущество"
     def regionId = formDataDepartment.regionId
-    def subjectId = row.subject
+    def subjectId = getOwnerValue(row, 'subject')
     def paramDestination = (hasCategory ? 1 : 0)
 
     def filter = "DECLARATION_REGION_ID = $regionId " +
@@ -1131,17 +1165,17 @@ def getNewGroupsMap(def groupsMap, def tmpGroupsMap) {
         def row = groupsMap[key][0]
         if (tmpGroupRows) {
             // ключ (Код субъекта, Код ОКТМО)
-            def subjectAndOktmoKey = row.subject + SEPARATOR + row.oktmo
+            def subjectAndOktmoKey = getOwnerValue(row,'subject') + SEPARATOR + getOwnerValue(row,'oktmo')
             if (!checkGroupsMap[subjectAndOktmoKey]) {
                 checkGroupsMap[subjectAndOktmoKey] = []
             }
             checkGroupsMap[subjectAndOktmoKey].add(tmpGroupRows)
         } else {
             // среди временных обновленных строк нет такой группы - удалить ее (пропустить)
-            def subject = getRefBookValue(4L, row.subject)?.CODE?.value
-            def taxAuthority = row.taxAuthority
-            def kpp = row.kpp
-            def oktmo = getRefBookValue(96L, row.oktmo)?.CODE?.value
+            def subject = getRefBookValue(4L, getOwnerValue(row,'subject'))?.CODE?.value
+            def taxAuthority = getOwnerValue(row,'taxAuthority')
+            def kpp = getOwnerValue(row,'kpp')
+            def oktmo = getRefBookValue(96L, getOwnerValue(row,'oktmo'))?.CODE?.value
             logger.info("Удалена группа строк по параметрам декларации «Код субъекта» = $subject, " +
                     "«Код НО» = $taxAuthority, «КПП» = $kpp, «Код ОКТМО» = $oktmo")
         }
@@ -1199,9 +1233,9 @@ def getNewGroupsMap(def groupsMap, def tmpGroupsMap) {
 
 /** Получить ключ группы (Код субъекта, Код НО, КПП, Код ОКТМО). */
 def getGroupKey(def row) {
-    def subject = getRefBookValue(4L, row.subject)?.CODE?.value
-    def oktmo = getRefBookValue(96L, row.oktmo)?.CODE?.value
-    return subject + SEPARATOR + row.taxAuthority + SEPARATOR + row.kpp + SEPARATOR + oktmo
+    def subject = getRefBookValue(4L, getOwnerValue(row, 'subject'))?.CODE?.value
+    def oktmo = getRefBookValue(96L, getOwnerValue(row, 'oktmo'))?.CODE?.value
+    return subject + SEPARATOR + getOwnerValue(row, 'taxAuthority') + SEPARATOR + getOwnerValue(row, 'kpp') + SEPARATOR + oktmo
 }
 
 /**
@@ -1217,4 +1251,22 @@ def containCategory(def rows, def value) {
         }
     }
     return false
+}
+
+/** Получить источники (важны только тип формы и подразделение). */
+def getFormSources() {
+    if (formSources945_1 == null) {
+        // получить источники (важны только тип формы и подразделение)
+        formSources945_1 = []
+        def formSources = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+                getReportPeriodStartDate(), getReportPeriodEndDate())
+        if (formSources != null && !formSources.isEmpty()) {
+            for (def source : formSources) {
+                if (source.formTypeId == sourceFormTypeId) {
+                    formSources945_1.add(source)
+                }
+            }
+        }
+    }
+    return formSources945_1
 }

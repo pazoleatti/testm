@@ -43,7 +43,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
 	@UiField
-	GenericDataGrid<RefBookDataRow> refbookDataTable;
+	GenericDataGrid<RefBookDataRow> refBookDataTable;
 	@UiField
 	FlexiblePager pager;
 	@UiField
@@ -96,18 +96,18 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 }
 			}
 		});
-		refbookDataTable.setSelectionModel(selectionModel);
+		refBookDataTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
 				getUiHandlers().onSelectionChanged();
 			}
 		});
-        refbookDataTable.setPageSize(pager.getPageSize());
-        refbookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-        refbookDataTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(refbookDataTable));
-        refbookDataTable.getColumnSortList().setLimit(1);
-        pager.setDisplay(refbookDataTable);
+        refBookDataTable.setPageSize(pager.getPageSize());
+        refBookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+        refBookDataTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(refBookDataTable));
+        refBookDataTable.getColumnSortList().setLimit(1);
+        pager.setDisplay(refBookDataTable);
         filterText.addKeyPressHandler(new HandlesAllKeyEvents() {
             @Override
             public void onKeyDown(KeyDownEvent event) {}
@@ -177,15 +177,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
             }
             column.setSortable(true);
-			refbookDataTable.addResizableSortableColumn(column, header.getName());
-			refbookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
+			refBookDataTable.addResizableSortableColumn(column, header.getName());
+			refBookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
 	}
 
 	@Override
 	public void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data) {
-		refbookDataTable.setPageSize(pageSize);
-		data.addDataDisplay(refbookDataTable);
+		refBookDataTable.setPageSize(pageSize);
+		data.addDataDisplay(refBookDataTable);
 	}
 
     @Override
@@ -195,14 +195,14 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @Override
 	public void setRange(Range range) {
-		refbookDataTable.setVisibleRangeAndClearData(range, true);
+		refBookDataTable.setVisibleRangeAndClearData(range, true);
 	}
 
 	@Override
 	public void updateTable() {
         selectionModel.clear();
 		Range range = new Range(pager.getPageStart(), pager.getPageSize());
-		refbookDataTable.setVisibleRangeAndClearData(range, true);
+		refBookDataTable.setVisibleRangeAndClearData(range, true);
 	}
 
 	@Override
@@ -213,15 +213,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@Override
 	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
 		if (dataRows == null) {
-			refbookDataTable.setRowCount(0);
-			refbookDataTable.setRowData(new ArrayList<RefBookDataRow>());
+			refBookDataTable.setRowCount(0);
+			refBookDataTable.setRowData(new ArrayList<RefBookDataRow>());
 		} else {
             if (totalCount == 0) {
                 start = 0;
                 pager.setPage(0);
             }
-			refbookDataTable.setRowCount(totalCount);
-			refbookDataTable.setRowData(start, dataRows);
+			refBookDataTable.setRowCount(totalCount);
+			refBookDataTable.setRowData(start, dataRows);
 		}
 	}
 
@@ -229,11 +229,11 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	public void setSelected(Long recordId) {
         selectionModel.clear();
 		int i = 0;
-		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
+		for (RefBookDataRow row : refBookDataTable.getVisibleItems()) {
 
 			if (row.getRefBookRowId().equals(recordId)) {
 				selectionModel.setSelected(row, true);
-				refbookDataTable.setKeyboardSelectedRow(i, true);
+				refBookDataTable.setKeyboardSelectedRow(i, true);
 				return;
 			}
 			i++;
@@ -252,8 +252,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@Override
     public void resetRefBookElements() {
         int i;
-        while ((i = refbookDataTable.getColumnCount()) != 0) {
-            refbookDataTable.removeColumn(i - 1);
+        while ((i = refBookDataTable.getColumnCount()) != 0) {
+            refBookDataTable.removeColumn(i - 1);
         }
     }
 
@@ -279,7 +279,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
-        selectionModel.clear();
+        //selectionModel.clear();
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}
@@ -373,26 +373,45 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             case EDIT:
                 addRow.setVisible(true);
                 deleteRow.setVisible(true);
-                cancelEdit.setVisible(true);
-                edit.setVisible(false);
-                // для красовы на форме
                 separator.setVisible(true);
+                edit.setVisible(false);
+                cancelEdit.setVisible(true);
+                search.setEnabled(true);
+                filterText.setEnabled(true);
+                refBookDataTable.setEnabled(true);
+                relevanceDate.setEnabled(true);
                 break;
             case READ:
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
-                cancelEdit.setVisible(false);
-                edit.setVisible(false);
-                // для красовы на форме
                 separator.setVisible(false);
+                edit.setVisible(false);
+                cancelEdit.setVisible(false);
+                search.setEnabled(true);
+                filterText.setEnabled(true);
+                refBookDataTable.setEnabled(true);
+                relevanceDate.setEnabled(true);
                 break;
             case VIEW:
+                edit.setVisible(true);
+                cancelEdit.setVisible(false);
+                addRow.setVisible(false);
+                deleteRow.setVisible(false);
+                separator.setVisible(false);
+                search.setEnabled(true);
+                filterText.setEnabled(true);
+                refBookDataTable.setEnabled(true);
+                relevanceDate.setEnabled(true);
+                break;
+            case CREATE:
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
                 cancelEdit.setVisible(false);
-                edit.setVisible(true);
-                // для красовы на форме
+                search.setEnabled(false);
+                filterText.setEnabled(false);
                 separator.setVisible(false);
+                refBookDataTable.setEnabled(false);
+                relevanceDate.setEnabled(false);
                 break;
         }
     }
@@ -411,18 +430,18 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @Override
     public int getSortColumnIndex() {
-        if (refbookDataTable.getColumnSortList().size() == 0) {
+        if (refBookDataTable.getColumnSortList().size() == 0) {
             return 0;
         }
-        return refbookDataTable.getColumnIndex((Column<RefBookDataRow,?>) refbookDataTable.getColumnSortList().get(0).getColumn());
+        return refBookDataTable.getColumnIndex((Column<RefBookDataRow,?>) refBookDataTable.getColumnSortList().get(0).getColumn());
     }
 
     @Override
     public boolean isAscSorting() {
-        if (refbookDataTable.getColumnSortList().size() == 0) {
+        if (refBookDataTable.getColumnSortList().size() == 0) {
             return true;
         }
-        return refbookDataTable.getColumnSortList().get(0).isAscending();
+        return refBookDataTable.getColumnSortList().get(0).isAscending();
     }
 
     @Override

@@ -321,11 +321,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
                 final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
                 // проверка использования подразделения в модуле гарантий
-                if (dep.isGarantUse()) {
+                /*if (dep.isGarantUse()) {
                     logger.error("Подразделение используется в АС \"Гарантии\"");
                     throw new ServiceLoggerException("Подразделение не может быть отредактировано!",
                             logEntryService.save(logger.getEntries()));
-                }
+                }*/
                 Department parentDep = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
                         departmentService.getDepartment(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
                         : null;
@@ -388,7 +388,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
 
                 RefBookRecord refBookRecord = new RefBookRecord();
-                refBookRecord.setRecordId(uniqueRecordId);
+                refBookRecord.setUniqueRecordId(uniqueRecordId);
                 refBookRecord.setValues(records);
 
                 //Проверка корректности
@@ -730,9 +730,9 @@ public class RefBookDepartment implements RefBookDataProvider {
     //Проверка использования
     private void isInUsed(final Department department, Logger logger){
         // проверка использования подразделения в гарантиях
-        if (department.isGarantUse()) {
+        /*if (department.isGarantUse()) {
             logger.error("Подразделение используется в АС \"Гарантии\"");
-        }
+        }*/
         //1 точка запроса
         List<FormData> formDatas =
                 formDataSearchService.findDataByFilter(new FormDataFilter(){{

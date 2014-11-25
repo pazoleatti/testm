@@ -71,9 +71,9 @@ public class RefBookUtils extends AbstractDao {
                 }
 
                 //Проверка для иерархичных справочников
-                if (record.getRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
+                if (record.getUniqueRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
                     Long parentId = values.get(a.getAlias()).getReferenceValue();
-                    if (record.getRecordId().equals(parentId)) {
+                    if (record.getUniqueRecordId().equals(parentId)) {
                         errors.add("Элемент справочника не может быть родительским для самого себя!");
                     }
                 }

@@ -86,8 +86,11 @@ class DBReport {
                             th 'monthly'
                         }
 
+                        // Сортировка
+                        def sorted = Main.TEMPLATE_NAME_TO_TYPE_ID[taxName].sort(){a, b -> a.value <=> b.value}
+
                         // Сравнение
-                        Main.TEMPLATE_NAME_TO_TYPE_ID[taxName].each { folderName, type_id ->
+                        sorted.each { folderName, type_id ->
                             if (type_id != -1) {
                                 allVersions[type_id].each { version ->
                                     // Макеты

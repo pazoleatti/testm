@@ -49,6 +49,9 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 @Field
@@ -79,6 +82,9 @@ def startDate = null
 
 @Field
 def endDate = null
+
+@Field
+def editableStyle = 'Редактируемая'
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
@@ -153,13 +159,13 @@ void preCalcLogicCheck() {
             it.departmentId == departmentId && it.formTypeId == sourceFormTypeId
         }
         if (departmentFormType == null) {
-            logger.error ("Строка ${row.getIndex()}: " + "Не назначена источником налоговая форма «${sourceFormType.name}» для ${row.bankName}!")
+            logger.error ("Строка ${row.getIndex()}: " + "Не назначена источником налоговая форма «${sourceFormType.name}» для «${row.bankName}»!")
         } else {
             def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (departmentFormType.formTypeId == sourceFormTypeId && (child == null || child.state != WorkflowState.ACCEPTED)) {
                 def cause = child == null ? "не создана" : "не находится в статусе «Принята»"
                 def childDepartment = departmentService.get(departmentFormType.departmentId)
-                logger.error("Строка ${row.getIndex()}: " + "${departmentFormType.kind.name} налоговая форма «${sourceFormType.name}» в подразделении ${childDepartment.name} $cause!")
+                logger.error("Строка ${row.getIndex()}: " + "${departmentFormType.kind.name} налоговая форма «${sourceFormType.name}» в подразделении «${childDepartment.name}» $cause!")
             }
         }
     }
@@ -190,7 +196,9 @@ void consolidation() {
     // очищаем форму
     dataRows.each { row ->
         clearColumns.each {
-            row[it] = null
+            if (row.getCell(it)?.style?.alias != editableStyle) {
+                row[it] = null
+            }
         }
     }
 

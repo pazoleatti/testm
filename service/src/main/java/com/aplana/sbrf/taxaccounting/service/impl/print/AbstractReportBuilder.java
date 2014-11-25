@@ -42,23 +42,6 @@ public abstract class AbstractReportBuilder {
      * Формирование отчета. Условно разбит на шесть частей.
      * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
      * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
-     * @return путь до сформированного файла
-     * @throws IOException
-     */
-    public final String createReport() throws IOException {
-        fillHeader();
-        createTableHeaders();
-        createDataForTable();
-        cellAlignment();
-        fillFooter();
-        setPrintSetup();
-        return flush();
-    }
-
-    /**
-     * Формирование отчета. Условно разбит на шесть частей.
-     * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
-     * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
      * @return массив byte[]
      * @throws IOException
      */
@@ -104,14 +87,6 @@ public abstract class AbstractReportBuilder {
      */
     protected void setPrintSetup(){
         //Nothing
-    }
-
-    protected String flush() throws IOException {
-        File file = File.createTempFile(fileName, postfix);
-        OutputStream out = new FileOutputStream(file);
-        workBook.write(out);
-
-        return file.getAbsolutePath();
     }
 
     protected byte[] flushBlobData() throws IOException {

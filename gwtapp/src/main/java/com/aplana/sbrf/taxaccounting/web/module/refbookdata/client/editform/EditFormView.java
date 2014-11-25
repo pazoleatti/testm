@@ -28,10 +28,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
@@ -66,7 +63,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     private boolean isVersionMode = false;
     private boolean canVersion = true;
-    private boolean isHierarchy = false;
     private boolean isNeedToReload = false;
 
 	@Inject
@@ -85,7 +81,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                updateRefBookPickerPeriod();
+                checkDateRange(event);
             }
         });
         versionEnd.setStartLimitDate(new Date(0));//01.01.1970
@@ -93,12 +89,24 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                updateRefBookPickerPeriod();
+                checkDateRange(event);
             }
         });
         versionStart.setCanBeEmpty(true);
         versionStart.setCanBeEmpty(true);
 	}
+
+    //Проверка диапазона дат
+    private void checkDateRange(ValueChangeEvent<Date> event){
+        if (versionEnd.getValue() != null && event.getValue().after(versionEnd.getValue())) {
+            Dialog.errorMessage("Неправильно указан диапазон дат!");
+            save.setEnabled(false);
+            cancel.setEnabled(false);
+        } else {
+            save.setEnabled(true);
+            cancel.setEnabled(true);
+        }
+    }
 
     @Override
     public void updateRefBookPickerPeriod() {
@@ -106,16 +114,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
             Date start = versionStart.getValue();
             if (start == null) {
                 start = new Date();
-            }
-
-            if (versionEnd.getValue() != null && start.after(versionEnd.getValue())) {
-                Dialog.errorMessage("Неправильно указан диапазон дат!");
-                save.setEnabled(false);
-                cancel.setEnabled(false);
-                return;
-            } else {
-                save.setEnabled(true);
-                cancel.setEnabled(true);
             }
 
             for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
@@ -252,8 +250,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         if (col.isRequired()){
             SafeHtmlBuilder builder = new SafeHtmlBuilder();
             builder.appendHtmlConstant(col.getName() + ":<span class='required'>*</span>");
-            HTML span = new HTML(builder.toSafeHtml());
-            label = span;
+            label = new HTML(builder.toSafeHtml());
         } else{
             label = new Label(col.getName()+":");
         }
@@ -263,6 +260,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
 	@Override
+    @SuppressWarnings("unchecked")
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {
 		if (record == null) {
             boolean textFieldFound = false;
@@ -322,6 +320,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	}
 
 	@Override
+    @SuppressWarnings("unchecked")
 	public Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException {
 		Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
 		for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
@@ -424,22 +423,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		}
 	}
 
-    @Override
-    public void setHierarchy(boolean isHierarchy) {
-        this.isHierarchy = isHierarchy;
-    }
-
-    @Override
-    public boolean isHierarchy() {
-        return isHierarchy;
-    }
-
 	private void updateWidgetsVisibility(boolean enabled) {
         if (widgets != null){
             for (HasValue entry : widgets.values()) {
                 if (entry instanceof HasEnabled) {
                     boolean readonly = ((UIObject) entry).getStyleName().contains(READ_ONLY_FIELD_STYLE);
-                    ((HasEnabled) entry).setEnabled(readonly ? false : enabled);
+                    ((HasEnabled) entry).setEnabled(!readonly && enabled);
                 }
             }
         }
@@ -500,8 +489,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 save.setEnabled(true);
                 cancel.setEnabled(true);
                 updateWidgetsVisibility(true);
-                versionStart.setEnabled(isVersionMode);
-                versionEnd.setEnabled(isVersionMode);
+                versionStart.setEnabled(true);
+                versionEnd.setEnabled(true);
                 break;
             case READ:
             case VIEW:
