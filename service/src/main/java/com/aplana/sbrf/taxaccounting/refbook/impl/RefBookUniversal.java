@@ -469,7 +469,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);
 
                 RefBookRecord refBookRecord = new RefBookRecord();
-                refBookRecord.setRecordId(uniqueRecordId);
+                refBookRecord.setUniqueRecordId(uniqueRecordId);
                 refBookRecord.setValues(records);
 
                 //Проверка корректности

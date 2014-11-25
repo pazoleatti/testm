@@ -13,6 +13,9 @@ public class RefBookRecord implements Serializable {
     /** Значения атрибутов записи */
     private Map<String, RefBookValue> values;
 
+    /** Уникальный идентификатор версии записи справочника. Используется при редактировании */
+    private Long uniqueRecordId;
+
     /** Идентификатор записи без учета версий.
      * Может быть null - тогда создается новый элемент справочника, а не новая версия элемента */
     private Long recordId;
@@ -33,10 +36,19 @@ public class RefBookRecord implements Serializable {
         this.recordId = recordId;
     }
 
+    public Long getUniqueRecordId() {
+        return uniqueRecordId;
+    }
+
+    public void setUniqueRecordId(Long uniqueRecordId) {
+        this.uniqueRecordId = uniqueRecordId;
+    }
+
     @Override
     public String toString() {
         return "RefBookRecord{" +
                 "values=" + values +
+                ", uniqueRecordId=" + uniqueRecordId +
                 ", recordId=" + recordId +
                 '}';
     }

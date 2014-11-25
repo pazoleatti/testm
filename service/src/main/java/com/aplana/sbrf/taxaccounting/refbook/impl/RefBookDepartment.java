@@ -388,7 +388,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
 
                 RefBookRecord refBookRecord = new RefBookRecord();
-                refBookRecord.setRecordId(uniqueRecordId);
+                refBookRecord.setUniqueRecordId(uniqueRecordId);
                 refBookRecord.setValues(records);
 
                 //Проверка корректности
