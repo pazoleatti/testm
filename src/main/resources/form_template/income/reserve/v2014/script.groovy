@@ -80,6 +80,9 @@ def startDate = null
 @Field
 def endDate = null
 
+@Field
+def editableStyle = 'Редактируемая'
+
 def getReportPeriodStartDate() {
     if (startDate == null) {
         startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
@@ -190,7 +193,9 @@ void consolidation() {
     // очищаем форму
     dataRows.each { row ->
         clearColumns.each {
-            row[it] = null
+            if (row.getCell(it)?.style?.alias != editableStyle) {
+                row[it] = null
+            }
         }
     }
 
