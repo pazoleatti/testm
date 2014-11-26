@@ -35,7 +35,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification get(int reportPeriodId, int senderDepartmentId, Integer receiverDepartmentId) {
+    public Notification get(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId) {
         return notificationDao.get(reportPeriodId, senderDepartmentId, receiverDepartmentId);
     }
 

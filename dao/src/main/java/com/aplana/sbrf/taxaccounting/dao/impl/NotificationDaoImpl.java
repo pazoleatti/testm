@@ -70,12 +70,12 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     }
 
     @Override
-    public Notification get(int reportPeriodId, int senderDepartmentId, Integer receiverDepartmentId) {
+    public Notification get(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId) {
         try {
 	        MapSqlParameterSource params = new MapSqlParameterSource();
 	        String query = "select * from notification where " +
 			        "REPORT_PERIOD_ID = :rpid and " +
-			        "SENDER_DEPARTMENT_ID = :sdid and " +
+			        "SENDER_DEPARTMENT_ID " + (senderDepartmentId == null ? "is null" : "= :sdid") + " and " +
 			        "RECEIVER_DEPARTMENT_ID " + (receiverDepartmentId == null ? "is null" : "= :rdid") + "";
 	        params.addValue("rpid", reportPeriodId);
 	        params.addValue("sdid", senderDepartmentId);
