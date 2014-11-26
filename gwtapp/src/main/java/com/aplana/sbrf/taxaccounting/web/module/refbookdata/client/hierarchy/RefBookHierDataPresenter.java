@@ -269,14 +269,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         editFormPresenter.setCurrentUniqueRecordId(null);
         editFormPresenter.setRecordId(null);
 
-        /** Очищаем поле поиска если перешли со страницы списка справочников */
-        if (!request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
-            getView().clearFilterInputBox();
-            recordId = null;
-        } else {
-            recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
-        }
-
         refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
 
         GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookDataId);
@@ -292,18 +284,27 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         }
                         getView().setAttributeId(attrId);
                         editFormPresenter.init(refBookDataId, result.getColumns());
-                        if (recordId == null) {
+
+                        /** Очищаем поле поиска если перешли со страницы списка справочников */
+                        if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
+                            recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+                            if (result.isReadOnly()){
+                                mode = FormMode.READ;
+                                //updateMode();
+                            } else if (mode == null) {
+                                mode = FormMode.VIEW;
+                            }
+                            setMode(mode);
+                            checkRecord();
+                        } else {
+                            recordId = null;
+                            getView().clearFilterInputBox();
+                            setMode(FormMode.VIEW);
                             getView().clearSelected();
                             getView().load();
                             getView().loadAndSelect();
-                        } else {
-                            checkRecord();
                         }
                         getProxy().manualReveal(RefBookHierDataPresenter.this);
-                        if (result.isReadOnly()){
-                            mode = FormMode.READ;
-                            //updateMode();
-                        }
                         updateMode();
                     }
                 }, this));

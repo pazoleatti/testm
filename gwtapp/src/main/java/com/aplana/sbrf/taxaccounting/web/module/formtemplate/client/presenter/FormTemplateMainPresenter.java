@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateMainUiHandlers;
@@ -164,6 +165,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
     protected void onReveal() {
         super.onReveal();
         setFormTemplate();
+        LogCleanEvent.fire(FormTemplateMainPresenter.this);
     }
 
     @Override

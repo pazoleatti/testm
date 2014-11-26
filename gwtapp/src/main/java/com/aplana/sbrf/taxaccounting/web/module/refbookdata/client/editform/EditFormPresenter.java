@@ -47,8 +47,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
     private boolean isVersionMode = false;
-    /** Режим показа формы */
-    private FormMode mode;
     /**Может ли справочник работать с версиями*/
     private boolean canVersion= false;
     // Признак того, что справочник подразделений
@@ -439,7 +437,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     @Override
     public void setMode(FormMode mode){
-        this.mode = mode;
         getView().updateMode(mode);
     }
 

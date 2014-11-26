@@ -55,7 +55,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @UiHandler("cancel")
     public void onCancel(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onCancel();
+            if (driver.isDirty()){
+                getUiHandlers().onCancel();
+            }
         }
     }
 

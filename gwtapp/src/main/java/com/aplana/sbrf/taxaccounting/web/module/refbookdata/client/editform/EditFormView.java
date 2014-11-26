@@ -250,8 +250,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         if (col.isRequired()){
             SafeHtmlBuilder builder = new SafeHtmlBuilder();
             builder.appendHtmlConstant(col.getName() + ":<span class='required'>*</span>");
-            HTML span = new HTML(builder.toSafeHtml());
-            label = span;
+            label = new HTML(builder.toSafeHtml());
         } else{
             label = new Label(col.getName()+":");
         }
@@ -490,8 +489,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 save.setEnabled(true);
                 cancel.setEnabled(true);
                 updateWidgetsVisibility(true);
-                versionStart.setEnabled(isVersionMode);
-                versionEnd.setEnabled(isVersionMode);
+                versionStart.setEnabled(true);
+                versionEnd.setEnabled(true);
                 break;
             case READ:
             case VIEW:
