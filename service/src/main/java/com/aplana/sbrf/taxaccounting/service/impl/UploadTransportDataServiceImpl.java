@@ -14,7 +14,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +25,6 @@ import java.util.List;
  * @author Dmitriy Levykin
  */
 @Service
-@Transactional
 public class UploadTransportDataServiceImpl implements UploadTransportDataService {
 
     //Добавил исключительно для записи в лог
@@ -73,7 +71,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, true),
         L34_1("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
-        L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true);
+        L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
+        L37("При загрузке файла «%s» произошла непредвидинная ошибка: %s.", LogLevel.ERROR, true);
 
         private LogLevel level;
         private String text;
@@ -257,104 +256,110 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * Возвращает путь к каталогу, если проверка прошла.
      */
     private CheckResult checkFileNameAccess(TAUserInfo userInfo, String fileName, Logger logger) {
-        boolean isDiasoftRefBook = loadRefBookDataService.isDiasoftFile(fileName);
-        boolean isFormData = TransportDataParam.isValidName(fileName);
+        try {
+            boolean isDiasoftRefBook = loadRefBookDataService.isDiasoftFile(fileName);
+            boolean isFormData = TransportDataParam.isValidName(fileName);
 
-        CheckResult checkResult = new CheckResult();
+            CheckResult checkResult = new CheckResult();
 
-        if (isDiasoftRefBook) {
-            // Справочники не проверяем
-            checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0,
-                    LogData.L34_1, logger));
-            checkResult.setRefBook(true);
+            if (isDiasoftRefBook) {
+                // Справочники не проверяем
+                checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0,
+                        LogData.L34_1, logger));
+                checkResult.setRefBook(true);
+                return checkResult;
+            }
+
+            // Не справочники Diasoft и не ТФ НФ
+            if (!isDiasoftRefBook && !isFormData) {
+                logger.warn(U2, fileName);
+                return null;
+            }
+
+            //// НФ
+
+            // Параметры из имени файла
+            TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
+            String formCode = transportDataParam.getFormCode();
+            String reportPeriodCode = transportDataParam.getReportPeriodCode();
+            Integer year = transportDataParam.getYear();
+            String departmentCode = transportDataParam.getDepartmentCode();
+
+            // Вывод результата разбора имени файла
+            logger.info(U5, fileName);
+            if (transportDataParam.getMonth() == null) {
+                logger.info(U6_1, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                        getFileNamePart(reportPeriodCode), getFileNamePart(year));
+            } else {
+                logger.info(U6_2, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                        getFileNamePart(reportPeriodCode), getFileNamePart(year),
+                        getFileNamePart(transportDataParam.getMonth()));
+            }
+
+            // Не задан код подразделения или код формы
+            if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
+                logger.warn(U2, fileName);
+                return null;
+            }
+
+            // Указан несуществующий код налоговой формы
+            FormType formType = formTypeService.getByCode(formCode);
+            if (formType == null) {
+                logger.warn(U2 + U2_2, fileName, formCode);
+                return null;
+            }
+
+            // Указан несуществующий код подразделения
+            Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
+            if (formDepartment == null) {
+                logger.warn(U2 + U2_1, fileName, transportDataParam.getDepartmentCode());
+                return null;
+            }
+
+            // Указан недопустимый код периода
+            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
+            if (reportPeriod == null) {
+                logger.warn(U2 + U2_3, fileName, reportPeriodCode, year);
+                return null;
+            }
+
+            // 40 - Выборка для доступа к экземплярам НФ/деклараций
+            List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
+                    Arrays.asList(TaxType.INCOME), null, null);
+
+            if (!departmentList.contains(formDepartment.getId())) {
+                logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
+                return null;
+            }
+
+            // Назначение подразделению типа и вида НФ
+            if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY)) {
+                logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
+                return null;
+            }
+
+            checkResult.setRefBook(false);
+
+            // ТБ, к которому относится подразделение, код которого содержится в имени ТФ
+            Department parentTB = departmentService.getParentTB(formDepartment.getId());
+            if (parentTB == null) {
+                logger.warn(U4, formType.getName(), formDepartment.getName());
+                return null;
+            }
+            Integer departmentTbId = parentTB.getId();
+
+            checkResult.setDepartmentTbId(departmentTbId);
+            checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
+                    LogData.L34_2, logger));
+            formTypeId = formType.getId();
+            formTypeName = formType.getName();
+
             return checkResult;
-        }
-
-        // Не справочники Diasoft и не ТФ НФ
-        if (!isDiasoftRefBook && !isFormData) {
-            logger.warn(U2, fileName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log(userInfo, LogData.L37, logger, fileName, e.getMessage());
             return null;
         }
-
-        //// НФ
-
-        // Параметры из имени файла
-        TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
-        String formCode = transportDataParam.getFormCode();
-        String reportPeriodCode = transportDataParam.getReportPeriodCode();
-        Integer year = transportDataParam.getYear();
-        String departmentCode = transportDataParam.getDepartmentCode();
-
-        // Вывод результата разбора имени файла
-        logger.info(U5, fileName);
-        if (transportDataParam.getMonth() == null) {
-            logger.info(U6_1, getFileNamePart(formCode), getFileNamePart(departmentCode),
-                    getFileNamePart(reportPeriodCode), getFileNamePart(year));
-        } else {
-            logger.info(U6_2, getFileNamePart(formCode), getFileNamePart(departmentCode),
-                    getFileNamePart(reportPeriodCode), getFileNamePart(year),
-                    getFileNamePart(transportDataParam.getMonth()));
-        }
-
-        // Не задан код подразделения или код формы
-        if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
-            logger.warn(U2, fileName);
-            return null;
-        }
-
-        // Указан несуществующий код налоговой формы
-        FormType formType = formTypeService.getByCode(formCode);
-        if (formType == null) {
-            logger.warn(U2 + U2_2, fileName, formCode);
-            return null;
-        }
-
-        // Указан несуществующий код подразделения
-        Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
-        if (formDepartment == null) {
-            logger.warn(U2 + U2_1, fileName, transportDataParam.getDepartmentCode());
-            return null;
-        }
-
-        // Указан недопустимый код периода
-        ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
-        if (reportPeriod == null) {
-            logger.warn(U2 + U2_3, fileName, reportPeriodCode, year);
-            return null;
-        }
-
-        // 40 - Выборка для доступа к экземплярам НФ/деклараций
-        List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                Arrays.asList(TaxType.INCOME), null, null);
-
-        if (!departmentList.contains(formDepartment.getId())) {
-            logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
-            return null;
-        }
-
-        // Назначение подразделению типа и вида НФ
-        if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY)) {
-            logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
-            return null;
-        }
-
-        checkResult.setRefBook(false);
-
-        // ТБ, к которому относится подразделение, код которого содержится в имени ТФ
-        Department parentTB = departmentService.getParentTB(formDepartment.getId());
-        if(parentTB == null){
-            logger.warn(U4, formType.getName(), formDepartment.getName());
-            return null;
-        }
-        Integer departmentTbId = parentTB.getId();
-
-        checkResult.setDepartmentTbId(departmentTbId);
-        checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
-                LogData.L34_2, logger));
-        formTypeId = formType.getId();
-        formTypeName = formType.getName();
-
-        return checkResult;
     }
 
     /**

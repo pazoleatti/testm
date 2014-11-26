@@ -49,6 +49,9 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 @Field
@@ -79,6 +82,9 @@ def startDate = null
 
 @Field
 def endDate = null
+
+@Field
+def editableStyle = 'Редактируемая'
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
@@ -190,7 +196,9 @@ void consolidation() {
     // очищаем форму
     dataRows.each { row ->
         clearColumns.each {
-            row[it] = null
+            if (row.getCell(it)?.style?.alias != editableStyle) {
+                row[it] = null
+            }
         }
     }
 

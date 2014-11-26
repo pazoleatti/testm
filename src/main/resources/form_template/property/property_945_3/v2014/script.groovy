@@ -387,7 +387,7 @@ def getPrevRowsMap() {
         def List<ReportPeriod> errorPeriods = []
         periodList.each{ period ->
             if (period.order != 4) {
-                def fd = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+                def fd = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, period.id, null)
                 if (fd != null && fd.state == WorkflowState.ACCEPTED) {
                     prevRowsMap.put(period.order, formDataService.getDataRowHelper(fd).allCached)
                 } else {
@@ -396,7 +396,9 @@ def getPrevRowsMap() {
             }
         }
         if (!errorPeriods.isEmpty()) {
-            loggerError(null, "Экземпляр налоговой формы «Наименование формы» в статусе «Принята» за ${errorPeriods.collect {it.name}.join(', ')} ${errorPeriods.get(0).taxPeriod.year} г. не существует! Расчеты не могут быть выполнены!")
+            def formTypeName = formTypeService.get(formData.formType.id).name
+            def periodAndYear = errorPeriods.collect { it.name }.join(', ') + " " + errorPeriods.get(0).taxPeriod.year
+            loggerError(null, "Экземпляр налоговой формы «$formTypeName» в статусе «Принята» за $periodAndYear г. не существует! Расчеты не могут быть выполнены!")
         }
     }
     return prevRowsMap
@@ -404,9 +406,10 @@ def getPrevRowsMap() {
 
 /**
  * Собрать из групп источника 945.5 и строк форм 953.3
- * @param dataRows
- * @param sourceRowsGroups
- * @param prevRowsMap
+ *
+ * @param dataRows строки текущей формы
+ * @param sourceRowsGroups строки источников 945.5
+ * @param prevRowsMap мапа с данными из предыдущих форм 945.3
  */
 void unite(def dataRows, def sourceRowsGroups, def prevRowsMap) {
     // проходим по группам строк 945.5
@@ -426,7 +429,7 @@ void unite(def dataRows, def sourceRowsGroups, def prevRowsMap) {
                     benefitError(row)
                     continue
                 }
-                benefitCodes = records.collect { getRefBookValue(202L, it.TAX_BENEFIT_ID.value).CODE.value }
+                def benefitCodes = records.collect { getRefBookValue(202L, it.TAX_BENEFIT_ID.value).CODE.value }
                 if (!specialRow && benefitCodes.contains('2012000')) {
                     specialRow = row
                 }
@@ -524,7 +527,7 @@ void updateRowFromPrev(def newRow, def row, def prevRowsMap, List<String> benefi
                 }
                 if (selectedRow) {
                     // суммируем 14-ые графы строк
-                    sum += selectedRow.cost10
+                    sum += selectedRow.taxSum
                 } else {
                     sourceRowError(newRow, row, periodList, order)
                 }
@@ -540,7 +543,7 @@ void updateRowFromPrev(def newRow, def row, def prevRowsMap, List<String> benefi
                 }
                 if (selectedRow) {
                     // суммируем 14-ые графы строк
-                    sum += selectedRow.cost10
+                    sum += selectedRow.taxSum
                 } else {
                     sourceRowError(newRow, row, periodList, order)
                 }

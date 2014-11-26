@@ -98,7 +98,7 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
         versionColumn.setSortable(true);
 
 		declarationTemplateTable.addResizableColumn(linkColumn, "Наименование");
-		declarationTemplateTable.addResizableColumn(versionColumn, "Количество версий");
+		declarationTemplateTable.addResizableColumn(versionColumn, "Версий");
 
         declarationTemplateTable.setSelectionModel(selectionModel);
         dataProvider.addDataDisplay(declarationTemplateTable);

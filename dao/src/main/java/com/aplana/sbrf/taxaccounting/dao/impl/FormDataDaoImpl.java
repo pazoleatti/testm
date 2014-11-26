@@ -143,8 +143,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                         || formData.getPerformer().getPrintDepartmentId() != null)
                 ) {
             formPerformerDao.save(formDataId, formData.isManual(), formData.getPerformer());
-        } else {
-            formPerformerDao.clear(formDataId);
         }
         if (formData.getSigners() != null) {
             formDataSignerDao.saveSigners(formDataId, formData.getSigners());
