@@ -720,7 +720,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 drpCopy.setReportPeriod(drp.getReportPeriod());
                 drpCopy.setDepartmentId(depId);
                 drpCopy.setActive(drp.isActive());
-                drpCopy.setCorrectionDate(null);
+                drpCopy.setCorrectionDate(drp.getCorrectionDate());
                 drpCopy.setBalance(drp.isBalance());
                 periodService.saveOrOpen(drpCopy, null);
             }
