@@ -306,6 +306,11 @@ public interface FormDataService {
     FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
 
     /**
+     * НФ созданная в последнем отчетном периоде подразделения
+     */
+    List<FormData> getLastList(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
+
+    /**
      * Принятый экземпляр НФ в предыдущем отчетном периоде
      * @param formData Текущий экземпляр НФ
      * @param departmentReportPeriodList Список всех отчетных периодов для пары подразделение-отчетный период. Должен
