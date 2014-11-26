@@ -31,7 +31,7 @@ public interface NotificationService {
      * @param receiverDepartmentId подразделение-получатель
      * @return оповещение
      */
-    Notification get(int reportPeriodId, int senderDepartmentId, Integer receiverDepartmentId);
+    Notification get(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId);
 
     /**
      * Получает список оповещений от отправителя получателю

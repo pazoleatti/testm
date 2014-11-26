@@ -71,7 +71,7 @@ public class GetPeriodDataHandler extends AbstractActionHandler<GetPeriodDataAct
             row.setOrd(drp.getReportPeriod().getOrder());
             row.setCorrectPeriod(drp.getCorrectionDate());
             Department dep = departmentMap.get(drp.getDepartmentId());
-            Notification notification = notificationService.get(drp.getReportPeriod().getId(), dep.getId(), dep.getParentId());
+            Notification notification = notificationService.get(drp.getReportPeriod().getId(), null, dep.getId());
             row.setDeadline(notification != null ? notification.getDeadline() : null);
             row.setDepartmentReportPeriodId(drp.getId());
             per.get(year).add(row);

@@ -25,7 +25,7 @@ public interface NotificationDao {
      * @param receiverDepartmentId подразделение-получатель
      * @return оповещение
      */
-    Notification get(int reportPeriodId, int senderDepartmentId, Integer receiverDepartmentId);
+    Notification get(int reportPeriodId, Integer senderDepartmentId, Integer receiverDepartmentId);
 
     /**
      * Сохраняет список уведомлений с помощью batch-запроса

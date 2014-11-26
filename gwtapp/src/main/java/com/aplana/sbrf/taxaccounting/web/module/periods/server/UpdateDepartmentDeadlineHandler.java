@@ -55,8 +55,8 @@ public class UpdateDepartmentDeadlineHandler extends AbstractActionHandler<Updat
             notification.setCreateDate(new Date());
             notification.setDeadline(action.getDeadline());
             notification.setReportPeriodId(action.getReportPeriodId());
-            notification.setSenderDepartmentId(pair.getDepartmentId());
-            notification.setReceiverDepartmentId(pair.getParentDepartmentId());
+            notification.setSenderDepartmentId(null);
+            notification.setReceiverDepartmentId(pair.getDepartmentId());
             notification.setText(String.format(text,
                     userInfo.getUser().getName(), departmentService.getParentsHierarchy(pair.getDepartmentId()), TaxTypeCase.fromCode(taxType).getGenitive(),
                     action.getReportPeriodName(), action.getCurrentYear(), df.format(action.getDeadline())));
