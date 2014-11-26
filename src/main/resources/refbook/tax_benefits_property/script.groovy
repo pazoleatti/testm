@@ -90,22 +90,27 @@ void save() {
 
         // 2. проверка уникальности записи
         def String filter = "DECLARATION_REGION_ID = ${it.DECLARATION_REGION_ID.referenceValue} AND REGION_ID = ${it.REGION_ID.referenceValue} AND PARAM_DESTINATION = ${paramDestination}"
+        def needCheck = true
         if (tax == '2012000' || paramDestination == 2) {
             filter += " AND (TAX_BENEFIT_ID =${tax000} or TAX_BENEFIT_ID =${tax400} or TAX_BENEFIT_ID =${tax500})"
         } else if (tax == '2012400') {
             filter += " AND (TAX_BENEFIT_ID =${tax000} or TAX_BENEFIT_ID =${tax400})"
         } else if (tax == '2012500') {
             filter += " AND (TAX_BENEFIT_ID =${tax000} or TAX_BENEFIT_ID =${tax500})"
+        } else {
+            needCheck = false
         }
-        def int recordsCount = getRecordsCount(filter)
-        if (recordsCount > (isNewRecords ? 0 : 1)) {
-            if (paramDestination != 2) {
-                logger.error("В течение одного года по одному и тому же субъекту для параметра " +
-                        "«по средней/ по категории» в справочнике может быть только либо одна запись с льготой " +
-                        "«2012000»/«2012400»/«2012500» либо две записи с льготой «2012400» и «2012500»!")
-            } else {
-                logger.error("В течение одного года по одному и тому же субъекту для параметра «по кадастровой» " +
-                        "в справочнике может быть только одна запись с льготой «2012000»/«2012400»/«2012500»!")
+        if (needCheck) {
+            def int recordsCount = getRecordsCount(filter)
+            if (recordsCount > (isNewRecords ? 0 : 1)) {
+                if (paramDestination != 2) {
+                    logger.error("В течение одного года по одному и тому же субъекту для параметра " +
+                            "«по средней/ по категории» в справочнике может быть только либо одна запись с льготой " +
+                            "«2012000»/«2012400»/«2012500» либо две записи с льготой «2012400» и «2012500»!")
+                } else {
+                    logger.error("В течение одного года по одному и тому же субъекту для параметра «по кадастровой» " +
+                            "в справочнике может быть только одна запись с льготой «2012000»/«2012400»/«2012500»!")
+                }
             }
         }
     }
