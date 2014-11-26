@@ -81,7 +81,14 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                checkDateRange(event);
+                if (versionEnd.getValue() != null && event.getValue().after(versionEnd.getValue())) {
+                    Dialog.errorMessage("Неправильно указан диапазон дат!");
+                    save.setEnabled(false);
+                    cancel.setEnabled(false);
+                } else {
+                    save.setEnabled(true);
+                    cancel.setEnabled(true);
+                }
             }
         });
         versionEnd.setStartLimitDate(new Date(0));//01.01.1970
@@ -89,24 +96,19 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                checkDateRange(event);
+                if (versionStart.getValue() != null && event.getValue().before(versionStart.getValue())) {
+                    Dialog.errorMessage("Неправильно указан диапазон дат!");
+                    save.setEnabled(false);
+                    cancel.setEnabled(false);
+                } else {
+                    save.setEnabled(true);
+                    cancel.setEnabled(true);
+                }
             }
         });
         versionStart.setCanBeEmpty(true);
         versionStart.setCanBeEmpty(true);
 	}
-
-    //Проверка диапазона дат
-    private void checkDateRange(ValueChangeEvent<Date> event){
-        if (versionEnd.getValue() != null && event.getValue().after(versionEnd.getValue())) {
-            Dialog.errorMessage("Неправильно указан диапазон дат!");
-            save.setEnabled(false);
-            cancel.setEnabled(false);
-        } else {
-            save.setEnabled(true);
-            cancel.setEnabled(true);
-        }
-    }
 
     @Override
     public void updateRefBookPickerPeriod() {
