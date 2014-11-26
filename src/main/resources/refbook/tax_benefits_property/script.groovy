@@ -84,28 +84,37 @@ void save() {
         def Number paramDestination = it.PARAM_DESTINATION?.numberValue
         def String assetsCategory = it.ASSETS_CATEGORY?.stringValue
         def boolean categoryIsEmpty = (assetsCategory == null || assetsCategory == '')
-        if ((paramDestination == 1 && categoryIsEmpty) || (paramDestination != 1 && !categoryIsEmpty)) {
-            logger.error("Категория имущества: атрибут должен быть заполнен только в том случае, если атрибут «Назначение параметра (0 – по средней, 1 – категория, 2 – по кадастровой)» равен значению «1»!")
+        if (paramDestination != 1 && !categoryIsEmpty) {
+            logger.error("Поле «Категория имущества» должно быть заполнено только в том случае, если поле «Назначение параметра (0 – по средней, 1 – категория, 2 – по кадастровой)» равно значению «1»!")
+        } else if (paramDestination == 1 && categoryIsEmpty) {
+            // т.к. атрибут «Категория имущества» обязателен для заполнения только при заполнении атрибута 3 значением «1»,
+            // то проверка его обязательности сделана тут, а не в ядре
+            logger.error("Для назначения параметра (0 – по средней, 1 – категория, 2 – по кадастровой) «1» поле «Категория имущества» является обязательным!")
         }
 
         // 2. проверка уникальности записи
         def String filter = "DECLARATION_REGION_ID = ${it.DECLARATION_REGION_ID.referenceValue} AND REGION_ID = ${it.REGION_ID.referenceValue} AND PARAM_DESTINATION = ${paramDestination}"
+        def needCheck = true
         if (tax == '2012000' || paramDestination == 2) {
             filter += " AND (TAX_BENEFIT_ID =${tax000} or TAX_BENEFIT_ID =${tax400} or TAX_BENEFIT_ID =${tax500})"
         } else if (tax == '2012400') {
             filter += " AND (TAX_BENEFIT_ID =${tax000} or TAX_BENEFIT_ID =${tax400})"
         } else if (tax == '2012500') {
             filter += " AND (TAX_BENEFIT_ID =${tax000} or TAX_BENEFIT_ID =${tax500})"
+        } else {
+            needCheck = false
         }
-        def int recordsCount = getRecordsCount(filter)
-        if (recordsCount > (isNewRecords ? 0 : 1)) {
-            if (paramDestination != 2) {
-                logger.error("В течение одного года по одному и тому же субъекту для параметра " +
-                        "«по средней/ по категории» в справочнике может быть только либо одна запись с льготой " +
-                        "«2012000»/«2012400»/«2012500» либо две записи с льготой «2012400» и «2012500»!")
-            } else {
-                logger.error("В течение одного года по одному и тому же субъекту для параметра «по кадастровой» " +
-                        "в справочнике может быть только одна запись с льготой «2012000»/«2012400»/«2012500»!")
+        if (needCheck) {
+            def int recordsCount = getRecordsCount(filter)
+            if (recordsCount > (isNewRecords ? 0 : 1)) {
+                if (paramDestination != 2) {
+                    logger.error("В течение одного года по одному и тому же субъекту для параметра " +
+                            "«по средней/ по категории» в справочнике может быть только либо одна запись с льготой " +
+                            "«2012000»/«2012400»/«2012500» либо две записи с льготой «2012400» и «2012500»!")
+                } else {
+                    logger.error("В течение одного года по одному и тому же субъекту для параметра «по кадастровой» " +
+                            "в справочнике может быть только одна запись с льготой «2012000»/«2012400»/«2012500»!")
+                }
             }
         }
     }

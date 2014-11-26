@@ -1206,6 +1206,7 @@ public class SourceServiceImpl implements SourceService {
         formToFormRelation.setFormType(formData.getFormType());
         formToFormRelation.setFormDataId(formData.getId());
         formToFormRelation.setState(formData.getState());
+        formToFormRelation.setMonth(Months.fromId(formData.getPeriodOrder() - 1).getName());
     }
 
     /**
@@ -1241,20 +1242,21 @@ public class SourceServiceImpl implements SourceService {
     private List<FormToFormRelation> getSourceList(DepartmentFormType departmentFormType,
                                                    DepartmentReportPeriod departmentReportPeriod,
                                                    Integer periodOrder) {
-        FormData formData = formDataDao.getLastByDate(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+        List<FormData> sourceForms = formDataDao.getLastListByDate(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
                 departmentFormType.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
                 periodOrder, departmentReportPeriod.getCorrectionDate());
 
-        DepartmentReportPeriod formDepartmentReportPeriod = null;
-        if (formData != null) {
-            formDepartmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        List<FormToFormRelation> relations = new ArrayList<FormToFormRelation>();
+        if (!sourceForms.isEmpty()) {
+            for (FormData sourceForm : sourceForms) {
+                DepartmentReportPeriod formDepartmentReportPeriod = departmentReportPeriodDao.get(sourceForm.getDepartmentReportPeriodId());
+                relations.add(performFormDataRelation(sourceForm,
+                        getRelationCommon(true, departmentFormType, formDepartmentReportPeriod), departmentFormType,
+                        departmentReportPeriod));
+
+            }
         }
-
-        FormToFormRelation formToFormRelation = performFormDataRelation(formData,
-                getRelationCommon(true, departmentFormType, formDepartmentReportPeriod), departmentFormType,
-                departmentReportPeriod);
-
-        return formToFormRelation == null ? new ArrayList<FormToFormRelation>(0) : Arrays.asList(formToFormRelation);
+        return relations;
     }
 
     /**
