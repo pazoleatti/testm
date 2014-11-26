@@ -28,20 +28,20 @@ public class EditFormPresenterTest {
     public void testOnCancelClickedWhenDepartments(EditFormPresenter.MyView myView) {
         presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
         presenter.onCancelClicked();
-        verify(myView).updateMode(FormMode.EDIT);
+        verify(myView, never()).updateMode(FormMode.EDIT);
     }
 
     @Test
     public void testOnCancelClickedWhenNotDepartments(EditFormPresenter.MyView myView) {
         presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
         presenter.onCancelClicked();
-        verify(myView, atLeastOnce()).updateMode(FormMode.EDIT);
+        verify(myView, never()).updateMode(FormMode.EDIT);
     }
 
     /**
      * Добавление элемента справочника подразделений
      *
-     * @param dispatchAsync
+     * @param dispatchAsync диспатчер
      * @throws ActionException
      */
     @Test

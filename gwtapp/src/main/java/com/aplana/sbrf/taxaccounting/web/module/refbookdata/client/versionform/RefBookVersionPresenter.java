@@ -122,11 +122,14 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
 	@Override
 	public void onAddRowClicked() {
-        setMode(FormMode.CREATE);
-        if (isHierarchy)
+        //setMode(FormMode.CREATE);
+        editFormPresenter.setMode(FormMode.CREATE);
+        if (isHierarchy){
             editFormPresenter.show(null, parentRefBookRecordItem);
-        else
+        }
+        else{
             editFormPresenter.show(null);
+        }
 	}
 
 	@Override
@@ -230,6 +233,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	public void onBind(){
 		addRegisteredHandler(UpdateForm.getType(), this);
 		addRegisteredHandler(RollbackTableRowSelection.getType(), this);
+        addRegisteredHandler(SetFormMode.getType(), this);
 	}
 
 	private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {

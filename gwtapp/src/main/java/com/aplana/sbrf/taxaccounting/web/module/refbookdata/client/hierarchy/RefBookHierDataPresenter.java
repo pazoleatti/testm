@@ -161,7 +161,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     public void onAddRowClicked() {
         editFormPresenter.setMode(FormMode.CREATE);
         editFormPresenter.show(null, getView().getSelectedItem());
-        getView().updateMode(FormMode.CREATE);
     }
 
     @Override

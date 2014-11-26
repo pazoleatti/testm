@@ -65,7 +65,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		void setTableColumns(final List<RefBookColumn> columns);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void setSelected(Long recordId);
-        Long getSelected();
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
         int getPageSize();
 		void setRange(Range range);
@@ -135,7 +134,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onAddRowClicked() {
-        getView().updateMode(FormMode.CREATE);
+        //getView().updateMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
 		editFormPresenter.show(null);
 	}

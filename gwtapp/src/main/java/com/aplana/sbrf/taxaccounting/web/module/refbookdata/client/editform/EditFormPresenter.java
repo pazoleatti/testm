@@ -53,6 +53,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     private boolean isDepartments = false;
     //Тип подразделения
     private long depType = 0;
+    private FormMode mode;
     Map<String, Object> modifiedFields = new HashMap<String, Object>();
 
     public void setNeedToReload() {
@@ -121,6 +122,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                         field.put("PARENT_ID", refBookParent);
                         getView().fillInputFields(field);
                     }
+                    SetFormMode.fire(EditFormPresenter.this, mode);
                 }
             });
         } else {
@@ -134,6 +136,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 field.put("PARENT_ID", refBookParent);
                 getView().fillInputFields(field);
             }
+            SetFormMode.fire(EditFormPresenter.this, mode);
         }
     }
 
@@ -387,7 +390,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             });
         } else {
             //Показать родительскую запись
-            setMode(FormMode.EDIT);
+            //setMode(FormMode.EDIT);
             showRecord(previousURId);
             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
         }
@@ -437,6 +440,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     @Override
     public void setMode(FormMode mode){
+        this.mode = mode;
         getView().updateMode(mode);
     }
 
