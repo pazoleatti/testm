@@ -10,7 +10,7 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * @author Dmitriy Levykin
  */
 public interface UploadTransportDataUiHandlers extends UiHandlers {
-    String ACTION_URL = "/upload/transportData/upload/";
+    String ACTION_URL = "upload/transportData/upload/";
     void onStartLoad(StartLoadFileEvent event);
     void onEndLoad(EndLoadFileEvent event);
     void onLoadAll();

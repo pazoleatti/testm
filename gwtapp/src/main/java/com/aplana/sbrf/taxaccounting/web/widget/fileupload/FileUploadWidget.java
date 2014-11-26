@@ -114,7 +114,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     @UiConstructor
     public FileUploadWidget() {
         initWidget(uiBinder.createAndBindUi(this));
-        uploadFormDataXls.setAction(actionUrl);
+        uploadFormDataXls.setAction(GWT.getHostPageBaseURL() + actionUrl);
         uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
@@ -159,9 +159,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
      */
     public void setUploadAsTemporal(boolean asTemporal){
         if (asTemporal)
-            uploadFormDataXls.setAction(actionTempUrl);
+            uploadFormDataXls.setAction(GWT.getHostPageBaseURL() + actionTempUrl);
         else
-            uploadFormDataXls.setAction(actionUrl);
+            uploadFormDataXls.setAction(GWT.getHostPageBaseURL() + actionUrl);
     }
 
     public void setText(String text) {
