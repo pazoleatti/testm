@@ -14,7 +14,7 @@ pivot
 count(*)
 for is_active in (0 as Closed_period, 1 as Open_period)
 )
-where correction_date is not null and (closed_period>0 and open_period>0);
+where (closed_period>0 and open_period>0);
 
 --Если есть период ввода остатков, то других периодов быть не может
 select department_id,

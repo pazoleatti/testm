@@ -23,9 +23,7 @@ import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.interceptor.Interceptors;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Задача на загрузку ТФ налоговых форм
@@ -103,6 +101,13 @@ public class LoadFormDataTask implements UserTask{
         // элементы выпадающего списка
         List<SelectBoxItem> selectBoxItems = new ArrayList<SelectBoxItem>();
         List<Department> departments = departmentService.getTBDepartments(userInfo.getUser());
+        // отсортировать по алфавиту
+        Collections.sort(departments, new Comparator<Department>() {
+            @Override
+            public int compare(Department o1, Department o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         for (Department department : departments) {
             selectBoxItems.add(new SelectBoxItem(department.getName(), department.getId()));
         }

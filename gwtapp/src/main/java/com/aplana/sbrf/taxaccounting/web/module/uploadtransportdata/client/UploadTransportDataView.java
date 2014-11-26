@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -46,7 +47,8 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
     @UiConstructor
     public UploadTransportDataView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-        formPanel.setAction(getUiHandlers().ACTION_URL);
+        formPanel.setAction(GWT.getHostPageBaseURL() + getUiHandlers().ACTION_URL);
+        formPanel.setAction(GWT.getHostPageBaseURL() + getUiHandlers().ACTION_URL);
         initListeners();
     }
 
