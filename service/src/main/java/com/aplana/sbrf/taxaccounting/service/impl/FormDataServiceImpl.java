@@ -849,11 +849,13 @@ public class FormDataServiceImpl implements FormDataService {
                 // Признак наличия принятых экземпляров источников
                 boolean existAcceptedSources = false;
                 for (DepartmentFormType sourceDFT : sourceFormTypes) {
-                    FormData sourceForm = getLast(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
+                    List<FormData> sourceForms = getLastList(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
                             sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                    if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
-                        existAcceptedSources = true;
-                        break;
+                    for (FormData sourceForm : sourceForms) {
+                        if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
+                            existAcceptedSources = true;
+                            break;
+                        }
                     }
                 }
                 // Если текущая форма-приемник имеет один или более источников в статусе «Принята» то консолидируем ее, иначе удаляем
@@ -1112,6 +1114,11 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
         return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
+    }
+
+    @Override
+    public List<FormData> getLastList(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+        return formDataDao.getLastListByDate(formTypeId, kind, departmentId, reportPeriodId, periodOrder, null);
     }
 
     @Override

@@ -33,6 +33,16 @@ public class FormToFormRelation implements Serializable {
 
     private Date correctionDate;
 
+    private String month;
+
+    public String getMonth() {
+        return month;
+    }
+
+    public void setMonth(String month) {
+        this.month = month;
+    }
+
     public String getFullDepartmentName() {
         return fullDepartmentName;
     }

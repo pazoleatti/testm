@@ -324,7 +324,7 @@ void consolidationSummary(def dataRows) {
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        def isMonth = it.formTypeId in [332] //ежемесячная
+        def isMonth = it.formTypeId in [332, 341, 344, 362] //ежемесячная
         def children = []
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {

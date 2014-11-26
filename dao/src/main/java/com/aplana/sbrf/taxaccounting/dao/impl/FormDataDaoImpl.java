@@ -550,6 +550,34 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         }
     }
 
+    @Override
+    public List<FormData> getLastListByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate) {
+        try {
+            return getJdbcTemplate().query(
+                    "select * from " +
+                            "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, " +
+                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id, r.manual " +
+                            "from form_data fd left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
+                            "on r.form_data_id = fd.id, department_report_period drp, form_template ft " +
+                            "where drp.id = fd.department_report_period_id " +
+                            "and ft.id = fd.form_template_id " +
+                            "and drp.department_id = ? " +
+                            "and drp.report_period_id = ? " +
+                            "and ft.type_id = ? " +
+                            "and fd.kind = ? " +
+                            "and (? is null or fd.period_order = ?) " +
+                            "and (? is null or drp.correction_date is null or drp.correction_date <= ?) " +
+                            "order by drp.correction_date desc nulls last) ",
+                    new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder,
+                            correctionDate, correctionDate},
+                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC,
+                            Types.DATE, Types.DATE},
+                    new FormDataRowMapper());
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<FormData>();
+        }
+    }
+
     private static final String UPDATE_FORM_DATA_PERFORMER_TB =
             "merge into FORM_DATA_PERFORMER fdp using ( " +
                     "  with formDataIdsWithRegExp as (select distinct fd.ID fd_id, FORM_DATA_PERFORMER.REPORT_DEPARTMENT_NAME from FORM_DATA fd " +
