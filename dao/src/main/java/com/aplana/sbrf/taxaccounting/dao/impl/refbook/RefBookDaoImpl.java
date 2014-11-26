@@ -1935,9 +1935,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             msg.append(value.get(REFBOOK_NAME_ALIAS));
             msg.append("\", ");
             if (value.get(UNIQUE_ATTRIBUTES_ALIAS) != null && !value.get(UNIQUE_ATTRIBUTES_ALIAS).isEmpty()) {
-                msg.append("запись id = \"");
+                msg.append("запись id = ");
                 msg.append(value.get(UNIQUE_ATTRIBUTES_ALIAS));
-				msg.append('\"');
             }
             msg.append("действует с \"");
             msg.append(value.get(VERSION_START_ALIAS));
