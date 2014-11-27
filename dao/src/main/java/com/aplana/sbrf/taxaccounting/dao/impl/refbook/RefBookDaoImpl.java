@@ -1146,7 +1146,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }, refBookId, startDate, refBookId, startDate, endDate);
     }
 
-    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ?)\n" +
+    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ? and status != 2)\n" +
             "select id from allRecords where version = (select min(version) from allRecords)";
 
     @Override
