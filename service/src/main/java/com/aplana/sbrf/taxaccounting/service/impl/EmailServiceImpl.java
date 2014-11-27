@@ -31,6 +31,8 @@ public class EmailServiceImpl implements EmailService {
         String port = model.get(ConfigurationParam.EMAIL_PORT, 0).get(0);
 
         Properties props = new Properties();
+        props.put("mail.smtp.socketFactory.port", port);
+        props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.host", server);
         props.put("mail.smtp.port", port);
         props.put("mail.smtp.auth", "true");
