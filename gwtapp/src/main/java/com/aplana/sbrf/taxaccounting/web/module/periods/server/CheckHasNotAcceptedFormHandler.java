@@ -47,11 +47,24 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
 
+    @Autowired
+    private FormDataSearchService formDataSearchService;
+
     @Override
     public CheckHasNotAcceptedFormResult execute(CheckHasNotAcceptedFormAction action, ExecutionContext executionContext) throws ActionException {
-        List<Integer> departments = departmentService.getAllChildrenIds(action.getDepartmentId());
-        List<FormData> forms = formDataService.find(departments, action.getReportPeriodId());
         List<LogEntry> logs = new ArrayList<LogEntry>();
+
+        List<Integer> departments = departmentService.getAllChildrenIds(action.getDepartmentId());
+        FormDataFilter dataFilter = new FormDataFilter();
+        dataFilter.setDepartmentIds(departments);
+        dataFilter.setReportPeriodIds(Arrays.asList(action.getReportPeriodId()));
+        if (action.getCorrectPeriod() != null) {
+            dataFilter.setCorrectionTag(true);
+            dataFilter.setCorrectionDate(action.getCorrectPeriod());
+        } else {
+            dataFilter.setCorrectionTag(false);
+        }
+        List<FormData> forms = formDataSearchService.findDataByFilter(dataFilter);
 
         for (FormData fd : forms) {
             if (fd.getState() != WorkflowState.ACCEPTED) {
@@ -66,6 +79,12 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
         filter.setDepartmentIds(departments);
         filter.setReportPeriodIds(Arrays.asList(action.getReportPeriodId()));
         filter.setFormState(WorkflowState.CREATED);
+        if (action.getCorrectPeriod() != null) {
+            filter.setCorrectionTag(true);
+            filter.setCorrectionDate(action.getCorrectPeriod());
+        } else {
+            filter.setCorrectionTag(false);
+        }
 
         List<DeclarationData> declarations = declarationDataService.getDeclarationData(filter, DeclarationDataSearchOrdering.ID, false);
 
