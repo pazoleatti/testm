@@ -16,9 +16,6 @@ import groovy.transform.Field
  *
  * форма действует с 1 октября 2014
  *
- * TODO:
- *      - при импорте невозможно получить значение для графы 23 http://jira.aplana.com/browse/SBRFACCTAX-9436
- *
  * @author ivildanov
  * @author Stanislav Yasinskiy
  */
@@ -56,14 +53,17 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CREATE:
         if (formData.kind == FormDataKind.PRIMARY) {
+            checkRegionId()
             copyData()
         }
         break
     case FormDataEvent.CALCULATE:
+        checkRegionId()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -80,19 +80,23 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
+        checkRegionId()
         consolidation()
         calc()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
+        checkRegionId()
         importData()
         calc()
         logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        checkRegionId()
         importTransportData()
         break
     case FormDataEvent.SORT_ROWS:
@@ -1290,4 +1294,11 @@ Long getRefBookRecordIdImport(Long refBookId, Date date, String filter, String c
         logger.warn("%s", msg)
     }
     return null
+}
+
+// Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+void checkRegionId() {
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
 }
