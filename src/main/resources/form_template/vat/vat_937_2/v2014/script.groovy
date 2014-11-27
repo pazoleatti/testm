@@ -201,9 +201,9 @@ void logicCheck() {
     if (appFormData) {
         def appDataRows = formDataService.getDataRowHelper(appFormData)?.allCached
         if (appDataRows) {
-            def appR4Row = getDataRow(appDataRows, 'R3')
+            def appR4Row = getDataRow(appDataRows, 'R3{wan}')
             def appTotalRow = getDataRow(appDataRows, 'total')
-            if (appTotalRow.sum == null || appR4Row.sum == null || totalA.diff != (appTotalRow.sum - appR4Row.sum)) {
+            if (appTotalRow.sum == null || appR4Row?.sum == null || totalA.diff != (appTotalRow.sum - appR4Row.sum)) {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
