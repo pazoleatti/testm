@@ -65,7 +65,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		void setTableColumns(final List<RefBookColumn> columns);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void setSelected(Long recordId);
-        Long getSelected();
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
         int getPageSize();
 		void setRange(Range range);
@@ -135,7 +134,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onAddRowClicked() {
-        getView().updateMode(FormMode.CREATE);
+        //getView().updateMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
 		editFormPresenter.show(null);
 	}
@@ -217,7 +216,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 getView().updateSendQuery(result.isSendQuery());
                                 editFormPresenter.init(refBookDataId, result.getColumns());
                                 if (result.isReadOnly()){
-                                    setMode(FormMode.READ);
+                                    mode = FormMode.READ;
                                 }
                                 if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
                                     recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
@@ -228,7 +227,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 } else {
                                     recordId = null;
                                     getView().resetSearchInputBox();
-                                    setMode(FormMode.VIEW);
+                                    if (!result.isReadOnly()) {
+                                        mode = FormMode.VIEW;
+                                    }
+                                    setMode(mode);
                                 }
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}

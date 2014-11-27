@@ -6,6 +6,7 @@ import org.jukito.JukitoRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @RunWith(JukitoRunner.class)
@@ -16,6 +17,6 @@ public class RefBookHierDataPresenterTest {
     @Test
     public void testOnAddRowClicked(RefBookHierDataPresenter.MyView myView) {
         refBookHierDataPresenter.onAddRowClicked();
-        verify(myView).updateMode(FormMode.CREATE);
+        verify(myView, never()).updateMode(FormMode.CREATE);
     }
 }

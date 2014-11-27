@@ -121,6 +121,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                 CheckHasNotAcceptedFormAction checkHasNotAcceptedForms = new CheckHasNotAcceptedFormAction();
                 checkHasNotAcceptedForms.setDepartmentId(getView().getSelectedRow().getDepartmentId());
                 checkHasNotAcceptedForms.setReportPeriodId((int) getView().getSelectedRow().getReportPeriodId());
+                checkHasNotAcceptedForms.setCorrectPeriod(getView().getSelectedRow().getCorrectPeriod());
 
                 dispatcher.execute(checkHasNotAcceptedForms, CallbackUtils
                         .defaultCallback(new AbstractCallback<CheckHasNotAcceptedFormResult>() {

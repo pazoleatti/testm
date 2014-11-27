@@ -30,10 +30,6 @@ import java.text.SimpleDateFormat
  * @author Stanislav Yasinskiy
  */
 
-// Признак периода ввода остатков
-@Field
-def Boolean isBalancePeriod = null
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -108,6 +104,10 @@ def start = null
 
 @Field
 def endDate = null
+
+// Признак периода ввода остатков
+@Field
+def Boolean isBalancePeriod = null
 
 //// Обертки методов
 

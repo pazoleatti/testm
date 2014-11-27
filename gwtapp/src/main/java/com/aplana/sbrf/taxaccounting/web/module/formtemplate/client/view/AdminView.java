@@ -173,10 +173,9 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
                 }
             }
         }
-        if (!formTypeTemplates.isEmpty() && (selectionModel.getSelectedObject() == null)) {
+        if (!formTypeTemplates.isEmpty()) {
             selectionModel.setSelected(formTypeTemplates.get(0), true);
-        }
-        if (formTypeTemplates.isEmpty()) {
+        } else {
             selectedItem = null;
             selectionModel.clear();
         }

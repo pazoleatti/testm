@@ -240,15 +240,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 		}
 	}
 
-    @Override
-    public Long getSelected() {
-        RefBookDataRow selectedObject = selectionModel.getSelectedObject();
-        if (selectedObject != null) {
-            return selectedObject.getRefBookRowId();
-        }
-        return null;
-    }
-
 	@Override
     public void resetRefBookElements() {
         int i;
@@ -438,10 +429,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @Override
     public boolean isAscSorting() {
-        if (refBookDataTable.getColumnSortList().size() == 0) {
-            return true;
-        }
-        return refBookDataTable.getColumnSortList().get(0).isAscending();
+        return refBookDataTable.getColumnSortList().size() == 0 || refBookDataTable.getColumnSortList().get(0).isAscending();
     }
 
     @Override
