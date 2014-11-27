@@ -349,7 +349,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         // departments
         String departmentClause = "";
         if (departmentIds != null && !departmentIds.isEmpty()){
-            departmentClause = "AND dft.department_id IN (:params)\n";
+            departmentClause = "AND " + SqlUtils.transformToSqlInStatement("dft.department_id", departmentIds) + "\n";
             parameters.addValue("params", departmentIds);
         }
 
@@ -664,20 +664,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     @Override
-    public void delete(final List<Long> ids) {
+    public void delete(List<Long> ids) {
         try {
-            getJdbcTemplate().batchUpdate("delete from DEPARTMENT_FORM_TYPE where id = ?",
-                    new BatchPreparedStatementSetter() {
-                        @Override
-                        public void setValues(PreparedStatement ps, int i) throws SQLException {
-                            ps.setLong(1, ids.get(i));
-                        }
-
-                        @Override
-                        public int getBatchSize() {
-                            return ids.size();
-                        }
-                    });
+            getJdbcTemplate().update("delete from DEPARTMENT_FORM_TYPE where " + SqlUtils.transformToSqlInStatement("id", ids));
         } catch (DataAccessException e){
             logger.error("", e);
             throw new DaoException("", e);

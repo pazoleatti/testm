@@ -363,10 +363,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
         }
         try {
             MapSqlParameterSource source = new MapSqlParameterSource();
-            source.addValue("rps", reportPeriodIdList);
             List<Pair<Integer, Date>> list = getNamedParameterJdbcTemplate().query("select distinct report_period_id, " +
                     "correction_date " +
-                    "from department_report_period where report_period_id in (:rps) and correction_date is not null",
+                    "from department_report_period where " +
+                    SqlUtils.transformToSqlInStatement("report_period_id", reportPeriodIdList) + " and correction_date is not null",
                     source, new CorrectionDateRowMapper());
 
             for (Pair<Integer, Date> pair : list) {

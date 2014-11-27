@@ -218,20 +218,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	}
 
     @Override
-    public void removeRecords(final List<Long> listIds) {
+    public void removeRecords(List<Long> listIds) {
         JdbcTemplate jt = getJdbcTemplate();
-        jt.batchUpdate("delete from log_system where id = ?",
-                new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setLong(1, listIds.get(i));
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return listIds.size();
-                    }
-                });
+        jt.update("delete from log_system where " + SqlUtils.transformToSqlInStatement("id", listIds));
     }
 
     @Override

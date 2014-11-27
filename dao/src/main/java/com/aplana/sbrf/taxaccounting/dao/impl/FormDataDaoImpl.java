@@ -393,13 +393,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public List<Long> getFormDataIds(List<TaxType> taxTypes, final List<Integer> departmentIds) {
         try {
             HashMap<String, Object> values = new HashMap<String, Object>() {{
-                put("departmentIds", departmentIds);
             }};
             String sql = "select fd.id from FORM_DATA fd left join FORM_TEMPLATE ft on fd.FORM_TEMPLATE_ID = ft.id " +
                     "join FORM_TYPE ftype on ft.TYPE_ID = ftype.ID, department_report_period drp " +
                     "where drp.id = fd.department_report_period_id and " +
                     "ftype.TAX_TYPE in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) + " " +
-                    "and drp.DEPARTMENT_ID in (:departmentIds)";
+                    "and " + SqlUtils.transformToSqlInStatement("drp.DEPARTMENT_ID", departmentIds);
             return getNamedParameterJdbcTemplate().queryForList(
                     sql,
                     values,
