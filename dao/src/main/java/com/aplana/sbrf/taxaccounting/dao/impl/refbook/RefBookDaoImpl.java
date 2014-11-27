@@ -435,7 +435,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "SELECT r.id, v.attribute_id, " +
                     "v.string_value, v.number_value, v.date_value, v.reference_value " +
                     "FROM ref_book_record r LEFT JOIN ref_book_value v ON v.record_id = r.id " +
-                    "WHERE r.id in (:recordIds) AND r.ref_book_id = :refBookId";
+                    "WHERE %s AND r.ref_book_id = :refBookId";
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(Long refBookId, List<Long> recordIds) {
@@ -443,8 +443,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         final Map<Long, Map<String, RefBookValue>> resultMap = new HashMap<Long, Map<String, RefBookValue>>();
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("refBookId", refBookId);
-        params.put("recordIds", recordIds);
-        getNamedParameterJdbcTemplate().query(SELECT_VALUES_BY_IDS_QUERY, params, new RowCallbackHandler() {
+        String sql = String.format(SELECT_VALUES_BY_IDS_QUERY, SqlUtils.transformToSqlInStatement("r.id", recordIds));
+        getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 processRecordDataRow(rs, refBook, resultMap);
@@ -1146,7 +1146,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }, refBookId, startDate, refBookId, startDate, endDate);
     }
 
-    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ?)\n" +
+    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ? and status != 2)\n" +
             "select id from allRecords where version = (select min(version) from allRecords)";
 
     @Override

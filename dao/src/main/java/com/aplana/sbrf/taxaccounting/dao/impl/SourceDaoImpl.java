@@ -18,28 +18,37 @@ import java.util.Date;
 @Repository
 public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
-    private Map<String, Long> buildParametrizedInQuery(String query, List<SourcePair> sourcePairs, PreparedStatementData ps) {
+    private String buildPairsInQuery(String query, String pairNames, List<SourcePair> sourcePairs) {
         StringBuilder in = new StringBuilder();
-        Map<String, Long> params = new HashMap<String, Long>();
-        int paramNum = 0;
         in.append("(");
+        int maxSize = SqlUtils.IN_CAUSE_LIMIT;
+        int counter = 0;
+        int sum = 0;
+        int size = sourcePairs.size();
         for (Iterator<SourcePair> it = sourcePairs.iterator(); it.hasNext();) {
             SourcePair pair = it.next();
-            ps.addParam(pair.getSource());
-            ps.addParam(pair.getDestination());
-            String leftPart = "leftPart" +  paramNum;
-            String rightPart = "rightPart" + paramNum;
-            in.append("(:").append(leftPart).append(",:").append(rightPart).append(")");
-            params.put(leftPart, pair.getSource());
-            params.put(rightPart, pair.getDestination());
-            if (it.hasNext()) {
-                in.append(",");
+            if (counter == 0) {
+                in.append(pairNames).append(" in (");
             }
-            paramNum += 1;
+            in.append("(").append(pair.getSource()).append(",").append(pair.getDestination()).append(")");
+            if (counter == maxSize - 1) {
+                in.append(")");
+                if (sum < size) {
+                    in.append(" OR ");
+                }
+                counter = 0;
+            } else {
+                if (sum < size - 1) {
+                    in.append(",");
+                } else {
+                    in.append(")");
+                }
+                counter++;
+            }
+            sum++;
         }
         in.append(")");
-        ps.appendQuery(String.format(query, in));
-        return params;
+        return String.format(query, in.toString());
     }
 
     private final static String GET_FORM_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, \n" +
@@ -52,8 +61,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "join department_form_type d_dft on d_dft.id = department_form_type_id\n" +
             "join form_kind d_kind on d_kind.id = d_dft.kind\n" +
             "join form_type d_type on d_type.id = d_dft.form_type_id\n" +
-            "where\n" +
-            "(src_department_form_type_id, department_form_type_id) in %s --список пар \n" +
+            "where \n" +
+            "%s --список пар \n" +
             "and (period_end >= :periodStart or period_end is null) --дата открытия периода \n" +
             "and (:periodEnd is null or period_start <= :periodEnd) --дата окончания периода (может быть передана null)\n" +
             "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) --исключить этот период";
@@ -67,8 +76,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "join form_type s_type on s_type.id = s_dft.form_type_id\n" +
             "join department_declaration_type d_ddt on d_ddt.id = department_declaration_type_id\n" +
             "join declaration_type d_type on d_type.id = d_ddt.declaration_type_id\n" +
-            "where\n" +
-            "(src_department_form_type_id, department_declaration_type_id) in %s --список пар\n" +
+            "where \n" +
+            "%s --список пар\n" +
             "and (period_end >= :periodStart or period_end is null) --дата открытия периода\n" +
             "and (:periodEnd is null or period_start <= :periodEnd) --дата окончания периода (может быть передана null)\n" +
             "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) --исключить этот период";
@@ -77,13 +86,12 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public Map<SourcePair, List<SourceObject>> getIntersections(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd,
                                                                 Date excludedPeriodStart, Date excludedPeriodEnd, final boolean declaration) {
         final Map<SourcePair, List<SourceObject>> result = new HashMap<SourcePair, List<SourceObject>>();
-        PreparedStatementData ps = new PreparedStatementData();
-        Map<String, Long> pairParams;
         //формируем in-часть вида ((1, 2), (1, 3))
+        String sql = null;
         if (declaration) {
-            pairParams = buildParametrizedInQuery(GET_DECLARATION_INTERSECTIONS, sourcePairs, ps);
+            sql = buildPairsInQuery(GET_DECLARATION_INTERSECTIONS, "(src_department_form_type_id, department_declaration_type_id)", sourcePairs);
         } else {
-            pairParams = buildParametrizedInQuery(GET_FORM_INTERSECTIONS, sourcePairs, ps);
+            sql = buildPairsInQuery(GET_FORM_INTERSECTIONS, "(src_department_form_type_id, department_form_type_id)", sourcePairs);
         }
         //составляем все параметры вместе. PreparedStatementData использовать не получается, т.к несколько параметров могут быть равны null
         Map<String, Object> params = new HashMap<String, Object>();
@@ -91,11 +99,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("periodEnd", periodEnd);
         params.put("excludedPeriodStart", excludedPeriodStart);
         params.put("excludedPeriodEnd", excludedPeriodEnd);
-        for (Map.Entry<String, Long> param : pairParams.entrySet()) {
-            params.put(param.getKey(), param.getValue());
-        }
 
-        getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), params, new RowCallbackHandler() {
+        getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 SourcePair pair = new SourcePair(rs.getLong("source"), rs.getLong("destination"));
@@ -121,7 +126,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "--существующие записи из таблицы соответствия\n" +
             "select tds.src_department_form_type_id, tds.department_form_type_id, period_start, period_end, 1 as base from form_data_source tds\n" +
             "union all --записи через cross join для возможности фильтрации попарно (можно заменить за запрос из временной таблицы), фиктивные даты = даты для фильтрации \n" +
-            "select a.id, b.id, :periodStart, cast(:periodEnd as date), 0 as base from department_form_type a, department_form_type b where (a.id, b.id) in %s\n" +
+            "select a.id, b.id, :periodStart, cast(:periodEnd as date), 0 as base from department_form_type a, department_form_type b where %s --список пар \n" +
             ")\n" +
             "select \n" +
             "       CONNECT_BY_ROOT src as IN_src_department_form_type_id, --исходный источник\n" +
@@ -136,18 +141,14 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public Map<SourcePair, SourcePair> getLoops(List<SourcePair> sourcePairs, Date periodStart, Date periodEnd) {
         final Map<SourcePair, SourcePair> result = new HashMap<SourcePair, SourcePair>();
-        PreparedStatementData ps = new PreparedStatementData();
-        //формируем in-часть вида ((1, 2), (1, 3))
-        Map<String, Long> pairParams = buildParametrizedInQuery(GET_LOOPS, sourcePairs, ps);
         //составляем все параметры вместе. PreparedStatementData использовать не получается, т.к несколько параметров могут быть равны null
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        for (Map.Entry<String, Long> param : pairParams.entrySet()) {
-            params.put(param.getKey(), param.getValue());
-        }
 
-        getNamedParameterJdbcTemplate().query(ps.getQuery().toString(), params, new RowCallbackHandler() {
+        //формируем in-часть вида ((1, 2), (1, 3))
+        String sql = buildPairsInQuery(GET_LOOPS, "(a.id, b.id)", sourcePairs);
+        getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 result.put(

@@ -216,7 +216,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 getView().updateSendQuery(result.isSendQuery());
                                 editFormPresenter.init(refBookDataId, result.getColumns());
                                 if (result.isReadOnly()){
-                                    setMode(FormMode.READ);
+                                    mode = FormMode.READ;
                                 }
                                 if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
                                     recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
@@ -227,7 +227,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 } else {
                                     recordId = null;
                                     getView().resetSearchInputBox();
-                                    setMode(FormMode.VIEW);
+                                    if (!result.isReadOnly()) {
+                                        mode = FormMode.VIEW;
+                                    }
+                                    setMode(mode);
                                 }
                                 getProxy().manualReveal(RefBookDataPresenter.this);
 							}

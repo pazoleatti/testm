@@ -687,8 +687,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         if (columnIdList == null || columnIdList.isEmpty()) {
             return;
         }
-        Map<String, Object> paramMap = new HashMap<String, Object>() {{put("ids", columnIdList);}};
-        getNamedParameterJdbcTemplate().update("DELETE FROM data_cell WHERE column_id IN (:ids)", paramMap);
+        getJdbcTemplate().update("DELETE FROM data_cell WHERE " + SqlUtils.transformToSqlInStatement("column_id", columnIdList));
     }
 
     @Override

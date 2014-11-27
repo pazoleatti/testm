@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.scheduler.task;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -109,7 +110,9 @@ public class LoadFormDataTask implements UserTask{
             }
         });
         for (Department department : departments) {
-            selectBoxItems.add(new SelectBoxItem(department.getName(), department.getId()));
+            if (department.getType() != DepartmentType.ROOT_BANK) {
+                selectBoxItems.add(new SelectBoxItem(department.getName(), department.getId()));
+            }
         }
         // добавление элемента "все подразделения"
         selectBoxItems.add(new SelectBoxItem(ALL_DEPARTMENTS_LABEL, ALL_DEPARTMENTS_ID));

@@ -277,7 +277,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     codes[i] = "'" + codes[i].trim() + "'";
                 }
                 if (codes != null && codes.length != 0) {
-                    sql.append(" AND dec.tax_organ_code in (" + StringUtils.join(Arrays.asList(codes), ",") + ")");
+                    sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.tax_organ_code", Arrays.asList(codes)));
                 }
             }
 
@@ -287,7 +287,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     codes[i] = "'" + codes[i].trim() + "'";
                 }
                 if (codes != null && codes.length != 0) {
-                    sql.append(" AND dec.kpp in (" + StringUtils.join(Arrays.asList(codes), ",") + ")");
+                    sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.kpp", Arrays.asList(codes)));
                 }
             }
         }

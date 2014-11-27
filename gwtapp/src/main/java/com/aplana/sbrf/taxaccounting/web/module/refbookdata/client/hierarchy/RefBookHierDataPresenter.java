@@ -298,7 +298,12 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         } else {
                             recordId = null;
                             getView().clearFilterInputBox();
-                            setMode(FormMode.VIEW);
+                            if (result.isReadOnly()){
+                                mode = FormMode.READ;
+                            } else {
+                                mode = FormMode.VIEW;
+                            }
+                            setMode(mode);
                             getView().clearSelected();
                             getView().load();
                             getView().loadAndSelect();

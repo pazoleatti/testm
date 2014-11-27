@@ -156,13 +156,13 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
             String odd;
             HashMap<String, Object> params;
             if (ftIds != null){
-                odd = " form_template_id IN (:ftIds)";
+                odd = " " + SqlUtils.transformToSqlInStatement("form_template_id", ftIds);
                 params = new HashMap<String, Object>() {{
                     put("ftIds", ftIds);
                 }};
             }
             else {
-                odd = " declaration_template_id in (:dtIds)";
+                odd = " " +SqlUtils.transformToSqlInStatement("declaration_template_id", dtIds);
                 params = new HashMap<String, Object>() {{
                     put("dtIds", dtIds);
                 }};
@@ -200,7 +200,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     @Override
     public void delete(final Collection<Integer> ids) {
         try {
-            getNamedParameterJdbcTemplate().update("delete from template_changes where id in (:ids)",
+            getNamedParameterJdbcTemplate().update("delete from template_changes where " + SqlUtils.transformToSqlInStatement("id", ids),
                     new HashMap<String, Object>(){{put("ids", ids);}});
         } catch (DataAccessException e){
             logger.error("Удаление записей журнала изменений", e);

@@ -389,7 +389,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, allEntries = true)
     public void delete(final Collection<Integer> formTemplateIds) {
         try {
-            getNamedParameterJdbcTemplate().update("delete from form_template where id in (:ids)",
+            getNamedParameterJdbcTemplate().update("delete from form_template where " + SqlUtils.transformToSqlInStatement("id", formTemplateIds),
                     new HashMap<String, Object>(){{put("ids", formTemplateIds);}});
         } catch (DataAccessException e){
             logger.error("", e);

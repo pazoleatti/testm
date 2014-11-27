@@ -1206,7 +1206,7 @@ public class SourceServiceImpl implements SourceService {
         formToFormRelation.setFormType(formData.getFormType());
         formToFormRelation.setFormDataId(formData.getId());
         formToFormRelation.setState(formData.getState());
-        formToFormRelation.setMonth(Months.fromId(formData.getPeriodOrder() - 1).getName());
+        formToFormRelation.setMonth(formData.getPeriodOrder() != null ? Months.fromId(formData.getPeriodOrder() - 1).getName() : "");
     }
 
     /**

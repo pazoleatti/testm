@@ -255,8 +255,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         // departments
         String departmentClause = "";
         if (departmentIds != null && !departmentIds.isEmpty()){
-            departmentClause = "AND ddt.DEPARTMENT_ID IN (:params)\n";
-            parameters.addValue("params", departmentIds);
+            departmentClause = "AND " + SqlUtils.transformToSqlInStatement("ddt.DEPARTMENT_ID", departmentIds) + "\n";
         }
 
         // order

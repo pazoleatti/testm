@@ -112,7 +112,7 @@ public class IfrsDaoImpl extends AbstractDao implements IfrsDao {
                                 "join report_period rp on rp.id = ifrs.report_period_id " +
                                 "join tax_period tp on tp.id=rp.tax_period_id ");
             if (reportPeriodIds != null && !reportPeriodIds.isEmpty()) {
-                ps.appendQuery("where ifrs.report_period_id in (" + SqlUtils.preparePlaceHolders(reportPeriodIds.size()) + ") ");
+                ps.appendQuery("where " + SqlUtils.transformToSqlInStatement("ifrs.report_period_id", reportPeriodIds));
                 for (Integer reportPeriodId: reportPeriodIds) {
                     ps.addParam(reportPeriodId);
                 }
