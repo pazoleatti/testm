@@ -120,16 +120,54 @@ WHEN NOT MATCHED THEN
 
 ----------------------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-9273: заполнить поле "Наименования для МСФО" макетов НФ, деклараций
-UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-25' WHERE ID=324;
-UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-26' WHERE ID=325;
-UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-27' WHERE ID=326;
-UPDATE form_type SET is_ifrs=1, ifrs_name='РСД' WHERE ID=614;
-UPDATE form_type SET is_ifrs=1, ifrs_name='Доходы простые' WHERE ID=301;
-UPDATE form_type SET is_ifrs=1, ifrs_name='Расходы простые' WHERE ID=304;
-UPDATE form_type SET is_ifrs=1, ifrs_name='Доходы сложные' WHERE ID=302;
-UPDATE form_type SET is_ifrs=1, ifrs_name='Расходы сложные' WHERE ID=303;
+UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-25' WHERE id=324;
+UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-26' WHERE id=325;
+UPDATE form_type SET is_ifrs=1, ifrs_name='РНУ-27' WHERE id=326;
+UPDATE form_type SET is_ifrs=1, ifrs_name='РСД' WHERE id=614;
+UPDATE form_type SET is_ifrs=1, ifrs_name='Доходы простые' WHERE id=301;
+UPDATE form_type SET is_ifrs=1, ifrs_name='Расходы простые' WHERE id=304;
+UPDATE form_type SET is_ifrs=1, ifrs_name='Доходы сложные' WHERE id=302;
+UPDATE form_type SET is_ifrs=1, ifrs_name='Расходы сложные' WHERE id=303;
 
 UPDATE declaration_type SET is_ifrs=1, ifrs_name='Декларация' WHERE id=2;
+----------------------------------------------------------------------------------------------------------------------------
+-- новые виды деклараций
+INSERT INTO declaration_type (id, tax_type, name, status, is_ifrs, ifrs_name) VALUES (8, 'P', 'Расчет по авансовому платежу', 0, 0, NULL);
+INSERT INTO declaration_type (id, tax_type, name, status, is_ifrs, ifrs_name) VALUES (9, 'I', 'Декларация по налогу на прибыль (Банк) (new)', 0, 0, NULL);
+INSERT INTO declaration_type (id, tax_type, name, status, is_ifrs, ifrs_name) VALUES (10, 'I', 'Декларация по налогу на прибыль (ОП) (new)', 0, 0, NULL);
+----------------------------------------------------------------------------------------------------------------------------
+-- коды для видов НФ
+UPDATE form_type SET code = '787' || CHR(47) || '2' || CHR(47) || '1' WHERE id = 200;
+UPDATE form_type SET code = '1084-3.1' WHERE id = 201;
+UPDATE form_type SET code = '1084-3.2' WHERE id = 202;
+UPDATE form_type SET code = '724.1' WHERE id = 600;
+UPDATE form_type SET code = '724.2.1' WHERE id = 601;
+UPDATE form_type SET code = '724.2.2' WHERE id = 602;
+UPDATE form_type SET code = '724.4' WHERE id = 603;
+UPDATE form_type SET code = '724.6' WHERE id = 604;
+UPDATE form_type SET code = '724.7' WHERE id = 605;
+UPDATE form_type SET code = '937.1' WHERE id = 606;
+UPDATE form_type SET code = '937.1.13' WHERE id = 607;
+UPDATE form_type SET code = '937.2' WHERE id = 608;
+UPDATE form_type SET code = '937.2.13' WHERE id = 609;
+----------------------------------------------------------------------------------------------------------------------------
+-- новые виды НФ
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (309, 'Остатки по начисленным авансовым платежам', 'I', 0, NULL, 0, NULL);
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (411, 'Сведения для расчёта налога с доходов в виде дивидендов (new)', 'I', 0, NULL, 0, NULL);
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (412, 'Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика (new)', 'I', 0, NULL, 0, NULL);
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (413, 'Сведения о дивидендах, выплаченных в отчетном квартале (new)', 'I', 0, NULL, 0, NULL);
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (610, 'Данные бухгалтерского учета для расчета налога на имущество', 'P', 0, '945.1', 0, NULL);
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (611, 'Данные о кадастровой стоимости объектов недвижимости для расчета налога на имущество', 'P', 0, '945.2', 0, NULL);
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (612, 'Расчёт налога на имущество по кадастровой стоимости', 'P', 0, '945.4', 0, NULL);
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (613, 'Расчёт налога на имущество по средней' || CHR(47) || 'среднегодовой стоимости', 'P', 0, '945.3', 0, NULL);
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (614, '(РСД) Расчет резерва по сомнительным долгам в целях налогообложения', 'I', 0, NULL, 1, 'РСД');
+INSERT INTO form_type (id, name, tax_type, status, code, is_ifrs, ifrs_name) VALUES (615, 'Сводная форма данных бухгалтерского учета для расчета налога на имущество', 'P', 0, '945.5', 0, NULL);
+----------------------------------------------------------------------------------------------------------------------------
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (3, 'Генерация xlsm-файла', 'ejb/taxaccounting/async-task.jar/XlsmGeneratorAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (4, 'Генерация csv-файла', 'ejb/taxaccounting/async-task.jar/CsvGeneratorAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (5, 'Генерация xlsx-файла', 'ejb/taxaccounting/async-task.jar/XlsxGeneratorAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (6, 'Генерация xml-файла', 'ejb/taxaccounting/async-task.jar/XmlGeneratorAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (9, 'Генерация отчетности для МСФО', 'ejb/taxaccounting/async-task.jar/IfrsGeneratorAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
 ----------------------------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
