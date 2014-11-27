@@ -433,7 +433,7 @@ def getDataRows(def taxOrganCode, def kpp, def formTypeId, def formDataCollectio
             row.getAlias() == null && taxOrganCode.equals(getOwnerValue(row, 'taxAuthority')) && kpp.equals(getOwnerValue(row,'kpp'))
         } ?: [])
     }
-    return dataRows.isEmpty() ? null : dataRows
+    return dataRows.isEmpty() ? [] : dataRows
 }
 
 def splitDataRows(def dataRows) {
