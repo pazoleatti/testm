@@ -123,6 +123,7 @@ public class LoadFormDataTask implements UserTask{
         selectBox.setRequired(true);
         selectBox.setName(TB_NAME);
         selectBox.setType(TaskParamType.INT);
+        selectBox.setRequired(true);
 
         // список параметров задачи
         List<FormElement> params = new ArrayList<FormElement>();
