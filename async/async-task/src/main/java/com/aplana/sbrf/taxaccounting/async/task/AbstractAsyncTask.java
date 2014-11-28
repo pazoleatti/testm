@@ -24,7 +24,8 @@ import java.util.Map;
  * @author dloshkarev
  */
 public abstract class AbstractAsyncTask implements AsyncTask {
-    protected final Log log = LogFactory.getLog(getClass());
+
+    protected static final Log log = LogFactory.getLog(AbstractAsyncTask.class);
 
     @Autowired
     private LockDataService lockService;

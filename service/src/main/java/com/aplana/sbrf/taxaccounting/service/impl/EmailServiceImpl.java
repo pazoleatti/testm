@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.EmailService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,8 @@ import java.util.Properties;
 
 @Service
 public class EmailServiceImpl implements EmailService {
+
+	static final Log Log = LogFactory.getLog(EmailServiceImpl.class);
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -55,7 +59,7 @@ public class EmailServiceImpl implements EmailService {
             message.setText(text);
             Transport.send(message);
         } catch (MessagingException e) {
-            e.printStackTrace();
+			Log.error(e);
             throw new ServiceException("Ошибка отправки сообщения. %s", e.getMessage());
         }
     }
@@ -70,11 +74,11 @@ public class EmailServiceImpl implements EmailService {
             transport.connect(server, Integer.parseInt(port), login, password);
             transport.close();
             logger.info("Проверка выполнена, ошибок не найдено");
-            return true;
         } catch (Exception e) {
             logger.error("Авторизация с указанными параметрами не выполнена!");
-            e.printStackTrace();
+			Log.error(e);
+			return false;
         }
-        return false;
+		return true;
     }
 }

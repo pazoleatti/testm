@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,8 @@ import java.util.List;
  */
 @Service
 public class UploadTransportDataServiceImpl implements UploadTransportDataService {
+
+	private static final Log LOG = LogFactory.getLog(UploadTransportDataServiceImpl.class);
 
     //Добавил исключительно для записи в лог
     private Integer formTypeId = null;
@@ -356,7 +360,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             return checkResult;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e);
             log(userInfo, LogData.L37, logger, fileName, e.getMessage());
             return null;
         }

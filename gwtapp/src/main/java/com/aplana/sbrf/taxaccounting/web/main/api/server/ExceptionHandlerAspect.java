@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.gwtplatform.dispatch.shared.Action;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -27,14 +29,17 @@ public class ExceptionHandlerAspect {
 
 	private static final String ERROR_MESSAGE = "Операция%s не выполнена. ";
 
+	private static final Log LOG = LogFactory.getLog(ExceptionHandlerAspect.class);
+
 	private String getErrorMessage(String errName) {
 		return String.format(ERROR_MESSAGE, errName.isEmpty() ? "" : " \"" + errName + "\"");
 	}
 
-	@AfterThrowing(pointcut = "target(com.gwtplatform.dispatch.server.actionhandler.ActionHandler) &&"
-			+ "args(action,..)", throwing = "e")
-	public void handleException(@SuppressWarnings("rawtypes") Action action,
-			Throwable e) throws ActionException {
+	@AfterThrowing(pointcut = "target(com.gwtplatform.dispatch.server.actionhandler.ActionHandler) && args(action,..)", throwing = "e")
+	public void handleException(@SuppressWarnings("rawtypes") Action action, Throwable e) throws ActionException {
+
+		LOG.error(e);
+
 		String actionName = "";
 		
 		if (action instanceof ActionName)
@@ -43,28 +48,19 @@ public class ExceptionHandlerAspect {
 		if (e instanceof TaActionException) {
 			throw (TaActionException)e;
 		} else if (e instanceof ServiceLoggerException) {
-            TaActionException tae = new TaActionException(
-                    getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""));
+            TaActionException tae = new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""));
             tae.setUuid(((ServiceLoggerException) e).getUuid());
             //Сделал на случай если все таки надо будет отображать стек трейс
             tae.setNeedStackTrace(false);
             throw tae;
         } else if (e instanceof AccessDeniedException) {
-			throw new TaActionException(
-					getErrorMessage(actionName)
-							+ (e.getLocalizedMessage() != null ? e
-									.getLocalizedMessage() : ""));
+			throw new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""));
 		} else if (e instanceof org.springframework.security.access.AccessDeniedException) {
-			throw new TaActionException(
-					getErrorMessage(actionName)
-							+ "Доступ запрещен");
+			throw new TaActionException(getErrorMessage(actionName) + "Доступ запрещен");
 		} else if (e instanceof DaoException) {
 			throw new TaActionException(getErrorMessage(actionName), formatException(e));
 		} else {
-			throw new TaActionException(
-					getErrorMessage(actionName)
-							+ (e.getLocalizedMessage() != null ? e.getLocalizedMessage()
-							: ""), formatException(e));
+			throw new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""), formatException(e));
 		}
 	}
 
