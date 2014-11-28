@@ -23,6 +23,7 @@ COMMENT ON COLUMN data_cell.rowspan IS 'Количество объединяе�
 
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_pk PRIMARY KEY (row_id, column_id);
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_fk_column_id FOREIGN KEY (column_id) REFERENCES form_column(id);
+ALTER TABLE data_cell ADD CONSTRAINT data_cell_fk_style_id FOREIGN KEY (style_id) REFERENCES form_style(id);
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_fk_data_row FOREIGN KEY (row_id) REFERENCES data_row(id) ON DELETE CASCADE;
 ALTER TABLE data_cell ADD CONSTRAINT data_cell_chk_editable CHECK (editable IN (0, 1));
 
