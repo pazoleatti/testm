@@ -99,7 +99,7 @@ void importFromNSI() {
     println("Import Emitent: Add count = ${addList.size()}, Update count = ${updList.size()}")
 
     if (!logger.containsLevel(LogLevel.ERROR) && !addList.isEmpty()) {
-        dataProvider.createRecordVersion(logger, actualDate, null, addList)
+        dataProvider.updateRecords(userInfo, actualDate, updList)
     }
 
     if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
