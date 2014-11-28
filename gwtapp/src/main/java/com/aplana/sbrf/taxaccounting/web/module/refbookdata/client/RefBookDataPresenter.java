@@ -198,6 +198,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
+        getView().resetSearchInputBox();
         editFormPresenter.setVersionMode(false);
         editFormPresenter.setCurrentUniqueRecordId(null);
         editFormPresenter.setRecordId(null);
