@@ -147,7 +147,7 @@ void generateXML() {
     // Форма 945.4 получаем только строки с Кодом НО и КПП
     def dataRowsCadastre = getDataRows(taxOrganCode, kpp, 612, formDataCollection)
     // Форма 945.5 получаем только строки с Кодом НО и КПП
-    def dataRowsSummary = getDataRows(taxOrganCode, kpp, 10640, formDataCollection)
+    def dataRowsSummary = getDataRows(taxOrganCode, kpp, 615, formDataCollection)
 
     // разделим строки по субъектам и октмо
     def dataRowsSummaryMap = splitDataRows(dataRowsSummary)
