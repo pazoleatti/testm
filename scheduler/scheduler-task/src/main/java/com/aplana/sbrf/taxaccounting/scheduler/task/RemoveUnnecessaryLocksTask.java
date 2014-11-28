@@ -74,6 +74,7 @@ public class RemoveUnnecessaryLocksTask implements UserTask {
         time.setRequired(true);
         time.setType(TaskParamType.INT);
         time.setName(secCountParam);
+        time.setRequired(true);
         params.add(time);
 
         return params;
