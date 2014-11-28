@@ -1050,11 +1050,50 @@ void addTransportData(def xml) {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
+    def rowsMap = [:]
+    def regNumberMap = [:]
+    def rowList = []
+    def total = null
+    dataRows.each{ row ->
+        if (row.getAlias() == null) {
+            rowList.add(row)
+        } else if (row.getAlias().contains('itogoRegNumber')) {
+            regNumberMap.put(row, rowList)
+            rowList = []
+        } else if (row.getAlias().contains('itogoIssuer')) {
+            rowsMap.put(row, regNumberMap)
+            regNumberMap = [:]
+        } else {
+            total = row
+        }
+    }
+
+    dataRows.clear()
+
+    // сортируем и добавляем все строки
+    rowsMap.sort{ it.key.fix }
+    rowsMap.each { row, subMap ->
+        subMap.sort { it.key.fix }
+        subMap.each { subTotalRow, dataRowsList ->
+            sortAddRows(dataRowsList, dataRows)
+            dataRows.add(subTotalRow)
+        }
+        dataRows.add(row)
+    }
+    // если остались данные вне иерархии, добавляем их перед итогами
+    sortAddRows(rowList, dataRows)
+    dataRows.add(total)
     dataRowHelper.saveSort()
 }
 
-// Получение подитоговых строк
-def getSubTotalRows(def dataRows) {
-    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+void sortAddRows(def addRows, def dataRows) {
+    if (!addRows.empty) {
+        def firstRow = addRows[0]
+        // Массовое разыменовывание граф НФ
+        def columnNameList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
+        refBookService.dataRowsDereference(logger, addRows, columnNameList)
+
+        sortRowsSimple(addRows)
+        dataRows.addAll(addRows)
+    }
 }

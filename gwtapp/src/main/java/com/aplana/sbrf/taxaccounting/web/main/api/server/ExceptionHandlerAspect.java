@@ -1,18 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.server;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
-
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.gwtplatform.dispatch.shared.Action;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.stereotype.Component;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Обработчик исключений для ActionHandler. Преобразует сервисные исключения в
@@ -58,13 +58,28 @@ public class ExceptionHandlerAspect {
 			throw new TaActionException(
 					getErrorMessage(actionName)
 							+ "Доступ запрещен");
+		} else if (e instanceof DaoException) {
+			throw new TaActionException(getErrorMessage(actionName), formatException(e));
 		} else {
 			throw new TaActionException(
 					getErrorMessage(actionName)
 							+ (e.getLocalizedMessage() != null ? e.getLocalizedMessage()
-									: ""), formatException(e));
+							: ""), formatException(e));
 		}
+	}
 
+	/**
+	 * Обернуть необработанные исключения в DaoException
+	 * @param e
+	 * @throws DaoException
+	 */
+	@AfterThrowing(pointcut = "execution(* com.aplana.sbrf.taxaccounting.dao.*.*(..))", throwing = "e")
+	public void handleDaoException(Throwable e) throws DaoException {
+		if (e instanceof DaoException) {
+			throw (DaoException) e;
+		} else {
+			throw new DaoException(e.getLocalizedMessage(), e);
+		}
 	}
 
 	/**
