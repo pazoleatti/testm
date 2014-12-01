@@ -566,38 +566,42 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 	}
 
-    @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive) {
-        Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive);
-        // get query and params
-        String query = sql.getFirst();
-        Map<String, Object> params = sql.getSecond();
+	@Override
+	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive) {
+		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive);
+		// get query and params
+		String query = sql.getFirst();
+		Map<String, Object> params = sql.getSecond();
 
-        // calculate count
-        String countQuery = "select count(*) from ("+query+")";
-        int count = getNamedParameterJdbcTemplate().queryForInt(countQuery, params);
+		// calculate count
+		String countQuery = "select count(*) from (" + query + ")";
+		int count = getNamedParameterJdbcTemplate().queryForInt(countQuery, params);
 
-        String dataQuery = "SELECT * FROM ("+query+") WHERE IDX BETWEEN :from AND :to";
-        params.put("from", range.getOffset());
-        params.put("to", range.getLimit() + range.getLimit() - 1);
+		List<FormDataSearchResult> dataRows;
 
-        List<FormDataSearchResult> dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, new RowMapper<FormDataSearchResult>() {
-            @Override
-            public FormDataSearchResult mapRow(ResultSet rs, int rowNum) throws SQLException {
-                FormDataSearchResult result = new FormDataSearchResult();
-                result.setIndex(SqlUtils.getLong(rs,"IDX"));
-                result.setColumnIndex(SqlUtils.getLong(rs,"column_index"));
-                result.setRowIndex(SqlUtils.getLong(rs,"row_index"));
-                result.setStringFound(rs.getString("true_val"));
+		if (count != 0) {
+			String dataQuery = "SELECT * FROM (" + query + ") WHERE IDX BETWEEN :from AND :to";
+			params.put("from", range.getOffset());
+			params.put("to", range.getLimit() + range.getLimit() - 1);
 
-                return result;
-            }
-        });
+			dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, new RowMapper<FormDataSearchResult>() {
+				@Override
+				public FormDataSearchResult mapRow(ResultSet rs, int rowNum) throws SQLException {
+					FormDataSearchResult result = new FormDataSearchResult();
+					result.setIndex(SqlUtils.getLong(rs, "IDX"));
+					result.setColumnIndex(SqlUtils.getLong(rs, "column_index"));
+					result.setRowIndex(SqlUtils.getLong(rs, "row_index"));
+					result.setStringFound(rs.getString("true_val"));
 
-        PagingResult<FormDataSearchResult> pagingResult = new PagingResult<FormDataSearchResult>(dataRows, count);
+					return result;
+				}
+			});
+		} else {
+			dataRows = new ArrayList<FormDataSearchResult>();
+		}
 
-        return pagingResult;
-    }
+		return new PagingResult<FormDataSearchResult>(dataRows, count);
+	}
 
     @Override
     public boolean isDataRowsCountChanged(long formId) {
@@ -614,7 +618,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
     private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive){
 
         String sql =
-				"WITH dcell AS (SELECT row_id, column_id, nvalue, svalue, dvalue FROM data_cell WHERE row_id IN (SELECT id FROM data_row WHERE form_data_id=:fdId)) \n" +
+				"WITH dcell_temp AS (SELECT row_id, column_id, nvalue, svalue, dvalue FROM data_cell WHERE row_id IN (SELECT id FROM data_row WHERE form_data_id=:fdId)), \n" +
+				"dcell AS (SELECT row_id, column_id, svalue, dvalue, CASE WHEN fc.type = 'R' and fc.parent_column_id is not NULL THEN \n" +
+				"  (SELECT reference_value FROM ref_book_value WHERE attribute_id = fc.attribute_id AND record_id = \n" +
+				"   (SELECT nvalue FROM dcell_temp WHERE dcell_temp.column_id = fc.parent_column_id AND dcell_temp.row_id = dc.row_id)) \n" +
+				"  ELSE nvalue END AS nvalue \n" +
+				"FROM dcell_temp dc JOIN FORM_COLUMN fc ON fc.id=dc.column_id) \n" +
                 "SELECT row_number() over (order by row_index, column_index) as IDX, row_index, column_index, true_val \n" +
                 "from (SELECT dense_rank()over(order by dr.ord) row_index, dc.ord as column_index, dc.type, val, dc.attribute_id, dc.attribute_id2, \n" +
                 "       case when dc.type='R' and (select ref_book_id from ref_book_attribute where id=dc.attribute_id)=30 then \n"+
