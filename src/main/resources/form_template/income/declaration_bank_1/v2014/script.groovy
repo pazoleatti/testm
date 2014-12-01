@@ -733,45 +733,42 @@ void generateXML() {
                             cvartalIchs = [0]
                     }
                     cvartalIchs.each { cvartalIch ->
-                        // 0..n
-                        НалПУМес(
-                                [ТипНП : typeNP] +
-                                        (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                        [ОКТМО : oktmo]) {
+                        if (!isTaxPeriod) {
+                            // 0..n
+                            НалПУМес(
+                                    [ТипНП : typeNP] +
+                                            (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
+                                            [ОКТМО : oktmo]) {
 
-                            def avPlat1 = empty
-                            def avPlat2 = empty
-                            def avPlat3 = empty
-                            if (!isTaxPeriod) {
                                 def list02Row300 = avPlatMesFB
-                                avPlat1 = (long) list02Row300 / 3
-                                avPlat2 = avPlat1
-                                avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
-                            }
-                            // 0..1
-                            ФедБдж(
-                                    КБК : kbk,
-                                    АвПлат1 : avPlat1,
-                                    АвПлат2 : avPlat2,
-                                    АвПлат3 : avPlat3)
+                                def avPlat1 = (long) list02Row300 / 3
+                                def avPlat2 = avPlat1
+                                def avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
+                                // 0..1
+                                ФедБдж(
+                                        КБК : kbk,
+                                        АвПлат1 : avPlat1,
+                                        АвПлат2 : avPlat2,
+                                        АвПлат3 : avPlat3)
 
-                            avPlat1 = empty
-                            avPlat2 = empty
-                            avPlat3 = empty
-                            if (!isTaxPeriod && dataRowsAdvance != null) {
-                                // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
-                                def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
-                                def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                                avPlat1 = (long) appl5List02Row120 / 3
-                                avPlat2 = avPlat1
-                                avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                                avPlat1 = empty
+                                avPlat2 = empty
+                                avPlat3 = empty
+                                if (!isTaxPeriod && dataRowsAdvance != null) {
+                                    // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
+                                    def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
+                                    def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
+                                    avPlat1 = (long) appl5List02Row120 / 3
+                                    avPlat2 = avPlat1
+                                    avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                                }
+                                // 0..1
+                                СубБдж(
+                                        КБК : kbk2,
+                                        АвПлат1 : avPlat1,
+                                        АвПлат2 : avPlat2,
+                                        АвПлат3 : avPlat3)
                             }
-                            // 0..1
-                            СубБдж(
-                                    КБК : kbk2,
-                                    АвПлат1 : avPlat1,
-                                    АвПлат2 : avPlat2,
-                                    АвПлат3 : avPlat3)
                         }
                     }
                     // Раздел 1. Подраздел 1.2 - конец

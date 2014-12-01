@@ -27,10 +27,7 @@ switch (formDataEvent) {
         allCheck()
         break
     case FormDataEvent.CALCULATE:
-        deleteAllStatic()
-        sort()
         calc()
-        addAllStatic()
         allCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -52,10 +49,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE : // обобщить
         consolidation()
-        deleteAllStatic()
-        sort()
         calc()
-        addAllStatic()
         allCheck()
         break
     case FormDataEvent.IMPORT :
@@ -70,6 +64,7 @@ switch (formDataEvent) {
         if (!hasError()) {
             addAllStatic()
         }
+        break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
         break
@@ -444,9 +439,14 @@ BigDecimal calc13(DataRow row) {
  * Табл. 207 Алгоритмы заполнения полей формы «Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части»
  */
 void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    deleteAllStatic(dataRowHelper, dataRows)
+    sort(dataRows)
+
     if (formData.kind == FormDataKind.PRIMARY) {
-        def data = getData(formData)
-        for (DataRow row in getRows(data)) {
+        for (DataRow row in dataRows) {
             if (row.getAlias() == null) {
                 row.income = calc9(row)
                 row.outcome = calc10(row)
@@ -455,8 +455,11 @@ void calc() {
                 row.outcomeTax = calc13(row)
             }
         }
-        data.save(getRows(data));
+        dataRowHelper.save(dataRows);
     }
+    dataRows.add(getItogo())
+
+    dataRowHelper.save(dataRows);
 
     sortFormDataRows()
 }
@@ -488,8 +491,8 @@ int getCountDaysInYear() {
 /**
  * Сортирует форму в соответвие с требованиями 6.11.2.1 Перечень полей формы
  */
-void sort() {
-    getRows(getData(formData)).sort({ DataRow a, DataRow b ->
+void sort(def dataRows) {
+    dataRows.sort({ DataRow a, DataRow b ->
         if (a.part1REPODate == b.part1REPODate) {
             return a.tradeNumber <=> b.tradeNumber
         }
@@ -509,12 +512,12 @@ void deleteRow() {
 /**
  * Удаляет все статические строки(ИТОГО) во всей форме
  */
-void deleteAllStatic() {
+void deleteAllStatic(def dataRowHelper, def dataRows) {
     def data = getData(formData)
-    for(def i=0;i<getRows(data).size();i++){
-        def row = getRows(data).get(i)
+    for(def i=0;i<dataRows.size();i++){
+        def row = dataRows.get(i)
         if (row.getAlias() == "itogo") {
-            data.delete(row)
+            dataRowHelper.delete(row)
         }
     }
 }
