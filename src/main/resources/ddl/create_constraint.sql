@@ -251,6 +251,8 @@ alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id)
 alter table ifrs_data add constraint ifrs_data_fk_report_period foreign key (report_period_id) references report_period(id);
 alter table ifrs_data add constraint ifrs_data_fk_blob_data foreign key (blob_data_id) references blob_data(id);
 
+alter table configuration_email add constraint configuration_email_pk primary key (id);
+alter table configuration_email add constraint configuration_email_unqname unique (name);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
