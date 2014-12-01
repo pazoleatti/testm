@@ -220,7 +220,7 @@ void generateXML() {
                             (rowsCadastreOKTMO.sum { it.sum - ((it.periodSum?:0) + (it.reductionPaymentSum?:0)) } ?:0)
                     СумНалПУ(
                             // ОКТМО (СумНалПУ) 010
-                            ОКТМО : oktmo,
+                            ОКТМО : getRefBookValue(96, oktmo).CODE.value,
                             // КБК (СумНалПУ) 020
                             КБК : kbk,
                             // НалПУ (СумНалПУ) 030

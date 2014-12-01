@@ -311,7 +311,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                         if (!result.isCheckRegion()) {
-                                            String title = "Создание записи справочника";
+                                            String title = "Сохранение изменений";
                                             String msg = "Отсутствуют права доступа на редактирование записи для указанного региона!";
                                             Dialog.errorMessage(title, msg);
                                             return;

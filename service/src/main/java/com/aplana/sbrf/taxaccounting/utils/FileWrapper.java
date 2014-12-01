@@ -87,7 +87,8 @@ public class FileWrapper {
         }
         if (smbFile != null) {
             try {
-                smbFile.mkdirs();
+                if (!smbFile.exists()) smbFile.mkdirs();
+                return;
             } catch (SmbException e) {
                 throw new ServiceException(ERROR_RESOURCE_SMB, e);
             }
