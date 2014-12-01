@@ -229,7 +229,9 @@ void calc() {
 
     // строка итого
     def totalRow = getCalcTotalRow()
-    insert(data, totalRow)
+    def dataRows = getRows(data)
+    dataRows.add(totalRow)
+    data.save(dataRows)
 
     sortFormDataRows()
 }

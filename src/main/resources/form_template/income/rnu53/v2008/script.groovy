@@ -254,14 +254,14 @@ void calc() {
             }
             row.outcomeTax = roundTo2(tmp)
         }
-        dataRowHelper.save(dataRows)
     }
 
     // строка итого
     if (dataRows.size() > 0) {
         def totalRow = getCalcTotalRow()
-        insert(dataRowHelper, totalRow)
+        dataRows.add(totalRow)
     }
+    dataRowHelper.save(dataRows)
 
     sortFormDataRows()
 }
