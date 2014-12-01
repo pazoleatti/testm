@@ -11,8 +11,6 @@ import java.util.Map;
  * @author dloshkarev
  */
 public interface RefBookEmailConfigDao {
-    Long REF_BOOK_EMAIL_CONFIG_ID = 400L;
-
     PagingResult<Map<String,RefBookValue>> getRecords();
 
     void updateRecords(List<Map<String, RefBookValue>> records);
