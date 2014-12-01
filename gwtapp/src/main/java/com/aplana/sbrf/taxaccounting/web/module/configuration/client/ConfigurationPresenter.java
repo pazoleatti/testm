@@ -52,9 +52,11 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 
         StringColumn getErrorPathColumn();
 
-        RefBookColumn getEmailParamColumn();
+        StringColumn getEmailNameColumn();
 
         StringColumn getEmailValueColumn();
+
+        StringColumn getEmailDescriptionColumn();
 
         List<DataRow<Cell>> getRowsData(ConfigurationParamGroup group);
 
@@ -87,7 +89,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                                 getView().setConfigData(ConfigurationParamGroup.COMMON, getCommonRowsData(result.getModel()), true);
                                 getView().setConfigData(ConfigurationParamGroup.FORM, getFormRowsData(result.getModel(),
                                         result.getDereferenceDepartmentNameMap()), true);
-                                getView().setConfigData(ConfigurationParamGroup.EMAIL, getEmailRowsData(result.getModel()), true);
+                                getView().setConfigData(ConfigurationParamGroup.EMAIL, getEmailRowsData(result.getModel()), false);
                             }
                         }, this).addCallback(TaManualRevealCallback.create(this, placeManager)));
     }
@@ -170,24 +172,13 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     private List<DataRow<Cell>> getEmailRowsData(ConfigurationParamModel model) {
         List<DataRow<Cell>> rowsData = new LinkedList<DataRow<Cell>>();
 
-        for (ConfigurationParam key : model.keySet()) {
-            if (!key.getGroup().equals(ConfigurationParamGroup.EMAIL)) {
-                continue;
-            }
-
-            List<String> list = model.get(key, 0);
-            if (list == null) {
-                continue;
-            }
-
-            for (String value : list) {
-                DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.EMAIL);
-                // Значения
-                dataRow.getCell(getView().getEmailParamColumn().getAlias()).setNumericValue(BigDecimal.valueOf(key.ordinal()));
-                dataRow.getCell(getView().getEmailParamColumn().getAlias()).setRefBookDereference(key.getCaption());
-                dataRow.getCell(getView().getEmailValueColumn().getAlias()).setStringValue(value);
-                rowsData.add(dataRow);
-            }
+        for (Map<String, String> emailRecord : model.getEmailParams()) {
+            DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.EMAIL);
+            // Значения
+            dataRow.getCell(getView().getEmailNameColumn().getAlias()).setStringValue(emailRecord.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE));
+            dataRow.getCell(getView().getEmailValueColumn().getAlias()).setStringValue(emailRecord.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE));
+            dataRow.getCell(getView().getEmailDescriptionColumn().getAlias()).setStringValue(emailRecord.get(ConfigurationParamModel.EMAIL_DESCRIPTION_ATTRIBUTE));
+            rowsData.add(dataRow);
         }
         return rowsData;
     }
@@ -291,30 +282,18 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         }
 
         // Параметры электронной почты
-        Map<ConfigurationParam, List<String>> emailMap = new HashMap<ConfigurationParam, List<String>>();
-
-        // Группировка по параметру
+        List<Map<String, String>> emailParams = new ArrayList<Map<String, String>>();
         for (DataRow<Cell> dataRow : emailRowsData) {
-            BigDecimal paramId = dataRow.getCell(getView().getEmailParamColumn().getAlias()).getNumericValue();
-            ConfigurationParam param = null;
-            if (paramId != null) {
-                param = ConfigurationParam.values()[paramId.intValue()];
-            }
-            String value = cleanString(dataRow.getCell(getView().getEmailValueColumn().getAlias()).getStringValue());
-            if (param == null || value == null) {
-                // Не полностью заполненные параметры не сохраняем
-                continue;
-            }
-            if (!emailMap.containsKey(param)) {
-                emailMap.put(param, new LinkedList<String>());
-            }
-            emailMap.get(param).add(value);
+            Map<String, String> param = new HashMap<String, String>();
+            param.put(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE,
+                    dataRow.getCell(getView().getEmailNameColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE,
+                    dataRow.getCell(getView().getEmailValueColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.EMAIL_DESCRIPTION_ATTRIBUTE,
+                    dataRow.getCell(getView().getEmailDescriptionColumn().getAlias()).getStringValue());
+            emailParams.add(param);
         }
-        for (Map.Entry<ConfigurationParam, List<String>> entry : emailMap.entrySet()) {
-            Map<Integer, List<String>> departmentMap = new HashMap<Integer, List<String>>();
-            departmentMap.put(0, entry.getValue());
-            model.put(entry.getKey(), departmentMap);
-        }
+        model.setEmailParams(emailParams);
     }
 
     @Override
@@ -381,15 +360,19 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             dataRow.setFormColumns(asList(departmentCell, uploadCell, archiveCell, errorCell));
 
         } else if (group.equals(ConfigurationParamGroup.EMAIL)) {
-            Cell paramCell = new Cell();
-            paramCell.setColumn(getView().getEmailParamColumn());
-            paramCell.setEditable(true);
+            Cell nameCell = new Cell();
+            nameCell.setColumn(getView().getEmailNameColumn());
+            nameCell.setEditable(false);
 
             Cell valueCell = new Cell();
             valueCell.setColumn(getView().getEmailValueColumn());
             valueCell.setEditable(true);
 
-            dataRow.setFormColumns(asList(paramCell, valueCell));
+            Cell descriptionCell = new Cell();
+            descriptionCell.setColumn(getView().getEmailDescriptionColumn());
+            descriptionCell.setEditable(false);
+
+            dataRow.setFormColumns(asList(nameCell, valueCell, descriptionCell));
         }
 
         return dataRow;

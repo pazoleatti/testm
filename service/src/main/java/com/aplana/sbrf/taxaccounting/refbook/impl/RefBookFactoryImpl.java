@@ -114,6 +114,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
             RefBookTaxOrganKpp dataProvider = applicationContext.getBean("refBookTaxOrganKpp", RefBookTaxOrganKpp.class);
             dataProvider.setRefBookId(refBookId);
             return dataProvider;
+        } else if (RefBook.EMAIL_CONFIG.equals(refBookId)) {
+            return applicationContext.getBean("refBookRefBookEmailConfig", RefBookEmailConfigProvider.class);
         } else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);

@@ -54,14 +54,10 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
             }
 
         } else if (group.equals(ConfigurationParamGroup.EMAIL)) {
-            configurationService.checkEmailParam(model, logger);
             if (logger.containsLevel(LogLevel.ERROR)) {
                 uuid = logEntryService.save(logger.getEntries());
             } else {
-                boolean success = emailService.testAuth(model.get(ConfigurationParam.EMAIL_SERVER, 0).get(0),
-                        model.get(ConfigurationParam.EMAIL_PORT, 0).get(0),
-                        model.get(ConfigurationParam.EMAIL_LOGIN, 0).get(0),
-                        model.get(ConfigurationParam.EMAIL_PASSWORD, 0).get(0), logger);
+                boolean success = emailService.testAuth(logger);
                 uuid = logEntryService.save(logger.getEntries());
                 if (!success) {
                     UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()

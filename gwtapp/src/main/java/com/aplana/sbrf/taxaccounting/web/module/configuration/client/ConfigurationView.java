@@ -15,6 +15,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.Range;
@@ -37,6 +38,15 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @UiField
     Widget commonPanel, formPanel, emailPanel;
 
+    @UiField
+    LinkAnchor addLink;
+
+    @UiField
+    LinkAnchor delLink;
+
+    @UiField
+    Button checkButton;
+
     List<DataRow<Cell>> formRowsData = new ArrayList<DataRow<Cell>>();
     List<DataRow<Cell>> commonRowsData = new ArrayList<DataRow<Cell>>();
     List<DataRow<Cell>> emailRowsData = new ArrayList<DataRow<Cell>>();
@@ -49,8 +59,9 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     private StringColumn archivePathColumn = new StringColumn();
     private StringColumn errorPathColumn = new StringColumn();
 
-    private RefBookColumn emailParamColumn = new RefBookColumn();
+    private StringColumn emailNameColumn = new StringColumn();
     private StringColumn emailValueColumn = new StringColumn();
+    private StringColumn emailDescriptionColumn = new StringColumn();
 
     private ConfigurationParamGroup activeGroup = ConfigurationParamGroup.COMMON;
 
@@ -84,7 +95,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
         comparatorMap.put(ConfigurationParamGroup.COMMON, commonComparator);
         comparatorMap.put(ConfigurationParamGroup.FORM, formComparator);
-        comparatorMap.put(ConfigurationParamGroup.EMAIL, emailComparator);
     }
 
     /**
@@ -173,23 +183,24 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
      * Подготовка таблицы параметров электронной почты
      */
     private void initEmailTable() {
-        emailParamColumn.setId(1);
-        emailParamColumn.setRefBookAttributeId(1041L);
-        // Допустимые значения
-        emailParamColumn.setFilter(getConfParamFilter(ConfigurationParamGroup.EMAIL));
-        emailParamColumn.setAlias("emailParamColumn");
-        emailParamColumn.setName("Параметр");
-        emailParamColumn.setSearchEnabled(false);
-        Column<DataRow<Cell>, ?> emailParamColumnUI = factory.createTableColumn(emailParamColumn, emailTable);
-        emailTable.setColumnWidth(emailParamColumnUI, 30, Style.Unit.EM);
-        emailTable.addColumn(emailParamColumnUI, emailParamColumn.getName());
+        emailNameColumn.setAlias("emailNameColumn");
+        emailNameColumn.setName("Название");
+        Column<DataRow<Cell>, ?> emailParamColumnUI = factory.createTableColumn(emailNameColumn, emailTable);
+        emailTable.setColumnWidth(emailParamColumnUI, 20, Style.Unit.EM);
+        emailTable.addColumn(emailParamColumnUI, emailNameColumn.getName());
 
         emailValueColumn.setAlias("emailValueColumn");
-        emailValueColumn.setName("Значение параметра");
-        emailTable.addColumn(factory.createTableColumn(emailValueColumn, emailTable), emailValueColumn.getName());
+        emailValueColumn.setName("Значение");
+        emailParamColumnUI = factory.createTableColumn(emailValueColumn, emailTable);
+        emailTable.setColumnWidth(emailParamColumnUI, 30, Style.Unit.EM);
+        emailTable.addColumn(emailParamColumnUI, emailValueColumn.getName());
+
+        emailDescriptionColumn.setAlias("emailCodeColumn");
+        emailDescriptionColumn.setName("Описание");
+        emailTable.addColumn(factory.createTableColumn(emailDescriptionColumn, emailTable), emailDescriptionColumn.getName());
 
         emailTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
-        emailTable.setMinimumTableWidth(40, Style.Unit.EM);
+        emailTable.setMinimumTableWidth(20, Style.Unit.EM);
 
         emailTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
         SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
@@ -231,6 +242,9 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
         emailLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL));
         emailPanel.setVisible(activeGroup.equals(ConfigurationParamGroup.EMAIL));
+
+        addLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL));
+        delLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL));
 
         for (DataGrid<DataRow<Cell>> table : tableMap.values()) {
             table.redraw();
@@ -343,24 +357,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         }
     };
 
-    private static final Comparator<DataRow<Cell>> emailComparator = new Comparator<DataRow<Cell>>() {
-        @Override
-        public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
-            String name1 = o1.getCell("emailParamColumn").getRefBookDereference();
-            String name2 = o2.getCell("emailParamColumn").getRefBookDereference();
-            if (name1 == null && name2 == null) {
-                return 0;
-            }
-            if (name1 == null) {
-                return 1;
-            }
-            if (name2 == null) {
-                return -1;
-            }
-            return name1.compareTo(name2);
-        }
-    };
-
     @Override
     public void setConfigData(ConfigurationParamGroup group, List<DataRow<Cell>> rowsData, boolean needSort) {
         if (needSort) {
@@ -406,13 +402,18 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     }
 
     @Override
-    public RefBookColumn getEmailParamColumn() {
-        return emailParamColumn;
+    public StringColumn getEmailNameColumn() {
+        return emailNameColumn;
     }
 
     @Override
     public StringColumn getEmailValueColumn() {
         return emailValueColumn;
+    }
+
+    @Override
+    public StringColumn getEmailDescriptionColumn() {
+        return emailDescriptionColumn;
     }
 
     @Override
