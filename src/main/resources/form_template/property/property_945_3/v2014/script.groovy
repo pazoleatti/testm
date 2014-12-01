@@ -586,13 +586,13 @@ void sourceRowError(def newRow, def row, def periodList, def order) {
     def reportPeriod = periodList.find { it.order == order }
     def subject = getRefBookValue(4, getOwnerValue(row, 'subject')).CODE.value
     def oktmo = getRefBookValue(96, getOwnerValue(row, 'oktmo')).CODE.value
-    def benefitBasis = getRefBookValue(203, newRow.benefitCode).CODE.value + '/' + calcBasis(newRow.benefitCode)
-    def benefitReduction = getRefBookValue(203, newRow.benefitReductionBasis).CODE.value + '/' + calcBasis(newRow.benefitReductionBasis)
-    def benefitDecrease = getRefBookValue(203, newRow.benefitDecreaseBasis).CODE.value + '/' + calcBasis(newRow.benefitDecreaseBasis)
+    def benefit = newRow.taxBenefitCode ? ((getRefBookValue(203, newRow.taxBenefitCode).CODE?.value ?: "\"\"") + '/' + calcBasis(newRow.taxBenefitCode)) : "\"\""
+    def benefitReduction = newRow.taxBenefitCodeReduction ? ((getRefBookValue(203, newRow.taxBenefitCodeReduction).CODE?.value ?: "\"\"") + '/' + calcBasis(newRow.taxBenefitCodeReduction)) : "\"\""
+    def benefitDecrease = newRow.taxBenefitCodeDecrease ? ((getRefBookValue(203, newRow.taxBenefitCodeDecrease).CODE?.value ?: "\"\"") + '/' + calcBasis(newRow.taxBenefitCodeDecrease)) : "\"\""
     loggerError(null, "В налоговой форме-источнике «${formData.formType.name}» за ${reportPeriod.name} " +
             "${reportPeriod.taxPeriod.year} отсутствует строка со значениями граф «Код субъекта» = ${subject}, " +
             "«Код НО» = ${getOwnerValue(row, 'taxAuthority')}, «КПП» = ${getOwnerValue(row, 'kpp')}, «Код ОКТМО» = ${oktmo}, " +
-            "«Код налоговой льготы и основание» = $benefitBasis, " +
+            "«Код налоговой льготы и основание» = $benefit, " +
             "«Код налоговой льготы и основание (понижение налоговой ставки)» = $benefitReduction, " +
             "«Код налоговой льготы и основание (в виде уменьшения суммы налога)» = $benefitDecrease!")
 }
