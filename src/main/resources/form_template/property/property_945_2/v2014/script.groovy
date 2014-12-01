@@ -174,6 +174,9 @@ void addPrevDataRows() {
         def Date startDate = getReportPeriodStartDate()
         def Date endDate = getReportPeriodEndDate()
         prevDataRows = prevDataRows.findAll { row ->
+            if (row.getAlias() != null) {
+                return false
+            }
             def rightBeginDate = row.propertyRightBeginDate
             def rightEndDate = row.propertyRightEndDate
             if (rightEndDate && rightEndDate < startDate || rightBeginDate > endDate) {
@@ -188,8 +191,10 @@ void addPrevDataRows() {
                 return !(rightBeginDate > endDate || rightEndDate < startDate)
             }
         }
+        logger.info("prevDataRows = $prevDataRows")
     }
     if (prevDataRows) {
+        logger.info("prevDataRows = $prevDataRows")
         def dataRowHelper = formDataService.getDataRowHelper(formData)
         dataRowHelper.save(prevDataRows)
     }
