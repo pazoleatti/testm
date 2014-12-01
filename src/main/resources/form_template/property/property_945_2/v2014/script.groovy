@@ -191,11 +191,13 @@ void addPrevDataRows() {
                 return !(rightBeginDate > endDate || rightEndDate < startDate)
             }
         }
-        logger.info("prevDataRows = $prevDataRows")
     }
     if (prevDataRows) {
-        logger.info("prevDataRows = $prevDataRows")
         def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.allCached
+        def totalRow = getDataRow(dataRows, 'total')
+        deleteAllAliased(prevDataRows)
+        addFixedRows(prevDataRows, totalRow)
         dataRowHelper.save(prevDataRows)
     }
 }
