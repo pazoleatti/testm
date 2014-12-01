@@ -127,7 +127,6 @@
         <name>Код налоговой льготы (понижение налоговой ставки)</name>
         <order>12</order>
         <width>5</width>
-        <filter>CODE = '2012400'</filter>
         <hierarchical>false</hierarchical>
         <nameAttributeId>2033</nameAttributeId>
         <refBookAttributeId>2033</refBookAttributeId>
@@ -181,7 +180,6 @@
         <name>Код налоговой льготы (в виде уменьшения суммы налога)</name>
         <order>17</order>
         <width>5</width>
-        <filter>CODE = '2012500'</filter>
         <hierarchical>false</hierarchical>
         <nameAttributeId>2033</nameAttributeId>
         <refBookAttributeId>2033</refBookAttributeId>
