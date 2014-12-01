@@ -724,20 +724,36 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         if (dataRows == null || dataRows.isEmpty()) {
             return;
         }
-        final List<Long> ids = dbUtils.getNextDataRowIds((long)dataRows.size());
 
-        // Обновление порядка строк
-        getJdbcTemplate().batchUpdate("UPDATE data_row SET ord = ? WHERE id = ?", new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, ids.get(i));
-                ps.setLong(2, dataRows.get(i).getId());
-            }
+        // получить отсортированные ord'ы сортируемых строк, что бы потом перезадать их строкам
+        List<Long> dataRowIds = new ArrayList<Long>();
+        for (DataRow<Cell> row : dataRows) {
+            dataRowIds.add(row.getId());
+        }
+        String sqlSelectOrds = "SELECT ord FROM data_row WHERE " + SqlUtils.transformToSqlInStatement("id", dataRowIds) + " ORDER BY ord";
+        final List<Long> ords = getJdbcTemplate().queryForList(sqlSelectOrds, Long.class);
 
-            @Override
-            public int getBatchSize() {
-                return dataRows.size();
+        StringBuilder sql = new StringBuilder("MERGE INTO data_row dr USING (");
+        // задать строке по id соответствующий ord
+        for (int i = 0; i < dataRows.size(); i++) {
+            DataRow<Cell> row = dataRows.get(i);
+            Long ord = ords.get(i);
+            sql.append("\n\t");
+            sql.append("SELECT ").append(row.getId());
+            if (i == 0) {
+                sql.append(" id");
             }
-        });
+            sql.append(", ").append(ord);
+            if (i == 0) {
+                sql.append(" ord");
+            }
+            sql.append(" FROM DUAL");
+            if (i < dataRows.size() - 1) {
+                sql.append(" UNION ALL");
+            }
+        }
+        sql.append("\n) ords ON (dr.id = ords.id) WHEN MATCHED THEN UPDATE SET dr.ord = ords.ord");
+
+        getJdbcTemplate().update(sql.toString());
     }
 }
