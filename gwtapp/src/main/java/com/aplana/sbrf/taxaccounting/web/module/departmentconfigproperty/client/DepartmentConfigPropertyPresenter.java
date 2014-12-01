@@ -298,7 +298,15 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                     public void onSuccess(SaveDepartmentRefBookValuesResult result) {
 
                         if (result.isHasFatalError()) {
-                            Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
+                            switch (result.getErrorType()) {
+                                case HAS_DUPLICATES:
+                                    Dialog.errorMessage("Версия не сохранена. Обнаружены фатальные ошибки!");
+                                    break;
+                                case INCORRECT_FIELDS:
+                                    Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
+                                    break;
+                            }
+
                             LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
                         } else {
                             getData();

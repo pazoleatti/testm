@@ -14,7 +14,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -29,6 +31,20 @@ public class IfrsDaoTest {
 
     @Autowired
     private BlobDataDao blobDataDao;
+
+    @Test
+    public void createTest() {
+        List<Integer> reportPeriodIds = new ArrayList<Integer>();
+        reportPeriodIds.add(1);
+
+        Assert.assertEquals(dao.findByReportPeriod(reportPeriodIds, null).size(), 0);
+
+        dao.create(1);
+
+        PagingResult<IfrsDataSearchResultItem> result = dao.findByReportPeriod(reportPeriodIds, null);
+        Assert.assertEquals(result.size(), 1);
+        Assert.assertNull(result.get(0).getBlobDataId());
+    }
 
     @Test
     public void updateTest() {

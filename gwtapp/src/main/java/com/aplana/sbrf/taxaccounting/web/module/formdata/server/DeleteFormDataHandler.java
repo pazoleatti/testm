@@ -118,11 +118,8 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
                 String departmentName = departmentService.getParentsHierarchy(departmentFormType.getDepartmentId());
 
                 if (sourceFormData.getState() == WorkflowState.ACCEPTED) {
-                    // Есть принятый источник
-                    String str = departmentReportPeriod.getCorrectionDate() == null ? "" :
-                            " в текущем корректирующем периоде";
-                    logger.error("Найдена форма-источник «%s», «%s»%s, которая имеет статус \"Принята\"!",
-                            sourceFormData.getFormType().getName(), departmentName, str);
+                    logger.error("Найдена форма-источник «%s» «%s» в текущем периоде, которая имеет статус \"Принята\"!",
+                            sourceFormData.getFormType().getName(), departmentName);
                 }
             } else {
                 List<Months> availableMonthList;
@@ -152,7 +149,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 
                     if (sourceFormData.getState() == WorkflowState.ACCEPTED) {
                         // Есть принятый источник
-                        logger.error("Найдена форма-источник «%s», «%s» в текущем периоде в месяце «%s», которая имеет статус \"Принята\"!",
+                        logger.error("Найдена форма-источник «%s» «%s» в текущем периоде в месяце «%s», которая имеет статус \"Принята\"!",
                                 sourceFormData.getFormType().getName(), departmentName, months.getName());
                     }
                 }

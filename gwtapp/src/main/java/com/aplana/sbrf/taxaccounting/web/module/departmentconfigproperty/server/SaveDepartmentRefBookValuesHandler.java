@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -48,7 +49,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
 
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
-
+        SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
         for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
             String sig = row.get("SIGNATORY_ID").getDeRefValue();
             Integer signatoryId = (sig == null || sig.isEmpty()) ?
@@ -65,12 +66,38 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                         "\"Наименование организации представителя\" " +
                         "должны заполняться только в том случае, если " +
                         "поле \"Признак лица подписавшего документ\" равно значению \"2\" (представитель налогоплательщика)");
-                SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
-                result.setUuid(logEntryService.save(logger.getEntries()));
                 result.setHasFatalError(true);
-                return result;
+                result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.INCORRECT_FIELDS);
+                break;
             }
         }
+
+        Map<Pair<String, String>, Integer> counter = new HashMap<Pair<String, String>, Integer>();
+        for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
+            Pair<String, String> p = new Pair<String, String>(row.get("KPP").getStringValue(), row.get("TAX_ORGAN_CODE").getStringValue());
+            if (!counter.containsKey(p)) {
+                counter.put(p, new Integer(0));
+            }
+            counter.put(p, counter.get(p) + 1);
+
+        }
+
+        for (Integer count : counter.values()) {
+            if (count > 1) {
+                logger.error("Нарушено требование к уникальности, уже существуют элементы с такими значениями атрибута " +
+                        "\"Код налогового органа, КПП\"" +
+                        " в указанном периоде!");
+                result.setHasFatalError(true);
+                result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.HAS_DUPLICATES);
+                break;
+            }
+        }
+
+        if (result.isHasFatalError()) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            return result;
+        }
+
 
         RefBookDataProvider provider = rbFactory.getDataProvider(saveDepartmentRefBookValuesAction.getRefBookId());
         ReportPeriod rp = reportService.getReportPeriod(saveDepartmentRefBookValuesAction.getReportPeriodId());
@@ -164,9 +191,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                     toAdd.add(rowFromClient);
                 }
             }
-            for (Map<String, RefBookValue> up : toUpdate) {
-                providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), null, null, up);
-            }
 
             List<RefBookRecord> recordsToAdd = new ArrayList<RefBookRecord>();
             for (Map<String, RefBookValue> add : toAdd) {
@@ -176,20 +200,17 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 recordsToAdd.add(record);
             }
 
-            if (!recordsToAdd.isEmpty()) {
-                providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), null, recordsToAdd);
-            }
 
             for (Map<String, RefBookValue> rowFromServer : paramsSlave) {
-                boolean notFinded = true;
+                boolean notFound = true;
                 for (Map<String, RefBookValue> rowFromClient : convertedRows) {
                     if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromServer.get("TAX_ORGAN_CODE").getStringValue())
                             && rowFromClient.get("KPP").getStringValue().equals(rowFromServer.get("KPP").getStringValue())) {
-                        notFinded = false;
+                        notFound = false;
                         break;
                     }
                 }
-                if (notFinded) {
+                if (notFound) {
                     toDelete.add(rowFromServer);
                 }
             }
@@ -199,8 +220,18 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 deleteIds.add(del.get("record_id").getNumberValue().longValue());
             }
 
-            if (!deleteIds.isEmpty()) {
-                providerSlave.deleteRecordVersions(logger, deleteIds);
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                if (!recordsToAdd.isEmpty()) {
+                    providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), null, recordsToAdd);
+                }
+
+                for (Map<String, RefBookValue> up : toUpdate) {
+                    providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), null, null, up);
+                }
+
+                if (!deleteIds.isEmpty()) {
+                    providerSlave.deleteRecordVersions(logger, deleteIds);
+                }
             }
         }
         return new SaveDepartmentRefBookValuesResult();
