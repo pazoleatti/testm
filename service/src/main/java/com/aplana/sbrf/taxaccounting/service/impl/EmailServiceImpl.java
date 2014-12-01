@@ -125,16 +125,9 @@ public class EmailServiceImpl implements EmailService {
             if (login == null || password == null || host == null || port == null) {
                 logger.error("Не указан один из обязательных параметров!");
             } else {
-                final String finalPassword = password;
-                final String finalLogin = login;
-                Session session = Session.getInstance(props,
-                        new javax.mail.Authenticator() {
-                            protected PasswordAuthentication getPasswordAuthentication() {
-                                return new PasswordAuthentication(finalLogin, finalPassword);
-                            }
-                        });
-                session.getTransport().connect(host, Integer.parseInt(port), login, password);
-                session.getTransport().close();
+                Session session = Session.getInstance(props);
+                Transport transport = session.getTransport("smtp");
+                transport.connect(host, Integer.parseInt(port), login, password);
                 logger.info("Проверка выполнена, ошибок не найдено");
             }
         } catch (Exception e) {
