@@ -182,51 +182,63 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-        uniqueRecordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+        CheckRefBookAction checkAction = new CheckRefBookAction();
+        checkAction.setRefBookId(refBookId);
+        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
+                new AbstractCallback<CheckRefBookResult>() {
+                    @Override
+                    public void onSuccess(CheckRefBookResult result) {
+                        if (result.isAvailable()) {
+                            uniqueRecordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
 
-        editFormPresenter.setVersionMode(true);
-        editFormPresenter.setCurrentUniqueRecordId(null);
-        editFormPresenter.setMode(mode);
-        editFormPresenter.setRecordId(null);
+                            editFormPresenter.setVersionMode(true);
+                            editFormPresenter.setCurrentUniqueRecordId(null);
+                            editFormPresenter.setMode(mode);
+                            editFormPresenter.setRecordId(null);
 
-        GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-		action.setRefBookId(refBookId);
-		dispatcher.execute(action,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetRefBookAttributesResult>() {
-							@Override
-							public void onSuccess(GetRefBookAttributesResult result) {
-                                getView().resetRefBookElements();
-								getView().setTableColumns(result.getColumns());
-								getView().setRange(new Range(0, getView().getPageSize()));
-                                if (result.isReadOnly()){
-                                    setMode(FormMode.READ);
-                                }
-                                //editFormPresenter.init(refBookId);
-                                getProxy().manualReveal(RefBookVersionPresenter.this);
-							}
-						}, this));
+                            GetRefBookAttributesAction action = new GetRefBookAttributesAction();
+                            action.setRefBookId(refBookId);
+                            dispatcher.execute(action,
+                                    CallbackUtils.defaultCallback(
+                                            new AbstractCallback<GetRefBookAttributesResult>() {
+                                                @Override
+                                                public void onSuccess(GetRefBookAttributesResult result) {
+                                                    getView().resetRefBookElements();
+                                                    getView().setTableColumns(result.getColumns());
+                                                    getView().setRange(new Range(0, getView().getPageSize()));
+                                                    if (result.isReadOnly()){
+                                                        setMode(FormMode.READ);
+                                                    }
+                                                    //editFormPresenter.init(refBookId);
+                                                    getProxy().manualReveal(RefBookVersionPresenter.this);
+                                                }
+                                            }, RefBookVersionPresenter.this));
 
-		GetNameAction nameAction = new GetNameAction();
-		nameAction.setRefBookId(refBookId);
-        nameAction.setUniqueRecordId(uniqueRecordId);
-		dispatcher.execute(nameAction,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetNameResult>() {
-							@Override
-							public void onSuccess(GetNameResult result) {
-								getView().setRefBookNameDesc(result.getName());
-                                getView().setTitleDetails(result.getUniqueAttributeValues());
-                                String href = "#" + (
-                                        result.getRefBookType().equals(RefBookType.LINEAR.getId()) ?
-                                        RefBookDataTokens.refBookData :
-                                        RefBookDataTokens.refBookHierData
-                                ) + ";id=" + refBookId + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + uniqueRecordId;
-                                getView().setBackAction(href);
-                                editFormPresenter.setRecordId(result.getRecordId());
-							}
-						}, this));
-
+                            GetNameAction nameAction = new GetNameAction();
+                            nameAction.setRefBookId(refBookId);
+                            nameAction.setUniqueRecordId(uniqueRecordId);
+                            dispatcher.execute(nameAction,
+                                    CallbackUtils.defaultCallback(
+                                            new AbstractCallback<GetNameResult>() {
+                                                @Override
+                                                public void onSuccess(GetNameResult result) {
+                                                    getView().setRefBookNameDesc(result.getName());
+                                                    getView().setTitleDetails(result.getUniqueAttributeValues());
+                                                    String href = "#" + (
+                                                            result.getRefBookType().equals(RefBookType.LINEAR.getId()) ?
+                                                                    RefBookDataTokens.refBookData :
+                                                                    RefBookDataTokens.refBookHierData
+                                                    ) + ";id=" + refBookId + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + uniqueRecordId;
+                                                    getView().setBackAction(href);
+                                                    editFormPresenter.setRecordId(result.getRecordId());
+                                                }
+                                            }, RefBookVersionPresenter.this));
+                        } else {
+                            getProxy().manualReveal(RefBookVersionPresenter.this);
+                            Dialog.errorMessage("Доступ к справочнику запрещен!");
+                        }
+                    }
+                }, this));
 	}
 
 	@Override
