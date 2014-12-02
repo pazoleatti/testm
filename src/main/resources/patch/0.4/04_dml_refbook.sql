@@ -339,7 +339,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2072, 207,'Вид налога','TAX_TYPE',1,2,null,null,1,null,10,1,0,null,null,0,2000);
 ---------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-9694: Справочник "Настройки почты"
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (400, 'Настройки почты', 1, 0, 0, null, 'CONFIGURATION_EMAIL');
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (400, 'Настройки почты', 0, 0, 0, null, 'CONFIGURATION_EMAIL');
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4000,400, '№','ID', 2,0,null,null,1,0,10,1,1,1,null,1,9);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4001,400, 'Название','NAME',1,1,null,null,1,null,10,0,0,null,null,1,200);
