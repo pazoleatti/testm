@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.EmailService;
+import com.sun.mail.util.MailSSLSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,14 +70,18 @@ public class EmailServiceImpl implements EmailService {
         } else {
             final String finalLogin = login;
             final String finalPassword = password;
-            Session session = Session.getInstance(props,
+            try {
+                MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
+                socketFactory.setTrustAllHosts(true);
+                props.put("mail.smtp.ssl.socketFactory", socketFactory);
+                Session session = Session.getInstance(props);
+                Session session = Session.getInstance(props,
                     new javax.mail.Authenticator() {
                         protected PasswordAuthentication getPasswordAuthentication() {
                             return new PasswordAuthentication(finalLogin, finalPassword);
                         }
                     });
 
-            try {
                 Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress(login));
                 for (String destination : destinations) {
@@ -86,7 +91,7 @@ public class EmailServiceImpl implements EmailService {
                 message.setSubject(subject);
                 message.setText(text);
                 Transport.send(message);
-            } catch (MessagingException e) {
+            } catch (Exception e) {
                 Log.error(e);
                 throw new ServiceException("Ошибка отправки сообщения. %s", e.getMessage());
             }
@@ -122,6 +127,9 @@ public class EmailServiceImpl implements EmailService {
                     }
                 }
             }
+            MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
+            socketFactory.setTrustAllHosts(true);
+            props.put("mail.smtp.ssl.socketFactory", socketFactory);
             if (login == null || password == null || host == null || port == null) {
                 logger.error("Не указан один из обязательных параметров!");
             } else {
