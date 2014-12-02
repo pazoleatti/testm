@@ -58,41 +58,43 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
 
             StringBuilder uniqueValues = new StringBuilder();
 
-            for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> entry : attributeValues.entrySet()) {
-                List<Pair<RefBookAttribute, RefBookValue>> values = entry.getValue();
-                for (int i = 0; i < values.size(); i++) {
-                    RefBookAttribute attribute = values.get(i).getFirst();
-                    RefBookValue value = values.get(i).getSecond();
-                    switch (attribute.getAttributeType()) {
-                        case NUMBER:
-                            if (value.getNumberValue() != null) {
-                                uniqueValues.append(value.getNumberValue().toString());
-                            }
-                            break;
-                        case DATE:
-                            if (value.getDateValue() != null) {
-                                uniqueValues.append(value.getDateValue().toString());
-                            }
-                            break;
-                        case STRING:
-                            if (value.getStringValue() != null) {
-                                uniqueValues.append(value.getStringValue());
-                            }
-                            break;
-                        case REFERENCE:
-                            if (value.getReferenceValue() != null) {
-                                Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
-                                uniqueValues.append(refValue.get(refAliases.get(attribute.getAlias())).toString());
-                            }
-                            break;
-                        default:
-                            uniqueValues.append("undefined");
-                            break;
+            if (attributeValues.size() > 0) {
+                for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> entry : attributeValues.entrySet()) {
+                    List<Pair<RefBookAttribute, RefBookValue>> values = entry.getValue();
+                    for (int i = 0; i < values.size(); i++) {
+                        RefBookAttribute attribute = values.get(i).getFirst();
+                        RefBookValue value = values.get(i).getSecond();
+                        switch (attribute.getAttributeType()) {
+                            case NUMBER:
+                                if (value.getNumberValue() != null) {
+                                    uniqueValues.append(value.getNumberValue().toString());
+                                }
+                                break;
+                            case DATE:
+                                if (value.getDateValue() != null) {
+                                    uniqueValues.append(value.getDateValue().toString());
+                                }
+                                break;
+                            case STRING:
+                                if (value.getStringValue() != null) {
+                                    uniqueValues.append(value.getStringValue());
+                                }
+                                break;
+                            case REFERENCE:
+                                if (value.getReferenceValue() != null) {
+                                    Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias()).getRecordData(value.getReferenceValue());
+                                    uniqueValues.append(refValue.get(refAliases.get(attribute.getAlias())).toString());
+                                }
+                                break;
+                            default:
+                                uniqueValues.append("undefined");
+                                break;
+                        }
+                        uniqueValues.append("/");
                     }
-                    uniqueValues.append("/");
                 }
+                if (uniqueValues.length() > 0) uniqueValues.delete(uniqueValues.length() - 1, uniqueValues.length());
             }
-            uniqueValues.delete(uniqueValues.length() - 1, uniqueValues.length());
             result.setUniqueAttributeValues(uniqueValues.toString());
             Long recordId = refBookDataProvider.getRecordId(action.getUniqueRecordId());
             result.setRecordId(recordId);
