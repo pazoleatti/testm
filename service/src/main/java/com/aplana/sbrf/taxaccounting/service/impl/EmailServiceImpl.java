@@ -74,7 +74,6 @@ public class EmailServiceImpl implements EmailService {
                 MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
                 socketFactory.setTrustAllHosts(true);
                 props.put("mail.smtp.ssl.socketFactory", socketFactory);
-                Session session = Session.getInstance(props);
                 Session session = Session.getInstance(props,
                     new javax.mail.Authenticator() {
                         protected PasswordAuthentication getPasswordAuthentication() {
