@@ -264,66 +264,79 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
 
-        editFormPresenter.setVersionMode(false);
-        editFormPresenter.setCurrentUniqueRecordId(null);
-        editFormPresenter.setRecordId(null);
-
         refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-
-        GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookDataId);
-        dispatcher.execute(action, CallbackUtils.defaultCallback(
-                new AbstractCallback<GetRefBookAttributesResult>() {
+        CheckRefBookAction checkAction = new CheckRefBookAction();
+        checkAction.setRefBookId(refBookDataId);
+        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
+                new AbstractCallback<CheckRefBookResult>() {
                     @Override
-                    public void onSuccess(GetRefBookAttributesResult result) {
-                        Long attrId = null;
-                        for (RefBookColumn refBookColumn : result.getColumns()) {
-                            if(refBookColumn.getAlias().toLowerCase().equals("name")){
-                                attrId = refBookColumn.getId();
-                            }
-                        }
-                        getView().setAttributeId(attrId);
-                        editFormPresenter.init(refBookDataId, result.getColumns());
+                    public void onSuccess(CheckRefBookResult result) {
+                        if (result.isAvailable()) {
+                            editFormPresenter.setVersionMode(false);
+                            editFormPresenter.setCurrentUniqueRecordId(null);
+                            editFormPresenter.setRecordId(null);
 
-                        /** Очищаем поле поиска если перешли со страницы списка справочников */
-                        if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
-                            recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
-                            if (result.isReadOnly()){
-                                mode = FormMode.READ;
-                                //updateMode();
-                            } else if (mode == null) {
-                                mode = FormMode.VIEW;
-                            }
-                            setMode(mode);
-                            checkRecord();
+
+                            GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookDataId);
+                            dispatcher.execute(action, CallbackUtils.defaultCallback(
+                                    new AbstractCallback<GetRefBookAttributesResult>() {
+                                        @Override
+                                        public void onSuccess(GetRefBookAttributesResult result) {
+                                            Long attrId = null;
+                                            for (RefBookColumn refBookColumn : result.getColumns()) {
+                                                if(refBookColumn.getAlias().toLowerCase().equals("name")){
+                                                    attrId = refBookColumn.getId();
+                                                }
+                                            }
+                                            getView().setAttributeId(attrId);
+                                            editFormPresenter.init(refBookDataId, result.getColumns());
+
+                                            /** Очищаем поле поиска если перешли со страницы списка справочников */
+                                            if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
+                                                recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+                                                if (result.isReadOnly()){
+                                                    mode = FormMode.READ;
+                                                    //updateMode();
+                                                } else if (mode == null) {
+                                                    mode = FormMode.VIEW;
+                                                }
+                                                setMode(mode);
+                                                checkRecord();
+                                            } else {
+                                                recordId = null;
+                                                getView().clearFilterInputBox();
+                                                if (result.isReadOnly()){
+                                                    mode = FormMode.READ;
+                                                } else {
+                                                    mode = FormMode.VIEW;
+                                                }
+                                                setMode(mode);
+                                                getView().clearSelected();
+                                                getView().load();
+                                                getView().loadAndSelect();
+                                            }
+                                            getProxy().manualReveal(RefBookHierDataPresenter.this);
+                                            updateMode();
+                                        }
+                                    }, RefBookHierDataPresenter.this));
+
+                            dispatcher.execute(new GetNameAction(refBookDataId), CallbackUtils.defaultCallback(
+                                    new AbstractCallback<GetNameResult>() {
+                                        @Override
+                                        public void onSuccess(GetNameResult result) {
+                                            getView().setRefBookNameDesc(result.getName());
+                                        }
+                                    }, RefBookHierDataPresenter.this));
+                            canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
+                            getView().setVersionedFields(canVersion);
+                            editFormPresenter.setCanVersion(canVersion);
+                            versionPresenter.setHierarchy(true);
                         } else {
-                            recordId = null;
-                            getView().clearFilterInputBox();
-                            if (result.isReadOnly()){
-                                mode = FormMode.READ;
-                            } else {
-                                mode = FormMode.VIEW;
-                            }
-                            setMode(mode);
-                            getView().clearSelected();
-                            getView().load();
-                            getView().loadAndSelect();
+                            getProxy().manualReveal(RefBookHierDataPresenter.this);
+                            Dialog.errorMessage("Доступ к справочнику запрещен!");
                         }
-                        getProxy().manualReveal(RefBookHierDataPresenter.this);
-                        updateMode();
                     }
                 }, this));
-
-        dispatcher.execute(new GetNameAction(refBookDataId), CallbackUtils.defaultCallback(
-                new AbstractCallback<GetNameResult>() {
-                    @Override
-                    public void onSuccess(GetNameResult result) {
-                        getView().setRefBookNameDesc(result.getName());
-                    }
-                }, this));
-        canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
-        getView().setVersionedFields(canVersion);
-        editFormPresenter.setCanVersion(canVersion);
-        versionPresenter.setHierarchy(true);
     }
 
     private void checkRecord() {
