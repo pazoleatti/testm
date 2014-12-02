@@ -3503,6 +3503,9 @@
 	<field name="str26_numrows" class="java.lang.Integer">
 		<fieldDescription><![CDATA[count(/Файл/Документ/Прибыль/ДохНеУчНБ_РасхУчОКН/СвЦелСред)]]></fieldDescription>
 	</field>
+	<field name="NalPUMes_numrows" class="java.lang.Integer">
+		<fieldDescription><![CDATA[count(/Файл/Документ/Прибыль/НалПУ/НалПУМес)]]></fieldDescription>
+	</field>
 	<variable name="ИННЮЛ" class="java.lang.String">
 		<variableExpression><![CDATA[$F{ИННЮЛ} == null ?
 "------------"
@@ -14181,7 +14184,7 @@
 				<reportElement x="2" y="60" width="598" height="750" uuid="d60f9bf1-5512-461a-bde9-d5ff5b45e32a"/>
 				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
 					<datasetRun subDataset="NalPUMes" uuid="08c45b4b-d761-4483-aeee-c525782f1d98">
-						<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалПУ/НалПУМес")]]></dataSourceExpression>
+						<dataSourceExpression><![CDATA[$F{NalPUMes_numrows}==0 ? new net.sf.jasperreports.engine.JREmptyDataSource(1) :((net.sf.jasperreports.engine.data.JRXmlDataSource)$P{REPORT_DATA_SOURCE}).subDataSource("/Документ/Прибыль/НалПУ/НалПУМес")]]></dataSourceExpression>
 					</datasetRun>
 					<jr:listContents height="750" width="598">
 						<staticText>
@@ -16406,7 +16409,7 @@
 							<textElement>
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$F{ТипНП}]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ТипНП}]]></textFieldExpression>
 						</textField>
 					</jr:listContents>
 				</jr:list>
