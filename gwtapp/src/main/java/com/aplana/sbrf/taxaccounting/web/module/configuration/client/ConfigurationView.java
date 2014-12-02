@@ -184,13 +184,13 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
      */
     private void initEmailTable() {
         emailNameColumn.setAlias("emailNameColumn");
-        emailNameColumn.setName("Название");
+        emailNameColumn.setName("Параметр");
         Column<DataRow<Cell>, ?> emailParamColumnUI = factory.createTableColumn(emailNameColumn, emailTable);
         emailTable.setColumnWidth(emailParamColumnUI, 20, Style.Unit.EM);
         emailTable.addColumn(emailParamColumnUI, emailNameColumn.getName());
 
         emailValueColumn.setAlias("emailValueColumn");
-        emailValueColumn.setName("Значение");
+        emailValueColumn.setName("Значение параметра");
         emailParamColumnUI = factory.createTableColumn(emailValueColumn, emailTable);
         emailTable.setColumnWidth(emailParamColumnUI, 30, Style.Unit.EM);
         emailTable.addColumn(emailParamColumnUI, emailValueColumn.getName());

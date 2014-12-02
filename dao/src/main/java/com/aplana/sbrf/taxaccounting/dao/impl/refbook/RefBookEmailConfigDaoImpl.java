@@ -21,7 +21,11 @@ public class RefBookEmailConfigDaoImpl  extends AbstractDao implements RefBookEm
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords() {
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query("select NAME, VALUE, DESCRIPTION from configuration_email order by id", new RowMapper<Map<String, RefBookValue>>() {
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query("select NAME, VALUE, DESCRIPTION from (SELECT ce.*,\n" +
+                "          CASE WHEN value IS NULL THEN 1 ELSE 0 END group_id,\n" +
+                "          row_number() over (partition BY CASE WHEN value IS NULL THEN 1 ELSE 0 END ORDER BY id) as ord\n" +
+                "   FROM configuration_email ce)\n" +
+                "order by group_id, ord", new RowMapper<Map<String, RefBookValue>>() {
             @Override
             public Map<String, RefBookValue> mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
