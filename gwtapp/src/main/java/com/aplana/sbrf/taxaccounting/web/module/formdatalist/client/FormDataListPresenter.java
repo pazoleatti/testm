@@ -142,8 +142,8 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
                 placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN)
                         .with(FormDataPresenter.READ_ONLY, "false")
                         .with(FormDataPresenter.FORM_DATA_ID, String.valueOf(result.getFormDataId()))
+                        .with(FormDataPresenter.UUID, String.valueOf(uuid))
                         .build());
-                LogAddEvent.fire(FormDataListPresenter.this, uuid);
             }
         });
     }

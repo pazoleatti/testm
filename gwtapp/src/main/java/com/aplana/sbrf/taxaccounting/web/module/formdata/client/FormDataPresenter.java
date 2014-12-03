@@ -621,7 +621,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	}
 
     private void getFormData(final GetFormDataAction action){
-        LogCleanEvent.fire(FormDataPresenter.this);
         dispatcher.execute(
                 action,
                 CallbackUtils.defaultCallback(

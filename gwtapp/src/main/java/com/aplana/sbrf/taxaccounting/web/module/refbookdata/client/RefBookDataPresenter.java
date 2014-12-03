@@ -249,6 +249,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onBind(){
+        super.bind();
 		addRegisteredHandler(UpdateForm.getType(), this);
 		addRegisteredHandler(RollbackTableRowSelection.getType(), this);
         addRegisteredHandler(SetFormMode.getType(), this);
