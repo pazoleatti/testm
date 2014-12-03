@@ -199,6 +199,11 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     }
 
     @Override
+    public void setSearchKey(String searchKey) {
+        filterText.setText(searchKey);
+    }
+
+    @Override
     public void setTableData(int start, List<FormDataSearchResult> resultList, int size) {
         searchResultTable.setRowData(start, resultList);
         searchResultTable.setRowCount(size, true);
@@ -228,7 +233,6 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     public void clearTableData() {
         searchResultTable.setRowCount(0);
         countLabel.setText("Найдено: 0");
-        filterText.setText("");
         filterText.setFocus(true);
     }
 

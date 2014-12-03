@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SearchAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SearchResult;
+import com.google.gwt.user.client.Cookies;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -21,6 +22,7 @@ import java.util.List;
 public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyView> implements FormSearchUiHandlers {
     public interface MyView extends PopupView, HasUiHandlers<FormSearchUiHandlers> {
         String getSearchKey();
+        void setSearchKey(String searchKey);
         void setTableData(int start, List<FormDataSearchResult> resultList, int size);
         void updateData();
         void updatePageSize();
@@ -51,11 +53,14 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     @Override
     public void setFormDataId(Long formDataId){
         this.formDataId = formDataId;
-        getView().clearSearchInput();
     }
 
     @Override
-    public void open(){
+    public void open() {
+        String searchKey = getView().getSearchKey();
+        if (searchKey == null || searchKey.isEmpty()) {
+            getView().setSearchKey(Cookies.getCookie(formDataId.toString()));
+        }
         getView().clearTableData();
     }
 
@@ -99,7 +104,8 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     }
 
     @Override
-    public void close(){
+    public void close() {
+        Cookies.setCookie(formDataId.toString(), getView().getSearchKey());
         getView().clearSearchInput();
         getView().clearTableData();
     }
