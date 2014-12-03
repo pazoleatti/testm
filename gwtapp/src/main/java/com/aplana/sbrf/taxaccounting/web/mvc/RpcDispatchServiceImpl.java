@@ -41,6 +41,11 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
     }
 
     @Override
+    public String getServletName() {
+        return this.getClass().getName();
+    }
+
+    @Override
     protected void doUnexpectedFailure(Throwable e) {
 
         boolean isAccessDeniedException = false;
