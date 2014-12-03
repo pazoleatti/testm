@@ -125,6 +125,7 @@ def formTemplatesExcludeRowMap = [
         362  : Exclude.SECTION_TOTAL,  // (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
         // транспорт
         202  : Exclude.NO,           // Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
+        11762: Exclude.SECTION_TOTAL,  // Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
         201  : Exclude.FIX,           // Сведения о транспортных средствах, по которым уплачивается транспортный налог
         // НДС
         600 : Exclude.SECTION_TOTAL, // Отчёт о суммах начисленного НДС по операциям Банка
@@ -147,6 +148,7 @@ def sectionsMap = [
         329 : ['А', 'Б'],    // (РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов.
         333 : ['А', 'Б'],    // (РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1
         312 : ['А', 'Б', 'В', 'Г', 'Д', 'Е'],    // (РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»
+        11762 : ['A', 'B', 'C']    // Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
 ]
 
 @Field
@@ -333,12 +335,8 @@ def getAllDataRows() {
     def dataRowsMap = [:]
 
     formTemplates.each { FormTemplate formTemplate ->
-        def formData
-        if (formTemplate?.isMonthly()) {
-            formData = formDataService.findMonth(formTemplate.type.id, kind, departmentId, taxPeriodId, periodOrder)
-        } else {
-            formData = formDataService.find(formTemplate.type.id, kind, departmentId, reportPeriodId)
-        }
+        def monthOrder = (formTemplate?.isMonthly() ? periodOrder : null)
+        def formData = formDataService.getLast(formTemplate.type.id, kind, departmentId, reportPeriodId, monthOrder)
         if (formData != null) {
             formDataMap[formTemplate.id] = formData
             dataRowsMap[formTemplate.id] = formDataService.getDataRowHelper(formData)?.all

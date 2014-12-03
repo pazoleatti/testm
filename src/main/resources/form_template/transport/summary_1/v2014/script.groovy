@@ -61,13 +61,16 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        checkRegionId()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
+        checkRegionId()
         consolidation()
         calc()
         break
@@ -77,6 +80,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
@@ -925,4 +929,11 @@ void sortFormDataRows() {
     }
 
     dataRowHelper.saveSort()
+}
+
+// Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+void checkRegionId() {
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
 }
