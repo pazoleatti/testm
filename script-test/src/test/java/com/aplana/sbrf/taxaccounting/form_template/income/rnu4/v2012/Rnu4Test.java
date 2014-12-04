@@ -54,27 +54,6 @@ public class Rnu4Test extends ScriptTestBase {
         return getDefaultScriptTestMockHelper(Rnu4Test.class);
     }
 
-    @Before
-    public void mockRefBookDataProvider() {
-//        // Для работы логических проверок
-//        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
-//                any(RefBookAttribute.class))).thenAnswer(
-//                new Answer<PagingResult<Map<String, RefBookValue>>>() {
-//                    @Override
-//                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
-//                        String filter = (String)invocation.getArguments()[2];
-//                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-//                        if (filter.equals("DECLARATION_REGION_ID = 1 and OKTMO = 1")) {
-//                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-//                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-//                            map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-//                            result.add(map);
-//                        }
-//                        return result;
-//                    }
-//                });
-    }
-
     @Test
     public void create() {
         testHelper.execute(FormDataEvent.CREATE);

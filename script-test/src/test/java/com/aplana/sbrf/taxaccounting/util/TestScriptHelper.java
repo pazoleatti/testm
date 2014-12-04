@@ -88,7 +88,7 @@ public class TestScriptHelper {
         userDepartment.setRegionId(DEPARTMENT_REGION_ID);
         // Шаблон НФ из файла
         FormType formType = formData.getFormType();
-        formData.initFormTemplateParams(getTemplate(SCRIPT_PATH_PREFIX + path));
+        formData.initFormTemplateParams(getTemplate(SCRIPT_PATH_PREFIX + path, true));
         formData.setFormType(formType); // Сбрасывается в FormData#initFormTemplateParams
         this.path = SCRIPT_PATH_PREFIX + path + SCRIPT_PATH_FILE_NAME;
         try {
@@ -113,12 +113,26 @@ public class TestScriptHelper {
     }
 
     /**
-     * Получение шаблона НФ из файлов content.xml, headers.xml, rows.xml
-     * Затратная по времени операция, выполняется один раз для одного скрипта
+     * Получение шаблона НФ из файлов content.xml, headers.xml, rows.xml.
+     * Затратная по времени операция, выполняется один раз для одного скрипта.
+     * Для получения данных любого макета (что бы можно было формировать строки других форм)
+     *
+     * @param path путь к каталогу макета
      */
-    private FormTemplate getTemplate(String path) {
+    public FormTemplate getTemplate(String path) {
+        return getTemplate(path, false);
+    }
+
+    /**
+     * Получение шаблона НФ из файлов content.xml, headers.xml, rows.xml
+     * Затратная по времени операция, выполняется один раз для одного скрипта.
+     *
+     * @param path путь к каталогу макета
+     * @param isUsedInside используется внутри тестового хеллпера (задавать ли значение для внутреннего шаблона или только вернуть загруженный)
+     */
+    private FormTemplate getTemplate(String path, boolean isUsedInside) {
         try {
-            formTemplate = new FormTemplate();
+            FormTemplate formTemplate = new FormTemplate();
             formTemplate.setId(formData.getFormTemplateId());
             // content.xml
             JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
@@ -139,6 +153,9 @@ public class TestScriptHelper {
             if (headersString != null && !headersString.isEmpty()) {
                 formTemplate.getHeaders().addAll(xmlSerializationUtils.deserialize(headersString,
                         formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class));
+            }
+            if (isUsedInside) {
+                this.formTemplate = formTemplate;
             }
             return formTemplate;
         } catch (Exception e) {

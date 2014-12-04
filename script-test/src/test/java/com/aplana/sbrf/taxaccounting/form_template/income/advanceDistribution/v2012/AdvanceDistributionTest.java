@@ -1,9 +1,8 @@
-package com.aplana.sbrf.taxaccounting.form_template.transport.vehicles_1.v2014;
+package com.aplana.sbrf.taxaccounting.form_template.income.advanceDistribution.v2012;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
@@ -22,16 +21,15 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 /**
- * Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
+ * Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации.
  *
- * @author Levykin
  */
-public class Vehicles1Test extends ScriptTestBase {
-    private static final int TYPE_ID = 10704;
+public class AdvanceDistributionTest extends ScriptTestBase {
+    private static final int TYPE_ID = 500;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
-    private static final FormDataKind KIND = FormDataKind.PRIMARY;
+    private static final FormDataKind KIND = FormDataKind.SUMMARY;
 
     @Override
     protected FormData getFormData() {
@@ -51,26 +49,36 @@ public class Vehicles1Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Vehicles1Test.class);
+        return getDefaultScriptTestMockHelper(AdvanceDistributionTest.class);
     }
 
     @Before
-    public void mockRefBookDataProvider() {
-        // Для работы логических проверок
-        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class))).thenAnswer(
-                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+    public void mockFormDataService() {
+        // для поиска подразделений
+        when(testHelper.getFormDataService().getRefBookRecord(anyLong(), anyMap(), anyMap(), anyMap(), anyString(),
+                anyString(), any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(
+                new Answer<Map<String, RefBookValue>>() {
                     @Override
-                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
-                        String filter = (String)invocation.getArguments()[2];
-                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-                        if (filter.equals("DECLARATION_REGION_ID = 1 and OKTMO = 1")) {
-                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            result.add(map);
+                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
+                        String value = (String) invocation.getArguments()[5];
+                        if (value == null || "".equals(value.trim())) {
+                            return null;
                         }
-                        return result;
+                        Long departmentId = Long.valueOf(value);
+                        return testHelper.getFormDataService().getRefBookValue(33L, departmentId, new HashMap<Long, Map<String, RefBookValue>>());
+                    }
+                });
+
+        // для получения сводных доходов-расходов простых-сложных
+        when(testHelper.getFormDataService().getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenAnswer(
+                new Answer<FormData>() {
+                    @Override
+                    public FormData answer(InvocationOnMock invocation) throws Throwable {
+                        Integer id = (Integer) invocation.getArguments()[0];
+                        FormData formData = new FormData();
+                        formData.setId(id.longValue());
+                        formData.setState(WorkflowState.ACCEPTED);
+                        return formData;
                     }
                 });
     }
@@ -117,12 +125,6 @@ public class Vehicles1Test extends ScriptTestBase {
         checkLogger();
     }
 
-    @Test
-    public void afterCreateTest() {
-        testHelper.execute(FormDataEvent.AFTER_CREATE);
-        checkLogger();
-    }
-
     // Консолидация
     @Test
     public void composeTest() {
@@ -130,14 +132,19 @@ public class Vehicles1Test extends ScriptTestBase {
         DepartmentFormType departmentFormType = new DepartmentFormType();
         departmentFormType.setKind(KIND);
         departmentFormType.setDepartmentId(DEPARTMENT_ID);
-        departmentFormType.setFormTypeId(TYPE_ID);
+        // идентификатор шаблона источников (Приложение 5)
+        int sourceTypeId = 372;
+        departmentFormType.setFormTypeId(sourceTypeId);
         departmentFormType.setId(1);
         when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
 
+        // Макет источника
+        FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//income//app5//v2012//");
+
         // Один экземпляр-источник
         FormData sourceFormData = new FormData();
-        sourceFormData.initFormTemplateParams(testHelper.getFormTemplate());
+        sourceFormData.initFormTemplateParams(sourceTemplate);
         sourceFormData.setId(2L);
         sourceFormData.setState(WorkflowState.ACCEPTED);
         when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(KIND), eq(DEPARTMENT_ID),
@@ -147,15 +154,41 @@ public class Vehicles1Test extends ScriptTestBase {
         DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
         when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
 
-        // Данные НФ-источника, формируются импортом
-        testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.execute(FormDataEvent.IMPORT);
-        sourceDataRowHelper.save(testHelper.getDataRowHelper().getAll());
+        // Данные НФ-источника, формируются в ручную
+        List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+
+        // формируем одну строку источника
+        DataRow<Cell> row = sourceFormData.createDataRow();
+        // графа 1
+        row.getCell("number").setValue(1L, null);
+        // графа 2
+        row.getCell("regionBank").setValue(1L, null);
+        // графа 3
+        row.getCell("regionBankDivision").setValue(1L, null);
+        // графа 4
+        row.getCell("divisionName").setValue("testA", null);
+        // графа 5
+        row.getCell("kpp").setValue("123", null);
+        // графа 5
+        row.getCell("avepropertyPricerageCost").setValue(1L, null);
+        // графа 6
+        row.getCell("workersCount").setValue(1L, null);
+        // графа 7
+        row.getCell("subjectTaxCredit").setValue(1L, null);
+        // графа 8
+        row.getCell("decreaseTaxSum").setValue(1L, null);
+        // графа 9
+        row.getCell("taxRate").setValue(1L, null);
+        dataRows.add(row);
+
+        sourceDataRowHelper.save(dataRows);
         testHelper.initRowData();
 
         // Консолидация
         testHelper.execute(FormDataEvent.COMPOSE);
-        Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
+
+        // должны получить 3 строки в приемнике: 1 строка из источника и 2 итоговые
+        Assert.assertEquals(3, testHelper.getDataRowHelper().getAll().size());
 
         checkLogger();
     }
@@ -167,24 +200,9 @@ public class Vehicles1Test extends ScriptTestBase {
     }
 
     @Test
-    public void importTransportFileTest() {
-        testHelper.setImportFileInputStream(getImportRnuInputStream());
-        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(4, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
-    }
-
-    @Test
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
-        // Проверка расчетных данных
-        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-        Assert.assertEquals(6, dataRows.get(1).getCell("pastYear").getNumericValue().intValue());
-        Assert.assertEquals(2, dataRows.get(2).getCell("pastYear").getNumericValue().intValue());
-        Assert.assertEquals(13, dataRows.get(4).getCell("pastYear").getNumericValue().intValue());
-        Assert.assertEquals(3, dataRows.get(6).getCell("pastYear").getNumericValue().intValue());
-        checkLogger();
+        Assert.assertTrue("Logger must contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 }
