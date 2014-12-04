@@ -8,10 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
-import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
-import com.aplana.sbrf.taxaccounting.service.script.ReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 
@@ -55,6 +52,7 @@ public class TestScriptHelper {
     private FormDataService formDataService;
     private DepartmentFormTypeService departmentFormTypeService;
     private ReportPeriodService reportPeriodService;
+    private DepartmentService departmentService;
     private RefBookService refBookService;
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
@@ -107,6 +105,7 @@ public class TestScriptHelper {
         formDataService = mockHelper.mockFormDataService();
         departmentFormTypeService = mockHelper.mockDepartmentFormTypeService();
         reportPeriodService = mockHelper.mockReportPeriodService();
+        departmentService = mockHelper.mockDepartmentService();
         refBookService = mockHelper.mockRefBookService();
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
@@ -199,6 +198,7 @@ public class TestScriptHelper {
         bindings.put("formDataEvent", formDataEvent);
         bindings.put("formDataService", formDataService);
         bindings.put("reportPeriodService", reportPeriodService);
+        bindings.put("departmentService", departmentService);
         bindings.put("refBookService", refBookService);
         bindings.put("departmentFormTypeService", departmentFormTypeService);
         bindings.put("refBookFactory", refBookFactory);
@@ -232,7 +232,7 @@ public class TestScriptHelper {
     }
 
     /**
-     * Чтениние из файла в строку
+     * Чтение из файла в строку
      */
     public static String readFile(String path, String charset) throws IOException {
         FileInputStream stream = new FileInputStream(new File(path));
@@ -302,6 +302,13 @@ public class TestScriptHelper {
      */
     public ReportPeriodService getReportPeriodService() {
         return reportPeriodService;
+    }
+
+    /**
+     * Mock DepartmentService для реализации mock-логики внутри теста
+     */
+    public DepartmentService getDepartmentService() {
+        return departmentService;
     }
 
     /**

@@ -193,13 +193,7 @@ def getRecord(def refBookId, def filter, Date date) {
         recordCache.put(refBookId, [:])
     }
 
-    def provider
-    if (!providerCache.containsKey(refBookId)) {
-        providerCache.put(refBookId, refBookFactory.getDataProvider(refBookId))
-    }
-    provider = providerCache.get(refBookId)
-
-    def records = provider.getRecords(date, null, filter, null)
+    def records = getProvider(refBookId).getRecords(date, null, filter, null)
     // отличие от FormDataServiceImpl.getRefBookRecord(...)
     if (records.size() > 0) {
         def retVal = records.get(0)
@@ -210,6 +204,10 @@ def getRecord(def refBookId, def filter, Date date) {
         return retVal
     }
     return null
+}
+
+def getProvider(def id) {
+    return formDataService.getRefBookProvider(refBookFactory, id, providerCache)
 }
 
 /**
@@ -267,10 +265,11 @@ def calc() {
         // Графа 24 (Налоговая ставка)
         row.taxRate = calc24(row, region, errorMsg)
 
+        def partRight = new BigDecimal(row.partRight)
         // Графа 25 (Сумма исчисления налога) = Расчет суммы исчисления налога
-        if (row.taxBase != null && row.coef362 != null && row.taxRate != null && row.partRight != null && row.koefKp != null) {
+        if (row.taxBase != null && row.coef362 != null && row.taxRate != null && partRight != null && row.koefKp != null) {
             def taxRate = getRefBookValue(41, row.taxRate)?.VALUE?.numberValue
-            row.calculatedTaxSum = (row.taxBase * taxRate * row.partRight * row.coef362 * row.koefKp).setScale(0, BigDecimal.ROUND_HALF_UP)
+            row.calculatedTaxSum = (row.taxBase * taxRate * partRight * row.coef362 * row.koefKp).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.calculatedTaxSum = null
             placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate', 'partRight', 'koefKp'], errorMsg)
@@ -314,24 +313,24 @@ def calc() {
 
             // Графа 31
             if (row.taxBenefitCode != null) {
-                if (row.taxBase != null && row.partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSum = (row.taxBase * taxRate * row.partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
+                if (row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
+                    row.benefitSum = (row.taxBase * taxRate * partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
             }
 
             // Графа 33
             if (row.taxBenefitCodeDecrease != null) {
                 reducingPerc = getCodeRecord(row.taxBenefitCodeDecrease, region).PERCENT.numberValue
-                if (row.taxBase != null && row.partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSumDecrease = (row.taxBase * taxRate * row.partRight * row.koefKp * row.coefKl * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
+                if (row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
+                    row.benefitSumDecrease = (row.taxBase * taxRate * partRight * row.koefKp * row.coefKl * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
                 }
             }
 
             // Графа 35
             if (row.benefitCodeReduction != null) {
                 loweringRates = getCodeRecord(row.benefitCodeReduction, region).RATE.numberValue
-                if (row.taxBase != null && row.partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * row.partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
+                if (row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
+                    row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
             }
         }
@@ -379,7 +378,7 @@ def calc() {
 
 void fillTaKpp(def row, def errorMsg) {
     String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = " + row.okato?.toString()
-    def records = refBookFactory.getDataProvider(210).getRecords(getReportPeriodEndDate(), null, filter, null)
+    def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() == 1) {
         row.taxAuthority = records[0].TAX_ORGAN_CODE?.value
         row.kpp = records[0].KPP?.value
@@ -392,7 +391,7 @@ def checkTaKpp(def row, def errorMsg) {
     String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = lower('" +
             row.okato?.toString() + "') and TAX_ORGAN_CODE = lower('" + row.taxAuthority?.toString() +
             "') and KPP = lower('" + row.kpp?.toString() + "')"
-    def records = refBookFactory.getDataProvider(210).getRecords(getReportPeriodEndDate(), null, filter, null)
+    def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() != 1) {
         logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     }
@@ -421,7 +420,7 @@ void logicCheck() {
     def int monthCountInPeriod = getMonthCount()
 
     for (def row : dataRows) {
-        if (row.getAlias() == 'total') {
+        if (row.getAlias() != null) {
             continue
         }
 
@@ -489,7 +488,7 @@ void logicCheck() {
 def getRegionByOKTMO(def oktmoCell, def errorMsg) {
     def reportDate = getReportDate()
 
-    def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue.substring(0, 2)
+    def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue?.substring(0, 2)
     if (oktmo3.equals("719")) {
         return getRecord(4, 'CODE', '89', null, null, reportDate);
     } else if (oktmo3.equals("718")) {
@@ -497,7 +496,7 @@ def getRegionByOKTMO(def oktmoCell, def errorMsg) {
     } else if (oktmo3.equals("118")) {
         return getRecord(4, 'CODE', '83', null, null, reportDate);
     } else {
-        def filter = "OKTMO_DEFINITION like '" + oktmo3.substring(0, 2) + "%'"
+        def filter = "OKTMO_DEFINITION like '" + oktmo3?.substring(0, 2) + "%'"
         def record = getRecord(4, filter, reportDate)
         if (record != null) {
             return record
@@ -527,8 +526,7 @@ def consolidation() {
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRowHelper = formDataService.getDataRowHelper(source)
             def sourceDataRows = sourceDataRowHelper.allCached
-            def formTypeVehicleId = 10704
-            // формы собираем, проверяем на пересечение, для дальнейшего использования
+            def formTypeVehicleId = 204
             if (source.formType.id == formTypeVehicleId) {
                 Department sDepartment = departmentService.get(it.departmentId)
                 def alias = null
@@ -541,12 +539,12 @@ def consolidation() {
                      * Если нашлись две строки с одинаковыми данными то ее не добавляем
                      * в общий список, и проверим остальные поля
                      */
-                    def containedRows = sourcesRows.find { el ->
+                    def containedRow = sourcesRows.find { el ->
                         (el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber)
                                 && el.taxBase.equals(sRow.taxBase) && el.baseUnit.equals(sRow.baseUnit))
                     }
-                    if (containedRows != null) {
-                        DataRow<Cell> row = containedRows
+                    if (containedRow != null) {
+                        DataRow<Cell> row = containedRow
                         // если поля совпадают то ругаемся и убираем текущую совпавшую с коллекции
                         if (row.taxBenefitCode == sRow.taxBenefitCode &&
                                 row.benefitStartDate.equals(sRow.benefitStartDate) &&
@@ -673,7 +671,7 @@ def formNewRow(def sRow) {
         def avgPriceRecord = getRefBookValue(208, sRow.version)
         // В справочнике «Повышающие коэффициенты транспортного налога» найти записи
         def filter = "(YEAR_FROM < " + sRow.pastYear + " OR YEAR_FROM = " + sRow.pastYear + ") and (YEAR_TO > " + sRow.pastYear + " or YEAR_TO = " + sRow.pastYear + ") and AVG_COST = " + avgPriceRecord.AVG_COST.value
-        def records = refBookFactory.getDataProvider(209).getRecords(getReportPeriodEndDate(), null, filter, null)
+        def records = getProvider(209L).getRecords(getReportPeriodEndDate(), null, filter, null)
         if (records.size() == 0) {
             // "Категории средней стоимости транспортных средств"
             logger.error("Для средней стоимости ${getRefBookValue(211, avgPriceRecord.AVG_COST.value).NAME.value} нет данных в справочнике «Повышающие коэффициенты транспортного налога»!")
