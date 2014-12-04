@@ -65,7 +65,7 @@ public class AdvanceDistributionTest extends ScriptTestBase {
                             return null;
                         }
                         Long departmentId = Long.valueOf(value);
-                        return testHelper.getFormDataService().getRefBookValue(33L, departmentId, new HashMap<Long, Map<String, RefBookValue>>());
+                        return testHelper.getFormDataService().getRefBookValue(33L, departmentId, new HashMap<String, Map<String, RefBookValue>>());
                     }
                 });
 
