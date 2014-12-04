@@ -98,6 +98,10 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         void setEditMode(boolean isEditable);
 
+        boolean isFormModified();
+
+        void setIsFormModified(boolean isModified);
+
     }
 
     @Inject
@@ -199,6 +203,23 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                     }
                 });
 
+    }
+
+    @Override
+    public void onCancel() {
+        if (getView().isFormModified()) {
+            Dialog.confirmMessage("Подтверждение операции", "Все не сохранённые данные будут потеряны. Выйти из режима редактирования?",
+                    new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            getView().setEditMode(false);
+                            getView().setIsFormModified(false);
+                            getData();
+                        }
+                    });
+        } else {
+            getView().setEditMode(false);
+        }
     }
 
 
