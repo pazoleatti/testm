@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 public interface ScriptTestMockHelper {
     FormDataService mockFormDataService();
     ReportPeriodService mockReportPeriodService();
+    DepartmentService mockDepartmentService();
     ImportService mockImportService();
     RefBookService mockRefBookService();
     DepartmentFormTypeService mockDepartmentFormTypeService();

@@ -16,7 +16,7 @@ package com.aplana.taxaccounting
 class Main {
     // Параметры подключения к БД
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
-    def static DB_USER = 'TAX_0_4'
+    def static DB_USER = 'TAX_0_4_1'
     def static DB_PASSWORD = 'TAX'
 
     // Схема для сравнения макетов, null если сравнение не требуется
@@ -223,7 +223,9 @@ class Main {
                     'benefit_vehicles': 202,
                     'declaration': -1,
                     'summary': 200,
-                    'vehicles': 201
+                    'summary_1': 203,
+                    'vehicles': 201,
+                    'vehicles_1': 204
             ],
             'property': [
                     'declaration': -1,

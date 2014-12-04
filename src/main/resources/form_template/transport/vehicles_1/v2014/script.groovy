@@ -11,8 +11,8 @@ import groovy.transform.Field
 
 /**
  * Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
- * formTypeId=10704
- * formTemplateId=11762
+ * formTypeId=204
+ * formTemplateId=204
  *
  * форма действует с 1 октября 2014
  *
