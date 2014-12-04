@@ -2,11 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.testutils.DispatchAsyncStub;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionAction;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.AddRefBookRowVersionResult;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionAction;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookRowVersionResult;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -29,15 +25,15 @@ public class EditFormPresenterTest {
     private static final long REF_BOOK_DEPARTMENTS_ID = 30L;
 
     @Test
-    public void testOnCancelClickedWhenDepartments(RefBookHierDataPresenter.MyView myView) {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, true);
+    public void testOnCancelClickedWhenDepartments(EditFormPresenter.MyView myView) {
+        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
         presenter.onCancelClicked();
-        verify(myView).updateMode(FormMode.EDIT);
+        verify(myView, never()).updateMode(FormMode.EDIT);
     }
 
     @Test
-    public void testOnCancelClickedWhenNotDepartments(RefBookHierDataPresenter.MyView myView) {
-        presenter.init(eq(anyLong()), true);
+    public void testOnCancelClickedWhenNotDepartments(EditFormPresenter.MyView myView) {
+        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
         presenter.onCancelClicked();
         verify(myView, never()).updateMode(FormMode.EDIT);
     }
@@ -45,13 +41,13 @@ public class EditFormPresenterTest {
     /**
      * Добавление элемента справочника подразделений
      *
-     * @param dispatchAsync
+     * @param dispatchAsync диспатчер
      * @throws ActionException
      */
     @Test
     @SuppressWarnings("unchecked")
-    public void testOnSaveClickedWhenCreateAndDepartments(DispatchAsync dispatchAsync, RefBookHierDataPresenter.MyView myView) throws ActionException {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, true);
+    public void testOnSaveClickedWhenCreateAndDepartments(DispatchAsync dispatchAsync, EditFormPresenter.MyView myView) throws ActionException {
+        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
         ArrayList<Long> ids = new ArrayList<Long>();
         ids.add(1000L);
 
@@ -78,8 +74,8 @@ public class EditFormPresenterTest {
      */
     @Test
     @SuppressWarnings("unchecked")
-    public void testOnSaveClickedWhenCreateAndNotDepartments(DispatchAsync dispatchAsync, RefBookHierDataPresenter.MyView myView) throws ActionException {
-        presenter.init(eq(anyLong()), true);
+    public void testOnSaveClickedWhenCreateAndNotDepartments(DispatchAsync dispatchAsync, EditFormPresenter.MyView myView) throws ActionException {
+        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
         ArrayList<Long> ids = new ArrayList<Long>();
         ids.add(1000L);
 
@@ -106,7 +102,7 @@ public class EditFormPresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOnSaveClickedWhenUpdate(DispatchAsync dispatchAsync) {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, true);
+        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
         presenter.setCurrentUniqueRecordId(null);
         presenter.onSaveClicked(false);
         verify(dispatchAsync, atLeastOnce()).execute((SaveRefBookRowVersionAction) any(), (AsyncCallback<SaveRefBookRowVersionResult>) any());

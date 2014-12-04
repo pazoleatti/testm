@@ -23,9 +23,9 @@ import java.util.List;
 @Transactional
 public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
-    public static final String MSG_IS_USED_VERSION = "Существует экземпляр декларации в подразделении \"%s\" периоде %s для макета!";
-    private static final String MSG_HAVE_DESTINATION = "Существует назначение налоговой формы в качестве источника данных для декларации вида %s в подразделении %s начиная с периода %s!";
-    private static final String MSG_HAVE_SOURCE = "Существует назначение декларации в качестве приёмника данных для налоговой формы типа %s вида %s в подразделении %s начиная с периода %s!";
+    public static final String MSG_IS_USED_VERSION = "Существует экземпляр декларации в подразделении \"%s\" в периоде \"%s\" для макета!";
+    private static final String MSG_HAVE_DESTINATION = "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
+    private static final String MSG_HAVE_SOURCE = "Существует назначение декларации в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 

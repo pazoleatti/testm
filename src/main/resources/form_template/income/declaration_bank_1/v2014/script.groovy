@@ -644,7 +644,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(2, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 9 : 2, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
@@ -733,45 +733,42 @@ void generateXML() {
                             cvartalIchs = [0]
                     }
                     cvartalIchs.each { cvartalIch ->
-                        // 0..n
-                        НалПУМес(
-                                [ТипНП : typeNP] +
-                                        (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                        [ОКТМО : oktmo]) {
+                        if (!isTaxPeriod) {
+                            // 0..n
+                            НалПУМес(
+                                    [ТипНП : typeNP] +
+                                            (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
+                                            [ОКТМО : oktmo]) {
 
-                            def avPlat1 = empty
-                            def avPlat2 = empty
-                            def avPlat3 = empty
-                            if (!isTaxPeriod) {
                                 def list02Row300 = avPlatMesFB
-                                avPlat1 = (long) list02Row300 / 3
-                                avPlat2 = avPlat1
-                                avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
-                            }
-                            // 0..1
-                            ФедБдж(
-                                    КБК : kbk,
-                                    АвПлат1 : avPlat1,
-                                    АвПлат2 : avPlat2,
-                                    АвПлат3 : avPlat3)
+                                def avPlat1 = (long) list02Row300 / 3
+                                def avPlat2 = avPlat1
+                                def avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
+                                // 0..1
+                                ФедБдж(
+                                        КБК : kbk,
+                                        АвПлат1 : avPlat1,
+                                        АвПлат2 : avPlat2,
+                                        АвПлат3 : avPlat3)
 
-                            avPlat1 = empty
-                            avPlat2 = empty
-                            avPlat3 = empty
-                            if (!isTaxPeriod && dataRowsAdvance != null) {
-                                // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
-                                def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
-                                def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                                avPlat1 = (long) appl5List02Row120 / 3
-                                avPlat2 = avPlat1
-                                avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                                avPlat1 = empty
+                                avPlat2 = empty
+                                avPlat3 = empty
+                                if (!isTaxPeriod && dataRowsAdvance != null) {
+                                    // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
+                                    def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
+                                    def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
+                                    avPlat1 = (long) appl5List02Row120 / 3
+                                    avPlat2 = avPlat1
+                                    avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                                }
+                                // 0..1
+                                СубБдж(
+                                        КБК : kbk2,
+                                        АвПлат1 : avPlat1,
+                                        АвПлат2 : avPlat2,
+                                        АвПлат3 : avPlat3)
                             }
-                            // 0..1
-                            СубБдж(
-                                    КБК : kbk2,
-                                    АвПлат1 : avPlat1,
-                                    АвПлат2 : avPlat2,
-                                    АвПлат3 : avPlat3)
                         }
                     }
                     // Раздел 1. Подраздел 1.2 - конец
@@ -979,91 +976,34 @@ void generateXML() {
                     // Приложение № 3 к Листу 02 - конец
 
                     // Приложение № 5 к Листу 02
-                    /** ОбРасч. Столбец «Признак расчёта». */
-                    def obRasch = emptyNull
-                    /** НаимОП. Столбец «Подразделение территориального банка». */
-                    def naimOP = emptyNull
-                    /** КППОП. Столбец «КПП». */
-                    def kppop = emptyNull
-                    /** ОбязУплНалОП. Столбец «Обязанность по уплате налога». */
-                    def obazUplNalOP = emptyNull
-                    /** ДоляНалБаз. Столбец «Доля налоговой базы (%)». */
-                    def dolaNalBaz = emptyNull
-                    /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.)». */
-                    def nalBazaDola = emptyNull
-                    /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
-                    def stavNalSubRF = emptyNull
-                    /** СумНал. Столбец «Сумма налога». */
-                    def sumNal = emptyNull
-                    /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
-                    def nalNachislSubRF = emptyNull
-                    /** СумНалП. Столбец «Сумма налога к доплате». */
-                    def sumNalP = emptyNull
-                    /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога». */
-                    def nalViplVneRF = emptyNull
-                    /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)». */
-                    def mesAvPlat = emptyNull
-                    /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
-                    def mesAvPlat1CvSled = emptyNull
-
                     if (dataRowsAdvance != null && !dataRowsAdvance.isEmpty()) {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
-                                obRasch = getRefBookValue(26, row.calcFlag)?.CODE?.value
+                                def naimOP = null
                                 def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
                                 if (record33 != null) {
                                     naimOP = record33?.ADDITIONAL_NAME?.value
                                 }
-                                kppop = row.kpp
-                                obazUplNalOP = getRefBookValue(25, row.obligationPayTax)?.CODE?.value
-                                dolaNalBaz = row.baseTaxOf
-                                nalBazaDola = row.baseTaxOfRub
-                                stavNalSubRF = row.subjectTaxStavka
-                                sumNal = row.taxSum
-                                nalNachislSubRF = row.subjectTaxCredit
-                                sumNalP = (row.taxSumToPay != 0) ? row.taxSumToPay : (- row.taxSumToReduction)
-                                nalViplVneRF = row.taxSumOutside
-                                mesAvPlat = row.everyMontherPaymentAfterPeriod
-                                mesAvPlat1CvSled = row.everyMonthForKvartalNextPeriod
-
                                 // 0..n
                                 РаспрНалСубРФ(
-                                        ТипНП : typeNP,
-                                        ОбРасч : obRasch,
-                                        НаимОП : naimOP,
-                                        КППОП : kppop,
-                                        ОбязУплНалОП : obazUplNalOP,
-                                        НалБазаОрг : nalBazaIsch,
-                                        НалБазаБезЛиквОП : empty,
-                                        ДоляНалБаз : dolaNalBaz,
-                                        НалБазаДоля : nalBazaDola,
-                                        СтавНалСубРФ : stavNalSubRF,
-                                        СумНал : sumNal,
-                                        НалНачислСубРФ : nalNachislSubRF,
-                                        НалВыплВнеРФ : nalViplVneRF,
-                                        СумНалП : sumNalP,
-                                        МесАвПлат : mesAvPlat,
-                                        МесАвПлат1КвСлед : mesAvPlat1CvSled)
+                                        ТипНП: typeNP,
+                                        ОбРасч: getRefBookValue(26, row.calcFlag)?.CODE?.value,
+                                        НаимОП: naimOP,
+                                        КППОП: row.kpp,
+                                        ОбязУплНалОП: getRefBookValue(25, row.obligationPayTax)?.CODE?.value,
+                                        НалБазаОрг: nalBazaIsch,
+                                        НалБазаБезЛиквОП: empty,
+                                        ДоляНалБаз: row.baseTaxOf,
+                                        НалБазаДоля: row.baseTaxOfRub,
+                                        СтавНалСубРФ: row.subjectTaxStavka,
+                                        СумНал: row.taxSum,
+                                        НалНачислСубРФ: row.subjectTaxCredit,
+                                        НалВыплВнеРФ: row.taxSumOutside,
+                                        СумНалП: (row.taxSumToPay != 0) ? row.taxSumToPay : (-row.taxSumToReduction),
+                                        МесАвПлат: row.everyMontherPaymentAfterPeriod,
+                                        МесАвПлат1КвСлед: row.everyMonthForKvartalNextPeriod)
                             }
                         }
-                    } else {
-                        РаспрНалСубРФ(
-                                ТипНП : typeNP,
-                                ОбРасч : obRasch,
-                                НаимОП : naimOP,
-                                КППОП : kppop,
-                                ОбязУплНалОП : obazUplNalOP,
-                                НалБазаОрг : nalBazaIsch,
-                                НалБазаБезЛиквОП : empty,
-                                ДоляНалБаз : dolaNalBaz,
-                                НалБазаДоля : nalBazaDola,
-                                СтавНалСубРФ : stavNalSubRF,
-                                СумНал : sumNal,
-                                НалНачислСубРФ : nalNachislSubRF,
-                                НалВыплВнеРФ : nalViplVneRF,
-                                СумНалП : sumNalP,
-                                МесАвПлат : mesAvPlat,
-                                МесАвПлат1КвСлед : mesAvPlat1CvSled)
                     }
                     // Приложение № 5 к Листу 02 - конец
                 }
@@ -1772,53 +1712,53 @@ def roundValue(def value, def precision) {
 
 List<String> getErrorDepartment(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.NAME == null || record.NAME.value == null || record.NAME.value.isEmpty()) {
+    if (record.NAME?.value == null || record.NAME.value.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.OKTMO == null || record.OKTMO.value == null) {
         errorList.add("«Код по ОКТМО»")
     }
-    if (record.INN == null || record.INN.value == null || record.INN.value.isEmpty()) {
+    if (record.INN?.value == null || record.INN.value.isEmpty()) {
         errorList.add("«ИНН»")
     }
-    if (record.KPP == null || record.KPP.value == null || record.KPP.value.isEmpty()) {
+    if (record.KPP?.value == null || record.KPP.value.isEmpty()) {
         errorList.add("«КПП»")
     }
-    if (record.TAX_ORGAN_CODE == null || record.TAX_ORGAN_CODE.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
+    if (record.TAX_ORGAN_CODE?.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
         errorList.add("«Код налогового органа»")
     }
-    if (record.OKVED_CODE == null || record.OKVED_CODE.value == null) {
+    if (record.OKVED_CODE?.value == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
     def reorgFormCode = getRefBookValue(5, record?.REORG_FORM_CODE?.value)?.CODE?.value
     if (reorgFormCode != null && reorgFormCode != '0') {
-        if (record.REORG_INN == null || record.REORG_INN.value == null || record.REORG_INN.value.isEmpty()) {
+        if (record.REORG_INN?.value == null || record.REORG_INN.value.isEmpty()) {
             errorList.add("«ИНН реорганизованного обособленного подразделения»")
         }
-        if (record.REORG_KPP == null || record.REORG_KPP.value == null || record.REORG_KPP.value.isEmpty()) {
+        if (record.REORG_KPP?.value == null || record.REORG_KPP.value.isEmpty()) {
             errorList.add("«КПП реорганизованного обособленного подразделения»")
         }
     }
-    if (record.SIGNATORY_ID == null || record.SIGNATORY_ID.value == null) {
+    if (record.SIGNATORY_ID?.value == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
-    if (record.SIGNATORY_SURNAME == null || record.SIGNATORY_SURNAME.value == null || record.SIGNATORY_SURNAME.value.isEmpty()) {
+    if (record.SIGNATORY_SURNAME?.value == null || record.SIGNATORY_SURNAME.value.isEmpty()) {
         errorList.add("«Фамилия подписанта»")
     }
-    if (record.SIGNATORY_FIRSTNAME == null || record.SIGNATORY_FIRSTNAME.value == null || record.SIGNATORY_FIRSTNAME.value.isEmpty()) {
+    if (record.SIGNATORY_FIRSTNAME?.value == null || record.SIGNATORY_FIRSTNAME.value.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
     def signatoryId = getRefBookValue(35, record?.SIGNATORY_ID?.value)?.CODE?.value
-    if ((signatoryId != null && signatoryId != 1) && (record.APPROVE_DOC_NAME == null || record.APPROVE_DOC_NAME.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
+    if ((signatoryId != null && signatoryId != 1) && (record.APPROVE_DOC_NAME?.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
-    if (record.TAX_PLACE_TYPE_CODE == null || record.TAX_PLACE_TYPE_CODE.value == null) {
+    if (record.TAX_PLACE_TYPE_CODE?.value == null) {
         errorList.add("«Код места, по которому представляется документ»")
     }
-    if (record.TAX_RATE == null || record.TAX_RATE.value == null) {
+    if (record.TAX_RATE?.value == null) {
         errorList.add("«Ставка налога»")
     }
-    if (record.SUM_TAX == null || record.SUM_TAX.value == null) {
+    if (record.SUM_TAX?.value == null) {
         errorList.add("«Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»")
     }
     errorList

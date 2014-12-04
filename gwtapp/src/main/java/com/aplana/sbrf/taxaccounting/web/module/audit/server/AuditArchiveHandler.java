@@ -58,18 +58,10 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                 PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(action.getLogSystemFilter());
                 if (records.isEmpty())
                     throw new ServiceException("Нет записей за указанную дату.");
-                File filePath = new File(printingService.generateAuditCsv(records));
-                try {
-                    String uuid = blobDataService.create(new FileInputStream(filePath), filePath.getName());
-                    result.setFileUuid(uuid);
-                    auditService.removeRecords(records, securityService.currentUserInfo());
-                    result.setCountOfRemoveRecords(records.getTotalCount());
-                    return result;
-                } catch (FileNotFoundException e) {
-                    throw new ServiceException("Возникла проблема при считывании файла, файл не найден.");
-                } finally {
-                    filePath.delete();
-                }
+                result.setFileUuid(printingService.generateAuditCsv(records));
+                auditService.removeRecords(records, securityService.currentUserInfo());
+                result.setCountOfRemoveRecords(records.getTotalCount());
+                return result;
             } finally{
                 auditService.unlock(userInfo);
             }

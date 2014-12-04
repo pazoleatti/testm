@@ -43,7 +43,7 @@ public class DeleteRefBookRowHandler extends AbstractActionHandler<DeleteRefBook
 
         TAUser user = securityService.currentUserInfo().getUser();
         for (Long recordId : action.getRecordsId()) {
-            if (!regionSecurityService.check(user, action.getRefBookId(), recordId)) {
+            if (!regionSecurityService.checkDelete(user, action.getRefBookId(), recordId, action.isDeleteVersion())) {
                 result.setCheckRegion(false);
                 return result;
             }

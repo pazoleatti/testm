@@ -164,16 +164,16 @@ public class DeclarationListPresenter extends
         if (taxType != null) {
             switch (taxType) {
                 case VAT:
-                    description = "Деклараци по НДС";
+                    description = "Декларации по НДС";
                     break;
                 case PROPERTY:
-                    description = "Деклараци по налогу на имущество";
+                    description = "Декларации по налогу на имущество";
                     break;
                 case TRANSPORT:
-                    description = "Деклараци по транспортному налогу";
+                    description = "Декларации по транспортному налогу";
                     break;
                 case INCOME:
-                    description = "Деклараци по налогу на прибыль";
+                    description = "Декларации по налогу на прибыль";
                     break;
                 case DEAL:
                     title = "Список уведомлений";

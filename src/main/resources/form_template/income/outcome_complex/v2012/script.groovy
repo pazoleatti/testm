@@ -324,7 +324,7 @@ void consolidationSummary(def dataRows) {
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        def isMonth = it.formTypeId in [332] //ежемесячная
+        def isMonth = it.formTypeId in [332, 341, 344, 362] //ежемесячная
         def children = []
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
@@ -881,11 +881,6 @@ void addData(def xml, int headRowCount) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
     dataRowHelper.update(rows)
-}
-
-def getOwnerValue (def dataRow , def alias) {
-    def cell = dataRow.getCell(alias)
-    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
 }
 
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма

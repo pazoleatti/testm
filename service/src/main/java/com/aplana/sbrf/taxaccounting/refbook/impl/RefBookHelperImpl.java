@@ -123,8 +123,10 @@ public class RefBookHelperImpl implements RefBookHelper {
 	 * @param attributeId атрибут справочника по которому хотим разыменовать ссылки
 	 * @param dataRows куда будем записывать итоговый результат
 	 * @param recordIds список ссылок для разыменования
+	 * @param isLevel2 признак разименования второго уровня (справочной или зависимой ячейки)
 	 */
-	private void dereference(Column column, Column parentColumn, Long attributeId, Collection<DataRow<Cell>> dataRows, Set<Long> recordIds) {
+	private void dereference(Column column, Column parentColumn, Long attributeId, Collection<DataRow<Cell>> dataRows,
+                             Set<Long> recordIds, boolean isLevel2) {
 		if (recordIds.isEmpty()) {
 			return;
 		}
@@ -134,14 +136,12 @@ public class RefBookHelperImpl implements RefBookHelper {
 		Map<Long, RefBookValue> values = provider.dereferenceValues(attributeId, recordIds);
 		// псевдоним для получения значений ссылки
 		String valueAlias = parentColumn == null ? column.getAlias() : parentColumn.getAlias();
-		// способ получения значения (проверяем случай разыменования 2-го уровня)
-		boolean deref = ColumnType.REFERENCE.equals(column.getColumnType()) && parentColumn == null;
 		// установка разыменованных значений
 		for (DataRow<Cell> dataRow : dataRows) {
 			Cell cell = dataRow.getCell(column.getAlias());
 			Cell valueCell = dataRow.getCell(valueAlias);
 			RefBookValue refBookValue = null;
-			if (!deref) {
+			if (!isLevel2) {
 				BigDecimal reference = valueCell.getNumericValue();
 				if (reference != null) {
 					refBookValue = values.get(reference.longValue());
@@ -161,7 +161,6 @@ public class RefBookHelperImpl implements RefBookHelper {
 		if (dataRows.isEmpty() || columns.isEmpty()) {
 			return;
 		}
-		// разыменовывание ссылок первого уровня
 		for (Column column : columns) {
 			if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
 				Column parentColumn = null;
@@ -187,33 +186,34 @@ public class RefBookHelperImpl implements RefBookHelper {
 					Long attributeId = ColumnType.REFBOOK.equals(column.getColumnType()) ?
 						((RefBookColumn) column).getRefBookAttributeId() :
 						((ReferenceColumn) column).getRefBookAttributeId();
-					dereference(column, parentColumn, attributeId, dataRows, recordIds);
+					dereference(column, parentColumn, attributeId, dataRows, recordIds, false);
 				}
 			}
 		}
 
-		// разыменовывание ссылок второго уровня
-		for (Column column : columns) {
-			if (ColumnType.REFERENCE.equals(column.getColumnType())) {
-				ReferenceColumn refColumn = ((ReferenceColumn) column);
-				if (refColumn.getRefBookAttributeId2() != null) {
-					// сбор всех ссылок на справочники по графе
-					Set<Long> recordIds = new HashSet<Long>();
-					for (DataRow<Cell> dataRow : dataRows) {
-						Cell cell = dataRow.getCell(column.getAlias());
-						String value = cell.getRefBookDereference();
-						if (value != null && !value.isEmpty()) {
-							recordIds.add(Long.valueOf(value));
-						}
-					}
-					if (!recordIds.isEmpty()) {
-						// установка значений
-						Long attributeId = refColumn.getRefBookAttributeId2();
-						dereference(column, null, attributeId, dataRows, recordIds);
-					}
-				}
-			}
-		}
+        // разыменовывание ссылок второго уровня
+        for (Column column : columns) {
+            if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
+                Long refBookAttributeId2 = (ColumnType.REFBOOK.equals(column.getColumnType()) ?
+                        ((RefBookColumn) column).getRefBookAttributeId2() :
+                        ((ReferenceColumn) column).getRefBookAttributeId2());
+                if (refBookAttributeId2 != null) {
+                    // сбор всех ссылок на справочники по графе
+                    Set<Long> recordIds = new HashSet<Long>();
+                    for (DataRow<Cell> dataRow : dataRows) {
+                        Cell cell = dataRow.getCell(column.getAlias());
+                        String value = cell.getRefBookDereference();
+                        if (value != null && !value.isEmpty()) {
+                            recordIds.add(Long.valueOf(value));
+                        }
+                    }
+                    if (!recordIds.isEmpty()) {
+                        // установка значений
+                        dereference(column, null, refBookAttributeId2, dataRows, recordIds, true);
+                    }
+                }
+            }
+        }
 	}
 
     @Override

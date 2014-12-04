@@ -270,14 +270,14 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             }
         }
 
-        if (filter.getTaxType() == TaxType.PROPERTY) {
+        if (filter.getTaxType() == TaxType.PROPERTY || filter.getTaxType() == TaxType.TRANSPORT) {
             if (filter.getTaxOrganCode() != null && !filter.getTaxOrganCode().isEmpty()) {
                 String[] codes = filter.getTaxOrganCode().split("; ");
                 for (int i = 0; i < codes.length; i++) {
                     codes[i] = "'" + codes[i].trim() + "'";
                 }
                 if (codes != null && codes.length != 0) {
-                    sql.append(" AND dec.tax_organ_code in (" + StringUtils.join(Arrays.asList(codes), ",") + ")");
+                    sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.tax_organ_code", Arrays.asList(codes)));
                 }
             }
 
@@ -287,7 +287,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     codes[i] = "'" + codes[i].trim() + "'";
                 }
                 if (codes != null && codes.length != 0) {
-                    sql.append(" AND dec.kpp in (" + StringUtils.join(Arrays.asList(codes), ",") + ")");
+                    sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.kpp", Arrays.asList(codes)));
                 }
             }
         }

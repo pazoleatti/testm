@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.FormTypeTemplate;
 import com.google.gwt.editor.client.Editor;
@@ -59,14 +60,26 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 ifrsNamePanel.setVisible(event.getValue());
-                if (!event.getValue()) ifrsName.setValue("");
+                if (!event.getValue()) ifrsName.setText("");
             }
         });
     }
 
     @UiHandler("cancel")
     public void onCancel(ClickEvent event) {
-        if (getUiHandlers() != null) {
+        if (driver.isDirty()){
+            Dialog.confirmMessage("Редактирование макета", "Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    getUiHandlers().onSave();
+                }
+
+                @Override
+                public void no() {
+                    getUiHandlers().onCancel();
+                }
+            });
+        } else {
             getUiHandlers().onCancel();
         }
     }
@@ -85,11 +98,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @Override
     public FormTypeTemplate getTypeData() {
         return driver.flush();
-    }
-
-    @Override
-    public boolean isChangeFilter() {
-        return driver.isDirty();
     }
 
     @Override

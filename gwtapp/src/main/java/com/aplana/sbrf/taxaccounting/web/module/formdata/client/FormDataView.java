@@ -592,7 +592,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
         if (correctionDiff) {
             checkButton.setVisible(false);
-            workflowButtons.setVisible(false);
+        } else {
+            checkButton.setVisible(true);
         }
         fillPreviousButton.setVisible(correctionPeriod && !readOnly);
 	}

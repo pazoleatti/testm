@@ -74,9 +74,8 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
                 result.setSuccess(true);
             } catch (Exception e) {
                 logger.error(e.getMessage());
-                auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
-                        e.getMessage(), null, null);
-                throw new ActionException(e.getMessage());
+                auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,e.getMessage(), null, null);
+                throw new ActionException(e);
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

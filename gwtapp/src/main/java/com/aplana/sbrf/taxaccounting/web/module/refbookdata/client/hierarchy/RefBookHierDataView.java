@@ -153,6 +153,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
+    public void clearSelected() {
+        refbookDataTree.clearSelected(true);
+    }
+
+    @Override
     public Long getSelectedId() {
         if (refbookDataTree.getSelectedIds().size() > 0) {
             return refbookDataTree.getSelectedIds().iterator().next();
@@ -192,9 +197,9 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @UiHandler("addRow")
     void addRowButtonClicked(ClickEvent event) {
-        //refbookDataTree.clearSelected(true);
         if (getUiHandlers() != null) {
             getUiHandlers().onAddRowClicked();
+            refbookDataTree.clearSelected(true);
         }
     }
 
@@ -270,6 +275,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 search.setEnabled(true);
                 filterText.setEnabled(true);
                 refbookDataTree.setEnabled(true);
+                relevanceDate.setEnabled(true);
                 break;
             case READ:
                 addRow.setVisible(false);
@@ -280,6 +286,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 search.setEnabled(true);
                 filterText.setEnabled(true);
                 refbookDataTree.setEnabled(true);
+                relevanceDate.setEnabled(true);
                 break;
             case VIEW:
                 edit.setVisible(true);
@@ -290,6 +297,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 search.setEnabled(true);
                 filterText.setEnabled(true);
                 refbookDataTree.setEnabled(true);
+                relevanceDate.setEnabled(true);
                 break;
             case CREATE:
                 addRow.setVisible(false);
@@ -299,6 +307,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 filterText.setEnabled(false);
                 separator.setVisible(false);
                 refbookDataTree.setEnabled(false);
+                relevanceDate.setEnabled(false);
                 break;
         }
     }

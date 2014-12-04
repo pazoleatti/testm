@@ -25,7 +25,7 @@ public class LogEntryReportBuilderTestMock {
 	@Test
 	public void testReport() throws IOException{
 		LogEntryReportBuilder builder = new LogEntryReportBuilder(logEntries);
-        builder.createReport();
+        builder.createBlobData();
 	}
 
 }

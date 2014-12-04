@@ -43,22 +43,15 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
 
     @Override
     public PrintAuditDataResult execute(PrintAuditDataAction action, ExecutionContext executionContext) throws ActionException {
-        try {
-            TAUserInfo userInfo = securityService.currentUserInfo();
-            PagingResult<LogSearchResultItem> records;
-            if (userInfo.getUser().hasRole("ROLE_ADMIN"))
-                records = auditService.getLogsByFilter(action.getLogSystemFilter().convertTo());
-            else
-                records = auditService.getLogsBusiness(action.getLogSystemFilter().convertTo(), userInfo);
-            String filePath = printingService.generateExcelLogSystem(records);
-            InputStream fileInputStream = new FileInputStream(filePath);
-
-            PrintAuditDataResult result = new PrintAuditDataResult();
-            result.setUuid(blobDataService.create(fileInputStream, "Журнал_аудита.xlsx"));
-            return result;
-        } catch (FileNotFoundException e) {
-            throw new ServiceException("Проблема при генерации отчета журнала аудита." , e);
-        }
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        PagingResult<LogSearchResultItem> records;
+        if (userInfo.getUser().hasRole("ROLE_ADMIN"))
+            records = auditService.getLogsByFilter(action.getLogSystemFilter().convertTo());
+        else
+            records = auditService.getLogsBusiness(action.getLogSystemFilter().convertTo(), userInfo);
+        PrintAuditDataResult result = new PrintAuditDataResult();
+        result.setUuid(printingService.generateExcelLogSystem(records));
+        return result;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -105,6 +106,9 @@ public final class ScriptUtils {
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
 
     private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
+
+    // разделитель между идентификаторами в ключе для кеширования записей справочника
+    private static final String SEPARATOR = "_";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -967,6 +971,14 @@ public final class ScriptUtils {
     }
 
     /**
+     * Получает значение самой ячейки или главной, если она в объединении
+     */
+    public static Object getOwnerValue (DataRow<Cell> dataRow , String alias) {
+        Cell cell = dataRow.getCell(alias);
+        return ((cell.hasValueOwner()) ? cell.getValueOwner().getValue() : cell.getValue());
+    }
+
+    /**
      * Расчет итогового значения, являющегося суммой по ячейкам одноименной графы
      *
      * @param dataRows
@@ -1371,5 +1383,15 @@ public final class ScriptUtils {
             throw new IllegalArgumentException(WRONG_XLS_COLUMN_INDEX);
         }
         return CellReference.convertNumToColString(index - 1);
+    }
+
+    /**
+     * Получить ключ для кешированых записей по идентикатору справочника и записи.
+     *
+     * @param refBookId идентикатор справочника
+     * @param recordId идентикатор записи
+     */
+    public static String getRefBookCacheKey(Long refBookId, Long recordId) {
+        return refBookId + SEPARATOR + recordId;
     }
 }

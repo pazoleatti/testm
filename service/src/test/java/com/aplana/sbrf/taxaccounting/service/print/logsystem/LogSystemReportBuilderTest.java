@@ -52,6 +52,6 @@ public class LogSystemReportBuilderTest {
     @Test
     public void test() throws IOException {
         LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(items);
-        builder.createReport();
+        builder.createBlobData();
     }
 }

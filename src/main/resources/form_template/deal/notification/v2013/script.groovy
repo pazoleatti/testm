@@ -170,6 +170,7 @@ void generateXML() {
 
             // По строкам матрицы
             УвКонтрСд() {
+                boolean hasRows = false
                 if (!matrixRecords.isEmpty()) {
                     def dataRowHelper = formDataService.getDataRowHelper(matrixRecords.get(0))
                     // "Да"
@@ -191,7 +192,7 @@ void generateXML() {
                         if (row.getAlias() != null) {
                             continue
                         }
-
+                        hasRows = true
                         // Раздел 1А. Сведения о контролируемой сделке (группе однородных сделок)
                         СвКонтрСд(
                                 НомПорСд: ++rowCounter
@@ -312,6 +313,9 @@ void generateXML() {
                         }
                     }
                 }
+                if(!hasRows){
+                    СвКонтрСд() {}
+                }
             }
         }
     }
@@ -319,19 +323,19 @@ void generateXML() {
 
 List<String> getErrorDepartment(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.NAME.stringValue == null || record.NAME.stringValue.isEmpty()) {
+    if (record.NAME?.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.OKTMO?.referenceValue == null) {
         errorList.add("«Код по ОКАТО»")
     }
-    if (record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
+    if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
     }
-    if (record.KPP.stringValue == null || record.KPP.stringValue.isEmpty()) {
+    if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
         errorList.add("«КПП»")
     }
-    if (record.TAX_ORGAN_CODE.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
+    if (record.TAX_ORGAN_CODE?.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
         errorList.add("«Код налогового органа»")
     }
     if (record.OKVED_CODE?.referenceValue == null) {
@@ -340,19 +344,18 @@ List<String> getErrorDepartment(record) {
     if (record.SIGNATORY_ID?.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
     }
-    if (record.SIGNATORY_SURNAME.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
+    if (record.SIGNATORY_SURNAME?.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
         errorList.add("«Фамилия подписанта»")
     }
-    if (record.SIGNATORY_FIRSTNAME.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
+    if (record.SIGNATORY_FIRSTNAME?.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    if (record.APPROVE_DOC_NAME.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+    if (record.APPROVE_DOC_NAME?.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
     }
     if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
         errorList.add("«Код места, по которому представляется документ»")
     }
-
     errorList
 }
 
@@ -384,10 +387,7 @@ def getProvider(def long providerId) {
  * @return
  */
 def getRefBookValue(def long refBookId, def long recordId) {
-    if (!refBookCache.containsKey(recordId)) {
-        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
-    }
-    return refBookCache.get(recordId)
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 def getOkato(def id) {

@@ -6,7 +6,7 @@ import com.gwtplatform.dispatch.shared.Result;
 import java.util.Map;
 
 public class GetConfigurationResult implements Result {
-	
+
 	private ConfigurationParamModel model;
     private Map<Integer, String> dereferenceDepartmentNameMap;
 

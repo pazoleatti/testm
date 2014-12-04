@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
 import org.junit.Before;
@@ -324,6 +325,7 @@ public class FormDataAccessServiceImplTest {
                 return periods.get(key);
             }
         }).when(departmentReportPeriodDao).get(anyInt());
+        when(departmentReportPeriodDao.getListIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(Arrays.asList(1));
         ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
 
         PeriodService reportPeriodService = mock(PeriodService.class);

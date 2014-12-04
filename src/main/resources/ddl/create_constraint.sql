@@ -117,7 +117,7 @@ alter table department_declaration_type add constraint dept_decl_type_uniq_decl 
 
 alter table declaration_template add constraint declaration_template_pk primary key (id);
 alter table declaration_template add constraint declaration_template_fk_dtype foreign key (declaration_type_id) references declaration_type (id);
-alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data (id);
+alter table declaration_template add constraint declaration_tem_fk_blob_data foreign key (XSD) references blob_data(id);
 alter table declaration_template add constraint dec_tem_fk_blob_data_jrxml foreign key (jrxml) references blob_data(id);
 alter table declaration_template add constraint dec_template_check_status check (status in (-1, 0, 1, 2));
 
@@ -156,6 +156,7 @@ alter table data_row add constraint data_row_chk_manual check (manual in (0, 1))
 
 alter table data_cell add constraint data_cell_pk primary key (row_id, column_id);
 alter table data_cell add constraint data_cell_fk_column_id foreign key (column_id) references form_column(id);
+alter table data_cell add constraint data_cell_fk_style_id foreign key (style_id) references form_style(id);
 alter table data_cell add constraint data_cell_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
 alter table data_cell add constraint data_cell_chk_editable check (editable in (0, 1));
 
@@ -250,6 +251,8 @@ alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id)
 alter table ifrs_data add constraint ifrs_data_fk_report_period foreign key (report_period_id) references report_period(id);
 alter table ifrs_data add constraint ifrs_data_fk_blob_data foreign key (blob_data_id) references blob_data(id);
 
+alter table configuration_email add constraint configuration_email_pk primary key (id);
+alter table configuration_email add constraint configuration_email_unqname unique (name);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);

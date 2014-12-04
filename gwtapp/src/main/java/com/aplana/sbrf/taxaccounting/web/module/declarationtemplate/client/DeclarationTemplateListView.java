@@ -98,7 +98,7 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
         versionColumn.setSortable(true);
 
 		declarationTemplateTable.addResizableColumn(linkColumn, "Наименование");
-		declarationTemplateTable.addResizableColumn(versionColumn, "Количество версий");
+		declarationTemplateTable.addResizableColumn(versionColumn, "Версий");
 
         declarationTemplateTable.setSelectionModel(selectionModel);
         dataProvider.addDataDisplay(declarationTemplateTable);
@@ -138,8 +138,11 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
                 }
             }
         }
-        if (!result.isEmpty() && (selectedItem == null)) {
+        if (!result.isEmpty()) {
             selectionModel.setSelected(result.get(0), true);
+        } else {
+            selectedItem = null;
+            selectionModel.clear();
         }
 	}
 

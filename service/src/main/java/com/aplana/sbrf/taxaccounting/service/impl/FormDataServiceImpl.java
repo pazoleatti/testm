@@ -44,7 +44,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String XLSM_EXT = "xlsm";
-    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" периоде \"%s\"";
+    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"";
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
@@ -323,7 +323,7 @@ public class FormDataServiceImpl implements FormDataService {
         boolean isNotThisReportPeriod = false;
         if (periodOrder != null) {
             List<Months> availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
-            if  (periodOrder > 1 && availableMonthList.contains(Months.fromId(periodOrder - 1))) {
+            if  (periodOrder > 1 && availableMonthList.contains(Months.fromId(periodOrder - 2))) {
                 isNotThisReportPeriod = true;
                 formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriod.getId().intValue(), Integer.valueOf(periodOrder - 1));
             }
@@ -849,11 +849,13 @@ public class FormDataServiceImpl implements FormDataService {
                 // Признак наличия принятых экземпляров источников
                 boolean existAcceptedSources = false;
                 for (DepartmentFormType sourceDFT : sourceFormTypes) {
-                    FormData sourceForm = getLast(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
+                    List<FormData> sourceForms = getLastList(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
                             sourceDFT.getDepartmentId(), formData.getReportPeriodId(), formData.getPeriodOrder());
-                    if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
-                        existAcceptedSources = true;
-                        break;
+                    for (FormData sourceForm : sourceForms) {
+                        if (sourceForm != null && sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
+                            existAcceptedSources = true;
+                            break;
+                        }
                     }
                 }
                 // Если текущая форма-приемник имеет один или более источников в статусе «Принята» то консолидируем ее, иначе удаляем
@@ -1112,6 +1114,11 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
         return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
+    }
+
+    @Override
+    public List<FormData> getLastList(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+        return formDataDao.getLastListByDate(formTypeId, kind, departmentId, reportPeriodId, periodOrder, null);
     }
 
     @Override

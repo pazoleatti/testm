@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
+import com.aplana.gwt.client.TextBox;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -27,10 +28,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
@@ -65,7 +63,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     private boolean isVersionMode = false;
     private boolean canVersion = true;
-    private boolean isHierarchy = false;
     private boolean isNeedToReload = false;
 
 	@Inject
@@ -84,7 +81,14 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionStart.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                updateRefBookPickerPeriod();
+                if (versionEnd.getValue() != null && event.getValue().after(versionEnd.getValue())) {
+                    Dialog.errorMessage("Неправильно указан диапазон дат!");
+                    save.setEnabled(false);
+                    cancel.setEnabled(false);
+                } else {
+                    save.setEnabled(true);
+                    cancel.setEnabled(true);
+                }
             }
         });
         versionEnd.setStartLimitDate(new Date(0));//01.01.1970
@@ -92,7 +96,14 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                updateRefBookPickerPeriod();
+                if (versionStart.getValue() != null && event.getValue().before(versionStart.getValue())) {
+                    Dialog.errorMessage("Неправильно указан диапазон дат!");
+                    save.setEnabled(false);
+                    cancel.setEnabled(false);
+                } else {
+                    save.setEnabled(true);
+                    cancel.setEnabled(true);
+                }
             }
         });
         versionStart.setCanBeEmpty(true);
@@ -105,16 +116,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
             Date start = versionStart.getValue();
             if (start == null) {
                 start = new Date();
-            }
-
-            if (versionEnd.getValue() != null && start.after(versionEnd.getValue())) {
-                Dialog.errorMessage("Неправильно указан диапазон дат!");
-                save.setEnabled(false);
-                cancel.setEnabled(false);
-                return;
-            } else {
-                save.setEnabled(true);
-                cancel.setEnabled(true);
             }
 
             for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
@@ -251,8 +252,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         if (col.isRequired()){
             SafeHtmlBuilder builder = new SafeHtmlBuilder();
             builder.appendHtmlConstant(col.getName() + ":<span class='required'>*</span>");
-            HTML span = new HTML(builder.toSafeHtml());
-            label = span;
+            label = new HTML(builder.toSafeHtml());
         } else{
             label = new Label(col.getName()+":");
         }
@@ -262,19 +262,26 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
 	@Override
+    @SuppressWarnings("unchecked")
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {
 		if (record == null) {
-			for (HasValue w : widgets.values()) {
-				w.setValue(null);
-				if (w instanceof UIObject) {
-                    if (w instanceof RefBookPickerWidget) {
-                        if (isNeedToReload) {
-                            isNeedToReload = false;
-                            ((RefBookPickerWidget) w).reload();
-                        }
-                        ((RefBookPickerWidget)w).setDereferenceValue("");
-					}
-				}
+            boolean textFieldFound = false;
+			for (Map.Entry<RefBookColumn, HasValue> entry : widgets.entrySet()) {
+                HasValue widget = entry.getValue();
+                RefBookColumn column = entry.getKey();
+                widget.setValue(null);
+                if (widget instanceof RefBookPickerWidget) {
+                    if (isNeedToReload) {
+                        isNeedToReload = false;
+                        ((RefBookPickerWidget) widget).reload();
+                    }
+                    ((RefBookPickerWidget) widget).setDereferenceValue("");
+                }
+                //Первый по порядку текстовый атрибут справочника принимает значение "Новая запись" (если текстовые атрибуты отсутствуют, то шаг не выполняется)
+                if (column.getAttributeType() == RefBookAttributeType.STRING && !textFieldFound){
+                    textFieldFound = true;
+                    ((TextBox) widget).setValue("Новая запись");
+                }
 			}
 		} else {
 			for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
@@ -315,6 +322,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	}
 
 	@Override
+    @SuppressWarnings("unchecked")
 	public Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException {
 		Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
 		for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
@@ -417,22 +425,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		}
 	}
 
-    @Override
-    public void setHierarchy(boolean isHierarchy) {
-        this.isHierarchy = isHierarchy;
-    }
-
-    @Override
-    public boolean isHierarchy() {
-        return isHierarchy;
-    }
-
 	private void updateWidgetsVisibility(boolean enabled) {
         if (widgets != null){
             for (HasValue entry : widgets.values()) {
                 if (entry instanceof HasEnabled) {
                     boolean readonly = ((UIObject) entry).getStyleName().contains(READ_ONLY_FIELD_STYLE);
-                    ((HasEnabled) entry).setEnabled(readonly ? false : enabled);
+                    ((HasEnabled) entry).setEnabled(!readonly && enabled);
                 }
             }
         }
@@ -493,8 +491,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 save.setEnabled(true);
                 cancel.setEnabled(true);
                 updateWidgetsVisibility(true);
-                versionStart.setEnabled(isVersionMode);
-                versionEnd.setEnabled(isVersionMode);
+                versionStart.setEnabled(true);
+                versionEnd.setEnabled(true);
                 break;
             case READ:
             case VIEW:
@@ -523,6 +521,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	void cancelButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCancelClicked();
+            for (Map.Entry<RefBookColumn, HasValue> widget : widgets.entrySet()){
+                ((Widget)widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
+                        .getStyle().setBackgroundColor("");
+            }
 		}
     }
 }

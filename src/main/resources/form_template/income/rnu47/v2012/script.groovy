@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
@@ -344,7 +342,7 @@ void logicCheck() {
 
 /** Получить данные за определенный месяц */
 def FormData getFormDataPeriod(def reportPeriodId, def periodOrder) {
-    if (taxPeriod != null && periodOrder != null) {
+    if (reportPeriodId != null && periodOrder != null) {
         return formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodId, periodOrder)
     }
 }

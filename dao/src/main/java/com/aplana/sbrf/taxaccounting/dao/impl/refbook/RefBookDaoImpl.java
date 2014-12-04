@@ -435,7 +435,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "SELECT r.id, v.attribute_id, " +
                     "v.string_value, v.number_value, v.date_value, v.reference_value " +
                     "FROM ref_book_record r LEFT JOIN ref_book_value v ON v.record_id = r.id " +
-                    "WHERE r.id in (:recordIds) AND r.ref_book_id = :refBookId";
+                    "WHERE %s AND r.ref_book_id = :refBookId";
 
     @Override
     public Map<Long, Map<String, RefBookValue>> getRecordData(Long refBookId, List<Long> recordIds) {
@@ -443,8 +443,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         final Map<Long, Map<String, RefBookValue>> resultMap = new HashMap<Long, Map<String, RefBookValue>>();
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("refBookId", refBookId);
-        params.put("recordIds", recordIds);
-        getNamedParameterJdbcTemplate().query(SELECT_VALUES_BY_IDS_QUERY, params, new RowCallbackHandler() {
+        String sql = String.format(SELECT_VALUES_BY_IDS_QUERY, SqlUtils.transformToSqlInStatement("r.id", recordIds));
+        getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 processRecordDataRow(rs, refBook, resultMap);
@@ -1146,7 +1146,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }, refBookId, startDate, refBookId, startDate, endDate);
     }
 
-    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ?)\n" +
+    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ? and status != 2)\n" +
             "select id from allRecords where version = (select min(version) from allRecords)";
 
     @Override
@@ -1772,9 +1772,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     result.append(FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getName()).append("\" типа \"");
                     result.append(rs.getString("formType")).append("\" в подразделении \"");
                     if (SqlUtils.getInteger(rs, "departmentType") != 1) {
-                        result.append(rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1)).append("\" периоде \"");
+                        result.append(rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1)).append("\" в периоде \"");
                     } else {
-                        result.append(rs.getString("departmentPath")).append("\" периоде \"");
+                        result.append(rs.getString("departmentPath")).append("\" в периоде \"");
                     }
                     result.append(rs.getString("reportPeriodName")).append(" ").append(rs.getString("year")).append("\", который содержит ссылку на версию!");
                     return result.toString();
@@ -1935,9 +1935,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             msg.append(value.get(REFBOOK_NAME_ALIAS));
             msg.append("\", ");
             if (value.get(UNIQUE_ATTRIBUTES_ALIAS) != null && !value.get(UNIQUE_ATTRIBUTES_ALIAS).isEmpty()) {
-                msg.append("запись id = \"");
+                msg.append("запись id = ");
                 msg.append(value.get(UNIQUE_ATTRIBUTES_ALIAS));
-				msg.append('\"');
             }
             msg.append("действует с \"");
             msg.append(value.get(VERSION_START_ALIAS));

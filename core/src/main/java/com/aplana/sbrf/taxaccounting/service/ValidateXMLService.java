@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 public interface ValidateXMLService {
 
@@ -15,5 +16,5 @@ public interface ValidateXMLService {
      * @param userInfo информация пользователя
      * @return true-если валидация прошла успешно
      */
-    boolean validate(DeclarationData data, TAUserInfo userInfo);
+    boolean validate(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal);
 }

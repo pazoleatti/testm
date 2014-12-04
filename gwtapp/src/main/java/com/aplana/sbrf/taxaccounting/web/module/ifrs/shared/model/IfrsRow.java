@@ -10,9 +10,9 @@ import java.io.Serializable;
 public class IfrsRow implements Serializable{
 
     public static enum StatusIfrs {
-        EXIST("Сформирован"), //существует
-        LOCKED("Инициировано формирование"), //есть блокировка
-        NOT_EXIST("Не сформирован"); //не существует
+        EXIST("Выгрузить в ZIP"), //существует
+        LOCKED("Сформировать ZIP"), //есть блокировка
+        NOT_EXIST("Сформировать ZIP"); //не существует
 
         private String name;
         StatusIfrs(String name) {

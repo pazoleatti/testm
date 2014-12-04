@@ -37,6 +37,6 @@ public class TAUsersReportBuilderTest {
     @Test
     public void createReportTest() throws IOException {
         TAUsersReportBuilder report = new TAUsersReportBuilder(taUserList);
-        report.createReport();
+        report.createBlobData();
     }
 }

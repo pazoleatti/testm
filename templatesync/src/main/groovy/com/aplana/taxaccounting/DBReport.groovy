@@ -16,12 +16,16 @@ class DBReport {
         def sqlColumns1 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
         def sqlColumns2 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
 
+        // Запросы на получение стилей
+        def sqlStyles1 = "select alias, form_template_id, font_color, back_color, italic, bold from form_style where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by alias"
+        def sqlStyles2 = "select alias, form_template_id, font_color, back_color, italic, bold from form_style where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by alias"
+
         // Перечень всех всерсий в БД (заполняется в getTemplates)
         def allVersions = [:]
 
         // Макеты
-        def templates1 = getTemplates(prefix1, sqlTemplate1, sqlColumns1, allVersions)
-        def templates2 = getTemplates(prefix2, sqlTemplate2, sqlColumns2, allVersions)
+        def templates1 = getTemplates(prefix1, sqlTemplate1, sqlColumns1, sqlStyles1, allVersions)
+        def templates2 = getTemplates(prefix2, sqlTemplate2, sqlColumns2, sqlStyles2, allVersions)
 
         // Построение отчета
         def report = new File(Main.REPORT_DB_NAME)
@@ -34,6 +38,9 @@ class DBReport {
 
         // Данные для отображения отличий в шапках НФ
         def headerTableData = [:]
+
+        // Данные для отображения отличий в стилях НФ
+        def styleTableData = [:]
 
         def writer = new FileWriter(new File(Main.REPORT_DB_NAME))
         def builder = new groovy.xml.MarkupBuilder(writer)
@@ -72,7 +79,7 @@ class DBReport {
                             th(rowspan: 2, 'Версия')
                             th(rowspan: 2, "$prefix1 id")
                             th(rowspan: 2, "$prefix2 id")
-                            th(colspan: 9, 'Результат сравнения')
+                            th(colspan: 10, 'Результат сравнения')
                         }
                         tr {
                             th 'name'
@@ -84,10 +91,14 @@ class DBReport {
                             th 'script'
                             th 'columns'
                             th 'monthly'
+                            th 'styles'
                         }
 
+                        // Сортировка
+                        def sorted = Main.TEMPLATE_NAME_TO_TYPE_ID[taxName].sort(){a, b -> a.value <=> b.value}
+
                         // Сравнение
-                        Main.TEMPLATE_NAME_TO_TYPE_ID[taxName].each { folderName, type_id ->
+                        sorted.each { folderName, type_id ->
                             if (type_id != -1) {
                                 allVersions[type_id].each { version ->
                                     // Макеты
@@ -97,6 +108,10 @@ class DBReport {
                                     // Графы
                                     def columnsSet1 = templates1.columnsMap[tmp1?.id]
                                     def columnsSet2 = templates2.columnsMap[tmp2?.id]
+
+                                    // Стили
+                                    def stylesSet1 = templates1.stylesMap[tmp1?.id]
+                                    def stylesSet2 = templates2.stylesMap[tmp2?.id]
 
                                     // Имя из первого макета, а при его отсутствии — из второго
                                     def name = tmp1?.name
@@ -209,7 +224,48 @@ class DBReport {
                                         }
                                     }
 
+                                    // Сравнение стилей
+                                    def styleDiff = null
+                                    def styleHeaders = ['alias', 'font_color', 'back_color', 'italic', 'bold']
+                                    if (stylesSet1 != null && stylesSet2 == null || stylesSet1 == null && stylesSet2 != null) {
+                                        styleDiff = "Нет в ${stylesSet1 == null ? prefix1 : prefix2}"
+                                    } else if (stylesSet1 != null && stylesSet2 != null) {
+                                        def changesMap = [:]
+
+                                        for (def i = 0; i < Math.max(stylesSet1.size(), stylesSet2.size()); i++) {
+                                            def style1 = stylesSet1.size() > i ? stylesSet1.getAt(i) : null
+                                            def style2 = stylesSet2.size() > i ? stylesSet2.getAt(i) : null
+
+                                            styleHeaders.each { styleHeader ->
+                                                if (style1 == null || style2 == null || style1[styleHeader] != style2[styleHeader]) {
+                                                    if (!changesMap.containsKey(i)) {
+                                                        changesMap.put(i, [])
+                                                    }
+                                                    changesMap[i].add(styleHeader)
+                                                }
+                                            }
+                                        }
+
+                                        if (!changesMap.isEmpty()) {
+                                            styleDiff = "Подробнее..."
+                                            def data = new Expando()
+                                            data.tmp1 = tmp1
+                                            data.tmp2 = tmp2
+                                            data.name = name
+                                            data.changesMap = changesMap
+                                            data.headers = styleHeaders
+                                            data.stylesSet1 = stylesSet1
+                                            data.stylesSet2 = stylesSet2
+                                            data.type_id = type_id
+                                            data.version = version
+                                            data.prefix1 = prefix1
+                                            data.prefix2 = prefix2
+                                            styleTableData.put("s_${type_id}_${version}", data)
+                                        }
+                                    }
+
                                     def columnsC = colDiff == null ? '+' : '—'
+                                    def stylesC = styleDiff == null ? '+' : '—'
                                     def monthlyC = tmp1?.monthly == tmp2?.monthly ? '+' : '—'
 
                                     tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
@@ -287,6 +343,13 @@ class DBReport {
                                         } else {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.monthly}, $prefix2 = ${tmp2?.monthly}", monthlyC)
                                         }
+
+                                        if (stylesC == '+') {
+                                            td(class: 'td_ok', stylesC)
+                                        } else {
+                                            td(class: 'td_error cln', title: styleDiff, 'data-tbl': "#s_${type_id}_${version}", stylesC)
+                                        }
+
                                     }
                                 }
                             }
@@ -313,6 +376,17 @@ class DBReport {
                         printHeaderTable(builder, data.prefix2, data.root2, data.headerCompare, data.hiddenCells2)
                     }
                 }
+                // Скрытый блок для отображения отличий в стилях НФ
+                styleTableData.each() { key, data ->
+                    div(class: 'dlg', id: key, title: "Сравнение стилей шаблона вида ${data.type_id} версии ${data.version} «${data.name}»") {
+                        table(class: 'rt') {
+                            // Вывод таблицы с колонками 1
+                            printStylesTable(builder, data.changesMap, data.headers, data.prefix1, data.stylesSet1)
+                            // Вывод таблицы с колонками 2
+                            printStylesTable(builder, data.changesMap, data.headers, data.prefix2, data.stylesSet2)
+                        }
+                    }
+                }
             }
         }
         writer.close()
@@ -320,7 +394,7 @@ class DBReport {
     }
 
     // Получение макетов
-    def private static getTemplates(def prefix, def sqlTemplate, def sqlColumns, def allVersions) {
+    def private static getTemplates(def prefix, def sqlTemplate, def sqlColumns, def sqlStyles, def allVersions) {
         println("DBMS connect: $prefix")
         def retVal = new Expando()
 
@@ -328,6 +402,7 @@ class DBReport {
 
         def templateMap = [:]
         def columnsMap = [:]
+        def stylesMap = [:]
 
         sql.eachRow(sqlTemplate) {
             def type_id = it.type_id as Integer
@@ -382,10 +457,26 @@ class DBReport {
             columnsMap[form_template_id].add(column)
         }
 
+        // Стили
+        sql.eachRow(sqlStyles) {
+            def form_template_id = it.form_template_id as Integer
+            if (!stylesMap.containsKey(form_template_id)) {
+                stylesMap.put(form_template_id, [] as Set)
+            }
+            def style = new Expando()
+            style.alias = it.alias
+            style.font_color = StyleColor.getById(it.font_color as Integer)
+            style.back_color = StyleColor.getById(it.back_color as Integer)
+            style.italic = it.italic == 1
+            style.bold = it.bold == 1
+            stylesMap[form_template_id].add(style)
+        }
+
         sql.close()
         println("Load DB form_template from $prefix OK")
         retVal.templateMap = templateMap
         retVal.columnsMap = columnsMap
+        retVal.stylesMap = stylesMap
         return retVal
     }
 
@@ -476,6 +567,27 @@ class DBReport {
             builder.tr {
                 headers.each { header ->
                     td((changesMap[i]?.contains(header) ? [class: 'td_error'] : [:]), column[header])
+                }
+            }
+        }
+    }
+
+    // Вывод шапки для styles
+    def private static printStylesTable(def builder, def changesMap, def headers, def prefix, def stylesSet) {
+        // Название таблицы
+        builder.tr {
+            td(colspan: 4, class: 'hdr', prefix)
+        }
+        builder.tr {
+            headers.each { header ->
+                th header
+            }
+        }
+        // Содержимое таблицы
+        stylesSet.eachWithIndex { style, i ->
+            builder.tr {
+                headers.each { header ->
+                    td((changesMap[i]?.contains(header) ? [class: 'td_error'] : [:]), style[header])
                 }
             }
         }

@@ -150,10 +150,9 @@ public class PrintingServiceImpl implements PrintingService {
 
     @Override
 	public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
-
 		try {
 			LogEntryReportBuilder builder = new LogEntryReportBuilder(listLogEntries);
-			return builder.createReport() ;
+            return blobDataService.create(new ByteArrayInputStream(builder.createBlobData()), "Список_ошибок.xlsx");
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			throw new ServiceException("Ошибка при создании печатной формы." + LogEntryReportBuilder.class);
@@ -164,7 +163,7 @@ public class PrintingServiceImpl implements PrintingService {
     public String generateExcelUsers(List<TAUserView> taUserViewList) {
         try {
             TAUsersReportBuilder taBuilder = new TAUsersReportBuilder(taUserViewList);
-            return taBuilder.createReport();
+            return blobDataService.create(new ByteArrayInputStream(taBuilder.createBlobData()), "Список_пользователей.xlsx");
         }catch (IOException e){
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы." + TAUsersReportBuilder.class);
@@ -175,7 +174,7 @@ public class PrintingServiceImpl implements PrintingService {
     public String generateExcelLogSystem(List<LogSearchResultItem> resultItems) {
         try {
             LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(resultItems);
-            return builder.createReport();
+            return blobDataService.create(new ByteArrayInputStream(builder.createBlobData()), "Журнал_аудита.xlsx");
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы." + LogSystemXlsxReportBuilder.class);
@@ -186,7 +185,7 @@ public class PrintingServiceImpl implements PrintingService {
     public String generateAuditCsv(List<LogSearchResultItem> resultItems) {
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
-            return logSystemCsvBuilder.createReport();
+            return blobDataService.create(new ByteArrayInputStream(logSystemCsvBuilder.createBlobData()), "");
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemXlsxReportBuilder.class);

@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
@@ -13,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -72,11 +70,17 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 	private FormDataDao formDataDao;
 	
 	@Autowired
+	private FormDataService formDataService;
+
+	@Autowired
 	private DepartmentDao departmentDao;
 	
 	@Autowired
 	private FormTypeDao formTypeDao;
 	
+	@Autowired
+	private FormTemplateDao formTemplateDao;
+
 	@Autowired
     private DeclarationTemplateDao declarationTemplateDao;
 
@@ -189,20 +193,48 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		List<DepartmentFormType> sourcesInfo = departmentFormTypeDao.getDeclarationSources(departmentId, declarationTemplate.getType().getId(),
                 reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
 		List<FormData> records = new ArrayList<FormData>();
+
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setDepartmentIdList(Arrays.asList(departmentId));
+        filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+        // Список всех отчетных периодов для пары отчетный период-подразделение
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declarationData.getDepartmentReportPeriodId());
+        Collections.sort(departmentReportPeriodList, new Comparator<DepartmentReportPeriod>() {
+            @Override
+            public int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
+                if (o1.getCorrectionDate() == null) {
+                    return -1;
+                }
+                if (o2.getCorrectionDate() == null) {
+                    return 1;
+                }
+                return o1.getCorrectionDate().compareTo(o2.getCorrectionDate());
+            }
+        });
+
 		for (DepartmentFormType dft : sourcesInfo) {
             // Ежемесячные формы не являются источниками для декларация, поэтому periodOrder = null
 			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId, null);
 			if (formData != null) {
 				if (formData.getState() != WorkflowState.ACCEPTED) {
-					Department department = departmentDao.getDepartment(dft.getDepartmentId());
-					FormType formType = formTypeDao.get(dft.getFormTypeId());
-					context.getLogger().warn(
-							"Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
-							formType.getName(),
-							dft.getKind().getName(),
-							department.getName()
-					);
-				} else {
+                    //TODO возможно перенести initFormTemplateParams внутрь функции
+                    FormData prevFormDataCorrection = formDataService.getPreviousFormDataCorrection(formData, departmentReportPeriodList, departmentReportPeriod);
+                    if (prevFormDataCorrection == null) {
+                        Department department = departmentDao.getDepartment(dft.getDepartmentId());
+                        FormType formType = formTypeDao.get(dft.getFormTypeId());
+                        context.getLogger().warn(
+                                "Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
+                                formType.getName(),
+                                dft.getKind().getName(),
+                                department.getName()
+                        );
+                    } else {
+                        FormTemplate formTemplate = formTemplateDao.get(prevFormDataCorrection.getFormTemplateId());
+                        prevFormDataCorrection.initFormTemplateParams(formTemplate);
+                        records.add(prevFormDataCorrection);
+                    }
+                } else {
 					records.add(formData);
 				}
 			}

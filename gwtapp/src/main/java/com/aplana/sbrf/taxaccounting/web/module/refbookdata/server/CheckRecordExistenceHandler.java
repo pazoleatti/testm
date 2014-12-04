@@ -19,7 +19,7 @@ import java.util.List;
  * @author Fail Mukhametdinov
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONF', 'ROLE_CONTROL_NS')")
+@PreAuthorize("isAuthenticated()")
 public class CheckRecordExistenceHandler extends AbstractActionHandler<CheckRecordExistenceAction, CheckRecordExistenceResult> {
 
     @Autowired

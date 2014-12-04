@@ -44,7 +44,7 @@ public class FormDataServiceTest {
 
     private Map<Long, Map<String, Long>> recordCache;
     private Map<Long, RefBookDataProvider> providerCache;
-    private Map<Long, Map<String, RefBookValue>> refBookCache;
+    private Map<String, Map<String, RefBookValue>> refBookCache;
 
     private static final Long REF_BOOK_ID = 1L;
     private static final Long REF_BOOK_RECORD_ID = 1L;
@@ -90,7 +90,7 @@ public class FormDataServiceTest {
         providerCache = new HashMap<Long, RefBookDataProvider>();
         providerCache.put(REF_BOOK_ID, refBookDataProvider);
 
-        refBookCache = new HashMap<Long, Map<String, RefBookValue>>();
+        refBookCache = new HashMap<String, Map<String, RefBookValue>>();
 
         ReflectionTestUtils.setField(formDataService, "refBookFactory", refBookFactory);
     }

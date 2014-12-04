@@ -35,12 +35,14 @@ public class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+        log.debug("IfrsGeneratorAsyncTask has been started");
         int userId = (Integer)params.get(USER_ID.name());
         Integer reportPeriod = (Integer)params.get("reportPeriodId");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
         ifrsDataService.calculate(logger, reportPeriod);
+        log.debug("IfrsGeneratorAsyncTask has been finished");
     }
 
     @Override

@@ -403,7 +403,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     @CacheEvict(value = CacheConstants.DECLARATION_TEMPLATE, beforeInvocation = true, allEntries = true)
     public void delete(final Collection<Integer> templateIds) {
         try {
-            getNamedParameterJdbcTemplate().update("delete from declaration_template where id in (:ids)",
+            getNamedParameterJdbcTemplate().update("delete from declaration_template where " + SqlUtils.transformToSqlInStatement("id", templateIds),
                     new HashMap<String, Object>(){{put("ids", templateIds);}});
         } catch (DataAccessException e){
             logger.error("", e);

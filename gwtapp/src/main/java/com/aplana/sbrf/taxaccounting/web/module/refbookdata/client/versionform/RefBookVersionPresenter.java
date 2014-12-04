@@ -12,8 +12,10 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -36,9 +38,14 @@ import java.util.List;
 
 public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.MyView,
 		RefBookVersionPresenter.MyProxy> implements RefBookVersionUiHandlers,
-		UpdateForm.UpdateFormHandler,  RollbackTableRowSelection.RollbackTableRowSelectionHandler{
+		UpdateForm.UpdateFormHandler,  RollbackTableRowSelection.RollbackTableRowSelectionHandler, SetFormMode.SetFormModeHandler{
 
-	@ProxyCodeSplit
+    @Override
+    public void onSetFormMode(SetFormMode event) {
+        setMode(event.getFormMode());
+    }
+
+    @ProxyCodeSplit
 	@NameToken(RefBookDataTokens.refBookVersion)
 	public interface MyProxy extends ProxyPlace<RefBookVersionPresenter>, Place {
 	}
@@ -48,15 +55,19 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	private Long refBookId;
     private Long uniqueRecordId;
     private FormMode mode;
+    private boolean isHierarchy = false;
+    private RefBookTreeItem parentRefBookRecordItem;
 
-	EditFormPresenter editFormPresenter;
+    public void setHierarchy(boolean hierarchy) {
+        isHierarchy = hierarchy;
+    }
+
+    EditFormPresenter editFormPresenter;
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 
-	private final TableDataProvider dataProvider = new TableDataProvider();
-
-	public interface MyView extends View, HasUiHandlers<RefBookVersionUiHandlers> {
+    public interface MyView extends View, HasUiHandlers<RefBookVersionUiHandlers> {
 		void setTableColumns(final List<RefBookColumn> columns);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
 		void setSelected(Long recordId);
@@ -80,9 +91,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		this.placeManager = placeManager;
 		this.editFormPresenter = editFormPresenter;
 		getView().setUiHandlers(this);
-		getView().assignDataProvider(getView().getPageSize(), dataProvider);
-        mode = FormMode.READ;
-        getView().updateMode(mode);
+        TableDataProvider dataProvider = new TableDataProvider();
+        getView().assignDataProvider(getView().getPageSize(), dataProvider);
+        setMode(FormMode.READ);
 	}
 
 	@Override
@@ -111,7 +122,14 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
 	@Override
 	public void onAddRowClicked() {
-        editFormPresenter.show(null);
+        //setMode(FormMode.CREATE);
+        editFormPresenter.setMode(FormMode.CREATE);
+        if (isHierarchy){
+            editFormPresenter.show(null, parentRefBookRecordItem);
+        }
+        else{
+            editFormPresenter.show(null);
+        }
 	}
 
 	@Override
@@ -130,13 +148,12 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 							public void onSuccess(DeleteRefBookRowResult result) {
                                 if (!result.isCheckRegion()) {
                                     String title = "Удаление элемента справочника";
-                                    String msg = "Отсутствуют права доступ на удаление записи для указанного региона!";
+                                    String msg = "Отсутствуют права доступа на удаление записи для указанного региона!";
                                     Dialog.errorMessage(title, msg);
                                     return;
                                 }
                                 LogCleanEvent.fire(RefBookVersionPresenter.this);
                                 LogAddEvent.fire(RefBookVersionPresenter.this, result.getUuid());
-                                editFormPresenter.setMode(mode);
                                 editFormPresenter.show(null);
                                 if (result.getNextVersion() != null) {
                                     placeManager
@@ -146,7 +163,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                                     .build());
                                 } else {
                                     placeManager
-                                            .revealPlace(new PlaceRequest.Builder().nameToken(editFormPresenter.getView().isHierarchy() ? RefBookDataTokens.refBookHierData : RefBookDataTokens.refBookData)
+                                            .revealPlace(new PlaceRequest.Builder().nameToken(isHierarchy ? RefBookDataTokens.refBookHierData : RefBookDataTokens.refBookData)
                                                     .with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(refBookId))
                                                     .build());
                                 }
@@ -158,8 +175,6 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
             editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
-        } else {
-            editFormPresenter.show(null);
         }
 	}
 
@@ -167,56 +182,70 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-        uniqueRecordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+        CheckRefBookAction checkAction = new CheckRefBookAction();
+        checkAction.setRefBookId(refBookId);
+        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
+                new AbstractCallback<CheckRefBookResult>() {
+                    @Override
+                    public void onSuccess(CheckRefBookResult result) {
+                        if (result.isAvailable()) {
+                            uniqueRecordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
 
-        editFormPresenter.setVersionMode(true);
-        editFormPresenter.setCurrentUniqueRecordId(null);
-        editFormPresenter.setRecordId(null);
+                            editFormPresenter.setVersionMode(true);
+                            editFormPresenter.setCurrentUniqueRecordId(null);
+                            editFormPresenter.setMode(mode);
+                            editFormPresenter.setRecordId(null);
 
-        GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-		action.setRefBookId(refBookId);
-		dispatcher.execute(action,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetRefBookAttributesResult>() {
-							@Override
-							public void onSuccess(GetRefBookAttributesResult result) {
-                                getView().resetRefBookElements();
-								getView().setTableColumns(result.getColumns());
-								getView().setRange(new Range(0, getView().getPageSize()));
-                                if (result.isReadOnly()){
-                                    setMode(FormMode.READ);
-                                }
-                                editFormPresenter.init(refBookId, result.isReadOnly());
-                                getProxy().manualReveal(RefBookVersionPresenter.this);
-							}
-						}, this));
+                            GetRefBookAttributesAction action = new GetRefBookAttributesAction();
+                            action.setRefBookId(refBookId);
+                            dispatcher.execute(action,
+                                    CallbackUtils.defaultCallback(
+                                            new AbstractCallback<GetRefBookAttributesResult>() {
+                                                @Override
+                                                public void onSuccess(GetRefBookAttributesResult result) {
+                                                    getView().resetRefBookElements();
+                                                    getView().setTableColumns(result.getColumns());
+                                                    getView().setRange(new Range(0, getView().getPageSize()));
+                                                    if (result.isReadOnly()){
+                                                        setMode(FormMode.READ);
+                                                    }
+                                                    //editFormPresenter.init(refBookId);
+                                                    getProxy().manualReveal(RefBookVersionPresenter.this);
+                                                }
+                                            }, RefBookVersionPresenter.this));
 
-		GetNameAction nameAction = new GetNameAction();
-		nameAction.setRefBookId(refBookId);
-        nameAction.setUniqueRecordId(uniqueRecordId);
-		dispatcher.execute(nameAction,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<GetNameResult>() {
-							@Override
-							public void onSuccess(GetNameResult result) {
-								getView().setRefBookNameDesc(result.getName());
-                                getView().setTitleDetails(result.getUniqueAttributeValues());
-                                String href = "#" + (
-                                        result.getRefBookType().equals(RefBookType.LINEAR.getId()) ?
-                                        RefBookDataTokens.refBookData :
-                                        RefBookDataTokens.refBookHierData
-                                ) + ";id=" + refBookId + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + uniqueRecordId;
-                                getView().setBackAction(href);
-                                editFormPresenter.setRecordId(result.getRecordId());
-							}
-						}, this));
-
+                            GetNameAction nameAction = new GetNameAction();
+                            nameAction.setRefBookId(refBookId);
+                            nameAction.setUniqueRecordId(uniqueRecordId);
+                            dispatcher.execute(nameAction,
+                                    CallbackUtils.defaultCallback(
+                                            new AbstractCallback<GetNameResult>() {
+                                                @Override
+                                                public void onSuccess(GetNameResult result) {
+                                                    getView().setRefBookNameDesc(result.getName());
+                                                    getView().setTitleDetails(result.getUniqueAttributeValues());
+                                                    String href = "#" + (
+                                                            result.getRefBookType().equals(RefBookType.LINEAR.getId()) ?
+                                                                    RefBookDataTokens.refBookData :
+                                                                    RefBookDataTokens.refBookHierData
+                                                    ) + ";id=" + refBookId + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + uniqueRecordId;
+                                                    getView().setBackAction(href);
+                                                    editFormPresenter.setRecordId(result.getRecordId());
+                                                }
+                                            }, RefBookVersionPresenter.this));
+                        } else {
+                            getProxy().manualReveal(RefBookVersionPresenter.this);
+                            Dialog.errorMessage("Доступ к справочнику запрещен!");
+                        }
+                    }
+                }, this));
 	}
 
 	@Override
 	public void onBind(){
 		addRegisteredHandler(UpdateForm.getType(), this);
 		addRegisteredHandler(RollbackTableRowSelection.getType(), this);
+        addRegisteredHandler(SetFormMode.getType(), this);
 	}
 
 	private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
@@ -254,5 +283,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     public void setMode(FormMode mode) {
         this.mode = mode;
         getView().updateMode(mode);
+    }
+
+    public void setParentElement(RefBookTreeItem parentRefBookRecordId){
+        this.parentRefBookRecordItem = parentRefBookRecordId;
     }
 }

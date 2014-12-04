@@ -37,10 +37,12 @@ switch (formDataEvent) {
         addPrevDataRows()
         break
     case FormDataEvent.CALCULATE:
+        checkRegionId()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -57,9 +59,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
+        checkRegionId()
         importData()
         calc()
         logicCheck()
@@ -170,6 +174,9 @@ void addPrevDataRows() {
         def Date startDate = getReportPeriodStartDate()
         def Date endDate = getReportPeriodEndDate()
         prevDataRows = prevDataRows.findAll { row ->
+            if (row.getAlias() != null) {
+                return false
+            }
             def rightBeginDate = row.propertyRightBeginDate
             def rightEndDate = row.propertyRightEndDate
             if (rightEndDate && rightEndDate < startDate || rightBeginDate > endDate) {
@@ -187,6 +194,10 @@ void addPrevDataRows() {
     }
     if (prevDataRows) {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.allCached
+        def totalRow = getDataRow(dataRows, 'total')
+        deleteAllAliased(prevDataRows)
+        addFixedRows(prevDataRows, totalRow)
         dataRowHelper.save(prevDataRows)
     }
 }
@@ -559,4 +570,11 @@ def getSubTotalRows(def dataRows) {
 // Получение подитоговых строк
 def getTotalRow(def dataRows) {
     return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
+}
+
+// Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+void checkRegionId() {
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
 }

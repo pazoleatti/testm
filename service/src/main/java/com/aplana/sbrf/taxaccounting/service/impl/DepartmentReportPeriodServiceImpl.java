@@ -17,87 +17,177 @@ import java.util.List;
 public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriodService {
 
     private final static String ERROR_BATCH_MESSAGE = "Пустой список отчетных периодов";
+	private final static String COMMON_ERROR_MESSAGE = "Ошибка при выполнении операции с отчетными периодами подразделения";
 
-    @Autowired
+	@Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Override
     public DepartmentReportPeriod get(int id) {
-        return departmentReportPeriodDao.get(id);
+		try {
+			return departmentReportPeriodDao.get(id);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public List<DepartmentReportPeriod> getListByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
-        return departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
+		try {
+			return departmentReportPeriodDao.getListByFilter(departmentReportPeriodFilter);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public List<Integer> getListIdsByFilter(DepartmentReportPeriodFilter departmentReportPeriodFilter) {
-        return departmentReportPeriodDao.getListIdsByFilter(departmentReportPeriodFilter);
+		try {
+        	return departmentReportPeriodDao.getListIdsByFilter(departmentReportPeriodFilter);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public int save(DepartmentReportPeriod departmentReportPeriod) {
-        return departmentReportPeriodDao.save(departmentReportPeriod);
+		try {
+        	return departmentReportPeriodDao.save(departmentReportPeriod);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public void updateActive(int id, boolean active, boolean isBalance) {
-        departmentReportPeriodDao.updateActive(id, active, isBalance);
+		try {
+			departmentReportPeriodDao.updateActive(id, active, isBalance);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public void updateActive(List<Integer> ids, boolean active) {
         if (ids == null || ids.isEmpty())
             throw new ServiceException(ERROR_BATCH_MESSAGE);
-
-        departmentReportPeriodDao.updateActive(ids, active);
+		try {
+			departmentReportPeriodDao.updateActive(ids, active);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public void updateCorrectionDate(int id, Date correctionDate) {
-        departmentReportPeriodDao.updateCorrectionDate(id, correctionDate);
+		try {
+			departmentReportPeriodDao.updateCorrectionDate(id, correctionDate);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public void updateBalance(int id, boolean isBalance) {
-        departmentReportPeriodDao.updateBalance(id, isBalance);
+		try {
+			departmentReportPeriodDao.updateBalance(id, isBalance);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public void updateBalance(List<Integer> ids, boolean isBalance) {
         if (ids == null || ids.isEmpty())
             throw new ServiceException(ERROR_BATCH_MESSAGE);
-        departmentReportPeriodDao.updateBalance(ids, isBalance);
+		try {
+			departmentReportPeriodDao.updateBalance(ids, isBalance);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public void delete(int id) {
-        departmentReportPeriodDao.delete(id);
+		try {
+			departmentReportPeriodDao.delete(id);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public void delete(List<Integer> ids) {
-        departmentReportPeriodDao.delete(ids);
+		try {
+			departmentReportPeriodDao.delete(ids);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public boolean existForDepartment(int departmentId, int reportPeriodId) {
-        return departmentReportPeriodDao.existForDepartment(departmentId, reportPeriodId);
+		try {
+			return departmentReportPeriodDao.existForDepartment(departmentId, reportPeriodId);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public Integer getCorrectionNumber(int id) {
-        return departmentReportPeriodDao.getCorrectionNumber(id);
+		try {
+			return departmentReportPeriodDao.getCorrectionNumber(id);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public DepartmentReportPeriod getLast(int departmentId, int reportPeriodId) {
-        return departmentReportPeriodDao.getLast(departmentId, reportPeriodId);
+		try {
+			return departmentReportPeriodDao.getLast(departmentId, reportPeriodId);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 
     @Override
     public boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
-        return departmentReportPeriodDao.existLargeCorrection(departmentId, reportPeriodId, correctionDate);
+		try {
+			return departmentReportPeriodDao.existLargeCorrection(departmentId, reportPeriodId, correctionDate);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+		}
     }
 }

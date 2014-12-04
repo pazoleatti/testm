@@ -175,6 +175,13 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
         formKindColumn.setCellStyleNames("linkCell");
 
+        TextColumn<FormToFormRelation> monthColumn = new TextColumn<FormToFormRelation>() {
+            @Override
+            public String getValue(FormToFormRelation object) {
+                return object.getMonth() != null ? object.getMonth() : "";
+            }
+        };
+
         table.addColumn(counterColumn, "№");
         table.setColumnWidth(counterColumn, 50, Style.Unit.PX);
         table.addColumn(sourceColumn, "Источник / Приёмник");
@@ -185,6 +192,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(formKindColumn, "Тип формы");
         table.setColumnWidth(formKindColumn, 150, Style.Unit.PX);
         table.addColumn(formTypeColumn, "Вид формы");
+        table.addColumn(monthColumn, "Месяц");
         table.addColumn(performerColumn, "Исполнитель");
         table.addColumn(stateColumn, "Состояние формы");
         table.setColumnWidth(stateColumn, 120, Style.Unit.PX);

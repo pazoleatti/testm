@@ -130,7 +130,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public void fillRefBookCache(Long formDataId, Map<Long, Map<String, RefBookValue>> refBookCache) {
+    public void fillRefBookCache(Long formDataId, Map<String, Map<String, RefBookValue>> refBookCache) {
         if (formDataId == null || refBookCache == null) {
             return;
         }
@@ -271,7 +271,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
      */
     private Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                                        Map<Long, RefBookDataProvider> providerCache,
-                                                       Map<Long, Map<String, RefBookValue>> refBookCache,
+                                                       Map<String, Map<String, RefBookValue>> refBookCache,
                                                        String alias, String value, Date date) {
         // Не указали справочник
         if (refBookId == null) {
@@ -316,7 +316,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             if (recordId != null) {
                 // Нашли в кэше
                 if (refBookCache != null) {
-                    return refBookCache.get(recordId);
+                    return refBookCache.get(ScriptUtils.getRefBookCacheKey(refBookId, recordId));
                 } else {
                     Map<String, RefBookValue> retVal = new HashMap<String, RefBookValue>();
                     retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId));
@@ -336,7 +336,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                 Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
                 recordCache.get(refBookId).put(dateStr + filter, recordId);
                 if (refBookCache != null) {
-                    refBookCache.put(recordId, retVal);
+                    refBookCache.put(ScriptUtils.getRefBookCacheKey(refBookId, recordId), retVal);
                 }
                 return retVal;
             } else if (records.size() > 1) {
@@ -353,7 +353,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public Map<String, RefBookValue> getRefBookRecord(Long refBookId, Map<Long, Map<String, Long>> recordCache,
                                                       Map<Long, RefBookDataProvider> providerCache,
-                                                      Map<Long, Map<String, RefBookValue>> refBookCache,
+                                                      Map<String, Map<String, RefBookValue>> refBookCache,
                                                       String alias, String value, Date date,
                                                       int rowIndex, String columnName, Logger logger, boolean required) {
         boolean tooManyValue = false;
@@ -412,7 +412,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public Map<String, RefBookValue> getRefBookRecordImport(Long refBookId,
                                                             Map<Long, Map<String, Long>> recordCache,
                                                             Map<Long, RefBookDataProvider> providerCache,
-                                                            Map<Long, Map<String, RefBookValue>> refBookCache,
+                                                            Map<String, Map<String, RefBookValue>> refBookCache,
                                                             String alias, String value, Date date,
                                                             int rowIndex, int colIndex, Logger logger, boolean required) {
         boolean tooManyValue = false;
@@ -469,14 +469,15 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public Map<String, RefBookValue> getRefBookValue(long refBookId, Long recordId,
-                                                     Map<Long, Map<String, RefBookValue>> refBookCache) {
+                                                     Map<String, Map<String, RefBookValue>> refBookCache) {
         if (recordId == null) {
             return null;
         }
-        if (!refBookCache.containsKey(recordId)) {
-            refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId));
+        String key = ScriptUtils.getRefBookCacheKey(refBookId, recordId);
+        if (!refBookCache.containsKey(key)) {
+            refBookCache.put(key, refBookService.getRecordData(refBookId, recordId));
         }
-        return refBookCache.get(recordId);
+        return refBookCache.get(key);
     }
 
     // Поиск предыдущей НФ относительно формы с заданными параметрами

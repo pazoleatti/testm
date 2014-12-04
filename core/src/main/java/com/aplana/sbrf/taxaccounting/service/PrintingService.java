@@ -15,7 +15,7 @@ public interface PrintingService {
      * @param manual
      * @param isShowChecked
      * @param saved
-     * @return
+     * @return uuid записи с данными из таблицы BLOB_DATA
      */
     String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved);
     /**
@@ -25,7 +25,7 @@ public interface PrintingService {
      * @param manual
      * @param isShowChecked
      * @param saved
-     * @return
+     * @return uuid записи с данными из таблицы BLOB_DATA
      */
     String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved);
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);

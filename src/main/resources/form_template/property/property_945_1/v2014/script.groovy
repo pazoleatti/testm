@@ -1,6 +1,5 @@
 package form_template.property.property_945_1.v2014
 
-import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -25,10 +24,12 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        checkRegionId()
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
@@ -45,9 +46,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+        checkRegionId()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
+        checkRegionId()
         importData()
         calc()
         logicCheck()
@@ -135,9 +138,6 @@ def Map<String, Integer> aliasNums = ['priceSubject' : 1, // №1 строка 1
                  'totalCorrection4' : 20_1, // строка 21 если всё имущество подразделения льготируемое
                  'totalUsingCorrection4' : 21_1 // строка 22 если всё имущество подразделения льготируемое
 ]
-
-@Field
-def startDate = null
 
 @Field
 def endDate = null
@@ -276,9 +276,7 @@ void calc() {
 
     calcCheckSubjects(dataRows, true)
     dataRows.each { row ->
-        if (getTitleAlias(row) != getTitle(13)) {
-            row.taxBaseSum = (row.taxBase1?:0) - (row.taxBase2?:0) + (row.taxBase3?:0) - (row.taxBase4?:0) - (row.taxBase5?:0)
-        }
+        row.taxBaseSum = (row.taxBase1?:0) - (row.taxBase2?:0) + (row.taxBase3?:0) - (row.taxBase4?:0) - (row.taxBase5?:0)
     }
     dataRowHelper.save(dataRows)
 }
@@ -287,6 +285,7 @@ void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    def subject
     def subjectId = null
     def oktmo = null
     def propertyCategory = null
@@ -401,7 +400,7 @@ void logicCheck() {
         }
         // Проверка итоговых значений Графы 7
         if (row.taxBaseSum != null && row.taxBase1 != null && row.taxBase2 != null && row.taxBase3 != null && row.taxBase4 != null && row.taxBase5 != null &&
-                row.taxBaseSum != row.taxBase1 - row.taxBase2 + row.taxBase3 - row.taxBase4 - row.taxBase5 && getTitleAlias(row) != getTitle(13)) {
+                row.taxBaseSum != row.taxBase1 - row.taxBase2 + row.taxBase3 - row.taxBase4 - row.taxBase5) {
             loggerError(row, errorMsg + "Итоговые значения рассчитаны неверно в графе «${getColumnName(row, 'taxBaseSum')}»!")
         }
     }
@@ -909,4 +908,11 @@ void loggerError(def row, def msg) {
 
 def extractValue(Object row, int count) {
     return row.name.toLowerCase().replaceAll(getTitlePattern(row).toLowerCase(), "\$$count")
+}
+
+// Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+void checkRegionId() {
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
 }

@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,6 +26,8 @@ import java.util.List;
  */
 @Repository
 public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
+
+	private static final Log LOG = LogFactory.getLog(LockDataDaoImpl.class);
 
 	@Override
 	public LockData get(String key) {
@@ -102,16 +106,16 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void unlockAllByUserId(int userId, boolean ignoreError) {
         try {
-            getJdbcTemplate().update("delete from lock_data where user_id = ?", userId);
+            getJdbcTemplate().update("delete from lock_data ld where user_id = ? and not exists (select 1 from lock_data_subscribers lds where lds.lock_key=ld.key)", userId);
         } catch (DataAccessException e) {
             if (ignoreError) {
-                e.printStackTrace();
+				LOG.error(e);
                 return;
             }
             throw new LockException("Ошибка при удалении блокировок для пользователя с id = %d. %s", userId, e.getMessage());
         } catch (Exception e) {
             if (ignoreError) {
-                e.printStackTrace();
+				LOG.error(e);
             }
         }
     }

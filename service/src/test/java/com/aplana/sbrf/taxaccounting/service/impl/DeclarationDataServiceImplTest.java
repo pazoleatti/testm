@@ -7,16 +7,12 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
@@ -26,13 +22,15 @@ import static org.mockito.Mockito.*;
 
 public class DeclarationDataServiceImplTest {
 
+    private static String TEST_XML_FILE_NAME = "com/aplana/sbrf/taxaccounting/service/impl/declaration.xml";
+
     private DeclarationDataServiceImpl service;
 	private DeclarationDataDao declarationDataDao;
     @SuppressWarnings("unused")
 	private DeclarationTemplateService declarationTemplateService;
 	@SuppressWarnings("unused")
 	private DeclarationDataScriptingService declarationDataScriptingService;
-	
+
 	@Before
 	public void tearUp() {
 		service = new DeclarationDataServiceImpl();
@@ -53,7 +51,7 @@ public class DeclarationDataServiceImplTest {
 		//when(declarationDataAccessService.canRefresh(USER_ID, 1)).thenReturn(true);
 		//when(declarationDataAccessService.canRefresh(USER_ID, 2)).thenReturn(false);
 		ReflectionTestUtils.setField(service, "declarationDataAccessService", declarationDataAccessService);
-		
+
 
 	}
 
@@ -167,7 +165,37 @@ public class DeclarationDataServiceImplTest {
         when(departmentDao.getDepartment(1)).thenReturn(department);
 
         assertTrue(service.existDeclaration(1, 1, logger.getEntries()));
-        assertEquals("Существует экземпляр Тестовый тип декларации в подразделении Тестовое подразделение периоде Тестовый период 2014", logger.getEntries().get(0).getMessage());
-        assertEquals("Существует экземпляр Тестовый тип декларации в подразделении Тестовое подразделение периоде Второй тестовый период 2014", logger.getEntries().get(1).getMessage());
+        assertEquals("Существует экземпляр \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\"", logger.getEntries().get(0).getMessage());
+        assertEquals("Существует экземпляр \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\"", logger.getEntries().get(1).getMessage());
+    }
+
+    @Test
+    public void getXmlSAXParserTest() {
+        DeclarationDataAccessService declarationDataAccessService = mock(DeclarationDataAccessService.class);
+        ReflectionTestUtils.setField(service, "declarationDataAccessService", declarationDataAccessService);
+
+        String uuid1 = UUID.randomUUID().toString().toLowerCase();
+        String uuid2 = UUID.randomUUID().toString().toLowerCase();
+
+        BlobData blobData1 = new BlobData();
+        blobData1.setInputStream(this.getClass().getClassLoader().getResourceAsStream(TEST_XML_FILE_NAME));
+        BlobData blobData2 = new BlobData();
+        blobData2.setInputStream(this.getClass().getClassLoader().getResourceAsStream(TEST_XML_FILE_NAME));
+
+        BlobDataService blobDataService = mock(BlobDataService.class);
+        when(blobDataService.get(uuid1)).thenReturn(blobData1);
+        when(blobDataService.get(uuid2)).thenReturn(blobData2);
+        ReflectionTestUtils.setField(service, "blobDataService", blobDataService);
+
+        long declarationDataId1 = 1, declarationDataId2 = 2;
+        TAUserInfo userInfo = new TAUserInfo();
+
+        ReportService reportService = mock(ReportService.class);
+        when(reportService.getDec(userInfo, declarationDataId1, ReportType.XML_DEC)).thenReturn(uuid1);
+        when(reportService.getDec(userInfo, declarationDataId2, ReportType.XML_DEC)).thenReturn(uuid2);
+        ReflectionTestUtils.setField(service, "reportService", reportService);
+
+        assertEquals(service.getXmlDataDocDate(declarationDataId1, userInfo), new GregorianCalendar(2014, Calendar.NOVEMBER, 12).getTime());
+        assertEquals(service.getXmlDataFileName(declarationDataId2, userInfo), "NO_PRIB_7750_7750_7707083893777777777_20141112_D63A8CB3-C93D-483C-BED5-81F4EC69B549");
     }
 }

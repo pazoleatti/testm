@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,7 +39,7 @@ public class UploadDataRowsHandler extends
 
     @Autowired
     private SecurityService securityService;
-    
+
 	@Autowired
 	private DataRowService dataRowService;
 
@@ -55,27 +56,31 @@ public class UploadDataRowsHandler extends
     @Override
     public DataRowResult execute(UploadDataRowsAction action, ExecutionContext context) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        System.out.println("UploadDataRowsHandler started");
         //Пытаемся установить блокировку на операцию импорта в текущую нф
         LockData lockData = lockDataService.lock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual(),
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 4);
-        System.out.println("lockData: " +lockData);
+                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        Logger logger = new Logger();
         if (lockData == null) {
-            Logger logger = new Logger();
-            FormData formData = action.getFormData();
+            try {
+                FormData formData = action.getFormData();
 
-            dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
+                dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 
-            BlobData blobData = blobDataService.get(action.getUuid());
-            logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
-            //Парсит загруженный в фаловое хранилище xls-файл
-            formDataService.importFormData(logger, userInfo,
-                    formData.getId(), formData.isManual(), blobData.getInputStream(), blobData.getName());
+                BlobData blobData = blobDataService.get(action.getUuid());
+                logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
+                //Парсит загруженный в фаловое хранилище xls-файл
+                formDataService.importFormData(logger, userInfo,
+                        formData.getId(), formData.isManual(), blobData.getInputStream(), blobData.getName());
 
-
-            DataRowResult result = new DataRowResult();
-            result.setUuid(logEntryService.save(logger.getEntries()));
-            return result;
+                DataRowResult result = new DataRowResult();
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                return result;
+            } catch (Exception e) {
+                try {
+                    lockDataService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual(), userInfo.getUser().getId());
+                } catch (Exception e2) {}
+                throw new ServiceLoggerException("Не удалось выполнить операцию импорта данных в налоговую форму", logEntryService.save(logger.getEntries()));
+            }
         } else {
             throw new ActionException("Операция импорта данных в текущую налоговую форму уже выполняется другим пользователем!");
         }

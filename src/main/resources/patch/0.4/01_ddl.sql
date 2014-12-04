@@ -361,5 +361,77 @@ create index i_declaration_template_xsd     on declaration_template(xsd);
 create index i_declaration_template_jrxml    on declaration_template(jrxml);
 create index i_notification_blob_data_id       on notification(blob_data_id);
 ---------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-9694: Справочник "Настройки почты"
+create table configuration_email
+(
+id number(9) not null,
+name varchar2(200) not null,
+value varchar2(200),
+description varchar2(1000) 
+);
+
+comment on table configuration_email is 'Настройки почты';
+comment on column configuration_email.id is 'Идентификатор записи';
+comment on column configuration_email.name is 'Код параметра';
+comment on column configuration_email.value is 'Значение параметра';
+comment on column configuration_email.description is 'Описание параметра';
+
+alter table configuration_email add constraint configuration_email_pk primary key (id);
+alter table configuration_email add constraint configuration_email_unqname unique (name);
+
+INSERT INTO configuration_email (id, name, value, description) values (1, 'mail.smtp.user', '', 'Имя учетной записи');
+INSERT INTO configuration_email (id, name, value, description) values (2, 'mail.smtp.password', '', 'Пароль');
+INSERT INTO configuration_email (id, name, value, description) values (3, 'mail.smtp.host', '', 'Адрес сервера SMTP');
+INSERT INTO configuration_email (id, name, value, description) values (4, 'mail.smtp.port', '', 'Порт сервера SMTP. Значение по умолчанию: 25.');
+INSERT INTO configuration_email (id, name, value, description) values (5, 'mail.smtp.connectiontimeout', '', 'Таймаут соединения. Значение по умолчанию: бесконечность.');
+INSERT INTO configuration_email (id, name, value, description) values (6, 'mail.smtp.timeout', '', 'Таймаут чтения. Значение по умолчанию: бесконечность.');
+INSERT INTO configuration_email (id, name, value, description) values (7, 'mail.smtp.writetimeout', '', 'Таймаут записи. Значение по умолчанию: бесконечность.');
+INSERT INTO configuration_email (id, name, value, description) values (8, 'mail.smtp.from', '', 'Email-адрес отправителя. Может не указываться');
+INSERT INTO configuration_email (id, name, value, description) values (9, 'mail.smtp.localhost', '', 'Имя локального узла, используемого в командах SMTP HELO или EHLO.');
+INSERT INTO configuration_email (id, name, value, description) values (10, 'mail.smtp.localaddress', '', 'Адрес локального узла, назначенного при выполнении соединения SMTP.');
+INSERT INTO configuration_email (id, name, value, description) values (11, 'mail.smtp.localport', '', 'Порт локального узла, назначенного при выполнении соединения SMTP.');
+INSERT INTO configuration_email (id, name, value, description) values (12, 'mail.smtp.ehlo', '', 'Если выбрано значение false, то не выполняется авторизация при исполнении команды SMTP EHLO.');
+INSERT INTO configuration_email (id, name, value, description) values (13, 'mail.smtp.auth', '', 'Если выбрано значение true, то авторизация пользователей выполняется при помощи команды AUTH. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (14, 'mail.smtp.auth.mechanisms', '', 'Список, определяющий перечень и очередность использования механизмов аутентификации.');
+INSERT INTO configuration_email (id, name, value, description) values (15, 'mail.smtp.auth.login.disable', '', 'Если выбрано значение true, то исключает использование команды AUTH LOGIN. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (16, 'mail.smtp.auth.plain.disable', '', 'Если выбрано значение true, то исключает использование команды AUTH PLAIN. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (17, 'mail.smtp.auth.digest-md5.disable', '', 'Если выбрано значение true, то исключает использование команды DIGEST-MD5. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (18, 'mail.smtp.auth.ntlm.disable', '', 'Если выбрано значение true, то исключает использование команды AUTH NTLM. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (19, 'mail.smtp.auth.ntlm.domain', '', 'Домен аутентификации NTLM.');
+INSERT INTO configuration_email (id, name, value, description) values (20, 'mail.smtp.auth.ntlm.flags', '', 'Параметры протокола NTLM');
+INSERT INTO configuration_email (id, name, value, description) values (21, 'mail.smtp.submitter', '', 'Отправитель, используемый в теге AUTH команды MAIL FROM.');
+INSERT INTO configuration_email (id, name, value, description) values (22, 'mail.smtp.dsn.notify', '', 'Параметр NOTIFY для команды RCPT');
+INSERT INTO configuration_email (id, name, value, description) values (23, 'mail.smtp.dsn.ret', '', 'Параметр RET для команды MAIL');
+INSERT INTO configuration_email (id, name, value, description) values (24, 'mail.smtp.allow8bitmime', '', 'Если выбрано значение true, то включает расширение 8BITMIME на почтовом сервере.');
+INSERT INTO configuration_email (id, name, value, description) values (25, 'mail.smtp.sendpartial', '', 'Если указано значение true, то в том случае, если часть адресов получателей указано неверно, сообщение будет отправлено. Если указано значение false, то в том случае, если хотя бы один адрес получателей указано неверно, сообщение не будет отправлено');
+INSERT INTO configuration_email (id, name, value, description) values (26, 'mail.smtp.sasl.enable', '', 'Если указано значение true, используется SASL при авторизации. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (27, 'mail.smtp.sasl.mechanisms', '', 'Список названий SASL механизмов в порядке проверки использования');
+INSERT INTO configuration_email (id, name, value, description) values (28, 'mail.smtp.sasl.authorizationid', '', 'ID, используемый в случае использования SASL при авторизации.');
+INSERT INTO configuration_email (id, name, value, description) values (29, 'mail.smtp.sasl.realm', '', 'Область, используемая при аутентификации DIGEST-MD5');
+INSERT INTO configuration_email (id, name, value, description) values (30, 'mail.smtp.sasl.usecanonicalhostname', '', 'Если указано значение true, используется для обработки InetAddress.getCanonicalHostName при использовании SASL.');
+INSERT INTO configuration_email (id, name, value, description) values (31, 'mail.smtp.quitwait', '', 'Если указано значение true, при выполнении команды QUIT соединение немедленно закрывается без ожидания ответа.');
+INSERT INTO configuration_email (id, name, value, description) values (32, 'mail.smtp.reportsuccess', '', 'Если указано значение true, формируется подтверждение об успешной отправке для каждого указанного адресата.');
+INSERT INTO configuration_email (id, name, value, description) values (33, 'mail.smtp.socketFactory', '', 'Используется для указания имени фабрики класса, создающего соединение.');
+INSERT INTO configuration_email (id, name, value, description) values (34, 'mail.smtp.socketFactory.class', '', 'Используется для указания имени класса, создающего соединение.');
+INSERT INTO configuration_email (id, name, value, description) values (35, 'mail.smtp.socketFactory.fallback', '', 'Если указано значение true, то при неудачном создании соединения с использованием mail.smtp.socketFactory используется попытка создать соединение при помощи класса java.net.Socket. Значение по умолчанию: 1');
+INSERT INTO configuration_email (id, name, value, description) values (36, 'mail.smtp.socketFactory.port', '', 'Используется для указания порта при соединении с использованием mail.smtp.socketFactory. Если не указан, то будет использован порт по умолчанию.');
+INSERT INTO configuration_email (id, name, value, description) values (37, 'mail.smtp.ssl.enable', '', 'Если указано значение true, то при соединении используется SSL и порт SSL по умолчанию. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (38, 'mail.smtp.ssl.checkserveridentity', '', 'Если указано значение true, идентификация сервера выполняется по спецификации RFC 2595. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (39, 'mail.smtp.ssl.trust', '', 'Если установлено и не указан параметр mail.smtp.socketFactory, то используется MailSSLSocketFactory. (* для доверия всем узлам или список доверенных узлов). Если не указано, уровень доверия узлам зависит от сертификатов сервера');
+INSERT INTO configuration_email (id, name, value, description) values (40, 'mail.smtp.ssl.socketFactory', '', 'Если установлено для класса, расширяющего класс javax.net.ssl.SSLSocketFactory, то этот класс будет использован для создания SMTP SSL соединений.');
+INSERT INTO configuration_email (id, name, value, description) values (41, 'mail.smtp.ssl.socketFactory.class', '', 'Если установлено, указывает имя класса, расширяющего класс javax.net.ssl.SSLSocketFactory. Этот класс будет использован для создания SMTP SSL соединений.');
+INSERT INTO configuration_email (id, name, value, description) values (42, 'mail.smtp.ssl.socketFactory.port', '', 'Указывает порт для соединения при mail.smtp.ssl.socketFactory. Если не установлено, используется порт по умолчанию.');
+INSERT INTO configuration_email (id, name, value, description) values (43, 'mail.smtp.ssl.protocols', '', 'Указывает SSL протоколы, которые используются при соединении SSL.');
+INSERT INTO configuration_email (id, name, value, description) values (44, 'mail.smtp.ssl.ciphersuites', '', 'Указывает SSL шифры, которые используются при соединении SSL.');
+INSERT INTO configuration_email (id, name, value, description) values (45, 'mail.smtp.starttls.enable', '', 'Если указано значение true, разрешает использование команды STARTTLS. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (46, 'mail.smtp.starttls.required', '', 'Если указано значение true, требует requires использование команды STARTTLS. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (47, 'mail.smtp.socks.host', '', 'Указывает имя узла, который является SOCKS5 прокси сервером для соединения с почтовым сервером.');
+INSERT INTO configuration_email (id, name, value, description) values (48, 'mail.smtp.socks.port', '', 'Указывает порт узла, который является SOCKS5 прокси сервером для соединения с почтовым сервером.');
+INSERT INTO configuration_email (id, name, value, description) values (49, 'mail.smtp.mailextension', '', 'Расширяет окончание строки для команды MAIL.');
+INSERT INTO configuration_email (id, name, value, description) values (50, 'mail.smtp.userset', '', 'Если указано значение true, команда RSET используется вместо команды NOOP. Значение по умолчанию: false');
+INSERT INTO configuration_email (id, name, value, description) values (51, 'mail.smtp.noop.strict', '', 'Если указано значение true, ожидает обязательного ответа с кодом 250 от команды NOOP об успехе.');
+INSERT INTO configuration_email (id, name, value, description) values (52, 'mail.transport.protocol', '', 'Определяет протокол доставки сообщений по-умолчанию');
+
+---------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

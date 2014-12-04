@@ -45,6 +45,7 @@ public class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+        log.debug("XlsmGeneratorAsyncTask has been started");
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -56,6 +57,7 @@ public class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         formDataAccessService.canRead(userInfo, formDataId);
         String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked, saved);
         reportService.create(formDataId, uuid, ReportType.EXCEL, isShowChecked, manual, saved);
+        log.debug("XlsmGeneratorAsyncTask has been finished");
     }
 
     @Override

@@ -36,17 +36,9 @@ public class LogErrorHandler extends AbstractActionHandler<LogErrorAction, LogEr
     @Override
     public LogErrorResult execute(LogErrorAction logErrorAction, ExecutionContext executionContext) throws ActionException {
 
-        try {
-            String filePath = printingService.generateExcelLogEntry(logErrorAction.getLogEntries());
-            InputStream fileInputStream = new FileInputStream(filePath);
-            String uuid = blobDataService.create(fileInputStream, "Список_ошибок.xlsx");
-
-            LogErrorResult result = new LogErrorResult();
-            result.setUuid(uuid);
-            return result;
-        } catch (FileNotFoundException e) {
-            throw new ServiceException("Проблема при формировании отчета об ошибках. ", e);
-        }
+        LogErrorResult result = new LogErrorResult();
+        result.setUuid(printingService.generateExcelLogEntry(logErrorAction.getLogEntries()));
+        return result;
     }
 
     @Override

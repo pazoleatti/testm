@@ -643,11 +643,6 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.update(rows)
 }
 
-def getOwnerValue (def dataRow , def alias) {
-    def cell = dataRow.getCell(alias)
-    return ((cell.hasValueOwner()) ? cell.valueOwner.value : cell.value)
-}
-
 /** Получить сумму диапазона строк определенного столбца. */
 def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAlias) {
     def from = getDataRow(dataRows, rowFromAlias).getIndex() - 1

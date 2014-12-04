@@ -31,13 +31,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -62,7 +63,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
 
-    public static final String MSG_IS_EXIST_DECLARATION = "Существует экземпляр %s в подразделении %s периоде %s";
+    public static final String MSG_IS_EXIST_DECLARATION = "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"";
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
@@ -115,12 +116,45 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private ValidateXMLService validateXMLService;
+
 	public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
+
+    private class SAXHandler extends DefaultHandler {
+        private List<String> values;
+        private String tagName;
+        private String attrName;
+
+        private SAXHandler(){};
+
+        public SAXHandler(String tagName, String attrName) {
+            this.tagName = tagName;
+            this.attrName = attrName;
+        }
+
+
+        public List<String> getValues() {
+            return values;
+        }
+
+        @Override
+        public void startDocument() throws SAXException {
+            values = new ArrayList<String>();
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            if (tagName.equals(qName)) {
+                values.add(attributes.getValue(attrName));
+            }
+        }
+    }
 
     @Override
     @Transactional(readOnly = false)
@@ -295,22 +329,37 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
-        Document document = getDocument(declarationDataId);
-        Node fileNode = document.getElementsByTagName(TAG_FILE).item(0);
-        NamedNodeMap attributes = fileNode.getAttributes();
-        Node fileNameNode = attributes.getNamedItem(ATTR_FILE_ID);
-        return fileNameNode.getTextContent();
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser saxParser = factory.newSAXParser();
+            String xmlUuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+            if (xmlUuid == null) return null;
+            BlobData blobData = blobDataService.get(xmlUuid);
+            SAXHandler handler = new SAXHandler(TAG_FILE, ATTR_FILE_ID);
+            saxParser.parse(blobData.getInputStream(), handler);
+            return handler.getValues().get(0);
+        } catch (Exception e) {
+            log.error(e.toString(), e);
+            return null;
+        }
     }
 
     @Override
     public Date getXmlDataDocDate(long declarationDataId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
-        Document document = getDocument(declarationDataId);
-        if (document == null) return null;
-        Node fileNode = document.getElementsByTagName(TAG_DOCUMENT).item(0);
-        NamedNodeMap attributes = fileNode.getAttributes();
-        Node fileNameNode = attributes.getNamedItem(ATTR_DOC_DATE);
-        return getFormattedDate(fileNameNode.getTextContent());
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser saxParser = factory.newSAXParser();
+            String xmlUuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+            if (xmlUuid == null) return null;
+            BlobData blobData = blobDataService.get(xmlUuid);
+            SAXHandler handler = new SAXHandler(TAG_DOCUMENT, ATTR_DOC_DATE);
+            saxParser.parse(blobData.getInputStream(), handler);
+            return getFormattedDate(handler.getValues().get(0));
+        } catch (Exception e) {
+            log.error(e.toString(), e);
+            return null;
+        }
     }
 
     @Override
@@ -373,49 +422,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
             throw new ServiceException(msg);
         }
-        String xml = new String(getBytesFromInputstream(xmlUuid));
         DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
-            InputStreamReader xsdStream = new InputStreamReader(
-                    blobDataService.get(declarationTemplate.getXsdId()).getInputStream(), Charset.forName("windows-1251"));
-            InputStreamReader xmlStream = new InputStreamReader(
-                    new ByteArrayInputStream(xml.getBytes()), Charset.forName("windows-1251"));
-
             try {
-                SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                Schema schema = factory.newSchema(new StreamSource(xsdStream));
-                Validator validator = schema.newValidator();
-                validator.setErrorHandler(new ErrorHandler() {
-                    @Override
-                    public void warning(SAXParseException e) throws SAXException {
-                        logger.info(getMessage(e));
-                    }
-
-                    @Override
-                    public void error(SAXParseException e) throws SAXException {
-                        if (isErrorFatal){
-                            logger.error(getMessage(e));
-                        } else {
-                            logger.warn(getMessage(e));
-                        }
-                    }
-
-                    @Override
-                    public void fatalError(SAXParseException e) throws SAXException {
-                        if (isErrorFatal){
-                            logger.error(getMessage(e));
-                        } else {
-                            logger.warn(getMessage(e));
-                        }
-                    }
-
-                    private String getMessage(SAXParseException e) throws SAXException {
-                        return String.format(e.getLocalizedMessage() + " Строка: %s; Столбец: %s",
-                                e.getLineNumber(), e.getColumnNumber());
-                    }
-                });
-                validator.validate(new StreamSource(xmlStream));
+                validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal);
             } catch (Exception e) {
                 log.error(VALIDATION_ERR_MSG, e);
                 logger.error(e);
@@ -445,20 +456,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         } catch (Exception e) {
             throw new ServiceException("Невозможно заполнить отчет", e);
-        }
-    }
-
-    private Document getDocument(long declarationDataId) {
-        try {
-            String xml = getXmlData(declarationDataId, taUserService.getSystemUserInfo());
-            if (xml == null) return null;
-            InputSource inputSource = new InputSource(new StringReader(xml));
-
-            return DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                    .parse(inputSource);
-        } catch (Exception e) {
-            throw new ServiceException(
-                    "Не удалось получить структуру документа", e);
         }
     }
 

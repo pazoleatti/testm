@@ -182,8 +182,8 @@ public class PeriodServiceImpl implements PeriodService {
                 filter.setIsCorrection(false);
             else
                 filter.setCorrectionDate(drp.getCorrectionDate());
-            List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
             departmentReportPeriodService.updateActive(departmentReportPeriodService.getListIdsByFilter(filter), false);
+            List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
             for (DepartmentReportPeriod item : drpList){
                 if (item.isActive())
                     continue;
@@ -645,10 +645,8 @@ public class PeriodServiceImpl implements PeriodService {
         monthsList.add(null);
 
         Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(reportPeriod.getDictTaxPeriodId());
-        // Код налогового периода
-        String code = refBookValueMap.get("CODE").getStringValue();
 
-        monthsList.addAll(getReportPeriodMonthList(code));
+        monthsList.addAll(getReportPeriodMonthList(refBookValueMap));
 
         return monthsList;
     }
@@ -658,35 +656,19 @@ public class PeriodServiceImpl implements PeriodService {
      * @param code код налогового периода
      * @return список месяцев в налоговом периоде.
      */
-    private List<Months> getReportPeriodMonthList(String code) {
-
-        int start = 0;
-        int end = 0;
+    private List<Months> getReportPeriodMonthList(Map<String, RefBookValue> refBookValueMap) {
+        int start;
+        int end;
 
         List<Months> list = new ArrayList<Months>();
 
-        if (code.equals("21")) {
-            start = 0;
-            end = 2;
-        } else if (code.equals("22")) {
-            start = 3;
-            end = 5;
-        } else if (code.equals("23")) {
-            start = 6;
-            end = 8;
-        } else if (code.equals("24")) {
-            start = 9;
-            end = 11;
-        } else if (code.equals("31")) {
-            start = 0;
-            end = 5;
-        } else if (code.equals("33")) {
-            start = 0;
-            end = 8;
-        } else if (code.equals("34")) {
-            start = 0;
-            end = 11;
-        }
+        GregorianCalendar startDate = new GregorianCalendar();
+        startDate.setTime(refBookValueMap.get("CALENDAR_START_DATE").getDateValue());
+        start = startDate.get(Calendar.MONTH);
+
+        GregorianCalendar endDate = new GregorianCalendar();
+        endDate.setTime(refBookValueMap.get("END_DATE").getDateValue());
+        end = endDate.get(Calendar.MONTH);
 
         for (int i = start; i <= end; ++i) {
             list.add(Months.values()[i]);
@@ -789,7 +771,7 @@ public class PeriodServiceImpl implements PeriodService {
             }
         
             if (drpLast.isActive())
-                return PeriodStatusBeforeOpen.INVALID;
+                return PeriodStatusBeforeOpen.CORRECTION_PERIOD_LAST_OPEN;
         }
 
         //Система проверяет статус периода корректировки (конкретный период ищем, т.е. д.б. одно значение)
@@ -802,6 +784,8 @@ public class PeriodServiceImpl implements PeriodService {
             throw new ServiceException("Найдено больше одного периода корректировки с заданной датой корректировки.");
         } else if (onePeriod.size() == 1 && onePeriod.get(0).isActive()){
             return PeriodStatusBeforeOpen.CORRECTION_PERIOD_NOT_CLOSE;
+        } else if (!onePeriod.get(0).isActive() && onePeriod.get(0).isBalance()) {
+            return PeriodStatusBeforeOpen.CLOSE_AND_BALANCE;
         }
 
         return PeriodStatusBeforeOpen.NOT_EXIST;
@@ -820,7 +804,7 @@ public class PeriodServiceImpl implements PeriodService {
             throw new ServiceException(ex.getMessage());
         }
 
-        String strBalance = isBalance ? " ввод остатков" : "";
+        String strBalance = isBalance ? " \"ввод остатков\"" : "";
         List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, departmentId);
         if ((rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
 
@@ -831,7 +815,7 @@ public class PeriodServiceImpl implements PeriodService {
             departmentReportPeriodService.updateBalance(departmentReportPeriodService.getListIdsByFilter(filter), isBalance);
             for (Integer depId : depIds) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() +
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + (!isBalance ? " \"ввод остатков\"" : "") +
                                 " был изменён на " + rp.getName() + strBalance + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
 
@@ -840,7 +824,7 @@ public class PeriodServiceImpl implements PeriodService {
             open(newYear, newDictTaxPeriodId, taxType, user, departmentId, null, isBalance, null);
             for (Integer depId : depIds) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + " был изменён на " +
+                        "Период с " + rp.getName() + " " + rp.getTaxPeriod().getYear() + (!isBalance ? " \"ввод остатков\"" : "") + " был изменён на " +
                                 dictTaxPeriod.get("NAME").getStringValue() + " " + newYear + strBalance + " для " + departmentService.getDepartment(depId).getName()));//<соответствующий календарный год>** + <"ввод остатков" *>**  для <Наименование подразделения>"));
             }
         }

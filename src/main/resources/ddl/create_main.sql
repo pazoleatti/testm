@@ -852,3 +852,17 @@ comment on table ifrs_data is 'Отчетность для МСФО';
 comment on column ifrs_data.report_period_id is 'Отчетный период';
 comment on column ifrs_data.blob_data_id is 'Файл архива с отчетностью для МСФО';
 --------------------------------------------------------------------------------------------------------
+create table configuration_email
+(
+id number(9) not null,
+name varchar2(200) not null,
+value varchar2(200),
+description varchar2(1000) 
+);
+
+comment on table configuration_email is 'Настройки почты';
+comment on column configuration_email.id is 'Идентификатор записи';
+comment on column configuration_email.name is 'Код параметра';
+comment on column configuration_email.value is 'Значение параметра';
+comment on column configuration_email.description is 'Описание параметра';
+--------------------------------------------------------------------------------------------------------

@@ -7,6 +7,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookEmailConfigProvider;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -16,8 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
@@ -48,6 +51,11 @@ public class ConfigurationServiceTest {
         when(departmentDao.getDepartment(eq(1))).thenReturn(testDepartment1);
         when(departmentDao.getDepartment(eq(2))).thenReturn(testDepartment2);
         ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
+
+        RefBookFactory refBookFactory = mock(RefBookFactory.class);
+        RefBookDataProvider provider = mock(RefBookDataProvider.class);
+        when(refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG)).thenReturn(provider);
+        ReflectionTestUtils.setField(service, "refBookFactory", refBookFactory);
     }
 
     // Нет прав на сохранение
@@ -104,10 +112,12 @@ public class ConfigurationServiceTest {
                 asList("file://" + errorFolder.getRoot().getPath() + "/"));
 
         // Заполнение параметров отправки почты
-        model.put(ConfigurationParam.EMAIL_SERVER, 0, asList("server"));
-        model.put(ConfigurationParam.EMAIL_PORT, 0, asList("25"));
-        model.put(ConfigurationParam.EMAIL_LOGIN, 0, asList("login"));
-        model.put(ConfigurationParam.EMAIL_PASSWORD, 0, asList("password"));
+        //model.put(ConfigurationParam.EMAIL_SERVER, 0, asList("server"));
+        //model.put(ConfigurationParam.EMAIL_PORT, 0, asList("25"));
+        //model.put(ConfigurationParam.EMAIL_LOGIN, 0, asList("login"));
+        //model.put(ConfigurationParam.EMAIL_PASSWORD, 0, asList("password"));
+        List<Map<String, String>> params = new ArrayList<Map<String, String>>();
+        model.setEmailParams(params);
 
         service.saveAllConfig(getUser(), model, logger);
 
@@ -227,7 +237,7 @@ public class ConfigurationServiceTest {
 
         // необязательно указывать все общие параметры, поэтому будет 6 ошибок (из них 4 у параметров отправки почты)
         // на превышение длины выше 500 символов
-        Assert.assertEquals(6, logger.getEntries().size());
+        Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains("(" + length + ")"));
         Assert.assertTrue(logger.getEntries().get(1).getMessage().contains("(" + length + ")"));
     }

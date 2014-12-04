@@ -13,6 +13,13 @@ import java.util.List;
  * @author dsultanbekov, sgoryachkin
  */
 public interface DepartmentFormTypeDao {
+
+    /**
+     * Получает назначения по идентификаторам
+     * @param ids списо идентификаторов
+     */
+    List<DepartmentFormType> getByListIds(List<Long> ids);
+
     /**
      * Возвращает информацию о формах по подразделению
      *
@@ -59,10 +66,19 @@ public interface DepartmentFormTypeDao {
      * Возвращает информацию о формах по заданному виду налога и исполнителю
      *
      * @param performerDepId    идентификатор подразделения исполнителя
-     * @param taxType           вид налога
+     * @param taxTypes           вид налога
      * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
      */
-    List<Long> getByPerformerId(int performerDepId, TaxType taxType, List<FormDataKind> kinds);
+    List<Long> getByPerformerId(int performerDepId, List<TaxType> taxTypes, List<FormDataKind> kinds);
+
+    /**
+     * Возвращает назначения по по заданному типу налога и исполнителю
+     *
+     * @param performerDepId    идентификатор подразделения исполнителя
+     * @param taxTypes           вид налога
+     * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
+     */
+    List<Long> getDFTByPerformerId(int performerDepId, List<TaxType> taxTypes, List<FormDataKind> kinds);
 
     /**
      * Возвращает типы НФ:
@@ -76,20 +92,6 @@ public interface DepartmentFormTypeDao {
      * @return список назначенных подразделению форм (с учётом вида и типа) по заданному виду налога
      */
     List<Long> getFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds);
-
-    /**
-     * Возвращает информацию об источниках, которые должны использоваться при
-     * формировании налоговой формы назначения с заданными параметрами
-     *
-     * @param departmentId идентификатор подразделения формируемой налоговой формы
-     *                     назначения
-     * @param formTypeId   вид налоговой формы
-     * @param kind         тип налоговой формы
-     * @return информация о формах-источниках в виде списка
-     *         {@link DepartmentFormType}
-     */
-    @Deprecated
-    List<DepartmentFormType> getFormSources(int departmentId, int formTypeId, FormDataKind kind);
 
     /**
      * Возвращает информацию об источниках, которые должны использоваться при
@@ -139,20 +141,6 @@ public interface DepartmentFormTypeDao {
     List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType, Date periodStart, Date periodEnd);
 
     /**
-     * Возвращает информацию о всех налоговых формах, которые являются источниками
-     * для налоговых форм или деклараций в заданном подразделении
-     * Предполагается что метод будет использоваться для заполнения фильтра,
-     * списком доступных для выбора департаментов, типов НФ, и видов НФ (kind)
-     *
-     * @param departmentId идентификатор подразделения
-     * @param taxType      вид налога
-     * @return информация о формах-источниках в виде списка
-     *         {@link DepartmentFormType}
-     */
-    @Deprecated
-    List<DepartmentFormType> getDepartmentSources(int departmentId, TaxType taxType);
-
-    /**
      * Возвращает информацию о формах-потребителях, которые должны использовать
      * информацию из данной налоговой формы в качестве источника
      *
@@ -178,28 +166,6 @@ public interface DepartmentFormTypeDao {
      */
     @Deprecated
     List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
-
-    /**
-     * Возвращает информацию о формах-потребителях, которые должны использовать
-     * информацию из данной налоговой формы в качестве источника  для определенного подразделения приемника
-     *
-     * @param departmentId идентификатор подразделения формы-источника
-     * @param terrBankId  подразделение приемник
-     * @return информация о формах-потребителях в виде списка
-     *         {@link DepartmentFormType}
-     */
-    List<Pair<DepartmentFormType, DepartmentFormType>> getFormDestinationsWithDepId(int departmentId, int terrBankId, List<TaxType> taxTypes);
-
-    /**
-     * Возвращает информацию о формах-потребителях, которые должны использовать
-     * информацию из данной налоговой формы в качестве источника  для определенного подразделения приемника
-     *
-     * @param departmentId идентификатор подразделения формы-источника
-     * @param terrBankId  подразделение приемник
-     * @return информация о формах-потребителях в виде списка
-     *         {@link DepartmentFormType}
-     */
-    List<Pair<DepartmentFormType, DepartmentFormType>> getFormSourcesWithDepId(int departmentId, int terrBankId, List<TaxType> taxTypes);
 
     /**
      * Возвращает информацию о декларациях-потребителях, которые должны использовать
@@ -228,41 +194,6 @@ public interface DepartmentFormTypeDao {
     @Deprecated
     List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind);
 
-    /**
-     * Возвращает информацию о декларациях-потребителях относящихся к переданному терр.банку и всем его подразделениям,
-     * которые должны использовать
-     * информацию из данной налоговой формы в качестве источника для определенного подразделения приемника
-     *
-     * @param departmentId идентификатор подразделения формы-источника
-     * @param terrBankId   подразделение-приемник
-     * @return информация о декларациях-потребителях в виде списка
-     *         {@link DepartmentDeclarationType}
-     */
-    List<Pair<DepartmentFormType, DepartmentDeclarationType>> getDeclarationDestinationsWithDepId(int departmentId, int terrBankId, List<TaxType> taxTypes);
-
-    /**
-     * Возвращает информацию о декларациях-источниках относящихся к переданному терр.банку и всем его подразделениям
-     * которые используются в формах назначениях приемниках
-     * для редактируемого подразделения
-     *
-     * @param departmentId идентификатор подразделения формы-источника
-     * @param terrBankId   подразделение-приемник
-     * @return информация о декларациях-потребителях в виде списка
-     *         {@link DepartmentDeclarationType}
-     */
-    List<Pair<DepartmentFormType, DepartmentDeclarationType>> getDeclarationSourcesWithDepId(int departmentId, int terrBankId, List<TaxType> taxTypes);
-
-    /**
-     * Возвращает информацию о формах-источниках, которые должны использоваться
-     * при формировании декларации
-     *
-     * @param departmentId      идентификатор декларации
-     * @param declarationTypeId идентификатор вида декларации
-     * @return информация о формах-источниках в виде списка
-     *         {@link DepartmentFormType}
-     */
-    @Deprecated
-    List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId);
 
     /**
      * Возвращает информацию о формах-источниках, которые должны использоваться
@@ -344,12 +275,17 @@ public interface DepartmentFormTypeDao {
     void delete(Long id);
 
     /**
+     * Удаляет назначение НФ
+     */
+    void delete(List<Long> ids);
+
+    /**
      * Проверяет существование формы назначения для позразделения с id = departmentId
      * c идентификатором вида typeId и идентификатором типа kindId
      *
-     * @param departmentId
-     * @param typeId
-     * @param kind
+     * @param departmentId позразделения
+     * @param typeId вид
+     * @param kind тип
      * @return true - существует форма, false в противном случае
      */
     boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind);
@@ -367,17 +303,6 @@ public interface DepartmentFormTypeDao {
     List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,
                                                          FormDataKind sourceKind, Integer reportPeriodId,
                                                          Date periodStart, Date periodEnd);
-
-    /**
-     * Проверяет существование форм-приемников в статусе "Принята" в указанном отчетном периоде
-     * @param sourceDepartmentId идентификатор подразделения формы-источника
-     * @param sourceFormTypeId   вид налоговой формы-источника
-     * @param sourceKind         тип налоговой формы-источника
-     * @param reportPeriodId     идентификатор отчетного периода
-     * @return приемники существуют?
-     */
-    @Deprecated
-    List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Integer reportPeriodId);
 
     /**
      * Находим приемники, у которых этот макет является источником

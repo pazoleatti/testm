@@ -215,7 +215,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
                         !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
-                        !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY)) {
+                        !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
+                        !refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
+                        !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId())) {
 
                     for (RefBookRecord record : records) {
                         //Проверка пересечения версий
@@ -270,49 +272,58 @@ public class RefBookUniversal implements RefBookDataProvider {
             throw new ServiceException("Обнаружено некорректное значение атрибута");
         }
 
-        //Проверка отсутствия конфликта с датой актуальности родительского элемента
-        if (refBook.isHierarchic()) {
-            checkParentConflict(logger, versionFrom, versionTo, records);
-        }
-        //Получаем записи у которых совпали значения уникальных атрибутов
-        List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, records);
-        if (matchedRecords != null && !matchedRecords.isEmpty()) {
-            //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-            List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
+        if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
+                !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
+                !refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
+                !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
+                !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
+                !refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
+                !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId())) {
 
-            if (conflictedIds.size() > 0) {
-                StringBuilder attrNames = new StringBuilder();
-                Map<String, Integer> map = new HashMap<String, Integer>();
-                for (Long id : conflictedIds) {
-                    for (Pair<Long,String> pair : matchedRecords) {
-                        if (pair.getFirst().equals(id)) {
-                            Integer integer = map.get(pair.getSecond());
-                            if (integer == null) integer = 0;
-                            integer++;
-                            map.put(pair.getSecond(), integer);
+            //Проверка отсутствия конфликта с датой актуальности родительского элемента
+            if (refBook.isHierarchic()) {
+                checkParentConflict(logger, versionFrom, versionTo, records);
+            }
+            //Получаем записи у которых совпали значения уникальных атрибутов
+            List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, records);
+            if (matchedRecords != null && !matchedRecords.isEmpty()) {
+                //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
+                List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
+
+                if (conflictedIds.size() > 0) {
+                    StringBuilder attrNames = new StringBuilder();
+                    Map<String, Integer> map = new HashMap<String, Integer>();
+                    for (Long id : conflictedIds) {
+                        for (Pair<Long,String> pair : matchedRecords) {
+                            if (pair.getFirst().equals(id)) {
+                                Integer integer = map.get(pair.getSecond());
+                                if (integer == null) integer = 0;
+                                integer++;
+                                map.put(pair.getSecond(), integer);
+                            }
                         }
                     }
-                }
 
-                Iterator<Map.Entry<String, Integer>> iterator = map.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    Map.Entry<String, Integer> pair = iterator.next();
-                    attrNames
-                            .append("(")
-                            .append(pair.getValue())
-                            .append(" шт.) с такими значениями атрибута \"")
-                            .append(pair.getKey())
-                            .append("\"");
-                    if (iterator.hasNext()) {
-                        attrNames.append(", ");
+                    Iterator<Map.Entry<String, Integer>> iterator = map.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry<String, Integer> pair = iterator.next();
+                        attrNames
+                                .append("(")
+                                .append(pair.getValue())
+                                .append(" шт.) с такими значениями атрибута \"")
+                                .append(pair.getKey())
+                                .append("\"");
+                        if (iterator.hasNext()) {
+                            attrNames.append(", ");
+                        }
                     }
+                    throw new ServiceException("Нарушено требование к уникальности, уже существуют элементы "+attrNames+" в указанном периоде!");
                 }
-                throw new ServiceException("Нарушено требование к уникальности, уже существуют элементы "+attrNames+" в указанном периоде!");
             }
-        }
 
-        //Проверка ссылочных значений
-        refBookDao.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom, versionTo, attributes, records);
+            //Проверка ссылочных значений
+            refBookDao.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom, versionTo, attributes, records);
+        }
     }
 
     /**
@@ -469,7 +480,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);
 
                 RefBookRecord refBookRecord = new RefBookRecord();
-                refBookRecord.setRecordId(uniqueRecordId);
+                refBookRecord.setUniqueRecordId(uniqueRecordId);
                 refBookRecord.setValues(records);
 
                 //Проверка корректности
@@ -576,7 +587,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 refBookDao.updateRecordVersion(refBookId, uniqueRecordId, records);
             } catch (Exception e) {
                 if (logger != null) {
-                    logger.error(e);
                     logger.clear(LogLevel.INFO);
                     throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
                             logEntryService.save(logger.getEntries()));

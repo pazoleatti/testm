@@ -5,20 +5,17 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.ConfirmButtonClickHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAction;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
@@ -45,19 +42,18 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     /** Идентификатор справочника */
     private Long currentRefBookId;
     /** Уникальный идентификатор версии записи справочника */
-    Long currentUniqueRecordId;
+    Long currentUniqueRecordId, previousURId;
     /** Идентификатор записи справочника без учета версий */
     private Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
     private boolean isVersionMode = false;
-    /** Режим показа формы */
-    private FormMode mode;
     /**Может ли справочник работать с версиями*/
     private boolean canVersion= false;
     // Признак того, что справочник подразделений
     private boolean isDepartments = false;
     //Тип подразделения
     private long depType = 0;
+    private FormMode mode;
     Map<String, Object> modifiedFields = new HashMap<String, Object>();
 
     public void setNeedToReload() {
@@ -68,10 +64,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
 		Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException;
-
-        void setHierarchy(boolean isHierarchy);
-
-        boolean isHierarchy();
 
 		void fillVersionData(RefBookRecordVersionData versionData, Long currentRefBookId, Long refBookRecordId);
         void setVersionMode(boolean versionMode);
@@ -90,42 +82,21 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     protected final RenameDialogPresenter renameDialogPresenter;
 
-    //TODO: взаимодействие в зависимом виджете д.б. через события, а не через "левое" view
-    private RefBookHierDataPresenter.MyView refBookHierDataPresenterMyView;
-
 	@Inject
 	public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync,
-                             PlaceManager placeManager, RenameDialogPresenter renameDialogPresenter,
-                             RefBookHierDataPresenter.MyView refBookHierDataPresenterMyView) {
+                             PlaceManager placeManager, RenameDialogPresenter renameDialogPresenter) {
 		super(eventBus, view);
 		this.placeManager = placeManager;
 		this.dispatchAsync = dispatchAsync;
         this.renameDialogPresenter = renameDialogPresenter;
-        this.refBookHierDataPresenterMyView = refBookHierDataPresenterMyView;
         getView().setUiHandlers(this);
 	}
 
-	public void init(final Long refbookId, final boolean readOnly) {
+	public void init(final Long refbookId, List<RefBookColumn> columns) {
         isDepartments = refbookId == 30;
-        GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-        action.setRefBookId(refbookId);
         currentRefBookId = refbookId;
-        dispatchAsync.execute(action,
-                CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetRefBookAttributesResult>() {
-                            @Override
-                            public void onSuccess(GetRefBookAttributesResult result) {
-                                getView().setHierarchy(RefBookType.HIERARCHICAL.getId() == result.getRefBookType());
-
-                                getView().createInputFields(result.getColumns());
-                                setIsFormModified(false);
-                                if (readOnly) {
-                                    setMode(FormMode.READ);
-                                } else {
-                                    updateMode();
-                                }
-                            }
-                        }, this));
+        getView().createInputFields(columns);
+        setIsFormModified(false);
     }
 
 	public void show(Long refBookRecordId) {
@@ -141,55 +112,52 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 @Override
                 public void yes() {
                     setIsFormModified(false);
-                    showRecord(refBookRecordId, parentRefBookRecordId);
-                }
-
-                @Override
-                public void no() {
-                    rollbackIfNo();
-                }
-
-                @Override
-                public void close() {
-                    no();
+                    showRecord(refBookRecordId);
+                    if (refBookRecordId == null && parentRefBookRecordId != null){
+                        RefBookValueSerializable refBookParent = new RefBookValueSerializable();
+                        refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
+                        refBookParent.setDereferenceValue(parentRefBookRecordId.getDereferenceValue());
+                        refBookParent.setReferenceValue(parentRefBookRecordId.getId());
+                        HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
+                        field.put("PARENT_ID", refBookParent);
+                        getView().fillInputFields(field);
+                    }
+                    SetFormMode.fire(EditFormPresenter.this, mode);
                 }
             });
         } else {
-            showRecord(refBookRecordId, parentRefBookRecordId);
-        }
-    }
-
-    private void rollbackIfNo(){
-        RollbackTableRowSelection.fire(this, currentUniqueRecordId);
-    }
-
-	private void showRecord(Long refBookRecordId) {
-        showRecord(refBookRecordId, null);
-	}
-
-    private void showRecord(final Long refBookRecordId, RefBookTreeItem parentRefBook) {
-        if (refBookRecordId == null) {
-            currentUniqueRecordId = null;
-            getView().fillInputFields(null);
-            if (parentRefBook != null){
+            showRecord(refBookRecordId);
+            if (refBookRecordId == null && parentRefBookRecordId != null){
                 RefBookValueSerializable refBookParent = new RefBookValueSerializable();
                 refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
-                refBookParent.setDereferenceValue(parentRefBook.getDereferenceValue());
-                refBookParent.setReferenceValue(parentRefBook.getId());
+                refBookParent.setDereferenceValue(parentRefBookRecordId.getDereferenceValue());
+                refBookParent.setReferenceValue(parentRefBookRecordId.getId());
                 HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
                 field.put("PARENT_ID", refBookParent);
                 getView().fillInputFields(field);
             }
-            if (!isVersionMode && mode == FormMode.EDIT) {
-                getView().updateMode(FormMode.CREATE);
+            SetFormMode.fire(EditFormPresenter.this, mode);
+        }
+    }
+
+    private void showRecord(final Long refBookRecordId) {
+        if (refBookRecordId == null) {
+            currentUniqueRecordId = null;
+            getView().fillInputFields(null);
+
+            /*if (!isVersionMode && mode == FormMode.EDIT) {
+                setMode(FormMode.CREATE);
+            } else if(!isVersionMode && mode == FormMode.CREATE){
+                setMode(FormMode.EDIT);
             } else {
                 setMode(mode);
-            }
+            } */
             getView().setVersionFrom(null);
             getView().setVersionTo(null);
             getView().updateRefBookPickerPeriod();
             return;
         }
+        previousURId = refBookRecordId;
         GetRefBookRecordAction action = new GetRefBookRecordAction();
         action.setRefBookId(currentRefBookId);
         action.setRefBookRecordId(refBookRecordId);
@@ -200,24 +168,25 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                             public void onSuccess(GetRefBookRecordResult result) {
                                 getView().fillVersionData(result.getVersionData(), currentRefBookId, refBookRecordId);
                                 getView().fillInputFields(result.getRecord());
-                                if (result.getRecord().containsKey("TYPE")) {
+                                if (isDepartments && result.getRecord().containsKey("TYPE")) {
                                     RefBookValueSerializable v = result.getRecord().get("TYPE");
                                     if (v.getAttributeType() == RefBookAttributeType.REFERENCE) {
                                         depType = v.getReferenceValue();
                                     }
                                 }
                                 currentUniqueRecordId = refBookRecordId;
-                                updateMode();
+                                //updateMode();
                             }
                         }, this));
     }
 
 	@Override
 	public void onSaveClicked(boolean isEditButtonClicked) {
+        final String title = (currentUniqueRecordId != null ? "Версия не сохранена" : "Версия не создана");
 		try {
             LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
-                Dialog.warningMessage("Версия не сохранена", "Не указана дата начала актуальности");
+                Dialog.warningMessage(title, "Не указана дата начала актуальности");
                 return;
             }
             Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
@@ -247,15 +216,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 final RecordChanges recordChanges = fillRecordChanges(recordId, map, action.getVersionFrom(), action.getVersionTo());
 
                 dispatchAsync.execute(action,
-                        CallbackUtils.defaultCallback(
+                        CallbackUtils.defaultCallbackNoModalError(
                                 new AbstractCallback<AddRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(AddRefBookRowVersionResult result) {
                                         if (!result.isCheckRegion()) {
-                                            String title = (isVersionMode ? "Создание записи справочника" : "Создание элемента справочника");
+                                            String title = (isVersionMode ? "Сохранение изменений" : "Создание элемента справочника");
                                             String msg = (isVersionMode ?
-                                                    "Отсутствуют права доступ на создание записи для указанного региона!" :
-                                                    "Отсутствуют права доступ на редактирование записи для указанного региона!");
+                                                    "Отсутствуют права доступа на создание записи для указанного региона!" :
+                                                    "Отсутствуют права доступа на редактирование записи для указанного региона!");
                                             Dialog.errorMessage(title, msg);
                                             return;
                                         }
@@ -264,9 +233,19 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
                                         recordChanges.setId(newId);
                                         currentUniqueRecordId = newId;
+                                        RefBookRecordVersionData data = new RefBookRecordVersionData();
+                                        data.setVersionStart(getView().getVersionFrom());
+                                        data.setVersionEnd(getView().getVersionTo());
+                                        data.setVersionCount(1);
+                                        getView().fillVersionData(data, currentRefBookId, newId);
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                         SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
 
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
                                     }
                                 }, this));
 			} else {
@@ -300,7 +279,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 renameDialogPresenter.getView().cleanDates();
 
                                 dispatchAsync.execute(action,
-                                        CallbackUtils.defaultCallback(
+                                        CallbackUtils.defaultCallbackNoModalError(
                                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                                     @Override
                                                     public void onSuccess(SaveRefBookRowVersionResult result) {
@@ -314,6 +293,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                                         }
                                                     }
+
+                                                    @Override
+                                                    public void onFailure(Throwable caught) {
+                                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
+                                                    }
                                                 }, EditFormPresenter.this));
                             }
                         });
@@ -322,13 +306,13 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 }
 
                 dispatchAsync.execute(action,
-                        CallbackUtils.defaultCallback(
+                        CallbackUtils.defaultCallbackNoModalError(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                         if (!result.isCheckRegion()) {
-                                            String title = "Редактирование записи справочника";
-                                            String msg = "Отсутствуют права доступ на редактирование записи для указанного региона!";
+                                            String title = "Сохранение изменений";
+                                            String msg = "Отсутствуют права доступа на редактирование записи для указанного региона!";
                                             Dialog.errorMessage(title, msg);
                                             return;
                                         }
@@ -342,10 +326,15 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                         }
                                     }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
+                                    }
                                 }, this));
 			}
 		} catch (BadValueException bve) {
-            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+            Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
             logEntries.add(new LogEntry(LogLevel.ERROR, bve.toString()));
             SaveLogEntriesAction action = new SaveLogEntriesAction();
@@ -383,24 +372,28 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onCancelClicked() {
         if (isFormModified) {
-            Dialog.confirmMessage("Редактирование версии", "Сохранить изменения?", new DialogHandler() {
+            Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);
                     onSaveClicked(false);
+                    showRecord(currentUniqueRecordId);
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
 
                 @Override
                 public void no() {
                     setIsFormModified(false);
-                    showRecord(currentUniqueRecordId);
+                    showRecord(previousURId);
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
             });
         } else {
-            showRecord(currentUniqueRecordId);
+            //Показать родительскую запись
+            //setMode(FormMode.EDIT);
+            showRecord(previousURId);
+            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
         }
-
-        if (isDepartments) refBookHierDataPresenterMyView.updateMode(FormMode.EDIT);
     }
 
 	@Override
@@ -448,10 +441,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     @Override
     public void setMode(FormMode mode){
         this.mode = mode;
-        getView().updateMode(mode);
-    }
-
-    private void updateMode() {
         getView().updateMode(mode);
     }
 

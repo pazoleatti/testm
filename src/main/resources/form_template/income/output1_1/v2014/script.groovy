@@ -179,7 +179,7 @@ def checkOverpower(def value, def row, def alias) {
 void importData() {
     def xml = getXML(ImportInputStream, importService, UploadFileName, 'Отчетный год', null, 26, 5)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 26, 5)
+    checkHeaderSize(xml.row[4].cell.size(), xml.row.size(), 26, 5)
 
     def headerMapping = [
             (xml.row[0].cell[0]) : 'Отчетный год',

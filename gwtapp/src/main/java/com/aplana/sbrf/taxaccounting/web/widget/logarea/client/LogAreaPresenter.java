@@ -75,6 +75,7 @@ public class LogAreaPresenter extends
             getView().setPrintLink(GWT.getHostPageBaseURL() + "download/logEntry/" + uuid);
 
         }
+        clean();
         onRangeChange(0, getView().getLogEntriesView().getPageSize());
     }
 
@@ -91,6 +92,7 @@ public class LogAreaPresenter extends
         getView().getLogEntriesView().clearLogEntries();
         rangeChangeHandle = true;
         getView().setLogEntriesCount(null);
+        hide();
     }
 
     @Override

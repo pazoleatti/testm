@@ -163,13 +163,13 @@ void logicCheck() {
     for (def row in [totalA, totalPeriod, totalAnnul, totalFix]) {
         def errorMsg = "Строка ${row.getIndex()}: "
         if (row.deal_20 != null && row.deal_20_Nds != null && row.deal_20_Nds < row.deal_20 * 0.2) {
-            rowWarning(logger, row, errorMsg + "Сумма НДС, облагаемая по ставке 20%%, неверная!")
+            rowWarning(logger, row, errorMsg + "Сумма НДС, облагаемая по ставке 20%, неверная!")
         }
         if (row.deal_18 != null && row.deal_18_Nds != null && row.deal_18_Nds < row.deal_18 * 0.18) {
-            rowWarning(logger, row, errorMsg + "Сумма НДС, облагаемая по ставке 18%%, неверная!")
+            rowWarning(logger, row, errorMsg + "Сумма НДС, облагаемая по ставке 18%, неверная!")
         }
         if (row.deal_10 != null && row.deal_10_Nds != null && row.deal_10_Nds < row.deal_10 * 0.1) {
-            rowWarning(logger, row, errorMsg + "Сумма НДС, облагаемая по ставке 10%%, неверная!")
+            rowWarning(logger, row, errorMsg + "Сумма НДС, облагаемая по ставке 10%, неверная!")
         }
     }
     // 5. По строке 2:
@@ -201,9 +201,9 @@ void logicCheck() {
     if (appFormData) {
         def appDataRows = formDataService.getDataRowHelper(appFormData)?.allCached
         if (appDataRows) {
-            def appR4Row = getDataRow(appDataRows, 'R3')
+            def appR4Row = getDataRow(appDataRows, 'R3{wan}')
             def appTotalRow = getDataRow(appDataRows, 'total')
-            if (appTotalRow.sum == null || appR4Row.sum == null || totalA.diff != (appTotalRow.sum - appR4Row.sum)) {
+            if (appTotalRow.sum == null || appR4Row?.sum == null || totalA.diff != (appTotalRow.sum - appR4Row.sum)) {
                 logger.warn("Сумма расхождения не соответствует расшифровке! ")
             }
         }
@@ -213,7 +213,8 @@ void logicCheck() {
     }
     // 9. «Графа N» строки 6 = Графа N строки 4 - Графа N строки 5, где N = 2, 3, 4, 5, 6, 7, 8, 9, 10 или 11
     calcColumns.each {
-        if (totalB[it] != totalPeriod[it] - totalAnnul[it] + totalFix[it]) {
+        if (totalPeriod[it] != null && totalAnnul[it] != null && totalFix[it] != null &&
+                totalB[it] != totalPeriod[it] - totalAnnul[it] + totalFix[it]) {
             logger.error("Строка ${totalB.getIndex()}: " + "Итоговые значения рассчитаны неверно в графе «${getColumnName(totalB, it)}»!")
         }
     }
@@ -312,10 +313,10 @@ void importData() {
             (xml.row[0].cell[12]) : 'Расхождение (руб.)',
             (xml.row[1].cell[3]) : 'продажи, облагаемые налогом по ставке',
             (xml.row[1].cell[10]) : 'продажи, освобождаемые от налога (ст. 145, 149 НК РФ)',
-            (xml.row[2].cell[3]) : '20%%',
-            (xml.row[2].cell[5]) : '18%%',
-            (xml.row[2].cell[7]) : '10%%',
-            (xml.row[2].cell[9]) : '0%%',
+            (xml.row[2].cell[3]) : '20%',
+            (xml.row[2].cell[5]) : '18%',
+            (xml.row[2].cell[7]) : '10%',
+            (xml.row[2].cell[9]) : '0%',
             (xml.row[3].cell[3]) : 'стоимость без НДС',
             (xml.row[3].cell[4]) : 'сумма НДС',
             (xml.row[3].cell[5]) : 'стоимость без НДС',

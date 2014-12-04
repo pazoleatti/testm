@@ -6,16 +6,18 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -23,7 +25,7 @@ import static java.util.Arrays.asList;
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
     private final static int MAX_LENGTH = 500;
-    private final static int EMAIL_MAX_LENGTH = 150;
+    private final static int EMAIL_MAX_LENGTH = 200;
     private final static String NOT_SET_ERROR = "Не задано значение поля «%s»!";
     private final static String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
     private final static String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
@@ -41,12 +43,27 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Autowired
     private DepartmentDao departmentDao;
 
+    @Autowired
+    private RefBookFactory refBookFactory;
+
     @Override
     public ConfigurationParamModel getAllConfig(TAUserInfo userInfo) {
         if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
-        return configurationDao.getAll();
+        ConfigurationParamModel model = configurationDao.getAll();
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
+        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
+        List<Map<String, String>> params = new ArrayList<Map<String, String>>();
+        for (Map<String, RefBookValue> value : values) {
+            Map<String, String> record = new HashMap<String, String>();
+            for (Map.Entry<String, RefBookValue> entry : value.entrySet()) {
+                record.put(entry.getKey(), entry.getValue().getStringValue());
+            }
+            params.add(record);
+        }
+        model.setEmailParams(params);
+        return model;
     }
 
     @Override
@@ -148,30 +165,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
 
-        checkEmailParam(model, logger);
-
         if (!logger.containsLevel(LogLevel.ERROR)) {
             configurationDao.save(model);
-        }
-    }
+            RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
 
-    @Override
-    public void checkEmailParam(ConfigurationParamModel model, Logger logger) {
-        // Проверки параметров электронной почты
-        for (ConfigurationParam configurationParam : ConfigurationParam.values()) {
-            if (configurationParam.getGroup().equals(ConfigurationParamGroup.EMAIL)) {
-                List<String> valuesList = model.get(configurationParam, 0);
-                if (valuesList == null || valuesList.isEmpty()) {
-                    // Обязательность
-                    logger.error(NOT_SET_ERROR, configurationParam.getCaption());
-                    model.remove(configurationParam);
-                } else {
-                    if (configurationParam.isUnique() && valuesList.size() != 1) {
-                        // Уникальность
-                        logger.error(DUPLICATE_SET_ERROR, configurationParam.getCaption());
-                    }
+            List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
+            for (Map<String, String> param : model.getEmailParams()) {
+                Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
+                for (Map.Entry<String, String> entry : param.entrySet()) {
+                    record.put(entry.getKey(), new RefBookValue(RefBookAttributeType.STRING, entry.getValue()));
                 }
+                records.add(record);
             }
+            provider.updateRecords(userInfo, new Date(), records);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.scheduler.task;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -23,9 +24,7 @@ import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.interceptor.Interceptors;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Задача на загрузку ТФ налоговых форм
@@ -103,8 +102,17 @@ public class LoadFormDataTask implements UserTask{
         // элементы выпадающего списка
         List<SelectBoxItem> selectBoxItems = new ArrayList<SelectBoxItem>();
         List<Department> departments = departmentService.getTBDepartments(userInfo.getUser());
+        // отсортировать по алфавиту
+        Collections.sort(departments, new Comparator<Department>() {
+            @Override
+            public int compare(Department o1, Department o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         for (Department department : departments) {
-            selectBoxItems.add(new SelectBoxItem(department.getName(), department.getId()));
+            if (department.getType() != DepartmentType.ROOT_BANK) {
+                selectBoxItems.add(new SelectBoxItem(department.getName(), department.getId()));
+            }
         }
         // добавление элемента "все подразделения"
         selectBoxItems.add(new SelectBoxItem(ALL_DEPARTMENTS_LABEL, ALL_DEPARTMENTS_ID));
@@ -115,6 +123,7 @@ public class LoadFormDataTask implements UserTask{
         selectBox.setRequired(true);
         selectBox.setName(TB_NAME);
         selectBox.setType(TaskParamType.INT);
+        selectBox.setRequired(true);
 
         // список параметров задачи
         List<FormElement> params = new ArrayList<FormElement>();

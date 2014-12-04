@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class WDateBox extends ParamWidget {
     private DateMaskBoxPicker datePicker;
+    private String errorMessage;
     public static final String FORMAT = "dd-MM-yyyy, HH:mm";
 
     public WDateBox() {
@@ -26,7 +27,12 @@ public class WDateBox extends ParamWidget {
 
     @Override
     boolean isValid() {
-        return isRequired() && datePicker.getValue() == null;
+        if (isRequired() && datePicker.getValue() == null){
+            errorMessage = "Поле «" + getName() + "» обязательно для заполненеия";
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public void setWidth(String width){
@@ -35,7 +41,7 @@ public class WDateBox extends ParamWidget {
 
     @Override
     public String getErrorMsg() {
-        return null;
+        return errorMessage;
     }
 
     @Override

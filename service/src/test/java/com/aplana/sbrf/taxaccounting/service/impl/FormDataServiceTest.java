@@ -247,8 +247,8 @@ public class FormDataServiceTest {
         when(departmentDao.getDepartment(1)).thenReturn(department);
 
         Assert.assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
-        Assert.assertEquals("Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" периоде \"Тестовый период 2014\"", logger.getEntries().get(0).getMessage());
-        Assert.assertEquals("Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" периоде \"Второй тестовый период 2014\"", logger.getEntries().get(1).getMessage());
+        Assert.assertEquals("Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\"", logger.getEntries().get(0).getMessage());
+        Assert.assertEquals("Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\"", logger.getEntries().get(1).getMessage());
     }
 
     /**
