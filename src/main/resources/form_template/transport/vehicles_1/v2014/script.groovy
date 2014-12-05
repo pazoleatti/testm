@@ -376,7 +376,7 @@ def logicCheck() {
 
         // 13. Проверка на наличие в списке ТС строк, период использования льготы, которых, не пересекается с отчётным...
         if (row.benefitStartDate != null && row.benefitStartDate > dTo || row.benefitEndDate != null && row.benefitEndDate < dFrom) {
-            rowError(logger, row, errorMsg + "Период использования льготы ТС ($row.benefitStartDate - $row.benefitEndDate) не пересекается с периодом ($dFrom - $dTo), за который сформирована налоговая форма!")
+            rowError(logger, row, errorMsg + "Период использования льготы ТС (${row.benefitStartDate.format(dFormat)} - ${row.benefitEndDate.format(dFormat)}) не пересекается с периодом (${dFrom.format(dFormat)} - ${dTo.format(dFormat)}), за который сформирована налоговая форма!")
         }
 
         // 15. Проверка корректности заполнения «Графы 24»
