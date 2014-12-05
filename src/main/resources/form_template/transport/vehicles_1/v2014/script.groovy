@@ -463,7 +463,10 @@ void consolidation() {
 
 def String checkPrevPeriod(def reportPeriod) {
     if (reportPeriod != null) {
-        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) {
+        // ищем форму нового типа иначе две формы старого
+        if ((formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) &&
+                (formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null ||
+                        formDataService.getLast(202, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null)) {
             return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
         }
     }
