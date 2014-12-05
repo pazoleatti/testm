@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
@@ -160,6 +161,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CreateNewDeclarationTypeResult>() {
                 @Override
                 public void onSuccess(CreateNewDeclarationTypeResult result) {
+                    LogCleanEvent.fire(DeclarationTemplatePresenter.this);
                     LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
                     Dialog.infoMessage("Декларация сохранена");
                     declarationTemplate.setId(result.getDeclarationTemplateId());
@@ -175,6 +177,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CreateNewDTVersionResult>() {
                 @Override
                 public void onSuccess(CreateNewDTVersionResult result) {
+                    LogCleanEvent.fire(DeclarationTemplatePresenter.this);
                     LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
                     Dialog.infoMessage("Декларация сохранена");
                     declarationTemplate.setId(result.getDeclarationTemplateId());
@@ -191,6 +194,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                     .defaultCallback(new AbstractCallback<UpdateDeclarationResult>() {
                         @Override
                         public void onSuccess(UpdateDeclarationResult result) {
+                            LogCleanEvent.fire(DeclarationTemplatePresenter.this);
                             LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getLogUuid());
                             Dialog.infoMessage("Декларация сохранена");
                         }
