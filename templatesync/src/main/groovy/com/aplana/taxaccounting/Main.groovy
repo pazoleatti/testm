@@ -222,6 +222,7 @@ class Main {
             'transport': [
                     'benefit_vehicles': 202,
                     'declaration': -1,
+                    'declaration_1': -1,
                     'summary': 200,
                     'summary_1': 203,
                     'vehicles': 201,
