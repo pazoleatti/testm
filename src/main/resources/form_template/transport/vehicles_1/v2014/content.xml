@@ -172,7 +172,7 @@
         <alias>stealDateStart</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Сведения об угоне. Дата начала розыска</name>
+        <name>Сведения об угоне. Дата начала розыска ТС</name>
         <order>17</order>
         <width>6</width>
         <formatId>0</formatId>
