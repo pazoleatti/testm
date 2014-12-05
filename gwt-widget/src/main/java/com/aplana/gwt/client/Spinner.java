@@ -89,6 +89,8 @@ public class Spinner extends DoubleStateComposite
 		initBehavior();
 	}
 
+    EnterKeyPressHandler handler;
+
 	/**
 	 * Задает расположение элементов виджета.
 	 */
@@ -148,7 +150,12 @@ public class Spinner extends DoubleStateComposite
 					incrementValue();
 				} else if (key == KeyCodes.KEY_DOWN) {
 					decrementValue();
-				}
+				} else if (key == KeyCodes.KEY_ENTER && handler != null) {
+                    // Magic! Скидываем фокус, чтобы отработал ValueChangeHandler
+                    textBox.setFocus(false);
+                    textBox.setFocus(true);
+                    handler.onEnterKeyPress();
+                }
 			}
 		});
 		incButton.addClickHandler(new ClickHandler() {
@@ -314,5 +321,13 @@ public class Spinner extends DoubleStateComposite
     @Override
     public String getTitle() {
         return panel.getTitle();
+    }
+
+    public void addEnterKeyPressHandler(EnterKeyPressHandler handler) {
+        this.handler = handler;
+    }
+
+    public static interface EnterKeyPressHandler {
+        void onEnterKeyPress();
     }
 }

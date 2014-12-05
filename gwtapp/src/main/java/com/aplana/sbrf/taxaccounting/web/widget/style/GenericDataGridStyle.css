@@ -54,6 +54,7 @@
     border-left: none;
     border-bottom: 1px solid #cfcfcf;
     border-right: 1px solid #cfcfcf;
+    word-wrap: break-word;
 }
 
 .dataGridCell input {

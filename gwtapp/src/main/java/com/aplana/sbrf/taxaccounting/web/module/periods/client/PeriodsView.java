@@ -81,6 +81,16 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 	public PeriodsView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
 
+        Spinner.EnterKeyPressHandler enterKeyPressHandler = new Spinner.EnterKeyPressHandler() {
+            @Override
+            public void onEnterKeyPress() {
+                getUiHandlers().onFindButton();
+            }
+        };
+
+        fromBox.addEnterKeyPressHandler(enterKeyPressHandler);
+        toBox.addEnterKeyPressHandler(enterKeyPressHandler);
+
 		TextColumn<TableRow> periodNameColumn = new TextColumn<TableRow>() {
 			@Override
 			public String getValue(TableRow object) {
