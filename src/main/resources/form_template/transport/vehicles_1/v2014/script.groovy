@@ -240,7 +240,10 @@ def calc24(row) {
     }
     def record = getRefBookValue(7L, row.taxBenefitCode)
     // дополнить 0 слева если значении меньше четырех
-    return record.SECTION.value.padLeft(4, '0') + record.ITEM.value.padLeft(4, '0') + record.SUBITEM.value.padLeft(4, '0')
+    def section = record.SECTION.value ?: ''
+    def item = record.ITEM.value ?: ''
+    def subItem = record.SUBITEM.value ?: ''
+    return String.format("%s%s%s", section.padLeft(4, '0'), item.padLeft(4, '0'), subItem.padLeft(4, '0'))
 }
 
 def logicCheck() {
