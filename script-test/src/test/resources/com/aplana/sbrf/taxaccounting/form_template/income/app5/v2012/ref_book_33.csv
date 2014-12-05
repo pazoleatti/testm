@@ -1,0 +1,4 @@
+record_id(N);SUM_TAX(N);ADDITIONAL_NAME(S);KPP(S);TYPE(R);OBLIGATION(R);TAX_RATE(N)
+1;1;addNameA;kppA;1;1;1
+2;2;addNameB;kppB;2;2;2
+3;3;addNameC;kppC;3;3;3
