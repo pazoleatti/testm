@@ -41,8 +41,8 @@ public class DeleteConfigPropertyHandler extends AbstractActionHandler<DeleteCon
     @Autowired
     LogEntryService logEntryService;
 
-    private static final String SUCCESS_INFO = "Настройки подразделения в период %s - %s были удалены";
-    private static final String SUCCESS_INFO_SHORT = "Настройки подразделения в период %s были удалены";
+    private static final String SUCCESS_INFO = "Были удалены настройки подразделения в период с %s по %s";
+    private static final String SUCCESS_INFO_SHORT = "Были удалены настройки подразделения в период с %s";
 
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
