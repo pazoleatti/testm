@@ -5,13 +5,6 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.Date;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Comp-1
- * Date: 28.08.13
- * Time: 14:52
- * To change this template use File | Settings | File Templates.
- */
 public class GetRefBookRecordAction extends UnsecuredActionImpl<GetRefBookRecordResult> implements ActionName {
 	Long refBookId;
 	Long refBookRecordId;

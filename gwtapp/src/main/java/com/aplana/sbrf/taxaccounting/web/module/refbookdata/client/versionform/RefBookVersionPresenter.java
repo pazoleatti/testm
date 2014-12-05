@@ -205,6 +205,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                                 public void onSuccess(GetRefBookAttributesResult result) {
                                                     getView().resetRefBookElements();
                                                     getView().setTableColumns(result.getColumns());
+                                                    editFormPresenter.init(refBookId, result.getColumns());
                                                     getView().setRange(new Range(0, getView().getPageSize()));
                                                     if (result.isReadOnly()){
                                                         setMode(FormMode.READ);
