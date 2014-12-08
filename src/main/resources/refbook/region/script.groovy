@@ -303,7 +303,7 @@ void importFromXML() {
 
         // Сохранение изменений в БД
         if (!delList.isEmpty()) {
-            dataProvider.updateRecordsVersionEnd(logger, actualDate, delList)
+            dataProvider.updateRecordsVersionEndWithoutLock(logger, actualDate, delList)
         }
         if (!addList.isEmpty()) {
             //            def addCreateRecordList = []
@@ -314,14 +314,14 @@ void importFromXML() {
             //                addCreateRecordList.add(rbRecord)
             //            }
             // dataProvider.createRecordVersion(logger, actualDate, null, addCreateRecordList)
-            dataProvider.insertRecords(userInfo, actualDate, addList)
+            dataProvider.insertRecordsWithoutLock(userInfo, actualDate, addList)
         }
         if (!updList.isEmpty()) {
 //            updList.each { map ->
 //                dataProvider.updateRecordVersion(logger, recIdMap.get(map.CODE.stringValue), actualDate, null, map)
 //            }
             println(updList)
-            dataProvider.updateRecords(userInfo, actualDate, updList)
+            dataProvider.updateRecordsWithoutLock(userInfo, actualDate, updList)
         }
     }
 

@@ -313,12 +313,12 @@ void importFromXML() {
                 for (def map : delList) {
                     delIds.add(map.get(RefBook.RECORD_ID_ALIAS).numberValue)
                 }
-                dataProvider.updateRecordsVersionEnd(logger, version, delIds)
+                dataProvider.updateRecordsVersionEndWithoutLock(logger, version, delIds)
             }
 
             // Удаление записей, которые изменились в текущей версии и которые при импорте были отмечены как удаляемые при этом версия совпадает с датой удаления
             if (!delRecList.isEmpty()) {
-                dataProvider.deleteRecordVersions(logger, delRecList)
+                dataProvider.deleteRecordVersionsWithoutLock(logger, delRecList)
             }
 
             // Обновление записей, которые изменились, но дата совпадает с датой создания
@@ -334,19 +334,19 @@ void importFromXML() {
                     if (tempList.size() < 500) {
                         tempList.add(record)
                     } else {
-                        dataProvider.insertRecords(userInfo, version, tempList)
+                        dataProvider.insertRecordsWithoutLock(userInfo, version, tempList)
                         tempList.clear()
                     }
                 }
                 if (!tempList.isEmpty()) {
-                    dataProvider.insertRecords(userInfo, version, tempList)
+                    dataProvider.insertRecordsWithoutLock(userInfo, version, tempList)
                     tempList.clear()
                 }
             }
 
             // Добавление элементов
             if (!addList.isEmpty()) {
-                dataProvider.updateRecords(userInfo, version, addList)
+                dataProvider.updateRecordsWithoutLock(userInfo, version, addList)
             }
 
             println("Import OKATO: DB update/create end " + System.currentTimeMillis())

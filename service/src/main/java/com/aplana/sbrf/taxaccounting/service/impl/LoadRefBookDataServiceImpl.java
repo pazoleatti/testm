@@ -1,10 +1,16 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
@@ -38,6 +44,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private ConfigurationDao configurationDao;
     @Autowired
     private SignService signService;
+    @Autowired
+    private LockDataService lockService;
+    @Autowired
+    private RefBookDao refBookDao;
 
     // ЦАС НСИ
     private static final long REF_BOOK_OKATO = 3L; // Коды ОКАТО
@@ -51,6 +61,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final String REGION_NAME = "справочника «Субъекты РФ»";
     private static final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
     private static final String DIASOFT_NAME = "справочников Diasoft";
+    private static final String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
 
     //// Справочники ЦАС НСИ
     // ОКАТО
@@ -185,44 +196,84 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         additionalParameters.put("inputStream", is);
                         additionalParameters.put("fileName", fileName);
                         additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
-                        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
-                                localLoggerList.get(i), additionalParameters);
-                        IOUtils.closeQuietly(is);
-                        // Обработка результата выполнения скрипта
-                        switch (scriptStatusHolder.getScriptStatus()) {
-                            case SUCCESS:
-                                // Уже загрузили, больше не пытаемся
-                                load = true;
-                                if (move) {
-                                    // Перемещение в каталог архива
-                                    boolean result = moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo,
-                                            logger), currentFile, logger);
-                                    if (result) {
-                                        success++;
-                                        logger.getEntries().addAll(localLoggerList.get(i).getEntries());
-                                        log(userInfo, LogData.L20, logger, currentFile.getName());
-                                    } else {
-                                        fail++;
-                                        // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
-                                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
-                                                Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), ""))), logger);
+
+                        //Устанавливаем блокировку на справочник
+                        List<String> lockedObjects = new ArrayList<String>();
+                        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBookId;
+                        int userId = userInfo.getUser().getId();
+
+                        LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+                        RefBook refBook = refBookDao.get(refBookId);
+                        if (lockData == null) {
+                            try {
+                                //Блокировка установлена
+                                lockedObjects.add(lockKey);
+                                //Блокируем связанные справочники
+                                List<RefBookAttribute> attributes = refBook.getAttributes();
+                                for (RefBookAttribute attribute : attributes) {
+                                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
+                                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                                        if (!lockedObjects.contains(referenceLockKey)) {
+                                            LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                                            if (referenceLockData == null) {
+                                                //Блокировка установлена
+                                                lockedObjects.add(referenceLockKey);
+                                            } else {
+                                                throw new ServiceException(String.format(LOCK_MESSAGE, attributeRefBook.getName()));
+                                            }
+                                        }
                                     }
-                                } else {
-                                    success++;
-                                    logger.getEntries().addAll(localLoggerList.get(i).getEntries());
-                                    log(userInfo, LogData.L20, logger, currentFile.getName());
                                 }
-                                break;
-                            case SKIP:
-                                skip++;
-                                if (skip == matchList.size()) {
-                                    // В случае неуспешного импорта в общий лог попадает вывод всех скриптов
-                                    logger.getEntries().addAll(getEntries(localLoggerList));
-                                    // Файл пропущен всеми справочниками — неправильный формат
-                                    log(userInfo, LogData.L4, logger, fileName, path);
-                                    fail++;
+
+                                //Выполняем логику скрипта
+                                refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
+                                        localLoggerList.get(i), additionalParameters);
+                                IOUtils.closeQuietly(is);
+                                // Обработка результата выполнения скрипта
+                                switch (scriptStatusHolder.getScriptStatus()) {
+                                    case SUCCESS:
+                                        // Уже загрузили, больше не пытаемся
+                                        load = true;
+                                        if (move) {
+                                            // Перемещение в каталог архива
+                                            boolean result = moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo,
+                                                    logger), currentFile, logger);
+                                            if (result) {
+                                                success++;
+                                                logger.getEntries().addAll(localLoggerList.get(i).getEntries());
+                                                log(userInfo, LogData.L20, logger, currentFile.getName());
+                                            } else {
+                                                fail++;
+                                                // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
+                                                moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
+                                                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), ""))), logger);
+                                            }
+                                        } else {
+                                            success++;
+                                            logger.getEntries().addAll(localLoggerList.get(i).getEntries());
+                                            log(userInfo, LogData.L20, logger, currentFile.getName());
+                                        }
+                                        break;
+                                    case SKIP:
+                                        skip++;
+                                        if (skip == matchList.size()) {
+                                            // В случае неуспешного импорта в общий лог попадает вывод всех скриптов
+                                            logger.getEntries().addAll(getEntries(localLoggerList));
+                                            // Файл пропущен всеми справочниками — неправильный формат
+                                            log(userInfo, LogData.L4, logger, fileName, path);
+                                            fail++;
+                                        }
+                                        break;
                                 }
-                                break;
+                            } finally {
+                                //Снимаем блокировки
+                                for (String lock : lockedObjects) {
+                                    lockService.unlock(lock, userId);
+                                }
+                            }
+                        } else {
+                            throw new ServiceException(String.format(LOCK_MESSAGE, refBook.getName()));
                         }
                     } catch (Exception e) {
                         // При ошибке второй раз не пытаемся загрузить

@@ -234,11 +234,11 @@ void importFromNSI() {
     println("Import Bonds: Add count = ${addList.size()}, Update count = ${updList.size()}")
 
     if (!logger.containsLevel(LogLevel.ERROR) && !addList.isEmpty()) {
-        dataProviderBond.createRecordVersion(logger, actualDate, null, addList)
+        dataProviderBond.createRecordVersionWithoutLock(logger, actualDate, null, addList)
     }
 
     if (!logger.containsLevel(LogLevel.ERROR) && !updList.isEmpty()) {
-        dataProviderBond.updateRecords(userInfo, actualDate, updList)
+        dataProviderBond.updateRecordsWithoutLock(userInfo, actualDate, updList)
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

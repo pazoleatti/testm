@@ -151,10 +151,10 @@ void importFromXML() {
         return
     }
     if (!insertList.empty) {
-        dataProvider.insertRecords(userInfo, version, insertList)
+        dataProvider.insertRecordsWithoutLock(userInfo, version, insertList)
     }
     if (!updateList.empty) {
-        dataProvider.updateRecords(userInfo, version, updateList)
+        dataProvider.updateRecordsWithoutLock(userInfo, version, updateList)
     }
     scriptStatusHolder.setSuccessCount(insertList.size() + updateList.size())
 }

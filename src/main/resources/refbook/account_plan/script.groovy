@@ -106,7 +106,7 @@ void importFromXML() {
                 refBookRecord.setRecordId(null)
                 refBookRecord.setValues(['ACCOUNT' : row.BSSCH, 'ACCOUNT_NAME' : row.NMBSP])
 
-                dataProvider.createRecordVersion(logger, versionFrom, versionTo, [refBookRecord])
+                dataProvider.createRecordVersionWithoutLock(logger, versionFrom, versionTo, [refBookRecord])
             } else {
                 tmpMap[-6].add(BSSCH)
                 log("$BSSCH=======6 false. ")
@@ -168,7 +168,7 @@ void importFromXML() {
                 // Запись справочника должна быть отредактирована: NMBSP должно быть присвоено атрибуту Наименование счета справочника Системы
                 record?.ACCOUNT_NAME?.value = NMBSP
 
-                dataProvider.updateRecordVersion(logger, recId, null, null, record);
+                dataProvider.updateRecordVersionWithoutLock(logger, recId, null, null, record);
                 continue
             }
         }
@@ -183,7 +183,7 @@ void importFromXML() {
                 def versionTo = END_DATE
                 record?.ACCOUNT_NAME?.value = NMBSP
 
-                dataProvider.updateRecordVersion(logger, recId, versionFrom, versionTo, record)
+                dataProvider.updateRecordVersionWithoutLock(logger, recId, versionFrom, versionTo, record)
             } else {
                 tmpMap[-7].add(BSSCH)
                 log("$BSSCH=======7 false. ")
@@ -203,7 +203,7 @@ void importFromXML() {
                 def versionTo = END_DATE
                 record?.ACCOUNT_NAME?.value = NMBSP
 
-                dataProvider.updateRecordVersion(logger, recId, versionFrom, versionTo, record)
+                dataProvider.updateRecordVersionWithoutLock(logger, recId, versionFrom, versionTo, record)
             } else {
                 tmpMap[-8].add(BSSCH)
                 log("$BSSCH=======8 false. ")
@@ -225,7 +225,7 @@ void importFromXML() {
                 refBookRecord.setRecordId(rbRecordId)
                 refBookRecord.setValues(['ACCOUNT' : row.BSSCH, 'ACCOUNT_NAME' : row.NMBSP])
 
-                dataProvider.createRecordVersion(logger, versionFrom, versionTo, [refBookRecord])
+                dataProvider.createRecordVersionWithoutLock(logger, versionFrom, versionTo, [refBookRecord])
             } else {
                 tmpMap[-9].add(BSSCH)
                 log("$BSSCH=======9 false. ")
