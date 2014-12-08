@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.service.script.impl.DepartmentServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
@@ -156,6 +157,7 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         ReportPeriodService reportPeriodService = mock(ReportPeriodService.class);
         when(reportPeriodService.getStartDate(anyInt())).thenReturn(PERIOD_START_DATE);
         when(reportPeriodService.getEndDate(anyInt())).thenReturn(PERIOD_END_DATE);
+        when(reportPeriodService.getReportDate(anyInt())).thenReturn(PERIOD_END_DATE);
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setTaxType(TaxType.INCOME);
         taxPeriod.setId(1);
@@ -166,6 +168,12 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         when(reportPeriodService.get(anyInt())).thenReturn(reportPeriod);
         when(reportPeriodService.getCalendarStartDate(anyInt())).thenReturn(PERIOD_START_DATE);
         return reportPeriodService;
+    }
+
+    @Override
+    public DepartmentService mockDepartmentService() {
+        DepartmentService departmentService = mock(DepartmentService.class);
+        return departmentService;
     }
 
     @Override

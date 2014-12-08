@@ -11,8 +11,8 @@ import groovy.transform.Field
 
 /**
  * Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
- * formTypeId=10704
- * formTemplateId=11762
+ * formTypeId=204
+ * formTemplateId=204
  *
  * форма действует с 1 октября 2014
  *
@@ -240,7 +240,10 @@ def calc24(row) {
     }
     def record = getRefBookValue(7L, row.taxBenefitCode)
     // дополнить 0 слева если значении меньше четырех
-    return record.SECTION.value.padLeft(4, '0') + record.ITEM.value.padLeft(4, '0') + record.SUBITEM.value.padLeft(4, '0')
+    def section = record.SECTION.value ?: ''
+    def item = record.ITEM.value ?: ''
+    def subItem = record.SUBITEM.value ?: ''
+    return String.format("%s%s%s", section.padLeft(4, '0'), item.padLeft(4, '0'), subItem.padLeft(4, '0'))
 }
 
 def logicCheck() {
@@ -463,7 +466,10 @@ void consolidation() {
 
 def String checkPrevPeriod(def reportPeriod) {
     if (reportPeriod != null) {
-        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) {
+        // ищем форму нового типа иначе две формы старого
+        if ((formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) &&
+                (formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null ||
+                        formDataService.getLast(202, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null)) {
             return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
         }
     }

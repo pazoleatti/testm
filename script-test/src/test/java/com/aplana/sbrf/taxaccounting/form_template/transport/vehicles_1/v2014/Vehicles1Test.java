@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
  * @author Levykin
  */
 public class Vehicles1Test extends ScriptTestBase {
-    private static final int TYPE_ID = 10704;
+    private static final int TYPE_ID = 204;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;

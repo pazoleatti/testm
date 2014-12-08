@@ -427,7 +427,8 @@ def getRecord(def refBookId, def filter, Date date) {
         Long recordId = recordCache.get(refBookId).get(dateStr + filter)
         if (recordId != null) {
             if (refBookCache != null) {
-                return refBookCache.get(recordId)
+                def key = getRefBookCacheKey(refBookId, recordId)
+                return refBookCache.get(key)
             } else {
                 def retVal = new HashMap<String, RefBookValue>()
                 retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
@@ -450,8 +451,10 @@ def getRecord(def refBookId, def filter, Date date) {
         def retVal = records.get(0)
         Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
         recordCache.get(refBookId).put(dateStr + filter, recordId)
-        if (refBookCache != null)
-            refBookCache.put(recordId, retVal)
+        if (refBookCache != null) {
+            def key = getRefBookCacheKey(refBookId, recordId)
+            refBookCache.put(key, retVal)
+        }
         return retVal
     }
     return null
@@ -558,10 +561,11 @@ def getRefBookValue(def refBookId, def recordId) {
     if(refBookId == null || recordId == null){
         return null
     }
-    if (!refBookCache.containsKey(recordId)) {
-        refBookCache.put(recordId, refBookService.getRecordData(refBookId, recordId))
+    def key = getRefBookCacheKey(refBookId, recordId)
+    if (!refBookCache.containsKey(key)) {
+        refBookCache.put(key, refBookService.getRecordData(refBookId, recordId))
     }
-    return refBookCache.get(recordId)
+    return refBookCache.get(key)
 }
 
 def getOkato(def id) {

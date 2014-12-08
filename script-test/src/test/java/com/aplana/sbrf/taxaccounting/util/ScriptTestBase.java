@@ -39,7 +39,7 @@ public abstract class ScriptTestBase {
             if (path == null) {
                 throw new ServiceException("Test folder path is null!");
             }
-            testHelper = new TestScriptHelper(getFolderPath(), getFormData(), getMockHelper());
+            testHelper = new TestScriptHelper(path, getFormData(), getMockHelper());
         }
         testHelper.reset();
     }
@@ -77,14 +77,18 @@ public abstract class ScriptTestBase {
      * Файл для импорта из Excel-файлов (из интерфейса)
      */
     protected InputStream getImportXlsInputStream() {
-        return this.getClass().getResourceAsStream("importFile.xlsm");
+        return getCustomInputStream("importFile.xlsm");
     }
 
     /**
      * Файл для импорта из .rnu-файлов (загрузка ТФ)
      */
     protected InputStream getImportRnuInputStream() {
-        return this.getClass().getResourceAsStream("importFile.rnu");
+        return getCustomInputStream("importFile.rnu");
+    }
+
+    protected InputStream getCustomInputStream(String fileName) {
+        return this.getClass().getResourceAsStream(fileName);
     }
 
     /**

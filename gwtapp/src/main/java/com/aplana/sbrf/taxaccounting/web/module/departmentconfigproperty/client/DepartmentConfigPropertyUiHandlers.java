@@ -7,5 +7,6 @@ public interface DepartmentConfigPropertyUiHandlers extends AplanaUiHandlers {
     void onSave();
     void onFind();
     void onDelete();
+    void onCancel();
     void reloadDepartments(TaxType taxType, Integer currentDepartmentId);
 }

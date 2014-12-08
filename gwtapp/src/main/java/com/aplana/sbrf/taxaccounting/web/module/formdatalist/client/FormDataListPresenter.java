@@ -139,11 +139,13 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
                 // По какой-то причине переход к экземпляру НФ не попадает в историю, добавляем принудительно
                 historyRef = FormDataPresenter.NAME_TOKEN + ";" + FormDataPresenter.FORM_DATA_ID + "=" + result.getFormDataId();
                 // Переход к созданному экземпляру. Режим редактирования.
-                placeManager.revealPlace(new Builder().nameToken(FormDataPresenter.NAME_TOKEN)
+                Builder builder = new Builder().nameToken(FormDataPresenter.NAME_TOKEN)
                         .with(FormDataPresenter.READ_ONLY, "false")
-                        .with(FormDataPresenter.FORM_DATA_ID, String.valueOf(result.getFormDataId()))
-                        .with(FormDataPresenter.UUID, String.valueOf(uuid))
-                        .build());
+                        .with(FormDataPresenter.FORM_DATA_ID, String.valueOf(result.getFormDataId()));
+                if (uuid != null && uuid.isEmpty()) {
+                    builder.with(FormDataPresenter.UUID, String.valueOf(uuid));
+                }
+                placeManager.revealPlace(builder.build());
             }
         });
     }

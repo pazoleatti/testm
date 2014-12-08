@@ -6,7 +6,10 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.TableCell;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
@@ -14,6 +17,8 @@ import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -26,6 +31,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.RowCountChangeEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -157,12 +163,22 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     Column<DataRow<Cell>, Boolean> checkColumn;
 
     boolean isEditMode = false;
+    boolean isFieldsModified = false;
 
     @Inject
     @UiConstructor
     public DepartmentConfigPropertyView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
+        ValueChangeHandler<String> valueChangeHandler =  new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                isFieldsModified = true;
+            }
+        };
 
+        inn.addValueChangeHandler(valueChangeHandler);
+        formatVersion.addValueChangeHandler(valueChangeHandler);
+        version.addValueChangeHandler(valueChangeHandler);
 
     }
 
@@ -277,6 +293,24 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         columns.add(numericColumn);
                         break;
                 }
+                if (paramColumnUI != null) {
+                    ((DataRowColumn<?>) paramColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+                        @Override
+                        public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                            if (getUiHandlers() != null) {
+                                isFieldsModified = true;
+
+                            }
+                        }
+                    });
+                }
+
+                table.addRowCountChangeHandler(new RowCountChangeEvent.Handler() {
+                    @Override
+                    public void onRowCountChange(RowCountChangeEvent event) {
+                        isFieldsModified = true;
+                    }
+                });
             }
         }
     }
@@ -442,7 +476,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @UiHandler("cancelButton")
     public void onCancel(ClickEvent event) {
-        setEditMode(false);
+        if (getUiHandlers() != null) {
+            getUiHandlers().onCancel();
+        }
     }
 
     @UiHandler("deleteButton")
@@ -497,6 +533,16 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             table.getHeaderBuilder().buildHeader();
         }
         table.redraw();
+    }
+
+    @Override
+    public boolean isFormModified() {
+        return isFieldsModified;
+    }
+
+    @Override
+    public void setIsFormModified(boolean isModified) {
+        this.isFieldsModified = isModified;
     }
 
     @UiHandler("saveButton")

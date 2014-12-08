@@ -440,6 +440,8 @@ public class FormDataServiceImpl implements FormDataService {
 
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
 
+        checkPerformer(logger, formData);
+
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
@@ -449,6 +451,14 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new ServiceLoggerException("Ошибок не обнаружено", logEntryService.save(logger.getEntries()));
 		}
 	}
+
+    private void checkPerformer(Logger logger, FormData formData) {
+        if (TaxType.INCOME.equals(formData.getFormType().getTaxType()) &&
+                (FormDataKind.PRIMARY.equals(formData.getKind()) || FormDataKind.CONSOLIDATED.equals(formData.getKind())) &&
+                (formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null || formData.getSigners().size() == 0)) {
+            logger.error("Форма «Исполнитель и подписанты» заполнена не полностью!");
+        }
+    }
 
     /**
 	 * Сохранить данные по налоговой форме
@@ -708,6 +718,16 @@ public class FormDataServiceImpl implements FormDataService {
 
     private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
+
+        if (workflowMove != null && (
+                WorkflowMove.CREATED_TO_ACCEPTED.equals(workflowMove) ||
+                        WorkflowMove.CREATED_TO_APPROVED.equals(workflowMove) ||
+                        WorkflowMove.CREATED_TO_PREPARED.equals(workflowMove) ||
+                        WorkflowMove.PREPARED_TO_APPROVED.equals(workflowMove) ||
+                        WorkflowMove.PREPARED_TO_ACCEPTED.equals(workflowMove) ||
+                        WorkflowMove.APPROVED_TO_ACCEPTED.equals(workflowMove))) {
+            checkPerformer(logger, formData);
+        }
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
