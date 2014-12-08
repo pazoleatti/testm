@@ -290,7 +290,8 @@ def logicCheck() {
             rowError(logger, row, errorMsg + 'Дата возврата ТС неверная!')
         }
 
-        // 5. Проверка на наличие в списке ТС строк, для которых графы codeOKATO, identNumber, regNumber одинаковы
+        // 5. Проверка на наличие в списке ТС строк, для которых графы "Код ОКТМО", "Вид ТС",
+        // "Идентификационный номер ТС", "Налоговая база", "Единица измерения налоговой базы по ОКЕИ" одинаковы
         if (!checkedRows.contains(row)) {
             def errorRows = ''
             for (def rowIn in dataRows) {
@@ -737,7 +738,8 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
 def isEquals(def row1, def row2, def columns) {
     for (def column : columns) {
         if (row1[column] == null) {
-            return true
+            // Если одна из проверяемых граф пустая - считаем строку уникальной
+            return false
         }
     }
 
