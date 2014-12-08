@@ -728,6 +728,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
                 //Проверка использования
+                if (refBook.isHierarchic()) {
+                    checkChildren(uniqueRecordIds);
+                }
                 List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true,
                         RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
                                 Collections.<Long>emptyList() :
@@ -737,9 +740,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                         logger.error(error);
                     }
                     throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
-                }
-                if (refBook.isHierarchic()) {
-                    checkChildren(uniqueRecordIds);
                 }
                 refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
             } catch (Exception e) {
@@ -802,6 +802,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
                 //Проверка использования
+                if (refBook.isHierarchic()) {
+                    checkChildren(uniqueRecordIds);
+                }
                 List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true,
                         RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
                                 Collections.<Long>emptyList() :
@@ -811,9 +814,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                         logger.error(error);
                     }
                     throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
-                }
-                if (refBook.isHierarchic()) {
-                    checkChildren(uniqueRecordIds);
                 }
                 List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
                 uniqueRecordIds.addAll(fakeVersionIds);
