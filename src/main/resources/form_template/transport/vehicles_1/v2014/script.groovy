@@ -301,11 +301,11 @@ def logicCheck() {
             }
             if (!''.equals(errorRows)) {
                 rowError(logger, row, "Обнаружены строки $index$errorRows, у которых " +
-                        "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue}, " +
-                        "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue}, " +
-                        "Идентификационный номер ТС = $row.identNumber, " +
+                        "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue ?: '\"\"'}, " +
+                        "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue ?: '\"\"'}, " +
+                        "Идентификационный номер ТС = ${row.identNumber ?: '\"\"'}, " +
                         "Налоговая база = ${row.taxBase?:'\"\"'}, " +
-                        "Единица измерения налоговой базы по ОКЕИ = ${getRefBookValue(12L, row.baseUnit)?.CODE?.value} " +
+                        "Единица измерения налоговой базы по ОКЕИ = ${getRefBookValue(12L, row.baseUnit)?.CODE?.value ?: '\"\"'} " +
                         "совпадают!")
             }
         }
@@ -669,10 +669,15 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
         }
         if (need) {
             newRow = copyRow(row, copyColumns201)
-            def tsTypeCode = getParentTsTypeCode(row.tsTypeCode)
-            sectionRows[sectionMap[tsTypeCode]].add(newRow)
-            rowsOld.add(newRow)
-            tmpRows.add(newRow)
+            def tsTypeCode = getRefBookValue(42L, row.tsTypeCode)?.CODE?.value
+            if (!(tsTypeCode in sectionMap.keySet())) {
+                tsTypeCode = getParentTsTypeCode(row.tsTypeCode)
+            }
+            if (tsTypeCode != null && tsTypeCode in sectionMap.keySet()) {
+                sectionRows[sectionMap[tsTypeCode]].add(newRow)
+                rowsOld.add(newRow)
+                tmpRows.add(newRow)
+            }
         }
     }
     sections.each {
