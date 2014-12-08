@@ -304,7 +304,7 @@ def logicCheck() {
                         "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue}, " +
                         "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue}, " +
                         "Идентификационный номер ТС = $row.identNumber, " +
-                        "Налоговая база = $row.taxBase, " +
+                        "Налоговая база = ${row.taxBase?:'\"\"'}, " +
                         "Единица измерения налоговой базы по ОКЕИ = ${getRefBookValue(12L, row.baseUnit)?.CODE?.value} " +
                         "совпадают!")
             }
@@ -345,21 +345,18 @@ def logicCheck() {
 
             // 14. Проверка допустимых значений «Графы 23»
             if (row.taxBenefitCode != null && records != null && !records.isEmpty()) {
-                filter = "CODE = '30200' or CODE = '20200' or CODE = '20210' or CODE = '20220' or CODE = '20230'"
-                // справочник «Коды налоговых льгот транспортного налога»
-                def records6 =  getProvider(6L).getRecords(dTo, null, filter, null)
-                if (records6 != null && !records6.isEmpty()) {
-                    def regionIds = records.collect { it.REGION_ID.value }.join(' or DICT_REGION_ID = ')
-                    def taxBenefitCodeIds = records6.collect { it.record_id.value }.join(' or TAX_BENEFIT_ID = ')
-                    filter = "DECLARATION_REGION_ID = $regionId and " +
-                            "(DICT_REGION_ID = $regionIds) and " +
-                            "(TAX_BENEFIT_ID = $taxBenefitCodeIds)"
-                    // справочник «Параметры налоговых льгот транспортного налога»
-                    def records7 =  getProvider(7L).getRecords(dTo, null, filter, null)
-                    if (records7 == null || records7.isEmpty()) {
-                        def columnName = getColumnName(row, 'taxBenefitCode')
-                        rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
-                    }
+                def record7 = getRefBookValue(7L, row.taxBenefitCode)
+                def record6 = getRefBookValue(6L, record7?.TAX_BENEFIT_ID?.value)
+                def isError
+                if (record6 == null) {
+                    isError = true
+                } else {
+                    def code = record6?.CODE?.value
+                    isError = !(code in ["30200" , "20200" , "20210" , "20220" , "20230"])
+                }
+                if (isError) {
+                    def columnName = getColumnName(row, 'taxBenefitCode')
+                    rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
                 }
             }
         }
@@ -792,7 +789,7 @@ void importData() {
             (xml.row[0].cell[14]): getColumnName(tmpRow, 'year'),
             (xml.row[0].cell[15]): getColumnName(tmpRow, 'pastYear'),
             (xml.row[0].cell[16]): 'Сведения об угоне',
-            (xml.row[1].cell[16]): 'Дата начала розыска',
+            (xml.row[1].cell[16]): 'Дата начала розыска ТС',
             (xml.row[1].cell[17]): 'Дата возврата ТС',
             (xml.row[0].cell[18]): getColumnName(tmpRow, 'share'),
             (xml.row[0].cell[19]): getColumnName(tmpRow, 'costOnPeriodBegin'),
