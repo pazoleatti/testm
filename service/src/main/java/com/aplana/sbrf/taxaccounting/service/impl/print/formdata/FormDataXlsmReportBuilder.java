@@ -282,11 +282,17 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
         r2.setHeight((short) -1);
 
+        StringBuilder sbPeriodName = new StringBuilder();
         //Fill period
-        if (!refBookValue.getStringValue().equals("34"))
-            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, reportPeriod.getName(), String.valueOf(reportPeriod.getTaxPeriod().getYear())));
-        else
-            sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, "", String.valueOf(reportPeriod.getTaxPeriod().getYear())));
+        if (data.getPeriodOrder() != null) {
+            sbPeriodName.append(Months.fromId(data.getPeriodOrder() - 1).getName().toLowerCase(new Locale("ru", "RU")));
+        } else {
+            sbPeriodName.append("за ");
+            if (!refBookValue.getStringValue().equals("34") ) {
+                sbPeriodName.append(reportPeriod.getName());
+            }
+        }
+        sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, sbPeriodName.toString(), String.valueOf(reportPeriod.getTaxPeriod().getYear())));
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2);
     }
 
