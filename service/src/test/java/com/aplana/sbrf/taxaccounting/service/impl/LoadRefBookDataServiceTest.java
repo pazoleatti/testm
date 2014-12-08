@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
@@ -126,6 +130,16 @@ public class LoadRefBookDataServiceTest {
         SignService signService = mock(SignService.class);
         when(signService.checkSign(anyString(), anyInt())).thenReturn(true);
         ReflectionTestUtils.setField(service, "signService", signService);
+
+        LockDataService lockService = mock(LockDataService.class);
+        when(lockService.lock(anyString(), anyInt(), anyLong())).thenReturn(null);
+        ReflectionTestUtils.setField(service, "lockService", lockService);
+
+        RefBookDao refBookDao = mock(RefBookDao.class);
+        RefBook refBook = new RefBook();
+        refBook.setAttributes(new ArrayList<RefBookAttribute>());
+        when(refBookDao.get(anyLong())).thenReturn(refBook);
+        ReflectionTestUtils.setField(service, "refBookDao", refBookDao);
     }
 
     @Test
