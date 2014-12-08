@@ -154,6 +154,11 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Обработка пересечений версий
      */
@@ -241,6 +246,11 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
+    public void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
         for (Long uniqueRecordId : uniqueRecordIds) {
             List<Long> relatedVersions = dao.getRelatedVersions(getTableName(), uniqueRecordIds);
@@ -255,8 +265,18 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
+    public void updateRecordsVersionEndWithoutLock(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
+        updateRecordsVersionEnd(logger, versionEnd, uniqueRecordIds);
+    }
+
+    @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
         //TODO реализовать когда нужен будет импорт
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteAllRecordsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
@@ -268,6 +288,11 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         //TODO dloshkarev: надо все перепроверять. Т.к пока эти справочники read only, то эти методы не нужны
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
@@ -297,7 +322,17 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
+    public void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         throw new UnsupportedOperationException();
     }
 

@@ -180,4 +180,39 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
         return refBookDao.isRecordsActiveInPeriod(recordIds, new Date(), null);
     }
+
+    @Override
+    public List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordsVersionEndWithoutLock(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteAllRecordsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
 }

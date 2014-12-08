@@ -191,6 +191,12 @@ public interface RefBookDataProvider {
     List<Long> createRecordVersion(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records);
 
     /**
+     * То же самое что и {@link RefBookDataProvider#createRecordVersion(com.aplana.sbrf.taxaccounting.model.log.Logger, java.util.Date, java.util.Date, java.util.List<com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord>)}
+     * Но без блокировок
+     */
+    List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records);
+
+    /**
      * Возвращает значения уникальных атрибутов для конкретной версии записи справочника
      * @param uniqueRecordId идентификатор версии записи
      * @return not null всегда - ожидается возврат результата
@@ -208,22 +214,45 @@ public interface RefBookDataProvider {
     void updateRecordVersion(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records);
 
     /**
+     * То же самое что и {@link RefBookDataProvider#updateRecordVersion(com.aplana.sbrf.taxaccounting.model.log.Logger, java.lang.Long, java.util.Date, java.util.Date, java.util.Map<java.lang.String,com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue>)}
+     * Но без блокировок
+     */
+    void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records);
+
+    /**
      * Устанавливает дату окончания периода актуальности для указанных версий записей справочника
      * @param versionEnd задает дату окончания периода актуальности
      * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
      */
     void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
+
+    /**
+     * То же самое что и {@link RefBookDataProvider#updateRecordsVersionEnd(com.aplana.sbrf.taxaccounting.model.log.Logger, java.util.Date, java.util.List<java.lang.Long>)}
+     * Но без блокировок
+     */
+    void updateRecordsVersionEndWithoutLock(Logger logger, Date versionEnd, List<Long> uniqueRecordIds);
     /**
      * Удаляет все версии записи из справочника
-     * @param recordIds список идентификаторов записей, все версии которых будут удалены
+     * @param uniqueRecordIds список уникальных идентификаторов записей, все версии которых будут удалены
      */
-    void deleteAllRecords(Logger logger, List<Long> recordIds);
+    void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds);
+    /**
+     * То же самое что и {@link RefBookDataProvider#deleteAllRecords(com.aplana.sbrf.taxaccounting.model.log.Logger, java.util.List<java.lang.Long>)}
+     * Но без блокировок
+     */
+    void deleteAllRecordsWithoutLock(Logger logger, List<Long> uniqueRecordIds);
 
     /**
      * Удаляет указанные версии записи из справочника
      * @param uniqueRecordIds список идентификаторов версий записей, которые будут удалены
      */
     void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds);
+
+    /**
+     * То же самое что и {@link RefBookDataProvider#deleteRecordVersions(com.aplana.sbrf.taxaccounting.model.log.Logger, java.util.List<java.lang.Long>)}
+     * Но без блокировок
+     */
+    void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds);
 
     /**
      * Удаляет указанные версии записи из справочника
@@ -265,24 +294,30 @@ public interface RefBookDataProvider {
     List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
 
     /**
-     * Создает новые записи в справочнике
+     * Создает новые записи в справочнике без учета версионирования
      * @param version дата актуальности новых записей
      * @param records список новых записей
-     *
-     * Вместо этого метода надо использовать {@link RefBookDataProvider#createRecordVersion}
      */
-    @Deprecated
     void insertRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
 
     /**
-     * Обновляет значения в справочнике
+     * То же самое что и {@link RefBookDataProvider#insertRecords(com.aplana.sbrf.taxaccounting.model.TAUserInfo, java.util.Date, java.util.List<java.util.Map<java.lang.String,com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue>>)}
+     * Но без блокировок
+     */
+    void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
+
+    /**
+     * Обновляет значения в справочнике без учета версионирования
      * @param version задает дату актуальности
      * @param records список обновленных записей
-     *
-     * Вместо этого метода надо использовать {@link RefBookDataProvider#updateRecordVersion}
      */
-    @Deprecated
     void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
+
+    /**
+     * То же самое что и {@link RefBookDataProvider#updateRecords(com.aplana.sbrf.taxaccounting.model.TAUserInfo, java.util.Date, java.util.List<java.util.Map<java.lang.String,com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue>>)}
+     * Но без блокировок
+     */
+    void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records);
 
 	/**
 	 * Разыменование набора ссылок

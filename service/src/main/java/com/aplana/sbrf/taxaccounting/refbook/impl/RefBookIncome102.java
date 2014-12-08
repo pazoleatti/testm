@@ -107,8 +107,18 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
+    public void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         dao.updateRecords(records);
+    }
+
+    @Override
+    public void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        updateRecords(taUserInfo, version, records);
     }
 
     @Override
@@ -139,6 +149,11 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
+    public List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>> getUniqueAttributeValues(Long recordId) {
         throw new UnsupportedOperationException();
     }
@@ -149,12 +164,27 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
+    public void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
     @Override
+    public void updateRecordsVersionEndWithoutLock(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void deleteAllRecords(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteAllRecordsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
@@ -166,6 +196,11 @@ public class RefBookIncome102 implements RefBookDataProvider {
     @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
         dao.deleteRecords(uniqueRecordIds);
+    }
+
+    @Override
+    public void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
+        deleteRecordVersions(logger, uniqueRecordIds);
     }
 
     @Override

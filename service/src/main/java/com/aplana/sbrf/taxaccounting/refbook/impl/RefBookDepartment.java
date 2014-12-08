@@ -175,7 +175,17 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public void insertRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void updateRecords(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordsWithoutLock(TAUserInfo taUserInfo, Date version, List<Map<String, RefBookValue>> records) {
         throw new UnsupportedOperationException();
     }
 
@@ -275,6 +285,11 @@ public class RefBookDepartment implements RefBookDataProvider {
             throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
                     logEntryService.save(logger.getEntries()));
         }
+    }
+
+    @Override
+    public List<Long> createRecordVersionWithoutLock(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -437,7 +452,17 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public void updateRecordVersionWithoutLock(Logger logger, Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void updateRecordsVersionEnd(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRecordsVersionEndWithoutLock(Logger logger, Date versionEnd, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
@@ -447,7 +472,17 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public void deleteAllRecordsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void deleteRecordVersions(Logger logger, List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteRecordVersionsWithoutLock(Logger logger, List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 
