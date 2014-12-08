@@ -1256,6 +1256,7 @@ public class SourceServiceImpl implements SourceService {
 
             }
         } else {
+            //Получаем несозданные источники
             relations.add(performFormDataRelation(null,
                     getRelationCommon(true, departmentFormType, null), departmentFormType,
                     departmentReportPeriod));
