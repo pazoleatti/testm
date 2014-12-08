@@ -1255,6 +1255,10 @@ public class SourceServiceImpl implements SourceService {
                         departmentReportPeriod));
 
             }
+        } else {
+            relations.add(performFormDataRelation(null,
+                    getRelationCommon(true, departmentFormType, null), departmentFormType,
+                    departmentReportPeriod));
         }
         return relations;
     }
