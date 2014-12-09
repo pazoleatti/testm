@@ -606,6 +606,7 @@ def formNewRow(def sRow) {
 // новая строка
     def newRow = formData.createDataRow()
     editableColumns.each {
+        newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias("Редактируемое поле")
     }
     // «Графа 4» принимает значение «графы 2» формы-источника
