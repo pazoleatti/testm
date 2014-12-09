@@ -199,7 +199,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     void addRowButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
             getUiHandlers().onAddRowClicked();
-            refbookDataTree.clearSelected(true);
         }
     }
 
