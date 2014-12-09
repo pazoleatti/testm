@@ -529,7 +529,12 @@ public class RefBookDepartment implements RefBookDataProvider {
                     logger.error("Обнаружены подчиненные подразделения для %s", departmentService.getDepartment(depId).getName());
                     throw new ServiceLoggerException("Подразделение не удалено!", logEntryService.save(logger.getEntries()));
                 }
-                isInUsed(departmentService.getDepartment(depId), logger);
+                // проверка использования подразделения в гарантиях
+                Department department = departmentService.getDepartment(depId);
+                if (department.isGarantUse()) {
+                    logger.error("Подразделение используется в АС \"Гарантии\"");
+                }
+                isInUsed(department, logger);
                 if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING) && !force)
                     return;
 
@@ -764,10 +769,6 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     //Проверка использования
     private void isInUsed(final Department department, Logger logger){
-        // проверка использования подразделения в гарантиях
-        /*if (department.isGarantUse()) {
-            logger.error("Подразделение используется в АС \"Гарантии\"");
-        }*/
         //1 точка запроса
         List<FormData> formDatas =
                 formDataSearchService.findDataByFilter(new FormDataFilter(){{
