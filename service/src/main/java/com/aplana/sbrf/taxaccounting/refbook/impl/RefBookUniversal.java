@@ -254,6 +254,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
+                logger.clear(LogLevel.INFO);
                 throw new ServiceLoggerException("Версия не сохранена. Обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
@@ -613,6 +614,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             refBookDao.updateRecordVersion(refBookId, uniqueRecordId, records);
         } catch (Exception e) {
             if (logger != null) {
+                logger.error(e);
                 logger.clear(LogLevel.INFO);
                 throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
@@ -702,6 +704,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
+                logger.clear(LogLevel.INFO);
                 throw new ServiceLoggerException("Версия не сохранена. Обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
@@ -795,6 +798,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
+                logger.clear(LogLevel.INFO);
                 throw new ServiceLoggerException("Элемент справочника не удален, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
@@ -879,6 +883,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         } catch (Exception e) {
             if (logger != null) {
                 logger.error(e);
+                logger.clear(LogLevel.INFO);
                 throw new ServiceLoggerException("Версия элемента справочника не удалена, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {

@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -67,7 +69,12 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
         if (formData == null) {
             isRecompose = false;
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
-			int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId, departmentReportPeriod.getReportPeriod().getId());
+            int formTemplateId = 0;
+            try {
+                formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId, departmentReportPeriod.getReportPeriod().getId());
+            } catch (DaoException e) {
+                throw new ServiceException(e.getLocalizedMessage(), e);
+            }
             // Создание формы в том же периоде
 			long dFormDataId = formDataService.createFormDataWithoutCheck(scriptComponentContext.getLogger(),
                     scriptComponentContext.getUserInfo(), formTemplateId, departmentReportPeriodId, kind, periodOrder, false);
