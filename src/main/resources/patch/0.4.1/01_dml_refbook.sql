@@ -44,7 +44,7 @@ update ref_book set region_attribute_id=2100 where id=210;
 commit;
 
 --Ставки транспортного налога
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (410,41,'Код субъекта РФ','DECLARATION_REGION_ID',4,0,4,10,1,null,10,1,1,null,null,0,null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (410,41,'Код субъекта РФ представителя декларации','DECLARATION_REGION_ID',4,0,4,10,1,null,10,1,1,null,null,0,null);
 update ref_book set region_attribute_id=410 where id=41;
 
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value)
