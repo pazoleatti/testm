@@ -1246,9 +1246,13 @@ public class SourceServiceImpl implements SourceService {
     private List<FormToFormRelation> getSourceList(DepartmentFormType departmentFormType,
                                                    DepartmentReportPeriod departmentReportPeriod,
                                                    Integer periodOrder) {
+        List<FormToFormRelation> relations = new ArrayList<FormToFormRelation>();
+        if (!formTemplateDao.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
+            return relations;
+
         List<Integer> periodOrders = new ArrayList<Integer>();
-        Integer formTemplateId = formTemplateDao.getActiveFormTemplateId(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
-        if (formTemplateId != null && formTemplateDao.get(formTemplateId).isMonthly() && periodOrder == null) {
+        int formTemplateId = formTemplateDao.getActiveFormTemplateId(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
+        if (formTemplateDao.get(formTemplateId).isMonthly() && periodOrder == null) {
             for(Months month: reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId())) {
                 if (month != null) periodOrders.add(month.getId());
             }
@@ -1256,7 +1260,6 @@ public class SourceServiceImpl implements SourceService {
             periodOrders.add(periodOrder);
         }
 
-        List<FormToFormRelation> relations = new ArrayList<FormToFormRelation>();
         for(Integer periodOrderForm: periodOrders) {
             FormData formData = formDataDao.getLastByDate(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
                     departmentFormType.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
@@ -1283,6 +1286,8 @@ public class SourceServiceImpl implements SourceService {
                                                         DepartmentReportPeriod departmentReportPeriod,
                                                         Integer periodOrder) {
         List<FormToFormRelation> retVal = new LinkedList<FormToFormRelation>();
+        if (!formTemplateDao.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
+            return retVal;
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
@@ -1302,6 +1307,10 @@ public class SourceServiceImpl implements SourceService {
             departmentReportPeriodList.removeAll(delList);
         }
 
+        int formTemplateId = formTemplateDao.getActiveFormTemplateId(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
+        if (!formTemplateDao.get(formTemplateId).isMonthly()) {
+            periodOrder = null;
+        }
         for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
             // Поиск экземпляра НФ в каждом существующем отчетном периоде подразделения
             FormData formData = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
