@@ -120,7 +120,7 @@ def editableColumns = ['taxAuthority', 'kpp']
 
 // Проверяемые на пустые значения атрибуты (графа 1..9, 11..15, 21)
 @Field
-def nonEmptyColumns = ['taxAuthority', 'kpp', 'okato', 'tsTypeCode', 'tsType', 'model', 'vi', 'regNumber', 'regDate',
+def nonEmptyColumns = ['taxAuthority', 'kpp', 'okato', 'tsTypeCode', 'model', 'vi', 'regNumber', 'regDate',
                        'taxBase', 'taxBaseOkeiUnit', 'createYear', 'years', 'ownMonths', 'partRight', 'coef362',
                        'taxRate', 'calculatedTaxSum', 'taxSumToPay']
 
@@ -391,9 +391,10 @@ void fillTaKpp(def row, def errorMsg) {
 }
 
 def checkTaKpp(def row, def errorMsg) {
-    String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = lower('" +
-            row.okato?.toString() + "') and TAX_ORGAN_CODE = lower('" + row.taxAuthority?.toString() +
-            "') and KPP = lower('" + row.kpp?.toString() + "')"
+    def String filter =  String.format("DECLARATION_REGION_ID = ${formDataDepartment.regionId?.toString()}"+
+            " and OKTMO = ${row.okato?.toString()}" +
+            " and LOWER(TAX_ORGAN_CODE) = LOWER('${row.taxAuthority?.toString()}') " +
+            " and LOWER(KPP) = LOWER('${row.kpp?.toString()}')")
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() != 1) {
         logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
@@ -612,7 +613,7 @@ def formNewRow(def sRow) {
     // «Графа 5» принимает значение «графы 4» формы-источника
     newRow.tsTypeCode = sRow.tsTypeCode
     // «Графа 6» принимает значение «графы 5» формы-источника
-    newRow.tsType = sRow.tsType
+    // зависимая графа newRow.tsType = sRow.tsType
     // «Графа 7» принимает значение «графы 6» формы-источника
     newRow.model = sRow.model
     // «Графа 8» принимает значение «графы 7» формы-источника
