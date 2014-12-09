@@ -323,7 +323,7 @@ def calc() {
 
             // Графа 33
             if (row.taxBenefitCodeDecrease != null) {
-                reducingPerc = getCodeRecord(row.taxBenefitCodeDecrease, region, errorMsg)?.PERCENT?.numberValue
+                reducingPerc = getRefBookValue(7, row.taxBenefitCodeDecrease)?.PERCENT?.numberValue
                 if (reducingPerc != null && row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
                     row.benefitSumDecrease = (row.taxBase * taxRate * partRight * row.koefKp * row.coefKl * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
                 }
@@ -331,7 +331,7 @@ def calc() {
 
             // Графа 35
             if (row.benefitCodeReduction != null) {
-                loweringRates = getCodeRecord(row.benefitCodeReduction, region, errorMsg)?.RATE?.numberValue
+                loweringRates = getRefBookValue(7, row.benefitCodeReduction)?.RATE?.numberValue
                 if (loweringRates != null && row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
                     row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
@@ -399,23 +399,6 @@ def checkTaKpp(def row, def errorMsg) {
     if (records.size() != 1) {
         logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     }
-}
-
-def getCodeRecord (def recordId, def region, def errorMsg) {
-    if (recordId != null) {
-        // получение параметров региона
-        // запрос по выборке данных из справочника
-        def query = "TAX_BENEFIT_ID = " + recordId + " and DICT_REGION_ID = " + region.record_id
-        def record = getRecord(7, query, reportDate)
-
-        if (record == null) {
-            logger.error(errorMsg + "Ошибка при получении параметров налоговых льгот.")
-            return null
-        } else {
-            return record
-        }
-    }
-    return null
 }
 
 void logicCheck() {
