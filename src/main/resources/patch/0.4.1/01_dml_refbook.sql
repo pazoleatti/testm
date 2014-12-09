@@ -74,6 +74,11 @@ update ref_book_attribute set is_unique = 1 where id in (2081, 2082);
 update ref_book_attribute set width = 10 where id = 2080;
 update ref_book_attribute set width = 30 where id = 2081;
 update ref_book_attribute set width = 30 where id = 2082;
+
+-- http://jira.aplana.com/browse/SBRFACCTAX-9777 - 0.4.1 Ошибки реализации в спр. Повышающие коэффициенты транспортного налога
+UPDATE ref_book_attribute SET width = 10 WHERE id = 2090;
+UPDATE ref_book_attribute SET width = 10 WHERE id = 633;
+UPDATE ref_book_attribute SET width = 10 WHERE id = 2110;
 ----------------------------------------------------------------------------------------------------------------
 
 commit;
