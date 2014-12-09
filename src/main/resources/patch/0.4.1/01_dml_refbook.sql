@@ -66,7 +66,8 @@ update ref_book_attribute set is_unique = 1 where id in (701, 18, 19, 20, 21, 22
 update ref_book_attribute set is_unique = 1 where id in (2090, 2091, 2092);
 
 -- http://jira.aplana.com/browse/SBRFACCTAX-9316 -  Требования к уникальности записей справочника "Средняя стоимость транспортных средств"
-update ref_book_attribute set is_unique = 1 where id in (2080, 2081, 2082);
+update ref_book_attribute set is_unique = 0 where id in (2080);
+update ref_book_attribute set is_unique = 1 where id in (2081, 2082);
 
 ----------------------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-9464 - Ширина колонок в 208-справочнике ("Средняя стоимость транспортных средств")
