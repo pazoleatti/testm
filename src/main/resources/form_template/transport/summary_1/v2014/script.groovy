@@ -323,16 +323,16 @@ def calc() {
 
             // Графа 33
             if (row.taxBenefitCodeDecrease != null) {
-                reducingPerc = getCodeRecord(row.taxBenefitCodeDecrease, region).PERCENT.numberValue
-                if (row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
+                reducingPerc = getCodeRecord(row.taxBenefitCodeDecrease, region, errorMsg)?.PERCENT?.numberValue
+                if (reducingPerc != null && row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
                     row.benefitSumDecrease = (row.taxBase * taxRate * partRight * row.koefKp * row.coefKl * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
                 }
             }
 
             // Графа 35
             if (row.benefitCodeReduction != null) {
-                loweringRates = getCodeRecord(row.benefitCodeReduction, region).RATE.numberValue
-                if (row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
+                loweringRates = getCodeRecord(row.benefitCodeReduction, region, errorMsg)?.RATE?.numberValue
+                if (loweringRates != null && row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
                     row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
             }
@@ -400,7 +400,7 @@ def checkTaKpp(def row, def errorMsg) {
     }
 }
 
-def getCodeRecord (def recordId, def region) {
+def getCodeRecord (def recordId, def region, def errorMsg) {
     if (recordId != null) {
         // получение параметров региона
         // запрос по выборке данных из справочника
@@ -891,7 +891,7 @@ def calc24(def row, def region, def errorMsg) {
         if (record != null) {
             return record.record_id.numberValue
         } else {
-            logger.error("Для заданных параметров ТС («Код вида ТС», «Налоговая база», " +
+            logger.error(errorMsg + "Для заданных параметров ТС («Код вида ТС», «Налоговая база», " +
                     "«Единица измерения налоговой базы по ОКЕИ», «Количество полных месяцев владения», «Код ОКТМО») " +
                     "в справочнике «Ставки транспортного налога» не найдена соответствующая налоговая ставка ТС!")
         }
