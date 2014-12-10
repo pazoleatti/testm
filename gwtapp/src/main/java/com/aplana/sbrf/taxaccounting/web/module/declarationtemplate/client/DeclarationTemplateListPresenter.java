@@ -61,15 +61,17 @@ public class DeclarationTemplateListPresenter
 	 * Интерфейс декларации, т.е. представления. Такой, каким видит его Presenter.
 	 */
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateListUiHandlers> {
-		void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result);
+		void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result, Integer selectedId);
         DeclarationTypeTemplate getSelectedElement();
-	}
+        Integer getSelectedElementId();
+    }
 
 	private final DispatchAsync dispatcher;
     protected final FilterDeclarationTemplatePresenter filterPresenter;
     protected final EditFormPresenter editFormPresenter;
     public static final Object OBJECT = new Object();
     public static final Object OBJECT_EDIT_FORM = new Object();
+    private Integer selectedItemId;
 
     @Inject
 	public DeclarationTemplateListPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
@@ -137,6 +139,7 @@ public class DeclarationTemplateListPresenter
         super.onHide();
         clearSlot(OBJECT);
         clearSlot(OBJECT_EDIT_FORM);
+        selectedItemId = getView().getSelectedElementId();
     }
 
     @Override
@@ -146,23 +149,24 @@ public class DeclarationTemplateListPresenter
 
     @Override
     public void onFilterReady(FilterDeclarationTemplateReadyEvent event) {
-        updateDeclarationData();
+        updateDeclarationData(selectedItemId);
     }
 
     public void updateDeclarationData() {
+        updateDeclarationData(null);
+    }
+
+    public void updateDeclarationData(final Integer selectedId) {
         previousFilter =  filterPresenter.getFilterData();
         DeclarationListAction action = new DeclarationListAction();
         action.setFilter(filterPresenter.getFilterData());
         dispatcher.execute(action,	CallbackUtils.defaultCallback(
                 new AbstractCallback<DeclarationListResult>() {
             @Override
-            public void onSuccess(
-                    DeclarationListResult result) {
-                    getView().setDeclarationTypeTemplateRows(result.getTypeTemplates());
+            public void onSuccess(DeclarationListResult result) {
+                    getView().setDeclarationTypeTemplateRows(result.getTypeTemplates(),selectedId);
             }
-        }, this).addCallback(
-                new ManualRevealCallback<DeclarationListResult>(
-                DeclarationTemplateListPresenter.this)));
+        }, this).addCallback(new ManualRevealCallback<DeclarationListResult>(DeclarationTemplateListPresenter.this)));
     }
 
     @Override

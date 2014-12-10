@@ -158,32 +158,43 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
     }
 
 	@Override
-	public void setFormTemplateTable(List<FormTypeTemplate> formTypeTemplates) {
+	public void setFormTemplateTable(List<FormTypeTemplate> formTypeTemplates, Integer selectedId) {
         dataProvider.setList(formTypeTemplates);
         formTemplateTable.setVisibleRange(0, formTypeTemplates.size());
         sortHandler.setList(dataProvider.getList());
         /* При единственном значении не перерисовывается таблица http://jira.aplana.com/browse/SBRFACCTAX-7612 */
         formTemplateTable.flush();
         selectionModel.clear();
-        if (selectedItem != null) {
-            for(FormTypeTemplate item: formTypeTemplates) {
-                if (item.getFormTypeId() == selectedItem.getFormTypeId()) {
-                    selectionModel.setSelected(item, true);
-                    break;
-                }
-            }
-        }
+
         if (!formTypeTemplates.isEmpty()) {
             selectionModel.setSelected(formTypeTemplates.get(0), true);
         } else {
             selectedItem = null;
             selectionModel.clear();
         }
+
+        if (selectedItem != null) {
+            for(FormTypeTemplate item: formTypeTemplates) {
+                if (selectedId != null && item.getFormTypeId() == selectedId) {
+                    selectionModel.setSelected(item, true);
+                    break;
+                }
+            }
+        }
 	}
 
     @Override
     public FormTypeTemplate getSelectedElement() {
         return selectionModel.getSelectedObject();
+    }
+
+    @Override
+    public Integer getSelectedElementId() {
+        FormTypeTemplate element = selectionModel.getSelectedObject();
+        if (element != null) {
+            return element.getFormTypeId();
+        }
+        return null;
     }
 
     @UiHandler("delete")
