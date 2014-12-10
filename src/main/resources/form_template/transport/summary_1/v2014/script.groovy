@@ -138,14 +138,24 @@ def reportDay = null
 def needCheckTaxRate = true
 
 @Field
+def calendarStartDate = null
+
+@Field
 def startDate = null
 
 @Field
 def endDate = null
 
+def getCalendarStartDate() {
+    if (calendarStartDate == null) {
+        calendarStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return calendarStartDate
+}
+
 def getReportPeriodStartDate() {
     if (startDate == null) {
-        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
 }
@@ -278,39 +288,15 @@ def calc() {
             placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate', 'partRight'], errorMsg)
         }
         // Графа 26 Определяется количество полных месяцев использования льготы в отчетном году
-        if (row.benefitStartDate == null && row.benefitEndDate == null) {
-            row.benefitMonths = null
-        } else {
-            if (row.benefitEndDate != null && row.benefitEndDate.compareTo(reportPeriodStartDate) < 0 ||
-                    row.benefitStartDate.compareTo(reportPeriodEndDate) > 0) {
-                row.benefitMonths = 0
-            } else {
-                //Определяем Доконч
-                def dOkonch
-                if (row.benefitEndDate == null || row.benefitEndDate.compareTo(reportPeriodEndDate) > 0) {
-                    dOkonch = reportPeriodEndDate
-                } else {
-                    dOkonch = row.benefitEndDate
-                }
-                // Определяем Днач
-                def dNach = (row.benefitStartDate.compareTo(reportPeriodStartDate) < 0) ? reportPeriodStartDate : row.benefitStartDate
-                // Определяем Мльгот
-                row.benefitMonths = dOkonch[Calendar.MONTH] - dNach[Calendar.MONTH] + 1
-            }
-        }
+        row.benefitMonths = calc26(row, reportPeriodStartDate, reportPeriodEndDate)
 
         // Графа 29 Коэффициент Кл
-        if (row.taxBenefitCode != null) {
-            if (row.benefitStartDate != null && row.benefitEndDate != null) {
-                int start = row.benefitStartDate.month
-                int end = row.benefitEndDate.month
-                row.coefKl = (end - start + 1) / monthCountInPeriod
-            } else {
-                row.coefKl = null
-            }
+        if (row.benefitMonths != null) {
+            row.coefKl = row.benefitMonths / monthCountInPeriod
+        } else {
+            row.coefKl = null
         }
 
-        def taxRate = null
         if (row.taxRate != null) {
             taxRate = getRefBookValue(41, row.taxRate)?.VALUE?.numberValue
 
@@ -319,6 +305,8 @@ def calc() {
                 if (row.taxBase != null && partRight != null) {
                     row.benefitSum = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
+            } else {
+                row.benefitSum = null
             }
 
             // Графа 33
@@ -327,6 +315,8 @@ def calc() {
                 if (reducingPerc != null && row.taxBase != null && partRight != null) {
                     row.benefitSumDecrease = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1) * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
                 }
+            } else {
+                row.benefitSumDecrease = null
             }
 
             // Графа 35
@@ -335,6 +325,8 @@ def calc() {
                 if (loweringRates != null && row.taxBase != null && partRight != null) {
                     row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
+            } else {
+                row.benefitSumReduction = null
             }
         }
 
@@ -508,7 +500,7 @@ def consolidation() {
     List<Department> departments = new ArrayList()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+            getCalendarStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRowHelper = formDataService.getDataRowHelper(source)
@@ -789,6 +781,30 @@ int calc21(DataRow sRow, Date reportPeriodStartDate, Date reportPeriodEndDate) {
          */
         return ownMonths - stealingMonths
     }
+}
+
+def calc26 (def row, def reportPeriodStartDate, def reportPeriodEndDate) {
+    if (row.benefitStartDate == null && row.benefitEndDate == null) {
+        return null
+    } else {
+        if (row.benefitEndDate != null && row.benefitEndDate.compareTo(reportPeriodStartDate) < 0 ||
+                row.benefitStartDate.compareTo(reportPeriodEndDate) > 0) {
+            return 0
+        } else {
+            //Определяем Доконч
+            def dOkonch
+            if (row.benefitEndDate == null || row.benefitEndDate.compareTo(reportPeriodEndDate) > 0) {
+                dOkonch = reportPeriodEndDate
+            } else {
+                dOkonch = row.benefitEndDate
+            }
+            // Определяем Днач
+            def dNach = (row.benefitStartDate.compareTo(reportPeriodStartDate) < 0) ? reportPeriodStartDate : row.benefitStartDate
+            // Определяем Мльгот
+            return dOkonch[Calendar.MONTH] - dNach[Calendar.MONTH] + 1
+        }
+    }
+
 }
 
 /** Число полных месяцев в текущем периоде (либо отчетном либо налоговом). */
