@@ -203,6 +203,7 @@ public class TestScriptHelper {
         bindings.put("departmentService", departmentService);
         bindings.put("refBookService", refBookService);
         bindings.put("departmentFormTypeService", departmentFormTypeService);
+        bindings.put("departmentReportPeriodService", departmentReportPeriodService);
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("formDataDepartment", userDepartment);
         bindings.put("formData", formData);
