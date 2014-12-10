@@ -3,8 +3,6 @@ package refbook.tax_benefits_transport
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
-import java.text.SimpleDateFormat
-
 /**
  * Cкрипт справочника «Параметры налоговых льгот транспортного налога» (id = 7)
  *
@@ -18,14 +16,7 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
-def providerCache = [:]
-@Field
-def recordsCountCache = [:]
-@Field
 def refBookCache = [:]
-
-@Field
-def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
 void save() {
     saveRecords.each {
@@ -46,44 +37,10 @@ void save() {
                 logger.error(errorStr, 'Основание - подпункт')
             }
         }
-
-        // 2. проверка уникальности записи
-        def String query = "TAX_BENEFIT_ID =" + it.TAX_BENEFIT_ID.referenceValue + " AND DICT_REGION_ID = " + it.DICT_REGION_ID.referenceValue
-        def int recordsCount = getRecordsCount(7, query, validDateFrom)
-        if (recordsCount > (isNewRecords ? 0 : 1)) {
-            logger.error("Атрибуты «Код региона» и «Код налоговой льготы» не уникальны!")
-        }
     }
 }
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
-}
-
-// Количество записей
-def int getRecordsCount(def refBookId, def filter, Date date) {
-    if (refBookId == null) {
-        return 0
-    }
-    String dateStr = sdf.format(date)
-    if (recordsCountCache.containsKey(refBookId)) {
-        Integer recordsCount = recordsCountCache.get(refBookId).get(dateStr + filter)
-        if (recordsCount != null) {
-            return recordsCount
-        }
-    } else {
-        recordsCountCache.put(refBookId, [:])
-    }
-
-    if (!providerCache.containsKey(refBookId)) {
-        providerCache.put(refBookId, refBookFactory.getDataProvider(refBookId))
-    }
-    def provider = providerCache.get(refBookId)
-
-    def records = provider.getRecords(date, null, filter, null)
-    // отличие от FormDataServiceImpl.getRefBookRecord(...)
-    recordsCountCache.get(refBookId).put(dateStr + filter, records.size())
-
-    return records.size()
 }
