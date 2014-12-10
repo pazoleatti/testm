@@ -359,7 +359,7 @@ def calc() {
     groups.each { section ->
         def from = getDataRow(dataRows, section).getIndex()
         def to = getDataRow(dataRows, "total$section").getIndex() - 2
-        calcTotalSum(dataRows[from..to], getDataRow(dataRows, section), totalColumns)
+        calcTotalSum(dataRows[from..to], getDataRow(dataRows, "total$section"), totalColumns)
     }
 
     def totalRow = getDataRow(dataRows, 'total')
