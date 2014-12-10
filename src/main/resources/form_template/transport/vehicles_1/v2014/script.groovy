@@ -290,7 +290,8 @@ def logicCheck() {
             rowError(logger, row, errorMsg + 'Дата возврата ТС неверная!')
         }
 
-        // 5. Проверка на наличие в списке ТС строк, для которых графы codeOKATO, identNumber, regNumber одинаковы
+        // 5. Проверка на наличие в списке ТС строк, для которых графы "Код ОКТМО", "Вид ТС",
+        // "Идентификационный номер ТС", "Налоговая база", "Единица измерения налоговой базы по ОКЕИ" одинаковы
         if (!checkedRows.contains(row)) {
             def errorRows = ''
             for (def rowIn in dataRows) {
@@ -301,11 +302,11 @@ def logicCheck() {
             }
             if (!''.equals(errorRows)) {
                 rowError(logger, row, "Обнаружены строки $index$errorRows, у которых " +
-                        "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue}, " +
-                        "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue}, " +
-                        "Идентификационный номер ТС = $row.identNumber, " +
-                        "Налоговая база = $row.taxBase, " +
-                        "Единица измерения налоговой базы по ОКЕИ = ${getRefBookValue(12L, row.baseUnit)?.CODE?.value} " +
+                        "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue ?: '\"\"'}, " +
+                        "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue ?: '\"\"'}, " +
+                        "Идентификационный номер ТС = ${row.identNumber ?: '\"\"'}, " +
+                        "Налоговая база = ${row.taxBase?:'\"\"'}, " +
+                        "Единица измерения налоговой базы по ОКЕИ = ${getRefBookValue(12L, row.baseUnit)?.CODE?.value ?: '\"\"'} " +
                         "совпадают!")
             }
         }
@@ -345,21 +346,18 @@ def logicCheck() {
 
             // 14. Проверка допустимых значений «Графы 23»
             if (row.taxBenefitCode != null && records != null && !records.isEmpty()) {
-                filter = "CODE = '30200' or CODE = '20200' or CODE = '20210' or CODE = '20220' or CODE = '20230'"
-                // справочник «Коды налоговых льгот транспортного налога»
-                def records6 =  getProvider(6L).getRecords(dTo, null, filter, null)
-                if (records6 != null && !records6.isEmpty()) {
-                    def regionIds = records.collect { it.REGION_ID.value }.join(' or DICT_REGION_ID = ')
-                    def taxBenefitCodeIds = records6.collect { it.record_id.value }.join(' or TAX_BENEFIT_ID = ')
-                    filter = "DECLARATION_REGION_ID = $regionId and " +
-                            "(DICT_REGION_ID = $regionIds) and " +
-                            "(TAX_BENEFIT_ID = $taxBenefitCodeIds)"
-                    // справочник «Параметры налоговых льгот транспортного налога»
-                    def records7 =  getProvider(7L).getRecords(dTo, null, filter, null)
-                    if (records7 == null || records7.isEmpty()) {
-                        def columnName = getColumnName(row, 'taxBenefitCode')
-                        rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
-                    }
+                def record7 = getRefBookValue(7L, row.taxBenefitCode)
+                def record6 = getRefBookValue(6L, record7?.TAX_BENEFIT_ID?.value)
+                def isError
+                if (record6 == null) {
+                    isError = true
+                } else {
+                    def code = record6?.CODE?.value
+                    isError = !(code in ["30200" , "20200" , "20210" , "20220" , "20230"])
+                }
+                if (isError) {
+                    def columnName = getColumnName(row, 'taxBenefitCode')
+                    rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
                 }
             }
         }
@@ -376,7 +374,7 @@ def logicCheck() {
 
         // 13. Проверка на наличие в списке ТС строк, период использования льготы, которых, не пересекается с отчётным...
         if (row.benefitStartDate != null && row.benefitStartDate > dTo || row.benefitEndDate != null && row.benefitEndDate < dFrom) {
-            rowError(logger, row, errorMsg + "Период использования льготы ТС ($row.benefitStartDate - $row.benefitEndDate) не пересекается с периодом ($dFrom - $dTo), за который сформирована налоговая форма!")
+            rowError(logger, row, errorMsg + "Период использования льготы ТС (${row.benefitStartDate.format(dFormat)} - ${row.benefitEndDate.format(dFormat)}) не пересекается с периодом (${dFrom.format(dFormat)} - ${dTo.format(dFormat)}), за который сформирована налоговая форма!")
         }
 
         // 15. Проверка корректности заполнения «Графы 24»
@@ -672,10 +670,15 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
         }
         if (need) {
             newRow = copyRow(row, copyColumns201)
-            def tsTypeCode = getParentTsTypeCode(row.tsTypeCode)
-            sectionRows[sectionMap[tsTypeCode]].add(newRow)
-            rowsOld.add(newRow)
-            tmpRows.add(newRow)
+            def tsTypeCode = getRefBookValue(42L, row.tsTypeCode)?.CODE?.value
+            if (!(tsTypeCode in sectionMap.keySet())) {
+                tsTypeCode = getParentTsTypeCode(row.tsTypeCode)
+            }
+            if (tsTypeCode != null && tsTypeCode in sectionMap.keySet()) {
+                sectionRows[sectionMap[tsTypeCode]].add(newRow)
+                rowsOld.add(newRow)
+                tmpRows.add(newRow)
+            }
         }
     }
     sections.each {
@@ -735,7 +738,8 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
 def isEquals(def row1, def row2, def columns) {
     for (def column : columns) {
         if (row1[column] == null) {
-            return true
+            // Если одна из проверяемых граф пустая - считаем строку уникальной
+            return false
         }
     }
 
@@ -792,7 +796,7 @@ void importData() {
             (xml.row[0].cell[14]): getColumnName(tmpRow, 'year'),
             (xml.row[0].cell[15]): getColumnName(tmpRow, 'pastYear'),
             (xml.row[0].cell[16]): 'Сведения об угоне',
-            (xml.row[1].cell[16]): 'Дата начала розыска',
+            (xml.row[1].cell[16]): 'Дата начала розыска ТС',
             (xml.row[1].cell[17]): 'Дата возврата ТС',
             (xml.row[0].cell[18]): getColumnName(tmpRow, 'share'),
             (xml.row[0].cell[19]): getColumnName(tmpRow, 'costOnPeriodBegin'),

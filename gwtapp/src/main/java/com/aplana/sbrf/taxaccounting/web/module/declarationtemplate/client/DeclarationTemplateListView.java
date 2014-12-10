@@ -122,33 +122,44 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
         declarationTemplateTable.addColumnSortHandler(dataSortHandler);
 	}
 
-	@Override
-	public void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result) {
+    @Override
+    public void setDeclarationTypeTemplateRows(List<DeclarationTypeTemplate> result, Integer selectedId) {
         dataProvider.setList(result);
         declarationTemplateTable.setVisibleRange(0, result.size());
         dataSortHandler.setList(dataProvider.getList());
         /* При единственном значении не перерисовывается таблица http://jira.aplana.com/browse/SBRFACCTAX-7612 */
         declarationTemplateTable.flush();
         selectionModel.clear();
-        if (selectedItem != null) {
-            for(DeclarationTypeTemplate item: result) {
-                if (item.getTypeId() == selectedItem.getTypeId()) {
-                    selectionModel.setSelected(item, true);
-                    break;
-                }
-            }
-        }
+
         if (!result.isEmpty()) {
             selectionModel.setSelected(result.get(0), true);
         } else {
             selectedItem = null;
             selectionModel.clear();
         }
-	}
+
+        if (selectedItem != null) {
+            for (DeclarationTypeTemplate item : result) {
+                if (selectedId != null && item.getTypeId() == selectedId) {
+                    selectionModel.setSelected(item, true);
+                    break;
+                }
+            }
+        }
+    }
 
     @Override
     public DeclarationTypeTemplate getSelectedElement() {
         return selectionModel.getSelectedObject();
+    }
+
+    @Override
+    public Integer getSelectedElementId() {
+        DeclarationTypeTemplate element = selectionModel.getSelectedObject();
+        if (element != null) {
+            return element.getTypeId();
+        }
+        return null;
     }
 
     @Override

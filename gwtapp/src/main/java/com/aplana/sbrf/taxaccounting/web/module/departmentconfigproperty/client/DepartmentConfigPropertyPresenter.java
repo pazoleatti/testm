@@ -102,6 +102,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         void setIsFormModified(boolean isModified);
 
+        void removeResizeHandler();
+        void addResizeHandler();
     }
 
     @Inject
@@ -122,6 +124,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         getView().setTaxType(nType);
         reloadDepartments(nType, null);
         getView().setEditMode(false);
+        getView().addResizeHandler();
     }
 
     private List<Map<String, TableCell>> convert(List<DataRow<Cell>> rows) {
@@ -385,5 +388,11 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().removeResizeHandler();
     }
 }

@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
-import com.aplana.sbrf.taxaccounting.service.script.impl.DepartmentServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
@@ -223,6 +222,12 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     public RefBookFactory mockRefBookFactory() {
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
         return refBookFactory;
+    }
+
+    @Override
+    public DepartmentReportPeriodService mockDepartmentReportPeriodService() {
+        DepartmentReportPeriodService departmentReportPeriodService = mock(DepartmentReportPeriodService.class);
+        return departmentReportPeriodService;
     }
 
     /**

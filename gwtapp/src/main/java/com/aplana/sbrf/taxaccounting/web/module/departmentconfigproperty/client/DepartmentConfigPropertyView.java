@@ -17,14 +17,20 @@ import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -162,6 +168,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     ListDataProvider<DataRow<Cell>> model;
     Column<DataRow<Cell>, Boolean> checkColumn;
 
+    private HandlerRegistration resizeHandler;
+    private Timer resizeTimer;
+
     boolean isEditMode = false;
     boolean isFieldsModified = false;
 
@@ -180,6 +189,12 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         formatVersion.addValueChangeHandler(valueChangeHandler);
         version.addValueChangeHandler(valueChangeHandler);
 
+        resizeTimer = new Timer() {
+            @Override
+            public void run() {
+                ellipsizeDepartmentPickerLabel(departmentPicker.isEnabled());
+            }
+        };
     }
 
     private void initTable(TaxType taxType) {
@@ -533,6 +548,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             table.getHeaderBuilder().buildHeader();
         }
         table.redraw();
+        ellipsizeDepartmentPickerLabel(!isEditMode);
     }
 
     @Override
@@ -602,5 +618,43 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public StringColumn getTextColumn() {
         return null;
+    }
+
+    @Override
+    public void removeResizeHandler() {
+        if (resizeHandler != null) {
+            resizeHandler.removeHandler();
+        }
+    }
+
+    @Override
+    public void addResizeHandler() {
+        if (resizeHandler == null)
+            resizeHandler = Window.addResizeHandler(new ResizeHandler() {
+                @Override
+                public void onResize(ResizeEvent event) {
+                    resizeTimer.scheduleRepeating(5);
+                }
+            });
+    }
+
+    /**
+     * Вручную выставляем многоточние в конце, если текст занимает больше 2х строк
+     * @param enabled
+     */
+    private void ellipsizeDepartmentPickerLabel(boolean enabled) {
+        if (!enabled) {
+            String text = departmentPicker.getText();
+            Element el = departmentPicker.getLabel().getElement();
+            el.setInnerText(text);
+            for(;el.getScrollHeight() > 32;) {
+                if (text.length() > 0) {
+                    text = text.substring(0, text.length() - 1);
+                    el.setInnerText(text + "…");
+                } else {
+                    break;
+                }
+            }
+        }
     }
 }

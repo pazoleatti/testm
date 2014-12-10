@@ -20,12 +20,18 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -71,6 +77,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	// Признак открытости выбранного отчетного периода
 	private boolean isReportPeriodActive = false;
+
+    private HandlerRegistration resizeHandler;
+    private Timer resizeTimer;
 
 	@UiField
 	TextBox inn,
@@ -176,6 +185,12 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
         driver.initialize(this);
 		enableAllChildren(false, formPanel);
 		initListeners();
+        resizeTimer = new Timer() {
+            @Override
+            public void run() {
+                ellipsizeDepartmentPickerLabel(departmentPicker.isEnabled());
+            }
+        };
 	}
 
 	private void initListeners() {
@@ -252,6 +267,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
         updateVisibility();
         clear();
+        addResizeHandler();
     }
 
 	@Override
@@ -407,6 +423,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		cancelButton.setVisible(isEditMode);
         findButtonPanel.setVisible(!isEditMode);
 		enableAllChildren(isEditMode, formPanel);
+        ellipsizeDepartmentPickerLabel(!isEditMode);
 	}
 
 	/**
@@ -549,5 +566,42 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Override
     public Integer getCurrentDepartmentId() {
         return currentDepartmentId;
+    }
+
+    @Override
+    public void removeResizeHandler() {
+        if (resizeHandler != null) {
+            resizeHandler.removeHandler();
+        }
+    }
+
+    private void addResizeHandler() {
+        if (resizeHandler == null)
+            resizeHandler = Window.addResizeHandler(new ResizeHandler() {
+                @Override
+                public void onResize(ResizeEvent event) {
+                    resizeTimer.scheduleRepeating(5);
+                }
+            });
+    }
+
+    /**
+     * Вручную выставляем многоточние в конце, если текст занимает больше 2х строк
+     * @param enabled
+     */
+    private void ellipsizeDepartmentPickerLabel(boolean enabled) {
+        if (!enabled) {
+            String text = departmentPicker.getText();
+            Element el = departmentPicker.getLabel().getElement();
+            el.setInnerText(text);
+            for(;el.getScrollHeight() > 32;) {
+                if (text.length() > 0) {
+                    text = text.substring(0, text.length() - 1);
+                    el.setInnerText(text + "…");
+                } else {
+                    break;
+                }
+            }
+        }
     }
 }
