@@ -63,7 +63,7 @@
         <columnType>REFERENCE</columnType>
         <name>Вид ТС</name>
         <order>6</order>
-        <width>5</width>
+        <width>15</width>
         <parentAlias>tsTypeCode</parentAlias>
         <refBookAttributeId>423</refBookAttributeId>
     </columns>
@@ -73,7 +73,7 @@
         <columnType>STRING</columnType>
         <name>Марка ТС</name>
         <order>7</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>120</maxLength>
         <prevLength>0</prevLength>
     </columns>
