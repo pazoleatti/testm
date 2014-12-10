@@ -64,9 +64,10 @@ public class AdminPresenter
 	 * Presenter.
 	 */
 	public interface MyView extends View, HasUiHandlers<AdminUIHandlers> {
-		void setFormTemplateTable(List<FormTypeTemplate> formTypeTemplates);
+		void setFormTemplateTable(List<FormTypeTemplate> formTypeTemplates, Integer selectedId);
         FormTypeTemplate getSelectedElement();
-	}
+        Integer getSelectedElementId();
+    }
 
 	private final DispatchAsync dispatcher;
     protected final FilterFormTemplatePresenter filterPresenter;
@@ -77,6 +78,8 @@ public class AdminPresenter
     private TemplateFilter previousFilter;
 
     private HashMap<Integer, String> lstHistory = new HashMap<Integer, String>();
+
+    private Integer selectedItemId;
 
     @Inject
 	public AdminPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher,
@@ -142,6 +145,7 @@ public class AdminPresenter
         super.onHide();
         clearSlot(TYPE_filterPresenter);
         clearSlot(TYPE_editPresenter);
+        selectedItemId = getView().getSelectedElementId();
     }
 
     @Override
@@ -152,27 +156,26 @@ public class AdminPresenter
     @Override
     public void onFilterReady(FilterFormTemplateReadyEvent event) {
         if (event.isSuccess())
-            updateFormData();
+            updateFormData(selectedItemId);
 
     }
 
     public void updateFormData() {
+        updateFormData(null);
+    }
+
+    public void updateFormData(final Integer selectedId) {
         previousFilter =  filterPresenter.getFilterData();
         GetFormTemplateListAction action = new GetFormTemplateListAction();
         action.setFilter(filterPresenter.getFilterData());
         dispatcher.execute(
-                action,
-                CallbackUtils.defaultCallback(
+                action, CallbackUtils.defaultCallback(
                         new AbstractCallback<GetFormTemplateListResult>() {
                             @Override
-                            public void onSuccess(
-                                    GetFormTemplateListResult result) {
-                                getView().setFormTemplateTable(
-                                        result.getFormTypeTemplates());
+                            public void onSuccess(GetFormTemplateListResult result) {
+                                getView().setFormTemplateTable(result.getFormTypeTemplates(), selectedId);
                             }
-                        }, this).addCallback(
-                        new ManualRevealCallback<GetFormTemplateListResult>(
-                                AdminPresenter.this)));
+                        }, this).addCallback(new ManualRevealCallback<GetFormTemplateListResult>(AdminPresenter.this)));
     }
 
     @Override
