@@ -56,6 +56,7 @@ public class TestScriptHelper {
     private RefBookService refBookService;
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -109,6 +110,7 @@ public class TestScriptHelper {
         refBookService = mockHelper.mockRefBookService();
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
+        departmentReportPeriodService = mockHelper.mockDepartmentReportPeriodService();
     }
 
     /**
@@ -337,5 +339,9 @@ public class TestScriptHelper {
      */
     public RefBookDataProvider getRefBookDataProvider() {
         return refBookDataProvider;
+    }
+
+    public DepartmentReportPeriodService getDepartmentReportPeriodService() {
+        return departmentReportPeriodService;
     }
 }
