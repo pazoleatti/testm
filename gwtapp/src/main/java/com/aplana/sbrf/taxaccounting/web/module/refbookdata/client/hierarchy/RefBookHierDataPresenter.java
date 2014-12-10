@@ -312,7 +312,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                                 }
                                                 setMode(mode);
                                                 getView().clearSelected();
-                                                getView().load();
+                                                //getView().load();
                                                 getView().loadAndSelect();
                                             }
                                             getProxy().manualReveal(RefBookHierDataPresenter.this);

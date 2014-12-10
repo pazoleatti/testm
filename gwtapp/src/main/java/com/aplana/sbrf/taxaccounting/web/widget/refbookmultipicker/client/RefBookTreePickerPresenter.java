@@ -67,7 +67,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
             load(null);
         } else {
             //иначе просто сеттим
-            ps.setValues(newState);
+            //ps.setValues(newState);
             trySelect(ps);
         }
     }
