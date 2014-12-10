@@ -146,6 +146,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
          * @return
          */
         Integer getCurrentDepartmentId();
+
+        void removeResizeHandler();
     }
 
     @Inject
@@ -356,5 +358,11 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                 userDepartment = result.getDepartment();
                             }
                         }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
+    }
+
+    @Override
+    protected void onHide() {
+        super.onHide();
+        getView().removeResizeHandler();
     }
 }

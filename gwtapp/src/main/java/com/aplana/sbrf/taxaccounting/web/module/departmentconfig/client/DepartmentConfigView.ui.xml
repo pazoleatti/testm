@@ -21,6 +21,8 @@
 
         .filterWidgets {
             min-width: 150px;
+            max-height: 32px;
+            overflow: hidden;
         }
 
         .separator {

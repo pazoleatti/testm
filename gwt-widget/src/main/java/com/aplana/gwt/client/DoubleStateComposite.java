@@ -120,4 +120,8 @@ public abstract class DoubleStateComposite extends Composite implements HasEnabl
     public void setVisible(boolean visible) {
         deckPanel.setVisible(visible);
     }
+
+    public Label getLabel() {
+        return label;
+    }
 }
