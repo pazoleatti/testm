@@ -270,12 +270,12 @@ def calc() {
 
         def partRight = new BigDecimal(row.partRight)
         // Графа 25 (Сумма исчисления налога) = Расчет суммы исчисления налога
-        if (row.taxBase != null && row.coef362 != null && row.taxRate != null && partRight != null && row.koefKp != null) {
+        if (row.taxBase != null && row.coef362 != null && row.taxRate != null && partRight != null) {
             def taxRate = getRefBookValue(41, row.taxRate)?.VALUE?.numberValue
-            row.calculatedTaxSum = (row.taxBase * taxRate * partRight * row.coef362 * row.koefKp).setScale(0, BigDecimal.ROUND_HALF_UP)
+            row.calculatedTaxSum = (row.taxBase * taxRate * partRight * row.coef362 * (row.koefKp ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.calculatedTaxSum = null
-            placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate', 'partRight', 'koefKp'], errorMsg)
+            placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate', 'partRight'], errorMsg)
         }
         // Графа 26 Определяется количество полных месяцев использования льготы в отчетном году
         if (row.benefitStartDate == null && row.benefitEndDate == null) {
@@ -286,8 +286,8 @@ def calc() {
                 row.benefitMonths = 0
             } else {
                 //Определяем Доконч
-                def dOkonch = null
-                if (row.benefitEndDate != null || row.benefitEndDate.compareTo(reportPeriodStartDate) > 0) {
+                def dOkonch
+                if (row.benefitEndDate == null || row.benefitEndDate.compareTo(reportPeriodEndDate) > 0) {
                     dOkonch = reportPeriodEndDate
                 } else {
                     dOkonch = row.benefitEndDate
@@ -295,7 +295,7 @@ def calc() {
                 // Определяем Днач
                 def dNach = (row.benefitStartDate.compareTo(reportPeriodStartDate) < 0) ? reportPeriodStartDate : row.benefitStartDate
                 // Определяем Мльгот
-                row.benefitMonths = dOkonch[Calendar.MONTH] - dOkonch[Calendar.MONTH] + 1
+                row.benefitMonths = dOkonch[Calendar.MONTH] - dNach[Calendar.MONTH] + 1
             }
         }
 
@@ -316,24 +316,24 @@ def calc() {
 
             // Графа 31
             if (row.taxBenefitCode != null) {
-                if (row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSum = (row.taxBase * taxRate * partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
+                if (row.taxBase != null && partRight != null) {
+                    row.benefitSum = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
             }
 
             // Графа 33
             if (row.taxBenefitCodeDecrease != null) {
                 reducingPerc = getRefBookValue(7, row.taxBenefitCodeDecrease)?.PERCENT?.numberValue
-                if (reducingPerc != null && row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSumDecrease = (row.taxBase * taxRate * partRight * row.koefKp * row.coefKl * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
+                if (reducingPerc != null && row.taxBase != null && partRight != null) {
+                    row.benefitSumDecrease = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1) * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
                 }
             }
 
             // Графа 35
             if (row.benefitCodeReduction != null) {
                 loweringRates = getRefBookValue(7, row.benefitCodeReduction)?.RATE?.numberValue
-                if (loweringRates != null && row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
+                if (loweringRates != null && row.taxBase != null && partRight != null) {
+                    row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
             }
         }
@@ -344,14 +344,14 @@ def calc() {
                 row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSum ?: 0)).setScale(0, BigDecimal.ROUND_HALF_UP)
             } else {
                 row.taxSumToPay = null
-                placeError(row, 'taxSumToPay', ['calculatedTaxSum', 'benefitSum'], errorMsg)
+                placeError(row, 'taxSumToPay', ['calculatedTaxSum'], errorMsg)
             }
         } else {
             if (row.calculatedTaxSum != null) {
                 row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSumDecrease ?: 0) - (row.benefitSumReduction ?: 0)).setScale(0, BigDecimal.ROUND_HALF_UP)
             } else {
                 row.taxSumToPay = null
-                placeError(row, 'taxSumToPay', ['calculatedTaxSum', 'benefitSumDecrease', 'benefitSumReduction'], errorMsg)
+                placeError(row, 'taxSumToPay', ['calculatedTaxSum'], errorMsg)
             }
         }
         /*
