@@ -410,7 +410,10 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         def benefitCode = row.taxBenefitCode ?: (row.taxBenefitCodeDecrease ?: (row.benefitCodeReduction ?: null))
-        def benefitSum = row.benefitSum ?: (row.benefitSumDecrease ?: (row.benefitSumReduction ?: null))
+        def sum = row.benefitSum
+        def sumD = row.benefitSumDecrease
+        def sumR = row.benefitSumReduction
+        def benefitSum = (sum != null) ? sum : ((sumD != null) ? sumD : ((sumR != null) ? sumR : null))
 
         // 2. Поверка на соответствие дат использования льготы
         if (benefitCode && row.benefitEndDate != null && (row.benefitStartDate == null || row.benefitStartDate > row.benefitEndDate)) {
