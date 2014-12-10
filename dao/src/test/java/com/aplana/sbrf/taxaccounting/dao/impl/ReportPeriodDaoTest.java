@@ -2,10 +2,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +16,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -135,7 +134,7 @@ public class ReportPeriodDaoTest {
 
     @Test
     public void getPeriodsByTaxTypesAndDepartmentsTest() {
-        List<Long> reportPeriods;
+        List<Integer> reportPeriods;
         reportPeriods = reportPeriodDao.getPeriodsByTaxTypesAndDepartments(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT), asList(1, 2, 3));
         Assert.assertEquals(2, reportPeriods.size());
         reportPeriods = reportPeriodDao.getPeriodsByTaxTypesAndDepartments(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT), asList(1000));
