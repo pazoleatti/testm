@@ -289,7 +289,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                     НалПУ: roundInt(row.amountOfTaxPayable),
                             ) {
                                 row.rowData.each { tRow ->
-                                    def taxBenefitCode = tRow.taxBenefitCode ? getRefBookValue(6, tRow.taxBenefitCode)?.CODE?.stringValue : null
+                                    def taxBenefitCode = getBenefitCode(tRow.taxBenefitCode)
                                     // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                                     РасчНалТС(
                                             [
@@ -304,36 +304,25 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                                     [
                                                             ВыпускТС: tRow.years, //
                                                             ВладенТС: tRow.ownMonths,
+                                                            ДоляТС: tRow.partRight,
                                                             КоэфКв: tRow.coef362,
                                                             НалСтавка: getRefBookValue(41, tRow.taxRate)?.VALUE?.numberValue,
                                                             СумИсчисл: roundInt(tRow.calculatedTaxSum),
                                                     ]
-                                                    + (taxBenefitCode && tRow.benefitStartDate ? [ЛьготМесТС: getBenefitMonths(tRow)] : []) +
+                                                    + (tRow.benefitMonths ? [ЛьготМесТС: tRow.benefitMonths] : []) +
                                                     [
                                                             СумИсчислУпл: roundInt(tRow.taxSumToPay),
                                                     ] +
-                                                    (taxBenefitCode && tRow.coefKl ? [КоэфКл: tRow.coefKl] : []),
+                                                    (tRow.coefKl ? [КоэфКл: tRow.coefKl] : []),
                                     ) {
                                         // генерация КодОсвНал
-                                        if (taxBenefitCode != null && (taxBenefitCode.equals('30200') || taxBenefitCode.equals('20210'))) {
-                                            def l = taxBenefitCode;
-                                            def x = "";
-                                            if (l.equals("30200")) {
-                                                //
-                                            } else {
-                                                def param = getParam(tRow.taxBenefitCode, tRow.okato);
-
-                                                if (param != null) {
-                                                    def section = param.SECTION.toString()
-                                                    def item = param.ITEM.toString()
-                                                    def subitem = param.SUBITEM.toString()
-                                                    x = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
-                                                            + (item.size() < 4 ? '0' * (4 - item.size()) + item : item)
-                                                            + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
-                                                }
+                                        if (taxBenefitCode != null && (taxBenefitCode.equals('30200') || taxBenefitCode.equals('20200') || taxBenefitCode.equals('20210'))) {
+                                            def valL = taxBenefitCode;
+                                            def valX = "";
+                                            if (! valL.equals("30200")) {
+                                                valX = tRow.benefitBase
                                             }
-                                            def kodOsnNal = (l != "" ? l.toString() : "0000") +
-                                                    (x != '' ? "/" + x : '')
+                                            def kodOsnNal = (valL != "" ? valL.toString() : "0000") + (valX != '' ? "/" + valX : '')
                                             ЛьготОсвНал(
                                                     КодОсвНал: kodOsnNal,
                                                     СумОсвНал: roundInt(tRow.benefitSum)
@@ -341,43 +330,27 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                         }
 
                                         // вычисление ЛьготУменСум
-                                        // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20230
-                                        if (taxBenefitCode != null && taxBenefitCode.equals("20220")) {
+                                        // заполняется если Код налоговой льготы = 20220
+                                        def taxBenefitCodeDecrease = getBenefitCode(tRow.taxBenefitCodeDecrease)
+                                        if (taxBenefitCodeDecrease != null && taxBenefitCodeDecrease.equals("20220")) {
 
                                             // вычисление КодУменСум
-                                            def param = getParam(tRow.taxBenefitCode, tRow.okato);
-                                            def valL = taxBenefitCode;
-                                            if (param != null) {
-                                                def section = param.SECTION.toString()
-                                                def item = param.ITEM.toString()
-                                                def subitem = param.SUBITEM.toString()
-                                                def valX = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
-                                                        + (item.size() < 4 ? '0' * (4 - item.size()) + item : item)
-                                                        + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
-
-                                                def kodUmenSum = (valL != "" ? valL.toString() : "0000") + "/" + valX
-                                                ЛьготУменСум(КодУменСум: kodUmenSum, СумУменСум: roundInt(tRow.benefitSum))
-                                            }
+                                            def valL = taxBenefitCodeDecrease;
+                                            def valX = tRow.benefitBase
+                                            def kodUmenSum = (valL != "" ? valL.toString() : "0000") + "/" + valX
+                                            ЛьготУменСум(КодУменСум: kodUmenSum, СумУменСум: roundInt(tRow.benefitSumDecrease))
                                         }
 
                                         // ЛьготСнижСтав
-                                        // не заполняется если Код налоговой льготы = 30200, 20200, 20210 или 20220
-                                        if (taxBenefitCode != null && taxBenefitCode.equals("20230")) {
+                                        // заполняется если Код налоговой льготы = 20230
+                                        def benefitCodeReduction = getBenefitCode(tRow.benefitCodeReduction)
+                                        if (benefitCodeReduction != null && benefitCodeReduction.equals("20230")) {
 
                                             // вычисление КодСнижСтав
-                                            def valL = taxBenefitCode;
-                                            def param = getParam(tRow.taxBenefitCode, tRow.okato);
-                                            if (param != null) {
-                                                def section = param.SECTION.toString()
-                                                def item = param.ITEM.toString()
-                                                def subitem = param.SUBITEM.toString()
-                                                def valX = ((section.size() < 4 ? '0' * (4 - section.size()) + section : section)
-                                                        + (item.size() < 4 ? '0' * (4 - item.size()) + item : item)
-                                                        + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
-
-                                                def kodNizhStav = (valL != "" ? valL.toString() : "0000") + "/" + valX
-                                                ЛьготСнижСтав(КодСнижСтав: kodNizhStav, СумСнижСтав: roundInt(tRow.benefitSum))
-                                            }
+                                            def valL = benefitCodeReduction;
+                                            def valX = tRow.benefitBase
+                                            def kodNizhStav = (valL != "" ? valL.toString() : "0000") + "/" + valX
+                                            ЛьготСнижСтав(КодСнижСтав: kodNizhStav, СумСнижСтав: roundInt(tRow.benefitSumReduction))
                                         }
                                     }
                                 }
@@ -486,18 +459,6 @@ def getParam(taxBenefitCode, oktmo) {
             logger.error("Ошибка при получении данных из справочника «Параметры налоговых льгот» $taxBenefitCode")
             return null
         }
-    }
-}
-
-def getBenefitMonths(def row) {
-    def periodStart = reportPeriodService.getStartDate(declarationData.reportPeriodId).time
-    def periodEnd = getReportPeriodEndDate()
-    if ((row.benefitEndDate != null && row.benefitEndDate < periodStart) || row.benefitStartDate > periodEnd) {
-        return 0
-    } else {
-        def end = row.benefitEndDate == null || row.benefitEndDate > periodEnd ? periodEnd : row.benefitEndDate
-        def start = row.benefitStartDate < periodStart ? periodStart : row.benefitStartDate
-        return (end.year * 12 + end.month) - (start.year * 12 + start.month) + 1
     }
 }
 
@@ -613,3 +574,9 @@ def generateXmlFileId(def departmentParam) {
 def roundInt(def value) {
     ((BigDecimal)value)?.setScale(0,RoundingMode.HALF_UP)
 }
+
+def getBenefitCode(def parentRecordId) {
+    def recordId = getRefBookValue(7, parentRecordId)?.TAX_BENEFIT_ID?.value
+    return  getRefBookValue(6, recordId)?.CODE?.value
+}
+
