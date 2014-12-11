@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 
 /**
@@ -129,9 +130,9 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         builder.Файл(
-                // TODO (Ramil Timerbaev)
+                // TODO (Ramil Timerbaev) поменять после исправления в ядре
                 // ИдФайл: declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
-                ИдФайл: generateXmlFileId(),
+                ИдФайл: generateXmlFileId(departmentParamTransport),
                 ВерсПрог: applicationVersion,
                 ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
             Документ(
@@ -281,11 +282,11 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                         resultMap.each { okato, row ->
                             СумПУ(
                                     ОКТМО: getOkato(okato),
-                                    НалИсчисл: row.taxSumToPay,
-                                    АвПУКв1: row.amountOfTheAdvancePayment1.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
-                                    АвПУКв2: row.amountOfTheAdvancePayment2.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
-                                    АвПУКв3: row.amountOfTheAdvancePayment3.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
-                                    НалПУ: row.amountOfTaxPayable.setScale(0, BigDecimal.ROUND_HALF_UP).intValue(),
+                                    НалИсчисл: roundInt(row.taxSumToPay),
+                                    АвПУКв1: roundInt(row.amountOfTheAdvancePayment1),
+                                    АвПУКв2: roundInt(row.amountOfTheAdvancePayment2),
+                                    АвПУКв3: roundInt(row.amountOfTheAdvancePayment3),
+                                    НалПУ: roundInt(row.amountOfTaxPayable),
                             ) {
                                 row.rowData.each { tRow ->
                                     def taxBenefitCode = tRow.taxBenefitCode ? getRefBookValue(6, tRow.taxBenefitCode)?.CODE?.stringValue : null
@@ -305,11 +306,11 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                                             ВладенТС: tRow.ownMonths,
                                                             КоэфКв: tRow.coef362,
                                                             НалСтавка: getRefBookValue(41, tRow.taxRate)?.VALUE?.numberValue,
-                                                            СумИсчисл: tRow.calculatedTaxSum,
+                                                            СумИсчисл: roundInt(tRow.calculatedTaxSum),
                                                     ]
                                                     + (taxBenefitCode && tRow.benefitStartDate ? [ЛьготМесТС: getBenefitMonths(tRow)] : []) +
                                                     [
-                                                            СумИсчислУпл: tRow.taxSumToPay,
+                                                            СумИсчислУпл: roundInt(tRow.taxSumToPay),
                                                     ] +
                                                     (taxBenefitCode && tRow.coefKl ? [КоэфКл: tRow.coefKl] : []),
                                     ) {
@@ -335,7 +336,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                                     (x != '' ? "/" + x : '')
                                             ЛьготОсвНал(
                                                     КодОсвНал: kodOsnNal,
-                                                    СумОсвНал: tRow.benefitSum
+                                                    СумОсвНал: roundInt(tRow.benefitSum)
                                             )
                                         }
 
@@ -355,7 +356,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                                         + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
 
                                                 def kodUmenSum = (valL != "" ? valL.toString() : "0000") + "/" + valX
-                                                ЛьготУменСум(КодУменСум: kodUmenSum, СумУменСум: tRow.benefitSum)
+                                                ЛьготУменСум(КодУменСум: kodUmenSum, СумУменСум: roundInt(tRow.benefitSum))
                                             }
                                         }
 
@@ -375,7 +376,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                                         + (subitem.size() < 4 ? '0' * (4 - subitem.size()) + subitem : subitem))
 
                                                 def kodNizhStav = (valL != "" ? valL.toString() : "0000") + "/" + valX
-                                                ЛьготСнижСтав(КодСнижСтав: kodNizhStav, СумСнижСтав: tRow.benefitSum)
+                                                ЛьготСнижСтав(КодСнижСтав: kodNizhStav, СумСнижСтав: roundInt(tRow.benefitSum))
                                             }
                                         }
                                     }
@@ -600,8 +601,15 @@ def getDepartmentParamTable(def departmentParamId) {
     return departmentParamTable
 }
 
+//TODO убрать как исправят в ядре com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl.generateXmlFileId
 /** Временный метод костыль, потому что для транспотного нагола неправильно работает ядровый. */
-def generateXmlFileId() {
-    // TODO (Ramil Timerbaev) 11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp
-    return "tempFixValue"
+def generateXmlFileId(def departmentParam) {
+    def code = declarationData.taxOrganCode
+    def kpp = declarationData.kpp
+    def date = Calendar.getInstance().getTime().format('yyyyMMdd')
+    return String.format("NO_TRAND_%s_%s_%s%s_%s_%s", code, code, departmentParam.INN.value, kpp, date, UUID.randomUUID().toString().toUpperCase())
+}
+
+def roundInt(def value) {
+    ((BigDecimal)value)?.setScale(0,RoundingMode.HALF_UP)
 }
