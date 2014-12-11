@@ -719,14 +719,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), formData.getReportPeriodId());
         if (departmentDeclarationTypes != null) {
             for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
-                DeclarationData declaration = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
+                List<DeclarationData> declarations = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
                         formData.getDepartmentReportPeriodId());
                 // Если декларация существует и статус "Принята"
-                if (declaration != null && declaration.isAccepted()) {
-                    String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
-                            "принята декларация";
-                    throw new ServiceException("Переход невозможен, т.к. уже %s.", str);
-                }
+                for(DeclarationData declaration: declarations)
+                    if (declaration != null && declaration.isAccepted()) {
+                        String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
+                                "принята декларация";
+                        throw new ServiceException("Переход невозможен, т.к. уже %s.", str);
+                    }
                 if (!retVal) {
                     if (formData.getDepartmentId() != departmentDeclarationType.getDepartmentId()) {
                         retVal = true;

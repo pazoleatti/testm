@@ -62,7 +62,7 @@ public interface DeclarationDataDao {
     /**
      * Декларация по типу и отчетному периоду подразделения
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriodId);
+    List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
 
     /**
      * Декларация по типу и отчетному периоду подразделения + «КПП» и «Налоговый орган»

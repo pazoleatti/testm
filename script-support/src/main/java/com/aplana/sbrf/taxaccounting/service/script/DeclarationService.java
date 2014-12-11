@@ -5,12 +5,14 @@ import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.util.List;
+
 @ScriptExposed
 public interface DeclarationService {
     /**
      * Поиск декларации в отчетном периоде подразделения
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriodId);
+    List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId);
 
     /**
      * Поиск декларации в отчетном периоде подразделения + «КПП» и «Налоговый орган»
