@@ -78,6 +78,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void setVisibleFields(boolean isVisible);
         // Устанавливает видимость для поля "Все версии"
         void setAllVersionField(boolean isVisible);
+        void cleanFields();
     }
 
     protected final RenameDialogPresenter renameDialogPresenter;
@@ -97,6 +98,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         currentRefBookId = refbookId;
         getView().createInputFields(columns);
         setIsFormModified(false);
+    }
+
+    public void cleanFields(){
+        getView().cleanFields();
     }
 
 	public void show(Long refBookRecordId) {

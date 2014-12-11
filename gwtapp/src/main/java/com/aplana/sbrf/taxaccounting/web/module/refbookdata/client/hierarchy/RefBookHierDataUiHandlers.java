@@ -12,4 +12,5 @@ public interface RefBookHierDataUiHandlers extends UiHandlers {
     void saveChanges();
     void cancelChanges();
     boolean isFormModified();
+    void onCleanEditForm();
 }

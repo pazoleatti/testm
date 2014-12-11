@@ -207,6 +207,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         if (getUiHandlers() != null) {
             pickerState.setSearchPattern(filterText.getValue());
             load();
+            getUiHandlers().onCleanEditForm();
         }
     }
 
