@@ -267,91 +267,91 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     formData.getKind().getName(), formData.getState().getName()) + " Период закрыт!");
         }
 
-		// Проверка периода ввода остатков
-		if (departmentReportPeriod.isBalance()) {
-			switch (formData.getState()) {
-				case CREATED:
-					// Созданные редактируют только контролеры, которые могут открыть форму для чтения
-					if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-							&& !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-							&& !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-						throw new AccessDeniedException(
-								String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-										formData.getKind().getName(), formData.getState().getName()));
-					}
-					return;
-				case ACCEPTED:
-					if (!manual) {
-						// Нельзя редактировать в состоянии "Принята"
-						throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-								formData.getFormType().getName(), formData.getState().getName()));
-					}
-			}
-		}
+        // Проверка периода ввода остатков
+        if (departmentReportPeriod.isBalance()) {
+            switch (formData.getState()) {
+                case CREATED:
+                    // Созданные редактируют только контролеры, которые могут открыть форму для чтения
+                    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        throw new AccessDeniedException(
+                                String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
+                                        formData.getKind().getName(), formData.getState().getName()));
+                    }
+                    return;
+                case ACCEPTED:
+                    if (!manual) {
+                        // Нельзя редактировать в состоянии "Принята"
+                        throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
+                                formData.getFormType().getName(), formData.getState().getName()));
+                    }
+            }
+        }
 
-		// Создаваемые вручную формы
-		if (asList(FormDataKind.ADDITIONAL, FormDataKind.PRIMARY, FormDataKind.UNP).contains(formData.getKind())) {
-			switch (formData.getState()) {
-				case CREATED:
-					// Созданные редактируют все, кто может открыть
-					return;
-				case PREPARED:
-					// Подготовленные редактируют только контролеры, которые могут открыть форму для чтения
-					if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-							&& !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-							&& !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-						throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-								formData.getKind().getName(), formData.getState().getName()));
-					}
-					return;
-				case APPROVED:
-					// Подготовленные редактируют только контролеры вышестоящего уровня, которые могут открыть форму для чтения
-					// Не контролеры
-					if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-							&& !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-							&& !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-						throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-								formData.getKind().getName(), formData.getState().getName()));
-					}
-					// Контролеры текущего уровня
-					if ((userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-							|| userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))
-							&& userInfo.getUser().getDepartmentId() == formData.getDepartmentId()) {
-						throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-								formData.getKind().getName(), formData.getState().getName()));
-					}
-					return;
-				case ACCEPTED:
-					if (!manual) {
-						// Нельзя редактировать НФ в состоянии "Принята"
-						throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-								formData.getFormType().getName(), formData.getState().getName()));
-					}
-			}
-		}
+        // Создаваемые вручную формы
+        if (asList(FormDataKind.ADDITIONAL, FormDataKind.PRIMARY, FormDataKind.UNP).contains(formData.getKind())) {
+            switch (formData.getState()) {
+                case CREATED:
+                    // Созданные редактируют все, кто может открыть
+                    return;
+                case PREPARED:
+                    // Подготовленные редактируют только контролеры, которые могут открыть форму для чтения
+                    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
+                                formData.getKind().getName(), formData.getState().getName()));
+                    }
+                    return;
+                case APPROVED:
+                    // Подготовленные редактируют только контролеры вышестоящего уровня, которые могут открыть форму для чтения
+                    // Не контролеры
+                    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
+                                formData.getKind().getName(), formData.getState().getName()));
+                    }
+                    // Контролеры текущего уровня
+                    if ((userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))
+                            && userInfo.getUser().getDepartmentId() == formData.getDepartmentId()) {
+                        throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
+                                formData.getKind().getName(), formData.getState().getName()));
+                    }
+                    return;
+                case ACCEPTED:
+                    if (!manual) {
+                        // Нельзя редактировать НФ в состоянии "Принята"
+                        throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
+                                formData.getFormType().getName(), formData.getState().getName()));
+                    }
+            }
+        }
 
-		// Создаваемые автоматически формы
-		if (asList(FormDataKind.CONSOLIDATED, FormDataKind.SUMMARY).contains(formData.getKind())) {
-			switch (formData.getState()) {
-				case CREATED:
-					// Созданные редактируют только контролеры, которые могут открыть форму для чтения
-					if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-							&& !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-							&& !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-						throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-								formData.getKind().getName(), formData.getState().getName()));
-					}
-					return;
-				case APPROVED:
-				case ACCEPTED:
-					if (!manual) {
-						// Нельзя редактировать НФ в состоянии "Принята"
-						throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-								formData.getFormType().getName(), formData.getState().getName()));
-					}
-					return;
-			}
-		}
+        // Создаваемые автоматически формы
+        if (asList(FormDataKind.CONSOLIDATED, FormDataKind.SUMMARY).contains(formData.getKind())) {
+            switch (formData.getState()) {
+                case CREATED:
+                    // Созданные редактируют только контролеры, которые могут открыть форму для чтения
+                    if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                            && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
+                                formData.getKind().getName(), formData.getState().getName()));
+                    }
+                    return;
+                case APPROVED:
+                case ACCEPTED:
+                    if (!manual) {
+                        // Нельзя редактировать НФ в состоянии "Принята"
+                        throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
+                                formData.getFormType().getName(), formData.getState().getName()));
+                    }
+                    return;
+            }
+        }
 
         // Непредвиденное состояние формы
         logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(),
@@ -719,8 +719,16 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), formData.getReportPeriodId());
         if (departmentDeclarationTypes != null) {
             for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
+                DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+                filter.setDepartmentIdList(Arrays.asList(departmentDeclarationType.getDepartmentId()));
+                filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
+                filter.setIsActive(departmentReportPeriod.isActive());
+                List<Integer> ids = departmentReportPeriodDao.getListIdsByFilter(filter);
+                if (ids.size() > 1) {
+                    throw new ServiceException("Не удалось получить приемники");
+                }
                 List<DeclarationData> declarations = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
-                        formData.getDepartmentReportPeriodId());
+                        ids.get(0));
                 // Если декларация существует и статус "Принята"
                 for(DeclarationData declaration: declarations)
                     if (declaration != null && declaration.isAccepted()) {
