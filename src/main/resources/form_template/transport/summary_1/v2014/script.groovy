@@ -303,7 +303,7 @@ def calc() {
             // Графа 31
             if (row.taxBenefitCode != null) {
                 if (row.taxBase != null && partRight != null) {
-                    row.benefitSum = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
+                    row.benefitSum = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(2, BigDecimal.ROUND_HALF_UP)
                 }
             } else {
                 row.benefitSum = null
@@ -313,7 +313,7 @@ def calc() {
             if (row.taxBenefitCodeDecrease != null) {
                 reducingPerc = getRefBookValue(7, row.taxBenefitCodeDecrease)?.PERCENT?.numberValue
                 if (reducingPerc != null && row.taxBase != null && partRight != null) {
-                    row.benefitSumDecrease = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1) * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
+                    row.benefitSumDecrease = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1) * reducingPerc).setScale(2, BigDecimal.ROUND_HALF_UP) / 100
                 }
             } else {
                 row.benefitSumDecrease = null
@@ -323,7 +323,7 @@ def calc() {
             if (row.benefitCodeReduction != null) {
                 loweringRates = getRefBookValue(7, row.benefitCodeReduction)?.RATE?.numberValue
                 if (loweringRates != null && row.taxBase != null && partRight != null) {
-                    row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
+                    row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(2, BigDecimal.ROUND_HALF_UP)
                 }
             } else {
                 row.benefitSumReduction = null
