@@ -110,8 +110,25 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
     }
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
-        return find(declarationTypeId, departmentReportPeriodId, null, null);
+    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
+        try {
+            return getJdbcTemplate().query(
+                "select dd.id, dd.declaration_template_id, dd.tax_organ_code, dd.kpp, dd.is_accepted, " +
+                        "dd.department_report_period_id, " +
+                        "drp.report_period_id, drp.department_id " +
+                        "from declaration_data dd, department_report_period drp " +
+                        "where drp.id = dd.department_report_period_id and drp.id = ?" +
+                        "and exists (select 1 from declaration_template dt where dd.declaration_template_id=dt.id " +
+                        "and dt.declaration_type_id = ?)",
+                new Object[]{
+                        departmentReportPeriodId,
+                        declarationTypeId
+                },
+                new DeclarationDataRowMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<DeclarationData>();
+        }
     }
 
     @Override

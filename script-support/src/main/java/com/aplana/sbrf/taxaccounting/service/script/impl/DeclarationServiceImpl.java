@@ -106,7 +106,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private TAUserService taUserService;
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
+    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
     }
 
