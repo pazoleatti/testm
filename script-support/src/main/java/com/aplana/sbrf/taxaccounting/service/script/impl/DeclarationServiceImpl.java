@@ -151,6 +151,18 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                         append(dateFormat.format(calendar.getTime())).
                         append('_').
                         append(UUID.randomUUID().toString().toUpperCase());
+            } else if (declarationTaxType == TaxType.TRANSPORT) {
+                stringBuilder.append('_').
+                        append(taxOrganCode).
+                        append('_').
+                        append(taxOrganCode).
+                        append('_').
+                        append(departmentParam.get("INN").toString()).
+                        append(kpp).
+                        append('_').
+                        append(dateFormat.format(calendar.getTime())).
+                        append('_').
+                        append(UUID.randomUUID().toString().toUpperCase());
             } else {
                 stringBuilder.append('_').
                         append(departmentParam.get("TAX_ORGAN_CODE").toString()).
