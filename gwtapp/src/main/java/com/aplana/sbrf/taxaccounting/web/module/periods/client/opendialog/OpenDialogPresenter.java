@@ -148,7 +148,7 @@ public class OpenDialogPresenter extends PresenterWidget<OpenDialogPresenter.MyV
 				.defaultCallback(new AbstractCallback<OpenPeriodResult>() {
 					@Override
 					public void onSuccess(OpenPeriodResult result) {
-						PeriodCreated.fire(OpenDialogPresenter.this, true, openFilterData.getYear());
+						PeriodCreated.fire(OpenDialogPresenter.this, true, openFilterData.getYear(), openFilterData.getDepartmentId());
 						LogAddEvent.fire(OpenDialogPresenter.this, result.getUuid());
 						getView().hide();
 					}

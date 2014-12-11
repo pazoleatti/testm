@@ -63,6 +63,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setFilterData(List<Department> departments, List<DepartmentPair> selectedDepartments,
                            Set<Integer> avalDepartments, int yearFrom, int yearTo);
 		void setYear(int year);
+        void setDepartment(int departmentId);
 		Integer getFromYear();
 		Integer getToYear();
         DepartmentPair getDepartmentId();
@@ -421,6 +422,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	@Override
 	public void onPeriodCreated(PeriodCreated event) {
 		getView().setYear(event.getYear());
+        getView().setDepartment(event.getDepartmentId());
 		find();
 	}
 

@@ -203,7 +203,12 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 		toBox.setValue(year);
 	}
 
-	@Override
+    @Override
+    public void setDepartment(int departmentId) {
+        departmentPicker.setValue(Arrays.asList(departmentId));
+    }
+
+    @Override
 	public Integer getFromYear() {
 		return fromBox.getValue();
 	}
