@@ -29,6 +29,8 @@ public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandler
     @UiField
     Label pageTitle;
 
+    private String oldText;
+
     @Inject
     public RefBookScriptView(Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -41,6 +43,7 @@ public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandler
 
     @Override
     public void setScriptCode(String text) {
+        oldText = text;
         script.setText(text);
     }
 
@@ -70,23 +73,27 @@ public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandler
 
     @UiHandler("cancelButton")
     void onCancelClicked(final ClickEvent event) {
-        Dialog.confirmMessage("Редактирование справочника", "Сохранить изменения?", new DialogHandler() {
-            @Override
-            public void yes() {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().saveScript(true);
+        if (oldText.hashCode() != script.getText().hashCode()){
+            Dialog.confirmMessage("Редактирование справочника", "Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().saveScript(true);
+                    }
                 }
-            }
 
-            @Override
-            public void no() {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().cancelEdit();
-                    event.preventDefault();
-                    event.stopPropagation();
+                @Override
+                public void no() {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().cancelEdit();
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            getUiHandlers().cancelEdit();
+        }
     }
 
     @UiHandler("resetButton")
