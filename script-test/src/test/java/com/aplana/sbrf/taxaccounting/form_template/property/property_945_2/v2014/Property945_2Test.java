@@ -5,8 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
-import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -55,14 +54,68 @@ public class Property945_2Test extends ScriptTestBase {
     }
 
     @Before
-    public void mockRefBookDataProvider() {
-        // Для работы проверок
+    public void mock() {
         when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
                 new Answer<DepartmentReportPeriod>() {
                     @Override
                     public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
                         DepartmentReportPeriod result = new DepartmentReportPeriod();
-                        result.setBalance(false);
+                        result.setBalance(true);
+                        return result;
+                    }
+                });
+        when(testHelper.getRefBookFactory().getDataProvider(any(Long.class))).thenAnswer(
+                new Answer<RefBookDataProvider>() {
+                    @Override
+                    public RefBookDataProvider answer(InvocationOnMock invocation) throws Throwable {
+                        return testHelper.getRefBookDataProvider();
+                    }
+                });
+
+        when(testHelper.getRefBookFactory().getDataProvider(202L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
+        when(testHelper.getRefBookFactory().getDataProvider(203L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "i1__"));
+                        map.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "si1_"));
+                        map.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "s1__"));
+                        map.put("DECLARATION_REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("PARAM_DESTINATION", new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        result.add(map);
+
+                        map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        map.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "i2__"));
+                        map.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "si2_"));
+                        map.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "s2__"));
+                        map.put("DECLARATION_REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("PARAM_DESTINATION", new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        result.add(map);
+
                         return result;
                     }
                 });
@@ -123,26 +176,18 @@ public class Property945_2Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO разобраться с источником данных
-    // @Test
-    public void importTransportFileTest() {
-        testHelper.setImportFileInputStream(getImportRnuInputStream());
-        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(4, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
-    }
-
-    // TODO разобраться с источником данных
-    // @Test
+    @Test
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
         // Проверка расчетных данных
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-        Assert.assertEquals(200, dataRows.get(2).getCell("sum").getNumericValue().intValue());
-        Assert.assertEquals(300, dataRows.get(4).getCell("sum").getNumericValue().intValue());
-        Assert.assertEquals(500, dataRows.get(5).getCell("sum").getNumericValue().intValue());
+        Assert.assertEquals("s1__i1__si1_", dataRows.get(0).getCell("benefitBasis").getStringValue());
+        Assert.assertNull(dataRows.get(1).getCell("benefitBasis").getStringValue());
+        Assert.assertEquals("s2__i2__si2_", dataRows.get(2).getCell("benefitBasis").getStringValue());
+        Assert.assertNull(dataRows.get(3).getCell("benefitBasis").getStringValue());
+        Assert.assertEquals("", dataRows.get(4).getCell("benefitBasis").getStringValue());
         checkLogger();
     }
 

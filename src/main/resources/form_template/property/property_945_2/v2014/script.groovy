@@ -214,7 +214,7 @@ void calc() {
         sort(dataRows)
     }
     for (def row : dataRows) {
-        def basis = calcBasis(row.taxBenefitCode)
+        def String basis = calcBasis(row.taxBenefitCode)
         row.benefitBasis = basis
     }
 
@@ -376,7 +376,7 @@ void logicCheck() {
                         row.kpp,
                         row.oktmo?.toString())
                 records = refBookFactory.getDataProvider(200).getRecords(getReportPeriodEndDate(), null, filter, null)
-                if (records.size() == 0) {
+                if (records != null && records.size() == 0) {
                     rowWarning(logger, row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код НО, КПП, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")
                 }
             }
