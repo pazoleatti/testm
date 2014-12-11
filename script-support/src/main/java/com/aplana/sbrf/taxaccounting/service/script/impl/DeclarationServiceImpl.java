@@ -139,19 +139,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             Map<String, RefBookValue> departmentParam = departmentParams.get(0);
 
             Calendar calendar = Calendar.getInstance();
-            if (declarationTaxType == TaxType.PROPERTY) {
-                stringBuilder.append('_').
-                        append(taxOrganCode).
-                        append('_').
-                        append(taxOrganCode).
-                        append('_').
-                        append(departmentParam.get("INN").toString()).
-                        append(kpp).
-                        append('_').
-                        append(dateFormat.format(calendar.getTime())).
-                        append('_').
-                        append(UUID.randomUUID().toString().toUpperCase());
-            } else if (declarationTaxType == TaxType.TRANSPORT) {
+            if (declarationTaxType == TaxType.PROPERTY || declarationTaxType == TaxType.TRANSPORT) {
                 stringBuilder.append('_').
                         append(taxOrganCode).
                         append('_').
