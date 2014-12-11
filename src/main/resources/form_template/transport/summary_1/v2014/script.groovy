@@ -120,7 +120,7 @@ def editableColumns = ['taxAuthority', 'kpp']
 
 // Проверяемые на пустые значения атрибуты (графа 1..9, 11..15, 21)
 @Field
-def nonEmptyColumns = ['taxAuthority', 'kpp', 'okato', 'tsTypeCode', 'tsType', 'model', 'vi', 'regNumber', 'regDate',
+def nonEmptyColumns = ['taxAuthority', 'kpp', 'okato', 'tsTypeCode', 'model', 'vi', 'regNumber', 'regDate',
                        'taxBase', 'taxBaseOkeiUnit', 'createYear', 'years', 'ownMonths', 'partRight', 'coef362',
                        'taxRate', 'calculatedTaxSum', 'taxSumToPay']
 
@@ -138,14 +138,24 @@ def reportDay = null
 def needCheckTaxRate = true
 
 @Field
+def calendarStartDate = null
+
+@Field
 def startDate = null
 
 @Field
 def endDate = null
 
+def getCalendarStartDate() {
+    if (calendarStartDate == null) {
+        calendarStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return calendarStartDate
+}
+
 def getReportPeriodStartDate() {
     if (startDate == null) {
-        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
 }
@@ -270,71 +280,53 @@ def calc() {
 
         def partRight = new BigDecimal(row.partRight)
         // Графа 25 (Сумма исчисления налога) = Расчет суммы исчисления налога
-        if (row.taxBase != null && row.coef362 != null && row.taxRate != null && partRight != null && row.koefKp != null) {
+        if (row.taxBase != null && row.coef362 != null && row.taxRate != null && partRight != null) {
             def taxRate = getRefBookValue(41, row.taxRate)?.VALUE?.numberValue
-            row.calculatedTaxSum = (row.taxBase * taxRate * partRight * row.coef362 * row.koefKp).setScale(0, BigDecimal.ROUND_HALF_UP)
+            row.calculatedTaxSum = (row.taxBase * taxRate * partRight * row.coef362 * (row.koefKp ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
         } else {
             row.calculatedTaxSum = null
-            placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate', 'partRight', 'koefKp'], errorMsg)
+            placeError(row, 'calculatedTaxSum', ['taxBase', 'coef362', 'taxRate', 'partRight'], errorMsg)
         }
         // Графа 26 Определяется количество полных месяцев использования льготы в отчетном году
-        if (row.benefitStartDate == null && row.benefitEndDate == null) {
-            row.benefitMonths = null
-        } else {
-            if (row.benefitEndDate != null && row.benefitEndDate.compareTo(reportPeriodStartDate) < 0 ||
-                    row.benefitStartDate.compareTo(reportPeriodEndDate) > 0) {
-                row.benefitMonths = 0
-            } else {
-                //Определяем Доконч
-                def dOkonch = null
-                if (row.benefitEndDate != null || row.benefitEndDate.compareTo(reportPeriodStartDate) > 0) {
-                    dOkonch = reportPeriodEndDate
-                } else {
-                    dOkonch = row.benefitEndDate
-                }
-                // Определяем Днач
-                def dNach = (row.benefitStartDate.compareTo(reportPeriodStartDate) < 0) ? reportPeriodStartDate : row.benefitStartDate
-                // Определяем Мльгот
-                row.benefitMonths = dOkonch[Calendar.MONTH] - dOkonch[Calendar.MONTH] + 1
-            }
-        }
+        row.benefitMonths = calc26(row, reportPeriodStartDate, reportPeriodEndDate)
 
         // Графа 29 Коэффициент Кл
-        if (row.taxBenefitCode != null) {
-            if (row.benefitStartDate != null && row.benefitEndDate != null) {
-                int start = row.benefitStartDate.month
-                int end = row.benefitEndDate.month
-                row.coefKl = (end - start + 1) / monthCountInPeriod
-            } else {
-                row.coefKl = null
-            }
+        if (row.benefitMonths != null) {
+            row.coefKl = row.benefitMonths / monthCountInPeriod
+        } else {
+            row.coefKl = null
         }
 
-        def taxRate = null
         if (row.taxRate != null) {
             taxRate = getRefBookValue(41, row.taxRate)?.VALUE?.numberValue
 
             // Графа 31
             if (row.taxBenefitCode != null) {
-                if (row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSum = (row.taxBase * taxRate * partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
+                if (row.taxBase != null && partRight != null) {
+                    row.benefitSum = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
+            } else {
+                row.benefitSum = null
             }
 
             // Графа 33
             if (row.taxBenefitCodeDecrease != null) {
-                reducingPerc = getCodeRecord(row.taxBenefitCodeDecrease, region, errorMsg)?.PERCENT?.numberValue
-                if (reducingPerc != null && row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSumDecrease = (row.taxBase * taxRate * partRight * row.koefKp * row.coefKl * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
+                reducingPerc = getRefBookValue(7, row.taxBenefitCodeDecrease)?.PERCENT?.numberValue
+                if (reducingPerc != null && row.taxBase != null && partRight != null) {
+                    row.benefitSumDecrease = (row.taxBase * taxRate * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1) * reducingPerc).setScale(0, BigDecimal.ROUND_HALF_UP) / 100
                 }
+            } else {
+                row.benefitSumDecrease = null
             }
 
             // Графа 35
             if (row.benefitCodeReduction != null) {
-                loweringRates = getCodeRecord(row.benefitCodeReduction, region, errorMsg)?.RATE?.numberValue
-                if (loweringRates != null && row.taxBase != null && partRight != null && row.koefKp != null && row.coefKl != null) {
-                    row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * row.koefKp * row.coefKl).setScale(0, BigDecimal.ROUND_HALF_UP)
+                loweringRates = getRefBookValue(7, row.benefitCodeReduction)?.RATE?.numberValue
+                if (loweringRates != null && row.taxBase != null && partRight != null) {
+                    row.benefitSumReduction = (row.taxBase * (taxRate - loweringRates) / 100 * partRight * (row.koefKp ?: 1) * (row.coefKl ?: 1)).setScale(0, BigDecimal.ROUND_HALF_UP)
                 }
+            } else {
+                row.benefitSumReduction = null
             }
         }
 
@@ -344,14 +336,14 @@ def calc() {
                 row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSum ?: 0)).setScale(0, BigDecimal.ROUND_HALF_UP)
             } else {
                 row.taxSumToPay = null
-                placeError(row, 'taxSumToPay', ['calculatedTaxSum', 'benefitSum'], errorMsg)
+                placeError(row, 'taxSumToPay', ['calculatedTaxSum'], errorMsg)
             }
         } else {
             if (row.calculatedTaxSum != null) {
                 row.taxSumToPay = (row.calculatedTaxSum - (row.benefitSumDecrease ?: 0) - (row.benefitSumReduction ?: 0)).setScale(0, BigDecimal.ROUND_HALF_UP)
             } else {
                 row.taxSumToPay = null
-                placeError(row, 'taxSumToPay', ['calculatedTaxSum', 'benefitSumDecrease', 'benefitSumReduction'], errorMsg)
+                placeError(row, 'taxSumToPay', ['calculatedTaxSum'], errorMsg)
             }
         }
         /*
@@ -367,7 +359,7 @@ def calc() {
     groups.each { section ->
         def from = getDataRow(dataRows, section).getIndex()
         def to = getDataRow(dataRows, "total$section").getIndex() - 2
-        calcTotalSum(dataRows[from..to], getDataRow(dataRows, section), totalColumns)
+        calcTotalSum(dataRows[from..to], getDataRow(dataRows, "total$section"), totalColumns)
     }
 
     def totalRow = getDataRow(dataRows, 'total')
@@ -391,30 +383,14 @@ void fillTaKpp(def row, def errorMsg) {
 }
 
 def checkTaKpp(def row, def errorMsg) {
-    String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = lower('" +
-            row.okato?.toString() + "') and TAX_ORGAN_CODE = lower('" + row.taxAuthority?.toString() +
-            "') and KPP = lower('" + row.kpp?.toString() + "')"
+    def String filter =  String.format("DECLARATION_REGION_ID = ${formDataDepartment.regionId?.toString()}"+
+            " and OKTMO = ${row.okato?.toString()}" +
+            " and LOWER(TAX_ORGAN_CODE) = LOWER('${row.taxAuthority?.toString()}') " +
+            " and LOWER(KPP) = LOWER('${row.kpp?.toString()}')")
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() != 1) {
         logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     }
-}
-
-def getCodeRecord (def recordId, def region, def errorMsg) {
-    if (recordId != null) {
-        // получение параметров региона
-        // запрос по выборке данных из справочника
-        def query = "TAX_BENEFIT_ID = " + recordId + " and DICT_REGION_ID = " + region.record_id
-        def record = getRecord(7, query, reportDate)
-
-        if (record == null) {
-            logger.error(errorMsg + "Ошибка при получении параметров налоговых льгот.")
-            return null
-        } else {
-            return record
-        }
-    }
-    return null
 }
 
 void logicCheck() {
@@ -434,7 +410,10 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         def benefitCode = row.taxBenefitCode ?: (row.taxBenefitCodeDecrease ?: (row.benefitCodeReduction ?: null))
-        def benefitSum = row.benefitSum ?: (row.benefitSumDecrease ?: (row.benefitSumReduction ?: null))
+        def sum = row.benefitSum
+        def sumD = row.benefitSumDecrease
+        def sumR = row.benefitSumReduction
+        def benefitSum = (sum != null) ? sum : ((sumD != null) ? sumD : ((sumR != null) ? sumR : null))
 
         // 2. Поверка на соответствие дат использования льготы
         if (benefitCode && row.benefitEndDate != null && (row.benefitStartDate == null || row.benefitStartDate > row.benefitEndDate)) {
@@ -524,7 +503,7 @@ def consolidation() {
     List<Department> departments = new ArrayList()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+            getCalendarStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRowHelper = formDataService.getDataRowHelper(source)
@@ -605,6 +584,7 @@ def formNewRow(def sRow) {
 // новая строка
     def newRow = formData.createDataRow()
     editableColumns.each {
+        newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias("Редактируемое поле")
     }
     // «Графа 4» принимает значение «графы 2» формы-источника
@@ -612,7 +592,7 @@ def formNewRow(def sRow) {
     // «Графа 5» принимает значение «графы 4» формы-источника
     newRow.tsTypeCode = sRow.tsTypeCode
     // «Графа 6» принимает значение «графы 5» формы-источника
-    newRow.tsType = sRow.tsType
+    // зависимая графа newRow.tsType = sRow.tsType
     // «Графа 7» принимает значение «графы 6» формы-источника
     newRow.model = sRow.model
     // «Графа 8» принимает значение «графы 7» формы-источника
@@ -804,6 +784,30 @@ int calc21(DataRow sRow, Date reportPeriodStartDate, Date reportPeriodEndDate) {
          */
         return ownMonths - stealingMonths
     }
+}
+
+def calc26 (def row, def reportPeriodStartDate, def reportPeriodEndDate) {
+    if (row.benefitStartDate == null && row.benefitEndDate == null) {
+        return null
+    } else {
+        if (row.benefitEndDate != null && row.benefitEndDate.compareTo(reportPeriodStartDate) < 0 ||
+                row.benefitStartDate.compareTo(reportPeriodEndDate) > 0) {
+            return 0
+        } else {
+            //Определяем Доконч
+            def dOkonch
+            if (row.benefitEndDate == null || row.benefitEndDate.compareTo(reportPeriodEndDate) > 0) {
+                dOkonch = reportPeriodEndDate
+            } else {
+                dOkonch = row.benefitEndDate
+            }
+            // Определяем Днач
+            def dNach = (row.benefitStartDate.compareTo(reportPeriodStartDate) < 0) ? reportPeriodStartDate : row.benefitStartDate
+            // Определяем Мльгот
+            return dOkonch[Calendar.MONTH] - dNach[Calendar.MONTH] + 1
+        }
+    }
+
 }
 
 /** Число полных месяцев в текущем периоде (либо отчетном либо налоговом). */

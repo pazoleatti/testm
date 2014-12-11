@@ -344,7 +344,7 @@ def logicCheck() {
                 rowError(logger, row, errorMsg + "Для выбранного кода ОКТМО отсутствует запись в справочнике «Параметры представления деклараций по транспортному налогу»!")
             }
 
-            // 14. Проверка допустимых значений «Графы 23»
+            // 15. Проверка допустимых значений «Графы 23»
             if (row.taxBenefitCode != null && records != null && !records.isEmpty()) {
                 def record7 = getRefBookValue(7L, row.taxBenefitCode)
                 def record6 = getRefBookValue(6L, record7?.TAX_BENEFIT_ID?.value)
@@ -372,18 +372,23 @@ def logicCheck() {
             rowError(logger, row, errorMsg + "При указании кода налоговой льготы должен быть заполнен период использования льготы!")
         }
 
-        // 13. Проверка на наличие в списке ТС строк, период использования льготы, которых, не пересекается с отчётным...
+        // 13. Проверка на заполнение кода налоговой льготы при указании периода использования льгот
+        if (row.benefitStartDate != null && row.taxBenefitCode == null) {
+            rowError(logger, row, errorMsg + "При указании периода использования льготы должен быть заполнен код налоговой льготы!")
+        }
+
+        // 14. Проверка на наличие в списке ТС строк, период использования льготы, которых, не пересекается с отчётным...
         if (row.benefitStartDate != null && row.benefitStartDate > dTo || row.benefitEndDate != null && row.benefitEndDate < dFrom) {
             rowError(logger, row, errorMsg + "Период использования льготы ТС (${row.benefitStartDate.format(dFormat)} - ${row.benefitEndDate.format(dFormat)}) не пересекается с периодом (${dFrom.format(dFormat)} - ${dTo.format(dFormat)}), за который сформирована налоговая форма!")
         }
 
-        // 15. Проверка корректности заполнения «Графы 24»
+        // 16. Проверка корректности заполнения «Графы 24»
         if (row.base != calc24(row)) {
             def columnName = getColumnName(row, 'base')
             rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
         }
 
-        // 16. Проверка наличия повышающего коэффициента для ТС дороже 3 млн. руб.
+        // 17. Проверка наличия повышающего коэффициента для ТС дороже 3 млн. руб.
         if (row.version != null) {
             def averageCost = getRefBookValue(208L, row.version)?.AVG_COST?.value
             def filter = "AVG_COST = $averageCost"
@@ -394,9 +399,9 @@ def logicCheck() {
             }
         }
 
-        // 17. Проверка кода вида ТС (графа 4) по разделу «Наземные транспортные средства»
-        // 18. Проверка кода вида ТС (графа 4) по разделу «Водные транспортные средства»
-        // 19. Проверка кода вида ТС (графа 4) по разделу «Воздушные транспортные средства»
+        // 18. Проверка кода вида ТС (графа 4) по разделу «Наземные транспортные средства»
+        // 19. Проверка кода вида ТС (графа 4) по разделу «Водные транспортные средства»
+        // 20. Проверка кода вида ТС (графа 4) по разделу «Воздушные транспортные средства»
         if (row.tsTypeCode != null) {
             // проверить выбрана ли верхушка деревьев видов ТС
             def tsTypeCode = getRefBookValue(42L, row.tsTypeCode)?.CODE?.value

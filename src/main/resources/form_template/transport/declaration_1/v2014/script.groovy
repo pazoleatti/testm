@@ -14,6 +14,10 @@ import java.text.SimpleDateFormat
 
 /**
  * Формирование XML для декларации по транспортному налогу.
+ *
+ * TODO:
+ *      - вместо declarationService.generateXmlFileId используется локаный generateXmlFileId(), потому что для транспотного нагола неправильно работает ядровый.
+ *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -45,6 +49,14 @@ def recordCache = [:]
 @Field
 def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
+// значение подразделения из справочника 31
+@Field
+def departmentParam = null
+
+// значение подразделения из справочника 310 (таблица)
+@Field
+def departmentParamTable = null
+
 // Дата окончания отчетного периода
 @Field
 def reportPeriodEndDate = null
@@ -60,24 +72,17 @@ void checkDepartmentParams(LogLevel logLevel) {
     def departmentId = declarationData.departmentId
 
     // Параметры подразделения
-    def departmentParamList = getProvider(31).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
-
-    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-    }
-
-    def departmentParam = departmentParamList?.get(0)
+    def departmentParam = getDepartmentParam()
+    def departmentParamTransportRow = getDepartmentParamTable(departmentParam.record_id.value)
 
     // Проверки подразделения
-    def List<String> errorList = getErrorDepartment(departmentParam)
+    def List<String> errorList = getErrorDepartment(departmentParamTransportRow)
     for (String error : errorList) {
         logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
     }
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
-        def name = departmentParam.NAME.stringValue
-        name = name == null ? "!" : " для $name!"
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s", error, name))
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений!", error))
     }
 
     // Справочник "Параметры представления деклараций по налогу на имущество"
@@ -86,7 +91,7 @@ void checkDepartmentParams(LogLevel logLevel) {
         throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
     }
     def String filter = String.format("DECLARATION_REGION_ID = ${regionId} and LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') and LOWER(KPP) = LOWER('${declarationData.kpp}')")
-    records = refBookFactory.getDataProvider(210).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+    def records = refBookFactory.getDataProvider(210).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
     if (records.size() == 0) {
         throw new Exception("В справочнике «Параметры представления деклараций по транспортному налогу» отсутствует запись по выбранным параметрам декларации (период, регион подразделения, налоговый орган, КПП)!")
     }
@@ -107,10 +112,8 @@ def checkAndBuildXml() {
 
     def departmentId = declarationData.departmentId
 
-    departmentParamTransport = getProvider(31).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null).get(0)
-
-    departmentParamTransportRow = getProvider(310).getRecords(getReportPeriodEndDate() - 1, null,
-            "LINK = ${departmentParamTransport.record_id} and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'", null).get(0)
+    def departmentParamTransport = getDepartmentParam()
+    def departmentParamTransportRow = getDepartmentParamTable(departmentParamTransport.record_id.value)
 
     buildXml(departmentParamTransport, departmentParamTransportRow, formDataCollection, departmentId)
 }
@@ -126,7 +129,9 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         builder.Файл(
-                ИдФайл: declarationService.generateXmlFileId(1, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+                // TODO (Ramil Timerbaev)
+                // ИдФайл: declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+                ИдФайл: generateXmlFileId(),
                 ВерсПрог: applicationVersion,
                 ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
             Документ(
@@ -495,16 +500,10 @@ def getBenefitMonths(def row) {
     }
 }
 
-List<String> getErrorDepartment(record) {
+List<String> getErrorDepartment(def record) {
     List<String> errorList = new ArrayList<String>()
     if (record.NAME?.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
-    }
-    if (record.OKTMO?.referenceValue == null) {
-        errorList.add("«Код по ОКТМО»")
-    }
-    if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
-        errorList.add("«ИНН»")
     }
     if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
         errorList.add("«КПП»")
@@ -515,7 +514,7 @@ List<String> getErrorDepartment(record) {
     if (record.OKVED_CODE?.referenceValue == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
-    if (record.NAME?.stringValue == null || record.NAME.stringValue.isEmpty()) {
+    if (record.REORG_INN?.stringValue == null || record.REORG_INN.stringValue.isEmpty()) {
         errorList.add("«ИНН реорганизованного обособленного подразделения»")
     }
     if (record.SIGNATORY_ID?.referenceValue == null) {
@@ -538,8 +537,11 @@ List<String> getErrorDepartment(record) {
 
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.02')) {
+    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.03')) {
         errorList.add("«Версия формата»")
+    }
+    if (record.INN == null || record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
+        errorList.add("«ИНН»")
     }
     errorList
 }
@@ -574,4 +576,32 @@ def getOkato(def id) {
         okato = getRefBookValue(96, id)?.CODE?.stringValue
     }
     return okato
+}
+
+// Получить параметры подразделения (из справочника 31)
+def getDepartmentParam() {
+    if (departmentParam == null) {
+        def departmentId = declarationData.departmentId
+        def departmentParamList = getProvider(31).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
+}
+
+// Получить параметры подразделения (из справочника 310)
+def getDepartmentParamTable(def departmentParamId) {
+    if (departmentParamTable == null) {
+        def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
+        departmentParamTable = getProvider(310).getRecords(getReportPeriodEndDate() - 1, null, filter, null).get(0)
+    }
+    return departmentParamTable
+}
+
+/** Временный метод костыль, потому что для транспотного нагола неправильно работает ядровый. */
+def generateXmlFileId() {
+    // TODO (Ramil Timerbaev) 11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp
+    return "tempFixValue"
 }

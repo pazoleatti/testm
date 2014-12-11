@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
+    <fixedRows>true</fixedRows>
     <name>Расчёт суммы налога по каждому транспортному средству (new)</name>
-    <fullName>Расчёт суммы налога по каждому транспортному средству (new)</fullName>
+    <fullName>Расчёт суммы налога по каждому транспортному средству</fullName>
     <header>787/2/1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -313,10 +313,10 @@
         <name>Код налоговой льготы</name>
         <order>31</order>
         <width>5</width>
-        <filter>CODE = '30200' OR CODE = '20210' OR CODE = '20220' OR CODE = '20230'</filter>
-        <hierarchical>true</hierarchical>
-        <nameAttributeId>16</nameAttributeId>
-        <refBookAttributeId>15</refBookAttributeId>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>19</nameAttributeId>
+        <refBookAttributeId>19</refBookAttributeId>
+        <refBookAttributeId2>15</refBookAttributeId2>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -326,8 +326,8 @@
         <name>Сумма налоговой льготы (руб.)</name>
         <order>32</order>
         <width>15</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>taxBenefitCodeDecrease</alias>
