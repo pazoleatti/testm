@@ -132,15 +132,6 @@ public class ReportPeriodDaoTest {
         Assert.assertEquals(0, reportPeriods.size());
     }
 
-    @Test
-    public void getPeriodsByTaxTypesAndDepartmentsTest() {
-        List<Integer> reportPeriods;
-        reportPeriods = reportPeriodDao.getPeriodsByTaxTypesAndDepartments(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT), asList(1, 2, 3));
-        Assert.assertEquals(2, reportPeriods.size());
-        reportPeriods = reportPeriodDao.getPeriodsByTaxTypesAndDepartments(Arrays.asList(TaxType.INCOME, TaxType.TRANSPORT), asList(1000));
-        Assert.assertEquals(0, reportPeriods.size());
-    }
-
     private ReportPeriod getReportPeriod() {
         ReportPeriod newReportPeriod = new ReportPeriod();
         newReportPeriod.setName("MyTestName");
