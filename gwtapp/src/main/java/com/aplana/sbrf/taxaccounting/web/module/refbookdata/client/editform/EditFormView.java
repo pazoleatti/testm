@@ -150,6 +150,21 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
     @Override
+    public void cleanFields() {
+        for (Map.Entry<RefBookColumn, HasValue> entry : widgets.entrySet()) {
+            HasValue widget = entry.getValue();
+            widget.setValue(null);
+            if (widget instanceof RefBookPickerWidget) {
+                if (isNeedToReload) {
+                    isNeedToReload = false;
+                    ((RefBookPickerWidget) widget).reload();
+                }
+                ((RefBookPickerWidget) widget).setDereferenceValue("");
+            }
+        }
+    }
+
+    @Override
 	public Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes) {
 		editPanel.clear();
 		if (widgets != null) widgets.clear();
