@@ -118,25 +118,42 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 
     /**
      * Разыменование ссылок
-     * TODO Левыкин можно было бы прикрутить RefBookHelper#dataRowsDereference, но нужно рефакторить RefBookDataRow → DataRow http://jira.aplana.com/browse/SBRFACCTAX-9387
+	 * @param refBook справочник, строки которого разыменовываем
+	 * @param refBookPage исходные данные для разыменовывания
+	 * @param rows пустой список, в который должен быть записан результат
      */
-    private void dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> refBookPage,
-                             List<RefBookDataRow> rows) {
-        //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать
-        Map<String, RefBookDataProvider> refProviders = new HashMap<String, RefBookDataProvider>();
-        Map<String, String> refAliases = new HashMap<String, String>();
-        for (RefBookAttribute attribute : refBook.getAttributes()) {
-            if (attribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
-                refProviders.put(attribute.getAlias(), refBookFactory.getDataProvider(attribute.getRefBookId()));
-                RefBook refRefBook = refBookFactory.get(attribute.getRefBookId());
-                RefBookAttribute refAttribute = refRefBook.getAttribute(attribute.getRefBookAttributeId());
-                refAliases.put(attribute.getAlias(), refAttribute.getAlias());
-            }
-        }
+    private void dereference(RefBook refBook, PagingResult<Map<String, RefBookValue>> refBookPage, List<RefBookDataRow> rows) {
+		if (refBookPage.isEmpty()) {
+			return;
+		}
+		List<RefBookAttribute> attributes = refBook.getAttributes();
+		// разыменовывание ссылок
+		Map<Long, Map<Long, String>> derefenceValues = new HashMap<Long, Map<Long, String>>(); // Map<attrId, Map<referenceId, value>>
+		for (RefBookAttribute attribute : attributes) {
+			if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
+				// сбор всех ссылок
+				String alias = attribute.getAlias();
+				Set<Long> recordIds = new HashSet<Long>();
+				for (Map<String, RefBookValue> record : refBookPage) {
+					RefBookValue value = record.get(alias);
+					if (value != null && !value.isEmpty()) {
+						recordIds.add(value.getReferenceValue());
+					}
+				}
+				// групповое разыменование
+				RefBookDataProvider provider = refBookFactory.getDataProvider(attribute.getRefBookId());
+				Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
+				Map<Long, String> stringValues = new HashMap<Long, String>();
+				for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
+					stringValues.put(entry.getKey(), String.valueOf(entry.getValue()));
+				}
+				derefenceValues.put(attribute.getId(), stringValues);
+			}
+		}
 
         for (Map<String, RefBookValue> record : refBookPage) {
             Map<String, String> tableRowData = new HashMap<String, String>();
-            for (RefBookAttribute attribute : refBook.getAttributes()) {
+            for (RefBookAttribute attribute : attributes) {
                 RefBookValue value = record.get(attribute.getAlias());
                 String tableCell;
                 if (value == null) {
@@ -166,9 +183,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                         case REFERENCE:
                             if (value.getReferenceValue() == null) tableCell = "";
                             else {
-                                Map<String, RefBookValue> refValue = refProviders.get(attribute.getAlias())
-                                        .getRecordData(value.getReferenceValue());
-                                tableCell = refValue.get(refAliases.get(attribute.getAlias())).toString();
+								tableCell = derefenceValues.get(attribute.getId()).get(value.getReferenceValue());
                             }
                             break;
                         default:
