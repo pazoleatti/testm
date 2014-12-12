@@ -2,11 +2,13 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.TextBox;
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
@@ -537,8 +539,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCancelClicked();
             for (Map.Entry<RefBookColumn, HasValue> widget : widgets.entrySet()){
-                ((Widget)widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
-                        .getStyle().setBackgroundColor("");
+                if (widget.getKey().getAttributeType() == RefBookAttributeType.STRING) {
+                    ((Widget) widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
+                            .getStyle().setBackgroundColor("");
+                }
             }
 		}
     }
