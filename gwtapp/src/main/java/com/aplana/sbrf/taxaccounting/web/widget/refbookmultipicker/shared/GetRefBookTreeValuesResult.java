@@ -10,6 +10,7 @@ public class GetRefBookTreeValuesResult implements Result {
 
     private PagingResult<RefBookTreeItem> page;
     private String uuid;
+    private Long refBookId;
 
     public PagingResult<RefBookTreeItem> getPage() {
         return page;
@@ -25,5 +26,13 @@ public class GetRefBookTreeValuesResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Long getRefBookId() {
+        return refBookId;
+    }
+
+    public void setRefBookId(Long refBookId) {
+        this.refBookId = refBookId;
     }
 }

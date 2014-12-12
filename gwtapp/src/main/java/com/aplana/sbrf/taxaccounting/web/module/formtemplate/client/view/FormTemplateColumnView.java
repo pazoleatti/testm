@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateColumnPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.ColumnAttributeEditor;
+import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -333,9 +334,15 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	@UiHandler("stringMaxLengthBox")
-	public void onStringMaxLengthBox(KeyUpEvent event) {
+	public void onStringMaxLengthBox(BlurEvent event) {
         final Integer maxLength = ((StringColumn) columns.get(columnListBox.getSelectedIndex())).MAX_LENGTH;
-        int length = stringMaxLengthBox.getValue();
+        int length = stringMaxLengthBox.getValue() != null?stringMaxLengthBox.getValue():0;
+        if (length == 0){
+            event.getRelativeElement().getStyle().setBackgroundColor("#ffccd2");
+            return;
+        } else{
+            event.getRelativeElement().getStyle().setBackgroundColor("");
+        }
 
         Timer timer = new Timer() {
             @Override
