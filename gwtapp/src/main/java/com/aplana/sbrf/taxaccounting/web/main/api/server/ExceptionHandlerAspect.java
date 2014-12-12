@@ -66,10 +66,12 @@ public class ExceptionHandlerAspect {
 
 	/**
 	 * Обернуть необработанные исключения в DaoException
-	 * @param e
+	 *
+	 * @param e брошенное исключение
 	 * @throws DaoException
 	 */
-	@AfterThrowing(pointcut = "execution(* com.aplana.sbrf.taxaccounting.dao.*.*(..))", throwing = "e")
+	@AfterThrowing(pointcut = "execution(* com.aplana.sbrf.taxaccounting.dao..*.*(..)) " +
+			"&& !within(com.aplana.sbrf.taxaccounting.dao.impl.DBInfo)", throwing = "e")
 	public void handleDaoException(Throwable e) throws DaoException {
 		if (e instanceof DaoException) {
 			throw (DaoException) e;

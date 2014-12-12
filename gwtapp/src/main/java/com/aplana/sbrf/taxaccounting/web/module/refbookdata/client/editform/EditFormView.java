@@ -28,7 +28,10 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
@@ -85,6 +88,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
                     save.setEnabled(false);
                     cancel.setEnabled(false);
+                }else if (event.getValue() == null){
+                    Dialog.errorMessage("Введите дату начала!");
+                    save.setEnabled(false);
+                    cancel.setEnabled(false);
                 } else {
                     save.setEnabled(true);
                     cancel.setEnabled(true);
@@ -96,8 +103,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                if (versionStart.getValue() != null && event.getValue().before(versionStart.getValue())) {
+                if (versionStart.getValue() != null && event.getValue() != null && event.getValue().before(versionStart.getValue())) {
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
+                    save.setEnabled(false);
+                    cancel.setEnabled(false);
+                } else if (versionStart.getValue() == null){
+                    Dialog.errorMessage("Введите дату начала!");
                     save.setEnabled(false);
                     cancel.setEnabled(false);
                 } else {
@@ -537,8 +548,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCancelClicked();
             for (Map.Entry<RefBookColumn, HasValue> widget : widgets.entrySet()){
-                ((Widget)widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
-                        .getStyle().setBackgroundColor("");
+                if (widget.getKey().getAttributeType() == RefBookAttributeType.STRING) {
+                    ((Widget) widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
+                            .getStyle().setBackgroundColor("");
+                }
             }
 		}
     }

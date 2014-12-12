@@ -50,6 +50,8 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
          * Инициирет открытие итемов по порядку чьи идентификаторы в листе
          */
         void openListItems(List<Long> ids);
+
+        RefBookUiTreeItem getUiTreeItem(Long id);
     }
 
     public RefBookTreePickerPresenter(MyView view) {
@@ -105,6 +107,15 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                     ps.getSetIds().add(result.getPage().get(0).getId());
                 }
                 trySelect(ps);
+
+                if (result.getRefBookId() == 30L) {
+                    RefBookUiTreeItem uiTreeItem = getView().getUiTreeItem(0L);
+                    if (uiTreeItem != null) {
+                        loadForItem(uiTreeItem);
+                        uiTreeItem.setChildLoaded(true);
+                        uiTreeItem.setState(true);
+                    }
+                }
             }
         }, this));
     }
