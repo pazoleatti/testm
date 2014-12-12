@@ -117,10 +117,29 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                                 if (result.isHasCorrectionPeriods()) {
                                     Dialog.errorMessage("Редактирование периода", "Перед изменением периода необходимо удалить все связанные корректирующие периоды!");
                                 } else {
-                                    checkPeriodStatus(data);
+                                    checkIsPeriodOpen(data);
                                 }
                             }
                         }, EditDialogPresenter.this)
+        );
+    }
+
+    private void checkIsPeriodOpen(final EditDialogData data) {
+        IsPeriodOpenAction action = new IsPeriodOpenAction();
+        action.setDepartmentId(initData.getDepartmentId());
+        action.setReportPeriodId(initData.getReportPeriodId());
+
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<IsPeriodOpenResult>() {
+                    @Override
+                    public void onSuccess(IsPeriodOpenResult result) {
+                        if (result.isPeriodOpen()) {
+                            checkPeriodStatus(data);
+                        } else {
+                            Dialog.errorMessage("Редактирование параметров", "Закрытый период не может быть отредактирован!");
+                        }
+                    }
+                }, EditDialogPresenter.this)
         );
     }
 
@@ -139,8 +158,6 @@ public class EditDialogPresenter extends PresenterWidget<EditDialogPresenter.MyV
                             public void onSuccess(CheckPeriodStatusResult result) {
                                 if ((result.getStatus() == PeriodStatusBeforeOpen.OPEN)) {
                                     Dialog.errorMessage("Редактирование периода", "Указанный период уже заведён в Системе!");
-                                } else if (PeriodStatusBeforeOpen.CLOSE.equals(result.getStatus())) {
-                                    Dialog.errorMessage("Редактирование параметров", "Закрытый период не может быть отредактирован!");
                                 } else if (PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED.equals(result.getStatus())) {
                                     if (initData.getDictTaxPeriodId() == data.getReportPeriodId().longValue()) {
                                         edit(data);
