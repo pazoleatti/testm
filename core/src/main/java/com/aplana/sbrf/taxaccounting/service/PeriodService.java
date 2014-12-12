@@ -151,16 +151,6 @@ public interface PeriodService {
 	void removeReportPeriod(TaxType taxType, int drpId, Logger logger, TAUserInfo user);
 
     /**
-     *
-     * @param reportPeriodId идентификатор отчетного периода
-     * @param correctionDate дата корректировки (может быть пустой)
-     * @param departmentId идентификатор подразделения, для которого удаляется период
-     * @param taxType тип налога
-     * @param logs логер, при необходимости
-     */
-    void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentId,  TaxType taxType, List<LogEntry> logs);
-
-    /**
      * Список отчетных периодов для указанного вида налога и для указанных подразделений
      *
      * @param taxType Вид налога

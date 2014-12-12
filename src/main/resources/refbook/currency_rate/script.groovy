@@ -127,7 +127,13 @@ void importFromXML() {
     // Получение записей
     def existRecords = [:]
     if (recordIds != null && !recordIds.empty) {
-        existRecords = dataProvider.getRecordData(recordIds)
+        def size = recordIds.size()
+        def delta = 1000
+        for (int start = 0; start < size; start += delta) {
+            def end = ((start + delta > size) ? size : (start + delta)) - 1
+            def subExistRecords = dataProvider.getRecordData(recordIds[start..end])
+            existRecords.putAll(subExistRecords)
+        }
     }
 
     // CODE_NUMBER → Запись

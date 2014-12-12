@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
@@ -93,7 +94,11 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
                 if (PropertyLoader.isProductionMode() || !(e.getClass().equals(RuntimeException.class))) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
                 }
-                throw new ActionException(e);
+                if (e instanceof ServiceLoggerException) {
+                    throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                } else {
+                    throw new ActionException(e);
+                }
             }
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {

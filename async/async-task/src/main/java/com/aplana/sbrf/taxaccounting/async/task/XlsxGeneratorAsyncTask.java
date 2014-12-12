@@ -71,7 +71,7 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         String str;
-        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType())) {
+        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
             str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
         } else {
             str = ".";
@@ -93,7 +93,7 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         String str;
-        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType())) {
+        if (TaxType.PROPERTY.equals(declarationTemplate.getType().getTaxType()) || TaxType.TRANSPORT.equals(declarationTemplate.getType().getTaxType())) {
             str = String.format(", Налоговый орган: \"%s\", КПП: \"%s\".", declaration.getTaxOrganCode(), declaration.getKpp());
         } else {
             str = ".";

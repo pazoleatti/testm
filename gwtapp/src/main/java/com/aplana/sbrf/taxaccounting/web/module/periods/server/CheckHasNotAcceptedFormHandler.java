@@ -93,7 +93,7 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
             msg.append("Для декларации/уведомления: ");
             msg.append("\"" + declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getName() + "\"");
             DeclarationType declarationType = declarationTemplateService.get(dd.getDeclarationTemplateId()).getType();
-            if (declarationType.getTaxType() == TaxType.PROPERTY) {
+            if (declarationType.getTaxType() == TaxType.PROPERTY || TaxType.TRANSPORT.equals(declarationType.getTaxType())) {
                 msg.append(" (налоговый орган \"" + dd.getTaxOrganCode() + "\", КПП \"" + dd.getKpp() + "\")");
             }
             msg.append(" в подразделении ");
