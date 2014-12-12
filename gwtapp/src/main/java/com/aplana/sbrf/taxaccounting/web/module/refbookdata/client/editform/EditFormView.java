@@ -2,13 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.TextBox;
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
@@ -30,7 +28,10 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> implements EditFormPresenter.MyView{
 
@@ -87,6 +88,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
                     save.setEnabled(false);
                     cancel.setEnabled(false);
+                }else if (event.getValue() == null){
+                    Dialog.errorMessage("Введите дату начала!");
+                    save.setEnabled(false);
+                    cancel.setEnabled(false);
                 } else {
                     save.setEnabled(true);
                     cancel.setEnabled(true);
@@ -98,8 +103,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionEnd.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
-                if (versionStart.getValue() != null && event.getValue().before(versionStart.getValue())) {
+                if (versionStart.getValue() != null && event.getValue() != null && event.getValue().before(versionStart.getValue())) {
                     Dialog.errorMessage("Неправильно указан диапазон дат!");
+                    save.setEnabled(false);
+                    cancel.setEnabled(false);
+                } else if (versionStart.getValue() == null){
+                    Dialog.errorMessage("Введите дату начала!");
                     save.setEnabled(false);
                     cancel.setEnabled(false);
                 } else {
