@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -68,6 +69,8 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Autowired
     private LockDataService lockDataService;
+
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
 	@Override
 	public List<ReportPeriod> listByTaxPeriod(int taxPeriodId) {
@@ -521,11 +524,17 @@ public class PeriodServiceImpl implements PeriodService {
 		for (Integer id : departmentIds) {
             if (logs != null) {
                 logs.add(new LogEntry(LogLevel.INFO,
-                        "Период \"" + rp.getName() + "\" " +
-                         rp.getTaxPeriod().getYear() + " удалён для " + "\"" + departmentService.getDepartment(id).getName() + "\""
+                        "Период удалён для " + "\"" + departmentService.getDepartment(id).getName() + "\""
                 ));
             }
 		}
+
+        if (logs != null) {
+            logs.add(new LogEntry(LogLevel.INFO,
+                    "Удален период \"" + rp.getName() + "\" " + rp.getTaxPeriod().getYear() +
+                            (correctionDate == null ? "" : " с датой сдачи корректировки " + formatter.format(correctionDate))
+                    ));
+        }
 
         notificationService.deleteByReportPeriod(reportPeriodId);
 
