@@ -1,7 +1,6 @@
 package refbook.declaration_params_transport
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import groovy.transform.Field
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
