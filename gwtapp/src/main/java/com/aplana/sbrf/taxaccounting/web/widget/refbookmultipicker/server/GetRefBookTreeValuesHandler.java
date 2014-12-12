@@ -57,6 +57,7 @@ public class GetRefBookTreeValuesHandler extends AbstractActionHandler<GetRefBoo
         GetRefBookTreeValuesResult result = new GetRefBookTreeValuesResult();
         Logger logger = new Logger();
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
+        result.setRefBookId(refBook.getId());
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBook.getId());
 
         String filter = buildFilter.buildTreePickerFilter(action.getFilter(), action.getSearchPattern(), refBook);

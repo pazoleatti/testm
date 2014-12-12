@@ -310,7 +310,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
         return it.hasNext() ? it.next() : null;
     }
 
-    private RefBookUiTreeItem getUiTreeItem(Long id) {
+    @Override
+    public RefBookUiTreeItem getUiTreeItem(Long id) {
         for (RefBookUiTreeItem item : tree.getAllLoadedItems()) {
             if (item.getRefBookTreeItem().getId().equals(id)) {
                 return item;
