@@ -382,7 +382,7 @@ void fillTaKpp(def row, def errorMsg) {
         row.taxAuthority = records[0].TAX_ORGAN_CODE?.value
         row.kpp = records[0].KPP?.value
     } else {
-        logger.error(errorMsg + "Для кода ОКТМО «${row.okato}» нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
+        logger.error(errorMsg + "Для кода ОКТМО «${getRefBookValue(96, row.okato)?.CODE?.value}» нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     }
 }
 
