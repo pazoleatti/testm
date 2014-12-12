@@ -319,26 +319,25 @@ public class FormDataServiceImpl implements FormDataService {
      * @return
      */
     public FormData getPrevPeriodFormData(FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod, FormDataKind kind, Integer periodOrder) {
-        FormData formDataOld = null;
-        boolean isNotThisReportPeriod = false;
         if (periodOrder != null) {
             List<Months> availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
             if  (periodOrder > 1 && availableMonthList.contains(Months.fromId(periodOrder - 2))) {
-                isNotThisReportPeriod = true;
-                formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriod.getId().intValue(), Integer.valueOf(periodOrder - 1));
+                return formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriod.getId().intValue(), Integer.valueOf(periodOrder - 1));
             }
         }
         ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(departmentReportPeriod.getReportPeriod().getId());
-        if (!isNotThisReportPeriod && prevReportPeriod != null) {
+        if (prevReportPeriod != null) {
             Integer lastPeriodOrder = null;
             if (periodOrder != null) {
                 List<Months> availableMonthList = reportPeriodService.getAvailableMonthList(prevReportPeriod.getId());
                 lastPeriodOrder = availableMonthList.get(availableMonthList.size() - 1).getId();
             }
             DepartmentReportPeriod departmentReportPeriodOld = departmentReportPeriodDao.getLast(departmentReportPeriod.getDepartmentId(), prevReportPeriod.getId().intValue());
-            formDataOld = formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriodOld.getId().intValue(), lastPeriodOrder);
+            if (departmentReportPeriodOld != null) {
+                return formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriodOld.getId().intValue(), lastPeriodOrder);
+            }
         }
-        return formDataOld;
+        return null;
     }
 
 	/**
