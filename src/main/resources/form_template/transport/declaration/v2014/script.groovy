@@ -138,7 +138,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
             Документ(
                     КНД: "1152004",
                     ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
-                    Период: 34,
+                    Период: reorgFormCode ? 50 : 34,
                     ОтчетГод: reportPeriod.taxPeriod.year,
                     КодНО: declarationData.taxOrganCode,
                     НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
