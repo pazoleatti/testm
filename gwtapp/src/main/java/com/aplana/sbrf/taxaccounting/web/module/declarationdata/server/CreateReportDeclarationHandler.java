@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -84,7 +85,11 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                         }
                     } catch (Exception e) {
                         lockDataService.unlock(key, userInfo.getUser().getId());
-                        throw new ActionException("Ошибка при постановке в очередь асинхронной задачи", e);
+                        if (e instanceof ServiceLoggerException) {
+                            throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                        } else {
+                            throw new ActionException(e);
+                        }
                     }
                 } else {
                     if (lockDataReportTask.getUserId() != userInfo.getUser().getId()) {
