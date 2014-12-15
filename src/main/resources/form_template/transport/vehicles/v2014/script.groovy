@@ -329,9 +329,16 @@ def logicCheck() {
             }
         }
 
-        if (row.share != null && ! (row.share ==~ /\d{1,10}\/\d{1,10}/)) {
+        if (row.share != null){
             def columnName = getColumnName(row, 'share')
-            rowError(logger, row, errorMsg + "Графа «$columnName» должна быть заполнена согласно формату «(от 1 до 10 знаков)/(от 1 до 10 знаков)»!")
+            if (!(row.share ==~ /\d{1,10}\/\d{1,10}/)) {
+                rowError(logger, row, errorMsg + "Графа «$columnName» должна быть заполнена согласно формату «(от 1 до 10 знаков)/(от 1 до 10 знаков)»!")
+            } else {
+                def partArray = row.share.split('/')
+                if (partArray[1] ==~ /0{1,10}/) {
+                    logger.error(errorMsg + "Деление на ноль в графе «$columnName»!")
+                }
+            }
         }
 
         // 9. Проверка корректности заполнения «Графы 15»

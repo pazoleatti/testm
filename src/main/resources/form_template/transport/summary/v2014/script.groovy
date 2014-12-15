@@ -281,7 +281,11 @@ def calc() {
         def partRight = null
         if (row.partRight != null && row.partRight ==~ /\d{1,10}\/\d{1,10}/) {
             def partArray = row.partRight.split('/')
-            partRight = new BigDecimal((new BigDecimal(partArray[0]))/(new BigDecimal(partArray[1])))
+            if (partArray[1] ==~ /0{1,10}/) {
+                logger.error(errorMsg + "Деление на ноль в графе \"${getColumnName(row, 'partRight')}\"!")
+            } else {
+                partRight = new BigDecimal((new BigDecimal(partArray[0]))/(new BigDecimal(partArray[1])))
+            }
         }
         // Графа 25 (Сумма исчисления налога) = Расчет суммы исчисления налога
         if (row.taxBase != null && row.coef362 != null && row.taxRate != null && partRight != null) {
