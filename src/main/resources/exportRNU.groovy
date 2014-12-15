@@ -37,11 +37,11 @@ String path = "C:\\temp\\tf\\test\\"
 
 // TODO (Ramil Timerbaev) надо задать параметры при которых найдутся все формы
 @Field
-def departmentId = 4
+def departmentId = 1
 @Field
-def taxPeriodId = 10002
+def taxPeriodId = 10020
 @Field
-def reportPeriodId = 103
+def reportPeriodId = 120
 @Field
 def periodOrder = 1
 
@@ -122,10 +122,11 @@ def formTemplatesExcludeRowMap = [
         358  : Exclude.FIX,		      // (РНУ-72) Регистр налогового учёта уступки права требования как реализации финансовых услуг и операций с закладными
         366  : Exclude.FIX,		      // (РНУ-75) Регистр налогового учета доходов по операциям депозитария
         320  : Exclude.FIX,		      // (РНУ-8) Простой регистр налогового учёта «Требования»
-        362  : Exclude.SECTION_TOTAL,  // (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
+        362  : Exclude.SECTION_TOTAL, // (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
+        1414 : Exclude.NO,            // Сведения для расчёта налога с доходов в виде дивидендов (начиная с год 2014)
         // транспорт
-        202  : Exclude.NO,           // Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
-        204: Exclude.SECTION_TOTAL,  // Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
+        202  : Exclude.NO,            // Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
+        204  : Exclude.SECTION_TOTAL, // Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
         201  : Exclude.FIX,           // Сведения о транспортных средствах, по которым уплачивается транспортный налог
         // НДС
         600 : Exclude.SECTION_TOTAL, // Отчёт о суммах начисленного НДС по операциям Банка
@@ -331,12 +332,16 @@ def getAllDataRows() {
     formTemplateIds.each { id ->
         formTemplates.add(formTemplatesMap[id])
     }
-    def kind = FormDataKind.PRIMARY
+    def kind1 = FormDataKind.PRIMARY
+    def kind2 = FormDataKind.ADDITIONAL
     def dataRowsMap = [:]
 
     formTemplates.each { FormTemplate formTemplate ->
         def monthOrder = (formTemplate?.isMonthly() ? periodOrder : null)
-        def formData = formDataService.getLast(formTemplate.type.id, kind, departmentId, reportPeriodId, monthOrder)
+        def formData = formDataService.getLast(formTemplate.type.id, kind1, departmentId, reportPeriodId, monthOrder)
+        if (formData == null) {
+            formData = formDataService.getLast(formTemplate.type.id, kind2, departmentId, reportPeriodId, monthOrder)
+        }
         if (formData != null) {
             formDataMap[formTemplate.id] = formData
             dataRowsMap[formTemplate.id] = formDataService.getDataRowHelper(formData)?.all
