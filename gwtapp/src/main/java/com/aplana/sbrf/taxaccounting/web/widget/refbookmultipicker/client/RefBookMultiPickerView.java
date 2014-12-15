@@ -34,7 +34,6 @@ import com.google.gwt.view.client.*;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static com.google.gwt.view.client.DefaultSelectionEventManager.*;
 
@@ -182,20 +181,18 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
 
     @Override
     public void setSelection(List<RefBookItem> values) {
-        if (values != null) {
-            if (!values.isEmpty()) {
-                clearSelected(false);
-                for (int i = 0; i < values.size(); i++) {
-                    RefBookItem item = values.get(i);
-                    if (i != values.size() - 1) {
-                        // Пока не последний элемент событие изменения не пробрасываем
-                        isEnabledFireChangeEvent = false;
-                    }
-                    selectionModel.setSelected(item, true);
+        if (values != null && !values.isEmpty()) {
+            clearSelected(false);
+            for (int i = 0; i < values.size(); i++) {
+                RefBookItem item = values.get(i);
+                if (i != values.size() - 1) {
+                    // Пока не последний элемент событие изменения не пробрасываем
+                    isEnabledFireChangeEvent = false;
                 }
-            } else {
-                clearSelected(true);
+                selectionModel.setSelected(item, true);
             }
+        } else {
+            clearSelected(true);
         }
     }
 
@@ -346,6 +343,9 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 if (cellTable.getVisibleItemCount() == 0 || force) {
                     cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
                 }
+            }
+            if (cellTable.getHeader(0) != null) {
+                ((CheckboxCell) cellTable.getHeader(0).getCell()).clearViewData(false);
             }
         } else if (force) {
             // все равно очищаем таблицу даже если она не показывается,
