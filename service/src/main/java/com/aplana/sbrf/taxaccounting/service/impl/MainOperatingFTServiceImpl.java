@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,13 +69,21 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             //Выполенение шага 5.А.1.1
             Pair<Date, Date> beginRange = null;
             Pair<Date, Date> endRange = null;
-            if (dbVersionBeginDate.compareTo(formTemplate.getVersion()) < 0)
-                beginRange = new Pair<Date, Date>(dbVersionBeginDate, formTemplate.getVersion());
+            if (dbVersionBeginDate.compareTo(formTemplate.getVersion()) < 0){
+                Calendar c = Calendar.getInstance();
+                c.setTime(formTemplate.getVersion());
+                c.add(Calendar.DATE, -1);
+                beginRange = new Pair<Date, Date>(dbVersionBeginDate, c.getTime());
+            }
             if (
                     (dbVersionEndDate == null && templateActualEndDate != null)
                 ||
-                    (dbVersionEndDate != null && templateActualEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) > 0))
-                endRange = new Pair<Date, Date>(templateActualEndDate, dbVersionEndDate);
+                    (dbVersionEndDate != null && templateActualEndDate != null && dbVersionEndDate.compareTo(templateActualEndDate) > 0)) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(templateActualEndDate);
+                c.add(Calendar.DATE, 1);
+                endRange = new Pair<Date, Date>(c.getTime(), dbVersionEndDate);
+            }
             versionOperatingService.checkDestinationsSources(formTemplate.getType().getId(), beginRange, endRange, logger);
             checkError(logger, SAVE_MESSAGE);
         }
