@@ -118,7 +118,7 @@ public interface DeclarationDataService {
      * @param departmentReportPeriod Отчетный период подразделения
      * @return
      */
-    DeclarationData find(int declarationTypeId, int departmentReportPeriod);
+    DeclarationData find(int declarationTypeId, int departmentReportPeriod, String kpp, String taxOrganCode);
 
     List<Long> getFormDataListInActualPeriodByTemplate(int declarationTemplateId, Date startDate);
 

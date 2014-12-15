@@ -98,11 +98,16 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                     .defaultCallback(new AbstractCallback<CreateDeclarationResult>() {
                         @Override
                         public void onSuccess(CreateDeclarationResult result) {
-                            onHide();
-                            placeManager
-                                    .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
-                                            .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
-                            LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                            if (result.getDeclarationId() == null) {
+                                LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                                Dialog.infoMessage("Создание декларации", "Декларация не создана");
+                            } else {
+                                onHide();
+                                placeManager
+                                        .revealPlace(new PlaceRequest.Builder().nameToken(DeclarationDataTokens.declarationData)
+                                                .with(DeclarationDataTokens.declarationId, String.valueOf(result.getDeclarationId())).build());
+                                LogAddEvent.fire(DeclarationCreationPresenter.this, result.getUuid());
+                            }
                         }
                     }, DeclarationCreationPresenter.this));
         }
