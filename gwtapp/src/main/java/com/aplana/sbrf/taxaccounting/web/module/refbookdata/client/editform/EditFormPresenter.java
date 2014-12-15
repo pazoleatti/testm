@@ -79,6 +79,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         // Устанавливает видимость для поля "Все версии"
         void setAllVersionField(boolean isVisible);
         void cleanFields();
+        void cleanErrorFields();
     }
 
     protected final RenameDialogPresenter renameDialogPresenter;
@@ -242,6 +243,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         data.setVersionStart(getView().getVersionFrom());
                                         data.setVersionEnd(getView().getVersionTo());
                                         data.setVersionCount(1);
+                                        getView().cleanErrorFields();
                                         getView().fillVersionData(data, currentRefBookId, newId);
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                         SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
@@ -377,12 +379,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onCancelClicked() {
         if (isFormModified) {
+            //TODO: Считаю лучше бы на клиента перенести это сообщение
             Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);
                     onSaveClicked(false);
-                    showRecord(currentUniqueRecordId);
                     SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
 
@@ -390,6 +392,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 public void no() {
                     setIsFormModified(false);
                     showRecord(previousURId);
+                    getView().cleanErrorFields();
                     SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
             });
@@ -397,6 +400,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             //Показать родительскую запись
             //setMode(FormMode.EDIT);
             showRecord(previousURId);
+            getView().cleanErrorFields();
             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
         }
     }
