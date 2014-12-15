@@ -152,11 +152,6 @@ def copyColumns = ['codeOKATO', 'tsTypeCode', 'model', 'ecoClass', 'identNumber'
 def copyColumns201 = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber',
                       'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd']
 
-// общее графы между фомрами 201 и 22
-@Field
-def commonBetween201and202 = ['codeOKATO', 'identNumber', 'regNumber', 'baseUnit']
-
-
 // Соответствие задается совпадением граф 2, 4, 8, 12, 13
 @Field
 def columnsForEquals = ['codeOKATO', 'tsTypeCode', 'identNumber', 'taxBase', 'baseUnit']
@@ -482,9 +477,7 @@ void consolidation() {
 def String checkPrevPeriod(def reportPeriod) {
     if (reportPeriod != null) {
         // ищем форму нового типа иначе две формы старого
-        if ((formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) &&
-                (formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null ||
-                        formDataService.getLast(202, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null)) {
+        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) {
             return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
         }
     }
@@ -548,14 +541,11 @@ def getPrevRowsForCopy(def reportPeriod, def dataRows) {
     if (reportPeriod != null) {
         def formData201 = formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, null)
         if (formData201 != null && formData201.formTemplateId == 201) {
-            // получить нет формы за предыдущий отчетный период, то попытаться найти старые формы 201 и 202
+            // получить нет формы за предыдущий отчетный период, то попытаться найти старую форму 201
             def dataRows201 = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allCached : null)
 
-            def formData202 = formDataService.getLast(202, formData.kind, formDataDepartment.id, reportPeriod.id, null)
-            def dataRows202 = (formData202 != null ? formDataService.getDataRowHelper(formData202)?.allCached : null)
-
             if (dataRows201 != null && !dataRows201.isEmpty()) {
-                dataRows = copyFromOldForm(dataRows, dataRows201, dataRows202)
+                dataRows = copyFromOldForm(dataRows, dataRows201)
             }
         } else {
             // получить форму за предыдущий отчетный период
@@ -642,9 +632,8 @@ def copyFromOursForm(def dataRows, def dataRowsPrev) {
  *
  * @param dataRows строки текущей формы
  * @param dataRows201Old строки предыдущей формы 201
- * @param dataRows202Old строки предыдущей формы 202
  */
-def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
+def copyFromOldForm(def dataRows, dataRows201Old) {
     def rowsOld = []
     rowsOld.addAll(dataRows)
     def tmpRows = []
@@ -702,51 +691,6 @@ def copyFromOldForm(def dataRows, dataRows201Old, dataRows202Old) {
     sections.each {
         dataRows.addAll(getLastRowIndexInSection(dataRows, it), sectionRows[it])
         updateIndexes(dataRows)
-    }
-
-    // получение данных из 202
-    if (!tmpRows.isEmpty()) {
-        def regionId = formDataDepartment.regionId
-        for (def row : dataRows202Old) {
-            if ((row.benefitEndDate != null && row.benefitEndDate < dFrom) || (row.benefitStartDate > dTo)) {
-                continue
-            }
-
-            // эта часть вроде как лишняя
-            def benefitEndDate = row.benefitEndDate
-            if (benefitEndDate == null || benefitEndDate > dTo) {
-                benefitEndDate = dTo
-            }
-            def benefitStartDate = row.benefitStartDate
-            if (benefitStartDate < dFrom) {
-                benefitStartDate = dFrom
-            }
-            if (benefitStartDate > dTo || benefitEndDate < dFrom) {
-                continue
-            }
-
-            // находим среди заполненых строк соответствующие тукущей строке
-            for (def tmpRow in tmpRows) {
-                if (isEquals(row, tmpRow, commonBetween201and202)) {
-                    // строка из 201 соответствует строке из 202
-                    ['benefitStartDate', 'benefitEndDate'].each {
-                        tmpRow.getCell(it).setValue(row.getCell(it).value, null)
-                    }
-                    // графа "Код налоговой льготы" в форме 202 и в текущей имеют разные справочники
-                    // в форме 202 - справочник 6, в текущей - справочник 7
-                    def record6Id = row.getCell('taxBenefitCode').value
-                    if (record6Id != null) {
-                        def filter = "TAX_BENEFIT_ID = $record6Id and DECLARATION_REGION_ID = $regionId"
-                        def records = getProvider(7L).getRecords(dTo, null, filter, null)
-                        def id = (records != null && !records.isEmpty() ? records.get(0)?.record_id?.value : null)
-                        if (id != null) {
-                            tmpRow.getCell('taxBenefitCode').setValue(id, null)
-                        }
-                    }
-                    break
-                }
-            }
-        }
     }
 
     return dataRows
