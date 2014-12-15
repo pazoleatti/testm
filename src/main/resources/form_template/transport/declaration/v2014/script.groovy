@@ -155,10 +155,9 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                             КПП: (declarationData.kpp)) {
 
                         if (reorgFormCode != null && !reorgFormCode.equals("")) {
-                            СвРеоргЮЛ(
-                                    ФормРеорг: reorgFormCode,
-                                    ИННЮЛ: (Integer.parseInt(reorgFormCode) in [1, 2, 3, 5, 6] ? departmentParamTransportRow.REORG_INN : 0),
-                                    КПП: (Integer.parseInt(reorgFormCode) in [1, 2, 3, 5, 6] ? departmentParamTransportRow.REORG_KPP : 0)
+                            СвРеоргЮЛ([ФормРеорг: reorgFormCode] +
+                                    (Integer.parseInt(reorgFormCode) in [1, 2, 3, 5, 6] ?
+                                            [ИННЮЛ: departmentParamTransportRow.REORG_INN, КПП: departmentParamTransportRow.REORG_KPP] : [])
                             )
                         }
                     }
