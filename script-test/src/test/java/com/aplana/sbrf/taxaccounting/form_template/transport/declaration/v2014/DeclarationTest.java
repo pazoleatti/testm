@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.transport.declaration_1.v2014;
+package com.aplana.sbrf.taxaccounting.form_template.transport.declaration.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
@@ -118,7 +118,7 @@ public class DeclarationTest extends DeclarationScriptTestBase {
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.getLogger().info("%s", testHelper.getXmlStringWriter() + "");
+        // testHelper.getLogger().info("%s", testHelper.getXmlStringWriter() + "");
         Assert.assertNotNull(testHelper.getXmlStringWriter());
         // TODO (Ramil Timerbaev) добавить проверку xml'ки
         checkLogger();
