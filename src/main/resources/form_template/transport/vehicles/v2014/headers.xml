@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><rows>
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
         <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ пп"/>
@@ -19,25 +20,33 @@
         <cell alias="years" colSpan="1" rowSpan="2" value="Количество лет, прошедших с года выпуска ТС"/>
         <cell alias="stealDateStart" colSpan="2" rowSpan="1" value="Сведения об угоне"/>
         <cell alias="stealDateEnd" colSpan="1" rowSpan="1" value="Сведения об угоне"/>
-        <cell alias="periodStartCost" colSpan="1" rowSpan="2" value="Балансовая стоимость ТС на начало отчетного периода (руб.)"/>
-        <cell alias="periodEndCost" colSpan="1" rowSpan="2" value="Балансовая стоимость ТС на конец отчетного периода (руб.)"/>
+        <cell alias="periodStartCost" colSpan="1" rowSpan="2"
+              value="Балансовая стоимость ТС на начало отчетного периода (руб.)"/>
+        <cell alias="periodEndCost" colSpan="1" rowSpan="2"
+              value="Балансовая стоимость ТС на конец отчетного периода (руб.)"/>
         <cell alias="ownMonths" colSpan="1" rowSpan="2" value="Количество полных месяцев владения"/>
         <cell alias="partRight" colSpan="1" rowSpan="2" value="Доля налогоплательщика в праве на ТС"/>
-        <cell alias="coef362" colSpan="1" rowSpan="2" value="Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ"/>
+        <cell alias="coef362" colSpan="1" rowSpan="2"
+              value="Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ"/>
         <cell alias="taxRate" colSpan="1" rowSpan="2" value="Ставка налога"/>
         <cell alias="calculatedTaxSum" colSpan="1" rowSpan="2" value="Исчисленная сумма налога (руб.)"/>
         <cell alias="benefitMonths" colSpan="1" rowSpan="2" value="Количество полных месяцев использования льготы"/>
         <cell alias="benefitStartDate" colSpan="1" rowSpan="2" value="Дата начала использования льготы"/>
         <cell alias="benefitEndDate" colSpan="1" rowSpan="2" value="Дата окончания использования льготы"/>
-        <cell alias="coefKl" colSpan="1" rowSpan="2" value="Коэффициент, определяемый в соответствии с законами субъектов РФ"/>
+        <cell alias="coefKl" colSpan="1" rowSpan="2"
+              value="Коэффициент, определяемый в соответствии с законами субъектов РФ"/>
         <cell alias="taxBenefitCode" colSpan="1" rowSpan="2" value="Код налоговой льготы"/>
         <cell alias="benefitSum" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="2" value="Код налоговой льготы в виде уменьшения суммы налога в соответствии с законами субъектов РФ"/>
+        <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="2"
+              value="Код налоговой льготы в виде уменьшения суммы налога в соответствии с законами субъектов РФ"/>
         <cell alias="benefitSumDecrease" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="benefitCodeReduction" colSpan="1" rowSpan="2" value="Код налоговой льготы в виде снижения налоговой ставки в соответствии с законами субъектов РФ"/>
+        <cell alias="benefitCodeReduction" colSpan="1" rowSpan="2"
+              value="Код налоговой льготы в виде снижения налоговой ставки в соответствии с законами субъектов РФ"/>
         <cell alias="benefitSumReduction" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="koefKp" colSpan="1" rowSpan="2" value="Коэффициент, определяемый в соответствии с п.2 ст. 362 НК РФ"/>
-        <cell alias="taxSumToPay" colSpan="1" rowSpan="2" value="Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)"/>
+        <cell alias="koefKp" colSpan="1" rowSpan="2"
+              value="Коэффициент, определяемый в соответствии с п.2 ст. 362 НК РФ"/>
+        <cell alias="taxSumToPay" colSpan="1" rowSpan="2"
+              value="Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)"/>
         <cell alias="benefitBase" colSpan="1" rowSpan="2" value="Основание льготы"/>
     </row>
     <row alias="">
@@ -60,25 +69,33 @@
         <cell alias="years" colSpan="1" rowSpan="1" value="Количество лет, прошедших с года выпуска ТС"/>
         <cell alias="stealDateStart" colSpan="1" rowSpan="1" value="Дата начала розыска ТС"/>
         <cell alias="stealDateEnd" colSpan="1" rowSpan="1" value="Дата возврата ТС"/>
-        <cell alias="periodStartCost" colSpan="1" rowSpan="1" value="Балансовая стоимость ТС на начало отчетного периода (руб.)"/>
-        <cell alias="periodEndCost" colSpan="1" rowSpan="1" value="Балансовая стоимость ТС на конец отчетного периода (руб.)"/>
+        <cell alias="periodStartCost" colSpan="1" rowSpan="1"
+              value="Балансовая стоимость ТС на начало отчетного периода (руб.)"/>
+        <cell alias="periodEndCost" colSpan="1" rowSpan="1"
+              value="Балансовая стоимость ТС на конец отчетного периода (руб.)"/>
         <cell alias="ownMonths" colSpan="1" rowSpan="1" value="Количество полных месяцев владения"/>
         <cell alias="partRight" colSpan="1" rowSpan="1" value="Доля налогоплательщика в праве на ТС"/>
-        <cell alias="coef362" colSpan="1" rowSpan="1" value="Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ"/>
+        <cell alias="coef362" colSpan="1" rowSpan="1"
+              value="Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ"/>
         <cell alias="taxRate" colSpan="1" rowSpan="1" value="Ставка налога"/>
         <cell alias="calculatedTaxSum" colSpan="1" rowSpan="1" value="Исчисленная сумма налога (руб.)"/>
         <cell alias="benefitMonths" colSpan="1" rowSpan="1" value="Количество полных месяцев использования льготы"/>
         <cell alias="benefitStartDate" colSpan="1" rowSpan="1" value="Дата начала использования льготы"/>
         <cell alias="benefitEndDate" colSpan="1" rowSpan="1" value="Дата окончания использования льготы"/>
-        <cell alias="coefKl" colSpan="1" rowSpan="1" value="Коэффициент, определяемый в соответствии с законами субъектов РФ"/>
+        <cell alias="coefKl" colSpan="1" rowSpan="1"
+              value="Коэффициент, определяемый в соответствии с законами субъектов РФ"/>
         <cell alias="taxBenefitCode" colSpan="1" rowSpan="1" value="Код налоговой льготы"/>
         <cell alias="benefitSum" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="1" value="Код налоговой льготы в виде уменьшения суммы налога в соответствии с законами субъектов РФ"/>
+        <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="1"
+              value="Код налоговой льготы в виде уменьшения суммы налога в соответствии с законами субъектов РФ"/>
         <cell alias="benefitSumDecrease" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="benefitCodeReduction" colSpan="1" rowSpan="1" value="Код налоговой льготы в виде снижения налоговой ставки в соответствии с законами субъектов РФ"/>
+        <cell alias="benefitCodeReduction" colSpan="1" rowSpan="1"
+              value="Код налоговой льготы в виде снижения налоговой ставки в соответствии с законами субъектов РФ"/>
         <cell alias="benefitSumReduction" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="koefKp" colSpan="1" rowSpan="1" value="Коэффициент, определяемый в соответствии с п.2 ст. 362 НК РФ"/>
-        <cell alias="taxSumToPay" colSpan="1" rowSpan="1" value="Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)"/>
+        <cell alias="koefKp" colSpan="1" rowSpan="1"
+              value="Коэффициент, определяемый в соответствии с п.2 ст. 362 НК РФ"/>
+        <cell alias="taxSumToPay" colSpan="1" rowSpan="1"
+              value="Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)"/>
         <cell alias="benefitBase" colSpan="1" rowSpan="1" value="Основание льготы"/>
     </row>
     <row alias="">

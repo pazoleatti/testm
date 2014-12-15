@@ -1,4 +1,4 @@
-package form_template.transport.summary_1.v2014
+package form_template.transport.summary.v2014
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -13,7 +13,7 @@ import groovy.transform.Field
 import java.text.SimpleDateFormat
 
 /**
- * Расчет суммы налога по каждому транспортному средству(new)
+ * Расчет суммы налога по каждому транспортному средству
  * formTemplateId=203
  *
  * графа 1  - rowNumber
@@ -512,7 +512,7 @@ def consolidation() {
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def sourceDataRowHelper = formDataService.getDataRowHelper(source)
             def sourceDataRows = sourceDataRowHelper.allCached
-            def formTypeVehicleId = 204
+            def formTypeVehicleId = 201
             if (source.formType.id == formTypeVehicleId) {
                 Department sDepartment = departmentService.get(it.departmentId)
                 def alias = null

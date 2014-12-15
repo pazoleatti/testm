@@ -1,4 +1,4 @@
-package form_template.transport.declaration_1.v2014
+package form_template.transport.declaration.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -195,7 +195,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
 
                         // Данные текущего квартала
                         reportPeriodMap[reportPeriod.order] = reportPeriod
-                        formDataMap[reportPeriod.order] = formDataCollection?.find(departmentId, 203, FormDataKind.SUMMARY)
+                        formDataMap[reportPeriod.order] = formDataCollection?.find(departmentId, 200, FormDataKind.SUMMARY)
                         if (formDataMap[reportPeriod.order] != null) {
                             // «Своя» сводная есть и «Принята»
                             rowsDataMap[reportPeriod.order] = formDataService.getDataRowHelper(formDataMap[reportPeriod.order]).getAllCached()
@@ -579,4 +579,3 @@ def getBenefitCode(def parentRecordId) {
     def recordId = getRefBookValue(7, parentRecordId)?.TAX_BENEFIT_ID?.value
     return  getRefBookValue(6, recordId)?.CODE?.value
 }
-

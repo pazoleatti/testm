@@ -1,4 +1,4 @@
-package form_template.transport.vehicles_1.v2014
+package form_template.transport.vehicles.v2014
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -10,8 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
- * Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
- * formTypeId=204
+ * Сведения о транспортных средствах, по которым уплачивается транспортный налог
+ * formTypeId=201
  * formTemplateId=204
  *
  * форма действует с 1 октября 2014
@@ -115,13 +115,13 @@ def refBookCache = [:]
 // Редактируемые атрибуты (графа 2, 4, 6..14, 16..23, 25)
 @Field
 def editableColumns = ['codeOKATO', 'tsTypeCode', 'model', 'ecoClass', 'identNumber', 'regNumber',
-        'regDate', 'regDateEnd', 'taxBase', 'baseUnit', 'year', 'stealDateStart', 'stealDateEnd',
-        'share', 'costOnPeriodBegin', 'costOnPeriodEnd', 'benefitStartDate', 'benefitEndDate', 'taxBenefitCode', 'version']
+                       'regDate', 'regDateEnd', 'taxBase', 'baseUnit', 'year', 'stealDateStart', 'stealDateEnd',
+                       'share', 'costOnPeriodBegin', 'costOnPeriodEnd', 'benefitStartDate', 'benefitEndDate', 'taxBenefitCode', 'version']
 
 // Проверяемые на пустые значения атрибуты (графа 1..6, 8..10, 12..15, 18. Графа 1, 3, 5 исключены)
 @Field
 def nonEmptyColumns = [/*'rowNumber',*/ 'codeOKATO', /*'regionName',*/ 'tsTypeCode', /*'tsType',*/ 'model',
-        'identNumber', 'regNumber', 'regDate', 'taxBase', 'baseUnit', 'year', 'pastYear', 'share']
+                       'identNumber', 'regNumber', 'regDate', 'taxBase', 'baseUnit', 'year', 'pastYear', 'share']
 
 // Автозаполняемые атрибуты
 @Field
@@ -145,12 +145,12 @@ def sections = ['A', 'B', 'C']
 
 @Field
 def copyColumns = ['codeOKATO', 'tsTypeCode', 'model', 'ecoClass', 'identNumber', 'regNumber', 'regDate',
-        'regDateEnd', 'taxBase', 'baseUnit', 'year', 'pastYear', 'stealDateStart', 'stealDateEnd', 'share',
-        'costOnPeriodBegin', 'costOnPeriodEnd', 'benefitStartDate', 'benefitEndDate', 'taxBenefitCode', 'base', 'version']
+                   'regDateEnd', 'taxBase', 'baseUnit', 'year', 'pastYear', 'stealDateStart', 'stealDateEnd', 'share',
+                   'costOnPeriodBegin', 'costOnPeriodEnd', 'benefitStartDate', 'benefitEndDate', 'taxBenefitCode', 'base', 'version']
 
 @Field
 def copyColumns201 = ['codeOKATO', 'tsTypeCode', 'identNumber', 'model', 'ecoClass', 'regNumber',
-        'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd']
+                      'baseUnit', 'year', 'regDate', 'regDateEnd', 'stealDateStart', 'stealDateEnd']
 
 // общее графы между фомрами 201 и 22
 @Field
@@ -539,14 +539,9 @@ def getNewRow() {
 // Получить строки для копирования за предыдущий отчетный период
 def getPrevRowsForCopy(def reportPeriod, def dataRows) {
     if (reportPeriod != null) {
-        // получить форму за предыдущий отчетный период
-        def formDataPrev = formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, null)
-        def dataRowsPrev = (formDataPrev != null ? formDataService.getDataRowHelper(formDataPrev)?.allCached : null)
-        if (dataRowsPrev != null && !dataRowsPrev.isEmpty()) {
-            dataRows = copyFromOursForm(dataRows, dataRowsPrev)
-        } else {
+        def formData201 = formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, null)
+        if (formData201 != null && formData201.formTemplateId == 201) {
             // получить нет формы за предыдущий отчетный период, то попытаться найти старые формы 201 и 202
-            def formData201 = formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, null)
             def dataRows201 = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allCached : null)
 
             def formData202 = formDataService.getLast(202, formData.kind, formDataDepartment.id, reportPeriod.id, null)
@@ -554,6 +549,12 @@ def getPrevRowsForCopy(def reportPeriod, def dataRows) {
 
             if (dataRows201 != null && !dataRows201.isEmpty()) {
                 dataRows = copyFromOldForm(dataRows, dataRows201, dataRows202)
+            }
+        } else {
+            // получить форму за предыдущий отчетный период
+            def dataRowsPrev = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allCached : null)
+            if (dataRowsPrev != null && !dataRowsPrev.isEmpty()) {
+                dataRows = copyFromOursForm(dataRows, dataRowsPrev)
             }
         }
     }
@@ -1278,7 +1279,7 @@ def getProvider(def id) {
 String REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» не найдена запись для графы «%s» актуальная на дату %s!";
 
 @Field
- REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» найдено более одной записи для графы «%s» актуальная на дату %s!";
+String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» найдено более одной записи для графы «%s» актуальная на дату %s!";
 
 /**
  * Получить id записи из справочника по фильтру.
