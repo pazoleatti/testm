@@ -355,10 +355,6 @@ void generateXML() {
                                                 СтИмущК : ((BigDecimal)stImushK)?.setScale(0,RoundingMode.HALF_UP),
                                                 СтИмущНеоблК : ((BigDecimal)stImushNeoblK)?.setScale(0,RoundingMode.HALF_UP)
                                         )
-                                        СведСтИнв (
-                                                СтИмущИ : empty,
-                                                СтИмущНеоблИ : empty,
-                                        )
                                     }
                                     НалПер(
                                             [НалБаза : ((BigDecimal)nalBaza2)?.setScale(0,RoundingMode.HALF_UP),

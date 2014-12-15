@@ -587,6 +587,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 refBookDao.updateRecordVersion(refBookId, uniqueRecordId, records);
             } catch (Exception e) {
                 if (logger != null) {
+                    logger.error(e);
                     logger.clear(LogLevel.INFO);
                     throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
                             logEntryService.save(logger.getEntries()));

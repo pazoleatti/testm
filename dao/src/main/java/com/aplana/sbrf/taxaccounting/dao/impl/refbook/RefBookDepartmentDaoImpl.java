@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -120,11 +119,6 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         }
 
         return pairList;
-    }
-
-    @Override
-    public List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList) {
-        return reportPeriodDao.getPeriodsByTaxTypesAndDepartments(taxTypes, departmentList);
     }
 
     private static final String UPDATE_DEPARTMENT = "update department t set %s where id = ?";

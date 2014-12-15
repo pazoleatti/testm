@@ -106,7 +106,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private TAUserService taUserService;
 
     @Override
-    public DeclarationData find(int declarationTypeId, int departmentReportPeriodId) {
+    public List<DeclarationData> find(int declarationTypeId, int departmentReportPeriodId) {
         return declarationDataDao.find(declarationTypeId, departmentReportPeriodId);
     }
 
@@ -139,7 +139,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             Map<String, RefBookValue> departmentParam = departmentParams.get(0);
 
             Calendar calendar = Calendar.getInstance();
-            if (declarationTaxType == TaxType.PROPERTY) {
+            if (declarationTaxType == TaxType.PROPERTY || declarationTaxType == TaxType.TRANSPORT) {
                 stringBuilder.append('_').
                         append(taxOrganCode).
                         append('_').

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -89,7 +90,11 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                         throw new ActionException(e2);
                     }
                 }
-                throw new ActionException(e);
+                if (e instanceof ServiceLoggerException) {
+                    throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                } else {
+                    throw new ActionException(e);
+                }
             }
         } else {
             throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
