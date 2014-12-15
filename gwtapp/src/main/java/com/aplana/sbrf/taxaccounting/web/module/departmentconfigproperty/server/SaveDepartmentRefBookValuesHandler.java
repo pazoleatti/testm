@@ -165,11 +165,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                     if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromServer.get("TAX_ORGAN_CODE").getStringValue())
                             && rowFromClient.get("KPP").getStringValue().equals(rowFromServer.get("KPP").getStringValue())) {
                         contains = true;
-                        for (Map.Entry<String, RefBookValue> v : rowFromServer.entrySet()) {
-                            if (rowFromClient.get(v.getKey()) == null || rowFromClient.get(v.getKey()).isEmpty()) {
-                                rowFromClient.put(v.getKey(), v.getValue());
-                            }
-                        }
                         rowFromClient.put("LINK",new RefBookValue(RefBookAttributeType.REFERENCE, recordId));
                         rowFromClient.put("ROW_ORD",rowFromServer.get("ROW_ORD"));
                         rowFromClient.put("record_id",rowFromServer.get("record_id"));
