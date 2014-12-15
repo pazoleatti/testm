@@ -176,6 +176,16 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
     @Override
+    public void cleanErrorFields() {
+        for (Map.Entry<RefBookColumn, HasValue> widget : widgets.entrySet()){
+            if (widget.getKey().getAttributeType() == RefBookAttributeType.STRING) {
+                ((Widget) widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
+                        .getStyle().setBackgroundColor("");
+            }
+        }
+    }
+
+    @Override
 	public Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes) {
 		editPanel.clear();
 		if (widgets != null) widgets.clear();
@@ -547,12 +557,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	void cancelButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCancelClicked();
-            for (Map.Entry<RefBookColumn, HasValue> widget : widgets.entrySet()){
-                if (widget.getKey().getAttributeType() == RefBookAttributeType.STRING) {
-                    ((Widget) widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
-                            .getStyle().setBackgroundColor("");
-                }
-            }
 		}
     }
 }
