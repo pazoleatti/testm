@@ -541,7 +541,7 @@ def consolidation() {
                                 row.benefitEndDate.equals(sRow.benefitEndDate)) {
                             def department = departments.get(sourcesRows.indexOf(row))
                             logger.error("Обнаружены несколько разных строк, у которых совпадают " +
-                                    +getIdentGraphsValue(sRow) +
+                                    getIdentGraphsValue(sRow) +
                                     " для форм «Сведения о транспортных средствах …» в подразделениях «" +
                                     sDepartment.name + "», «" + department.name + "». Строки : " + sRow.getIndex() + ", " + row.getIndex())
                             departments.remove(sourcesRows.indexOf(row))
