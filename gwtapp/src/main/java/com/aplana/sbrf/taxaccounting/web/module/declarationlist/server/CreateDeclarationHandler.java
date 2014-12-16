@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -26,13 +27,13 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 	}
 
 	@Autowired
-	DeclarationDataService declarationDataService;
+    private DeclarationDataService declarationDataService;
 
 	@Autowired
-	DeclarationTemplateService declarationTemplateService;
+    private DeclarationTemplateService declarationTemplateService;
 
     @Autowired
-    DeclarationTypeService declarationTypeService;
+    private DeclarationTypeService declarationTypeService;
 
 	@Autowired
 	private SecurityService securityService;
@@ -45,37 +46,55 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 
 	@Override
 	public CreateDeclarationResult execute(CreateDeclaration command, ExecutionContext executionContext) throws ActionException {
-        Integer declarationTypeId = command.getDeclarationTypeId();
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(command.getDepartmentId(),
-                command.getReportPeriodId());
-
-        if (departmentReportPeriod == null) {
-            throw new ActionException("Не удалось определить налоговый период.");
-        }
-
-        if (command.getTaxType().equals(TaxType.DEAL)) {
-            List<DeclarationType> declarationTypeList = declarationTypeService.getTypes(departmentReportPeriod.getDepartmentId(),
-                    departmentReportPeriod.getReportPeriod().getId(), TaxType.DEAL);
-            if (declarationTypeList.size() == 1) {
-                declarationTypeId = declarationTypeList.get(0).getId();
-            } else {
-                throw new ActionException("Не удалось определить шаблон для уведомления.");
-            }
-        }
         CreateDeclarationResult result = new CreateDeclarationResult();
         Logger logger = new Logger();
 
-        int activeDeclarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId,
-                departmentReportPeriod.getReportPeriod().getId());
 
-        long declarationId = declarationDataService.create(logger, activeDeclarationTemplateId,
-                securityService.currentUserInfo(), departmentReportPeriod, command.getTaxOrganCode(),
-                command.getTaxOrganKpp());
 
-        result.setDeclarationId(declarationId);
+        try {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(command.getDepartmentId(),
+                    command.getReportPeriodId());
+            Integer declarationTypeId = command.getDeclarationTypeId();
 
-        result.setUuid(logEntryService.save(logger.getEntries()));
+            if (departmentReportPeriod == null) {
+                throw new ActionException("Не удалось определить налоговый период.");
+            }
+
+            if (command.getTaxType().equals(TaxType.DEAL)) {
+                List<DeclarationType> declarationTypeList = declarationTypeService.getTypes(departmentReportPeriod.getDepartmentId(),
+                        departmentReportPeriod.getReportPeriod().getId(), TaxType.DEAL);
+                if (declarationTypeList.size() == 1) {
+                    declarationTypeId = declarationTypeList.get(0).getId();
+                } else {
+                    throw new ActionException("Не удалось определить шаблон для уведомления.");
+                }
+            }
+
+            DeclarationData declarationData = declarationDataService.find(declarationTypeId, departmentReportPeriod.getId(), command.getTaxOrganKpp(), command.getTaxOrganCode());
+            if (declarationData != null) {
+                logger.error("Декларация с заданными параметрами уже существует");
+                result.setDeclarationId(null);
+                return result;
+            }
+/*
+            if (declarationTemplateService.) {
+                logger.error("Выбранный вид декларации не существует в выбранном периоде");
+                return result;
+            }*/
+
+            int activeDeclarationTemplateId = declarationTemplateService.getActiveDeclarationTemplateId(declarationTypeId,
+                    departmentReportPeriod.getReportPeriod().getId());
+
+            long declarationId = declarationDataService.create(logger, activeDeclarationTemplateId,
+                    securityService.currentUserInfo(), departmentReportPeriod, command.getTaxOrganCode(),
+                    command.getTaxOrganKpp());
+
+            result.setDeclarationId(declarationId);
+        } finally {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
+
 		return result;
 	}
 

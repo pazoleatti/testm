@@ -4,15 +4,15 @@ import com.gwtplatform.dispatch.shared.Result;
 
 public class CreateDeclarationResult implements Result {
 	private static final long serialVersionUID = -5166980391678790505L;
-	
-	long declarationId;
+
+	private Long  declarationId;
     private String uuid;
 
-	public long getDeclarationId() {
+	public Long getDeclarationId() {
 		return declarationId;
 	}
 
-	public void setDeclarationId(long declarationId) {
+	public void setDeclarationId(Long declarationId) {
 		this.declarationId = declarationId;
 	}
 

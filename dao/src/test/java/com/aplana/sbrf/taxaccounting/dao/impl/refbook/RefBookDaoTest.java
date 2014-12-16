@@ -655,6 +655,14 @@ public class RefBookDaoTest {
 		assertEquals(0, result.size());
 	}
 
+	@Test(expected = org.springframework.jdbc.BadSqlGrammarException.class)
+	public void testDereferenceFail() {
+		List<Long> recordIds = new ArrayList<Long>();
+		recordIds.add(null);
+		recordIds.add(5L);
+		refBookDao.dereferenceValues(4L, recordIds);
+	}
+
     @Test
     public void getMatchedRecordsByUniqueAttributesIncome102() {
         String opuCode = "code";
