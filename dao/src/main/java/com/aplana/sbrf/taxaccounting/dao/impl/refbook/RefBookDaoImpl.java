@@ -1437,7 +1437,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     RefBookAttribute attribute = pair.getFirst();
                     String type = attribute.getAttributeType().toString() + "_VALUE";
                     // Здесь проставляем номера таблиц
-                    clauseForGroup.append(valuesTableName).append(".attribute_id = ? AND ").append(valuesTableName).append(".").append(type).append(" = ? ");
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
+                        clauseForGroup.append(valuesTableName).append(".attribute_id = ? AND UPPER(").append(valuesTableName).append(".").append(type).append(") = UPPER(?) ");
+                    } else {
+                        clauseForGroup.append(valuesTableName).append(".attribute_id = ? AND ").append(valuesTableName).append(".").append(type).append(" = ? ");
+                    }
 
                     /*************************************Добавление параметров****************************************/
                     selectParams.add(attribute.getId());
