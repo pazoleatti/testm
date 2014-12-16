@@ -306,6 +306,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                                             ДоляТС: tRow.partRight,
                                                             КоэфКв: tRow.coef362,
                                                             НалСтавка: getRefBookValue(41, tRow.taxRate)?.VALUE?.numberValue,
+                                                            КоэфКп: tRow.koefKp,
                                                             СумИсчисл: roundInt(tRow.calculatedTaxSum),
                                                     ]
                                                     + (tRow.benefitMonths ? [ЛьготМесТС: tRow.benefitMonths] : []) +
