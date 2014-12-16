@@ -531,7 +531,8 @@ def consolidation() {
                      */
                     def containedRow = sourcesRows.find { el ->
                         (el.codeOKATO.equals(sRow.codeOKATO) && el.identNumber.equals(sRow.identNumber)
-                                && el.taxBase.equals(sRow.taxBase) && el.baseUnit.equals(sRow.baseUnit))
+                                && el.tsTypeCode.equals(sRow.tsTypeCode) && el.taxBase.equals(sRow.taxBase)
+                                && el.baseUnit.equals(sRow.baseUnit))
                     }
                     if (containedRow != null) {
                         DataRow<Cell> row = containedRow
