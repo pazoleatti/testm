@@ -4,10 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookScriptAction;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookScriptResult;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookScriptAction;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookScriptResult;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -50,7 +47,7 @@ public class RefBookScriptPresenter extends Presenter<RefBookScriptPresenter.MyV
         PlaceRequest request = placeManager.getCurrentPlaceRequest();
         SaveRefBookScriptAction action = new SaveRefBookScriptAction();
         action.setRefBookId(Long.valueOf(request.getParameter("id", null)));
-        action.setScript(getView().getScriptCode());
+        action.setScript(getView().getData().getScript());
         dispatchAsync.execute(action,
                 CallbackUtils.defaultCallback(new AbstractCallback<SaveRefBookScriptResult>() {
                     @Override
@@ -74,18 +71,18 @@ public class RefBookScriptPresenter extends Presenter<RefBookScriptPresenter.MyV
                 CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookScriptResult>() {
                     @Override
                     public void onSuccess(GetRefBookScriptResult result) {
-                        getView().setScriptCode(result.getScript());
-                        getView().setPageTitle(result.getName());
+                        RefBookScript refBookScript = new RefBookScript();
+                        refBookScript.setScript(result.getScript());
+                        refBookScript.setPageTitle(result.getName());
+                        getView().setData(refBookScript);
                     }
                 }, this));
     }
 
     public interface MyView extends View, HasUiHandlers<RefBookScriptUiHandlers> {
-        String getScriptCode();
+        RefBookScript getData();
 
-        void setScriptCode(String script);
-
-        void setPageTitle(String title);
+        void setData(RefBookScript refBookScript);
 
         void showSavedMessage(boolean isRedirect);
     }
