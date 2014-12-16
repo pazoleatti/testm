@@ -135,6 +135,10 @@ def start = null
 @Field
 def endDate = null
 
+// Признак периода ввода остатков
+@Field
+def isBalancePeriod
+
 // отчетный период формы
 @Field
 def currentReportPeriod = null
@@ -184,6 +188,15 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
     }
     return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
+    }
+    return isBalancePeriod
 }
 
 //// Кастомные методы
@@ -268,21 +281,21 @@ def logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index ?: 0, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, index ?: 0, nonEmptyColumns, logger, !isBalancePeriod())
 
         // 2. Проверка на соответствие дат при постановке (снятии) с учёта
         if (!(row.regDateEnd == null || (row.regDate != null && row.regDateEnd >= row.regDate))) {
-            rowError(logger, row, errorMsg + 'Дата постановки (снятия) с учёта неверная!')
+            loggerError(row, errorMsg + 'Дата постановки (снятия) с учёта неверная!')
         }
 
         // 3. Проврека на наличие даты угона при указании даты возврата
         if (row.stealDateEnd != null && row.stealDateStart == null) {
-            rowError(logger, row, errorMsg + 'Не заполнено поле «Дата угона»!')
+            loggerError(row, errorMsg + 'Не заполнено поле «Дата угона»!')
         }
 
         // 4. Проверка на соответствие дат сведений об угоне
         if (row.stealDateStart != null && row.stealDateEnd != null && row.stealDateEnd < row.stealDateStart) {
-            rowError(logger, row, errorMsg + 'Дата возврата ТС неверная!')
+            loggerError(row, errorMsg + 'Дата возврата ТС неверная!')
         }
 
         // 5. Проверка на наличие в списке ТС строк, для которых графы "Код ОКТМО", "Вид ТС",
@@ -296,7 +309,7 @@ def logicCheck() {
                 }
             }
             if (!''.equals(errorRows)) {
-                rowError(logger, row, "Обнаружены строки $index$errorRows, у которых " +
+                loggerError(row, "Обнаружены строки $index$errorRows, у которых " +
                         "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue ?: '\"\"'}, " +
                         "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue ?: '\"\"'}, " +
                         "Идентификационный номер ТС = ${row.identNumber ?: '\"\"'}, " +
@@ -309,7 +322,7 @@ def logicCheck() {
 
         // 6. Проверка на наличие в списке ТС строк, период владения которых не пересекается с отчётным
         if (row.regDate != null && row.regDate > dTo || row.regDateEnd != null && row.regDateEnd < dFrom) {
-            rowError(logger, row, errorMsg + 'Период регистрации ТС ('
+            loggerError(row, errorMsg + 'Период регистрации ТС ('
                     + row.regDate.format(dFormat) + ' - ' + ((row.regDateEnd != null) ? row.regDateEnd.format(dFormat) : '...') + ') ' +
                     ' не пересекается с периодом (' + dFrom.format(dFormat) + " - " + dTo.format(dFormat) +
                     '), за который сформирована налоговая форма!')
@@ -320,14 +333,14 @@ def logicCheck() {
             Calendar calenadarMake = Calendar.getInstance()
             calenadarMake.setTime(row.year)
             if (calenadarMake.get(Calendar.YEAR) > reportPeriod.taxPeriod.year) {
-                rowError(logger, row, errorMsg + 'Год изготовления ТС не может быть больше отчетного года!')
+                loggerError(row, errorMsg + 'Год изготовления ТС не может быть больше отчетного года!')
             }
         }
 
         if (row.share != null){
             def columnName = getColumnName(row, 'share')
             if (!(row.share ==~ /\d{1,10}\/\d{1,10}/)) {
-                rowError(logger, row, errorMsg + "Графа «$columnName» должна быть заполнена согласно формату «(от 1 до 10 знаков)/(от 1 до 10 знаков)»!")
+                loggerError(row, errorMsg + "Графа «$columnName» должна быть заполнена согласно формату «(от 1 до 10 знаков)/(от 1 до 10 знаков)»!")
             } else {
                 def partArray = row.share.split('/')
                 if (partArray[1] ==~ /0{1,10}/) {
@@ -339,7 +352,7 @@ def logicCheck() {
         // 9. Проверка корректности заполнения «Графы 15»
         if (row.pastYear != calc15(row, reportPeriod.taxPeriod.year)) {
             def columnName = getColumnName(row, 'pastYear')
-            rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
+            loggerError(row, errorMsg + "Графа «$columnName» заполнена неверно!")
         }
 
         if (row.codeOKATO != null) {
@@ -348,7 +361,7 @@ def logicCheck() {
             // справочник «Параметры представления деклараций по транспортному налогу»
             def records = getProvider(210L).getRecords(dTo, null, filter, null)
             if (records == null || records.isEmpty()) {
-                rowError(logger, row, errorMsg + "Для выбранного кода ОКТМО отсутствует запись в справочнике «Параметры представления деклараций по транспортному налогу»!")
+                loggerError(row, errorMsg + "Для выбранного кода ОКТМО отсутствует запись в справочнике «Параметры представления деклараций по транспортному налогу»!")
             }
 
             // 15. Проверка допустимых значений «Графы 23»
@@ -364,35 +377,35 @@ def logicCheck() {
                 }
                 if (isError) {
                     def columnName = getColumnName(row, 'taxBenefitCode')
-                    rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
+                    loggerError(row, errorMsg + "Графа «$columnName» заполнена неверно!")
                 }
             }
         }
 
         // 11. Поверка на соответствие дат использования льготы
         if (row.benefitEndDate != null && row.benefitStartDate != null && row.benefitEndDate < row.benefitStartDate) {
-            rowError(logger, row, errorMsg + "Неверно указаны даты начала и окончания использования льготы!")
+            loggerError(row, errorMsg + "Неверно указаны даты начала и окончания использования льготы!")
         }
 
         // 12. Проверка на заполнение периода использования льготы при указании кода налоговой льготы
         if (row.taxBenefitCode != null && row.benefitStartDate == null) {
-            rowError(logger, row, errorMsg + "При указании кода налоговой льготы должен быть заполнен период использования льготы!")
+            loggerError(row, errorMsg + "При указании кода налоговой льготы должен быть заполнен период использования льготы!")
         }
 
         // 13. Проверка на заполнение кода налоговой льготы при указании периода использования льгот
         if (row.benefitStartDate != null && row.taxBenefitCode == null) {
-            rowError(logger, row, errorMsg + "При указании периода использования льготы должен быть заполнен код налоговой льготы!")
+            loggerError(row, errorMsg + "При указании периода использования льготы должен быть заполнен код налоговой льготы!")
         }
 
         // 14. Проверка на наличие в списке ТС строк, период использования льготы, которых, не пересекается с отчётным...
         if (row.benefitStartDate != null && row.benefitStartDate > dTo || row.benefitEndDate != null && row.benefitEndDate < dFrom) {
-            rowError(logger, row, errorMsg + "Период использования льготы ТС (${row.benefitStartDate.format(dFormat)} - ${row.benefitEndDate.format(dFormat)}) не пересекается с периодом (${dFrom.format(dFormat)} - ${dTo.format(dFormat)}), за который сформирована налоговая форма!")
+            loggerError(row, errorMsg + "Период использования льготы ТС (${row.benefitStartDate.format(dFormat)} - ${row.benefitEndDate.format(dFormat)}) не пересекается с периодом (${dFrom.format(dFormat)} - ${dTo.format(dFormat)}), за который сформирована налоговая форма!")
         }
 
         // 16. Проверка корректности заполнения «Графы 24»
         if (row.base != calc24(row)) {
             def columnName = getColumnName(row, 'base')
-            rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
+            loggerError(row, errorMsg + "Графа «$columnName» заполнена неверно!")
         }
 
         // 17. Проверка наличия повышающего коэффициента для ТС дороже 3 млн. руб.
@@ -402,7 +415,7 @@ def logicCheck() {
             // справочник «Повышающие коэффициенты транспортного налога»
             def records = getProvider(209L).getRecords(dTo, null, filter, null)
             if (records == null || records.isEmpty()) {
-                rowError(logger, row, errorMsg + "Для средней стоимости выбранной модели (версии) из перечня, утвержденного на налоговый период, отсутствует запись в справочнике «Повышающие коэффициенты транспортного налога»!")
+                loggerError(row, errorMsg + "Для средней стоимости выбранной модели (версии) из перечня, утвержденного на налоговый период, отсутствует запись в справочнике «Повышающие коэффициенты транспортного налога»!")
             }
         }
 
@@ -422,7 +435,7 @@ def logicCheck() {
             }
             if (hasError) {
                 def columnName = getColumnName(row, 'tsTypeCode')
-                rowError(logger, row, errorMsg + "Графа «$columnName» заполнена неверно!")
+                loggerError(row, errorMsg + "Графа «$columnName» заполнена неверно!")
             }
         }
     }
@@ -526,12 +539,19 @@ def copyRow(def row, def columns) {
 // Получить новую строку с заданными стилями.
 def getNewRow() {
     def newRow = formData.createDataRow()
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).styleAlias = 'Редактируемая'
-    }
-    autoFillColumns.each {
-        newRow.getCell(it).styleAlias = 'Автозаполняемая'
+    if (isBalancePeriod()) {
+        (editableColumns + ['pastYear', 'base']).each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).styleAlias = 'Редактируемая'
+        }
+    } else {
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).styleAlias = 'Редактируемая'
+        }
+        autoFillColumns.each {
+            newRow.getCell(it).styleAlias = 'Автозаполняемая'
+        }
     }
     return newRow
 }
@@ -1272,5 +1292,13 @@ Long getRefBookRecordIdImport(Long refBookId, Date date, String filter, String c
 void checkRegionId() {
     if (formDataDepartment.regionId == null) {
         throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
+}
+
+def loggerError(def row, def msg) {
+    if (isBalancePeriod()) {
+        rowWarning(logger, row, msg)
+    } else {
+        rowError(logger, row, msg)
     }
 }
