@@ -2,12 +2,15 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.script;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookScript;
+import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -18,38 +21,39 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
  *
  * @author Fail Mukhametdinov
  */
-public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandlers> implements RefBookScriptPresenter.MyView {
+public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandlers> implements RefBookScriptPresenter.MyView,
+        Editor<RefBookScript> {
+
+    interface MyDriver extends SimpleBeanEditorDriver<RefBookScript, RefBookScriptView> {}
+
+    private MyDriver driver;
 
     @UiField
-    HasText script;
+    CodeMirror script;
 
+    @Ignore
     @UiField
     Anchor returnAnchor;
 
     @UiField
     Label pageTitle;
 
-    private String oldText;
-
     @Inject
-    public RefBookScriptView(Binder uiBinder) {
+    public RefBookScriptView(Binder uiBinder, MyDriver driver) {
         initWidget(uiBinder.createAndBindUi(this));
+        this.driver = driver;
+        this.driver.initialize(this);
+        this.driver.edit(new RefBookScript());
     }
 
     @Override
-    public String getScriptCode() {
-        return script.getText();
+    public RefBookScript getData() {
+        return driver.flush();
     }
 
     @Override
-    public void setScriptCode(String text) {
-        oldText = text;
-        script.setText(text);
-    }
-
-    @Override
-    public void setPageTitle(String title) {
-        pageTitle.setText(title);
+    public void setData(RefBookScript refBookScript) {
+        driver.edit(refBookScript);
     }
 
     @Override
@@ -73,7 +77,7 @@ public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandler
 
     @UiHandler("cancelButton")
     void onCancelClicked(final ClickEvent event) {
-        if (oldText.hashCode() != script.getText().hashCode()){
+        if (driver.isDirty()){
             Dialog.confirmMessage("Редактирование справочника", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {
@@ -98,14 +102,16 @@ public class RefBookScriptView extends ViewWithUiHandlers<RefBookScriptUiHandler
 
     @UiHandler("resetButton")
     void onResetClicked(ClickEvent event) {
-        Dialog.confirmMessage("Редактирование справочника", "Сбросить изменения?", new DialogHandler() {
-            @Override
-            public void yes() {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().getScript();
+        if (driver.isDirty()){
+            Dialog.confirmMessage("Редактирование справочника", "Сбросить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().getScript();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @UiHandler("returnAnchor")
