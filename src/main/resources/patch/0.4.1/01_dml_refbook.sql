@@ -15,7 +15,7 @@ commit;
 --Категории средней стоимости транспортных средств
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (211,'Категории средней стоимости транспортных средств',1,0,0,null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2110, 211, 'Код', 'CODE', 1, 1, null, null, 1, null, 1, 1, 1, null, null, 0, 1);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2111, 211, 'Наименование', 'NAME', 1, 2, null, null, 1, null, 50, 1, 1, null, null, 0, 50);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2111, 211, 'Наименование', 'NAME', 1, 2, null, null, 1, null, 50, 1, 2, null, null, 0, 50);
 commit;
 
 --Средняя стоимость транспортных средств
