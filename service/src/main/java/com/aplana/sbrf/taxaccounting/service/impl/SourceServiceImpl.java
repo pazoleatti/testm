@@ -731,11 +731,11 @@ public class SourceServiceImpl implements SourceService {
                         /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
                         if (periodStart.after(oldPeriodStart)) {
                             acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                                    oldPeriodStart, periodStart));
+                                    oldPeriodStart , SimpleDateUtils.addDayToDate(periodStart, -1)));
                         }
                         if ((periodEnd != null && oldPeriodEnd == null) || (periodEnd != null && oldPeriodEnd != null && periodEnd.before(oldPeriodEnd))) {
                             acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                                    periodEnd, oldPeriodEnd));
+                                    SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd));
                         }
 
                         if (!acceptedSources.isEmpty()) {
