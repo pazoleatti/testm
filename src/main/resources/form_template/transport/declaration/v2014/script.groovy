@@ -563,7 +563,11 @@ def getDepartmentParam() {
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamTable == null) {
         def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
-        departmentParamTable = getProvider(310).getRecords(getReportPeriodEndDate() - 1, null, filter, null).get(0)
+        def departmentParamTableList = getProvider(310).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParamTable = departmentParamTableList.get(0)
     }
     return departmentParamTable
 }
