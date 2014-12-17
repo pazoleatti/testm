@@ -2,6 +2,7 @@ package form_template.transport.declaration.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -129,6 +130,8 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+        Date yearStartDate = new SimpleDateFormat('dd.MM.yyyy').parse("01.01.${reportPeriod.taxPeriod.year}")
+        def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.TRANSPORT, yearStartDate, getReportPeriodEndDate())
         builder.Файл(
                 // TODO (Ramil Timerbaev) поменять после исправления в ядре
                 // ИдФайл: declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
@@ -201,8 +204,9 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
 
                             // Заполнение данных предыдущих кварталов
                             if (reportPeriod.order > 1) {
-                                ((reportPeriod.order - 1)..1).each { order ->
-                                    reportPeriodMap[order] = reportPeriodService.getPrevReportPeriod(reportPeriodMap[order + 1].id)
+                                reportPeriods.each { period ->
+                                    def order = period.order
+                                    reportPeriodMap[order] = period
                                     formDataMap[order] = formDataService.getLast(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id, formDataMap[reportPeriod.order].periodOrder)
                                     if (formDataMap[order] != null && formDataMap[order].state == WorkflowState.ACCEPTED) {
                                         rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).getAllCached()
@@ -215,8 +219,12 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                         def resultMap = [:]
 
                         // По кварталам с начала года до текущего
-                        (1..reportPeriod.order).each { order ->
+                        for (period in reportPeriods) {
+                            def order = period.order
                             def rowsData = rowsDataMap[order]
+                            if (rowsData == null) {
+                                continue
+                            }
                             rowsData.each { row ->
                                 if (row.getAlias() == null && row.taxAuthority == declarationData.taxOrganCode && row.kpp == declarationData.kpp) {
                                     // Новый код ОКТМО — инициализация результирующего набора
