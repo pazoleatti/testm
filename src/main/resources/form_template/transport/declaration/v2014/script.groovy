@@ -502,8 +502,11 @@ List<String> getErrorDepartment(def record) {
     if (record.SIGNATORY_FIRSTNAME?.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
         errorList.add("«Имя подписанта»")
     }
-    if (record.APPROVE_DOC_NAME?.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
-        errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
+    def signatoryId = getRefBookValue(35, record?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
+    if  (signatoryId != null && signatoryId != 1) {
+        if (record.APPROVE_DOC_NAME?.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
+            errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
+        }
     }
     if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
         errorList.add("«Код места, по которому представляется документ»")
