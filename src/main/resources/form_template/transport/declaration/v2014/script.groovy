@@ -476,8 +476,14 @@ List<String> getErrorDepartment(def record) {
     if (record.OKVED_CODE?.referenceValue == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
     }
-    if (record.REORG_INN?.stringValue == null || record.REORG_INN.stringValue.isEmpty()) {
-        errorList.add("«ИНН реорганизованного обособленного подразделения»")
+    def reorgFormCode = getRefBookValue(5, record?.REORG_FORM_CODE?.referenceValue)?.CODE?.stringValue
+    if (reorgFormCode != null && !reorgFormCode.equals("") && Integer.parseInt(reorgFormCode) in [1, 2, 3, 5, 6]) {
+        if (record.REORG_INN?.stringValue == null || record.REORG_INN.stringValue.isEmpty()) {
+            errorList.add("«ИНН реорганизованного обособленного подразделения»")
+        }
+        if (record.REORG_KPP?.stringValue == null || record.REORG_KPP.stringValue.isEmpty()) {
+            errorList.add("«КПП реорганизованного обособленного подразделения»")
+        }
     }
     if (record.SIGNATORY_ID?.referenceValue == null) {
         errorList.add("«Признак лица подписавшего документ»")
