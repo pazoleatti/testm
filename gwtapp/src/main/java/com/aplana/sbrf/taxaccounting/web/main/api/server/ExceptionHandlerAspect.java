@@ -65,20 +65,6 @@ public class ExceptionHandlerAspect {
     }
 
     /**
-     * Обернуть необработанные исключения в DaoException
-     * @param e
-     * @throws DaoException
-     */
-    @AfterThrowing(pointcut = "execution(* com.aplana.sbrf.taxaccounting.dao.*.*(..))", throwing = "e")
-    public void handleDaoException(Throwable e) throws DaoException {
-        if (e instanceof DaoException) {
-            throw (DaoException) e;
-        } else {
-            throw new DaoException(e.getLocalizedMessage(), e);
-        }
-    }
-
-    /**
      * Метод преобразующий стек трейс исключения в формат строки.
      *
      * @param e брошенное исключение
