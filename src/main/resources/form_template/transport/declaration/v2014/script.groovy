@@ -311,16 +311,14 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                                     [
                                                             ВыпускТС: tRow.years, //
                                                             ВладенТС: tRow.ownMonths,
-                                                            ДоляТС: tRow.partRight,
-                                                            КоэфКв: tRow.coef362,
-                                                            НалСтавка: getRefBookValue(41, tRow.taxRate)?.VALUE?.numberValue,
-                                                            КоэфКп: tRow.koefKp,
-                                                            СумИсчисл: roundInt(tRow.calculatedTaxSum),
-                                                    ]
-                                                    + (tRow.benefitMonths ? [ЛьготМесТС: tRow.benefitMonths] : []) +
-                                                    [
-                                                            СумИсчислУпл: roundInt(tRow.taxSumToPay),
+                                                            ДоляТС  : tRow.partRight
                                                     ] +
+                                                    (tRow.coef362 ? [КоэфКв: tRow.coef362] : []) +
+                                                    [НалСтавка: getRefBookValue(41, tRow.taxRate)?.VALUE?.numberValue] +
+                                                    (tRow.koefKp ? [КоэфКп: tRow.koefKp] : []) +
+                                                    [СумИсчисл: roundInt(tRow.calculatedTaxSum)] +
+                                                    (tRow.benefitMonths ? [ЛьготМесТС: tRow.benefitMonths] : []) +
+                                                    [СумИсчислУпл: roundInt(tRow.taxSumToPay)] +
                                                     (tRow.coefKl ? [КоэфКл: tRow.coefKl] : []),
                                     ) {
                                         // генерация КодОсвНал
