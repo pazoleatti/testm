@@ -1,10 +1,6 @@
 package form_template.transport.summary.v2014
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.Department
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
@@ -284,7 +280,7 @@ def calc() {
             if (partArray[1] ==~ /0{1,10}/) {
                 logger.error(errorMsg + "Деление на ноль в графе \"${getColumnName(row, 'partRight')}\"!")
             } else {
-                partRight = new BigDecimal((new BigDecimal(partArray[0]))/(new BigDecimal(partArray[1])))
+                partRight = new BigDecimal((new BigDecimal(partArray[0])) / (new BigDecimal(partArray[1])))
             }
         }
         // Графа 25 (Сумма исчисления налога) = Расчет суммы исчисления налога
@@ -382,16 +378,18 @@ def calc() {
 void fillTaKpp(def row, def errorMsg) {
     String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = " + row.okato?.toString()
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() == 1) {
+    if (records.size() != 1) {
+        logger.error(errorMsg + "Для кода ОКТМО «${getRefBookValue(96, row.okato)?.CODE?.value}» "
+                + (records.size() == 0 ? "нет данных" : "найдено больше одной записи")
+                + " в справочнике «Параметры представления деклараций по транспортному налогу»!")
+    } else if (formDataEvent != FormDataEvent.CHECK) {
         row.taxAuthority = records[0].TAX_ORGAN_CODE?.value
         row.kpp = records[0].KPP?.value
-    } else {
-        logger.error(errorMsg + "Для кода ОКТМО «${getRefBookValue(96, row.okato)?.CODE?.value}» нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     }
 }
 
 def checkTaKpp(def row, def errorMsg) {
-    def String filter =  String.format("DECLARATION_REGION_ID = ${formDataDepartment.regionId?.toString()}"+
+    def String filter = String.format("DECLARATION_REGION_ID = ${formDataDepartment.regionId?.toString()}" +
             " and OKTMO = ${row.okato?.toString()}" +
             " and LOWER(TAX_ORGAN_CODE) = LOWER('${row.taxAuthority?.toString()}') " +
             " and LOWER(KPP) = LOWER('${row.kpp?.toString()}')")
@@ -505,8 +503,8 @@ def consolidation() {
     // очистить форму
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    dataRows.removeAll{ it.getAlias() == null }
-    Map<String, List> dataRowsMap = ['A':[], 'B':[], 'C':[]]
+    dataRows.removeAll { it.getAlias() == null }
+    Map<String, List> dataRowsMap = ['A': [], 'B': [], 'C': []]
     List<DataRow<Cell>> sourcesRows = new ArrayList()
     List<Department> departments = new ArrayList()
 
@@ -795,7 +793,7 @@ int calc21(DataRow sRow, Date reportPeriodStartDate, Date reportPeriodEndDate) {
     }
 }
 
-def calc26 (def row, def reportPeriodStartDate, def reportPeriodEndDate) {
+def calc26(def row, def reportPeriodStartDate, def reportPeriodEndDate) {
     if (row.benefitStartDate == null && row.benefitEndDate == null) {
         return null
     } else {
@@ -916,12 +914,12 @@ def calc24(def row, def region, def errorMsg) {
 
 // Получение подитоговых строк
 def getTotalRow(def dataRows) {
-    return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
+    return dataRows.find { it.getAlias() != null && it.getAlias().equals('total') }
 }
 
 def getBenefitCode(def parentRecordId) {
     def recordId = getRefBookValue(7, parentRecordId).TAX_BENEFIT_ID.value
-    return  getRefBookValue(6, recordId).CODE.value
+    return getRefBookValue(6, recordId).CODE.value
 }
 
 // Сортировка групп и строк
@@ -936,7 +934,7 @@ void sortFormDataRows() {
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
         // Массовое разыменование строк НФ
-        def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
         sortRowsSimple(sectionsRows)
