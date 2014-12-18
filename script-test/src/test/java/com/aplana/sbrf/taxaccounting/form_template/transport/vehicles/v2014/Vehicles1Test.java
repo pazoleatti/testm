@@ -73,6 +73,15 @@ public class Vehicles1Test extends ScriptTestBase {
                         return result;
                     }
                 });
+        when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        result.setBalance(true);
+                        return result;
+                    }
+                });
     }
 
     @Test

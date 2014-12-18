@@ -150,6 +150,17 @@ public class SummaryTest extends ScriptTestBase {
         TestScriptHelper sourceTestHelper = new TestScriptHelper("/form_template/transport/vehicles/v2014/", sourceFormData, getDefaultScriptTestMockHelper(Vehicles1Test.class));
         sourceTestHelper.setImportFileInputStream(getCustomInputStream("sourceImportFile.xlsm"));
         sourceTestHelper.initRowData();
+
+        when(sourceTestHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        result.setBalance(true);
+                        return result;
+                    }
+                });
+
         sourceTestHelper.execute(FormDataEvent.IMPORT);
         sourceDataRowHelper.save(sourceTestHelper.getDataRowHelper().getAll());
 
@@ -161,7 +172,7 @@ public class SummaryTest extends ScriptTestBase {
         // Консолидация
         testHelper.initRowData();
         testHelper.execute(FormDataEvent.COMPOSE);
-        Assert.assertEquals(testHelper.getFormTemplate().getRows().size() + 4, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
 
         checkLogger();
     }
