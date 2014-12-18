@@ -469,9 +469,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 if (c.getType() == RefBookAttributeType.STRING) {
                     paramCell.setStringValue(c.getStringValue());
                 } else if (c.getType() == RefBookAttributeType.REFERENCE) {
+                    paramCell.setNumericValue(c.getRefValue() == null ? null : new BigDecimal(c.getRefValue()));
                     paramCell.setRefBookDereference(c.getDeRefValue());
                 } else if (c.getType() == RefBookAttributeType.NUMBER) {
-                    System.out.println("ADD NUMBER");
                     paramCell.setNumericValue(c.getNumberValue() == null ? null : new BigDecimal(c.getNumberValue().longValue()));
                 }
                 cells.add(paramCell);

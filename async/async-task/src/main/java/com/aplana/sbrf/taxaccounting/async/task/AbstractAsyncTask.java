@@ -99,7 +99,11 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     }
                 });
             }
-            throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
+            if (e instanceof ServiceLoggerException) {
+                throw new ServiceLoggerException("Не удалось выполнить асинхронную задачу", ((ServiceLoggerException) e).getUuid());
+            } else {
+                throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
+            }
         }
     }
 

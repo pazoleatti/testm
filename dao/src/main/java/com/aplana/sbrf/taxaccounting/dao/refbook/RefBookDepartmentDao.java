@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
@@ -71,14 +70,6 @@ public interface RefBookDepartmentDao {
      * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
      */
     List<Pair<String,String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
-
-    /**
-     * Получает отчетные периоды по виду налога и департаментам
-     * @param taxTypes
-     * @param departmentList
-     * @return
-     */
-    List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList);
 
     void update(int uniqueId, Map<String, RefBookValue> records, List<RefBookAttribute> attributes);
 

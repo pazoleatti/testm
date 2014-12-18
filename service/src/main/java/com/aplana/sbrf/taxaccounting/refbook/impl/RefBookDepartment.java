@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -100,6 +101,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     private LockDataService lockService;
     @Autowired
     private DepartmentFormTypeService departmentFormTypeService;
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
@@ -590,7 +593,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                     provider.deleteRecordVersions(logger, uniqueIds, false);
                 }
 
-                deletePeriods(depId);
+                deleteDRPs(depId);
 
                 auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
                         String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null, depId);
@@ -875,14 +878,12 @@ public class RefBookDepartment implements RefBookDataProvider {
             logger.warn("Заданы пути к каталогам транспортных файлов для %s!", department.getName());
     }
 
-    private void deletePeriods(int depId){
-        List<Long> reportPeriods =
-                refBookDepartmentDao.getPeriodsByTaxTypesAndDepartments(
-                        Arrays.asList(TaxType.values()),
-                        Arrays.asList(depId));
-        for (Long id : reportPeriods){
-            periodService.removePeriodWithLog(id.intValue(), null, Arrays.asList(depId), null, null);
-        }
+    private void deleteDRPs(int depId){
+        DepartmentReportPeriodFilter drpFilter = new DepartmentReportPeriodFilter();
+        drpFilter.setIsCorrection(null);
+        drpFilter.setDepartmentIdList(Arrays.asList(depId));
+        List<Integer> corrIds = departmentReportPeriodService.getListIdsByFilter(drpFilter);
+        departmentReportPeriodService.delete(corrIds);
     }
 
     private void checkCycle(Department department, Department parentDep, Logger logger){

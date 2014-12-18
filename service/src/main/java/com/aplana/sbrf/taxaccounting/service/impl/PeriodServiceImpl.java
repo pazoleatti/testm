@@ -512,8 +512,7 @@ public class PeriodServiceImpl implements PeriodService {
 		return canRemove;
 	}
 
-    @Override
-	public void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentIds,  TaxType taxType, List<LogEntry> logs) {
+	private void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentIds,  TaxType taxType, List<LogEntry> logs) {
         ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setCorrectionDate(correctionDate);
