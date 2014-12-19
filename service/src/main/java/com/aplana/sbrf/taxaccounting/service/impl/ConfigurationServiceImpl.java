@@ -201,8 +201,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 if (valuesList != null)
                     for (String value : valuesList) {
                         // Проверка значения параметра "Проверять ЭЦП"
-                        if (configurationParam.getCaption().equals("Проверять ЭЦП")) {
-                            if (!value.equals("0") && !value.equals("1")) {
+                        if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
+                            if (!"0".equals(value) && !"1".equals(value)) {
                                 logger.error(SIGN_CHECK_ERROR, configurationParam.getCaption());
                             }
                         }
