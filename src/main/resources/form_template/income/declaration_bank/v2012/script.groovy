@@ -368,7 +368,7 @@ void generateXML() {
 
     /** Период. */
     def period = 0
-    if (reorgFormCode == 50) {
+    if (reorgFormCode != null) {
         period = 50
     } else if (reportPeriod.order != null) {
         def values = [21, 31, 33, 34]
@@ -667,11 +667,11 @@ void generateXML() {
                         ИННЮЛ : inn,
                         КПП : kpp) {
 
-                    if (reorgFormCode != null) {
-                        СвРеоргЮЛ(
-                                ФормРеорг : reorgFormCode,
-                                ИННЮЛ : reorgInn,
-                                КПП : reorgKpp)
+                    if (reorgFormCode != null && !reorgFormCode.equals("")) {
+                        СвРеоргЮЛ([ФормРеорг: reorgFormCode] +
+                                (Integer.parseInt(reorgFormCode) in [1, 2, 3, 5, 6] ?
+                                        [ИННЮЛ: reorgInn, КПП: reorgKpp] : [])
+                        )
                     }
                 }
             }

@@ -368,7 +368,7 @@ void generateXML() {
 
     /** Период. */
     def period = 0
-    if (reorgFormCode == 50) {
+    if (reorgFormCode != null) {
         period = 50
     } else if (reportPeriod.order != null) {
         def values = [21, 31, 33, 34]
@@ -667,11 +667,11 @@ void generateXML() {
                         ИННЮЛ : inn,
                         КПП : kpp) {
 
-                    if (reorgFormCode != null) {
-                        СвРеоргЮЛ(
-                                ФормРеорг : reorgFormCode,
-                                ИННЮЛ : reorgInn,
-                                КПП : reorgKpp)
+                    if (reorgFormCode != null && !reorgFormCode.equals("")) {
+                        СвРеоргЮЛ([ФормРеорг: reorgFormCode] +
+                                (Integer.parseInt(reorgFormCode) in [1, 2, 3, 5, 6] ?
+                                        [ИННЮЛ: reorgInn, КПП: reorgKpp] : [])
+                        )
                     }
                 }
             }
@@ -739,7 +739,6 @@ void generateXML() {
                                     [ТипНП : typeNP] +
                                             (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
                                             [ОКТМО : oktmo]) {
-
                                 def list02Row300 = avPlatMesFB
                                 def avPlat1 = (long) list02Row300 / 3
                                 def avPlat2 = avPlat1
