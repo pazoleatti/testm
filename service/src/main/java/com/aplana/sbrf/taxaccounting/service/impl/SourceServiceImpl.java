@@ -594,6 +594,10 @@ public class SourceServiceImpl implements SourceService {
                     sourceClientData.getMode(), sourceClientData.isDeclaration(),
                     sourceDepartmentName, destinationDepartmentName);
 
+            /** Специфичные проверки */
+            checkSpecifics(logger, sourceClientData.getSourcePairs(),
+                    sourceClientData.getMode(), sourceClientData.isDeclaration(), sourceClientData.getTaxType());
+
             /** Проверка существования экземпляров нф */
             checkFormInstances(logger, sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(),
                     sourceDepartmentName, destinationDepartmentName, sourceClientData.isDeclaration());
@@ -635,6 +639,34 @@ public class SourceServiceImpl implements SourceService {
             }
         } else {
             throw new ServiceException(EMPTY_LIST_MSG);
+        }
+    }
+
+    /**
+     * Специфичные проверки назначений.
+     * Предполагается что этот метод будет вызываться только при создании, когда участвует только одна пара назначений, так что оптимизации вызовов дао не делал
+     * @param logger                  логгер
+     * @param sourcePairs             входной набор пар источник-приемник
+     * @param mode                    режим работы: назначение приемников или назначение источников
+     * @param declaration             признак того, что идет обработка в режиме "Декларации"
+     * @param taxType                 тип налога
+     */
+    private void checkSpecifics(Logger logger, List<SourcePair> sourcePairs, SourceMode mode, boolean declaration, TaxType taxType) {
+        for (SourcePair pair : sourcePairs) {
+            /** Для транспортного налога и имущества источник и приемник должен относиться к одному ТБ */
+            if (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY) {
+                Integer srcDepartmentId = sourceDao.getDepartmentIdByDepartmentFormType(pair.getSource());
+                Integer destDepartmentId = declaration ?
+                        sourceDao.getDepartmentIdByDepartmentDeclarationType(pair.getDestination()) : sourceDao.getDepartmentIdByDepartmentFormType(pair.getDestination());
+                if (srcDepartmentId != null && destDepartmentId != null) {
+                    Integer srcTB = departmentDao.getParentTBId(srcDepartmentId);
+                    Integer destTB = departmentDao.getParentTBId(destDepartmentId);
+                    if (srcTB != null && destTB != null && !destTB.equals(srcTB)) {
+                        throw new ServiceLoggerException("Ограничение регионального налога: приёмник должен принадлежать тому же территориальному банку, к которому относится форма-источник!",
+                                logEntryService.save(logger.getEntries()));
+                    }
+                }
+            }
         }
     }
 

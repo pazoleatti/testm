@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.source;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +31,8 @@ public class SourceClientData implements Serializable{
     private SourceMode mode;
     /** Признак того, что идет обработка назначений источников для деклараций */
     private boolean isDeclaration;
+    /** Тип налога */
+    private TaxType taxType;
 
 
     /** --- Используется только при редактировании --- */
@@ -153,5 +157,13 @@ public class SourceClientData implements Serializable{
 
     public void setSourceObjects(List<SourceObject> sourceObjects) {
         this.sourceObjects = sourceObjects;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
     }
 }
