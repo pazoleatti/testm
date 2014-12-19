@@ -1,6 +1,8 @@
 package com.aplana.taxaccounting
 
 import groovy.sql.Sql
+import org.custommonkey.xmlunit.Diff
+import org.custommonkey.xmlunit.XMLUnit
 
 /**
  * Отчет сравнения Git и БД
@@ -119,11 +121,25 @@ class DBReport {
                                         name = tmp2?.name
                                     }
 
+                                    XMLUnit.setIgnoreWhitespace(true)
+                                    XMLUnit.setIgnoreComments(true)
+                                    XMLUnit.setIgnoreDiffBetweenTextAndCDATA(true)
+                                    XMLUnit.setNormalizeWhitespace(true)
+
+                                    boolean dataRowsEqual = true
+                                    Diff diff
+                                    if (tmp1?.data_rows != null && tmp2?.data_rows != null) {
+                                        diff = XMLUnit.compareXML(tmp1.data_rows, tmp2.data_rows)
+                                        dataRowsEqual = diff.similar()
+                                    } else if (tmp1?.data_rows != null || tmp2?.data_rows != null) {
+                                        dataRowsEqual = false
+                                    }
+
                                     // Признак сравнения
                                     def nameC = tmp1?.name == tmp2?.name ? '+' : '—'
                                     def fullnameC = tmp1?.fullname == tmp2?.fullname ? '+' : '—'
                                     def fixedrowsC = tmp1?.fixed_rows == tmp2?.fixed_rows ? '+' : '—'
-                                    def datarowsC = tmp1?.data_rows == tmp2?.data_rows ? '+' : '—'
+                                    def datarowsC = dataRowsEqual ? '+' : '—'
                                     def dataheadersC = tmp1?.data_headers == tmp2?.data_headers ? '+' : '—'
                                     def statusC = tmp1?.status == tmp2?.status ? '+' : '—'
                                     def scriptC = tmp1?.script == tmp2?.script ? '+' : '—'

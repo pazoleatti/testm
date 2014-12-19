@@ -375,4 +375,14 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         });
         return result;
     }
+
+    @Override
+    public Integer getDepartmentIdByDepartmentFormType(long departmentFormTypeId) {
+        return getJdbcTemplate().queryForInt("select d.id from department d join department_form_type dft on dft.department_id = d.id where dft.id = ?", departmentFormTypeId);
+    }
+
+    @Override
+    public Integer getDepartmentIdByDepartmentDeclarationType(long departmentDeclarationTypeId) {
+        return getJdbcTemplate().queryForInt("select d.id from department d join department_declaration_type ddt on ddt.department_id = d.id where ddt.id = ?", departmentDeclarationTypeId);
+    }
 }

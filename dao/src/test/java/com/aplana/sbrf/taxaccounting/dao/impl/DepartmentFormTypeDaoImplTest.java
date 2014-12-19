@@ -149,6 +149,16 @@ public class DepartmentFormTypeDaoImplTest {
 
     @Test
     public void getByListIdsTest(){
-        assertEquals(3, departmentFormTypeDao.getByListIds(Arrays.asList(1l,2l,3l)).size());
+        assertEquals(3, departmentFormTypeDao.getByListIds(Arrays.asList(1l, 2l, 3l)).size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void deleteEmptyIdsTest(){
+        departmentFormTypeDao.delete(new ArrayList<Long>(0));
+    }
+
+    @Test
+    public void deleteIdsTest(){
+        departmentFormTypeDao.delete(Arrays.asList(1l));
     }
 }

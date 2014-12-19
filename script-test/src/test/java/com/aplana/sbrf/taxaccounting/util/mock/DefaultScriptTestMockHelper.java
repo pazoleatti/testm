@@ -267,4 +267,10 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     public RefBookDataProvider getRefBookDataProvider() {
         return refBookDataProvider;
     }
+
+    @Override
+    public DeclarationService getDeclarationService() {
+        DeclarationService declarationService = mock(DeclarationService.class);
+        return declarationService;
+    }
 }

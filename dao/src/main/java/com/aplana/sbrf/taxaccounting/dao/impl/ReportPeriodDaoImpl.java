@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -150,28 +149,6 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
                         "and tp.tax_type = \'" + taxType.getCode() + "\' " +
                         "order by tp.year desc, rp.calendar_start_date",
                 new ReportPeriodMapper());
-    }
-
-    @Override
-    public List<Long> getPeriodsByTaxTypesAndDepartments(List<TaxType> taxTypes, List<Integer> departmentList) {
-        Object[] params = new Object[departmentList.size()];
-        int cnt = 0;
-        for (Integer departmentId : departmentList) {
-            params[cnt++] = departmentId;
-        }
-
-        try {
-            return getJdbcTemplate().queryForList(
-                    "select rp.id from report_period rp, tax_period tp where rp.id in " +
-                            "(select distinct report_period_id from department_report_period " +
-                            "where correction_date is null and department_id in("+ SqlUtils.preparePlaceHolders(departmentList.size())+")) " +
-                            "and rp.tax_period_id = tp.id " +
-                            "and tp.tax_type in " + SqlUtils.transformTaxTypeToSqlInStatement(taxTypes) +
-                            "order by tp.year desc, rp.calendar_start_date", Long.class, params);
-        } catch (DataAccessException e){
-            logger.error("", e);
-            throw new  DaoException("", e);
-        }
     }
 
     @Override

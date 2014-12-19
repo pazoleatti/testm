@@ -139,7 +139,7 @@ def int getRecordsCount(def filter) {
     def records = provider.checkRecordExistence(null, filter)
     def count = 0
     for (def record : records) {
-        def versionInfo = provider.getRecordVersionInfo(records.get(0).getFirst())
+        def versionInfo = provider.getRecordVersionInfo(record.getFirst())
         def int startYear = Integer.valueOf(formatDate(versionInfo.versionStart, "yyyy"))
         def int endYear = Integer.valueOf(formatDate(versionInfo.versionEnd, "yyyy")?:currentYear)
         if (startYear <= currentYear && (endYear == null || endYear >= currentYear)) {

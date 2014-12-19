@@ -38,6 +38,8 @@ public class DepartmentFormTypeServiceImpl implements DepartmentFormTypeService 
 
     @Override
     public void deleteByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty())
+            return;
         departmentFormTypeDao.delete(ids);
     }
 }

@@ -195,7 +195,7 @@ public class DeclarationDataDaoTest {
 
     @Test
     public void findTest() {
-        DeclarationData declaration = declarationDataDao.find(1, 204);
+        DeclarationData declaration = declarationDataDao.find(1, 204, null, null);
         assertEquals(2, declaration.getId().intValue());
     }
 
@@ -222,7 +222,7 @@ public class DeclarationDataDaoTest {
         declarationData.setTaxOrganCode("CD11");
         declarationDataDao.saveNew(declarationData);
 
-        DeclarationData  declaration = declarationDataDao.find(1, 102);
+        DeclarationData declaration = declarationDataDao.find(1, 102, null, null);
         assertNotNull(declaration);
         assertEquals(1, declaration.getId().intValue());
     }
@@ -246,7 +246,7 @@ public class DeclarationDataDaoTest {
 
     @Test
     public void findEmptyResultTest() {
-        DeclarationData declaration = declarationDataDao.find(222, 222);
+        DeclarationData declaration = declarationDataDao.find(222, 222, null, null);
         assertNull(declaration);
     }
 

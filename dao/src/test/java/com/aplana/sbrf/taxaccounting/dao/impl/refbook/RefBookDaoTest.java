@@ -655,7 +655,7 @@ public class RefBookDaoTest {
 		assertEquals(0, result.size());
 	}
 
-	@Test(expected = org.springframework.jdbc.BadSqlGrammarException.class)
+	@Test(expected = DaoException.class)
 	public void testDereferenceFail() {
 		List<Long> recordIds = new ArrayList<Long>();
 		recordIds.add(null);

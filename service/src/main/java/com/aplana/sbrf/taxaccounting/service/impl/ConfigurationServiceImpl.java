@@ -32,10 +32,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private final static String ACCESS_WRITE_ERROR = "Нет прав на изменение конфигурационных параметров приложения!";
     private final static String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
     private final static String WRITE_ERROR = "«%s»: Отсутствует доступ на запись!";
+    private final static String LOAD_WRITE_ERROR = "«%s» для «%s»: отсутствует доступ на запись!";
     private final static String READ_INFO = "«%s»: Присутствует доступ на чтение!";
     private final static String WRITE_INFO = "«%s»: Присутствует доступ на запись!";
     private final static String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
     private final static String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
+    private final static String SIGN_CHECK_ERROR = "Для параметра «%s» значение должно быть равно 0 или 1";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -93,7 +95,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 continue;
             }
             for (List<String> valueList : map.values()) {
-                if  (valueList == null) {
+                if (valueList == null) {
                     continue;
                 }
                 for (String value : valueList) {
@@ -198,6 +200,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList != null)
                     for (String value : valuesList) {
+                        // Проверка значения параметра "Проверять ЭЦП"
+                        if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
+                            if (!"0".equals(value) && !"1".equals(value)) {
+                                logger.error(SIGN_CHECK_ERROR, configurationParam.getCaption());
+                            }
+                        }
                         if (configurationParam.hasReadCheck() && (configurationParam.isFolder()
                                 && !FileWrapper.canReadFolder(value) || !configurationParam.isFolder()
                                 && !FileWrapper.canReadFile(value))) {
@@ -242,7 +250,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                     String value = list.get(0);
                     // Проверка доступности
                     if (!FileWrapper.canWriteFolder(value)) {
-                        logger.error(WRITE_ERROR, value);
+                        Department department = departmentDao.getDepartment(departmentId);
+                        logger.error(LOAD_WRITE_ERROR, value, department.getName());
                     } else {
                         logger.info(WRITE_INFO, value);
                     }

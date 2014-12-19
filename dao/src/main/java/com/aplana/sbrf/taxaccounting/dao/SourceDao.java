@@ -117,4 +117,18 @@ public interface SourceDao {
      * @return пары id источника - название подразделения
      */
     Map<Long, String> getDepartmentNamesBySource(List<Long> sources);
+
+    /**
+     * Возвращает id подразделения по его назначению НФ
+     * @param departmentFormTypeId id назначения формы подразделению
+     * @return id подразделения
+     */
+    Integer getDepartmentIdByDepartmentFormType(long departmentFormTypeId);
+
+    /**
+     * Возвращает id подразделения по его назначению декларации
+     * @param departmentDeclarationTypeId id назначения декларации подразделению
+     * @return id подразделения
+     */
+    Integer getDepartmentIdByDepartmentDeclarationType(long departmentDeclarationTypeId);
 }
