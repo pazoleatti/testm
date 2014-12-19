@@ -91,7 +91,7 @@ public class EmailServiceImpl implements EmailService {
                 message.setText(text);
                 Transport.send(message);
             } catch (Exception e) {
-                Log.error(e);
+                Log.error(e.getMessage(), e);
                 throw new ServiceException("Ошибка отправки сообщения. %s", e.getMessage());
             }
         }
@@ -131,14 +131,18 @@ public class EmailServiceImpl implements EmailService {
             props.put("mail.smtp.ssl.socketFactory", socketFactory);
             if (login == null || password == null || host == null || port == null) {
                 logger.error("Не указан один из обязательных параметров!");
+                logger.error("Авторизация с указанными параметрами не выполнена!");
+                return false;
             } else {
                 Session session = Session.getInstance(props);
-                Transport transport = session.getTransport("smtp");
+                Transport transport = session.getTransport();
                 transport.connect(host, Integer.parseInt(port), login, password);
-                logger.info("Проверка выполнена, ошибок не найдено");
+                logger.info("Авторизация выполнена успешно");
             }
         } catch (Exception e) {
-            logger.error("Авторизация с указанными параметрами не выполнена!", e);
+            Log.error("Авторизация с указанными параметрами не выполнена!", e);
+            logger.error(e.getLocalizedMessage());
+            logger.error("Авторизация с указанными параметрами не выполнена!");
 			return false;
         }
 		return true;
