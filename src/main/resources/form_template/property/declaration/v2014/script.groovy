@@ -229,140 +229,144 @@ void generateXML() {
                             НалПУ : ((BigDecimal)nalPU)?.setScale(0,RoundingMode.HALF_UP)
                     ) {
                         // Лист 03 (Раздел 2)
-                        РасОбДеятРФ() {
-                            def summaryIndex
-                            // строка из 945.3
-                            rowsAverageOKTMO.each{ row ->
-                                // СтИмущ 150 Значение атрибута «Средняя/среднегодовая стоимость имущества» налоговой формы источника (Форма 945.3)
-                                def stImush = row.priceAverage ?: 0
-                                // КодНалЛьг 160
-                                def kodNalLg = getCodeBasis(row.taxBenefitCode, row.benefitBasis, '2012000')
-                                // СтИмущНеобл 170 Значение атрибута «Средняя/Среднегодовая стоимость необлагаемого имущества» налоговой формы источника (Форма 945.3)
-                                def stImushNeobl = row.priceAverageTaxFree ?: 0
-                                // НалБаза 190 Значение атрибута «Налоговая база» налоговой формы источника (Форма 945.3)
-                                def nalBaza = row.taxBase ?: 0
-                                // КодЛгПНС 200
-                                def kodLgPNS = getCodeBasis(row.taxBenefitCodeReduction, row.benefitReductionBasis, '2012400')
-                                // НалСтав 210 Значение атрибута «Налоговая ставка» налоговой формы источника (Форма 945.3)
-                                def nalStav = row.taxRate ?: 0
-                                // СумНалИсчисл 220 Значение атрибута «Сумма налога (авансового платежа)» налоговой формы источника (Форма 945.3)
-                                def sumNalIschisl = row.taxSum ?: 0
-                                // СумАвИсчисл 230 Значение атрибута «Сумма авансовых платежей, исчисленная за отчетные периоды» налоговой формы источника (Форма 945.3)
-                                def sumAvIschisl = row.sumPayment ?: 0
-                                // КодЛгУмен 240
-                                def kodLgUmen = getCodeBasis(row.taxBenefitCodeDecrease, row.benefitDecreaseBasis, '2012500')
-                                // СумЛгУмен 250 Значение атрибута «Сумма уменьшения платежа» налоговой формы источника (Форма 945.3)
-                                def sumLgUmen = row.sumDecrease ?: 0
-                                // СтОстВс 260 Значение атрибута «Остаточная стоимость основных средств» налоговой формы источника (Форма 945.3)
-                                def stOstVs = row.residualValue ?: 0
+                        if (!rowsAverageOKTMO.empty) {
+                            РасОбДеятРФ() {
+                                def summaryIndex
+                                // строка из 945.3
+                                rowsAverageOKTMO.each{ row ->
+                                    // СтИмущ 150 Значение атрибута «Средняя/среднегодовая стоимость имущества» налоговой формы источника (Форма 945.3)
+                                    def stImush = row.priceAverage ?: 0
+                                    // КодНалЛьг 160
+                                    def kodNalLg = getCodeBasis(row.taxBenefitCode, row.benefitBasis, '2012000')
+                                    // СтИмущНеобл 170 Значение атрибута «Средняя/Среднегодовая стоимость необлагаемого имущества» налоговой формы источника (Форма 945.3)
+                                    def stImushNeobl = row.priceAverageTaxFree ?: 0
+                                    // НалБаза 190 Значение атрибута «Налоговая база» налоговой формы источника (Форма 945.3)
+                                    def nalBaza = row.taxBase ?: 0
+                                    // КодЛгПНС 200
+                                    def kodLgPNS = getCodeBasis(row.taxBenefitCodeReduction, row.benefitReductionBasis, '2012400')
+                                    // НалСтав 210 Значение атрибута «Налоговая ставка» налоговой формы источника (Форма 945.3)
+                                    def nalStav = row.taxRate ?: 0
+                                    // СумНалИсчисл 220 Значение атрибута «Сумма налога (авансового платежа)» налоговой формы источника (Форма 945.3)
+                                    def sumNalIschisl = row.taxSum ?: 0
+                                    // СумАвИсчисл 230 Значение атрибута «Сумма авансовых платежей, исчисленная за отчетные периоды» налоговой формы источника (Форма 945.3)
+                                    def sumAvIschisl = row.sumPayment ?: 0
+                                    // КодЛгУмен 240
+                                    def kodLgUmen = getCodeBasis(row.taxBenefitCodeDecrease, row.benefitDecreaseBasis, '2012500')
+                                    // СумЛгУмен 250 Значение атрибута «Сумма уменьшения платежа» налоговой формы источника (Форма 945.3)
+                                    def sumLgUmen = row.sumDecrease ?: 0
+                                    // СтОстВс 260 Значение атрибута «Остаточная стоимость основных средств» налоговой формы источника (Форма 945.3)
+                                    def stOstVs = row.residualValue ?: 0
 
-                                def key = row.subject + '#' + row.oktmo
-                                def rowsSummary = dataRowsSummaryMap[key]
-                                // строки из 945.5 по коду субъекта, коду НО, КПП и Коду ОКТМО соотвествующие строке из 945.3
-                                def rows = getSubjectOktmoRows(rowsSummary, row)
-                                def commonRow = null
-                                def benefitRow = null
-                                if (rowsAverageOKTMO.indexOf(row) == 0) {
-                                    commonRow = rows[0]
-                                    summaryIndex = 1
-                                    if (getBenefitCode(row.taxBenefitCode) == '2012000') {
-                                        benefitRow = rows[2]
-                                        summaryIndex = 2
+                                    def key = row.subject + '#' + row.oktmo
+                                    def rowsSummary = dataRowsSummaryMap[key]
+                                    // строки из 945.5 по коду субъекта, коду НО, КПП и Коду ОКТМО соотвествующие строке из 945.3
+                                    def rows = getSubjectOktmoRows(rowsSummary, row)
+                                    def commonRow = null
+                                    def benefitRow = null
+                                    if (rowsAverageOKTMO.indexOf(row) == 0) {
+                                        commonRow = rows[0]
+                                        summaryIndex = 1
+                                        if (getBenefitCode(row.taxBenefitCode) == '2012000') {
+                                            benefitRow = rows[2]
+                                            summaryIndex = 2
+                                        }
+                                    } else {
+                                        commonRow = benefitRow = rows[++summaryIndex]
                                     }
-                                } else {
-                                    commonRow = benefitRow = rows[++summaryIndex]
-                                }
-                                РасОб(  ВидИмущ : vidImush ) {
-                                    ДанРас(
-                                            [СтИмущ : ((BigDecimal)stImush)?.setScale(0,RoundingMode.HALF_UP)] +
-                                            (kodNalLg ? [КодНалЛьг : kodNalLg] : [:]) +
-                                            [СтИмущНеобл : ((BigDecimal)stImushNeobl)?.setScale(0,RoundingMode.HALF_UP)] +
-                                            (kodLgPNS ? [КодЛгПНС : kodLgPNS] : [:]) +
-                                            [НалСтав : nalStav]
-                                    ) {
-                                        СтоимМес() {
-                                            for (int i = 1; i <= 12; i++) {
-                                                def elemName = "ОстСтом01" + String.valueOf(i).padLeft(2, '0')
-                                                def stOstOn = commonRow ? commonRow.getCell("cost$i").value : 0
-                                                def stLgImush = benefitRow ? benefitRow.getCell("cost$i").value : 0
-                                                "$elemName" (
-                                                        СтОстОН : ((BigDecimal)stOstOn ?: 0)?.setScale(0,RoundingMode.HALF_UP),
+                                    РасОб(  ВидИмущ : vidImush ) {
+                                        ДанРас(
+                                                [СтИмущ : ((BigDecimal)stImush)?.setScale(0,RoundingMode.HALF_UP)] +
+                                                (kodNalLg ? [КодНалЛьг : kodNalLg] : [:]) +
+                                                [СтИмущНеобл : ((BigDecimal)stImushNeobl)?.setScale(0,RoundingMode.HALF_UP)] +
+                                                (kodLgPNS ? [КодЛгПНС : kodLgPNS] : [:]) +
+                                                [НалСтав : nalStav]
+                                        ) {
+                                            СтоимМес() {
+                                                for (int i = 1; i <= 12; i++) {
+                                                    def elemName = "ОстСтом01" + String.valueOf(i).padLeft(2, '0')
+                                                    def stOstOn = commonRow ? commonRow.getCell("cost$i").value : 0
+                                                    def stLgImush = benefitRow ? benefitRow.getCell("cost$i").value : 0
+                                                    "$elemName" (
+                                                            СтОстОН : ((BigDecimal)stOstOn ?: 0)?.setScale(0,RoundingMode.HALF_UP),
+                                                            СтЛьгИмущ: ((BigDecimal)stLgImush ?: 0)?.setScale(0,RoundingMode.HALF_UP)
+                                                    )
+                                                }
+                                                def stOstOn = commonRow ? commonRow.getCell("cost13").value : 0
+                                                def stLgImush = benefitRow ? benefitRow.getCell("cost13").value : 0
+                                                ОстСтом3112(
+                                                        СтОстОН: ((BigDecimal)stOstOn ?: 0)?.setScale(0,RoundingMode.HALF_UP),
                                                         СтЛьгИмущ: ((BigDecimal)stLgImush ?: 0)?.setScale(0,RoundingMode.HALF_UP)
                                                 )
+                                                def stOstOn31 = commonRow ? commonRow.getCell("cost31_12").value : 0
+                                                def stLgImush31 = benefitRow ? benefitRow.getCell("cost31_12").value : 0
+                                                ВтчНедИм(
+                                                        СтОстОН: ((BigDecimal)stOstOn31 ?: 0)?.setScale(0,RoundingMode.HALF_UP),
+                                                        СтЛьгИмущ: ((BigDecimal)stLgImush31 ?: 0)?.setScale(0,RoundingMode.HALF_UP)
+                                                )
+                                                СтОстВс(((BigDecimal)stOstVs)?.setScale(0,RoundingMode.HALF_UP))
                                             }
-                                            def stOstOn = commonRow ? commonRow.getCell("cost13").value : 0
-                                            def stLgImush = benefitRow ? benefitRow.getCell("cost13").value : 0
-                                            ОстСтом3112(
-                                                    СтОстОН: ((BigDecimal)stOstOn ?: 0)?.setScale(0,RoundingMode.HALF_UP),
-                                                    СтЛьгИмущ: ((BigDecimal)stLgImush ?: 0)?.setScale(0,RoundingMode.HALF_UP)
-                                            )
-                                            def stOstOn31 = commonRow ? commonRow.getCell("cost31_12").value : 0
-                                            def stLgImush31 = benefitRow ? benefitRow.getCell("cost31_12").value : 0
-                                            ВтчНедИм(
-                                                    СтОстОН: ((BigDecimal)stOstOn31 ?: 0)?.setScale(0,RoundingMode.HALF_UP),
-                                                    СтЛьгИмущ: ((BigDecimal)stLgImush31 ?: 0)?.setScale(0,RoundingMode.HALF_UP)
-                                            )
-                                            СтОстВс(((BigDecimal)stOstVs)?.setScale(0,RoundingMode.HALF_UP))
                                         }
+                                        НалПер(
+                                                [НалБаза : ((BigDecimal)nalBaza)?.setScale(0,RoundingMode.HALF_UP),
+                                                СумНалИсчисл : ((BigDecimal)sumNalIschisl)?.setScale(0,RoundingMode.HALF_UP),
+                                                СумАвИсчисл : ((BigDecimal)sumAvIschisl)?.setScale(0,RoundingMode.HALF_UP)] +
+                                                (kodLgUmen ? [КодЛгУмен  : kodLgUmen] : [:]) +
+                                                [СумНалПред : empty,
+                                                СумЛгУмен   : ((BigDecimal)sumLgUmen)?.setScale(0,RoundingMode.HALF_UP)]
+                                        )
                                     }
-                                    НалПер(
-                                            [НалБаза : ((BigDecimal)nalBaza)?.setScale(0,RoundingMode.HALF_UP),
-                                            СумНалИсчисл : ((BigDecimal)sumNalIschisl)?.setScale(0,RoundingMode.HALF_UP),
-                                            СумАвИсчисл : ((BigDecimal)sumAvIschisl)?.setScale(0,RoundingMode.HALF_UP)] +
-                                            (kodLgUmen ? [КодЛгУмен  : kodLgUmen] : [:]) +
-                                            [СумНалПред : empty,
-                                            СумЛгУмен   : ((BigDecimal)sumLgUmen)?.setScale(0,RoundingMode.HALF_UP)]
-                                    )
                                 }
                             }
                         }
                         // Лист 04 (Раздел 3)
-                        РасОБНедИО() {
-                            rowsCadastreOKTMO.each { row ->
-                                // НомКадЗдан 014 Заполняется значением атрибута «Кадастровый номер. Здание» налоговой формы источника (Форма 945.4)
-                                def nomKadZdan = row.cadastreNumBuilding
-                                // НомКадПом 015
-                                def nomKadPom = (row.sign == '2') ? row.cadastreNumRoom : empty
-                                // СтИмущК 020 Значение атрибута «Кадастровая стоимость. на 1 января» налоговой формы источника (Форма 945.4)
-                                def stImushK = row.cadastrePriceJanuary ?: 0
-                                // СтИмущНеоблК 025 Значение атрибута «Кадастровая стоимость. В т.ч. необлагаемая налогом» налоговой формы источника (Форма 945.4)
-                                def stImushNeoblK = row.cadastrePriceTaxFree ?: 0
-                                // КодНалЛьг 040
-                                def kodNalLg = getCodeBasis(row.taxBenefitCode, row.benefitBasis, '2012000')
-                                // НалБаза 060 Значение атрибута «Налоговая база» налоговой формы источника (Форма 945.4)
-                                def nalBaza2 = row.taxBase ?: 0
-                                // КодЛгПНС 070
-                                def kodLgPNS2 = getCodeBasis(row.taxBenefitCode, row.benefitBasis, '2012400')
-                                // НалСтав 080 Значение атрибута «Налоговая ставка» налоговой формы источника (Форма 945.4)
-                                def nalStav2 = row.taxRate ?: 0
-                                // СумНалИсчисл 100 Значение атрибута «Сумма налога (авансового платежа)» налоговой формы источника (Форма 945.4)
-                                def sumNalIschisl2 = row.sum ?: 0
-                                // СумАвИсчисл 110 Значение атрибута «Сумма авансовых платежей за отчетные периоды» налоговой формы источника (Форма 945.4)
-                                def sumAvIschisl2 = row.periodSum ?: 0
-                                // КодЛгУмен 120
-                                def kodLgUmen2 = getCodeBasis(row.taxBenefitCode, row.benefitBasis, '2012500')
-                                // СумЛгУмен 130 Значение атрибута «Сумма уменьшения платежа» налоговой формы источника (Форма 945.4)
-                                def sumLgUmen2 = row.reductionPaymentSum ?: 0
-                                РасОб() {
-                                    ДанРас(
-                                            [НомКадЗдан : nomKadZdan] +
-                                            (nomKadPom ? [НомКадПом : nomKadPom] : [:]) +
-                                            (kodNalLg ? [КодНалЛьг : kodNalLg] : [:]) +
-                                            (kodLgPNS2 ? [КодЛгПНС : kodLgPNS2] : [:]) +
-                                            [НалСтав : nalStav2]
-                                    ) {
-                                        СведСтКад (
-                                                СтИмущК : ((BigDecimal)stImushK)?.setScale(0,RoundingMode.HALF_UP),
-                                                СтИмущНеоблК : ((BigDecimal)stImushNeoblK)?.setScale(0,RoundingMode.HALF_UP)
+                        if (!rowsCadastreOKTMO.empty) {
+                            РасОБНедИО() {
+                                rowsCadastreOKTMO.each { row ->
+                                    // НомКадЗдан 014 Заполняется значением атрибута «Кадастровый номер. Здание» налоговой формы источника (Форма 945.4)
+                                    def nomKadZdan = row.cadastreNumBuilding
+                                    // НомКадПом 015
+                                    def nomKadPom = (row.sign == '2') ? row.cadastreNumRoom : empty
+                                    // СтИмущК 020 Значение атрибута «Кадастровая стоимость. на 1 января» налоговой формы источника (Форма 945.4)
+                                    def stImushK = row.cadastrePriceJanuary ?: 0
+                                    // СтИмущНеоблК 025 Значение атрибута «Кадастровая стоимость. В т.ч. необлагаемая налогом» налоговой формы источника (Форма 945.4)
+                                    def stImushNeoblK = row.cadastrePriceTaxFree ?: 0
+                                    // КодНалЛьг 040
+                                    def kodNalLg = getCodeBasis(row.taxBenefitCode, row.benefitBasis, '2012000')
+                                    // НалБаза 060 Значение атрибута «Налоговая база» налоговой формы источника (Форма 945.4)
+                                    def nalBaza2 = row.taxBase ?: 0
+                                    // КодЛгПНС 070
+                                    def kodLgPNS2 = getCodeBasis(row.taxBenefitCode, row.benefitBasis, '2012400')
+                                    // НалСтав 080 Значение атрибута «Налоговая ставка» налоговой формы источника (Форма 945.4)
+                                    def nalStav2 = row.taxRate ?: 0
+                                    // СумНалИсчисл 100 Значение атрибута «Сумма налога (авансового платежа)» налоговой формы источника (Форма 945.4)
+                                    def sumNalIschisl2 = row.sum ?: 0
+                                    // СумАвИсчисл 110 Значение атрибута «Сумма авансовых платежей за отчетные периоды» налоговой формы источника (Форма 945.4)
+                                    def sumAvIschisl2 = row.periodSum ?: 0
+                                    // КодЛгУмен 120
+                                    def kodLgUmen2 = getCodeBasis(row.taxBenefitCode, row.benefitBasis, '2012500')
+                                    // СумЛгУмен 130 Значение атрибута «Сумма уменьшения платежа» налоговой формы источника (Форма 945.4)
+                                    def sumLgUmen2 = row.reductionPaymentSum ?: 0
+                                    РасОб() {
+                                        ДанРас(
+                                                [НомКадЗдан : nomKadZdan] +
+                                                (nomKadPom ? [НомКадПом : nomKadPom] : [:]) +
+                                                (kodNalLg ? [КодНалЛьг : kodNalLg] : [:]) +
+                                                (kodLgPNS2 ? [КодЛгПНС : kodLgPNS2] : [:]) +
+                                                [НалСтав : nalStav2]
+                                        ) {
+                                            СведСтКад (
+                                                    СтИмущК : ((BigDecimal)stImushK)?.setScale(0,RoundingMode.HALF_UP),
+                                                    СтИмущНеоблК : ((BigDecimal)stImushNeoblK)?.setScale(0,RoundingMode.HALF_UP)
+                                            )
+                                        }
+                                        НалПер(
+                                                [НалБаза : ((BigDecimal)nalBaza2)?.setScale(0,RoundingMode.HALF_UP),
+                                                СумНалИсчисл : ((BigDecimal)sumNalIschisl2)?.setScale(0,RoundingMode.HALF_UP),
+                                                СумАвИсчисл : ((BigDecimal)sumAvIschisl2)?.setScale(0,RoundingMode.HALF_UP)] +
+                                                (kodLgUmen2 ? [КодЛгУмен  : kodLgUmen2] : [:]) +
+                                                [СумЛгУмен : ((BigDecimal)sumLgUmen2)?.setScale(0,RoundingMode.HALF_UP)]
                                         )
                                     }
-                                    НалПер(
-                                            [НалБаза : ((BigDecimal)nalBaza2)?.setScale(0,RoundingMode.HALF_UP),
-                                            СумНалИсчисл : ((BigDecimal)sumNalIschisl2)?.setScale(0,RoundingMode.HALF_UP),
-                                            СумАвИсчисл : ((BigDecimal)sumAvIschisl2)?.setScale(0,RoundingMode.HALF_UP)] +
-                                            (kodLgUmen2 ? [КодЛгУмен  : kodLgUmen2] : [:]) +
-                                            [СумЛгУмен : ((BigDecimal)sumLgUmen2)?.setScale(0,RoundingMode.HALF_UP)]
-                                    )
                                 }
                             }
                         }

@@ -2,12 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
     <ui:style>
-        .titleText {
-        font-size: 14px;
-        color: #636460;
-        }
-        .marginRight5{
-        margin-right: 5px;
+        .marginLeft15{
+            margin-left: 15px;
         }
     </ui:style>
 
@@ -24,17 +20,26 @@
         <fm:body>
             <fm:BodyContainer>
                 <g:VerticalPanel spacing="10">
-                    <g:Button ui:field="uploadButton"
-                              title="Загрузка ТФ с компьютера пользователя. Может быть загружен один ТФ или архиф zip, содержащий множество ТФ.">
-                        Загрузить ТФ с локального компьютера
-                    </g:Button>
-                    <g:Button ui:field="loadButton"
-                              title="Загрузка всех доступных ТФ, находящихся в централизованном каталоге загрузки.">
-                        Загрузить ТФ из каталога загрузки
-                    </g:Button>
-                    <g:FormPanel ui:field="formPanel" encoding="multipart/form-data" method="post">
-                        <g:FileUpload ui:field="uploader" name="uploader" visible="false"/>
-                    </g:FormPanel>
+                    <g:HorizontalPanel>
+                        <g:Button ui:field="uploadButton" width="300px"
+                                  text="Загрузить ТФ с локального компьютера"
+                                  title="Загрузка ТФ с компьютера пользователя. Может быть загружен один ТФ или архив zip, содержащий множество ТФ."/>
+                        <g:cell verticalAlignment="middle">
+                            <g:Label addStyleNames="{style.marginLeft15}" text="Загрузка ТФ с компьютера пользователя. Может быть загружен один ТФ или архив zip, содержащий множество ТФ."/>
+                        </g:cell>
+                        <g:FormPanel ui:field="formPanel" encoding="multipart/form-data" method="post">
+                            <g:FileUpload ui:field="uploader" name="uploader" visible="false"/>
+                        </g:FormPanel>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel>
+                        <g:Button ui:field="loadButton" width="300px"
+                                  text="Загрузить ТФ из каталога загрузки"
+                                  title="Загрузка всех доступных ТФ, находящихся в централизованном каталоге загрузки."/>
+                        <g:cell verticalAlignment="middle">
+                            <g:Label addStyleNames="{style.marginLeft15}" text="Загрузка всех доступных ТФ, находящихся в централизованном каталоге загрузки."/>
+                        </g:cell>
+                    </g:HorizontalPanel>
 
                 </g:VerticalPanel>
             </fm:BodyContainer>

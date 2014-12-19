@@ -15,7 +15,7 @@ commit;
 --Категории средней стоимости транспортных средств
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (211,'Категории средней стоимости транспортных средств',1,0,0,null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2110, 211, 'Код', 'CODE', 1, 1, null, null, 1, null, 1, 1, 1, null, null, 0, 1);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2111, 211, 'Наименование', 'NAME', 1, 2, null, null, 1, null, 50, 1, 1, null, null, 0, 50);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2111, 211, 'Наименование', 'NAME', 1, 2, null, null, 1, null, 50, 1, 2, null, null, 0, 50);
 commit;
 
 --Средняя стоимость транспортных средств
@@ -44,7 +44,7 @@ update ref_book set region_attribute_id=2100 where id=210;
 commit;
 
 --Ставки транспортного налога
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (410,41,'Код субъекта РФ','DECLARATION_REGION_ID',4,0,4,10,1,null,10,1,1,null,null,0,null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (410,41,'Код субъекта РФ представителя декларации','DECLARATION_REGION_ID',4,0,4,10,1,null,10,1,1,null,null,0,null);
 update ref_book set region_attribute_id=410 where id=41;
 
 insert into ref_book_value(record_id, attribute_id, string_value, number_value, date_value, reference_value)
@@ -66,13 +66,19 @@ update ref_book_attribute set is_unique = 1 where id in (701, 18, 19, 20, 21, 22
 update ref_book_attribute set is_unique = 1 where id in (2090, 2091, 2092);
 
 -- http://jira.aplana.com/browse/SBRFACCTAX-9316 -  Требования к уникальности записей справочника "Средняя стоимость транспортных средств"
-update ref_book_attribute set is_unique = 1 where id in (2080, 2081, 2082);
+update ref_book_attribute set is_unique = 0 where id in (2080);
+update ref_book_attribute set is_unique = 1 where id in (2081, 2082);
 
 ----------------------------------------------------------------------------------------------------------------
 -- http://jira.aplana.com/browse/SBRFACCTAX-9464 - Ширина колонок в 208-справочнике ("Средняя стоимость транспортных средств")
 update ref_book_attribute set width = 10 where id = 2080;
 update ref_book_attribute set width = 30 where id = 2081;
 update ref_book_attribute set width = 30 where id = 2082;
+
+-- http://jira.aplana.com/browse/SBRFACCTAX-9777 - 0.4.1 Ошибки реализации в спр. Повышающие коэффициенты транспортного налога
+UPDATE ref_book_attribute SET width = 10 WHERE id = 2090;
+UPDATE ref_book_attribute SET width = 10 WHERE id = 633;
+UPDATE ref_book_attribute SET width = 10 WHERE id = 2110;
 ----------------------------------------------------------------------------------------------------------------
 
 commit;

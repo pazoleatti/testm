@@ -22,4 +22,5 @@ public interface ScriptTestMockHelper {
 
     DataRowHelper getDataRowHelper();
     RefBookDataProvider getRefBookDataProvider();
+    DeclarationService getDeclarationService();
 }
