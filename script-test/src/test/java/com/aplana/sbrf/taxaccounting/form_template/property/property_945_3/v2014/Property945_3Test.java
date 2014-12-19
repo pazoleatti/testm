@@ -132,7 +132,6 @@ public class Property945_3Test extends ScriptTestBase {
         List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
         // формируем одну строку источника
-
             DataRow<Cell> row = sourceFormData.createDataRow();
             // графа 1
             row.getCell("rowNum").setValue(1L, null);
