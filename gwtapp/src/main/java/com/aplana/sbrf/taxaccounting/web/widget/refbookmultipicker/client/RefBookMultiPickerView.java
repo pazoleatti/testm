@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
-import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
@@ -345,7 +344,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                     cellTable.setVisibleRangeAndClearData(cellTable.getVisibleRange(), true);
                 }
             }
-            if (cellTable.getHeader(0) != null && (cellTable.getHeader(0) instanceof CheckBoxHeader)) {
+            if (cellTable.getHeader(0) != null && cellTable.getHeader(0).getCell() instanceof CheckboxCell) {
                 ((CheckboxCell) cellTable.getHeader(0).getCell()).clearViewData(false);
             }
         } else if (force) {
