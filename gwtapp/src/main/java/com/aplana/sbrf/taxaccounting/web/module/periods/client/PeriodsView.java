@@ -167,8 +167,7 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
 				}
 			}
 		});
-
-	}
+    }
 
 	@Override
 	public void setTitle(String title) {
@@ -291,7 +290,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
     @Override
     public void setCanEditPeriod(boolean canEditPeriod) {
         editPeriod.setVisible(canEditPeriod);
-        editPeriod.setEnabled(!selectionModel.getSelectedObject().isCorrection());
+        if (selectionModel.getSelectedObject() != null) {
+            editPeriod.setEnabled(!selectionModel.getSelectedObject().isCorrection());
+        }
     }
 
     @Override
