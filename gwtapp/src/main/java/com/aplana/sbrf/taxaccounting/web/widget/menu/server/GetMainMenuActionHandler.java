@@ -124,7 +124,9 @@ public class GetMainMenuActionHandler extends
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
                         if (!TaxType.PROPERTY.toString().equals(menu.getMeta())
-                                && !TaxType.TRANSPORT.toString().equals(menu.getMeta())) {
+                                && !TaxType.TRANSPORT.toString().equals(menu.getMeta())
+                                && !TaxType.INCOME.toString().equals(menu.getMeta())
+                                ) {
                             menu.getSubMenu().add(new MenuItem("Настройки подразделений", NUMBER_SIGN
                                     + DepartmentConfigTokens.departamentConfig + ";" + TYPE + "=" + menu.getMeta()));
                         } else {

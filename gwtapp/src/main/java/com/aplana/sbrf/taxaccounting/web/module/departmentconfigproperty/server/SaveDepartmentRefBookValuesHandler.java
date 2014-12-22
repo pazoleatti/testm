@@ -45,8 +45,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
 
     @Override
     public SaveDepartmentRefBookValuesResult execute(SaveDepartmentRefBookValuesAction saveDepartmentRefBookValuesAction, ExecutionContext executionContext) throws ActionException {
-
-
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
