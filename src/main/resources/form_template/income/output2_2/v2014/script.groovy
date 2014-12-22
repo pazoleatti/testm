@@ -115,16 +115,7 @@ void checkCreation() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    if (!dataRows.isEmpty()) {
-        def number = 0
-        for (def row in dataRows) {
-            row.rowNumber = ++number
-        }
-    }
-    dataRowHelper.save(dataRows)
-
+    // расчетов нет
     sortFormDataRows()
 }
 
@@ -227,9 +218,7 @@ void addData(def xml, headRowCount) {
         }
 
         // графа 1
-        def xmlIndexCol = 0
-        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
+        def xmlIndexCol = 1
 
         // графа 2
         newRow.emitent = row.cell[xmlIndexCol].text()
@@ -371,9 +360,7 @@ void addTransportData(def xml) {
         }
 
         // графа 1
-        def xmlIndexCol = 0
-        newRow.rowNumber = parseNumber(row.cell[1].text(), rnuIndexRow, 1 + colOffset, logger, true)
-        xmlIndexCol++
+        def xmlIndexCol = 1
 
         // графа 2
         newRow.emitent = row.cell[2].text()
