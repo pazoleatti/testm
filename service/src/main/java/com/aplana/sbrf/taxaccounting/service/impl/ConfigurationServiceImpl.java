@@ -37,6 +37,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private final static String WRITE_INFO = "«%s»: Присутствует доступ на запись!";
     private final static String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
     private final static String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
+    private final static String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -199,6 +200,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList != null)
                     for (String value : valuesList) {
+                        // Проверка значения параметра "Проверять ЭЦП"
+                        if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
+                            if (!"0".equals(value) && !"1".equals(value)) {
+                                logger.error(SIGN_CHECK_ERROR, value);
+                            }
+                        }
                         if (configurationParam.hasReadCheck() && (configurationParam.isFolder()
                                 && !FileWrapper.canReadFolder(value) || !configurationParam.isFolder()
                                 && !FileWrapper.canReadFile(value))) {

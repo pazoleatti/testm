@@ -388,6 +388,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 				.defaultCallback(new AbstractCallback<PeriodsGetFilterDataResult>() {
 					@Override
 					public void onSuccess(PeriodsGetFilterDataResult result) {
+                        getView().clearSelection();
                         currentYear = result.getCurrentYear();
 						PeriodsPresenter.this.taxType = result.getTaxType();
                         getView().setTaxTitle(taxType.getName());

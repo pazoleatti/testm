@@ -50,7 +50,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     static final Object TYPE_editFormPresenter = new Object();
 
-    Long refBookDataId;
+    private Long refBookDataId;
 
     private Long recordId;
 
@@ -150,7 +150,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                     getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
                 }
             }
-            getView().setSelected(rc.getId());
+            //getView().setSelected(rc.getId());
         }
     }
 
@@ -163,6 +163,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     public void onAddRowClicked() {
         editFormPresenter.setMode(FormMode.CREATE);
         editFormPresenter.show(null, getView().getSelectedItem());
+        getView().clearSelected();
     }
 
     @Override
@@ -190,8 +191,10 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                         "Обнаружены фатальные ошибки!");
                             } else {
                                 //editFormPresenter.show(null);
+                                editFormPresenter.clearRecordId();
                                 editFormPresenter.setNeedToReload();
                                 getView().deleteItem(selected);
+                                getView().clearSelected();
                             }
                         }
                     }, this));
@@ -220,9 +223,10 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                     public void onSuccess(DeleteNonVersionRefBookRowResult result) {
                                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                                         //editFormPresenter.show(null);
+                                        editFormPresenter.clearRecordId();
                                         editFormPresenter.setNeedToReload();
                                         getView().deleteItem(selected);
-                                        getView().setSelected(parentRefBookItem!=null?parentRefBookItem.getId():0);
+                                        getView().clearSelected();
                                     }
                                 }, RefBookHierDataPresenter.this));
                             }
@@ -235,9 +239,10 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                     } else {
                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                         //editFormPresenter.show(null);
+                        editFormPresenter.clearRecordId();
                         editFormPresenter.setNeedToReload();
                         getView().deleteItem(selected);
-                        getView().setSelected(parentRefBookItem!=null?parentRefBookItem.getId():0);
+                        getView().clearSelected();
                     }
                 }
             }, RefBookHierDataPresenter.this));

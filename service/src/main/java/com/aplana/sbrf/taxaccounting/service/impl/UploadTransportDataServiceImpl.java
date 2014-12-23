@@ -329,7 +329,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             // 40 - Выборка для доступа к экземплярам НФ/деклараций
             List<Integer> departmentList = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    Arrays.asList(TaxType.INCOME), null, null);
+                    Arrays.asList(formType.getTaxType()), null, null);
 
             if (!departmentList.contains(formDepartment.getId())) {
                 logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
@@ -337,7 +337,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             }
 
             // Назначение подразделению типа и вида НФ
-            if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY)) {
+            if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY) &&
+                    !departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL)) {
                 logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
                 return null;
             }

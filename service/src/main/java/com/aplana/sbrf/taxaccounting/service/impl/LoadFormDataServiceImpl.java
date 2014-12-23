@@ -196,14 +196,22 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
             formTypeId = formType.getId();
 
+            FormDataKind formDataKind = FormDataKind.PRIMARY;
+
             // Назначение подразделению типа и вида НФ
-            if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY)) {
+            boolean existedPrimaryAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY);
+            boolean existedAdditionalAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
+            // если нет назначения на первичную и выходную, то ошибка
+            if (!existedPrimaryAssigning && !existedAdditionalAssigning) {
                 log(userInfo, LogData.L14, logger, formType.getName(), formDepartment.getName());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
                                 formType.getName(), formDepartment.getName()))), logger);
                 fail++;
                 continue;
+            } else if (!existedPrimaryAssigning) {
+                // иначе если нет назначения на первичную, то ищем выходную
+                formDataKind = FormDataKind.ADDITIONAL;
             }
 
             // Последний отчетный период подразделения для указанного отчетного периода
@@ -220,8 +228,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 fail++;
                 continue;
             }
-
-            FormDataKind formDataKind = FormDataKind.PRIMARY; // ТФ только для первичных НФ
 
             // ЭЦП
             List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
@@ -350,6 +356,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     departmentReportPeriod.getId(), formDataKind, month);
             formData = formDataDao.get(formDataId, false);
             formCreated = true;
+        } else {
+            formData.initFormTemplateParams(formTemplate);
         }
 
         // Блокировка
@@ -386,7 +394,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Сохранение
                 formDataService.saveFormData(localLogger, userInfo, formData);
 
-                log(userInfo, LogData.L19, localLogger, formType.getName(), formDepartment.getName(), reportPeriodName);
+                log(userInfo, LogData.L19, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
                 success = true;
             } else {
                 // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок

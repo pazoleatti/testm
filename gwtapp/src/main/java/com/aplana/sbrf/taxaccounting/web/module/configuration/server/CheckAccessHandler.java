@@ -49,25 +49,16 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
 
         if (group.equals(ConfigurationParamGroup.COMMON) || group.equals(ConfigurationParamGroup.FORM)) {
             configurationService.checkReadWriteAccess(securityService.currentUserInfo(), model, logger);
-            if (logger.getEntries() != null) {
-                uuid = logEntryService.save(logger.getEntries());
-            }
-
         } else if (group.equals(ConfigurationParamGroup.EMAIL)) {
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                uuid = logEntryService.save(logger.getEntries());
-            } else {
-                boolean success = emailService.testAuth(logger);
-                uuid = logEntryService.save(logger.getEntries());
-                if (!success) {
-                    UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
-                            .getAuthentication().getPrincipal()));
-                    auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
-                            logger.getEntries().get(0).getMessage(), uuid, null);
-                }
+            boolean success = emailService.testAuth(logger);
+            if (!success) {
+                UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
+                        .getAuthentication().getPrincipal()));
+                auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
+                        logger.getEntries().get(0).getMessage(), uuid, null);
             }
         }
-        result.setUuid(uuid);
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
     }

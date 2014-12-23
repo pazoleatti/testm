@@ -86,6 +86,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public void init() {
         departmentPicker.setEnabled(false);
         declarationTypeId.setEnabled(false);
+        declarationTypeId.setTitle("Выбор вида декларации");
         taxOrganCode.setEnabled(false);
         taxOrganKpp.setEnabled(false);
         correctionPanel.setVisible(false);
