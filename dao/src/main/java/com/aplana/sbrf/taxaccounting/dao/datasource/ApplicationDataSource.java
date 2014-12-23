@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.common.datasource;
+package com.aplana.sbrf.taxaccounting.dao.datasource;
 import com.aplana.sbrf.taxaccounting.service.DataSourceHolderService;
 
 import javax.sql.DataSource;
@@ -7,9 +7,9 @@ import javax.sql.DataSource;
  * Класс для получения датасурса приложения из ejb-модуля
  *
  */
-public final class AuditEjbDataSource {
+public final class ApplicationDataSource {
 
-    private AuditEjbDataSource() {}
+    private ApplicationDataSource() {}
 
     public static DataSource getDataSource(DataSourceHolderService holder) {
         return holder.getApplicationDataSource();
