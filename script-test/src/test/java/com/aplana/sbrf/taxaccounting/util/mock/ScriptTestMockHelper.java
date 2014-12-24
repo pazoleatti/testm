@@ -19,6 +19,7 @@ public interface ScriptTestMockHelper {
     DepartmentFormTypeService mockDepartmentFormTypeService();
     RefBookFactory mockRefBookFactory();
     DepartmentReportPeriodService  mockDepartmentReportPeriodService();
+    FormTypeService mockFormTypeService();
 
     DataRowHelper getDataRowHelper();
     RefBookDataProvider getRefBookDataProvider();

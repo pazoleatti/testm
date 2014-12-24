@@ -339,6 +339,7 @@ void importTransportData() {
 
 
 void addTransportData(def xml) {
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
@@ -391,7 +392,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 9
-        newRow.recType = row.cell[9].text()
+        newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[9].text(), rnuIndexRow, 9 + colOffset, false)
         xmlIndexCol++
 
         // графа 10
