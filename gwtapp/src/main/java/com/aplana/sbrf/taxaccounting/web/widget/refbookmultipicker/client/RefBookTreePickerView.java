@@ -77,6 +77,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             @Override
             public void onOpen(OpenEvent<TreeItem> event) {
                 RefBookUiTreeItem refBookUiTreeItem = (RefBookUiTreeItem) event.getTarget();
+                //TODO: надо было бы использовать параметр RefBookTreeItem.hasChild, чтобы не делать запрос в базу
                 if (!refBookUiTreeItem.isChildLoaded()) {
                     getUiHandlers().loadForItem(refBookUiTreeItem);
                     refBookUiTreeItem.setChildLoaded(true);
@@ -436,17 +437,6 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
             sb.deleteCharAt(sb.length() - 2);
         }
         return sb.toString();
-    }
-
-    @Override
-    public String getOtherDereferenceValue(String alias) {
-        Set<RefBookUiTreeItem> selectedItems = getSelectedSet();
-        if (selectedItems != null && !selectedItems.isEmpty()) {
-            List<RefBookRecordDereferenceValue> dereferenceValues =
-                    selectedItems.iterator().next().getRefBookTreeItem().getRefBookRecordDereferenceValues();
-            return RefBookPickerUtils.getDereferenceValue(dereferenceValues, alias);
-        }
-        return null;
     }
 
     @Override

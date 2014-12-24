@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
-import java.util.Date;
-import java.util.List;
-
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.gwt.client.modal.CanHide;
 import com.aplana.gwt.client.modal.OnHideHandler;
@@ -12,6 +9,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Интерфейс компонента выбора значений из справочника
@@ -57,10 +57,6 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
     void load();
 
     void reload();
-
-    // @deprecated Использовать getOtherDereferenceValue(Long attrId)
-    @Deprecated
-    String getOtherDereferenceValue(String alias);
 
     String getOtherDereferenceValue(Long attrId);
 

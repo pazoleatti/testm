@@ -1,14 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import com.aplana.sbrf.taxaccounting.web.main.api.client.handler.DeferredInvokeHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.user.client.ui.IsWidget;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Интерфейс представления для компонента выбора значений из справочника
@@ -42,17 +42,6 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
 	 * @return строка из одного или нескольких значений через ";"
 	 */
 	String getDereferenceValue();
-
-    /**
-     * Возвращает разименованное значение поля в выбранной строке по alias
-     *
-     * !!!!! Не предназначен для мультиселекта
-     * @deprecated Использовать getOtherDereferenceValue(Long attrId)
-     * @param alias наименование атрибута
-     * @return строку с единичным значением(даже если выбрано куча)
-     */
-    @Deprecated
-    String getOtherDereferenceValue(String alias);
 
     /**
      * Возвращает разименованное значение поля в выбранной строке по attrId

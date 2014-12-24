@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookTreePickerView;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -206,7 +207,21 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     void searchButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
             pickerState.setSearchPattern(filterText.getValue());
-            load();
+            if (filterText.getValue()!= null && !filterText.getValue().isEmpty()){
+                refbookDataTree.checkCount(filterText.getValue().trim(), new CheckValuesCountHandler() {
+                    @Override
+                    public void onGetValuesCount(Integer count) {
+                        if (count != null && count < 100) {
+                            refbookDataTree.find(filterText.getValue());
+                        } else {
+                            Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений.");
+                        }
+                    }
+                });
+            } else {
+                load();
+            }
+
             getUiHandlers().onCleanEditForm();
         }
     }

@@ -369,15 +369,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public String getOtherDereferenceValue(String alias) {
-        Set<RefBookItem> selectedItems = getSelectedSet();
-        if (selectedItems != null && !selectedItems.isEmpty()) {
-            return RefBookPickerUtils.getDereferenceValue(selectedItems.iterator().next().getRefBookRecordDereferenceValues(), alias);
-        }
-        return null;
-    }
-
-    @Override
     public String getOtherDereferenceValue(Long attrId) {
         Set<RefBookItem> selectedItems = getSelectedSet();
         if (selectedItems != null && !selectedItems.isEmpty()) {

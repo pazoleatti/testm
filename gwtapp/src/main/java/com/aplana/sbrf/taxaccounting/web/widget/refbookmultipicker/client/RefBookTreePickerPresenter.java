@@ -100,7 +100,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         dispatcher.execute(createLoadAction(null, null), CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookTreeValuesResult>() {
             @Override
             public void onSuccess(GetRefBookTreeValuesResult result) {
-                getView().loadRoot(result.getPage(), ps.getSearchPattern()!= null && !ps.getSearchPattern().trim().isEmpty());
+                getView().loadRoot(result.getPage(), false);
                 if(isNeedSelectFirstItem && !result.getPage().isEmpty()){
                     isNeedSelectFirstItem = false;
                     ps.getSetIds().clear();
@@ -108,14 +108,14 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                 }
                 trySelect(ps);
 
-                if (result.getRefBookId() == 30L) {
+               /* if (result.getRefBookId() == 30L) {
                     RefBookUiTreeItem uiTreeItem = getView().getUiTreeItem(0L);
                     if (uiTreeItem != null) {
                         loadForItem(uiTreeItem);
                         uiTreeItem.setChildLoaded(true);
                         uiTreeItem.setState(true);
                     }
-                }
+                }*/
             }
         }, this));
     }
@@ -237,7 +237,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                         uiTreeItem.removeItems();
                         if (!result.getPage().isEmpty()) {
                             // если у нас searchPattern не пуст то будет загрузка каскадная так как результаты будут фильтровать по нему
-                            getView().insertChildrens(uiTreeItem, result.getPage(), ps.getSearchPattern()!= null && !ps.getSearchPattern().trim().isEmpty());
+                            getView().insertChildrens(uiTreeItem, result.getPage(), false);
                         }
 
                     }
