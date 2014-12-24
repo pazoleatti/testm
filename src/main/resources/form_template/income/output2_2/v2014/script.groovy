@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
+import java.util.regex.Pattern
+
 /**
  * Сведения о дивидендах (доходах от долевого участия в других организациях,
  * созданных на территории Российской Федерации), выплаченных в отчетном квартале
@@ -125,11 +127,16 @@ void logicCheck() {
 
     for (row in dataRows) {
         def rowNum = row.getIndex()
+        def recType = (String) row.recType;
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка одновременного заполнения/не заполнения «Графы 17» и «Графы 18»
         if (row.surname == null && row.name != null || row.name == null && row.surname != null) {
-            rowError(logger, row, "Графы «Фамилия» и «Имя» должны быть заполнены одновременно (либо обе графы не должны заполняться)!")
+            rowError(logger, row, "Строка ${rowNum}: Графы «Фамилия» и «Имя» должны быть заполнены одновременно (либо обе графы не должны заполняться)!")
+        }
+        // Проверка допустимых значений «Графы 6»
+        if (!Pattern.compile("[0-9]{2}").matcher(recType).matches()) {
+            logger.error("Строка ${rowNum}: Графа «Получатель. Тип» заполнена неверно!")
         }
     }
 }
@@ -325,7 +332,7 @@ void addData(def xml, headRowCount) {
         xmlIndexCol++
 
         // графа 28
-        newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }
