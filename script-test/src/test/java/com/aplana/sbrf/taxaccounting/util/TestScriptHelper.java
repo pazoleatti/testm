@@ -57,6 +57,7 @@ public class TestScriptHelper {
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
     private DepartmentReportPeriodService departmentReportPeriodService;
+    private FormTypeService formTypeService;
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -111,6 +112,7 @@ public class TestScriptHelper {
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
         departmentReportPeriodService = mockHelper.mockDepartmentReportPeriodService();
+        formTypeService = mockHelper.mockFormTypeService();
     }
 
     /**
@@ -204,6 +206,7 @@ public class TestScriptHelper {
         bindings.put("refBookService", refBookService);
         bindings.put("departmentFormTypeService", departmentFormTypeService);
         bindings.put("departmentReportPeriodService", departmentReportPeriodService);
+        bindings.put("formTypeService", formTypeService);
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("formDataDepartment", userDepartment);
         bindings.put("formData", formData);
@@ -326,6 +329,13 @@ public class TestScriptHelper {
      */
     public FormDataService getFormDataService() {
         return formDataService;
+    }
+
+    /**
+     * Mock FormTypeService для реализации mock-логики внутри теста
+     */
+    public FormTypeService getFormTypeService() {
+        return formTypeService;
     }
 
     /**
