@@ -227,6 +227,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         updateUIState();
         prevState.setValues(state);
 
+        isEnabledFireChangeEvent = true;
         refBookView.load(state);
     }
 

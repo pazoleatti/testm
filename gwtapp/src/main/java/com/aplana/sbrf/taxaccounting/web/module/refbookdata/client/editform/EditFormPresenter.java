@@ -105,6 +105,11 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         getView().cleanFields();
     }
 
+    public void clearRecordId() {
+        currentUniqueRecordId = null;
+        previousURId = null;
+    }
+
 	public void show(Long refBookRecordId) {
         show(refBookRecordId, null);
 	}

@@ -230,6 +230,12 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         return departmentReportPeriodService;
     }
 
+    @Override
+    public FormTypeService mockFormTypeService() {
+        FormTypeService formTypeService = mock(FormTypeService.class);
+        return formTypeService;
+    }
+
     /**
      * Получение всех значений записи справочника по Id
      */

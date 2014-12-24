@@ -142,7 +142,7 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
                 Builder builder = new Builder().nameToken(FormDataPresenter.NAME_TOKEN)
                         .with(FormDataPresenter.READ_ONLY, "false")
                         .with(FormDataPresenter.FORM_DATA_ID, String.valueOf(result.getFormDataId()));
-                if (uuid != null && uuid.isEmpty()) {
+                if (uuid != null && !uuid.isEmpty()) {
                     builder.with(FormDataPresenter.UUID, String.valueOf(uuid));
                 }
                 placeManager.revealPlace(builder.build());

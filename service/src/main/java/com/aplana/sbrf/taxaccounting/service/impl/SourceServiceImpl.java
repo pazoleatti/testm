@@ -682,16 +682,21 @@ public class SourceServiceImpl implements SourceService {
 
             /** Получаем источники, имеющие принятые экземпляры в удаляемых периодах */
             Map<SourcePair, List<String>> acceptedSources = new HashMap<SourcePair, List<String>>();
+            Set<Long> processedSources = new HashSet<Long>();
             for (SourceObject sourceObject: sourceObjects) {
-                List<String> periodsInfo = sourceDao.findAcceptedInstances(sourceObject.getSourcePair().getSource(),
-                        sourceObject.getPeriodStart(), sourceObject.getPeriodEnd());
-                if (!periodsInfo.isEmpty()) {
-                    acceptedSources.put(sourceObject.getSourcePair(), periodsInfo);
+                Long source = sourceObject.getSourcePair().getSource();
+                if (!processedSources.contains(source)) {
+                    List<String> periodsInfo = sourceDao.findAcceptedInstances(source,
+                            sourceObject.getPeriodStart(), sourceObject.getPeriodEnd());
+                    if (!periodsInfo.isEmpty()) {
+                        acceptedSources.put(sourceObject.getSourcePair(), periodsInfo);
+                    }
+                    processedSources.add(source);
                 }
             }
 
             if (!acceptedSources.isEmpty()) {
-                /** Если существуют принятые источники в промежуточных периодах */
+                /** Если существуют принятые источники */
                 logger.error(DELETE_FATAL_ERROR_BEGIN);
                 for (Map.Entry<SourcePair, List<String>> acceptedSource : acceptedSources.entrySet()) {
                     logger.error(String.format(DELETE_FATAL_ERROR_MID,
