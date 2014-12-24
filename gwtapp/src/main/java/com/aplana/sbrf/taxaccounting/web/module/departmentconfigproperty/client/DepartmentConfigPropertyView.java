@@ -425,17 +425,17 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         } else if (taxType == TaxType.INCOME) {
             TableCell taxRateCell = new TableCell();
             taxRateCell.setType(RefBookAttributeType.NUMBER);
-            taxRateCell.setNumberValue(taxRate.getValue());//Long.getLong(taxRate.getValue()));
+            taxRateCell.setNumberValue(taxRate.getValue());
             params.put("TAX_RATE", taxRateCell);
 
             TableCell sumTaxCell = new TableCell();
             sumTaxCell.setType(RefBookAttributeType.NUMBER);
-            sumTaxCell.setNumberValue(sumTax.getValue().longValue());//Long.getLong(taxRate.getValue()));
+            sumTaxCell.setNumberValue(sumTax.getValue() == null ? null : sumTax.getValue().longValue());
             params.put("SUM_TAX", sumTaxCell);
 
             TableCell sumDividendsCell = new TableCell();
             sumDividendsCell.setType(RefBookAttributeType.NUMBER);
-            sumDividendsCell.setNumberValue(sumDividends.getValue().longValue());//Long.getLong(taxRate.getValue()));
+            sumDividendsCell.setNumberValue(sumDividends.getValue() == null ? null : sumDividends.getValue().longValue());
             params.put("SUM_DIVIDENDS", sumDividendsCell);
 
         }
@@ -483,9 +483,19 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         if (taxType == TaxType.PROPERTY) {
             version.setText(itemList.get("PREPAYMENT_VERSION").getStringValue());
         } else if (taxType == TaxType.INCOME) {
-            taxRate.setValue(itemList.get("TAX_RATE").getNumberValue().doubleValue());
-            sumTax.setValue(itemList.get("SUM_TAX").getNumberValue().longValue());
-            sumDividends.setValue(itemList.get("SUM_DIVIDENDS").getNumberValue().longValue());
+            Number value = itemList.get("TAX_RATE").getNumberValue();
+            taxRate.setValue(itemList.get("TAX_RATE").getNumberValue() == null
+                                    ? null
+                                    : itemList.get("TAX_RATE").getNumberValue().doubleValue());
+
+
+            sumTax.setValue(itemList.get("SUM_TAX").getNumberValue() == null
+                                    ? null
+                                    : itemList.get("SUM_TAX").getNumberValue().longValue());
+
+            sumDividends.setValue(itemList.get("SUM_DIVIDENDS").getNumberValue() == null
+                                    ? null
+                                    : itemList.get("SUM_DIVIDENDS").getNumberValue().longValue());
         }
     }
 
