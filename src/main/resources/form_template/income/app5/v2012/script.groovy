@@ -49,7 +49,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE :
-        formDataService.consolidationSimple(formData, logger)
+        formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
         break
