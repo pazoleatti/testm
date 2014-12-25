@@ -125,7 +125,9 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
         //setMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
         if (isHierarchy){
-            editFormPresenter.show(null, parentRefBookRecordItem);
+            //http://jira.aplana.com/browse/SBRFACCTAX-9922
+            editFormPresenter.show(null, parentRefBookRecordItem.getParent()!=null?
+                    parentRefBookRecordItem.getParent() : null);
         }
         else{
             editFormPresenter.show(null);
