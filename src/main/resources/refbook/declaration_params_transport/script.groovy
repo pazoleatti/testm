@@ -1,8 +1,6 @@
 package refbook.declaration_params_transport
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Cкрипт справочника "Параметры представления деклараций по транспортному налогу" (id = 210)
@@ -14,12 +12,6 @@ switch (formDataEvent) {
     case FormDataEvent.SAVE:
         save()
         break
-}
-
-boolean checkFormat(String enteredValue, String pat) {
-    Pattern p = Pattern.compile(pat);
-    Matcher m = p.matcher(enteredValue);
-    return m.matches();
 }
 
 void save() {

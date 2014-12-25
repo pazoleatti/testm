@@ -33,6 +33,7 @@ public class DateMaskInputCell extends
 	public static final String DEFAULT_DATE_FORMAT = "dd.MM.yyyy";
 	public static final String DEFAULT_DATE_MASK = "99.99.9999";
     public static final String CHECKED_EMPTY_VALUE = "__.__.____";
+    public static final Date DATE_1900 = new Date(0,0,1);
 
 	private ValueUpdater<Date> valueUpdater;
 
@@ -542,7 +543,8 @@ public class DateMaskInputCell extends
             if (inputted.length() > dateFormat.length()) {
                 throw new IllegalArgumentException();
             }
-            DateTimeFormat.getFormat(dateFormat).parseStrict(inputted);
+            Date date = DateTimeFormat.getFormat(dateFormat).parseStrict(inputted);
+            if (date.before(DATE_1900)) return false;
         } catch (IllegalArgumentException ex){
             return false;
         }

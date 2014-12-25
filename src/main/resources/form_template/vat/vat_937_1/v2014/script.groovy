@@ -123,7 +123,7 @@ void calc() {
 
     // строка 2 «Графа 13» = По строке 2 («Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»)
     def diff = (totalA.nds ?: 0) - (totalA.deal_20_Nds ?: 0) - (totalA.deal_18_Nds ?: 0) - (totalA.deal_10_Nds ?: 0)
-    checkOverflowAlgorithm(diff, totalA, 'diff', totalA.getIndex(), sizeDiff, '«Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»')
+    checkOverflow(diff, totalA, 'diff', totalA.getIndex(), sizeDiff, '«Графа 12» - «Графа 5» - «Графа 7» - «Графа 9»')
     totalA.diff = diff
 
     // строка 6 графы с 2 по 11
@@ -461,14 +461,3 @@ void addTransportData(def xml) {
     dataRowHelper.save(dataRows)
 }
 
-def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
-    if (value == null) {
-        return;
-    }
-    BigDecimal overpower = new BigDecimal("1E" + size);
-
-    if (value.abs() >= overpower) {
-        String columnName = getColumnName(row, alias);
-        throw new ServiceException("Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
-    }
-}

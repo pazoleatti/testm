@@ -134,8 +134,8 @@ void logicCheck() {
         if (row.surname == null && row.name != null || row.name == null && row.surname != null) {
             rowError(logger, row, "Строка ${rowNum}: Графы «Фамилия» и «Имя» должны быть заполнены одновременно (либо обе графы не должны заполняться)!")
         }
-        // Проверка допустимых значений «Графы 6»
-        if (!Pattern.compile("[0-9]{2}").matcher(recType).matches()) {
+        // Проверка допустимых значений «Графы 6» (диапазон 00...99)
+        if (!checkFormat(recType, "[0-9]{2}")) {
             logger.error("Строка ${rowNum}: Графа «Получатель. Тип» заполнена неверно!")
         }
     }
@@ -244,7 +244,12 @@ void addData(def xml, headRowCount) {
         xmlIndexCol++
 
         // графа 6
-        newRow.recType = row.cell[xmlIndexCol].text()
+        //Проверяется: если загруженное из Excel значение - цифра от 0 до 9, то спереди подставляется 0, чтобы получилось двузначное число.
+        if (checkFormat(row.cell[xmlIndexCol].text(), "[0-9]")) {
+            newRow.recType = "0" + row.cell[xmlIndexCol].text()
+        } else {
+            newRow.recType = row.cell[xmlIndexCol].text()
+        }
         xmlIndexCol++
 
         // графа 7

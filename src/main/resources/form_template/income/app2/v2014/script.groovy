@@ -227,13 +227,13 @@ void calc() {
 
         // проверки, выполняемые до расчёта
         def int index = row.getIndex()
-        checkOverflowAlgorithm(value25, row, 'column25', index, 15, '«Графа 35» - «Графа 47» - «Графа 59»')
-        checkOverflowAlgorithm(value26, row, 'column26', index, 15,
+        checkOverflow(value25, row, 'column25', index, 15, '«Графа 35» - «Графа 47» - «Графа 59»')
+        checkOverflow(value26, row, 'column26', index, 15,
                 '«Графа 37» - «Графа 39» - «Графа 41» - «Графа 43» - «Графа 455» - ' +
                         '«Графа 49» - «Графа 51» - «Графа 53» - «Графа 55» - «Графа 57» - ' +
                         '«Графа 61» - «Графа 63» - «Графа 65» - «Графа 67» - «Графа 69» - ' +
                         '«Графа 71» - «Графа 73»')
-        checkOverflowAlgorithm(value27, row, 'column27', index, 15, '«Графа 25» - «Графа 26»')
+        checkOverflow(value27, row, 'column27', index, 15, '«Графа 25» - «Графа 26»')
 
         row.column25 = value25
         row.column26 = value26
@@ -371,18 +371,6 @@ void addTransportData(def xml) {
     }
 
     dataRowHelper.save(rows)
-}
-
-def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
-    if (value == null) {
-        return;
-    }
-    BigDecimal overpower = new BigDecimal("1E" + size);
-
-    if (value.abs() >= overpower) {
-        String columnName = getColumnName(row, alias);
-        throw new ServiceException("Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
-    }
 }
 
 boolean checkFormat(String enteredValue, String pat) {

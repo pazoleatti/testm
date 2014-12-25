@@ -146,17 +146,17 @@ void logicCheck() {
         // 3. Проверка допустимых значений «Графы 3»
         if (! row.taxPeriod in ['13', '21', '31', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43',
                                  '44', '45', '46', '50']) {
-            errorMessage(row, 'taxPeriod')
+            errorMessage(row, 'taxPeriod', errorMsg)
         }
         // 4. Проверка допустимых значений «Графы 7»
         if (! row.dividendType in ['1', '2']) {
-            errorMessage(row, 'dividendType')
+            errorMessage(row, 'dividendType', errorMsg)
         }
         // 5. Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
         if (row.taCategory == 2) {
             ['dividendAgentAll', 'dividendAgentWithStavka0'].each {
                 if (row[it] != 0) {
-                    errorMessage(row, it)
+                    errorMessage(row, it, errorMsg)
                 }
             }
         }
@@ -164,7 +164,7 @@ void logicCheck() {
         if (row.taCategory == 2) {
             ['dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast'].each {
                 if (row[it] != 0) {
-                    errorMessage(row, it)
+                    errorMessage(row, it, errorMsg)
                 }
             }
         }
@@ -190,7 +190,7 @@ def calc10( def row) {
     row.dividendRussianStavka0 + row.dividendRussianStavka6 + row.dividendRussianStavka9 + row.dividendRussianTaxFree
 }
 
-void errorMessage(def row, def alias) {
+void errorMessage(def row, def alias, def errorMsg) {
     rowError(logger, row, errorMsg + "Графа «${getColumnName(row, alias)}» заполнена неверно!!")
 }
 
