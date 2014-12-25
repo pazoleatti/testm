@@ -93,8 +93,8 @@ def editableColumns = ['financialYear', 'taxPeriod', 'emitent', 'decreeNumber', 
                        'dividendForgeinPersonalAll', 'dividendStavka0', 'dividendStavkaLess5', 'dividendStavkaMore5',
                        'dividendStavkaMore10', 'dividendRussianMembersAll', 'dividendRussianOrgStavka9',
                        'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
-                       'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendSumForTaxAll','dividendSumForTaxStavka9',
-                       'dividendSumForTaxStavka0','taxSum', 'taxSumFromPeriod', 'taxSumFromPeriodAll']
+                       'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendSumForTaxAll', 'dividendSumForTaxStavka9',
+                       'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumFromPeriodAll']
 
 @Field
 def nonEmptyColumns = ['financialYear', 'taxPeriod', 'dividendType', 'dividendSumRaspredPeriod', 'dividendSumNalogAgent',
@@ -154,26 +154,6 @@ def logicCheck() {
 
 def roundValue(BigDecimal value, def int precision) {
     value?.setScale(precision, BigDecimal.ROUND_HALF_UP)
-}
-
-def checkOverpower(def value, def row, def alias) {
-    if (value?.abs() >= 1e15) {
-        def checksMap = [
-                'dividendSumForTaxAll'    : "«графа 6» - «графа 20»",
-                'dividendSumForTaxStavka9': "ОКРУГЛ («графа 15» / «графа 6» * «графа 21» ; 0) ",
-                'dividendSumForTaxStavka0': "ОКРУГЛ («графа 16» / «графа 6» * «графа 21» ; 0) ",
-                'taxSum'                  : "ОКРУГЛ («графа 22» * 9%; 0)"
-        ]
-        def aliasMap = [
-                'dividendSumForTaxAll'    : '21',
-                'dividendSumForTaxStavka9': '22',
-                'dividendSumForTaxStavka0': '23',
-                'taxSum'                  : '24'
-        ]
-        throw new ServiceException("Строка ${row.getIndex()}: значение «Графы ${aliasMap[alias]}» превышает допустимую " +
-                "разрядность (15 знаков). «Графа ${aliasMap[alias]}» рассчитывается как «${checksMap[alias]}»!")
-    }
-    return value
 }
 
 void importData() {

@@ -144,7 +144,7 @@ void calc() {
     def dataRows = dataRowHelper.allCached
     def other = getDataRow(dataRows, 'R2{wan}')
     def sum = calcOther(dataRows)
-    checkOverflowAlgorithm(sum, other, 'sum', other.getIndex(), sizeSum, "Сумма значений всех нефиксированных строк по Графе 3")
+    checkOverflow(sum, other, 'sum', other.getIndex(), sizeSum, "Сумма значений всех нефиксированных строк по Графе 3")
     other?.sum = sum
     def itog = getDataRow(dataRows, 'total')
     itog?.sum = calcItog(dataRows)

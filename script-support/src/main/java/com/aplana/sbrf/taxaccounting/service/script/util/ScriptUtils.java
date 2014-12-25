@@ -111,6 +111,7 @@ public final class ScriptUtils {
 
     // разделитель между идентификаторами в ключе для кеширования записей справочника
     private static final String SEPARATOR = "_";
+    public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -1414,7 +1415,7 @@ public final class ScriptUtils {
         return m.matches();
     }
 
-    public static void checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
+    public static void checkOverflow(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
         if (value == null) {
             return;
         }
@@ -1422,7 +1423,7 @@ public final class ScriptUtils {
 
         if (value.abs().compareTo(overpower) != -1) {
             String columnName = getColumnName(row, alias);
-            throw new ServiceException("Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
+            throw new ServiceException(CHECK_OVERFLOW_MESSAGE, index, columnName, size, columnName, algorithm);
         }
     }
 }
