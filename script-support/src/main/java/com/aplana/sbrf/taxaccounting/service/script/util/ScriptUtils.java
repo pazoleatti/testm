@@ -388,6 +388,7 @@ public final class ScriptUtils {
 
     /**
      * Возвращает дату по строгому шаблону, иначе дата вида 01.13.2014 становится 01.01.2015
+     *
      * @param format
      * @param value
      * @return
@@ -1410,6 +1411,9 @@ public final class ScriptUtils {
      * Проверка формата введённых данных по регулярному выражению
      */
     public static boolean checkFormat(String enteredValue, String pat) {
+        if (enteredValue == null || pat == null) {
+            return false;
+        }
         Pattern p = Pattern.compile(pat);
         Matcher m = p.matcher(enteredValue);
         return m.matches();

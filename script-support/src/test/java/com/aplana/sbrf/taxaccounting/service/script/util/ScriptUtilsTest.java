@@ -189,6 +189,33 @@ public class ScriptUtilsTest {
         ScriptUtils.checkHeaderEquals(headerMapping);
     }
 
+    @Test
+    public void checkFormatTest() {
+        Assert.assertTrue(ScriptUtils.checkFormat("99", "[0-9]{2}"));
+        Assert.assertFalse(ScriptUtils.checkFormat("ss", "[0-9]{2}"));
+        Assert.assertFalse(ScriptUtils.checkFormat("3333", "[0-9]{2}"));
+        Assert.assertFalse(ScriptUtils.checkFormat(null, "[0-9]{2}"));
+        Assert.assertFalse(ScriptUtils.checkFormat("22", null));
+    }
+
+    @Test(expected = ServiceException.class)
+    public void checkOverflow1Test() {
+        BigDecimal a = new BigDecimal("10");
+        // в числе "10" знаков больше 1
+        ScriptUtils.checkOverflow(a, null, "test", 2, 1, "test");
+    }
+
+    @Test
+    public void checkOverflow2Test() {
+        BigDecimal a = new BigDecimal("10");
+        // в числе "10" знаков не больше 2
+        ScriptUtils.checkOverflow(a, null, "test", 2, 2, "test");
+        // в числе "10" знаков не больше 3
+        ScriptUtils.checkOverflow(a, null, "test", 2, 3, "test");
+        // проверяем число null
+        ScriptUtils.checkOverflow(null, null, "test", 2, 2, "test");
+    }
+
     @Test(expected = ServiceException.class)
     public void checkHeaderEqualsError() {
         // неодинаковые
