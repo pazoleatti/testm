@@ -32,6 +32,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Библиотека скриптовых функций
@@ -483,6 +485,7 @@ public final class ScriptUtils {
 
     /**
      * Сортировка строк без учета группировок и наличия итоговых строк
+     *
      * @return список неразличимых строк (важен для подитогов)
      */
     static Set<DataRow<Cell>> sortRowsSimple(List<DataRow<Cell>> dataRows) {
@@ -586,17 +589,17 @@ public final class ScriptUtils {
     /**
      * Сортировка строк НФ
      *
-     * @param refBookService Сервис работы со справочниками
-     * @param logger Логгер
-     * @param dataRows Список строк НФ
+     * @param refBookService   Сервис работы со справочниками
+     * @param logger           Логгер
+     * @param dataRows         Список строк НФ
      * @param subTotalDataRows Список подитоговых строк (может отсутствовать)
-     * @param totalRow Итоговая строка (может отсутствовать)
-     * @param subTotalLast Положение подитоговой строки, true — в конце, false — в начале (может отсутствовать)
+     * @param totalRow         Итоговая строка (может отсутствовать)
+     * @param subTotalLast     Положение подитоговой строки, true — в конце, false — в начале (может отсутствовать)
      */
     @SuppressWarnings("unused")
     static void sortRows(RefBookService refBookService, Logger logger, List<DataRow<Cell>> dataRows,
-                                 List<DataRow<Cell>> subTotalDataRows,
-                                 DataRow<Cell> totalRow, Boolean subTotalLast) {
+                         List<DataRow<Cell>> subTotalDataRows,
+                         DataRow<Cell> totalRow, Boolean subTotalLast) {
         if (dataRows == null || dataRows.isEmpty()) {
             return;
         }
@@ -857,8 +860,8 @@ public final class ScriptUtils {
     /**
      * Проверка заголовка импортируемого файла на соответствие размерности
      *
-     * @param currentColSize - количество столбцов в текущих данных
-     * @param currentRowSize - количество строк в текущих данных
+     * @param currentColSize   - количество столбцов в текущих данных
+     * @param currentRowSize   - количество строк в текущих данных
      * @param referenceColSize - количество ожидаемых столбцов
      * @param referenceRowSize - количество ожидаемых строк
      */
@@ -973,7 +976,7 @@ public final class ScriptUtils {
     /**
      * Получает значение самой ячейки или главной, если она в объединении
      */
-    public static Object getOwnerValue (DataRow<Cell> dataRow , String alias) {
+    public static Object getOwnerValue(DataRow<Cell> dataRow, String alias) {
         Cell cell = dataRow.getCell(alias);
         return ((cell.hasValueOwner()) ? cell.getValueOwner().getValue() : cell.getValue());
     }
@@ -1115,6 +1118,7 @@ public final class ScriptUtils {
 
     /**
      * Приводит текст к удобному для сравнения виду (обрезает, убирает лишние пробелы, если остается только крестик, то заменяет на пустую строку)
+     *
      * @param value
      * @return
      */
@@ -1130,7 +1134,9 @@ public final class ScriptUtils {
         return value;
     }
 
-    /** Выдать сообщение что импорт не предусмотрен. */
+    /**
+     * Выдать сообщение что импорт не предусмотрен.
+     */
     @SuppressWarnings("unused")
     public static void noImport(Logger logger) {
         logger.error(IMPORT_IS_NOT_PROVIDED);
@@ -1209,7 +1215,7 @@ public final class ScriptUtils {
             }
 
             // после строк с данными через одну пустую должны быть итоги
-            rowIndex+=2;
+            rowIndex += 2;
 
             // проверка на итоги идет только если они ожидаются
             if (totalCount != 0) {
@@ -1272,13 +1278,13 @@ public final class ScriptUtils {
     /**
      * Проверить фиксированное значение из файла на соответствие фиксированой строке из макета.
      *
-     * @param row строка
-     * @param value значение для проверки
+     * @param row           строка
+     * @param value         значение для проверки
      * @param valueExpected ожидаемое значение
-     * @param indexRow номер строки
-     * @param alias алиас столбца проверяемой графы
-     * @param logger для вывода лога
-     * @param required фатальность
+     * @param indexRow      номер строки
+     * @param alias         алиас столбца проверяемой графы
+     * @param logger        для вывода лога
+     * @param required      фатальность
      */
     @SuppressWarnings("unused")
     public static void checkFixedValue(DataRow<Cell> row, String value, String valueExpected, int indexRow, String alias, Logger logger, boolean required) {
@@ -1339,7 +1345,7 @@ public final class ScriptUtils {
     }
 
     /**
-     *  Замена "ёлочек" («») на двойные кавычки (")
+     * Замена "ёлочек" («») на двойные кавычки (")
      */
     @SuppressWarnings("unused")
     public static String replaceQuotes(String value) {
@@ -1372,12 +1378,16 @@ public final class ScriptUtils {
         return false;
     }
 
-    /** Получить название столбца excel'я по номеру. */
+    /**
+     * Получить название столбца excel'я по номеру.
+     */
     public static String getXLSColumnName(int index) {
         return index + " (" + getXLSColumnNumber(index) + ")";
     }
 
-    /** Получить буквенное название столбца excel'я по номеру. */
+    /**
+     * Получить буквенное название столбца excel'я по номеру.
+     */
     public static String getXLSColumnNumber(int index) {
         if (index < 1) {
             throw new IllegalArgumentException(WRONG_XLS_COLUMN_INDEX);
@@ -1389,9 +1399,31 @@ public final class ScriptUtils {
      * Получить ключ для кешированых записей по идентикатору справочника и записи.
      *
      * @param refBookId идентикатор справочника
-     * @param recordId идентикатор записи
+     * @param recordId  идентикатор записи
      */
     public static String getRefBookCacheKey(Long refBookId, Long recordId) {
         return refBookId + SEPARATOR + recordId;
     }
+
+    /**
+     * Проверка формата введённых данных по регулярному выражению
+     */
+    public static boolean checkFormat(String enteredValue, String pat) {
+        Pattern p = Pattern.compile(pat);
+        Matcher m = p.matcher(enteredValue);
+        return m.matches();
+    }
+
+    public static void checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
+        if (value == null) {
+            return;
+        }
+        BigDecimal overpower = new BigDecimal("1E" + size);
+
+        if (value.abs().compareTo(overpower) != -1) {
+            String columnName = getColumnName(row, alias);
+            throw new ServiceException("Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
+        }
+    }
 }
+

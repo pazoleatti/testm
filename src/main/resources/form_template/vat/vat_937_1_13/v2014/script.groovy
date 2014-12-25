@@ -331,18 +331,6 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.save(dataRows)
 }
 
-def checkOverflowAlgorithm(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
-    if (value == null) {
-        return;
-    }
-    BigDecimal overpower = new BigDecimal("1E" + size);
-
-    if (value.abs() >= overpower) {
-        String columnName = getColumnName(row, alias);
-        throw new ServiceException("Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!", index, columnName, size, columnName, algorithm);
-    }
-}
-
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 3, 1)
     addTransportData(xml)
