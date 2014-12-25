@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.script.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -367,6 +366,21 @@ public final class ScriptUtils {
         if (tmp.isEmpty()) {
             return null;
         }
+
+        // формат строки и шаблона не совпадают (excel может подставить в ячейку "yyyy" значение "01.01.yyyy")
+        if (!tmp.contains(".") && format.contains(".")) {
+            BigDecimal tmpNum = parseNumber(tmp, indexRow, indexColumn, logger, required);
+            if (tmpNum != null && !tmpNum.equals(0)) {
+                return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
+            }
+        }
+        if (tmp.contains(".") && !format.contains(".")) {
+            BigDecimal tmpNum = parseNumber(tmp.substring(tmp.lastIndexOf('.') + 1), indexRow, indexColumn, logger, required);
+            if (tmpNum != null && !tmpNum.equals(0)) {
+                return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
+            }
+        }
+
         Date retVal = null;
         try {
             retVal = parseDate(format, tmp);

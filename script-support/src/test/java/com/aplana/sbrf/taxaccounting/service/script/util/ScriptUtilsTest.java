@@ -94,12 +94,12 @@ public class ScriptUtilsTest {
 
     @Test
     public void roundTest1() {
-        Assert.assertEquals(ScriptUtils.round(3.12345, 3), 3.123, Constants.EPS);
+        Assert.assertEquals(3.123, ScriptUtils.round(3.12345, 3), Constants.EPS);
     }
 
     @Test
     public void roundTest2() {
-        Assert.assertEquals(ScriptUtils.round(1.5, 0), 2, Constants.EPS);
+        Assert.assertEquals(2, ScriptUtils.round(1.5, 0), Constants.EPS);
     }
 
     @Test
@@ -123,13 +123,13 @@ public class ScriptUtilsTest {
         double d1 = -0.9999345345345436d;
         long l1 = 999900L;
 
-        Assert.assertEquals(ScriptUtils.parseNumber(str1, 1, 1, null, true).doubleValue(), d1, 0);
-        Assert.assertEquals(ScriptUtils.parseNumber(str1, 1, 1, null, false).doubleValue(), d1, 0);
-        Assert.assertEquals(ScriptUtils.parseNumber(str2, 1, 1, null, true).doubleValue(), d1, 0);
-        Assert.assertEquals(ScriptUtils.parseNumber(str2, 1, 1, null, false).doubleValue(), d1, 0);
+        Assert.assertEquals(d1, ScriptUtils.parseNumber(str1, 1, 1, null, true).doubleValue(), 0);
+        Assert.assertEquals(d1, ScriptUtils.parseNumber(str1, 1, 1, null, false).doubleValue(), 0);
+        Assert.assertEquals(d1, ScriptUtils.parseNumber(str2, 1, 1, null, true).doubleValue(), 0);
+        Assert.assertEquals(d1, ScriptUtils.parseNumber(str2, 1, 1, null, false).doubleValue(), 0);
         Assert.assertNull(ScriptUtils.parseNumber(str3, 1, 1, null, false));
         Assert.assertNull(ScriptUtils.parseNumber(str4, 1, 1, null, false));
-        Assert.assertEquals(ScriptUtils.parseNumber(str5, 1, 1, null, false).longValue(), l1);
+        Assert.assertEquals(l1, ScriptUtils.parseNumber(str5, 1, 1, null, false).longValue());
         Assert.assertNull(ScriptUtils.parseNumber(str6, 1, 1, null, true));
         Assert.assertNull(ScriptUtils.parseNumber(str6, 1, 1, null, false));
     }
@@ -150,15 +150,23 @@ public class ScriptUtilsTest {
         String str2 = " 05.02.2009 ";
         Date date1 = new Date(2009 - 1900, 2 - 1, 5);
         String format = "dd.MM.yyyy";
-        Assert.assertEquals(ScriptUtils.parseDate(str1, format, 1, 1, null, true), date1);
-        Assert.assertEquals(ScriptUtils.parseDate(str1, format, 1, 1, null, false), date1);
-        Assert.assertEquals(ScriptUtils.parseDate(str2, format, 1, 1, null, true), date1);
-        Assert.assertEquals(ScriptUtils.parseDate(str2, format, 1, 1, null, false), date1);
+        Assert.assertEquals(date1, ScriptUtils.parseDate(str1, format, 1, 1, null, true));
+        Assert.assertEquals(date1, ScriptUtils.parseDate(str1, format, 1, 1, null, false));
+        Assert.assertEquals(date1, ScriptUtils.parseDate(str2, format, 1, 1, null, true));
+        Assert.assertEquals(date1, ScriptUtils.parseDate(str2, format, 1, 1, null, false));
     }
 
     @Test(expected = ServiceException.class)
     public void parseDate2() {
         ScriptUtils.parseDate("Hello", "dd.MM.yyyy", 1, 1, null, true);
+    }
+
+    @Test
+    public void parseDate3() {
+        Date date = new Date(2009 - 1900, 0, 1);
+        Assert.assertEquals(date, ScriptUtils.parseDate("01.02.2009", "yyyy", 1, 1, null, true));
+        Assert.assertEquals(date, ScriptUtils.parseDate("2009", "dd.MM.yyyy", 1, 1, null, true));
+        Assert.assertEquals(date, ScriptUtils.parseDate("2009", "yyyy", 1, 1, null, true));
     }
 
     @Test
@@ -171,13 +179,13 @@ public class ScriptUtilsTest {
         String str6 = "  a  b  c ч  d";
         String str7 = "  a\n  b  c ч  d";
 
-        Assert.assertEquals(ScriptUtils.normalize(str1), "");
-        Assert.assertEquals(ScriptUtils.normalize(str2), "");
-        Assert.assertEquals(ScriptUtils.normalize(str3), "");
-        Assert.assertEquals(ScriptUtils.normalize(str4), "");
-        Assert.assertEquals(ScriptUtils.normalize(str5), "a b c d");
-        Assert.assertEquals(ScriptUtils.normalize(str6), "a b c ч d");
-        Assert.assertEquals(ScriptUtils.normalize(str7), "a b c ч d");
+        Assert.assertEquals("", ScriptUtils.normalize(str1));
+        Assert.assertEquals("", ScriptUtils.normalize(str2));
+        Assert.assertEquals("", ScriptUtils.normalize(str3));
+        Assert.assertEquals("", ScriptUtils.normalize(str4));
+        Assert.assertEquals("a b c d", ScriptUtils.normalize(str5));
+        Assert.assertEquals("a b c ч d", ScriptUtils.normalize(str6));
+        Assert.assertEquals("a b c ч d", ScriptUtils.normalize(str7));
     }
 
     @Test
@@ -251,7 +259,7 @@ public class ScriptUtilsTest {
 
         for (Integer index : map.keySet()) {
             String value = map.get(index);
-            Assert.assertEquals(value, ScriptUtils.getXLSColumnNumber(index));
+            Assert.assertEquals(ScriptUtils.getXLSColumnNumber(index), value);
         }
     }
 
@@ -291,8 +299,8 @@ public class ScriptUtilsTest {
         int[] indexesAfter = {9, 7, 8, 5, 4, 3, 10, 2, 6, 1};
         List<DataRow<Cell>> dataRows = getTestSimpleRows();
 
-        System.out.println("Before sort:");
-        printRows(dataRows);
+        //System.out.println("Before sort:");
+        //printRows(dataRows);
 
         int index = 0;
         for (DataRow<Cell> row : dataRows) {
@@ -301,14 +309,14 @@ public class ScriptUtilsTest {
 
         ScriptUtils.sortRowsSimple(dataRows);
 
-        System.out.println("After sort:");
+        //System.out.println("After sort:");
 
         index = 0;
         for (DataRow<Cell> row : dataRows) {
             Assert.assertEquals(indexesAfter[index++], row.getIndex().intValue());
         }
 
-        printRows(dataRows);
+        //printRows(dataRows);
     }
 
     // Проверка сортировки с наличием подитоговых и итоговой строки (итоговые в начале)
@@ -321,16 +329,16 @@ public class ScriptUtilsTest {
         List<DataRow<Cell>> subtotalRows = Arrays.asList(dataRows.get(3), dataRows.get(4), dataRows.get(9), dataRows.get(12));
         DataRow<Cell> totalRow = dataRows.get(14);
 
-        System.out.println("Before:");
-        printRows(dataRows);
+        //System.out.println("Before:");
+        //printRows(dataRows);
 
         // Реализация не требуется, т.к. строки уже разыменованы
         RefBookService refBookService = mock(RefBookService.class);
 
         ScriptUtils.sortRows(refBookService, new Logger(), dataRows, subtotalRows, totalRow, true);
 
-        System.out.println("After:");
-        printRows(dataRows);
+        //System.out.println("After:");
+        //printRows(dataRows);
 
         int index1 = 0;
         int index2 = 0;
@@ -353,16 +361,16 @@ public class ScriptUtilsTest {
         List<DataRow<Cell>> subtotalRows = Arrays.asList(dataRows.get(3), dataRows.get(4), dataRows.get(9), dataRows.get(12));
         DataRow<Cell> totalRow = dataRows.get(14);
 
-        System.out.println("Before:");
-        printRows(dataRows);
+        //System.out.println("Before:");
+        //printRows(dataRows);
 
         // Реализация не требуется, т.к. строки уже разыменованы
         RefBookService refBookService = mock(RefBookService.class);
 
         ScriptUtils.sortRows(refBookService, new Logger(), dataRows, subtotalRows, totalRow, false);
 
-        System.out.println("After:");
-        printRows(dataRows);
+        //System.out.println("After:");
+        //printRows(dataRows);
 
         int index1 = 0;
         int index2 = 0;
