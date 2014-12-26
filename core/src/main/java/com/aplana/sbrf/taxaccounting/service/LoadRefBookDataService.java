@@ -38,6 +38,16 @@ public interface LoadRefBookDataService {
     ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger);
 
     /**
+     * Загрузка ТФ справочника Средняя стоимость транспортных средст (AVG_COST_UPLOAD_DIRECTORY)
+     */
+    ImportCounter importRefBookAvgCost(TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Загрузка ТФ справочника Средняя стоимость транспортных средст (AVG_COST_UPLOAD_DIRECTORY)
+     */
+    ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger);
+
+    /**
      * Соответствие имени файла ТФ справочников, поставляемых ЦАС НСИ:
      * «Коды ОКАТО»
      * «Коды субъектов Российской Федерации»
@@ -51,6 +61,11 @@ public interface LoadRefBookDataService {
      * «Эмитенты»
      */
     boolean isDiasoftFile(String name);
+
+    /**
+     * Соответствие имени файла ТФ справочника "Средняя стоимость транспортных средств"
+     */
+    boolean isAvgCostFile(String name);
 
     /**
      * TODO Перенести в отдельный сервис

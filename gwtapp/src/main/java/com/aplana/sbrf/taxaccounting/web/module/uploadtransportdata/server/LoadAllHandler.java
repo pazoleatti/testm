@@ -44,6 +44,8 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         // Diasoft
         loadRefBookDataService.importRefBookDiasoft(userInfo, logger);
 
+        loadRefBookDataService.importRefBookAvgCost(userInfo, logger);
+
         // НФ
         loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger);
 

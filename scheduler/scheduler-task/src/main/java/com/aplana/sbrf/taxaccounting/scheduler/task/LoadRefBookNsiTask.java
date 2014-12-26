@@ -40,7 +40,7 @@ public class LoadRefBookNsiTask implements UserTask {
 
     @Override
     public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
-        loadRefBookDataService.importRefBookDiasoft(userService.getSystemUserInfo(), new Logger());
+        loadRefBookDataService.importRefBookNsi(userService.getSystemUserInfo(), new Logger());
     }
 
     @Override

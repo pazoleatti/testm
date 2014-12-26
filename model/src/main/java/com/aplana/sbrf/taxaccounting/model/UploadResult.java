@@ -10,6 +10,7 @@ public class UploadResult {
     int successCounter;
     int failCounter;
     List<String> diasoftFileNameList = new LinkedList<String>();
+    List<String> avgCostFileNameList = new LinkedList<String>();
     List<String> formDataFileNameList = new LinkedList<String>();
     List<Integer> formDataDepartmentList = new LinkedList<Integer>();
 
@@ -31,6 +32,10 @@ public class UploadResult {
 
     public List<String> getDiasoftFileNameList() {
         return diasoftFileNameList;
+    }
+
+    public List<String> getAvgCostFileNameList() {
+        return avgCostFileNameList;
     }
 
     public List<String> getFormDataFileNameList() {

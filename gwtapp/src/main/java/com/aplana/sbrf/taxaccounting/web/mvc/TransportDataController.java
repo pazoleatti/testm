@@ -79,6 +79,9 @@ public class TransportDataController {
             // Diasoft
             loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
         }
+        if (!uploadResult.getAvgCostFileNameList().isEmpty()) {
+            loadRefBookDataService.importRefBookAvgCost(userInfo, uploadResult.getAvgCostFileNameList(), logger);
+        }
 
         if (!uploadResult.getFormDataFileNameList().isEmpty()) {
             // НФ

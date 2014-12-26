@@ -64,6 +64,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     final static String U6_1 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s.";
     final static String U6_2 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s";
 
+    private static final String DIASOFT_NAME = "справочников Diasoft";
+    private static final String AVG_COST_NAME = "справочника «Средняя стоимость транспортных средств»";
+
     // Сообщения, которые не учтены в постановка
     final static String USER_NOT_FOUND_ERROR = "Не определен пользователь!";
     final static String ACCESS_DENIED_ERROR = "У пользователя нет прав для загрузки транспортных файлов!";
@@ -73,10 +76,10 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     protected static enum LogData {
         L32("Файл «%s» сохранен в каталоге загрузки «%s».", LogLevel.INFO, true),
         L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, true),
-        L34_1("Не указан путь к каталогу загрузки справочников Diasoft! Файл «%s» не сохранен.", LogLevel.ERROR, true),
+        L34_1("Не указан путь к каталогу загрузки %s! Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
-        L37("При загрузке файла «%s» произошла непредвидинная ошибка: %s.", LogLevel.ERROR, true);
+        L37("При загрузке файла «%s» произошла непредвиденная ошибка: %s.", LogLevel.ERROR, true);
 
         private LogLevel level;
         private String text;
@@ -108,8 +111,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     public UploadResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {
         UploadResult uploadResult = new UploadResult();
         ImportCounter importCounter = uploadFileWithoutLog(userInfo, fileName, inputStream,
-                uploadResult.getDiasoftFileNameList(), uploadResult.getFormDataFileNameList(),
-                uploadResult.getFormDataDepartmentList(), logger);
+                uploadResult.getDiasoftFileNameList(), uploadResult.getAvgCostFileNameList(),
+                uploadResult.getFormDataFileNameList(), uploadResult.getFormDataDepartmentList(), logger);
         log(userInfo, LogData.L35, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
         uploadResult.setSuccessCounter(importCounter.getSuccessCounter());
         uploadResult.setFailCounter(importCounter.getFailCounter());
@@ -117,8 +120,9 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     }
 
     private ImportCounter uploadFileWithoutLog(TAUserInfo userInfo, String fileName, InputStream inputStream,
-                                               List<String> diasoftFileNameList, List<String> formDataFileNameList,
-                                               List<Integer> formDataDepartmentList, Logger logger) {
+                                               List<String> diasoftFileNameList, List<String> avgCostFileNameList,
+                                               List<String> formDataFileNameList, List<Integer> formDataDepartmentList,
+                                               Logger logger) {
         // Проверка прав
         if (userInfo == null) {
             logger.error(USER_NOT_FOUND_ERROR);
@@ -158,7 +162,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                             try {
                                 if (copyFileFromStream(userInfo, zais, checkResult.getPath(), entry.getName(), logger)) {
                                     if (checkResult.isRefBook()) {
-                                        diasoftFileNameList.add(entry.getName());
+                                        if (loadRefBookDataService.isDiasoftFile(entry.getName())) {
+                                            diasoftFileNameList.add(entry.getName());
+                                        } else {
+                                            avgCostFileNameList.add(entry.getName());
+                                        }
                                     } else {
                                         formDataFileNameList.add(entry.getName());
                                         formDataDepartmentList.add(checkResult.getDepartmentTbId());
@@ -197,7 +205,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         if (copyFileFromStream(userInfo, inputStream, checkResult.getPath(),
                                 fileName, logger)) {
                             if (checkResult.isRefBook()) {
-                                diasoftFileNameList.add(fileName);
+                                if (loadRefBookDataService.isDiasoftFile(fileName)) {
+                                    diasoftFileNameList.add(fileName);
+                                } else {
+                                    avgCostFileNameList.add(fileName);
+                                }
                             } else {
                                 formDataFileNameList.add(fileName);
                                 formDataDepartmentList.add(checkResult.getDepartmentTbId());
@@ -262,6 +274,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private CheckResult checkFileNameAccess(TAUserInfo userInfo, String fileName, Logger logger) {
         try {
             boolean isDiasoftRefBook = loadRefBookDataService.isDiasoftFile(fileName);
+            boolean isAvgCostRefBook = loadRefBookDataService.isAvgCostFile(fileName);
             boolean isFormData = TransportDataParam.isValidName(fileName);
 
             CheckResult checkResult = new CheckResult();
@@ -269,13 +282,20 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             if (isDiasoftRefBook) {
                 // Справочники не проверяем
                 checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0,
-                        LogData.L34_1, logger));
+                        DIASOFT_NAME, LogData.L34_1, logger));
+                checkResult.setRefBook(true);
+                return checkResult;
+            }
+
+            if (isAvgCostRefBook) {
+                checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY, 0,
+                        AVG_COST_NAME, LogData.L34_1, logger));
                 checkResult.setRefBook(true);
                 return checkResult;
             }
 
             // Не справочники Diasoft и не ТФ НФ
-            if (!isDiasoftRefBook && !isFormData) {
+            if (!isFormData) {
                 logger.warn(U2, fileName);
                 return null;
             }
@@ -355,7 +375,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             checkResult.setDepartmentTbId(departmentTbId);
             checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentTbId,
-                    LogData.L34_2, logger));
+                    DIASOFT_NAME, LogData.L34_2, logger));
             formTypeId = formType.getId();
             formTypeName = formType.getName();
 
@@ -371,12 +391,12 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
      * Получение пути из конф. параметров
      */
     private String getUploadPath(TAUserInfo userInfo, String fileName, ConfigurationParam configurationParam,
-                                 int departmentId, LogData logData, Logger logger) {
+                                 int departmentId, String refBookName, LogData logData, Logger logger) {
         ConfigurationParamModel model = configurationDao.getByDepartment(departmentId);
         List<String> uploadPathList = model.get(configurationParam, departmentId);
         if (uploadPathList == null || uploadPathList.isEmpty()) {
             if (logData == LogData.L34_1) {
-                log(userInfo, logData, logger, fileName);
+                log(userInfo, logData, logger, refBookName, fileName);
             } else if (logData == LogData.L34_2) {
                 log(userInfo, logData, logger, departmentService.getDepartment(departmentId).getName(), fileName);
             }

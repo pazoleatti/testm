@@ -57,10 +57,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final long REF_BOOK_EMITENT = 100L; // Эмитенты
     private static final long REF_BOOK_BOND = 84L; // Ценные бумаги
 
+    private static final long REF_BOOK_AVG_COST = 208L; // Средняя стоимость транспортных средств
+
     private static final String OKATO_NAME = "справочника ОКАТО";
     private static final String REGION_NAME = "справочника «Субъекты РФ»";
     private static final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
     private static final String DIASOFT_NAME = "справочников Diasoft";
+    private static final String AVG_COST_NAME = "справочника «Средняя стоимость транспортных средств»";
     private static final String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
 
     //// Справочники ЦАС НСИ
@@ -75,6 +78,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     // Ценные бумаги и Эмитенты
     private static final Map<String, List<Pair<Boolean, Long>>> diasoftMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
+    // Справочник "Средняя стоимость транспортных средств"
+    private static final Map<String, List<Pair<Boolean, Long>>> avgCostMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
+
     // Сообщения, которые не учтены в постановка
     private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников %s.";
 
@@ -84,6 +90,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         // Ценные бумаги + Эмитенты
         diasoftMappingMap.put("ds\\d{6}\\.nsi", asList(new Pair<Boolean, Long>(true, REF_BOOK_EMITENT),
                 new Pair<Boolean, Long>(true, REF_BOOK_BOND)));
+
+        // Средняя стоимость транспортных средств
+        avgCostMappingMap.put(".*\\.xlsx", asList(new Pair<Boolean, Long>(true, REF_BOOK_AVG_COST)));
 
         // Архив "Коды ОКАТО"
         nsiOkatoMappingMap.put("oka.{5}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_OKATO)));
@@ -317,13 +326,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ImportCounter importCounter = new ImportCounter();
         try {
             // ОКАТО
-            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY,
+            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.NSI_UPLOAD_DIRECTORY,
                     nsiOkatoMappingMap, OKATO_NAME, false, loadedFileNameList));
             // Субъекты РФ
-            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY,
+            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.NSI_UPLOAD_DIRECTORY,
                     nsiRegionMappingMap, REGION_NAME, false, loadedFileNameList));
             // План счетов
-            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY,
+            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.NSI_UPLOAD_DIRECTORY,
                     nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false, loadedFileNameList));
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
@@ -346,6 +355,27 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         try {
             importCounter = importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY,
                     diasoftMappingMap, DIASOFT_NAME, true, loadedFileNameList);
+        } catch (Exception e) {
+            // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
+            logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
+            return importCounter;
+        }
+        log(userInfo, LogData.L24, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
+        return importCounter;
+    }
+
+    @Override
+    public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, Logger logger) {
+        return importRefBookAvgCost(userInfo, null, logger);
+    }
+
+    @Override
+    public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger) {
+        log(userInfo, LogData.L23, logger);
+        ImportCounter importCounter = new ImportCounter();
+        try {
+            importCounter = importRefBook(userInfo, logger, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY,
+                    avgCostMappingMap, AVG_COST_NAME, true, loadedFileNameList);
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
@@ -417,6 +447,11 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     @Override
     public boolean isDiasoftFile(String name) {
         return name != null && mappingMatch(name, diasoftMappingMap.keySet()) != null;
+    }
+
+    @Override
+    public boolean isAvgCostFile(String name) {
+        return name != null && mappingMatch(name, avgCostMappingMap.keySet()) != null;
     }
 
     /**
