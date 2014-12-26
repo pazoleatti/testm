@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
-import java.util.regex.Pattern
-
 /**
  * Сведения о дивидендах (доходах от долевого участия в других организациях,
  * созданных на территории Российской Федерации), выплаченных в отчетном квартале

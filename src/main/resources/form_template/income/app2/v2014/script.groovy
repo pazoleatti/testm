@@ -3,11 +3,7 @@ package form_template.income.app2.v2014
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 /**
  * Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с
@@ -371,12 +367,6 @@ void addTransportData(def xml) {
     }
 
     dataRowHelper.save(rows)
-}
-
-boolean checkFormat(String enteredValue, String pat) {
-    Pattern p = Pattern.compile(pat);
-    Matcher m = p.matcher(enteredValue);
-    return m.matches();
 }
 
 // Сортировка групп и строк

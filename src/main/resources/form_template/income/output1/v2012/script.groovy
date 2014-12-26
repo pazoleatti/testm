@@ -2,7 +2,6 @@ package form_template.income.output1.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
@@ -115,12 +114,12 @@ void calc() {
         for (def row in dataRows) {
             def int index = row.getIndex()
             def BigDecimal value4 = calc4(row)
-            def BigDecimal value7 = calc4(row)
-            def BigDecimal value20 = calc4(row)
-            def BigDecimal value21 = calc4(row)
-            def BigDecimal value22 = calc4(row)
-            def BigDecimal value23 = calc4(row)
-            def BigDecimal value24 = calc4(row)
+            def BigDecimal value7 = calc7(row)
+            def BigDecimal value20 = calc20(row)
+            def BigDecimal value21 = calc21(row)
+            def BigDecimal value22 = calc22(row)
+            def BigDecimal value23 = calc23(row)
+            def BigDecimal value24 = calc24(row)
 
             // Проверки, выполняемые до расчёта
             checkOverflow(value4, row, 'dividendSumRaspredPeriod', index, 15, 'ОКРУГЛ («графа 5» + «графа 6» + «графа 12»; 0)')
