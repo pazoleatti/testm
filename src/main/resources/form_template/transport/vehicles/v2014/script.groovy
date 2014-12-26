@@ -1071,17 +1071,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 14
-        def yearStr = row.cell[xmlIndexCol].text()
-        if (yearStr != null) {
-            if (yearStr.contains(".")) {
-                newRow.year = parseDate(yearStr, "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-            } else {
-                def yearNum = parseNumber(yearStr, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-                if (yearNum != null && yearNum != 0) {
-                    newRow.year = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
-                }
-            }
-        }
+        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 15

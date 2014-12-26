@@ -343,7 +343,7 @@ void addData(def xml, headRowCount) {
         xmlIndexCol = 1
         newRow.taxPeriod = row.cell[xmlIndexCol].text()
         xmlIndexCol = 2
-        newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol = 3
         newRow.dividendSumRaspredPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol = 4
