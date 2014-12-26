@@ -117,8 +117,12 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     for (def row in dataRows) {
-        row.dividendRussianTotal = calc10(row)
-        row.dividendSumRaspredPeriod = calc9(row)
+        def value10 = calc10(row)
+        checkOverflow(value10, row, 'dividendRussianTotal', row.getIndex(), 15, '«Графа 10» + «Графа 15» + «Графа16» + «Графа 17» + «Графа 22»')
+        row.dividendRussianTotal = value10
+        def value9 = calc9(row)
+        checkOverflow(value9, row, 'dividendSumRaspredPeriod', row.getIndex(), 15, '«Графа 11» + «Графа 12» + «Графа13» + «Графа 14»')
+        row.dividendSumRaspredPeriod = value9
     }
 
     dataRowHelper.save(dataRows)
@@ -140,8 +144,8 @@ void logicCheck() {
             rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'inn')}» должна быть заполнена в случае если графа «${getColumnName(row, 'taCategory')}» равна «2»!")
         }
         // 3. Проверка допустимых значений «Графы 1»
-        if (! row.taCategory in [1, 2]) {
-            rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'taCategory')}» заполнена неверно!!")
+        if (row.taCategory != 1 && row.taCategory != 2) {
+            rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'taCategory')}» заполнена неверно!")
         }
         // 3. Проверка допустимых значений «Графы 3»
         if (! row.taxPeriod in ['13', '21', '31', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43',
@@ -149,7 +153,7 @@ void logicCheck() {
             errorMessage(row, 'taxPeriod', errorMsg)
         }
         // 4. Проверка допустимых значений «Графы 7»
-        if (! row.dividendType in ['1', '2']) {
+        if (!['1', '2'].contains(row.dividendType)) {
             errorMessage(row, 'dividendType', errorMsg)
         }
         // 5. Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
@@ -182,16 +186,21 @@ void logicCheck() {
 
 // «Графа 9» = «Графа 10» + «Графа 15» + «Графа16» + «Графа 17» + «Графа 22»
 def calc9( def row) {
-    row.dividendRussianTotal + row.dividendRussianPersonal + row.dividendForgeinOrgAll + row.dividendForgeinPersonalAll + row.dividendTaxUnknown
+    if (row.dividendRussianTotal != null && row.dividendRussianPersonal != null &&
+            row.dividendForgeinOrgAll != null && row.dividendForgeinPersonalAll != null && row.dividendTaxUnknown != null) {
+        row.dividendRussianTotal + row.dividendRussianPersonal + row.dividendForgeinOrgAll + row.dividendForgeinPersonalAll + row.dividendTaxUnknown
+    }
 }
 
 // «Графа 10» = «Графа 11» + «Графа 12» + «Графа13» + «Графа 14»
 def calc10( def row) {
-    row.dividendRussianStavka0 + row.dividendRussianStavka6 + row.dividendRussianStavka9 + row.dividendRussianTaxFree
+    if (row.dividendRussianStavka0 != null && row.dividendRussianStavka6 != null && row.dividendRussianStavka9 != null && row.dividendRussianTaxFree != null) {
+        row.dividendRussianStavka0 + row.dividendRussianStavka6 + row.dividendRussianStavka9 + row.dividendRussianTaxFree
+    }
 }
 
 void errorMessage(def row, def alias, def errorMsg) {
-    rowError(logger, row, errorMsg + "Графа «${getColumnName(row, alias)}» заполнена неверно!!")
+    rowError(logger, row, errorMsg + "Графа «${getColumnName(row, alias)}» заполнена неверно!")
 }
 
 void importData() {
