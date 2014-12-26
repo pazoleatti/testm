@@ -283,6 +283,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         }
         List<DataRow<Cell>> rowsData = new ArrayList<DataRow<Cell>>(getRowsData(activeGroup));
         rowsData.remove(selRow);
+        ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).clear();
         setConfigData(activeGroup, rowsData, false);
     }
 
