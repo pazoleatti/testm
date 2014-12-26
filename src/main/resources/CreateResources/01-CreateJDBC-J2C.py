@@ -104,6 +104,20 @@ else:
 	AdminConfig.create('J2EEResourceProperty', AdminConfig.showAttribute(dataSuorceId, 'propertySet'), [['name', 'connectionProperties'], ['type', 'java.lang.String'], ['value', 'defaultRowPrefetch=1000']])
 	AdminConfig.create('MappingModule', dataSuorceId, [['authDataAlias', jaasAlias], ['mappingConfigAlias', '']])
 	AdminConfig.modify(dataSuorceId, [['authDataAlias', jaasAlias], ['xaRecoveryAuthAlias', jaasAlias]])
+	J2EEResourcePropertyIds = AdminConfig.list('J2EEResourceProperty', dataSuorceId).split(lineSeparator)
+	for J2EEResourcePropertyId in J2EEResourcePropertyIds:
+		J2EEResourcePropertyName = AdminConfig.showAttribute(J2EEResourcePropertyId, 'name')
+		if (J2EEResourcePropertyName == 'validateNewConnection'):
+			AdminConfig.modify(J2EEResourcePropertyId, [['value', "true"]])
+		if (J2EEResourcePropertyName == 'validateNewConnectionRetryCount'):
+			AdminConfig.modify(J2EEResourcePropertyId, [['value', "100"]])
+		if (J2EEResourcePropertyName == 'validateNewConnectionRetryInterval'):
+			AdminConfig.modify(J2EEResourcePropertyId, [['value', "3"]])	
+		if (J2EEResourcePropertyName == 'validateNewConnectionTimeout'):
+			AdminConfig.modify(J2EEResourcePropertyId, [['value', "10"]])
+		if (J2EEResourcePropertyName == 'preTestSQLString'):
+			AdminConfig.modify(J2EEResourcePropertyId, [['value', ""]])
+	AdminConfig.modify(dataSuorceId, [['connectionPool', [['minConnections', '5'], ['maxConnections', '100'], ['testConnectionInterval', '3'], ['testConnection', 'true']]]])		
 	print 'Parameters are set'
 	AdminConfig.save()
 	print 'Configuration is saved.'

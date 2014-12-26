@@ -29,6 +29,7 @@ MQActivationSpecDest        = 'jms/transportQueueMQ'+ suffixForResources
 
 print '- MQ messaging provider'
 
+# Queue
 MQQueuesId = AdminTask.listWMQQueues(resourceRootLocationId).split(lineSeparator)
 MQQueueNotFound = 1
 if MQQueuesId[0] != '':
@@ -43,6 +44,7 @@ if MQQueueNotFound:
 	AdminConfig.save()
 	print 'Configuration is saved.'
 
+# Activation specifications
 print ''
 print '____________________________________________'
 MQActivationSpecsId = AdminTask.listWMQActivationSpecs(resourceRootLocationId).split(lineSeparator)

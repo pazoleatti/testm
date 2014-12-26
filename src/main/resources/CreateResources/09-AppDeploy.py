@@ -70,12 +70,8 @@ applicationOptions = [
 		['migration-ejb',	'MigrationBean',	'migration-ejb.jar,META-INF/ejb-jar.xml',	'jms/transportConnectionFactory',	'javax.jms.ConnectionFactory',	SIBJMSConnectionFactoryJndi],
 		['async-core',		'AsyncManagerBean',	'async-core.jar,META-INF/ejb-jar.xml',		'jms/shortAsyncConnectionFactory',	'javax.jms.ConnectionFactory',	SIBJMSShortAsyncConnectionFactoryJndi],
 		['mdb',					'DataSourceHolderBean',		'mdb.jar,META-INF/ejb-jar.xml',				'jdbc/TaxAccDS_MIGRATION',	'javax.sql.DataSource',	migrationDataSourceJndi],
-		['mdb',					'DataSourceHolderBean',		'mdb.jar,META-INF/ejb-jar.xml',				'jdbc/TaxAccDS',			'javax.sql.DataSource',	dataSourceJndi],
-		['async-task.jar',		'DataSourceHolderBean',		'async-task.jar,META-INF/ejb-jar.xml',		'jdbc/TaxAccDS',			'javax.sql.DataSource',	dataSourceJndi],
-		['audit-ejb',			'AuditDSHolderBean',		'audit-ejb.jar,META-INF/ejb-jar.xml',		'jdbc/TaxAccDS',			'javax.sql.DataSource',	dataSourceJndi],
-		['department-ejb',		'DepartmentDSHolderBean',	'department-ejb.jar,META-INF/ejb-jar.xml',	'jdbc/TaxAccDS',			'javax.sql.DataSource',	dataSourceJndi],
-		['gwtapp.war',			'',							'gwtapp.war,WEB-INF/web.xml',				'jdbc/TaxAccDS',			'javax.sql.DataSource',	dataSourceJndi],
-		['scheduler-task.jar',	'DataSourceHolderBean',		'scheduler-task.jar,META-INF/ejb-jar.xml',	'jdbc/TaxAccDS',			'javax.sql.DataSource',	dataSourceJndi]
+		['mdb',					'DataSourceHolderBean',		'mdb.jar,META-INF/ejb-jar.xml',				'jdbc/TaxAccDS',			'javax.sql.DataSource',	dataSourceJndi],		
+		['gwtapp.war',			'',							'gwtapp.war,WEB-INF/web.xml',				'jdbc/TaxAccDS',			'javax.sql.DataSource',	dataSourceJndi]
 	],
 	'-BindJndiForEJBMessageBinding', [
 		['mdb',			'TransportMDB',		'mdb.jar,META-INF/ejb-jar.xml',			'',	SIBJMSActivationSpecJndi,			SIBJMSQueueJndi],

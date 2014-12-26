@@ -123,6 +123,6 @@ if len(permanentDataId):
 	print 'Found existing object cache instance ='+ permanentDataId
 else:
 	print 'Initiated the creation of an object cache instance '+ permanentDataName
-	print 'id='+ AdminConfig.create('ObjectCacheInstance', cacheProviderId, [['name', permanentDataName], ['jndiName', permanentDataJndi], ['cacheSize', 100], ['defaultPriority', 1], ['disableDependencyId', 'true']])
+	print 'id='+ AdminConfig.create('ObjectCacheInstance', cacheProviderId, [['name', permanentDataName], ['jndiName', permanentDataJndi], ['cacheSize', 500], ['defaultPriority', 1], ['disableDependencyId', 'true']])
 	AdminConfig.save()
 	print 'Configuration is saved.'
