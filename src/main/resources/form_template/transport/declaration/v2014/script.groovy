@@ -19,9 +19,6 @@ import java.text.SimpleDateFormat
  *
  * declarationTemplateId=21127
  *
- * TODO:
- *      - вместо declarationService.generateXmlFileId используется локаный generateXmlFileId(), потому что для транспотного нагола неправильно работает ядровый.
- *
  * @author Stanislav Yasinskiy
  */
 switch (formDataEvent) {
@@ -122,7 +119,7 @@ def checkAndBuildXml() {
     buildXml(departmentParamTransport, departmentParamTransportRow, formDataCollection, departmentId)
 }
 
-def buildXml(def departmentParamTransport,def departmentParamTransportRow, def formDataCollection, def departmentId) {
+def buildXml(def departmentParamTransport, def departmentParamTransportRow, def formDataCollection, def departmentId) {
 
     def reorgFormCode = getRefBookValue(5, departmentParamTransportRow?.REORG_FORM_CODE?.referenceValue)?.CODE?.stringValue
     def okvedCode = getRefBookValue(34, departmentParamTransportRow?.OKVED_CODE?.referenceValue)?.CODE?.stringValue
@@ -135,9 +132,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
         Date yearStartDate = new SimpleDateFormat('dd.MM.yyyy').parse("01.01.${reportPeriod.taxPeriod.year}")
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.TRANSPORT, yearStartDate, getReportPeriodEndDate())
         builder.Файл(
-                // TODO (Ramil Timerbaev) поменять после исправления в ядре
-                // ИдФайл: declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
-                ИдФайл: generateXmlFileId(departmentParamTransport),
+                ИдФайл: declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
                 ВерсПрог: applicationVersion,
                 ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
             Документ(
@@ -302,11 +297,11 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                     // TODO есть поля которые могут не заполняться, в нашем случае опираться какой логики?
                                     РасчНалТС(
                                             [
-                                                    КодВидТС: getRefBookValue(42, tRow.tsTypeCode)?.CODE?.stringValue,
-                                                    ИдНомТС: tRow.vi, //
-                                                    МаркаТС: tRow.model, //
-                                                    РегЗнакТС: tRow.regNumber,
-                                                    НалБаза: tRow.taxBase,
+                                                    КодВидТС   : getRefBookValue(42, tRow.tsTypeCode)?.CODE?.stringValue,
+                                                    ИдНомТС    : tRow.vi, //
+                                                    МаркаТС    : tRow.model, //
+                                                    РегЗнакТС  : tRow.regNumber,
+                                                    НалБаза    : tRow.taxBase,
                                                     ОКЕИНалБаза: getRefBookValue(12, tRow.taxBaseOkeiUnit)?.CODE?.stringValue,
                                             ]
                                                     + (tRow.ecoClass ? [ЭкологКл: getRefBookValue(40, tRow.ecoClass)?.CODE?.numberValue] : []) + //
@@ -327,7 +322,7 @@ def buildXml(def departmentParamTransport,def departmentParamTransportRow, def f
                                         if (taxBenefitCode != null && (taxBenefitCode.equals('30200') || taxBenefitCode.equals('20200') || taxBenefitCode.equals('20210'))) {
                                             def valL = taxBenefitCode;
                                             def valX = "";
-                                            if (! valL.equals("30200")) {
+                                            if (!valL.equals("30200")) {
                                                 valX = tRow.benefitBase
                                             }
                                             def kodOsnNal = (valL != "" ? valL.toString() : "0000") + (valX != '' ? "/" + valX : '')
@@ -451,6 +446,7 @@ def getRecord(def refBookId, def filter, Date date) {
 * 2.2. Получить в справочнике «Параметры налоговых льгот» запись,
 * соответствующую значениям атрибутов «Код субъекта» и «Код налоговой льготы»;
 */
+
 def getParam(taxBenefitCode, oktmo) {
     if (taxBenefitCode != null) {
         // получения региона по коду ОКТМО по справочнику Регионов
@@ -503,7 +499,7 @@ List<String> getErrorDepartment(def record) {
         errorList.add("«Имя подписанта»")
     }
     def signatoryId = getRefBookValue(35, record?.SIGNATORY_ID?.referenceValue)?.CODE?.numberValue
-    if  (signatoryId != null && signatoryId != 1) {
+    if (signatoryId != null && signatoryId != 1) {
         if (record.APPROVE_DOC_NAME?.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty()) {
             errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
         }
@@ -539,7 +535,7 @@ def getProvider(def long providerId) {
 
 // Разыменование с использованием кеширования
 def getRefBookValue(def refBookId, def recordId) {
-    if(refBookId == null || recordId == null){
+    if (refBookId == null || recordId == null) {
         return null
     }
     def key = getRefBookCacheKey(refBookId, recordId)
@@ -551,7 +547,7 @@ def getRefBookValue(def refBookId, def recordId) {
 
 def getOkato(def id) {
     def String okato = null
-    if(id != null){
+    if (id != null) {
         okato = getRefBookValue(96, id)?.CODE?.stringValue
     }
     return okato
@@ -583,20 +579,11 @@ def getDepartmentParamTable(def departmentParamId) {
     return departmentParamTable
 }
 
-//TODO убрать как исправят в ядре com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl.generateXmlFileId
-/** Временный метод костыль, потому что для транспотного нагола неправильно работает ядровый. */
-def generateXmlFileId(def departmentParam) {
-    def code = declarationData.taxOrganCode
-    def kpp = declarationData.kpp
-    def date = Calendar.getInstance().getTime().format('yyyyMMdd')
-    return String.format("NO_TRAND_%s_%s_%s%s_%s_%s", code, code, departmentParam.INN.value, kpp, date, UUID.randomUUID().toString().toUpperCase())
-}
-
 def roundInt(def value) {
-    ((BigDecimal)value)?.setScale(0,RoundingMode.HALF_UP)
+    ((BigDecimal) value)?.setScale(0, RoundingMode.HALF_UP)
 }
 
 def getBenefitCode(def parentRecordId) {
     def recordId = getRefBookValue(7, parentRecordId)?.TAX_BENEFIT_ID?.value
-    return  getRefBookValue(6, recordId)?.CODE?.value
+    return getRefBookValue(6, recordId)?.CODE?.value
 }
