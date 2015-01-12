@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.cell.date;
 
 import com.aplana.gwt.client.mask.MaskUtils;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.cell.client.AbstractEditableCell;
@@ -32,8 +33,6 @@ public class DateMaskInputCell extends
 
 	public static final String DEFAULT_DATE_FORMAT = "dd.MM.yyyy";
 	public static final String DEFAULT_DATE_MASK = "99.99.9999";
-    public static final String CHECKED_EMPTY_VALUE = "__.__.____";
-    public static final Date DATE_1900 = new Date(0,0,1);
 
 	private ValueUpdater<Date> valueUpdater;
 
@@ -544,7 +543,7 @@ public class DateMaskInputCell extends
                 throw new IllegalArgumentException();
             }
             Date date = DateTimeFormat.getFormat(dateFormat).parseStrict(inputted);
-            if (date.before(DATE_1900)) return false;
+            if (date.before(Cell.DATE_1900)) return false;
         } catch (IllegalArgumentException ex){
             return false;
         }
@@ -556,10 +555,10 @@ public class DateMaskInputCell extends
 	 * @param parent parent Element
 	 * @return true, если пользователь поле ввода содержит пустое значение или строку из пробелов
 	 */
-	private static boolean isBlank(Element parent) {
+	private boolean isBlank(Element parent) {
 		InputElement input = (InputElement) parent.getFirstChild();
 		String text = input.getValue();
-		return text.equals(CHECKED_EMPTY_VALUE) || text == null || text.trim().isEmpty();
+		return text.equals(maskPicture) || text == null || text.trim().isEmpty();
 	}
 
 	private void commitIfValueIsCorrect(Context context, Element parent, Date value, ViewData viewData, ValueUpdater<Date> valueUpdater){

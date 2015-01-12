@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class Cell extends AbstractCell {
     private static final long serialVersionUID = -3684680064726678753L;
+    public static final Date DATE_1900 = new Date(0,0,1);
 
     private String stringValue;
     private Date dateValue;
@@ -130,6 +131,9 @@ public class Cell extends AbstractCell {
 				return getValue();
 			}
 			case DATE: {
+                if (((Date) value).before(DATE_1900)) { // Сделано из-за ограничений Excel при работе с датами SBRFACCTAX-9982
+                    throw new IllegalArgumentException(msg + "Не может быть указана более ранняя дата, чем 01.01.1900!");
+                }
 				dateValue = (Date) value;
 				return getValue();
 			}
