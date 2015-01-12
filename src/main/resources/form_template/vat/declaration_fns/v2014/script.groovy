@@ -11,6 +11,9 @@ import groovy.xml.MarkupBuilder
 
 /**
  * Декларация по НДС. Генератор XML.
+ *
+ * declarationTemplateId=1004
+ *
  * http://jira.aplana.com/browse/SBRFACCTAX-6453
  *
  * совпадает с "Декларация по НДС" (короткая) (declaration_audit), кроме заполнения секции "РАЗДЕЛ 2"

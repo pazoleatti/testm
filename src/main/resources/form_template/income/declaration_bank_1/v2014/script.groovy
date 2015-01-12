@@ -10,7 +10,7 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (Банк)
  * Формирование XML для декларации налога на прибыль.
  *
- * declarationTemplateId=21107
+ * declarationTemplateId=21067
  *
  * @author rtimerbaev
  */

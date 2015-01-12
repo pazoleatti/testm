@@ -17,6 +17,8 @@ import java.text.SimpleDateFormat
 /**
  * Формирование XML для декларации по транспортному налогу.
  *
+ * declarationTemplateId=21127
+ *
  * TODO:
  *      - вместо declarationService.generateXmlFileId используется локаный generateXmlFileId(), потому что для транспотного нагола неправильно работает ядровый.
  *

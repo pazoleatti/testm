@@ -9,7 +9,7 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (ОП)
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
- * declarationTemplateId=21108
+ * declarationTemplateId=21068
  *
  * @author rtimerbaev
  */
