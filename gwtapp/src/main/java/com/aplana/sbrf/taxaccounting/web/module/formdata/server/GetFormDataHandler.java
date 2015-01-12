@@ -310,9 +310,11 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
      * @param isManual признак ручного ввода
      */
     private void checkManualMode(FormData formData, boolean isManual) {
-        int rowCount = dataRowService.getRowCount(formData.getId(), true, true);
-        if (isManual && rowCount == 0) {
-            formData.setManual(true);
-        }
+		if (isManual) {
+        	int rowCount = dataRowService.getRowCount(formData.getId(), true, true);
+			if (rowCount == 0) {
+				formData.setManual(true);
+			}
+		}
     }
 }
