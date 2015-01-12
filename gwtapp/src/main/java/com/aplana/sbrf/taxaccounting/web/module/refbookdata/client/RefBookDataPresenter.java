@@ -174,7 +174,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	@Override
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
-            recordId = getView().getSelectedRow().getRefBookRowId();
+            Long recordId = getView().getSelectedRow().getRefBookRowId();
             editFormPresenter.setRecordId(recordId);
             editFormPresenter.show(recordId);
         } else {
