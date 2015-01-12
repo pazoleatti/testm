@@ -314,6 +314,15 @@ public interface RefBookDao {
     boolean isVersionUsed(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Date versionFrom);
 
     /**
+     * Проверяет использование записи как родителя для дочерних
+     * @param refBookId идентификатор справочника
+     * @param recordId уникальный идентификатор записи
+     * @param versionFrom дата начала актуальности новой версии
+     * @return список дат начала периода актуальности обнаруженных дочерних записей
+     */
+    List<Date> isVersionUsedLikeParent(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom);
+
+    /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса
      *
      *
