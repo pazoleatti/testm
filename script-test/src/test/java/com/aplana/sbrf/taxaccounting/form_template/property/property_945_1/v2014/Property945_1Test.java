@@ -1,23 +1,35 @@
 package com.aplana.sbrf.taxaccounting.form_template.property.property_945_1.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
-import java.util.List;
+import java.util.*;
+
+import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 /**
  * Данные бухгалтерского учета для расчета налога на имущество.
- *
- * TODO:
- *      - загрузка *.rnu
  */
-public class Property945_1 extends ScriptTestBase {
-    private static final int TYPE_ID =610;
+public class Property945_1Test extends ScriptTestBase {
+    private static final int TYPE_ID = 610;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -41,29 +53,64 @@ public class Property945_1 extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Property945_1.class);
+        return getDefaultScriptTestMockHelper(Property945_1Test.class);
+    }
+
+    @After
+    public void resetMock() {
+        reset(testHelper.getRefBookFactory());
     }
 
     @Before
     public void mockFormDataService() {
-        // для поиска подразделений и настроек подразделении
-//        when(testHelper.getFormDataService().getRefBookRecord(anyLong(), anyMap(), anyMap(), anyMap(), anyString(),
-//                anyString(), any(Date.class), anyInt(), anyString(), any(Logger.class), anyBoolean())).thenAnswer(
-//                new Answer<Map<String, RefBookValue>>() {
-//                    @Override
-//                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
-//                        Long refBookId = (Long) invocation.getArguments()[0];
-//                        if (refBookId == null) {
-//                            return null;
-//                        }
-//                        String value5 = (String) invocation.getArguments()[5];
-//                        if (value5 == null || "".equals(value5.trim())) {
-//                            return null;
-//                        }
-//                        Long departmentId = Long.valueOf(value5);
-//                        return testHelper.getFormDataService().getRefBookValue(refBookId, departmentId, new HashMap<String, Map<String, RefBookValue>>());
-//                    }
-//                });
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+                        departmentReportPeriod.setBalance(false);
+                        return departmentReportPeriod;
+                    }
+                }
+        );
+
+        when(testHelper.getRefBookFactory().getDataProvider(anyLong())).thenAnswer(new Answer<RefBookDataProvider>() {
+            @Override
+            public RefBookDataProvider answer(InvocationOnMock invocation) throws Throwable {
+                final Long id = (Long) invocation.getArguments()[0];
+                if (id == null) {
+                    return null;
+                }
+                RefBookDataProvider refBookDataProvider = mock(RefBookDataProvider.class);
+                // для остальных справочников используется метод getRecords
+                when(refBookDataProvider.getRecords(any(Date.class), any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenAnswer(
+                        new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                            @Override
+                            public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                                Map<String, RefBookValue> record = testHelper.getFormDataService().getRefBookValue(id, 1L, new HashMap<String, Map<String, RefBookValue>>());
+                                return new PagingResult<Map<String, RefBookValue>>(Arrays.asList(record));
+                            }
+                        });
+                return refBookDataProvider;
+            }
+        });
+
+        when(testHelper.getRefBookFactory().get(anyLong())).thenAnswer(new Answer<RefBook>() {
+            @Override
+            public RefBook answer(InvocationOnMock invocation) throws Throwable {
+                final Long id = (Long) invocation.getArguments()[0];
+                if (id == null) {
+                    return null;
+                }
+                RefBookAttribute refBookAttribute = new RefBookAttribute();
+                refBookAttribute.setAlias("CODE");
+                List<RefBookAttribute> list = Arrays.asList(refBookAttribute);
+
+                RefBook refBook = new RefBook();
+                refBook.setAttributes(list);
+                return refBook;
+            }
+        });
     }
 
     @Test
@@ -77,14 +124,14 @@ public class Property945_1 extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        checkLogger();
+        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     // Расчет пустой
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
-        checkLogger();
+        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     @Test
@@ -114,12 +161,11 @@ public class Property945_1 extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    @Test
     public void importTransportFileTest() {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(58, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
