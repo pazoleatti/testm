@@ -19,10 +19,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode.*;
 
@@ -217,15 +214,21 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                 refbookDataTree.checkCount(filterText.getValue().trim(), new CheckValuesCountHandler() {
                     @Override
                     public void onGetValuesCount(Integer count) {
-                        if (count != null && count < 100) {
-                            refbookDataTree.find(filterText.getValue());
+                        if (count != null && count < 100 && count>0) {
+                            refbookDataTree.selectFirstItenOnLoad();
+                            loadAndSelect();
+                        } else if (count != null && count == 0){
+                            pickerState.setSetIds(new ArrayList<Long>(0));
+                            refbookDataTree.cleanValues();
+                            deleteRow.setVisible(false);
+                            getUiHandlers().onCleanEditForm();
                         } else {
                             Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений.");
                         }
                     }
                 });
             } else {
-                load();
+                loadAndSelect();
             }
 
             getUiHandlers().onCleanEditForm();

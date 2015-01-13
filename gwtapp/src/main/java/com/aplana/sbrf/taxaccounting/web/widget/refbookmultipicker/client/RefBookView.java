@@ -64,16 +64,12 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
      */
     String getOtherDereferenceValue(Long attrId, Long attrId2);
 
-    Boolean isMultiSelect();
-
     /**
      * Смена режима выбора значений.
      * При смене происходит очищение ранее выделенных значений
      * @param multiSelect true - множественный выбор
      */
     void setMultiSelect(Boolean multiSelect);
-
-    int getLoadedItemsCount();
 
     /**
      * Выделить все записи, если мультиселект
@@ -91,4 +87,6 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
      * @param checkValuesCountHandler хендлер который исполниться после получения количества попавщих под фильтр записей
      */
     void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler);
+
+    void cleanValues();
 }

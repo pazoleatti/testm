@@ -1700,6 +1700,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    @Override
+    public List<Date> isVersionUsedLikeParent(Long refBookId, Long recordId, Date versionFrom) {
+        return getJdbcTemplate().query("select r.version as version from ref_book_record r, ref_book_value v " +
+                        "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where reference_id=?) " +
+                        "and r.version >= ? and v.REFERENCE_VALUE=?", new RowMapper<Date>() {
+                    @Override
+                    public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getDate("version");
+                    }
+                },
+                refBookId, versionFrom, recordId);
+    }
+
     private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
             "  select fd.*, drp.report_period_id as report_period_id, drp.department_id as department_id from form_data fd \n" +
             "  join department_report_period drp on drp.id = fd.department_report_period_id\n" +

@@ -6,11 +6,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.*;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -92,6 +93,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         int getSortColumnIndex();
         // Признак сортировки по-возрастанию
         boolean isAscSorting();
+        void setDeleteButtonVisible(boolean isVisible);
         // позиция выделенной строки в таблице
         Integer getSelectedRowIndex();
     }
@@ -314,6 +316,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
                                     if (recordId == null && !result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
+                                    } else if(result.getDataRows().isEmpty()){
+                                        editFormPresenter.cleanFields();
+                                        editFormPresenter.clearRecordId();
+                                        if (mode == FormMode.EDIT)
+                                            getView().setDeleteButtonVisible(false);
                                     }
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759
                                     if (recordId != null) {
@@ -322,7 +329,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     recordId = null;
                                     if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
                                         //сохраняем позицию после удаления записи
-                                        getView().setSelected(result.getDataRows().get(selectedRowIndex.intValue()).getRefBookRowId());
+                                        getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
                                     }
                                     selectedRowIndex = null;
                                     if (result.getDataRows().size() == 0) {
