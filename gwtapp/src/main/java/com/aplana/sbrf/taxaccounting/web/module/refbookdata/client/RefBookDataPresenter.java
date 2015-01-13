@@ -329,7 +329,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     recordId = null;
                                     if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
                                         //сохраняем позицию после удаления записи
-                                        getView().setSelected(result.getDataRows().get(selectedRowIndex.intValue()).getRefBookRowId());
+                                        getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
                                     }
                                     selectedRowIndex = null;
                                     if (result.getDataRows().size() == 0) {

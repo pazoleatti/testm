@@ -60,6 +60,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     private FormMode mode;
     private boolean isHierarchy = false;
     private RefBookTreeItem parentRefBookRecordItem;
+    private Integer selectedRowIndex;
 
     public void setHierarchy(boolean hierarchy) {
         isHierarchy = hierarchy;
@@ -84,6 +85,8 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
         void setTitleDetails(String uniqueAttrValues);
         void setBackAction(String url);
         void updateMode(FormMode mode);
+        // позиция выделенной строки в таблице
+        Integer getSelectedRowIndex();
     }
 
 	@Inject
@@ -147,6 +150,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 		rowsId.add(deletedVersion);
 		action.setRecordsId(rowsId);
         action.setDeleteVersion(true);
+        selectedRowIndex = getView().getSelectedRowIndex();
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<DeleteRefBookRowResult>() {
@@ -162,11 +166,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                 LogAddEvent.fire(RefBookVersionPresenter.this, result.getUuid());
                                 editFormPresenter.show(null);
                                 if (result.getNextVersion() != null) {
-                                    placeManager
-                                            .revealPlace(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookVersion)
-                                                    .with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(refBookId))
-                                                    .with(RefBookDataTokens.REFBOOK_RECORD_ID, String.valueOf(result.getNextVersion()))
-                                                    .build());
+                                    getView().updateTable();
                                 } else {
                                     placeManager
                                             .revealPlace(new PlaceRequest.Builder().nameToken(isHierarchy ? RefBookDataTokens.refBookHierData : RefBookDataTokens.refBookData)
@@ -187,6 +187,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	@Override
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
+        selectedRowIndex = null;
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         CheckRefBookAction checkAction = new CheckRefBookAction();
         checkAction.setRefBookId(refBookId);
@@ -279,6 +280,11 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                         getView().setSelected(recordId);
                                     }
                                     recordId = null;
+                                    if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
+                                        //сохраняем позицию после удаления записи
+                                        getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
+                                    }
+                                    selectedRowIndex = null;
 								}
 							}, RefBookVersionPresenter.this));
 		}

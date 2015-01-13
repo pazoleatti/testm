@@ -244,7 +244,18 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
         }
     }
 
-	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
+    @Override
+    public Integer getSelectedRowIndex() {
+        List<RefBookDataRow> visibleItems = refbookDataTable.getVisibleItems();
+        RefBookDataRow selectedItem = selectionModel.getSelectedObject();
+        for(int i = 0; i < visibleItems.size(); i++) {
+            if (visibleItems.get(i) == selectedItem)
+                return i;
+        }
+        return null;
+    }
+
+    private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
 		switch (alignment) {
 			case ALIGN_LEFT:
 				return HasHorizontalAlignment.ALIGN_LEFT;
