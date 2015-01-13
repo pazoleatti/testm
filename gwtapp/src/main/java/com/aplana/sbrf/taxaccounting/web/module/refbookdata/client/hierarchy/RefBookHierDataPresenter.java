@@ -204,7 +204,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
             action.setRecordsId(Arrays.asList(selected));
             action.setOkDelete(false);
             action.setRefBookId(refBookDataId);
-            final RefBookItem parentRefBookItem = getView().getSelectedItem().getParent();
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteNonVersionRefBookRowResult>() {
                 @Override
                 public void onSuccess(DeleteNonVersionRefBookRowResult result) {
@@ -404,6 +403,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     @Override
     public void onCleanEditForm() {
         editFormPresenter.cleanFields();
+        editFormPresenter.setCurrentUniqueRecordId(-1l);
     }
 
     @Override

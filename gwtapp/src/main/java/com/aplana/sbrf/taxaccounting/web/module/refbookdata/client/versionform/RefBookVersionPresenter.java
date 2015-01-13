@@ -53,7 +53,10 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	static final Object TYPE_editFormPresenter = new Object();
 
 	private Long refBookId;
+    //Идентификатор записи
     private Long uniqueRecordId;
+    //Идентификатор версии
+    private Long recordId;
     private FormMode mode;
     private boolean isHierarchy = false;
     private RefBookTreeItem parentRefBookRecordItem;
@@ -111,6 +114,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	@Override
 	public void onUpdateForm(UpdateForm event) {
         if (this.isVisible()) {
+            recordId = event.getRecordChanges().getId();
             getView().updateTable();
         }
 	}
@@ -268,10 +272,13 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 								public void onSuccess(GetRefBookRecordVersionResult result) {
 									getView().setTableData(range.getStart(),
 											result.getTotalCount(), result.getDataRows());
-                                    if (!result.getDataRows().isEmpty()) {
+                                    if (recordId == null && !result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
                                         // recordCommonId = result.getRefBookRecordCommonId();
+                                    } else if (recordId != null){
+                                        getView().setSelected(recordId);
                                     }
+                                    recordId = null;
 								}
 							}, RefBookVersionPresenter.this));
 		}

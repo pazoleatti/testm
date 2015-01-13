@@ -462,20 +462,10 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
-    public Boolean isMultiSelect() {
-        return multiSelect;
-    }
-
-    @Override
     public void setMultiSelect(Boolean multiSelect) {
         this.multiSelect = multiSelect;
         tree.setMultiSelect(this.multiSelect);
         widgetFireChangeEvent(getSelectedIds());
-    }
-
-    @Override
-    public int getLoadedItemsCount() {
-        return tree.getAllLoadedItems().size();
     }
 
     @Override
@@ -507,6 +497,11 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     @Override
     public void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler) {
         getUiHandlers().getValuesCount(text, checkValuesCountHandler);
+    }
+
+    @Override
+    public void cleanValues() {
+        tree.clear();
     }
 
     public void widgetFireChangeEvent(Set<Long> value) {
