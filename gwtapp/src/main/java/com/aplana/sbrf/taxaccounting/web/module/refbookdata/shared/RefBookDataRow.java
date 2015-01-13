@@ -22,4 +22,15 @@ public class RefBookDataRow implements Serializable {
 	public void setValues(Map<String, String> values) {
 		this.values = values;
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RefBookDataRow that = (RefBookDataRow) o;
+
+        return refBookRowId.equals(that.refBookRowId);
+
+    }
 }

@@ -433,8 +433,24 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     }
 
     @Override
+    public void setDeleteButtonVisible(boolean isVisible) {
+        deleteRow.setVisible(isVisible);
+    }
+
+    @Override
     public String getSearchPattern() {
         return searchPattern;
+    }
+
+    @Override
+    public Integer getSelectedRowIndex() {
+        List<RefBookDataRow> visibleItems = refBookDataTable.getVisibleItems();
+        RefBookDataRow selectedItem = selectionModel.getSelectedObject();
+        for(int i = 0; i < visibleItems.size(); i++) {
+            if (visibleItems.get(i) == selectedItem)
+                return i;
+        }
+        return null;
     }
 
     @Override

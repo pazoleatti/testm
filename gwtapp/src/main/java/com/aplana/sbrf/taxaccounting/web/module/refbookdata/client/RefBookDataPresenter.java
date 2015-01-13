@@ -6,11 +6,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.ErrorEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.*;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -53,6 +54,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private Long recordId;
     private FormMode mode;
 
+    private Integer selectedRowIndex;
+
 	EditFormPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
     DialogPresenter dialogPresenter;
@@ -90,6 +93,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         int getSortColumnIndex();
         // Признак сортировки по-возрастанию
         boolean isAscSorting();
+        void setDeleteButtonVisible(boolean isVisible);
+        // позиция выделенной строки в таблице
+        Integer getSelectedRowIndex();
     }
 
 	@Inject
@@ -166,6 +172,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 }
                                 editFormPresenter.setMode(mode);
 								editFormPresenter.show(null);
+                                selectedRowIndex = getView().getSelectedRowIndex();
 								getView().updateTable();
 							}
 						}, this));
@@ -200,6 +207,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
 
+        selectedRowIndex = null;
         refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         CheckRefBookAction checkAction = new CheckRefBookAction();
         checkAction.setRefBookId(refBookDataId);
@@ -224,7 +232,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                         public void onSuccess(GetRefBookAttributesResult result) {
                                                             getView().resetRefBookElements();
                                                             getView().setTableColumns(result.getColumns());
-                                                            getView().setRange(new Range(0, getView().getPageSize()));
                                                             getView().updateSendQuery(result.isSendQuery());
                                                             editFormPresenter.init(refBookDataId, result.getColumns());
                                                             if (result.isReadOnly()){
@@ -244,6 +251,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                                 }
                                                                 setMode(mode);
                                                             }
+                                                            getView().setRange(new Range(0, getView().getPageSize()));
                                                             getProxy().manualReveal(RefBookDataPresenter.this);
                                                         }
                                                     }, RefBookDataPresenter.this));
@@ -308,12 +316,22 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
                                     if (recordId == null && !result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
+                                    } else if(result.getDataRows().isEmpty()){
+                                        editFormPresenter.cleanFields();
+                                        editFormPresenter.clearRecordId();
+                                        if (mode == FormMode.EDIT)
+                                            getView().setDeleteButtonVisible(false);
                                     }
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759
                                     if (recordId != null) {
                                         getView().setSelected(recordId);
                                     }
                                     recordId = null;
+                                    if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
+                                        //сохраняем позицию после удаления записи
+                                        getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
+                                    }
+                                    selectedRowIndex = null;
                                     if (result.getDataRows().size() == 0) {
                                         editFormPresenter.setAllVersionVisible(false);
                                     }

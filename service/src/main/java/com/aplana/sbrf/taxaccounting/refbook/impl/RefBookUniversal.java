@@ -558,7 +558,18 @@ public class RefBookUniversal implements RefBookDataProvider {
             boolean isValuesChanged = checkValuesChanged(uniqueRecordId, records);
 
             //Проверка использования
-
+            if (refBook.isHierarchic()) {
+                //Поиск среди дочерних элементов
+                List<Date> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, uniqueRecordId, versionFrom);
+                if (childrenVersions != null && !childrenVersions.isEmpty()) {
+                    for (Date version : childrenVersions) {
+                        if (logger != null) {
+                            logger.error(String.format("Существует дочерняя запись, действует с %s", formatter.get().format(version)));
+                        }
+                    }
+                    throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
+                }
+            }
             List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId), versionFrom, versionTo, isValuesChanged,
                     RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
                             Collections.<Long>emptyList() :

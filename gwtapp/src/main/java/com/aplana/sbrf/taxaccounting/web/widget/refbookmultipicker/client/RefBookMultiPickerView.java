@@ -387,11 +387,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public Boolean isMultiSelect() {
-        return multiSelect;
-    }
-
-    @Override
     public void setMultiSelect(Boolean multiSelect) {
         this.multiSelect = multiSelect;
 
@@ -409,11 +404,6 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             @Override
             public void onSelectionChange(SelectionChangeEvent event) { onSelection(); }
         });
-    }
-
-    @Override
-    public int getLoadedItemsCount() {
-        return cellTable.getRowCount();
     }
 
     @Override
@@ -442,6 +432,12 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     @Override
     public void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler) {
         getUiHandlers().getValuesCount(text, checkValuesCountHandler);
+    }
+
+    @Override
+    public void cleanValues() {
+        dataProvider.updateRowData(0, new ArrayList<RefBookItem>(0));
+        dataProvider.updateRowCount(0, true);
     }
 
     public void widgetFireChangeEvent(Set<Long> value) {

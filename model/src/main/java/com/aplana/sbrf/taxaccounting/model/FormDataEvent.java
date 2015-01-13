@@ -14,7 +14,6 @@ import java.io.Serializable;
  */
 public enum FormDataEvent implements Serializable {
 	CREATE(1, "Создать"),
-	AFTER_CREATE(12, "После создания"),
 	DELETE(2, "Удалить"),
 	CALCULATE(3, "Рассчитать"),
 	COMPOSE(4, "Обобщить"),
@@ -25,7 +24,9 @@ public enum FormDataEvent implements Serializable {
 	GET_LEVEL1(9, "Получение защищенных данных"),
     TEST(10, "Тестирование скриптов"),
 	MIGRATION (11, "Миграция из АС \"Ведение РНУ\""),
-    SORT_ROWS (12, "Сортировка строк"),
+    AFTER_CREATE(12, "После создания"),
+    SORT_ROWS (13, "Сортировка строк"),
+    GET_SOURCES (14, "Получение источников-приемников"),
 
 	MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),

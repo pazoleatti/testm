@@ -1,4 +1,4 @@
-package form_template.transport.declaration
+package form_template.transport.declaration.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -14,6 +14,9 @@ import java.text.SimpleDateFormat
 
 /**
  * Формирование XML для декларации по транспортному налогу.
+ *
+ * declarationTemplateId=1020
+ *
  * @author auldanov
  * @since 19.03.2013 16:30
  */
