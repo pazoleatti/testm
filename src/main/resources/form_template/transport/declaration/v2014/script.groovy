@@ -132,7 +132,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
         Date yearStartDate = new SimpleDateFormat('dd.MM.yyyy').parse("01.01.${reportPeriod.taxPeriod.year}")
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.TRANSPORT, yearStartDate, getReportPeriodEndDate())
         builder.Файл(
-                ИдФайл: declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+                ИдФайл: declarationService.generateXmlFileId(1, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
                 ВерсПрог: applicationVersion,
                 ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
             Документ(
