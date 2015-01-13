@@ -320,15 +320,15 @@
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>column32</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Сумма налога, не удержанная налоговым агентом</name>
         <order>32</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>column33</alias>

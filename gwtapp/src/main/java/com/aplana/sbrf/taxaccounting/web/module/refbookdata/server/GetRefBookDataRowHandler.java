@@ -87,7 +87,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 rowNum = rowNum--;
                 int countOfRecords = action.getPagingParams().getCount();
                 int startIndex = action.getPagingParams().getStartIndex();
-                int page = (int) (rowNum / countOfRecords);
+                int page = (int) ((rowNum - 1) / countOfRecords);
                 if ((startIndex / countOfRecords) != page) {
                     return result;
                 }

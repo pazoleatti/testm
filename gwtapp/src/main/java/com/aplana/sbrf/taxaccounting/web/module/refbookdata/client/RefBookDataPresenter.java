@@ -53,6 +53,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private Long recordId;
     private FormMode mode;
 
+    private Integer selectedRowIndex;
+
 	EditFormPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
     DialogPresenter dialogPresenter;
@@ -90,6 +92,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         int getSortColumnIndex();
         // Признак сортировки по-возрастанию
         boolean isAscSorting();
+        // позиция выделенной строки в таблице
+        Integer getSelectedRowIndex();
     }
 
 	@Inject
@@ -166,6 +170,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 }
                                 editFormPresenter.setMode(mode);
 								editFormPresenter.show(null);
+                                selectedRowIndex = getView().getSelectedRowIndex();
 								getView().updateTable();
 							}
 						}, this));
@@ -200,6 +205,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 	public void prepareFromRequest(final PlaceRequest request) {
 		super.prepareFromRequest(request);
 
+        selectedRowIndex = null;
         refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         CheckRefBookAction checkAction = new CheckRefBookAction();
         checkAction.setRefBookId(refBookDataId);
@@ -224,7 +230,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                         public void onSuccess(GetRefBookAttributesResult result) {
                                                             getView().resetRefBookElements();
                                                             getView().setTableColumns(result.getColumns());
-                                                            getView().setRange(new Range(0, getView().getPageSize()));
                                                             getView().updateSendQuery(result.isSendQuery());
                                                             editFormPresenter.init(refBookDataId, result.getColumns());
                                                             if (result.isReadOnly()){
@@ -244,6 +249,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                                 }
                                                                 setMode(mode);
                                                             }
+                                                            getView().setRange(new Range(0, getView().getPageSize()));
                                                             getProxy().manualReveal(RefBookDataPresenter.this);
                                                         }
                                                     }, RefBookDataPresenter.this));
@@ -314,6 +320,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                         getView().setSelected(recordId);
                                     }
                                     recordId = null;
+                                    if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
+                                        //сохраняем позицию после удаления записи
+                                        getView().setSelected(result.getDataRows().get(selectedRowIndex.intValue()).getRefBookRowId());
+                                    }
+                                    selectedRowIndex = null;
                                     if (result.getDataRows().size() == 0) {
                                         editFormPresenter.setAllVersionVisible(false);
                                     }
