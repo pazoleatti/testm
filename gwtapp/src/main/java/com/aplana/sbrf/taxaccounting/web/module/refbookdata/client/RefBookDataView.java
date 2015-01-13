@@ -443,6 +443,17 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     }
 
     @Override
+    public Integer getSelectedRowIndex() {
+        List<RefBookDataRow> visibleItems = refBookDataTable.getVisibleItems();
+        RefBookDataRow selectedItem = selectionModel.getSelectedObject();
+        for(int i = 0; i < visibleItems.size(); i++) {
+            if (visibleItems.get(i) == selectedItem)
+                return i;
+        }
+        return null;
+    }
+
+    @Override
     public void resetSearchInputBox() {
         filterText.setValue("");
         searchPattern = "";

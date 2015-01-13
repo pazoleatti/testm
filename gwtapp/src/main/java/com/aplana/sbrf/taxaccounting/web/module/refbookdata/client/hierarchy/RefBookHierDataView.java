@@ -151,6 +151,12 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
+    public void setSelection(RefBookTreeItem parentRefBookItem) {
+        if (parentRefBookItem != null)
+            refbookDataTree.setSelection(Arrays.asList(parentRefBookItem));
+    }
+
+    @Override
     public void clearSelected() {
         refbookDataTree.clearSelected(true);
     }

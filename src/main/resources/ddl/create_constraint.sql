@@ -159,6 +159,7 @@ alter table data_cell add constraint data_cell_fk_column_id foreign key (column_
 alter table data_cell add constraint data_cell_fk_style_id foreign key (style_id) references form_style(id);
 alter table data_cell add constraint data_cell_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
 alter table data_cell add constraint data_cell_chk_editable check (editable in (0, 1));
+alter table data_cell add constraint data_cell_chk_min_dvalue check (dvalue >= to_date('01.01.1900', 'DD.MM.YYYY'));
 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_perf_dep_id foreign key (performer_dep_id) references department(id);
