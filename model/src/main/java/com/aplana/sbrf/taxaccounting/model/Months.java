@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 /**
+ * Перечисление месяцев. Нумерация идет с 1.
+ *
  * @author fmukhametdinov
  */
 public enum Months {
@@ -19,25 +21,27 @@ public enum Months {
     DECEMBER(12, "Декабрь");
 
     private final int id;
-    private final String name;
+    private final String title;
 
-    private Months(int id, String name) {
+    private Months(int id, String title) {
         this.id = id;
-        this.name = name;
+        this.title = title;
     }
 
     public int getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
     public static Months fromId(int monthId) {
-        if (monthId < 0 || monthId > 11) {
-            throw new IllegalArgumentException("Wrong Month id: " + monthId);
-        }
-        return values()[monthId];
+		for (Months month : values()) {
+			if (month.getId() == monthId) {
+				return month;
+			}
+		}
+		throw new IllegalArgumentException("Wrong monthId: " + monthId);
     }
 }
