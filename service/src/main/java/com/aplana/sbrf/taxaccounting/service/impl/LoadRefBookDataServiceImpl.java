@@ -298,6 +298,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                     getEntries(localLoggerList), logger);
                         }
                     }
+                    if (!load) {
+                        log(userInfo, LogData.L38, logger, refBookName);
+                    }
                 }
             }
         }
