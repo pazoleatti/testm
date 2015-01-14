@@ -119,6 +119,8 @@ public class ConfigurationServiceTest {
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
         model.setEmailParams(params);
 
+        model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
+
         service.saveAllConfig(getUser(), model, logger);
 
         file.delete();
@@ -163,6 +165,8 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, testDepartment1.getId(), asList("file://" + path + "/"));
         model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(), asList("file://" + errorFolder.getRoot().getPath() + "/"));
 
+        model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
+
         service.saveAllConfig(getUser(), model, logger);
 
         file.delete();
@@ -170,7 +174,7 @@ public class ConfigurationServiceTest {
         uploadFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(2, logger.getEntries().size());
+        Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(testDepartment1.getName()));
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(path));
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_ARCHIVE_DIRECTORY.getCaption()));
@@ -209,6 +213,8 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + archiveFolder.getRoot().getPath() + "/"));
 
+        model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
+
         service.saveAllConfig(getUser(), model, logger);
 
         file.delete();
@@ -216,7 +222,7 @@ public class ConfigurationServiceTest {
         uploadFolder.delete();
         archiveFolder.delete();
 
-        Assert.assertEquals(2, logger.getEntries().size());
+        Assert.assertEquals(1, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_ERROR_DIRECTORY.getCaption()));
     }
 

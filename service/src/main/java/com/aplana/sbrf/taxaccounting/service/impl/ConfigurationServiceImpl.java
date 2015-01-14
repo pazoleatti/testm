@@ -100,7 +100,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 }
                 for (String value : valueList) {
                     // Проверка значения параметра "Проверять ЭЦП"
-                    signCheck(value, logger, parameter);
+                    if (parameter.equals(parameter.SIGN_CHECK)) {
+                        signCheck(value, logger);
+                    }
                     if (value != null && value.length() > maxLength) {
                         logger.error(MAX_LENGTH_ERROR, parameter.getCaption(), maxLength);
                     }
@@ -203,7 +205,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 if (valuesList != null)
                     for (String value : valuesList) {
                         // Проверка значения параметра "Проверять ЭЦП"
-                        signCheck(value, logger, configurationParam);
+                        if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
+                            signCheck(value, logger);
+                        }
                         if (configurationParam.hasReadCheck() && (configurationParam.isFolder()
                                 && !FileWrapper.canReadFolder(value) || !configurationParam.isFolder()
                                 && !FileWrapper.canReadFile(value))) {
@@ -259,11 +263,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     // Проверка значения параметра "Проверять ЭЦП"
-    public void signCheck(String value, Logger logger, ConfigurationParam configurationParam) {
-        if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
-            if (!"0".equals(value) && !"1".equals(value)) {
-                logger.error(SIGN_CHECK_ERROR, value);
-            }
+    private void signCheck(String value, Logger logger) {
+        if (!"0".equals(value) && !"1".equals(value)) {
+            logger.error(SIGN_CHECK_ERROR, value);
         }
     }
 }
