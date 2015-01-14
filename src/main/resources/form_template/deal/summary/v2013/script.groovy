@@ -1,6 +1,5 @@
 package form_template.deal.summary.v2013
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -80,12 +79,10 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        // В ручном режиме строки добавлять нельзя
-        logger.warn("Добавление строк запрещено!")
+        addNewRow()
         break
     case FormDataEvent.DELETE_ROW:
-        // В ручном режиме строки удалять нельзя
-        logger.warn("Удаление строк запрещено!")
+        formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         break
 // После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
@@ -128,6 +125,21 @@ def startDate = null
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+void addNewRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def index
+    if (currentDataRow == null || currentDataRow.getIndex() == -1) {
+        index = dataRows.size()
+    } else {
+        index = currentDataRow.getIndex()
+    }
+    def newRow = formData.createDataRow()
+    dataRows.add(index, newRow)
+    dataRowHelper.save(dataRows)
+}
 
 def getReportPeriodStartDate() {
     if (startDate == null) {

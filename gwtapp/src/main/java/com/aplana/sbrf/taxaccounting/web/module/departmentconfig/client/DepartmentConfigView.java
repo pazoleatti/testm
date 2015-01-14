@@ -309,11 +309,6 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		sumDividendsPanel.setVisible(currentDepartmentId != null && isUnp && currentTaxType == TaxType.INCOME);
 		// Обязанность по уплате налога и Признак расчёта
 		boolean isPayPanelVisible = currentDepartmentId != null && !isUnp && currentTaxType == TaxType.INCOME;
-        // Сведения о реорганизации
-        reorgCodePanel.setVisible(currentTaxType != TaxType.VAT);
-        reorgInnPanel.setVisible(currentTaxType != TaxType.VAT);
-        reorgKppPanel.setVisible(currentTaxType != TaxType.VAT);
-        reorgLabel.setVisible(currentTaxType != TaxType.VAT);
 
 		payPanelObligation.setVisible(isPayPanelVisible);
 		payPanelType.setVisible(isPayPanelVisible);

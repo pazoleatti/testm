@@ -82,6 +82,10 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 
         // По назначениям
         for (DepartmentFormType departmentFormType : sourceList) {
+            if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), formData.getReportPeriodId())) {
+                //не проверяем формы с неактивными макетами(или с макетами у которых изменили период актуальноси)
+                continue;
+            }
             DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
             filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
             filter.setReportPeriodIdList(Arrays.asList(formData.getReportPeriodId()));

@@ -714,7 +714,7 @@
         <alias>column71</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <name>052 (Сумма вычета)</name>
         <order>71</order>
         <width>5</width>
         <maxLength>17</maxLength>
