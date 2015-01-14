@@ -139,7 +139,7 @@ void generateXML() {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
     // Выходная Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
-    def dataRowsApp2 = getDataRows(formDataCollection, 1415, FormDataKind.ADDITIONAL)
+    def dataRowsApp2 = getDataRows(formDataCollection, 415, FormDataKind.ADDITIONAL)
 
     if (xml == null) {
         return
@@ -735,7 +735,7 @@ void generateXML() {
                             (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
                             (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
                         )
-                        int num = 32
+                        int num = 33
                         //0..1
                         СпрДохФЛ() {
                             3.times{
@@ -796,8 +796,8 @@ def roundValue(def value, def precision) {
 }
 
 // Получить строки формы.
-def getDataRows(def formDataCollection, def formTemplateId, def kind) {
-    def formList = formDataCollection?.findAllByFormTypeAndKind(formTemplateId, kind)
+def getDataRows(def formDataCollection, def formTypeId, def kind) {
+    def formList = formDataCollection?.findAllByFormTypeAndKind(formTypeId, kind)
     def dataRows = []
     for (def form : formList) {
         dataRows += (formDataService.getDataRowHelper(form)?.getAll()?:[])

@@ -285,7 +285,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         StringBuilder sbPeriodName = new StringBuilder();
         //Fill period
         if (data.getPeriodOrder() != null) {
-            sbPeriodName.append(Months.fromId(data.getPeriodOrder() - 1).getName().toLowerCase(new Locale("ru", "RU")));
+            sbPeriodName.append(Months.fromId(data.getPeriodOrder()).getTitle().toLowerCase(new Locale("ru", "RU")));
         } else {
             sbPeriodName.append("за ");
             if (!refBookValue.getStringValue().equals("34") ) {
