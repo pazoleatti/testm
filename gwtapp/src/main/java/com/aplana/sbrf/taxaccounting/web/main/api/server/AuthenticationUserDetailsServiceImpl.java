@@ -22,7 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserDetailsService<Authentication> {
-	private final Log logger = LogFactory.getLog(getClass());
+
+	private static final Log logger = LogFactory.getLog(AuthenticationUserDetailsServiceImpl.class);
 
 	@Autowired
 	TAUserService userService;
@@ -40,6 +41,7 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 			throw new UsernameNotFoundException(message);
 		}
 
+		logger.info("Получение информации пользователя по логину \"" + userName + "\" getUser()");
 		TAUser user = userService.getUser(userName.toLowerCase());
 
         if (!user.isActive()) {
