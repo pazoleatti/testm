@@ -41,6 +41,17 @@ import java.util.*;
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
+
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final Calendar CALENDAR = Calendar.getInstance();
+    private static final Date MAX_DATE;
+    static {
+        CALENDAR.clear();
+        CALENDAR.set(9999, Calendar.DECEMBER, 31);
+        MAX_DATE = CALENDAR.getTime();
+        CALENDAR.clear();
+    }
+
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String XLSM_EXT = "xlsm";
@@ -51,6 +62,7 @@ public class FormDataServiceImpl implements FormDataService {
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
+    private static final String FD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -101,7 +113,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private FormPerformerDao formPerformerDao;
     @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
+    private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private IfrsDataService ifrsDataService;
 
@@ -240,7 +252,7 @@ public class FormDataServiceImpl implements FormDataService {
 		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formTemplateId);
         FormData formData = new FormData(formTemplate);
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
         if (departmentReportPeriod == null) {
             throw new ServiceException(DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR, departmentReportPeriodId);
         }
@@ -332,7 +344,7 @@ public class FormDataServiceImpl implements FormDataService {
                 List<Months> availableMonthList = reportPeriodService.getAvailableMonthList(prevReportPeriod.getId());
                 lastPeriodOrder = availableMonthList.get(availableMonthList.size() - 1).getId();
             }
-            DepartmentReportPeriod departmentReportPeriodOld = departmentReportPeriodDao.getLast(departmentReportPeriod.getDepartmentId(), prevReportPeriod.getId().intValue());
+            DepartmentReportPeriod departmentReportPeriodOld = departmentReportPeriodService.getLast(departmentReportPeriod.getDepartmentId(), prevReportPeriod.getId());
             if (departmentReportPeriodOld != null) {
                 return formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriodOld.getId().intValue(), lastPeriodOrder);
             }
@@ -735,7 +747,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         if (formData.getFormType().getIsIfrs() && workflowMove.getFromState().equals(WorkflowState.ACCEPTED) &&
-                departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
+                departmentReportPeriodService.get(formData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
             IfrsData ifrsData = ifrsDataService.get(formData.getReportPeriodId());
             if (ifrsData != null && ifrsData.getBlobDataId() != null) {
                 ifrsDataService.deleteReport(formData, userInfo);
@@ -799,7 +811,7 @@ public class FormDataServiceImpl implements FormDataService {
             return;
         }
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
 
         if ((formData.getPeriodOrder() == null || formData.getPeriodOrder() - 1 % 3 == 0) && departmentReportPeriod.isBalance()) {
             return;
@@ -848,7 +860,7 @@ public class FormDataServiceImpl implements FormDataService {
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
                 // Последний отчетный период подразделения
                 DepartmentReportPeriod destinationDepartmentReportPeriod =
-                        departmentReportPeriodDao.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
+                        departmentReportPeriodService.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
 
                 if (destinationDepartmentReportPeriod == null) {
                     continue;
@@ -1023,7 +1035,7 @@ public class FormDataServiceImpl implements FormDataService {
     public Integer getPreviousRowNumber(FormData formData) {
         int previousRowNumber = 0;
         // Отчетный период подразделения
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         // Налоговый период
         TaxPeriod taxPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
@@ -1051,7 +1063,7 @@ public class FormDataServiceImpl implements FormDataService {
      * @param formData редактируемый экземпляр НФ
      */
     void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         if (beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
                 && dataRowDao.isDataRowsCountChanged(formData.getId())) {
             updatePreviousRowNumber(formData, logger);
@@ -1231,5 +1243,21 @@ public class FormDataServiceImpl implements FormDataService {
             }
         }
         reportService.delete(formDataId, manual);
+    }
+
+    @Override
+    public void findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate, Logger logger) {
+        List<Integer> fdIds = formDataDao.findFormDataIdsByRangeInReportPeriod(formTemplateId,
+                startDate, endDate != null ? endDate : MAX_DATE);
+        for (Integer id : fdIds){
+            FormData fd = formDataDao.getWithoutRows(id);
+            ReportPeriod rp = reportPeriodService.getReportPeriod(fd.getReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
+            FormTemplate ft = formTemplateService.get(fd.getFormTemplateId());
+            logger.error(FD_NOT_IN_RANGE, rp.getName(), rp.getTaxPeriod().getYear(),
+                    drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                            SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
+                    ft.getName(), fd.getState().getName());
+        }
     }
 }

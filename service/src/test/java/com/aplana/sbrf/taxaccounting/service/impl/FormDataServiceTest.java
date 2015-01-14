@@ -5,10 +5,13 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
@@ -24,6 +27,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -44,8 +49,6 @@ public class FormDataServiceTest {
     ReportPeriodDao reportPeriodDao;
     @Autowired
     DepartmentDao departmentDao;
-    @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Autowired
     private FormDataServiceImpl formDataService;
@@ -53,8 +56,13 @@ public class FormDataServiceTest {
     PeriodService periodService;
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private FormTemplateService formTemplateService;
 
     private static final int FORM_TEMPLATE_ID = 1;
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     @Before
     public void init() {
@@ -150,10 +158,8 @@ public class FormDataServiceTest {
         departmentReportPeriod.setBalance(false);
         formData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
 
-        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
-        when(departmentReportPeriodDao.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
-        when(departmentReportPeriodDao.get(anyInt())).thenReturn(departmentReportPeriod);
-        ReflectionTestUtils.setField(formDataService, "departmentReportPeriodDao", departmentReportPeriodDao);
+        when(departmentReportPeriodService.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.get(anyInt())).thenReturn(departmentReportPeriod);
 
         when(formDataDao.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData1);
 
@@ -272,7 +278,7 @@ public class FormDataServiceTest {
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
         departmentReportPeriod.setReportPeriod(reportPeriod);
-        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
 
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
                 formDataService.getPreviousRowNumber(newFormData).equals(0));
@@ -319,7 +325,7 @@ public class FormDataServiceTest {
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
         departmentReportPeriod.setReportPeriod(reportPeriod);
-        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 8",
                 formDataService.getPreviousRowNumber(newFormData).equals(8));
@@ -368,7 +374,7 @@ public class FormDataServiceTest {
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
         departmentReportPeriod.setReportPeriod(reportPeriod);
-        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
                 formDataService.getPreviousRowNumber(newFormData).equals(3));
@@ -479,7 +485,7 @@ public class FormDataServiceTest {
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
         departmentReportPeriod.setReportPeriod(reportPeriod);
-        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+        when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
 
         FormDataServiceImpl dataService = spy(formDataService);
         dataService.saveFormData(logger, userInfo, formData);
@@ -647,7 +653,7 @@ public class FormDataServiceTest {
 
         when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
         when(periodService.getPrevReportPeriod(1)).thenReturn(reportPeriodPrev);
-        when(departmentReportPeriodDao.getLast(new Integer(1), 0)).thenReturn(departmentReportPeriodPrev);
+        when(departmentReportPeriodService.getLast(1, 0)).thenReturn(departmentReportPeriodPrev);
         when(formDataDao.find(111, kind, 0, null)).thenReturn(formData1);
 
         FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder);
@@ -696,7 +702,7 @@ public class FormDataServiceTest {
         when(periodService.getAvailableMonthList(1)).thenReturn(monthsList);
         when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
         when(periodService.getPrevReportPeriod(1)).thenReturn(reportPeriodPrev);
-        when(departmentReportPeriodDao.getLast(new Integer(1), 0)).thenReturn(departmentReportPeriodPrev);
+        when(departmentReportPeriodService.getLast(1, 0)).thenReturn(departmentReportPeriodPrev);
         when(formDataDao.find(111, kind, 0, new Integer(12))).thenReturn(formData1);
         when(formDataDao.find(111, kind, 1, new Integer(1))).thenReturn(formData2);
 
@@ -719,5 +725,54 @@ public class FormDataServiceTest {
         formData.setKind(FormDataKind.PRIMARY);
         formData.setManual(false);
         return formData;
+    }
+
+    @Test(expected = ServiceException.class)
+    public void findFormDataIdsByRangeInReportPeriodTest() throws ParseException {
+        ArrayList<Integer> a =new ArrayList<Integer>(1);
+        a.add(7);
+
+        FormData fd = new FormData();
+        fd.setReportPeriodId(17);
+        fd.setDepartmentReportPeriodId(17);
+        fd.setState(WorkflowState.ACCEPTED);
+        fd.setFormTemplateId(1);
+        ReportPeriod rp = new ReportPeriod();
+        rp.setName("Период");
+        TaxPeriod tp = new TaxPeriod();
+        tp.setYear(2015);
+        rp.setTaxPeriod(tp);
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        drp.setCorrectionDate(new Date());
+        FormTemplate ft = new FormTemplate();
+        ft.setName("Вид НФ");
+
+        Logger logger = new Logger();
+        when(formDataDao.findFormDataIdsByRangeInReportPeriod(1,
+                SIMPLE_DATE_FORMAT.parse("01.01.2012"), SIMPLE_DATE_FORMAT.parse("31.12.2012"))).thenReturn(a);
+        when(formDataDao.findFormDataIdsByRangeInReportPeriod(1,
+                SIMPLE_DATE_FORMAT.parse("01.01.2012"), SIMPLE_DATE_FORMAT.parse("31.12.9999"))).thenReturn(a);
+        when(periodService.getReportPeriod(fd.getReportPeriodId())).thenReturn(rp);
+        when(departmentReportPeriodService.get(fd.getDepartmentReportPeriodId())).thenReturn(drp);
+        when(formTemplateService.get(fd.getFormTemplateId())).thenReturn(ft);
+        for (Integer id : a){
+            when(formDataDao.getWithoutRows(id)).thenReturn(fd);
+        }
+
+        formDataService.findFormDataIdsByRangeInReportPeriod(1,
+                SIMPLE_DATE_FORMAT.parse("01.01.2012"), SIMPLE_DATE_FORMAT.parse("31.12.2012"), logger
+        );
+
+        if (logger.containsLevel(LogLevel.ERROR)){
+            throw new ServiceException(logger.getEntries().get(0).getMessage());
+        }
+    }
+
+    @Test
+    public void findFormDataIdsByRangeInReportPeriodTestNull() throws ParseException {
+        Logger logger = new Logger();
+        formDataService.findFormDataIdsByRangeInReportPeriod(1,
+                SIMPLE_DATE_FORMAT.parse("01.01.2012"), null, logger
+        );
     }
 }

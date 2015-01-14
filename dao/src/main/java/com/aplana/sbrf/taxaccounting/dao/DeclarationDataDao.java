@@ -97,4 +97,13 @@ public interface DeclarationDataDao {
      * @return
      */
     List<DeclarationData> getIfrs(int reportPeriodId);
+
+    /**
+     * Находим декларации, относящиеся к отчетным периодам, с которыми новый период актуальности версии макета не пересекается
+     * @param formTemplateId идентификатор версии макета НФ
+     * @param startDate дата, начиная с которой искать пересечения
+     * @param endDate дата, до которой искать
+     * @return идентификаторы
+     */
+    List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate);
 }

@@ -234,4 +234,13 @@ public interface FormDataDao {
      * Использование этого метода требуется только для обработки ежемесячных форм
      */
     List<FormData> getLastListByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate);
+
+    /**
+     * Находим НФ, относящиеся к отчетным периодам, с которыми новый период актуальности версии макета не пересекается
+     * @param formTemplateId идентификатор версии макета НФ
+     * @param startDate дата, начиная с которой искать пересечения
+     * @param endDate дата, до которой искать
+     * @return идентификаторы
+     */
+    List<Integer> findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate);
 }

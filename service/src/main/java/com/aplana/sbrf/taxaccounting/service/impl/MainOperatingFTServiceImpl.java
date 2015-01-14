@@ -14,11 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: avanteev
@@ -27,7 +23,6 @@ import java.util.List;
 @Transactional
 public class MainOperatingFTServiceImpl implements MainOperatingService {
 
-    private static final String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
     private static final String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static final String HAVE_DFT_MESSAGE = "Существует назначение налоговой формы подразделению \"%s\"!";
@@ -51,6 +46,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     private DataRowDao dataRowDao;
     @Autowired
     private ColumnDao columnDao;
+    @Autowired
+    private FormDataService formDataService;
 
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
@@ -85,6 +82,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 endRange = new Pair<Date, Date>(c.getTime(), dbVersionEndDate);
             }
             versionOperatingService.checkDestinationsSources(formTemplate.getType().getId(), beginRange, endRange, logger);
+            checkError(logger, SAVE_MESSAGE);
+            formDataService.findFormDataIdsByRangeInReportPeriod(formTemplate.getId(), formTemplate.getVersion(), templateActualEndDate, logger);
             checkError(logger, SAVE_MESSAGE);
         }
 

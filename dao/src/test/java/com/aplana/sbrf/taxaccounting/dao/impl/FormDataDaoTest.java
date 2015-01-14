@@ -458,4 +458,10 @@ public class FormDataDaoTest {
         assertEquals(0, formDataDao.getManualInputForms(Arrays.asList(1), 1, TaxType.INCOME, FormDataKind.PRIMARY,
                 SIMPLE_DATE_FORMAT.parse("03.01.2013"), SIMPLE_DATE_FORMAT.parse("03.01.2014")).size());
     }
+
+    @Test
+    public void findFormDataIdsByIntersectionInReportPeriodTest() throws ParseException {
+        assertEquals(7, formDataDao.findFormDataIdsByRangeInReportPeriod(2,
+                SIMPLE_DATE_FORMAT.parse("01.01.2012"), SIMPLE_DATE_FORMAT.parse("31.12.2012")).size());
+    }
 }

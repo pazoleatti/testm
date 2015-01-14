@@ -274,7 +274,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
-        Map paramMap = new HashMap();
+        HashMap<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("rp", reportPeriodId);
         return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, fd.form_template_id, " +
                 "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
@@ -291,7 +291,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public List<FormData> getIfrsForm(int reportPeriodId) {
-        Map paramMap = new HashMap();
+        HashMap<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("rp", reportPeriodId);
         return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, fd.form_template_id, " +
                 "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
@@ -574,6 +574,28 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     new FormDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<FormData>();
+        }
+    }
+
+
+    private final static String FIND_FD_BY_RANGE_IN_RP =
+            "select fd.id " +
+                    " from form_data fd\n" +
+                    "  INNER JOIN DEPARTMENT_REPORT_PERIOD drp ON fd.DEPARTMENT_REPORT_PERIOD_ID = drp.ID\n" +
+                    "  INNER JOIN REPORT_PERIOD rp ON drp.REPORT_PERIOD_ID = rp.ID\n" +
+                    "  where fd.FORM_TEMPLATE_ID = :formTemplateId and (rp.CALENDAR_START_DATE NOT BETWEEN :startDate AND :endDate\n" +
+                    "    OR rp.END_DATE NOT BETWEEN :startDate AND :endDate)";
+
+    @Override
+    public List<Integer> findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate) {
+        try {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("formTemplateId", formTemplateId);
+            params.put("startDate", startDate);
+            params.put("endDate", endDate);
+            return getNamedParameterJdbcTemplate().queryForList(FIND_FD_BY_RANGE_IN_RP, params, Integer.class);
+        } catch (EmptyResultDataAccessException e){
+            return new ArrayList<Integer>(0);
         }
     }
 

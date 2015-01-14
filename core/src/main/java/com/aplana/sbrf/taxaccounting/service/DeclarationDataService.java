@@ -165,4 +165,6 @@ public interface DeclarationDataService {
      * @param declarationDataId
      */
     void deleteReport(long declarationDataId, boolean isLock);
+
+    void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 }

@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultIt
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -18,10 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -450,6 +446,27 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                     "Для заданного сочетания параметров найдено несколько деклараций: reportPeriodId = %d",
                     reportPeriodId
             );
+        }
+    }
+
+    private final static String FIND_DD_BY_RANGE_IN_RP =
+            "select dd.id " +
+                    " from DECLARATION_DATA dd \n" +
+                    "  INNER JOIN DEPARTMENT_REPORT_PERIOD drp ON dd.DEPARTMENT_REPORT_PERIOD_ID = drp.ID\n" +
+                    "  INNER JOIN REPORT_PERIOD rp ON drp.REPORT_PERIOD_ID = rp.ID\n" +
+                    "  where dd.DECLARATION_TEMPLATE_ID = :decTemplateId and (rp.CALENDAR_START_DATE NOT BETWEEN :startDate AND :endDate\n" +
+                    "    OR rp.END_DATE NOT BETWEEN :startDate AND :endDate)";
+
+    @Override
+    public List<Integer> findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate) {
+        try {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("decTemplateId", decTemplateId);
+            params.put("startDate", startDate);
+            params.put("endDate", endDate);
+            return getNamedParameterJdbcTemplate().queryForList(FIND_DD_BY_RANGE_IN_RP, params, Integer.class);
+        } catch (EmptyResultDataAccessException e){
+            return new ArrayList<Integer>(0);
         }
     }
 }

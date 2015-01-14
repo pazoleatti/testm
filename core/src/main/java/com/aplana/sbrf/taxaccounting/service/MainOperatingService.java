@@ -10,6 +10,7 @@ import java.util.Date;
  * Основные операции над макетами
  */
 public interface MainOperatingService {
+    static final String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
 
     <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user);
     <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUser user);

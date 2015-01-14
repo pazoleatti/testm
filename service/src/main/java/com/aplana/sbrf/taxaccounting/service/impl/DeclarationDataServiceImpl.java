@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -29,22 +28,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -99,9 +90,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private LogEntryService logEntryService;
 
     @Autowired
-    private TransactionHelper tx;
-
-    @Autowired
     private LockDataService lockDataService;
 
     @Autowired
@@ -115,23 +103,37 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private PeriodService reportPeriodService;
 
     @Autowired
     private ValidateXMLService validateXMLService;
 
-	public static final String TAG_FILE = "Файл";
+    private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
+
+    public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
 	public static final String ATTR_FILE_ID = "ИдФайл";
 	public static final String ATTR_DOC_DATE = "ДатаДок";
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
 
+    private static final Date MAX_DATE;
+    private static final Calendar CALENDAR = Calendar.getInstance();
+    static {
+        CALENDAR.clear();
+        CALENDAR.set(9999, Calendar.DECEMBER, 31);
+        MAX_DATE = CALENDAR.getTime();
+        CALENDAR.clear();
+    }
+
+
     private class SAXHandler extends DefaultHandler {
         private List<String> values;
         private String tagName;
         private String attrName;
 
-        private SAXHandler(){};
+        private SAXHandler(){}
 
         public SAXHandler(String tagName, String attrName) {
             this.tagName = tagName;
@@ -607,5 +609,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
         reportService.deleteDec(declarationDataId);
+    }
+
+    @Override
+    public void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger) {
+        List<Integer> ddIds = declarationDataDao.findDDIdsByRangeInReportPeriod(decTemplateId,
+                startDate, endDate != null ? endDate : MAX_DATE);
+        for (Integer id : ddIds){
+            DeclarationData dd = declarationDataDao.get(id);
+            ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
+            DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
+            logger.error(DD_NOT_IN_RANGE, rp.getName(), rp.getTaxPeriod().getYear(),
+                    drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                            formatter.format(drp.getCorrectionDate())) : "",
+                    dt.getName(), dd.isAccepted()?"принята":"не принята");
+        }
     }
 }

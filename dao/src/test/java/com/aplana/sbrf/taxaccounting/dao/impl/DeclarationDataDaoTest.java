@@ -30,6 +30,8 @@ public class DeclarationDataDaoTest {
 
     private BlobData blobData;
 
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+
     @Before
     public void init(){
         blobData = new BlobData();
@@ -106,6 +108,7 @@ public class DeclarationDataDaoTest {
 			declarationDataDao.get(5);
 			fail("Record was not deleted");
 		} catch (DaoException e) {
+            //Nothing
 		}
 	}
 
@@ -290,5 +293,11 @@ public class DeclarationDataDaoTest {
         DeclarationData declarationData = declarationDataDao.getLast(1, 1, 20);
         Assert.assertNotNull(declarationData);
         Assert.assertEquals(3, declarationData.getId().intValue());
+    }
+
+    @Test
+    public void findFormDataIdsByIntersectionInReportPeriodTest() throws ParseException {
+        Assert.assertEquals(6, declarationDataDao.findDDIdsByRangeInReportPeriod(1,
+                SIMPLE_DATE_FORMAT.parse("01.01.2012"), SIMPLE_DATE_FORMAT.parse("31.12.2012")).size());
     }
 }

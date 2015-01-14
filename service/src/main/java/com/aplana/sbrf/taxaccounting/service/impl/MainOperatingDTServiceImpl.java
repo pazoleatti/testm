@@ -24,7 +24,6 @@ import java.util.List;
 @Transactional
 public class MainOperatingDTServiceImpl implements MainOperatingService {
 
-    private static final String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
     private static final String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружены ссылки на удаляемую версию макета!";
     private static final String HAVE_DDT_MESSAGE = "Существует назначение налоговой формы подразделению \"%s\"!";
@@ -48,6 +47,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     private SourceService sourceService;
     @Autowired
     private DepartmentService departmentService;
+    @Autowired
+    private DeclarationDataService declarationDataService;
 
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
@@ -80,6 +81,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                 endRange = new Pair<Date, Date>(c.getTime(), dbVersionEndDate);
             }
             versionOperatingService.checkDestinationsSources(declarationTemplate.getType().getId(), beginRange, endRange, logger);
+            checkError(logger, SAVE_MESSAGE);
+            declarationDataService.findDDIdsByRangeInReportPeriod(declarationTemplate.getId(), declarationTemplate.getVersion(), templateActualEndDate, logger);
             checkError(logger, SAVE_MESSAGE);
         }
 

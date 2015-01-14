@@ -326,4 +326,6 @@ public interface FormDataService {
      * @param manual признак версии ручного ввода. Если null - то удаляются отчеты для обеих версий
      */
     void deleteReport(long formDataId, Boolean manual);
+
+    void findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate, Logger logger);
 }
