@@ -489,12 +489,6 @@ public class RefBookDaoTest {
     }*/
 
     @Test
-    public void checkVersionUsages() {
-        boolean isOk = !refBookDao.isVersionUsed(1L, 1L, getDate(1, 1, 2013));
-        assertEquals(true, isOk);
-    }
-
-    @Test
     public void deleteAllRecordVersions() {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(1L, getDate(1, 1, 2014), null, null, null);
         assertEquals(1, records.size());
