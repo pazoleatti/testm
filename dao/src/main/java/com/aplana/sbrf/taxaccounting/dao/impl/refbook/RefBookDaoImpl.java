@@ -1339,7 +1339,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  \t\t(nextversion is not null and nextversion >= :versionFrom) or \t\t-- 1, 6\n" +
             "\t\t(nextversion is null and version >= :versionFrom)\t\t\t\t\t-- 9, 10, 11, 12\n" +
             "  \t)) or (:versionTo is not null and (\n" +
-            "  \t\t(version <= :versionFrom and nextversion >= :versionFrom) or \t\t-- 2, 3\n" +
+            "  \t\t(version <= :versionFrom and nextversion is not null and nextversion >= :versionFrom) or \t\t-- 2, 3\n" +
             "  \t\t(version >= :versionFrom and version <= :versionTo)\t\t\t\t\t-- 4, 5\n" +
             "  \t))\n" +
             "  )) then 1\n" +
@@ -1348,7 +1348,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  when (status=2 and (\n" +
             "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or  \t-- 18\n" +
             "  \t(version = :versionFrom) or \n" +
-            "  \t(nextversion is null and version >= :versionFrom)\t\t\t\t\t\t\t\t\t-- 21, 22\n" +
+            "  \t(nextversion is null and version >= :versionFrom and (:versionTo is null or :versionTo >= version))\t\t\t\t\t\t\t\t\t-- 21, 22\n" +
             "  )) then 4\n" +
             "  else 0\n" +
             "end as result\n" +
@@ -1679,25 +1679,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public boolean isVersionUsed(Long refBookId, Long uniqueRecordId, Date versionFrom) {
-        //Проверка использования в справочниках и настройках подразделений
-        boolean hasUsages = getJdbcTemplate().queryForInt("select count(r.id) from ref_book_record r, ref_book_value v " +
-                "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where reference_id=?) " +
-                "and r.version >= ? and v.REFERENCE_VALUE=?",
-                refBookId, versionFrom, uniqueRecordId) != 0;
-        if (!hasUsages) {
-            //Проверка использования в налоговых формах
-            return getJdbcTemplate().queryForInt("select count(*) from report_period where id in " +
-                    "(select report_period_id from department_report_period where id in " +
-                    "(select department_report_period_id from form_data where id in " +
-                    "(select form_data_id from data_row where id in " +
-                    "(select row_id from data_cell where column_id in " +
-                    "(select id from form_column where attribute_id in " +
-                    "(select id from ref_book_attribute where ref_book_id = ?)) and nvalue = ?)))) and start_date > ?",
-                    refBookId, uniqueRecordId, versionFrom) != 0;
-        } else {
-            return hasUsages;
-        }
+    public List<Date> isVersionUsedLikeParent(Long refBookId, Long recordId, Date versionFrom) {
+        return getJdbcTemplate().query("select r.version as version from ref_book_record r, ref_book_value v " +
+                        "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where reference_id=?) " +
+                        "and r.version >= ? and v.REFERENCE_VALUE=?", new RowMapper<Date>() {
+                    @Override
+                    public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return rs.getDate("version");
+                    }
+                },
+                refBookId, versionFrom, recordId);
     }
 
     private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +

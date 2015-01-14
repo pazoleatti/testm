@@ -170,7 +170,7 @@ public class ConfigurationServiceTest {
         uploadFolder.delete();
         errorFolder.delete();
 
-        Assert.assertEquals(1, logger.getEntries().size());
+        Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(testDepartment1.getName()));
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(path));
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_ARCHIVE_DIRECTORY.getCaption()));
@@ -216,7 +216,7 @@ public class ConfigurationServiceTest {
         uploadFolder.delete();
         archiveFolder.delete();
 
-        Assert.assertEquals(1, logger.getEntries().size());
+        Assert.assertEquals(2, logger.getEntries().size());
         Assert.assertTrue(logger.getEntries().get(0).getMessage().contains(ConfigurationParam.FORM_ERROR_DIRECTORY.getCaption()));
     }
 

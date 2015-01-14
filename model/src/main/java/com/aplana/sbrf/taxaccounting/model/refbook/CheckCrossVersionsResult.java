@@ -18,7 +18,7 @@ public class CheckCrossVersionsResult implements Serializable {
 
     /** Порядковый номер результата, необходим для обработки связок дат */
     private int num;
-    /** Идентификатор записи версии записи справочника */
+    /** Уникальный идентификатор версии записи справочника */
     private Long recordId;
     /** Дата начала актуальности версии */
     private Date version;

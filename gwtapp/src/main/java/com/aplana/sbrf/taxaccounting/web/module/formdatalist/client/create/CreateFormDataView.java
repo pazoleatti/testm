@@ -100,7 +100,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
                 if (object == null) {
                     return "";
                 }
-                return object.getName();
+                return object.getTitle();
             }
         });
 

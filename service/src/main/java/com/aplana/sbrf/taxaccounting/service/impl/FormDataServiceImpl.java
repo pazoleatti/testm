@@ -333,7 +333,7 @@ public class FormDataServiceImpl implements FormDataService {
     public FormData getPrevPeriodFormData(FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod, FormDataKind kind, Integer periodOrder) {
         if (periodOrder != null) {
             List<Months> availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
-            if  (periodOrder > 1 && availableMonthList.contains(Months.fromId(periodOrder - 2))) {
+            if  (periodOrder > 1 && availableMonthList.contains(Months.fromId(periodOrder - 1))) {
                 return formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriod.getId().intValue(), Integer.valueOf(periodOrder - 1));
             }
         }

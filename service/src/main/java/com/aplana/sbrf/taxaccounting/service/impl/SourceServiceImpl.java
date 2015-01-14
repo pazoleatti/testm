@@ -1239,7 +1239,7 @@ public class SourceServiceImpl implements SourceService {
         if (departmentreportPeriod != null && departmentreportPeriod.getCorrectionDate() != null) {
             formToFormRelation.setCorrectionDate(departmentreportPeriod.getCorrectionDate());
         }
-        formToFormRelation.setMonth(periodOrder != null ? Months.fromId(periodOrder - 1).getName() : "");
+        formToFormRelation.setMonth(periodOrder != null ? Months.fromId(periodOrder).getTitle() : "");
         return formToFormRelation;
     }
 

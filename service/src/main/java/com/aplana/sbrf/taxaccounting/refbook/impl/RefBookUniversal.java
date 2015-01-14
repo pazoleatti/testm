@@ -240,7 +240,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                     //Проверка пересечения версий
                     if (record.getRecordId() != null) {
                         boolean needToCreateFakeVersion = crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, versionTo, null),
-                                versionFrom, versionTo, logger);
+                                refBook, versionFrom, versionTo, logger);
                         if (!needToCreateFakeVersion) {
                             //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
                             excludedVersionEndRecords.add(record.getRecordId());
@@ -411,7 +411,7 @@ public class RefBookUniversal implements RefBookDataProvider {
      * Обработка пересечений версий
      * @return нужна ли дальнейшая обработка даты окончания (фиктивной версии)? Она могла быть выполнена в процессе проверки пересечения
      */
-    private boolean crossVersionsProcessing(List<CheckCrossVersionsResult> results, Date versionFrom, Date versionTo, Logger logger) {
+    private boolean crossVersionsProcessing(List<CheckCrossVersionsResult> results, RefBook refBook, Date versionFrom, Date versionTo, Logger logger) {
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.FATAL_ERROR) {
                 throw new ServiceException(CROSS_ERROR_MSG);
@@ -420,13 +420,29 @@ public class RefBookUniversal implements RefBookDataProvider {
 
         for (CheckCrossVersionsResult result : results) {
             if (result.getResult() == CrossResult.NEED_CHECK_USAGES) {
-                boolean isReferenceToVersionExists = refBookDao.isVersionUsed(refBookId, result.getRecordId(), versionFrom);
-                if (isReferenceToVersionExists) {
-                    throw new ServiceException(CROSS_ERROR_MSG);
-                } else {
-                    if (logger != null) {
-                        logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
+                if (refBook.isHierarchic()) {
+                    //Поиск среди дочерних элементов
+                    List<Date> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, result.getRecordId(), versionFrom);
+                    if (childrenVersions != null && !childrenVersions.isEmpty()) {
+                        for (Date version : childrenVersions) {
+                            if (logger != null) {
+                                logger.error(String.format("Существует дочерняя запись, действует с %s", formatter.get().format(version)));
+                            }
+                        }
+                        throw new ServiceException(CROSS_ERROR_MSG);
                     }
+                }
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, null);
+                if (usagesResult != null && !usagesResult.isEmpty()) {
+                    for (String error: usagesResult) {
+                        if (logger != null) {
+                            logger.error(error);
+                        }
+                    }
+                    throw new ServiceException(CROSS_ERROR_MSG);
+                }
+                if (logger != null) {
+                    logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
                 }
             }
             if (result.getResult() == CrossResult.NEED_CHANGE) {
@@ -558,7 +574,18 @@ public class RefBookUniversal implements RefBookDataProvider {
             boolean isValuesChanged = checkValuesChanged(uniqueRecordId, records);
 
             //Проверка использования
-
+            if (refBook.isHierarchic()) {
+                //Поиск среди дочерних элементов
+                List<Date> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, uniqueRecordId, versionFrom);
+                if (childrenVersions != null && !childrenVersions.isEmpty()) {
+                    for (Date version : childrenVersions) {
+                        if (logger != null) {
+                            logger.error(String.format("Существует дочерняя запись, действует с %s", formatter.get().format(version)));
+                        }
+                    }
+                    throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
+                }
+            }
             List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId), versionFrom, versionTo, isValuesChanged,
                     RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
                             Collections.<Long>emptyList() :
