@@ -436,6 +436,9 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             if (handler != null) {
                 handler.onInvoke();
             }
+            if (cellTable.getColumnCount() > 0 && cellTable.getHeader(0) != null && cellTable.getHeader(0).getCell() instanceof CheckboxCell) {
+                ((CheckboxCell) cellTable.getHeader(0).getCell()).clearViewData(false);
+            }
         }
     }
 
