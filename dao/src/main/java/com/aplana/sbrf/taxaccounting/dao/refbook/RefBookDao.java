@@ -305,15 +305,6 @@ public interface RefBookDao {
     List<Long> checkConflictValuesVersions(List<Pair<Long,String>> recordPairs, Date versionFrom, Date versionTo);
 
     /**
-     * Проверяет есть ли ссылки на версию в каких либо точках запроса
-     *
-     * @param uniqueRecordId уникальный идентификатор версии записи
-     * @param versionFrom дата начала актуальности новой версии
-     * @return есть ссылки на версию?
-     */
-    boolean isVersionUsed(@NotNull Long refBookId, @NotNull Long uniqueRecordId, @NotNull Date versionFrom);
-
-    /**
      * Проверяет использование записи как родителя для дочерних
      * @param refBookId идентификатор справочника
      * @param recordId уникальный идентификатор записи
@@ -328,7 +319,7 @@ public interface RefBookDao {
      *
      * @param uniqueRecordIds список идентификаторов версий записей
      * @param versionFrom
-     *@param versionTo
+     * @param versionTo
      * @param isValuesChanged признак того, что были изменены атрибуты  @return результаты проверки. Сообщения об ошибках
      * @param excludeUseCheck идентификаторы справочников, которые игнорируются при проверке использования
      */

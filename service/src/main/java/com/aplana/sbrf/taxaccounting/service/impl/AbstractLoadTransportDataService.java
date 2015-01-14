@@ -72,6 +72,7 @@ public abstract class AbstractLoadTransportDataService {
         L31("В каталоге загрузки для %s не найдены файлы!", LogLevel.ERROR, true, false),
         L36("Обнаружена ошибка при использовании библиотеки для проверки ЭЦП! %s.", LogLevel.ERROR, true, false),
         L37("Не указан путь к каталогу загрузки для %s!", LogLevel.ERROR, true, false),
+        L38("Не задан алгоритм загрузки для %s!", LogLevel.ERROR, true, false),
         // Сообщения которых нет в постановке
         L_1("Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
         L_2("Не указан каталог архива в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false);
