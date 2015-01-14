@@ -72,7 +72,7 @@
         <cell alias="column68" colSpan="1" rowSpan="1" value="042 (Код вычета)"/>
         <cell alias="column69" colSpan="1" rowSpan="1" value="043 (Сумма вычета)"/>
         <cell alias="column70" colSpan="1" rowSpan="1" value="051 (Код вычета)"/>
-        <cell alias="column71" colSpan="1" rowSpan="1" value="043 (Сумма вычета)"/>
+        <cell alias="column71" colSpan="1" rowSpan="1" value="052 (Сумма вычета)"/>
         <cell alias="column72" colSpan="1" rowSpan="1" value="051 (Код вычета)"/>
         <cell alias="column73" colSpan="1" rowSpan="1" value="052 (Сумма вычета)"/>
     </row>
