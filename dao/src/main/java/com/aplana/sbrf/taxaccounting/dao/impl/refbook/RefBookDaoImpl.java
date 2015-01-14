@@ -1339,7 +1339,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  \t\t(nextversion is not null and nextversion >= :versionFrom) or \t\t-- 1, 6\n" +
             "\t\t(nextversion is null and version >= :versionFrom)\t\t\t\t\t-- 9, 10, 11, 12\n" +
             "  \t)) or (:versionTo is not null and (\n" +
-            "  \t\t(version <= :versionFrom and nextversion >= :versionFrom) or \t\t-- 2, 3\n" +
+            "  \t\t(version <= :versionFrom and nextversion is not null and nextversion >= :versionFrom) or \t\t-- 2, 3\n" +
             "  \t\t(version >= :versionFrom and version <= :versionTo)\t\t\t\t\t-- 4, 5\n" +
             "  \t))\n" +
             "  )) then 1\n" +
@@ -1348,7 +1348,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  when (status=2 and (\n" +
             "  \t(nextversion is not null and :versionTo is null and version > :versionFrom) or  \t-- 18\n" +
             "  \t(version = :versionFrom) or \n" +
-            "  \t(nextversion is null and version >= :versionFrom)\t\t\t\t\t\t\t\t\t-- 21, 22\n" +
+            "  \t(nextversion is null and version >= :versionFrom and (:versionTo is null or :versionTo >= version))\t\t\t\t\t\t\t\t\t-- 21, 22\n" +
             "  )) then 4\n" +
             "  else 0\n" +
             "end as result\n" +
