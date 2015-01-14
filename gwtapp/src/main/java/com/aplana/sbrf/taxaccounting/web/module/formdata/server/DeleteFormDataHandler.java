@@ -82,6 +82,10 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 
         // По назначениям
         for (DepartmentFormType departmentFormType : sourceList) {
+            if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), formData.getReportPeriodId())) {
+                //не проверяем формы с неактивными макетами(или с макетами у которых изменили период актуальноси)
+                continue;
+            }
             DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
             filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
             filter.setReportPeriodIdList(Arrays.asList(formData.getReportPeriodId()));
@@ -127,7 +131,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
                     availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
                 } else {
                     availableMonthList = new ArrayList<Months>();
-                    availableMonthList.add(Months.fromId(action.getFormData().getPeriodOrder()-1));
+                    availableMonthList.add(Months.fromId(action.getFormData().getPeriodOrder()));
                 }
 
                 for (Months months: availableMonthList) {
@@ -150,7 +154,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
                     if (sourceFormData.getState() == WorkflowState.ACCEPTED) {
                         // Есть принятый источник
                         logger.error("Найдена форма-источник «%s» «%s» в текущем периоде в месяце «%s», которая имеет статус \"Принята\"!",
-                                sourceFormData.getFormType().getName(), departmentName, months.getName());
+                                sourceFormData.getFormType().getName(), departmentName, months.getTitle());
                     }
                 }
             }

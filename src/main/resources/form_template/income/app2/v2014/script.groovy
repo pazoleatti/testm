@@ -217,22 +217,23 @@ void calc() {
     }
 
     for (DataRow<Cell> row in dataRows) {
-        def BigDecimal value25 = calc25(row)
-        def BigDecimal value26 = calc26(row)
-        def BigDecimal value27 = calc27(row)
-
         // проверки, выполняемые до расчёта
         def int index = row.getIndex()
+
+        def BigDecimal value25 = calc25(row)
         checkOverflow(value25, row, 'column25', index, 15, '«Графа 35» - «Графа 47» - «Графа 59»')
+        row.column25 = value25
+
+        def BigDecimal value26 = calc26(row)
         checkOverflow(value26, row, 'column26', index, 15,
                 '«Графа 37» - «Графа 39» - «Графа 41» - «Графа 43» - «Графа 455» - ' +
                         '«Графа 49» - «Графа 51» - «Графа 53» - «Графа 55» - «Графа 57» - ' +
                         '«Графа 61» - «Графа 63» - «Графа 65» - «Графа 67» - «Графа 69» - ' +
                         '«Графа 71» - «Графа 73»')
-        checkOverflow(value27, row, 'column27', index, 15, '«Графа 25» - «Графа 26»')
-
-        row.column25 = value25
         row.column26 = value26
+
+        def BigDecimal value27 = calc27(row)
+        checkOverflow(value27, row, 'column27', index, 15, '«Графа 25» - «Графа 26»')
         row.column27 = value27
     }
 

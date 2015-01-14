@@ -489,7 +489,7 @@ public class SourceServiceImpl implements SourceService {
             List<SourceObject> deleteSources = new ArrayList<SourceObject>();
             List<SourcePair> deletePairs = new ArrayList<SourcePair>();
             final Map<SourcePair, SourceObject> unionMap = new HashMap<SourcePair, SourceObject>();
-            final List<String> intersectionParts = new ArrayList<String>();
+            final Map<SourcePair, List<String>> intersectionParts = new HashMap<SourcePair, List<String>>();
             for (Map.Entry<SourcePair, List<SourceObject>> intersectionGroup : intersections.entrySet()) {
                 Date minDate = periodStart;
                 Date maxDate = periodEnd;
@@ -504,25 +504,28 @@ public class SourceServiceImpl implements SourceService {
                     }
                     deleteSources.add(intersection);
                     deletePairs.add(intersection.getSourcePair());
-                    if (mode == SourceMode.SOURCES) {
-                        intersectionParts.add(String.format(INTERSECTION_PART,
-                                        isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType(),
-                                        "приемника",
-                                        intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
-                                        formatter.get().format(intersection.getPeriodStart()) + " - " +
-                                                (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
-                                )
-                        );
-                    } else {
-                        intersectionParts.add(String.format(INTERSECTION_PART,
-                                        intersection.getSourcePair().getSourceKind() + ": " +  intersection.getSourcePair().getSourceType(),
-                                        "источника",
-                                        isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " +  intersection.getSourcePair().getDestinationType(),
-                                        formatter.get().format(intersection.getPeriodStart()) + " - " +
-                                                (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
-                                )
-                        );
+                    List<String> msgsForPair = intersectionParts.get(intersection.getSourcePair());
+                    if (msgsForPair == null) {
+                        msgsForPair = new ArrayList<String>();
                     }
+                    if (mode == SourceMode.SOURCES) {
+                        msgsForPair.add(String.format(INTERSECTION_PART,
+                                isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType(),
+                                "приемника",
+                                intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
+                                formatter.get().format(intersection.getPeriodStart()) + " - " +
+                                        (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                        ));
+                    } else {
+                        msgsForPair.add(String.format(INTERSECTION_PART,
+                                intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
+                                "источника",
+                                isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType(),
+                                formatter.get().format(intersection.getPeriodStart()) + " - " +
+                                        (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
+                        ));
+                    }
+                    intersectionParts.put(intersection.getSourcePair(), msgsForPair);
                 }
                 SourceObject union;
 
@@ -574,7 +577,7 @@ public class SourceServiceImpl implements SourceService {
                             }
                             List<String> msgs = new ArrayList<String>();
                             msgs.add(INTERSECTION_MSG_BEGIN);
-                            msgs.addAll(intersectionParts);
+                            msgs.addAll(intersectionParts.get(sourcePair));
                             msgs.add(String.format(INTERSECTION_MSG_END, period));
                             return msgs;
                         }
@@ -1236,7 +1239,7 @@ public class SourceServiceImpl implements SourceService {
         if (departmentreportPeriod != null && departmentreportPeriod.getCorrectionDate() != null) {
             formToFormRelation.setCorrectionDate(departmentreportPeriod.getCorrectionDate());
         }
-        formToFormRelation.setMonth(periodOrder != null ? Months.fromId(periodOrder - 1).getName() : "");
+        formToFormRelation.setMonth(periodOrder != null ? Months.fromId(periodOrder).getTitle() : "");
         return formToFormRelation;
     }
 

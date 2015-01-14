@@ -186,7 +186,7 @@ def reportPeriod = null
 def END_ROW = "\r\n"
 
 @Field
-def SEPARATOR = "|"
+def VALUE_SEPARATOR = "|"
 
 // id текущей формы для вывода в лог
 @Field
@@ -227,7 +227,7 @@ def createFiles() {
                 sectionValue = (sectionsMap[id] != null ? sectionsMap[id][sectionIndex++] : ++sectionIndex)
             } else if (exclude == Exclude.SECTION2_TOTAL && alias != null && !alias.contains(Exclude.SECTION_TOTAL.value) && alias.size() == 2) {
                 // определяет номер раздела и подраздела для рну 39.1 и 39.2 - если алиас строки A1 или B1,  то в конце строки тф A|1 или Б|1
-                sectionValue = (alias[0] == 'A' ? 'А' : 'Б') + SEPARATOR + alias[1]
+                sectionValue = (alias[0] == 'A' ? 'А' : 'Б') + VALUE_SEPARATOR + alias[1]
             }
 
             // обработать строки имеющие алиас (итоги/подитоги/фиксированные строки)
@@ -309,18 +309,18 @@ def getHeader(FormTemplate template) {
 
     // 1. Время создания транспортного файла
     value = (new Date()).format('yyyy.MM.dd HH.mm.ss')
-    sb.append(value).append(SEPARATOR)
+    sb.append(value).append(VALUE_SEPARATOR)
 
     // 2. Наименование подразделения
     value = getRefBookValue(30, departmentId as Long)?.NAME?.value
-    sb.append(value).append(SEPARATOR)
+    sb.append(value).append(VALUE_SEPARATOR)
 
     // 3. Наименование вида налоговой формы
-    sb.append(template.getName()).append(SEPARATOR)
+    sb.append(template.getName()).append(VALUE_SEPARATOR)
 
     // 4. Наименование АСНУ
     // сказали что этот параметр можно не определять
-    sb.append('тестовое наименование АСНУ').append(SEPARATOR)
+    sb.append('тестовое наименование АСНУ').append(VALUE_SEPARATOR)
 
     sb.append(END_ROW)
     return sb
@@ -510,7 +510,7 @@ def loadRefBookAttributes(Statement statement) {
  */
 def getRowValues(def row, def index, def section, def templateId) {
     StringBuilder rowValues = new StringBuilder()
-    rowValues.append(index).append(SEPARATOR)
+    rowValues.append(index).append(VALUE_SEPARATOR)
     def columns = row.keySet()
     def overrideWithHidden = null
 
@@ -532,8 +532,8 @@ def getRowValues(def row, def index, def section, def templateId) {
         }
 
         // проверка наличия в значении знака «|»
-        if (value != null && value.contains(SEPARATOR)) {
-            log(LogLevel.WARNING, "Значение содержит запрещеный символ «$SEPARATOR»: formId $currFormId, row ${row.getIndex()}, column $alias, value = $value")
+        if (value != null && value.contains(VALUE_SEPARATOR)) {
+            log(LogLevel.WARNING, "Значение содержит запрещеный символ «$VALUE_SEPARATOR»: formId $currFormId, row ${row.getIndex()}, column $alias, value = $value")
             value = value.toString().replace('|', 'SEPARATOR')
         }
 
@@ -541,7 +541,7 @@ def getRowValues(def row, def index, def section, def templateId) {
             rowValues.append(value)
         }
 
-        rowValues.append(SEPARATOR)
+        rowValues.append(VALUE_SEPARATOR)
     }
 
     // служебное поле для подитогов/разделов
@@ -734,13 +734,13 @@ String getTotalRow(def dataRows, def templateId, Exclude exclude) {
 
     // сформировать строку итогов
     StringBuilder sb = new StringBuilder()
-    sb.append(SEPARATOR)
+    sb.append(VALUE_SEPARATOR)
     columnsSort.each { Column column ->
         if (column.width > 0) {
             if (column.alias in totalAliases) {
                 sb.append(total[column.alias])
             }
-            sb.append(SEPARATOR)
+            sb.append(VALUE_SEPARATOR)
         }
     }
     sb.append(END_ROW)

@@ -232,9 +232,9 @@
                                         </g:cell>
                                     </g:HorizontalPanel>
 
-                                    <style:LabelSeparator text="Сведения о реорганизации" addStyleNames="{style.labelSeparetors}" ui:field="reorgLabel" visible="false"/>
+                                    <style:LabelSeparator text="Сведения о реорганизации" addStyleNames="{style.labelSeparetors}" ui:field="reorgLabel"/>
 
-                                    <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle" ui:field="reorgCodePanel" visible="false">
+                                    <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle" ui:field="reorgCodePanel">
                                         <g:cell width="1%" height="22px">
                                             <g:Label text="Код формы реорганизации и ликвидации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
@@ -245,7 +245,7 @@
                                                                    title="Коды форм реорганизации и ликвидации организации"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
-                                    <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle" ui:field="reorgInnPanel" visible="false">
+                                    <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle" ui:field="reorgInnPanel">
                                         <g:cell width="1%" height="22px">
                                             <g:Label text="ИНН реорганизованной организации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
@@ -253,7 +253,7 @@
                                             <aplana:TextBox ui:field="reorgInn" width="150px"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
-                                    <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle" ui:field="reorgKppPanel" visible="false">
+                                    <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle" ui:field="reorgKppPanel">
                                         <g:cell width="1%" height="22px">
                                             <g:Label text="КПП реорганизованной организации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>

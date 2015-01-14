@@ -218,4 +218,15 @@ public interface FormTemplateService {
      * @return true - есть, false - нет
      */
     boolean isAnyAutoNumerationColumn(FormTemplate formTemplate, NumerationType type);
+
+    /**
+     * Проверка существования активного шаблона нф
+     * с типом formTypeId и датой актуальности которой является период включающий
+     * reportPeriodId
+     *
+     * @param formTypeId вид шаблона
+     * @param reportPeriodId отчетный период
+     * @return
+     */
+    boolean existFormTemplate(int formTypeId, int reportPeriodId);
 }

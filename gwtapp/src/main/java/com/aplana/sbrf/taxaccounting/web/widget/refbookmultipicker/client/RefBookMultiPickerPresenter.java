@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client;
 
-import java.util.*;
-
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.GINContextHolder;
@@ -18,6 +16,8 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
+
+import java.util.*;
 
 /**
  * Презентор представления компонента выбора из линейного српавончика
@@ -98,7 +98,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
             }
             ps.getSetIds().clear();
         } else {
-            getView().setSelection(new ArrayList<RefBookItem>());
+            getView().setSelection(new ArrayList<RefBookItem>(0));
         }
     }
 

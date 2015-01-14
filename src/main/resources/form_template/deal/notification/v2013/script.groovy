@@ -7,6 +7,9 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 /**
  * Уведомление. Генератор XML.
+ *
+ * declarationTemplateId=21006
+ *
  * http://conf.aplana.com/pages/viewpage.action?pageId=9594552
  * http://conf.aplana.com/pages/viewpage.action?pageId=10388852
  *

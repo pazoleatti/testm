@@ -53,7 +53,6 @@ public class TAUserServiceImpl implements TAUserService {
 
 	@Override
 	public TAUser getUser(String login) {
-        logger.info("Получение информации пользователя по логину " + login + " getUser()");
 		try {
 			int userId = userDao.getUserIdByLogin(login.toLowerCase());
 			return userDao.getUser(userId);

@@ -48,7 +48,6 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
     public UploadTransportDataView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
         formPanel.setAction(GWT.getHostPageBaseURL() + getUiHandlers().ACTION_URL);
-        formPanel.setAction(GWT.getHostPageBaseURL() + getUiHandlers().ACTION_URL);
         initListeners();
     }
 

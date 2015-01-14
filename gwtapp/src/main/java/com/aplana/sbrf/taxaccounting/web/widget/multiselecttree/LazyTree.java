@@ -116,6 +116,7 @@ public class LazyTree<H extends LazyTreeItem> extends Tree implements HasLazyTre
     @Override
     public void clear() {
         super.clear();
+        selectionModel.clear();
         loadedItems = new ArrayList<H>();
         itemsCount = 0;
     }

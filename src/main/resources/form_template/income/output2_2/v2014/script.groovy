@@ -259,7 +259,12 @@ void addData(def xml, headRowCount) {
         xmlIndexCol++
 
         // графа 9 - справочник "Коды субъектов Российской Федерации"
-        newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        //Проверяется: если загруженное из Excel значение - цифра от 0 до 9, то спереди подставляется 0, чтобы получилось двузначное число.
+        if (checkFormat(row.cell[xmlIndexCol].text(), "[0-9]")) {
+            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', "0" + row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        } else {
+            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
+        }
         xmlIndexCol++
 
         // графа 10
@@ -335,7 +340,7 @@ void addData(def xml, headRowCount) {
         xmlIndexCol++
 
         // графа 28
-        newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }

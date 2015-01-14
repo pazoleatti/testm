@@ -457,4 +457,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         }
         return false;
     }
+
+    @Override
+    public boolean existFormTemplate(int formTypeId, int reportPeriodId) {
+        return formTemplateDao.existFormTemplate(formTypeId, reportPeriodId);
+    }
 }
