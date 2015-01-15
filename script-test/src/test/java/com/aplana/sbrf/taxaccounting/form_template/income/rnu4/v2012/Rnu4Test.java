@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.form_template.income.rnu4.v2012;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -150,7 +151,7 @@ public class Rnu4Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
-        checkLogger();
+        checkLoadData(testHelper.getDataRowHelper().getAll());
     }
 
     @Test
@@ -163,6 +164,25 @@ public class Rnu4Test extends ScriptTestBase {
         Assert.assertEquals(200, dataRows.get(2).getCell("sum").getNumericValue().intValue());
         Assert.assertEquals(300, dataRows.get(4).getCell("sum").getNumericValue().intValue());
         Assert.assertEquals(500, dataRows.get(5).getCell("sum").getNumericValue().intValue());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
+    }
+
+    /**
+     * Проверить загруженные данные.
+     */
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        // графа 3
+        Assert.assertEquals(1, dataRows.get(0).getCell("balance").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(1).getCell("balance").getNumericValue().intValue());
+        Assert.assertEquals(2, dataRows.get(3).getCell("balance").getNumericValue().intValue());
+
+        // графа 5
+        Assert.assertEquals(100, dataRows.get(0).getCell("sum").getNumericValue().intValue());
+        Assert.assertEquals(100, dataRows.get(1).getCell("sum").getNumericValue().intValue());
+        Assert.assertEquals(200, dataRows.get(2).getCell("sum").getNumericValue().intValue());
+        Assert.assertEquals(300, dataRows.get(3).getCell("sum").getNumericValue().intValue());
+        Assert.assertEquals(300, dataRows.get(4).getCell("sum").getNumericValue().intValue());
+        Assert.assertEquals(500, dataRows.get(5).getCell("sum").getNumericValue().intValue());
     }
 }

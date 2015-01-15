@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.*;
@@ -180,6 +181,7 @@ public class Vehicles1Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         Assert.assertEquals(4, testHelper.getDataRowHelper().getAll().size());
+        //checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
 
@@ -194,6 +196,43 @@ public class Vehicles1Test extends ScriptTestBase {
         Assert.assertEquals(2, dataRows.get(2).getCell("pastYear").getNumericValue().intValue());
         Assert.assertEquals(13, dataRows.get(4).getCell("pastYear").getNumericValue().intValue());
         Assert.assertEquals(3, dataRows.get(6).getCell("pastYear").getNumericValue().intValue());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
+    }
+
+    /**
+     * Проверить загруженные данные.
+     */
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+
+        // графа 11
+        Assert.assertEquals("12.00.2012", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(1).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.00.2012", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(2).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.00.2011", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(4).getCell("regDate").getDateValue())));
+        Assert.assertEquals("20.00.2008", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(6).getCell("regDate").getDateValue())));
+
+        // графа 12
+        Assert.assertEquals("12.00.2014", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(1).getCell("regDateEnd").getDateValue())));
+
+        // графа 13
+        Assert.assertEquals(12.0, dataRows.get(1).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+        Assert.assertEquals(23.0, dataRows.get(2).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+        Assert.assertEquals(34.0, dataRows.get(4).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+        Assert.assertEquals(56.0, dataRows.get(6).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+
+        // графа 14
+        Assert.assertEquals(1, dataRows.get(1).getCell("baseUnit").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("baseUnit").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(4).getCell("baseUnit").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(6).getCell("baseUnit").getNumericValue().intValue());
+
+        // графа 15
+        Assert.assertEquals("2008", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(1).getCell("year").getDateValue())));
+        Assert.assertEquals("2012", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(2).getCell("year").getDateValue())));
+        Assert.assertEquals("2001", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(4).getCell("year").getDateValue())));
+        Assert.assertEquals("2011", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(6).getCell("year").getDateValue())));
+
+        // графа 20
+        Assert.assertEquals(12.0, dataRows.get(1).getCell("costOnPeriodBegin").getNumericValue().doubleValue(), 0.0);
     }
 }
