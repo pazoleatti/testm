@@ -16,14 +16,12 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-@Transactional(readOnly=true)
 public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	private final Log logger = LogFactory.getLog(getClass());
 	
@@ -94,7 +92,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     @Cacheable(value = "User", key = "'login_'+#login")
 	public int getUserIdByLogin(String login) {
 		try {
-			return getJdbcTemplate().queryForInt("select id from sec_user where lower(login) = ?", login);
+			return getJdbcTemplate().queryForInt("select id from sec_user where lower(login) = ?", login.toLowerCase());
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Пользователь с login = " + login + " не найден. " + e.toString());
 		}
@@ -115,7 +113,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	}
 
-	@Transactional(readOnly=false)
 	@Override
 	public int createUser(final TAUser user) {
 		final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -162,7 +159,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 		}
 	}
 
-	@Transactional(readOnly=false)
 	@Override
 	@CacheEvict(value="User", key="#userId", beforeInvocation=true)
 	public void setUserIsActive(int userId, int isActive) {
@@ -173,7 +169,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			throw new DaoException("Пользователя с id = " + userId + " не существует. Не удалось выставить флаг active.");
 	}
 
-	@Transactional(readOnly=false)
 	@Override
 	@CacheEvict(value="User", key="#user.id", beforeInvocation=true)
 	public void updateUser(final TAUser user) {
@@ -194,7 +189,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			}
 			sb.deleteCharAt(sb.toString().trim().length() - 1); //delete separator
 			sb.append(" where lower(login) = ?");
-			array.add(user.getLogin());
+			array.add(user.getLogin().toLowerCase());
 			int rows = getJdbcTemplate().update(sb.toString(),	array.toArray());
 			if(rows == 0)
 				throw new DaoException("Пользователя с login = " + user.getLogin() + " не существует.");
@@ -213,7 +208,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	private void updateUserRoles(final TAUser user) {
 		try {
             getJdbcTemplate().update("delete from sec_user_role where user_id=" +
-                    "(select id from sec_user where lower(login)=?)",user.getLogin());
+                    "(select id from sec_user where lower(login)=?)",user.getLogin().toLowerCase());
 
 			getJdbcTemplate().batchUpdate("insert into sec_user_role (user_id, role_id) " +
 					"select ?, id from sec_role where alias = ?",
@@ -409,6 +404,6 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	 */
 	@Override
 	public boolean existsUser(String login) {
-		return getJdbcTemplate().queryForInt("select count(id) from sec_user where lower(login) = ?", login) == 1;
+		return getJdbcTemplate().queryForInt("select count(id) from sec_user where lower(login) = ?", login.toLowerCase()) == 1;
 	}
 }

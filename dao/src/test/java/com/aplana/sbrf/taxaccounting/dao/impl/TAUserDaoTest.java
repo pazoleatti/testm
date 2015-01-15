@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,7 @@ public class TAUserDaoTest {
 	@Autowired
 	private TAUserDao userDao;
 
-	private static String LOGIN_CONTROL_BANK = "controlbank";
+	private static String LOGIN_CONTROL_BANK = "controlBank";
 	private static String LOGIN_TEST_BANK = "testBank";
 	
 	@Test
@@ -34,7 +33,7 @@ public class TAUserDaoTest {
 		TAUser user = userDao.getUser(1);
 		Assert.assertEquals(1, user.getId());
 		Assert.assertEquals("controlBank", user.getLogin());
-		Assert.assertEquals(Department.ROOT_BANK_ID, user.getDepartmentId());
+		Assert.assertEquals(1, user.getDepartmentId());
 		Assert.assertTrue(user.hasRole(TARole.ROLE_CONTROL));
 		Assert.assertEquals("controlBank@bank.ru", user.getEmail());
 		Assert.assertTrue(user.isActive());
@@ -46,7 +45,7 @@ public class TAUserDaoTest {
 	}
 
 
-	@Test(expected = DaoException.class)
+	@Test
 	public void testGetUserIdByLoginLower() {
 		Assert.assertEquals(1, userDao.getUserIdByLogin("controlBank"));
 	}
@@ -65,7 +64,7 @@ public class TAUserDaoTest {
 		roles.add(role);
 		TAUser user = new TAUser();
 		user.setActive(true);
-		user.setDepartmentId(Department.ROOT_BANK_ID);
+		user.setDepartmentId(1);
 		user.setEmail("controlBank@bank.ru");
 		user.setName("");
 		user.setLogin(LOGIN_TEST_BANK.toLowerCase());
@@ -161,7 +160,7 @@ public class TAUserDaoTest {
 		filter.setActive(false);
 		Assert.assertEquals(1, userDao.getByFilter(filter).size());
 
-		filter.setRoleIds(Arrays.asList(new Long[]{Long.valueOf(1)}));
+		filter.setRoleIds(Arrays.asList((long) 1));
 		filter.setDepartmentIds(null);
 		filter.setActive(null);
 		Assert.assertEquals(3, userDao.getByFilter(filter).size());
