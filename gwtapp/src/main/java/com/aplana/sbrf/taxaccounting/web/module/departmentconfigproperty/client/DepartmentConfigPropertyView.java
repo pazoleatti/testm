@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client;
 
+import com.aplana.gwt.client.DoubleBox;
+import com.aplana.gwt.client.LongBox;
 import com.aplana.gwt.client.TextBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -99,6 +101,29 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             new TABLE_HEADER("APPROVE_ORG_NAME")
     };
 
+    private TABLE_HEADER[]  TABLE_HEADER_INCOME = new TABLE_HEADER[] {
+            new TABLE_HEADER("TAX_ORGAN_CODE"),
+            new TABLE_HEADER("KPP"),
+            new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
+            new TABLE_HEADER("NAME"),
+            new TABLE_HEADER("ADDITIONAL_NAME"),
+            new TABLE_HEADER("OKVED_CODE"),
+            new TABLE_HEADER("DICT_REGION_ID"),
+            new TABLE_HEADER("OKTMO"),
+            new TABLE_HEADER("PHONE"),
+            new TABLE_HEADER("OBLIGATION"),
+            new TABLE_HEADER("TYPE"),
+            new TABLE_HEADER("REORG_FORM_CODE"),
+            new TABLE_HEADER("REORG_INN"),
+            new TABLE_HEADER("REORG_KPP"),
+            new TABLE_HEADER("SIGNATORY_ID"),
+            new TABLE_HEADER("SIGNATORY_SURNAME"),
+            new TABLE_HEADER("SIGNATORY_FIRSTNAME"),
+            new TABLE_HEADER("SIGNATORY_LASTNAME"),
+            new TABLE_HEADER("APPROVE_DOC_NAME"),
+            new TABLE_HEADER("APPROVE_ORG_NAME")
+    };
+
     public class TABLE_HEADER {
         String name;
 
@@ -124,7 +149,13 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiField
     TextBox formatVersion;
     @UiField
-    TextBox  version;
+    TextBox version;
+    @UiField
+    DoubleBox taxRate;
+    @UiField
+    LongBox sumTax;
+    @UiField
+    LongBox sumDividends;
     @UiField
     Button saveButton;
     @UiField
@@ -141,6 +172,12 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     Label taxTypeLbl;
     @UiField
     Panel versionBlock;
+    @UiField
+    Panel taxRateBlock;
+    @UiField
+    Panel sumTaxBlock;
+    @UiField
+    Panel sumDividendsBlock;
 
     @UiField
     Label editModeLabel;
@@ -148,6 +185,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     Button findButton;
 
     private Integer currentDepartmentId;
+
+    private Boolean isUnp;
 
     private List<com.aplana.sbrf.taxaccounting.model.Column> columns = new ArrayList<com.aplana.sbrf.taxaccounting.model.Column>();
 
@@ -185,10 +224,34 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         };
 
+        ValueChangeHandler<Double> valueChangeHandlerDouble =  new ValueChangeHandler<Double>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Double> event) {
+                isFieldsModified = true;
+            }
+        };
+
+        ValueChangeHandler<Long> valueChangeHandlerLong =  new ValueChangeHandler<Long>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Long> event) {
+                isFieldsModified = true;
+            }
+        };
+
+        departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                getUiHandlers().onDepartmentChanged();
+            }
+        });
+
+
         inn.addValueChangeHandler(valueChangeHandler);
         formatVersion.addValueChangeHandler(valueChangeHandler);
         version.addValueChangeHandler(valueChangeHandler);
-
+        taxRate.addValueChangeHandler(valueChangeHandlerDouble);
+        sumTax.addValueChangeHandler(valueChangeHandlerLong);
+        sumDividends.addValueChangeHandler(valueChangeHandlerLong);
         resizeTimer = new Timer() {
             @Override
             public void run() {
@@ -205,6 +268,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             table.setHeaderBuilder(hb);
         } else if (taxType == TaxType.TRANSPORT) {
             ConstTransportHeaderBuilder hb = new ConstTransportHeaderBuilder(table);
+            hb.setNeedCheckedRow(false);
+            table.setHeaderBuilder(hb);
+        } else if (taxType == TaxType.INCOME) {
+            ConstIncomeHeaderBuilder hb = new ConstIncomeHeaderBuilder(table);
             hb.setNeedCheckedRow(false);
             table.setHeaderBuilder(hb);
         }
@@ -227,6 +294,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             return TABLE_HEADER_PROPERTY;
         } else if(taxType == TaxType.TRANSPORT) {
             return TABLE_HEADER_TRANSPORT;
+        } else if (taxType == TaxType.INCOME) {
+            return TABLE_HEADER_INCOME;
         }
         return new TABLE_HEADER[0];
     }
@@ -314,18 +383,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                         public void onCellModified(CellModifiedEvent event, boolean withReference) {
                             if (getUiHandlers() != null) {
                                 isFieldsModified = true;
-
                             }
                         }
                     });
                 }
-
-                table.addRowCountChangeHandler(new RowCountChangeEvent.Handler() {
-                    @Override
-                    public void onRowCountChange(RowCountChangeEvent event) {
-                        isFieldsModified = true;
-                    }
-                });
             }
         }
     }
@@ -361,6 +422,22 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             versionCell.setType(RefBookAttributeType.STRING);
             versionCell.setStringValue(version.getValue());
             params.put("PREPAYMENT_VERSION", versionCell);
+        } else if (taxType == TaxType.INCOME) {
+            TableCell taxRateCell = new TableCell();
+            taxRateCell.setType(RefBookAttributeType.NUMBER);
+            taxRateCell.setNumberValue(taxRate.getValue());
+            params.put("TAX_RATE", taxRateCell);
+
+            TableCell sumTaxCell = new TableCell();
+            sumTaxCell.setType(RefBookAttributeType.NUMBER);
+            sumTaxCell.setNumberValue(sumTax.getValue() == null ? null : sumTax.getValue().longValue());
+            params.put("SUM_TAX", sumTaxCell);
+
+            TableCell sumDividendsCell = new TableCell();
+            sumDividendsCell.setType(RefBookAttributeType.NUMBER);
+            sumDividendsCell.setNumberValue(sumDividends.getValue() == null ? null : sumDividends.getValue().longValue());
+            params.put("SUM_DIVIDENDS", sumDividendsCell);
+
         }
 
         return params;
@@ -370,12 +447,20 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
         initTable(taxType);
+        versionBlock.setVisible(false);
+        taxRateBlock.setVisible(false);
+        sumTaxBlock.setVisible(false);
+        sumDividendsBlock.setVisible(false);
         if (taxType == TaxType.TRANSPORT) {
-            versionBlock.setVisible(false);
             taxTypeLbl.setText("Транспортный налог");
-        } else {
+        } else if (taxType == TaxType.PROPERTY) {
             versionBlock.setVisible(true);
             taxTypeLbl.setText("Налог на имущество");
+        } else if (taxType == TaxType.INCOME) {
+            taxRateBlock.setVisible(true);
+            sumTaxBlock.setVisible(true);
+            sumDividendsBlock.setVisible(true);
+            taxTypeLbl.setText("Налог на прибыль");
         }
     }
 
@@ -395,8 +480,22 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public void fillNotTableData(Map<String, TableCell> itemList) {
         inn.setText(itemList.get("INN").getStringValue());
         formatVersion.setText(itemList.get("FORMAT_VERSION").getStringValue());
-        if (taxType != TaxType.TRANSPORT) {
+        if (taxType == TaxType.PROPERTY) {
             version.setText(itemList.get("PREPAYMENT_VERSION").getStringValue());
+        } else if (taxType == TaxType.INCOME) {
+            Number value = itemList.get("TAX_RATE").getNumberValue();
+            taxRate.setValue(itemList.get("TAX_RATE").getNumberValue() == null
+                                    ? null
+                                    : itemList.get("TAX_RATE").getNumberValue().doubleValue());
+
+
+            sumTax.setValue(itemList.get("SUM_TAX").getNumberValue() == null
+                                    ? null
+                                    : itemList.get("SUM_TAX").getNumberValue().longValue());
+
+            sumDividends.setValue(itemList.get("SUM_DIVIDENDS").getNumberValue() == null
+                                    ? null
+                                    : itemList.get("SUM_DIVIDENDS").getNumberValue().longValue());
         }
     }
 
@@ -405,6 +504,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         inn.setText("");
         formatVersion.setText("");
         version.setText("");
+        taxRate.setValue(null);
+        sumTax.setValue(null);
+        sumDividends.setValue(null);
     }
 
     @Override
@@ -429,13 +531,14 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             model.getList().remove(row);
         }
         table.redraw();
+        setIsFormModified(true);
     }
 
     @UiHandler("addLink")
     public void onAddRow(ClickEvent event) {
         model.getList().add(createDataRow());
         table.redraw();
-
+        setIsFormModified(true);
     }
 
     private DataRow<Cell> createDataRow() {
@@ -520,6 +623,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
         inn.setEnabled(isEditMode);
         version.setEnabled(isEditMode);
+        taxRate.setEnabled(isEditMode);
+        sumTax.setEnabled(isEditMode);
+        sumDividends.setEnabled(isEditMode);
         formatVersion.setEnabled(isEditMode);
 
         editModeLabel.setVisible(isEditMode);
@@ -529,7 +635,19 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         for (DataRow<Cell> row : model.getList()) {
             for (TABLE_HEADER h : getCurrentTableHeaders()) {
                 try {
-                    row.getCell(h.name()).setEditable(isEditMode);
+                    if (isEditable) {
+                        if (isUnp != null && isUnp) {
+                            if ("OBLIGATION".equals(h.name) || "TYPE".equals(h.name)) {
+                                row.getCell(h.name()).setEditable(false);
+                            } else {
+                                row.getCell(h.name()).setEditable(true);
+                            }
+                        } else {
+                            row.getCell(h.name()).setEditable(true);
+                        }
+                    } else {
+                        row.getCell(h.name()).setEditable(false);
+                    }
                 } catch (IllegalArgumentException ex) {
 
                 }
@@ -586,7 +704,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
         departmentPicker.setAvalibleValues(departments, availableDepartments);
-        departmentPicker.setValue(Arrays.asList(departments.get(0).getId()));
+        departmentPicker.setValue(Arrays.asList(departments.get(0).getId()), true);
     }
 
     @Override
@@ -636,6 +754,17 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                     resizeTimer.scheduleRepeating(5);
                 }
             });
+    }
+
+    @Override
+    public void setIsUnp(boolean isUnp) {
+        this.isUnp = isUnp;
+    }
+
+    @Override
+    public void showUnpOnlyBlock(boolean show) {
+        sumDividendsBlock.setVisible(show);
+        sumTaxBlock.setVisible(show);
     }
 
     /**
