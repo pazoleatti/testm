@@ -322,6 +322,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             state.setSetIds(null);
             prevState.setValues(state);
             clearSearchPattern();
+            refBookView.cleanValues();
             if (!isManualUpdate) {
                 refBookView.load(state);
                 updateUIState();
