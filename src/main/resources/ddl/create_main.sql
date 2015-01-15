@@ -625,7 +625,7 @@ CREATE TABLE log_system (
   form_kind_id          NUMBER(9, 0),
   note                  VARCHAR2(4000 BYTE),
   user_department_name  VARCHAR2(4000 BYTE),
-  declaration_type_name VARCHAR2(80),
+  declaration_type_name VARCHAR2(1000),
   form_type_name        VARCHAR2(1000),
   form_department_id    NUMBER(9),
   blob_data_id          VARCHAR2(36),
