@@ -750,7 +750,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         if (parentVersions != null && !parentVersions.isEmpty()) {
             StringBuilder versions = new StringBuilder();
             for (int i=0; i<parentVersions.size(); i++) {
-                versions.append(formatter.get().format(parentVersions));
+                versions.append(formatter.get().format(parentVersions.get(i)));
                 if (i < parentVersions.size() - 1) {
                     versions.append(", ");
                 }
