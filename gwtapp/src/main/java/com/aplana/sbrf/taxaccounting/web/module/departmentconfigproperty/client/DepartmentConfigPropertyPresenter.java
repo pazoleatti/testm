@@ -33,8 +33,15 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private List<RefBookAttribute> attributes;
 
-    private static final long TABLE_REFBOOK_ID = 206L;
-    private static final long REFBOOK_ID = 99L;
+    private static final long TABLE_PROPERTY_REFBOOK_ID = 206L;
+    private static final long PROPERTY_REFBOOK_ID = 99L;
+
+    private static final long TABLE_TRANSPORT_REFBOOK_ID = 310L;
+    private static final long TRANSPORT_REFBOOK_ID = 31L;
+
+    private static final long TABLE_INCOME_REFBOOK_ID = 330L;
+    private static final long INCOME_REFBOOK_ID = 33L;
+
 
     private Department userDepartment;
 
@@ -104,6 +111,10 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         void removeResizeHandler();
         void addResizeHandler();
+
+        void setIsUnp(boolean isUnp);
+
+        void showUnpOnlyBlock(boolean show);
     }
 
     @Inject
@@ -179,6 +190,31 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         getData();
     }
 
+
+    private Long getCurrentRefBookId() {
+        if (getView().getTaxType() == TaxType.PROPERTY) {
+            return PROPERTY_REFBOOK_ID;
+        } else if (getView().getTaxType() == TaxType.TRANSPORT) {
+            return TRANSPORT_REFBOOK_ID;
+        } else if (getView().getTaxType() == TaxType.INCOME) {
+            return INCOME_REFBOOK_ID;
+        }
+
+        return null;
+    }
+
+    private Long getCurrentTableRefBookId() {
+        if (getView().getTaxType() == TaxType.PROPERTY) {
+            return TABLE_PROPERTY_REFBOOK_ID;
+        } else if (getView().getTaxType() == TaxType.TRANSPORT) {
+            return TABLE_TRANSPORT_REFBOOK_ID;
+        } else if (getView().getTaxType() == TaxType.INCOME) {
+            return TABLE_INCOME_REFBOOK_ID;
+        }
+
+        return null;
+    }
+
     @Override
     public void onDelete() {
         Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?",
@@ -187,8 +223,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                     public void yes() {
                         super.yes();
                         DeleteConfigPropertyAction action = new DeleteConfigPropertyAction();
-                        action.setRefBookId(REFBOOK_ID);
-                        action.setSlaveRefBookId(TABLE_REFBOOK_ID);
+                        action.setRefBookId(getCurrentRefBookId());
+                        action.setSlaveRefBookId(getCurrentTableRefBookId());
                         action.setReportPeriodId(getView().getReportPeriodId());
                         action.setDepartmentId(getView().getDepartmentId());
                         action.setRows(convert(getView().getTableRows()));
@@ -229,13 +265,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private void getData() {
         LogCleanEvent.fire(DepartmentConfigPropertyPresenter.this);
         GetRefBookValuesAction action = new GetRefBookValuesAction();
-        if (getView().getTaxType() == TaxType.PROPERTY) {
-            action.setRefBookId(REFBOOK_ID);
-            action.setSlaveRefBookId(TABLE_REFBOOK_ID);
-        } else if (getView().getTaxType() == TaxType.TRANSPORT) {
-            action.setRefBookId(31L);
-            action.setSlaveRefBookId(310L);
-        }
+        action.setRefBookId(getCurrentRefBookId());
+        action.setSlaveRefBookId(getCurrentTableRefBookId());
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartmentId(getView().getDepartmentId());
 
@@ -266,13 +297,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private void createTableColumns() {
         GetFormAttributesAction action = new GetFormAttributesAction();
-        if (getView().getTaxType() == TaxType.TRANSPORT) {
-            action.setRefBookId(31L);
-            action.setTableRefBookId(310L);
-        } else {
-            action.setRefBookId(REFBOOK_ID);
-            action.setTableRefBookId(TABLE_REFBOOK_ID);
-        }
+        action.setRefBookId(getCurrentRefBookId());
+        action.setTableRefBookId(getCurrentTableRefBookId());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetFormAttributesResult>() {
                     @Override
@@ -309,13 +335,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartmentId(getView().getDepartmentId());
         action.setNotTableParams(getView().getNonTableParams());
-        if (getView().getTaxType() == TaxType.TRANSPORT) {
-            action.setRefBookId(31L);
-            action.setSlaveRefBookId(310L);
-        } else {
-            action.setRefBookId(REFBOOK_ID);
-            action.setSlaveRefBookId(TABLE_REFBOOK_ID);
-        }
+        action.setRefBookId(getCurrentRefBookId());
+        action.setSlaveRefBookId(getCurrentTableRefBookId());
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<SaveDepartmentRefBookValuesResult>() {
                     @Override
@@ -388,6 +409,23 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
+    }
+
+    @Override
+    public void onDepartmentChanged() {
+        if (getView().getTaxType() == TaxType.INCOME) {
+            GetDepartmentAction action = new GetDepartmentAction();
+            action.setDepartmentId(getView().getDepartmentId());
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<GetDepartmentResult>() {
+                        @Override
+                        public void onSuccess(GetDepartmentResult result) {
+                            boolean isUnp = "99_6200_00".equals(result.getDepartment().getSbrfCode());//УНП
+                            getView().setIsUnp(isUnp);
+                            getView().showUnpOnlyBlock(isUnp);
+                        }
+                    }, this));
+        }
     }
 
     @Override

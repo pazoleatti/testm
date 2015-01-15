@@ -112,6 +112,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             taxOrganKpp.setAttributeId(952L);
         }
 
+        if (taxType == TaxType.INCOME) {
+            taxOrganCode.setAttributeId(3304L);
+            taxOrganKpp.setAttributeId(3305L);
+        }
+
         if (filter != null && !filter.isEmpty()) {
             taxOrganKpp.setFilter(filter);
             taxOrganCode.setFilter(filter);
@@ -127,7 +132,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @Override
     public void updateEnabled() {
         boolean departmentSelected =  departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
-        boolean taxOrganCodeSelected = departmentSelected && taxOrganCode.getValue() != null && !taxOrganCode.getValue().isEmpty();
+        boolean taxOrganCodeSelected = !codePanel.isVisible() || departmentSelected && taxOrganCode.getValue() != null && !taxOrganCode.getValue().isEmpty();
         boolean periodSelected = periodPicker.getValue() != null && !periodPicker.getValue().isEmpty();
         boolean correctionDateSelected = correctionDate.getText() != null && !correctionDate.getText().isEmpty();
 
@@ -275,6 +280,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         boolean isCodeKppVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT);
         codePanel.setVisible(isCodeKppVisible);
         kppPanel.setVisible(isCodeKppVisible);
+
+        kppPanel.setVisible(taxType.equals(TaxType.INCOME));
 
         declarationTypeId.setVisible(true);
     }

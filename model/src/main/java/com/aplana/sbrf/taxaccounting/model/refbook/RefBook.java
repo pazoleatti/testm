@@ -47,7 +47,8 @@ public class RefBook implements Serializable {
      */
     public enum WithTable {
         TRANSPORT(TaxType.TRANSPORT, 31L, 310L),
-        PROPERTY(TaxType.PROPERTY, 99L, 206L);
+        PROPERTY(TaxType.PROPERTY, 99L, 206L),
+        INCOME(TaxType.INCOME, 33L, 330L);
 
         private TaxType taxType;
         private Long refBookId;

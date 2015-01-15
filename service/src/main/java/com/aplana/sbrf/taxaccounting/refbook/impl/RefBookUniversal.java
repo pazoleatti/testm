@@ -234,7 +234,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
                     !refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
-                    !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId())) {
+                    !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) &&
+                    !refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId())
+                    ) {
 
                 for (RefBookRecord record : records) {
                     //Проверка пересечения версий
@@ -288,7 +290,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                 !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
                 !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
                 !refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
-                !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId())) {
+                !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) &&
+                !refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId())
+                ) {
 
             //Проверка отсутствия конфликта с датой актуальности родительского элемента
             if (refBook.isHierarchic()) {
