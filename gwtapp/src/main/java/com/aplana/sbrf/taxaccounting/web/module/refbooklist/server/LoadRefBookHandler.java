@@ -49,17 +49,27 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
 		Logger logger = new Logger();
         // Проверки путей
         ConfigurationParamModel model = configurationService.getByDepartment(0, securityService.currentUserInfo());
-        List<String> nsiList = model.get(ConfigurationParam.NSI_UPLOAD_DIRECTORY, 0);
+        List<String> okatoList = model.get(ConfigurationParam.OKATO_UPLOAD_DIRECTORY, 0);
+        List<String> regionList = model.get(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 0);
         List<String> diasoftList = model.get(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0);
-        boolean hasNsi = nsiList != null && !nsiList.isEmpty();
+        List<String> accountPlanList = model.get(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY, 0);
+        boolean hasOkato = okatoList != null && !okatoList.isEmpty();
+        boolean hasRegion = regionList != null && !regionList.isEmpty();
         boolean hasDiasoft = diasoftList != null && !diasoftList.isEmpty();
-        if (hasNsi || hasDiasoft) {
+        boolean hasAccountPlan = accountPlanList != null && !accountPlanList.isEmpty();
+        if (hasOkato || hasRegion || hasDiasoft || hasAccountPlan) {
             List<String> catalogStrList = new LinkedList<String>();
-            if (hasNsi) {
-                catalogStrList.add(ConfigurationParam.NSI_UPLOAD_DIRECTORY.getCaption());
+            if (hasOkato) {
+                catalogStrList.add(ConfigurationParam.OKATO_UPLOAD_DIRECTORY.getCaption());
+            }
+            if (hasRegion) {
+                catalogStrList.add(ConfigurationParam.REGION_UPLOAD_DIRECTORY.getCaption());
             }
             if (hasDiasoft) {
                 catalogStrList.add(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY.getCaption());
+            }
+            if (hasAccountPlan) {
+                catalogStrList.add(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY.getCaption());
             }
             if (catalogStrList.size() == 1) {
                 logger.info("Получен: %s.", catalogStrList.get(0));

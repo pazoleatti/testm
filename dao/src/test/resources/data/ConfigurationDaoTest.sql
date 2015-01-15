@@ -1,7 +1,8 @@
 insert into configuration (code, value, department_id) values ('KEY_FILE', 'test1', 1);
 insert into configuration (code, value, department_id) values ('DIASOFT_UPLOAD_DIRECTORY', 'test2', 1);
-insert into configuration (code, value, department_id) values ('NSI_UPLOAD_DIRECTORY', 'test3', 1);
-insert into configuration (code, value, department_id) values ('AVG_COST_UPLOAD_DIRECTORY', 'test4', 1);
+insert into configuration (code, value, department_id) values ('ACCOUNT_PLAN_UPLOAD_DIRECTORY', 'test3', 1);
+insert into configuration (code, value, department_id) values ('OKATO_UPLOAD_DIRECTORY', 'test4', 1);
+insert into configuration (code, value, department_id) values ('AVG_COST_UPLOAD_DIRECTORY', 'test5', 1);
 insert into configuration (code, value, department_id) values ('FORM_UPLOAD_DIRECTORY', 'test6', 1);
 insert into configuration (code, value, department_id) values ('FORM_UPLOAD_DIRECTORY', 'test7', 2);
 insert into configuration (code, value, department_id) values ('FORM_ARCHIVE_DIRECTORY', 'test8', 1);

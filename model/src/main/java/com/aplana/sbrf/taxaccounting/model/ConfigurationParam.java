@@ -10,7 +10,9 @@ public enum ConfigurationParam {
     // Общие
     KEY_FILE("Путь к файлу ключей ЭЦП", ConfigurationParamGroup.COMMON, false, false, 1),
     SIGN_CHECK("Проверять ЭЦП", ConfigurationParamGroup.COMMON, true, false, 0),
-    NSI_UPLOAD_DIRECTORY("Путь к каталогу загрузки справочников ЦАС НСИ", ConfigurationParamGroup.COMMON, true, true, 1),
+    ACCOUNT_PLAN_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»", ConfigurationParamGroup.COMMON, true, true, 1),
+    OKATO_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «ОКАТО»", ConfigurationParamGroup.COMMON, true, true, 1),
+    REGION_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Субъекты РФ»", ConfigurationParamGroup.COMMON, true, true, 1),
     DIASOFT_UPLOAD_DIRECTORY("Путь к каталогу загрузки справочников Diasoft", ConfigurationParamGroup.COMMON, true, true, 2),
     AVG_COST_UPLOAD_DIRECTORY("Путь к каталогу справочника \"Средняя стоимость транспортных средств\"", ConfigurationParamGroup.COMMON, true, true, 2),
     REF_BOOK_ARCHIVE_DIRECTORY("Путь к каталогу архива справочников", ConfigurationParamGroup.COMMON, true, true, 2),

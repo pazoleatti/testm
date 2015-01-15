@@ -329,13 +329,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ImportCounter importCounter = new ImportCounter();
         try {
             // ОКАТО
-            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.NSI_UPLOAD_DIRECTORY,
+            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY,
                     nsiOkatoMappingMap, OKATO_NAME, false, loadedFileNameList));
             // Субъекты РФ
-            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.NSI_UPLOAD_DIRECTORY,
+            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY,
                     nsiRegionMappingMap, REGION_NAME, false, loadedFileNameList));
             // План счетов
-            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.NSI_UPLOAD_DIRECTORY,
+            importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY,
                     nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false, loadedFileNameList));
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе

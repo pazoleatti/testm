@@ -29,10 +29,11 @@ public class ConfigurationDaoTest {
     @Test
 	public void getAllTest() {
         ConfigurationParamModel model = dao.getAll();
-        Assert.assertEquals(7, model.size());
+        Assert.assertEquals(8, model.size());
         Assert.assertTrue(model.containsKey(ConfigurationParam.KEY_FILE));
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_ERROR_DIRECTORY));
-        Assert.assertTrue(model.containsKey(ConfigurationParam.NSI_UPLOAD_DIRECTORY));
+        Assert.assertTrue(model.containsKey(ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY));
+        Assert.assertTrue(model.containsKey(ConfigurationParam.OKATO_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY));
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
@@ -44,21 +45,21 @@ public class ConfigurationDaoTest {
     @Test
     public void save1Test() {
         ConfigurationParamModel model = dao.getAll();
-        model.put(ConfigurationParam.NSI_UPLOAD_DIRECTORY, 1, asList("testSaveRegion"));
+        model.put(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 1, asList("testSaveRegion"));
         model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, 1, null);
         dao.save(model);
         model = dao.getAll();
         Assert.assertTrue(model.containsKey(ConfigurationParam.FORM_UPLOAD_DIRECTORY));
         Assert.assertNull(model.get(ConfigurationParam.FORM_UPLOAD_DIRECTORY).get(1));
-        Assert.assertTrue(model.containsKey(ConfigurationParam.NSI_UPLOAD_DIRECTORY));
-        Assert.assertEquals("testSaveRegion", model.get(ConfigurationParam.NSI_UPLOAD_DIRECTORY, 1).get(0));
+        Assert.assertTrue(model.containsKey(ConfigurationParam.REGION_UPLOAD_DIRECTORY));
+        Assert.assertEquals("testSaveRegion", model.get(ConfigurationParam.REGION_UPLOAD_DIRECTORY, 1).get(0));
     }
 
     // Попытка сохраннить запись с ссылкой на несуществующий depatment_id
     @Test(expected = RuntimeException.class)
     public void save2Test() {
         ConfigurationParamModel model = dao.getAll();
-        model.put(ConfigurationParam.NSI_UPLOAD_DIRECTORY, -99, asList("testSaveRegion"));
+        model.put(ConfigurationParam.REGION_UPLOAD_DIRECTORY, -99, asList("testSaveRegion"));
         dao.save(model);
     }
 

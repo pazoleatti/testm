@@ -11,7 +11,7 @@ import static java.util.Arrays.asList;
 public class ConfigurationParamModelTest {
 
     private static final ConfigurationParam KEY1 = ConfigurationParam.KEY_FILE;
-    private static final ConfigurationParam KEY2 = ConfigurationParam.NSI_UPLOAD_DIRECTORY;
+    private static final ConfigurationParam KEY2 = ConfigurationParam.REGION_UPLOAD_DIRECTORY;
     private static final int DEPARTMENT_ID1 = 1;
     private static final int DEPARTMENT_ID2 = 2;
 
