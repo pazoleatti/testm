@@ -48,13 +48,13 @@ public class TAUserServiceImpl implements TAUserService {
 	 */
 	@Override
 	public boolean existsUser(String login) {
-        return login != null && userDao.existsUser(login.toLowerCase());
+        return login != null && userDao.existsUser(login);
 	}
 
 	@Override
 	public TAUser getUser(String login) {
 		try {
-			int userId = userDao.getUserIdByLogin(login.toLowerCase());
+			int userId = userDao.getUserIdByLogin(login);
 			return userDao.getUser(userId);
 		} catch (DaoException e) {
             logger.error("Ошибка при получении пользователя по логину" + login, e);
@@ -72,6 +72,7 @@ public class TAUserServiceImpl implements TAUserService {
 		return systemUserInfo;
 	}
 
+    @Transactional(readOnly=false)
 	@Override
 	public void setUserIsActive(String login, boolean isActive) {
 		try {
@@ -88,6 +89,7 @@ public class TAUserServiceImpl implements TAUserService {
 		}
 	}
 
+    @Transactional(readOnly=false)
 	@Override
 	public void updateUser(TAUser user) {
         if(!existsUser(user.getLogin()))
@@ -112,6 +114,7 @@ public class TAUserServiceImpl implements TAUserService {
 		}
 	}
 
+    @Transactional(readOnly=false)
 	@Override
 	public int createUser(TAUser user) {
 		if(existsUser(user.getLogin()))
