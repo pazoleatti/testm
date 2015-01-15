@@ -1,6 +1,8 @@
 package form_template.property.property_945_1.v2014
 
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormToFormRelation
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
@@ -58,6 +60,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         break
+    case FormDataEvent.GET_SOURCES:
+        getSources()
+        break
 }
 
 // Все атрибуты
@@ -75,6 +80,22 @@ def autoFillColumns = ['taxBaseSum']
 // Итоговые атрибуты
 @Field
 def totalColumns = ['taxBase1', 'taxBase2', 'taxBase3', 'taxBase4', 'taxBase5']
+
+// результат для события FormDataEvent.GET_SOURCES
+@Field
+def formToFormRelationList = null
+
+// Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
+@Field
+def departmentFullNameMap = [:]
+
+// Мапа для хранения подразделений (id подразделения  -> подразделение)
+@Field
+def departmentMap = [:]
+
+// Идентификатор типа формы приемника текущей формы
+@Field
+def destinationFormTypeId = 615
 
 @Field
 def patternMap = [
@@ -140,6 +161,9 @@ def Map<String, Integer> aliasNums = ['priceSubject' : 1, // №1 строка 1
 ]
 
 @Field
+def startDate = null
+
+@Field
 def endDate = null
 
 @Field
@@ -152,6 +176,13 @@ def isBalancePeriod() {
         isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
+}
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
 }
 
 def getReportPeriodEndDate() {
@@ -915,4 +946,91 @@ void checkRegionId() {
     if (formDataDepartment.regionId == null) {
         throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
     }
+}
+
+/** Получить результат для события FormDataEvent.GET_SOURCES. */
+def getSources() {
+    if (formToFormRelationList == null) {
+        formToFormRelationList = []
+        def reportPeriods = []
+        def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
+        def monthOrder = currentPeriod?.order
+
+        // если январь (order = 1) то возможно имеются 2 приемника: сводная текущего периода и сводная за прошлый год
+        if (monthOrder == 1) {
+            reportPeriods.add(currentPeriod)
+        }
+
+        // если первый месяц квартала (order = 4, 7, 10) (так как для 945.1 период смещен на один месяц вперед, то это последний месяц в его смещенных периодах)
+        // тогда надо получить приемник для предыдущего месяца (3, 6, 9) (предыдущей месяц - будет последний месяц в нормальных кварталах)
+        def x = monthOrder
+        def monthInQuarter = 3
+        if (monthOrder % monthInQuarter == 1) {
+            x = monthOrder - 1
+            def prevPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+            if (prevPeriod) {
+                reportPeriods.add(reportPeriodService.getPrevReportPeriod(formData.reportPeriodId))
+            }
+        } else if (reportPeriods.isEmpty()) {
+            reportPeriods.add(currentPeriod)
+        }
+
+        // получить мапу с периодами и приемниками (период -> список приемников)
+        def periodDestinationMap = [:]
+        reportPeriods.each { reportPeriod ->
+            def start = reportPeriodService.getCalendarStartDate(reportPeriod.id).time
+            def end = reportPeriodService.getEndDate(reportPeriod.id).time
+            def formDestination945_5 = []
+            def destinationDepartmentFormTypes = departmentFormTypeService.getFormDestinations(formDataDepartment.id,
+                    formData.formType.id, formData.kind, start, end)
+            if (destinationDepartmentFormTypes != null && !destinationDepartmentFormTypes.isEmpty()) {
+                for (def destinationDepartmentFormType : destinationDepartmentFormTypes) {
+                    if (destinationDepartmentFormType.formTypeId == destinationFormTypeId) {
+                        formDestination945_5.add(destinationDepartmentFormType)
+                    }
+                }
+            }
+            periodDestinationMap[reportPeriod] = formDestination945_5
+        }
+
+        // проходим по периодам
+        periodDestinationMap.each { period, formDestionations ->
+            // проходим по всем приемникам в каждом периоде
+            formDestionations.each { formDestionation ->
+                FormData destination = formDataService.getLast(destinationFormTypeId, formDestionation.kind, formDestionation.departmentId, period.id, null)
+                if (destination != null) {
+                    FormToFormRelation formToFormRelation = new FormToFormRelation()
+
+                    formToFormRelation.fullDepartmentName = getDepartmentFullName(formDestionation.departmentId)
+                    formToFormRelation.formType           = destination.formType
+                    formToFormRelation.formDataKind       = destination.kind
+                    formToFormRelation.performer          = getDepartmentById(formDestionation.departmentId);
+                    formToFormRelation.state              = destination.state
+                    formToFormRelation.source             = false
+                    formToFormRelation.created            = true
+                    formToFormRelation.formDataId         = destination.id
+                    formToFormRelation.correctionDate     = departmentReportPeriodService.get(destination.departmentReportPeriodId)?.correctionDate
+
+                    formToFormRelationList.add(formToFormRelation)
+                }
+            }
+        }
+    }
+    return formToFormRelationList
+}
+
+/** Получить полное название подразделения по id подразделения. */
+def getDepartmentFullName(def id) {
+    if (departmentFullNameMap[id] == null) {
+        departmentFullNameMap[id] = departmentService.getParentsHierarchy(id)
+    }
+    return departmentFullNameMap[id]
+}
+
+/** Получить подразделение по id. */
+def getDepartmentById(def id) {
+    if (departmentMap[id] == null) {
+        departmentMap[id] = departmentService.get(id)
+    }
+    return departmentMap[id]
 }

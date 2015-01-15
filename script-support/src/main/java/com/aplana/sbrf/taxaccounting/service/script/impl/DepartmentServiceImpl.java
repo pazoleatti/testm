@@ -24,5 +24,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
         throw new IllegalArgumentException();
     }
+
+    @Override
+    public String getParentsHierarchy(Integer departmentId) {
+        return departmentDao.getParentsHierarchy(departmentId);
+    }
 }
 

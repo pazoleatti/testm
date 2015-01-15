@@ -3,9 +3,9 @@ package form_template.property.property_945_5.v2014
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.FormToFormRelation
 import com.aplana.sbrf.taxaccounting.model.Formats
 import com.aplana.sbrf.taxaccounting.model.TaxType
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -65,6 +65,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
+        break
+    case FormDataEvent.GET_SOURCES:
+        getSources()
         break
 }
 
@@ -226,6 +229,18 @@ def infoMessagesRowMap = [:]
 // источники 945.1 (важны только подразделения и тип формы)
 @Field
 def formSources945_1 = null
+
+// результат для события FormDataEvent.GET_SOURCES
+@Field
+def formToFormRelationList = null
+
+// Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
+@Field
+def departmentFullNameMap = [:]
+
+// Мапа для хранения подразделений (id подразделения  -> подразделение)
+@Field
+def departmentMap = [:]
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -906,6 +921,7 @@ def getFormDataSources() {
     if (formDataSources == null) {
         // найти все ежемесячные источники (принятые)
         formDataSources = []
+        formToFormRelationList = []
 
         // найти все ежемесячные источники за текущий периоде и за первый месяц следующего периода
         def periodsMap = getSourcesPeriodMap()
@@ -916,7 +932,7 @@ def getFormDataSources() {
             monthOrders.each { monthOrder ->
                 formSources945_1.each { formSource ->
                     FormData source = formDataService.getLast(sourceFormTypeId, formSource.kind, formSource.departmentId, period.id, monthOrder)
-                    if (source != null && source.getState() == WorkflowState.ACCEPTED) {
+                    if (source != null) {
                         def alias = 'cost' + monthOrder
                         // если форма за январь следующего года, то заполняется графа 17 (cost13)
                         if (period.taxPeriod.id != getReportPeriod().taxPeriod.id) {
@@ -925,6 +941,20 @@ def getFormDataSources() {
                         aliasMap[source.id] = alias
                         periodNameMap[source.id] = Formats.getRussianMonthNameWithTier(monthOrder) + ' ' + period.taxPeriod.year
                         formDataSources.add(source)
+
+                        // заполнение данных для события FormDataEvent.GET_SOURCES
+                        FormToFormRelation formToFormRelation = new FormToFormRelation()
+                        formToFormRelation.fullDepartmentName = getDepartmentFullName(formSource.departmentId)
+                        formToFormRelation.formType = source.formType
+                        formToFormRelation.formDataKind = source.kind
+                        formToFormRelation.state = source.state
+                        formToFormRelation.performer = getDepartmentById(formSource.departmentId);
+                        formToFormRelation.source = true
+                        formToFormRelation.created = true
+                        formToFormRelation.formDataId = source.id
+                        formToFormRelation.correctionDate = departmentReportPeriodService.get(source.departmentReportPeriodId)?.correctionDate
+                        formToFormRelation.month = monthOrder
+                        formToFormRelationList.add(formToFormRelation)
                     }
                 }
             }
@@ -1269,4 +1299,28 @@ def getFormSources() {
         }
     }
     return formSources945_1
+}
+
+/** Получить результат для события FormDataEvent.GET_SOURCES. */
+def getSources() {
+    if (formToFormRelationList == null) {
+        getFormDataSources()
+    }
+    return formToFormRelationList
+}
+
+/** Получить полное название подразделения по id подразделения. */
+def getDepartmentFullName(def id) {
+    if (departmentFullNameMap[id] == null) {
+        departmentFullNameMap[id] = departmentService.getParentsHierarchy(id)
+    }
+    return departmentFullNameMap[id]
+}
+
+/** Получить подразделение по id. */
+def getDepartmentById(def id) {
+    if (departmentMap[id] == null) {
+        departmentMap[id] = departmentService.get(id)
+    }
+    return departmentMap[id]
 }
