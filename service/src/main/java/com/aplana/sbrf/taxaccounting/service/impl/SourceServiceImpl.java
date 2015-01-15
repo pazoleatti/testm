@@ -9,10 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
-import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
-import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
-import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
+import com.aplana.sbrf.taxaccounting.model.source.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -381,13 +378,13 @@ public class SourceServiceImpl implements SourceService {
             if (!emptyPeriods.isEmpty()) {
                 for (SourceObject empty : emptyPeriods) {
                     /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
-                    acceptedSources.addAll(sourceDao.findAcceptedInstances(empty.getSourcePair().getSource(),
-                            empty.getPeriodStart(), empty.getPeriodEnd()));
+                    acceptedSources.addAll(checkAcceptedFormData(sourceDao.findAcceptedInstances(empty.getSourcePair().getSource(),
+                            empty.getPeriodStart(), empty.getPeriodEnd())));
                 }
             } else {
                 /** Получаем источники, имеющие принятые экземпляры в создаваемом новом периоде */
-                acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                        newPeriodStart, newPeriodEnd));
+                acceptedSources.addAll(checkAcceptedFormData(sourceDao.findAcceptedInstances(sourcePair.getSource(),
+                        newPeriodStart, newPeriodEnd)));
             }
             if (!acceptedSources.isEmpty()) {
                 if (declaration) {
@@ -689,8 +686,8 @@ public class SourceServiceImpl implements SourceService {
             for (SourceObject sourceObject: sourceObjects) {
                 Long source = sourceObject.getSourcePair().getSource();
                 if (!processedSources.contains(source)) {
-                    List<String> periodsInfo = sourceDao.findAcceptedInstances(source,
-                            sourceObject.getPeriodStart(), sourceObject.getPeriodEnd());
+                    List<String> periodsInfo = checkAcceptedFormData(sourceDao.findAcceptedInstances(source,
+                            sourceObject.getPeriodStart(), sourceObject.getPeriodEnd()));
                     if (!periodsInfo.isEmpty()) {
                         acceptedSources.put(sourceObject.getSourcePair(), periodsInfo);
                     }
@@ -770,12 +767,12 @@ public class SourceServiceImpl implements SourceService {
                         List<String> acceptedSources = new ArrayList<String>();
                         /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
                         if (periodStart.after(oldPeriodStart)) {
-                            acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                                    oldPeriodStart , SimpleDateUtils.addDayToDate(periodStart, -1)));
+                            acceptedSources.addAll(checkAcceptedFormData(sourceDao.findAcceptedInstances(sourcePair.getSource(),
+                                    oldPeriodStart , SimpleDateUtils.addDayToDate(periodStart, -1))));
                         }
                         if ((periodEnd != null && oldPeriodEnd == null) || (periodEnd != null && oldPeriodEnd != null && periodEnd.before(oldPeriodEnd))) {
-                            acceptedSources.addAll(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                                    SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd));
+                            acceptedSources.addAll(checkAcceptedFormData(sourceDao.findAcceptedInstances(sourcePair.getSource(),
+                                    SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd)));
                         }
 
                         if (!acceptedSources.isEmpty()) {
@@ -1376,5 +1373,14 @@ public class SourceServiceImpl implements SourceService {
         queryParams.setSearchOrdering(SourcesSearchOrdering.TYPE);
         queryParams.setAscending(true);
         return queryParams;
+    }
+
+    private List<String> checkAcceptedFormData(List<AcceptedFormData> acceptedFormDataList) {
+        List<String> periodsInfo = new ArrayList<String>();
+        for (AcceptedFormData acceptedFormData : acceptedFormDataList) {
+            if (formTemplateDao.existFormTemplate(acceptedFormData.getFormTypeId(), acceptedFormData.getReportPeriodId()))
+                periodsInfo.add(acceptedFormData.getPeriodInfo());
+        }
+        return periodsInfo;
     }
 }

@@ -334,7 +334,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         });
     }
 
-    private static final String FIND_ACCEPTED_INSTANCES = "select rp.name, tp.year from report_period rp\n" +
+    private static final String FIND_ACCEPTED_INSTANCES = "select rp.name, tp.year, drp.report_period_id, dft.form_type_id from report_period rp\n" +
             "join tax_period tp on tp.id = rp.tax_period_id\n" +
             "join department_report_period drp on drp.report_period_id = rp.id\n" +
             "join form_data fd on fd.department_report_period_id = drp.id\n" +
@@ -346,15 +346,19 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             ")";
 
     @Override
-    public List<String> findAcceptedInstances(Long source, Date periodStart, Date periodEnd) {
+    public List<AcceptedFormData> findAcceptedInstances(Long source, Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("source", source);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(FIND_ACCEPTED_INSTANCES, params, new RowMapper<String>() {
+        return getNamedParameterJdbcTemplate().query(FIND_ACCEPTED_INSTANCES, params, new RowMapper<AcceptedFormData>() {
             @Override
-            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return rs.getString("name") + " " + rs.getString("year");
+            public AcceptedFormData mapRow(ResultSet rs, int rowNum) throws SQLException {
+                AcceptedFormData acceptedFormData = new AcceptedFormData();
+                acceptedFormData.setPeriodInfo(rs.getString("name") + " " + rs.getString("year"));
+                acceptedFormData.setFormTypeId(rs.getInt("form_type_id"));
+                acceptedFormData.setReportPeriodId(rs.getInt("report_period_id"));
+                return acceptedFormData;
             }
         });
     }

@@ -109,7 +109,7 @@ public interface SourceDao {
      * @param periodEnd окончание диапазона
      * @return информация о периодах в которых существуют принятые источники
      */
-    List<String> findAcceptedInstances(Long source, Date periodStart, Date periodEnd);
+    List<AcceptedFormData> findAcceptedInstances(Long source, Date periodStart, Date periodEnd);
 
     /**
      * Возвращает названия подразделений для указанных источников
