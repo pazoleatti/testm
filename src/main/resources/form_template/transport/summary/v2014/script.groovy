@@ -378,11 +378,10 @@ def calc() {
 void fillTaKpp(def row, def errorMsg) {
     String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = " + row.okato?.toString()
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() != 1) {
+    if (records.size() == 0) {
         logger.error(errorMsg + "Для кода ОКТМО «${getRefBookValue(96, row.okato)?.CODE?.value}» "
-                + (records.size() == 0 ? "нет данных" : "найдено больше одной записи")
-                + " в справочнике «Параметры представления деклараций по транспортному налогу»!")
-    } else if (formDataEvent != FormDataEvent.CHECK) {
+                +  "нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
+    } else if (formDataEvent != FormDataEvent.CHECK && records.size() == 1) {
         row.taxAuthority = records[0].TAX_ORGAN_CODE?.value
         row.kpp = records[0].KPP?.value
     }
