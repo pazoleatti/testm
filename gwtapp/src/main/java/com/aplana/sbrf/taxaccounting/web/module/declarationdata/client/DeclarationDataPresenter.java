@@ -144,6 +144,7 @@ public class DeclarationDataPresenter
 							@Override
 							public void onSuccess(
 									GetDeclarationDataResult result) {
+                                LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
 								declarationId = id;
 								taxName = result.getTaxType().name();
                                 taxType = result.getTaxType();
