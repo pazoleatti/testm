@@ -5,8 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 375 - Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий (3)
+ * 2375 - Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий (3)
  * похож на  trademark (Предоставление права пользования товарным знаком)
+ *
+ * formTemplateId=2375
  *
  * @author Stanislav Yasinskiy
  */

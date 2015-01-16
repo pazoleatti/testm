@@ -8,10 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов (11)
+ * 2386 - Предоставление инструментов торгового финансирования и непокрытых аккредитивов (11)
  * (похож на guarantees "Предоставление гарантий")
  *
- * formTemplateId=386
+ * formTemplateId=2386
  *
  * @author Stanislav Yasinskiy
  */

@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 380 - Приобретение услуг по организации и проведению торгов по реализации имущества (5)
+ * 2380 - Приобретение услуг по организации и проведению торгов по реализации имущества (5)
+ *
+ * formTemplateId=2380
  *
  * @author Stanislav Yasinskiy
  */

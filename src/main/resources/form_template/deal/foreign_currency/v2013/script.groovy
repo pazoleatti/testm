@@ -8,9 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 390 - Купля-продажа иностранной валюты (15)
+ * 2390 - Купля-продажа иностранной валюты (15)
  *
- * formTemplateId=390
+ * formTemplateId=2390
  *
  * @author Stanislav Yasinskiy
  */

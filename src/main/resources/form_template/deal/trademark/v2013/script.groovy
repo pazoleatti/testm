@@ -7,7 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 379 - Предоставление права пользования товарным знаком (4)
+ * 2379 - Предоставление права пользования товарным знаком (4)
+ *
+ * formTemplateId=2379
  *
  * похож на  software_development (Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий)
  * похож на corporate_credit (Предоставление корпоративного кредита)

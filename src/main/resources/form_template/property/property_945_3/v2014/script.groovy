@@ -12,6 +12,8 @@ import groovy.transform.Field
 /**
  * Расчёт налога на имущество по средней/среднегодовой стоимости
  *
+ * formTemplateId=613
+ *
  * @author Bulat Kinzyabulatov
  */
 

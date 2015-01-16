@@ -8,9 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 391 - Поставочные срочные сделки, базисным активом которых является иностранная валюта (16)
+ * 2391 - Поставочные срочные сделки, базисным активом которых является иностранная валюта (16)
  *
- * formTemplateId=391
+ * formTemplateId=2391
  *
  * @author Stanislav Yasinskiy
  */

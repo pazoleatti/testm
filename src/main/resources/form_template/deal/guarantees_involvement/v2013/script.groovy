@@ -8,10 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 401 - Привлечение гарантий (24)
+ * 2401 - Привлечение гарантий (24)
  * (похож на "Предоставление гарантий")
  *
- * formTemplateId=401
+ * formTemplateId=2401
  *
  * @author Vyacheslav Petrov
  */

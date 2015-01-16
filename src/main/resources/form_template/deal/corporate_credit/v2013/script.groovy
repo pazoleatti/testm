@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 387 - Предоставление корпоративного кредита (12)
+ * 2387 - Предоставление корпоративного кредита (12)
+ *
+ * formTemplateId=2387
  *
  * похож на software_development (Разработка, внедрение, поддержка и модификация программного обеспечения, приобретение лицензий)
  * похож на trademark (Предоставление права пользования товарным знаком)

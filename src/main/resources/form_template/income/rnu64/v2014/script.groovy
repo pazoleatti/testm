@@ -7,7 +7,7 @@ import groovy.transform.Field
 
 /**
  * РНУ-64 "Регистр налогового учёта затрат, связанных с проведением сделок РЕПО"
- * formTypeId=355
+ * formTypeId=1355
  *
  * @author auldanov
  * @author bkinzyabulatov

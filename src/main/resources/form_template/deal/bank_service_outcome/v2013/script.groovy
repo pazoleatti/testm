@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 399 - Оказание услуг (расходы) (22)
+ * 2399 - Оказание услуг (расходы) (22)
+ *
+ * formTemplateId=2399
  *
  * @author Stanislav Yasinskiy
  */

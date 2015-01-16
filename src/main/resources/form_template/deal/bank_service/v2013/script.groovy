@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 382 - Оказание банковских услуг (7)
+ * 2382 - Оказание банковских услуг (7)
+ *
+ * formTemplateId=2382
  *
  * @author Dmitriy Levykin
  */

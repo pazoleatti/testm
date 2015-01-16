@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 383 - Сделки РЕПО (8)
+ * 2383 - Сделки РЕПО (8)
  *
  * formTemplateId = 2383
  *

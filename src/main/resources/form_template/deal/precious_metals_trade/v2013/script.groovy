@@ -8,9 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 394 - Купля-продажа драгоценных металлов (19)
+ * 2394 - Купля-продажа драгоценных металлов (19)
  *
- * formTemplateId=394
+ * formTemplateId=2394
  *
  * @author Stanislav Yasinskiy
  */

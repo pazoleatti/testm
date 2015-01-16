@@ -5,9 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 385 - Уступка прав требования по кредитным договорам (10)
+ * 2385 - Уступка прав требования по кредитным договорам (10)
  *
- * formTemplateId=385
+ * formTemplateId=2385
  *
  * @author Dmitriy Levykin
  */

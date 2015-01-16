@@ -8,8 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
- * 409 — Сводный отчет
- * formTemplateId = 409
+ * 2409 — Сводный отчет
+ *
+ * formTemplateId = 2409
+ *
  */
 // 1.	dealNum1	п. 010 "Порядковый номер сделки по уведомлению"
 // 2.	interdependenceSing	п. 100
