@@ -8,7 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 392 - Беспоставочные срочные сделки (17)
+ * 2392 - Беспоставочные срочные сделки (17)
+ *
+ * formTemplateId=2392
  *
  * @author Dmitriy Levykin
  */

@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 398 - Оказание услуг (доходы) (21)
+ * 2398 - Оказание услуг (доходы) (21)
+ *
+ * formTemplateId=2398
  *
  * @author Stanislav Yasinskiy
  */

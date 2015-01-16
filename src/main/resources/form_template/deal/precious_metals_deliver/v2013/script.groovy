@@ -8,9 +8,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 393 - Поставочные срочные сделки с драгоценными металлами (18)
+ * 2393 - Поставочные срочные сделки с драгоценными металлами (18)
  *
- * formTemplateId=393
+ * formTemplateId=2393
  *
  * @author Dmitriy Levykin
  */

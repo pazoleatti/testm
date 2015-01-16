@@ -7,7 +7,9 @@ import groovy.transform.Field
 import java.math.RoundingMode
 
 /**
- * 376 - Предоставление нежилых помещений в аренду (1)
+ * 2376 - Предоставление нежилых помещений в аренду (1)
+ *
+ * formTemplateId=2376
  *
  * @author Dmitriy Levykin
  */

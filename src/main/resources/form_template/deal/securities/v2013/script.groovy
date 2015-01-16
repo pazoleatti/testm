@@ -7,7 +7,9 @@ import groovy.transform.Field
 import java.math.RoundingMode
 
 /**
- * 381 - Приобретение и реализация ценных бумаг (долей в уставном капитале) (6)
+ * 2381 - Приобретение и реализация ценных бумаг (долей в уставном капитале) (6)
+ *
+ * formTemplateId=2381
  *
  * @author Stanislav Yasinskiy
  */

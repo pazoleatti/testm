@@ -8,8 +8,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 403 - Привлечение ИТФ и аккредитивов (25)
- * formTemplateId = 403
+ * 2403 - Привлечение ИТФ и аккредитивов (25)
+ *
+ * formTemplateId = 2403
+ *
  * v. 2014
  */
 

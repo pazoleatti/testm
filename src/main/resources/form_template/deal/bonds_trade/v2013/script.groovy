@@ -7,7 +7,7 @@ import groovy.transform.Field
 import java.math.RoundingMode
 
 /**
- * 384 - Реализация и приобретение ценных бумаг (9)
+ * 2384 - Реализация и приобретение ценных бумаг (9)
  *
  * formTemplateId=2384
  *

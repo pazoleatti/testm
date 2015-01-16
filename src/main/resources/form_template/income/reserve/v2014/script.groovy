@@ -6,6 +6,13 @@ import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
 import groovy.transform.Field
 
 /**
+ * 614 - Расчет резерва по сомнительным долгам в целях налогообложения
+ *
+ * formTemplateId=614
+ *
+ */
+
+/**
  * Форма "(РСД) Расчет резерва по сомнительным долгам в целях налогообложения"
  * графа  1 - rowNum			- № п/п
  * графа  2 - bankName			- Наименование банка

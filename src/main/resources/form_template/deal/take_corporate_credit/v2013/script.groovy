@@ -5,8 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 397 - Привлечение ресурсов (20)
- * formTemplateId = 10186
+ * 2397 - Привлечение ресурсов (20)
+ *
+ * formTemplateId = 2397
  *
  * @author Stanislav Yasinskiy
  */

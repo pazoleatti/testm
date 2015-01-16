@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 404 - Приобретение прав требования (26)
+ * 2404 - Приобретение прав требования (26)
+ *
+ * formTemplateId=2404
  *
  * @author Stanislav Yasinskiy
  */

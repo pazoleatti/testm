@@ -5,9 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 389 - Предоставление межбанковских кредитов (14)
+ * 2389 - Предоставление межбанковских кредитов (14)
  *
- * formTemplateId=389
+ * formTemplateId=2389
  *
  * @author Stanislav Yasinskiy
  */

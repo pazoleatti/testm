@@ -7,7 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
 /**
- * 402 - Привлечение средств на межбанковском рынке (23)
+ * 2402 - Привлечение средств на межбанковском рынке (23)
+ *
+ * formTemplateId=2402
  *
  * @author LHaziev
  */

@@ -90,7 +90,7 @@ public class GetDeclarationDataHandler
         if (declarationTemplate.getStatus() == VersionedObjectStatus.DRAFT) {
             Logger logger = new Logger();
             if (taxType.equals(taxType.DEAL)) {
-                logger.error("Уведомление выведено из действия");
+                logger.error("Уведомление выведено из действия!");
             } else {
                 logger.error("Декларация выведена из действия!");
             }
