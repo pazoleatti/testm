@@ -1,8 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SourcesAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SourcesResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -11,9 +16,7 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Обработчик получения списка источников/приемников
@@ -24,6 +27,12 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
     @Autowired
     SourceService sourceService;
 
+    @Autowired
+    FormDataScriptingService scriptingService;
+
+    @Autowired
+    SecurityService securityService;
+
     public SourcesHandler() {
         super(SourcesAction.class);
     }
@@ -32,13 +41,29 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
     public SourcesResult execute(SourcesAction action, ExecutionContext executionContext) throws ActionException {
         FormData formData = action.getFormData();
         SourcesResult result = new SourcesResult();
-        List<FormToFormRelation> relationList = sourceService.getRelations(
-                formData.getDepartmentId(),
-                formData.getFormType().getId(),
-                formData.getKind(),
-                formData.getDepartmentReportPeriodId(),
-                formData.getPeriodOrder()
-        );
+        Logger logger = new Logger();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        List<FormToFormRelation> relationList = new ArrayList<FormToFormRelation>();
+
+        /** Проверяем в скрипте источники-приемники для особенных форм */
+        Map<String, Object> params = new HashMap<String, Object>();
+        List<FormToFormRelation> sourceList = new ArrayList<FormToFormRelation>();
+        params.put("sourceList", sourceList);
+        scriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
+
+        if (params.containsKey("sourcesProcessedByScript") && ((Boolean) params.get("sourcesProcessedByScript"))) {
+            //Скрипт возвращает все необходимые источники-приемники
+            relationList.addAll(sourceList);
+        } else {
+            //Получаем источники-приемники стандарртными методами ядра
+            relationList = sourceService.getRelations(
+                    formData.getDepartmentId(),
+                    formData.getFormType().getId(),
+                    formData.getKind(),
+                    formData.getDepartmentReportPeriodId(),
+                    formData.getPeriodOrder()
+            );
+        }
 
         Collections.sort(relationList, new Comparator<FormToFormRelation>() {
             @Override
@@ -77,7 +102,6 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
             }
         });
         result.setData(relationList);
-
         return result;
     }
 
