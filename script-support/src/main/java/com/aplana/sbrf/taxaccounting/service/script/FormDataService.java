@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -49,6 +46,15 @@ public interface FormDataService {
      */
     @SuppressWarnings("unused")
     FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
+
+    /**
+     * Получить шаблон нф.
+     * НФ созданная в последнем отчетном периоде подразделения.
+     *
+     * @param formTypeId идентификатор типа формы
+     * @param reportPeriodId идентификатор периода
+     */
+    FormTemplate getFormTemplate(int formTypeId, int reportPeriodId);
 
     /**
      * Посредник для работы со строками налоговой формы во временном и постоянном срезах

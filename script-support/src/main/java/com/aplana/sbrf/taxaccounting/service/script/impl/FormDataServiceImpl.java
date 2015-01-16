@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -74,6 +75,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Autowired
     private FormTypeDao formTypeDao;
 
+    @Autowired
+    private FormTemplateDao formTemplateDao;
+
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
     private static ApplicationContext applicationContext;
@@ -102,6 +106,12 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
         return dao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
+    }
+
+    @Override
+    public FormTemplate getFormTemplate(int formTypeId, int reportPeriodId) {
+        int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
+        return formTemplateDao.get(formTemplateId);
     }
 
     @Override

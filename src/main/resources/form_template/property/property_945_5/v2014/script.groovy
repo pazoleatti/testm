@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation
 import com.aplana.sbrf.taxaccounting.model.Formats
 import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -230,10 +231,6 @@ def infoMessagesRowMap = [:]
 @Field
 def formSources945_1 = null
 
-// результат для события FormDataEvent.GET_SOURCES
-@Field
-def formToFormRelationList = null
-
 // Мапа для хранения полного названия подразделения (id подразделения  -> полное название)
 @Field
 def departmentFullNameMap = [:]
@@ -241,6 +238,23 @@ def departmentFullNameMap = [:]
 // Мапа для хранения подразделений (id подразделения  -> подразделение)
 @Field
 def departmentMap = [:]
+
+// Мапа для хранения типов форм (id типа формы -> тип формы)
+@Field
+def formTypeMap = [:]
+
+// Мапа для хранения переодичности форм источников-приемников (id типа формы + id периода -> периодичность ежемесячная или квартальная)
+@Field
+def monthlyMap = [:]
+
+// Мапа для хранения номером месяцев по кварталам (номер квартала -> список с номерами месяцев квартала)
+@Field
+def monthsInQuarterMap = [
+        1 : (1..3),
+        2 : (4..6),
+        3 : (7..9),
+        4 : (10..12)
+]
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -921,7 +935,6 @@ def getFormDataSources() {
     if (formDataSources == null) {
         // найти все ежемесячные источники (принятые)
         formDataSources = []
-        formToFormRelationList = []
 
         // найти все ежемесячные источники за текущий периоде и за первый месяц следующего периода
         def periodsMap = getSourcesPeriodMap()
@@ -932,7 +945,7 @@ def getFormDataSources() {
             monthOrders.each { monthOrder ->
                 formSources945_1.each { formSource ->
                     FormData source = formDataService.getLast(sourceFormTypeId, formSource.kind, formSource.departmentId, period.id, monthOrder)
-                    if (source != null) {
+                    if (source != null && source.getState() == WorkflowState.ACCEPTED) {
                         def alias = 'cost' + monthOrder
                         // если форма за январь следующего года, то заполняется графа 17 (cost13)
                         if (period.taxPeriod.id != getReportPeriod().taxPeriod.id) {
@@ -941,20 +954,6 @@ def getFormDataSources() {
                         aliasMap[source.id] = alias
                         periodNameMap[source.id] = Formats.getRussianMonthNameWithTier(monthOrder) + ' ' + period.taxPeriod.year
                         formDataSources.add(source)
-
-                        // заполнение данных для события FormDataEvent.GET_SOURCES
-                        FormToFormRelation formToFormRelation = new FormToFormRelation()
-                        formToFormRelation.fullDepartmentName = getDepartmentFullName(formSource.departmentId)
-                        formToFormRelation.formType = source.formType
-                        formToFormRelation.formDataKind = source.kind
-                        formToFormRelation.state = source.state
-                        formToFormRelation.performer = getDepartmentById(formSource.departmentId);
-                        formToFormRelation.source = true
-                        formToFormRelation.created = true
-                        formToFormRelation.formDataId = source.id
-                        formToFormRelation.correctionDate = departmentReportPeriodService.get(source.departmentReportPeriodId)?.correctionDate
-                        formToFormRelation.month = monthOrder
-                        formToFormRelationList.add(formToFormRelation)
                     }
                 }
             }
@@ -970,19 +969,13 @@ def getSourcesPeriodMap() {
 
         def reportPeriod = getReportPeriod()
         def order = reportPeriod?.order
-        // получить список месяцев
-        def monthMap = [
-                1 : (1..3),
-                2 : (4..6),
-                3 : (7..9),
-                4 : (10..12)
-        ]
+
         // получить список месяцев в периоде без первого месяца (кроме 1 квартала, для него нужен первый месяц)
         def months
         if (order > 1) {
-            months = monthMap[order] - (order * 3 - 2)
+            months = monthsInQuarterMap[order] - (order * 3 - 2)
         } else {
-            months = monthMap[order]
+            months = monthsInQuarterMap[order]
         }
         sourcesPeriodMap[reportPeriod] = months
 
@@ -992,7 +985,7 @@ def getSourcesPeriodMap() {
         def nextPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.PROPERTY, from, to)
         if (nextPeriods != null && nextPeriods.size() == 1) {
             def nextTaxPeriod = nextPeriods.get(0)
-            nextMonthNumber = monthMap[nextTaxPeriod?.order].get(0)
+            def nextMonthNumber = monthsInQuarterMap[nextTaxPeriod?.order].get(0)
             sourcesPeriodMap[nextTaxPeriod] = [nextMonthNumber]
         } else {
             println "property_945_5: impossible to get first month from next period." // TODO (Ramil Timerbaev)
@@ -1301,14 +1294,6 @@ def getFormSources() {
     return formSources945_1
 }
 
-/** Получить результат для события FormDataEvent.GET_SOURCES. */
-def getSources() {
-    if (formToFormRelationList == null) {
-        getFormDataSources()
-    }
-    return formToFormRelationList
-}
-
 /** Получить полное название подразделения по id подразделения. */
 def getDepartmentFullName(def id) {
     if (departmentFullNameMap[id] == null) {
@@ -1319,8 +1304,132 @@ def getDepartmentFullName(def id) {
 
 /** Получить подразделение по id. */
 def getDepartmentById(def id) {
+    if (id == null) {
+        return null
+    }
     if (departmentMap[id] == null) {
         departmentMap[id] = departmentService.get(id)
     }
     return departmentMap[id]
+}
+
+/** Получить тип фомры по id. */
+def getFormTypeById(def id) {
+    if (formTypeMap[id] == null) {
+        formTypeMap[id] = formTypeService.get(sourceFormTypeId)
+    }
+    return formTypeMap[id]
+}
+
+/** Получить результат для события FormDataEvent.GET_SOURCES. */
+def getSources() {
+    def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
+    def start = getReportPeriodStartDate()
+    def end = getReportPeriodEndDate()
+
+    // источники
+    def sourceDepartmentFormTypes = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind, start, end)
+
+    // приемники
+    def destinationDepartmentFormTypes = departmentFormTypeService.getFormDestinations(formDataDepartment.id, formData.formType.id, formData.kind, start, end)
+
+    // найти все ежемесячные источники 945.1 за текущий периоде и за первый месяц следующего периода
+    // Мапа с периодами и номерами месяцев для источников 945.1 (период -> список номеров месяцев)
+    def source945_1periodsMap = getSourcesPeriodMap()
+
+    // номера месяцев для остальных ежемесячных источников-приемников
+    def otherMonthlyFormsPeriods = monthsInQuarterMap[currentPeriod.order]
+    def otherMonthlyFormsPeriodsMap = [currentPeriod : otherMonthlyFormsPeriods]
+
+    // приемники
+    destinationDepartmentFormTypes.each { departmentFormType ->
+        def isMonthly = isMonthlyForm(departmentFormType.formTypeId, currentPeriod.id)
+        def isSource = false
+        if (isMonthly) {
+            // другая ежемесячная форма
+            otherMonthlyFormsPeriods.each { monthOrder ->
+                FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
+                        departmentFormType.departmentId, currentPeriod.id, monthOrder)
+                def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
+                sourceList.add(formToFormRelation)
+            }
+        } else {
+            // квартальная форма
+            FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
+                    departmentFormType.departmentId, currentPeriod.id, null)
+            def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
+            sourceList.add(formToFormRelation)
+        }
+    }
+
+    // источники
+    for (def departmentFormType : sourceDepartmentFormTypes) {
+        def isSource = true
+        def monthlyFormsPeriodsMap
+        if (departmentFormType.formTypeId == sourceFormTypeId) {
+            // 945.1
+            monthlyFormsPeriodsMap = source945_1periodsMap
+        } else if (isMonthlyForm(departmentFormType.formTypeId, currentPeriod.id)) {
+            // другая ежемесячная форма
+            monthlyFormsPeriodsMap = otherMonthlyFormsPeriodsMap
+        } else {
+            // квартальная форма
+            FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
+                    departmentFormType.departmentId, currentPeriod.id, null)
+            def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
+            sourceList.add(formToFormRelation)
+            continue
+        }
+        // ежемесячные
+        monthlyFormsPeriodsMap.each { period, monthOrders ->
+            monthOrders.each { monthOrder ->
+                FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
+                        departmentFormType.departmentId, currentPeriod.id, monthOrder)
+                def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
+                sourceList.add(formToFormRelation)
+            }
+        }
+    }
+
+    sourcesProcessedByScript = true
+    return sourceList
+}
+
+/**
+ * Получить запись для источника-приемника.
+ *
+ * @param tmpFormData нф
+ * @param departmentFormType информация об источнике приемнике
+ * @param isSource признак источника
+ * @param period период нф
+ * @param monthOrder номер месяца (для ежемесячной формы)
+ */
+def getFormToFormRelation(def tmpFormData, def departmentFormType, def isSource, def period, def monthOrder) {
+    FormToFormRelation formToFormRelation = new FormToFormRelation()
+    formToFormRelation.fullDepartmentName = getDepartmentFullName(departmentFormType.departmentId)
+    formToFormRelation.performer = getDepartmentById(departmentFormType.performerId);
+    formToFormRelation.formDataKind = departmentFormType.kind
+    formToFormRelation.source = isSource
+    formToFormRelation.month = (monthOrder ? Formats.getRussianMonthNameWithTier(monthOrder) : null)
+    formToFormRelation.year = period.taxPeriod.year
+    formToFormRelation.periodName = period.name
+    if (tmpFormData != null) {
+        formToFormRelation.created = true
+        formToFormRelation.formType = tmpFormData.formType
+        formToFormRelation.state = tmpFormData.state
+        formToFormRelation.formDataId = tmpFormData.id
+        formToFormRelation.correctionDate = departmentReportPeriodService.get(tmpFormData.departmentReportPeriodId)?.correctionDate
+    } else {
+        formToFormRelation.formType = getFormTypeById(departmentFormType.formTypeId)
+        formToFormRelation.created = false
+    }
+    return formToFormRelation
+}
+
+def isMonthlyForm(def formTemplateId, def periodId) {
+    def key = formTemplateId?.toString() + periodId?.toString()
+    if (monthlyMap[key] == null) {
+        monthlyMap[key] = formDataService.getFormTemplate(formTemplateId, periodId)?.monthly
+    }
+    return monthlyMap[key]
 }
