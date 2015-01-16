@@ -1433,6 +1433,9 @@ public final class ScriptUtils {
         return m.matches();
     }
 
+    /**
+     * Проверка превышения допустимой разрядности
+     */
     public static void checkOverflow(BigDecimal value, DataRow<Cell> row, String alias, int index, int size, String algorithm) {
         if (value == null) {
             return;

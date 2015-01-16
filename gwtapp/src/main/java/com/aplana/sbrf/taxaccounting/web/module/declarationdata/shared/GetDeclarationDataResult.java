@@ -15,6 +15,7 @@ public class GetDeclarationDataResult implements Result {
 	private Date docDate;
     private String taxOrganCode;
     private String kpp;
+	private String uuid;
 
 	private boolean accepted;
 	private boolean canAccept;
@@ -123,4 +124,12 @@ public class GetDeclarationDataResult implements Result {
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
     }
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 }

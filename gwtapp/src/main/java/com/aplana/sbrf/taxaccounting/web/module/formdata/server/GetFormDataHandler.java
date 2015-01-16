@@ -105,6 +105,14 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		fillLockData(action, userInfo, result);
 		fillFormAndTemplateData(action, userInfo, logger, result);
 		fillFormDataAccessParams(action, userInfo, result);
+
+        FormData formData = result.getFormData();
+        FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
+        //Проверка статуса макета НФ при открытиии налоговой формы.
+        if (formTemplate.getStatus() == VersionedObjectStatus.DRAFT) {
+            logger.error("Форма выведена из действия!");
+        }
+
         // Форма открывается для чтения если так и запросили или нет прав или период закрыт
         result.setReadOnly(action.isReadOnly() || !result.getFormDataAccessParams().isCanEdit()
                 || !result.getDepartmentReportPeriod().isActive());
