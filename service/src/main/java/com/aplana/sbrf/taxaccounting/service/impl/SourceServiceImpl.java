@@ -1235,6 +1235,8 @@ public class SourceServiceImpl implements SourceService {
         formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
         if (departmentreportPeriod != null && departmentreportPeriod.getCorrectionDate() != null) {
             formToFormRelation.setCorrectionDate(departmentreportPeriod.getCorrectionDate());
+            formToFormRelation.setYear(departmentreportPeriod.getReportPeriod().getTaxPeriod().getYear());
+            formToFormRelation.setPeriodName(departmentreportPeriod.getReportPeriod().getName());
         }
         formToFormRelation.setMonth(periodOrder != null ? Months.fromId(periodOrder).getTitle() : "");
         return formToFormRelation;

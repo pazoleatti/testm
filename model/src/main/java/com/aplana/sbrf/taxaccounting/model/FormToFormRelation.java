@@ -34,6 +34,10 @@ public class FormToFormRelation implements Serializable {
     private Date correctionDate;
 
     private String month;
+    /** Год налогового периода */
+    private int year;
+    /** Название периода */
+    private String periodName;
 
     public String getMonth() {
         return month;
@@ -113,5 +117,21 @@ public class FormToFormRelation implements Serializable {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public String getPeriodName() {
+        return periodName;
+    }
+
+    public void setPeriodName(String periodName) {
+        this.periodName = periodName;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
     }
 }

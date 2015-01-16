@@ -150,6 +150,20 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
+        TextColumn<FormToFormRelation> yearColumn = new TextColumn<FormToFormRelation>() {
+            @Override
+            public String getValue(FormToFormRelation object) {
+                return String.valueOf(object.getYear());
+            }
+        };
+
+        TextColumn<FormToFormRelation> periodColumn = new TextColumn<FormToFormRelation>() {
+            @Override
+            public String getValue(FormToFormRelation object) {
+                return object.getPeriodName();
+            }
+        };
+
         Column<FormToFormRelation, String> formTypeColumn = new Column<FormToFormRelation, String>(new ClickableTextCell()){
 
             @Override
@@ -192,6 +206,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(formKindColumn, "Тип формы");
         table.setColumnWidth(formKindColumn, 150, Style.Unit.PX);
         table.addColumn(formTypeColumn, "Вид формы");
+        table.addColumn(yearColumn, "Год");
+        table.addColumn(periodColumn, "Период");
         table.addColumn(monthColumn, "Месяц");
         table.addColumn(performerColumn, "Исполнитель");
         table.addColumn(stateColumn, "Состояние формы");
