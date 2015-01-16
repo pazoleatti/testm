@@ -48,10 +48,12 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
         /** Проверяем в скрипте источники-приемники для особенных форм */
         Map<String, Object> params = new HashMap<String, Object>();
         List<FormToFormRelation> sourceList = new ArrayList<FormToFormRelation>();
+        Boolean sourcesProcessedByScript = null;
         params.put("sourceList", sourceList);
+        params.put("sourcesProcessedByScript", sourcesProcessedByScript);
         scriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
 
-        if (params.containsKey("sourcesProcessedByScript") && ((Boolean) params.get("sourcesProcessedByScript"))) {
+        if (sourcesProcessedByScript != null && sourcesProcessedByScript) {
             //Скрипт возвращает все необходимые источники-приемники
             relationList.addAll(sourceList);
         } else {
