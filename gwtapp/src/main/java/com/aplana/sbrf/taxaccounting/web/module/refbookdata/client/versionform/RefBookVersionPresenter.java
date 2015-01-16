@@ -59,7 +59,6 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     private Long recordId;
     private FormMode mode;
     private boolean isHierarchy = false;
-    private RefBookTreeItem parentRefBookRecordItem;
     private Integer selectedRowIndex;
 
     public void setHierarchy(boolean hierarchy) {
@@ -132,9 +131,20 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
         //setMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
         if (isHierarchy){
-            //http://jira.aplana.com/browse/SBRFACCTAX-9922
-            editFormPresenter.show(null, parentRefBookRecordItem.getParent()!=null?
-                    parentRefBookRecordItem.getParent() : null);
+            //http://jira.aplana.com/browse/SBRFACCTAX-10062
+            GetLastVersionHierarchyAction action
+                    = new GetLastVersionHierarchyAction();
+            action.setRefBookId(refBookId);
+            action.setRefBookRecordId(uniqueRecordId);
+            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetLastVersionHierarchyResult>() {
+                @Override
+                public void onSuccess(GetLastVersionHierarchyResult result) {
+                    editFormPresenter.show(null, new RefBookTreeItem(
+                            result.getDataRow().getRefBookRowId(),
+                            result.getDataRow().getValues().get("PARENT_ID"))
+                    );
+                }
+            }, this));
         }
         else{
             editFormPresenter.show(null);
@@ -299,9 +309,5 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
     public void setMode(FormMode mode) {
         this.mode = mode;
         getView().updateMode(mode);
-    }
-
-    public void setParentElement(RefBookTreeItem parentRefBookRecordId){
-        this.parentRefBookRecordItem = parentRefBookRecordId;
     }
 }
