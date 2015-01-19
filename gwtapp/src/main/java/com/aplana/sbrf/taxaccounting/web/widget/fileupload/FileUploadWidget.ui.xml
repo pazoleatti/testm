@@ -15,13 +15,10 @@
         }
     </ui:style>
 
-    <ui:with field="imageResources"
-             type="com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget.IconResource"/>
-
     <g:FormPanel ui:field="uploadFormDataXls" encoding="multipart/form-data" method="post">
         <g:HorizontalPanel ui:field="uploadPanel" addStyleNames="{style.heightInherit}" verticalAlignment="middle">
             <g:FileUpload ui:field="uploader" name="uploader" visible="false" addStyleNames="{style.heightInherit}"/>
-            <st:LinkButton ui:field="uploadButton" imageResource="{imageResources.icon}" text="Загрузить файл"
+            <st:LinkButton ui:field="uploadButton" text="Загрузить файл"
                            addStyleNames="{style.heightInherit}"/>
             <g:Button ui:field="justButton" visible="false" text="Загрузить файл"
                       addStyleNames="{style.heightInherit}"/>
