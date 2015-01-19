@@ -971,6 +971,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             leftTable.setEnabled(false);
             rightTable.setEnabled(false);
             downTable.setEnabled(false);
+            Dialog.errorMessage("Указание источников/приемников", "Неверно указан период!");
         }
 
         if (!leftDepPicker.isEnabled() && isPeriodCorrect) {
