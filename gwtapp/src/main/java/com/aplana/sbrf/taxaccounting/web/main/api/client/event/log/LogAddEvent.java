@@ -28,17 +28,24 @@ public class LogAddEvent extends
 	}
 
 	public static void fire(HasHandlers source,	String uuid) {
+        fire(source, uuid, true);
+	}
+
+    public static void fire(HasHandlers source,	String uuid, boolean clearPreviousLog) {
         if (uuid != null){
             LogAddEvent event = new LogAddEvent();
             event.setUuid(uuid);
+            event.setClearPreviousLog(clearPreviousLog);
             source.fireEvent(event);
         }
-	}
+    }
 
     /**
      * UUID-идентификатор списка сообщений
      */
 	private String uuid;
+
+    private boolean clearPreviousLog = true;
 
 	public LogAddEvent() {
 	}
@@ -60,4 +67,12 @@ public class LogAddEvent extends
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
+
+    public boolean isClearPreviousLog() {
+        return clearPreviousLog;
+    }
+
+    public void setClearPreviousLog(boolean clearPreviousLog) {
+        this.clearPreviousLog = clearPreviousLog;
+    }
 }
