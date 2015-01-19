@@ -75,7 +75,9 @@ public class LogAreaPresenter extends
             getView().setPrintLink(GWT.getHostPageBaseURL() + "download/logEntry/" + uuid);
 
         }
-        clean();
+        if (event.isClearPreviousLog()) {
+            clean();
+        }
         onRangeChange(0, getView().getLogEntriesView().getPageSize());
     }
 

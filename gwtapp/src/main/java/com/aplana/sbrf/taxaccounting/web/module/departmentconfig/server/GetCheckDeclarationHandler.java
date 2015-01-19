@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetCheckDeclarationAction;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -27,11 +29,7 @@ import static java.util.Arrays.asList;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDeclarationAction, GetCheckDeclarationResult> {
 
-    private static final String FORM_WARN = "В налоговой форме \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
-    private static final String FORM_WARN_S = "В форме \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
-
-    private static final String DECLARATION_WARN = "В декларации \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
-    private static final String DECLARATION_WARN_D = "В уведомлении \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
+    private static final String WARN_MSG = "\"%s\" %s, \"%s\", состояние - \"%s\"";
 
     @Autowired
     private TAUserService userService;
@@ -62,6 +60,9 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
     @Autowired
     SecurityService securityService;
 
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
+
     public GetCheckDeclarationHandler() {
         super(GetCheckDeclarationAction.class);
     }
@@ -73,7 +74,17 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
 
         ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
         String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
-        String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
+        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
+        departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(action.getDepartment()));
+        departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
+        departmentReportPeriodFilter.setIsActive(true);
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
+        DepartmentReportPeriod departmentReportPeriod = null;
+        if (departmentReportPeriodList.size() == 1) {
+            departmentReportPeriod = departmentReportPeriodList.get(0);
+        }
+        String correctionDate = (departmentReportPeriod == null || departmentReportPeriod.getCorrectionDate() == null) ? "" :
+                "с датой сдачи корректировки \"" + (departmentReportPeriod.getCorrectionDate()) + "\"";
 
         DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
         declarationDataFilter.setReportPeriodIds(asList(action.getReportPeriodId()));
@@ -84,7 +95,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         declarationDataFilter.setTaxType(action.getTaxType());
         PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(declarationDataFilter);
         for(DeclarationDataSearchResultItem item: page) {
-            logger.warn(String.format(action.getTaxType().equals(TaxType.DEAL) ? DECLARATION_WARN_D : DECLARATION_WARN, item.getDeclarationType(), departmentName, periodName));
+            logger.warn(String.format(WARN_MSG, periodName, correctionDate, item.getDeclarationType(), item.isAccepted() ? "Принята" : "Создана"));
             result.setDeclarationFormFound(true);
         }
 
@@ -105,7 +116,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
             for(DataRow<Cell> dataRow : resultDataRow) {
                 BigDecimal regionBankDivisionId = dataRow.getCell("regionBankDivision").getNumericValue();
                 if (regionBankDivisionId != null && regionBankDivisionId.intValue() == action.getDepartment()) {
-                    logger.warn(String.format(action.getTaxType().equals(TaxType.DEAL) ? FORM_WARN_S : FORM_WARN, formData.getFormType().getName(), departmentName, periodName));
+                    logger.warn(String.format(WARN_MSG, periodName, correctionDate, formData.getFormType().getName(), formData.getState().getName()));
                     result.setDeclarationFormFound(true);
                     break;
                 }

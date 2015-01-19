@@ -5,6 +5,8 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -12,6 +14,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.AddLogAction;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.AddLogResult;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -40,8 +44,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     private static final String SAVE_FOUND_TEXT = "В Системе созданы формы/декларации, использующие старую версию Настроек. Для вступления изменений в силу каждую налоговую форму/декларацию нужно обновить вручную.";
     private static final String SAVE_FOUND_TEXT_D = "В Системе созданы формы/уведомления использующие старую версию Настроек. Для вступления изменений в силу каждую форму/уведомление нужно обновить вручную.";
 
-    private static final String EDIT_FOUND_TEXT = "Настройки используются для налоговых форм/деклараций. Желаете внести изменения в Настройки?";
-    private static final String EDIT_FOUND_TEXT_D = "Настройки используются для форм/уведомлений. Желаете внести изменения в Настройки?";
+    private static final String EDIT_FOUND_TEXT = "Найдены экземпляры налоговых форм/деклараций, " +
+            "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
 
     private final DispatchAsync dispatcher;
 
@@ -159,28 +163,70 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     }
 
     @Override
-    public void save(DepartmentCombined combinedDepartmentParam, Integer period, Integer department) {
+    public void save(final DepartmentCombined combinedDepartmentParam, final Integer period, final Integer department) {
         if (combinedDepartmentParam == null || department == null || period == null) {
             return;
         }
 
         LogCleanEvent.fire(DepartmentConfigPresenter.this);
 
-        SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
-        action.setDepartmentCombined(combinedDepartmentParam);
+        final GetCheckDeclarationAction action = new GetCheckDeclarationAction();
         action.setReportPeriodId(period);
-        action.setTaxType(getView().getTaxType());
         action.setDepartment(department);
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
+        action.setTaxType(getView().getTaxType());
+        dispatcher.execute(action,
+            CallbackUtils.defaultCallback(
+                new AbstractCallback<GetCheckDeclarationResult>() {
+                    void save() {
+                        SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
+                        action.setDepartmentCombined(combinedDepartmentParam);
+                        action.setReportPeriodId(period);
+                        action.setTaxType(getView().getTaxType());
+                        action.setDepartment(department);
+                        dispatcher.execute(action, CallbackUtils
+                                .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
+                                    @Override
+                                    public void onSuccess(SaveDepartmentCombinedResult result) {
+                                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid(), false);
+                                        if (!result.isHasError()) {
+                                            if (result.isDeclarationFormFound()) {
+                                                Dialog.infoMessage(getView().getTaxType().equals(TaxType.DEAL) ? SAVE_FOUND_TEXT_D : SAVE_FOUND_TEXT);
+                                            }
+                                            getView().reloadDepartmentParams();
+                                        }
+                                    }
+                                }, DepartmentConfigPresenter.this));
+                    }
+
                     @Override
-                    public void onSuccess(SaveDepartmentCombinedResult result) {
-                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                        if (!result.isHasError()) {
-                            if (result.isDeclarationFormFound()) {
-                                Dialog.infoMessage(getView().getTaxType().equals(TaxType.DEAL) ? SAVE_FOUND_TEXT_D : SAVE_FOUND_TEXT);
-                            }
-                            getView().reloadDepartmentParams();
+                    public void onSuccess(final GetCheckDeclarationResult result) {
+                        isControlUnp = result.isControlUnp();
+                        if (result.getUuid() != null) {
+                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                        }
+                        if (result.isDeclarationFormFound()) {
+                            Dialog.confirmMessage(EDIT_FOUND_TEXT,
+                                    new DialogHandler() {
+                                        @Override
+                                        public void yes() {
+                                            super.yes();
+
+                                            AddLogAction addLogAction = new AddLogAction();
+                                            addLogAction.setOldUUID(result.getUuid());
+                                            addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
+                                                    "Для актуализации данных в найденных экземплярах налоговых/форм деклараций их необходимо рассчитать/обновить")));
+                                            dispatcher.execute(addLogAction, CallbackUtils
+                                                    .defaultCallback(new AbstractCallback<AddLogResult>() {
+                                                        @Override
+                                                        public void onSuccess(AddLogResult result) {
+                                                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                                                        }
+                                                    }, DepartmentConfigPresenter.this));
+                                            save();
+                                        }
+                                    });
+                        } else {
+                            save();
                         }
                     }
                 }, this));
@@ -214,34 +260,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         if (department == null || period == null) {
             return;
         }
-
-        GetCheckDeclarationAction action = new GetCheckDeclarationAction();
-        action.setReportPeriodId(period);
-        action.setDepartment(department);
-        action.setTaxType(getView().getTaxType());
-        dispatcher.execute(action,
-                CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetCheckDeclarationResult>() {
-                            @Override
-                            public void onSuccess(GetCheckDeclarationResult result) {
-                                isControlUnp = result.isControlUnp();
-                                if (result.getUuid() != null) {
-                                    LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                                }
-                                if (result.isDeclarationFormFound()) {
-                                    Dialog.confirmMessage(getView().getTaxType().equals(TaxType.DEAL) ? EDIT_FOUND_TEXT_D : EDIT_FOUND_TEXT,
-                                            new DialogHandler() {
-                                                @Override
-                                                public void yes() {
-                                                    super.yes();
-                                                    getView().setEditMode(true);
-                                                }
-                                            });
-                                } else {
-                                    getView().setEditMode(true);
-                                }
-                            }
-                        }, this));
+        getView().setEditMode(true);
     }
 
     @Override
