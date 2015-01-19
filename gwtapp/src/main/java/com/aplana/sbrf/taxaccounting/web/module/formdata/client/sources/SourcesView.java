@@ -197,15 +197,16 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         };
 
         table.addColumn(counterColumn, "№");
-        table.setColumnWidth(counterColumn, 50, Style.Unit.PX);
+        table.setColumnWidth(counterColumn, 20, Style.Unit.PX);
         table.addColumn(sourceColumn, "Источник / Приёмник");
         table.setColumnWidth(sourceColumn, 80, Style.Unit.PX);
         table.addColumn(departmentColumn, "Подразделение");
         table.addColumn(correctionDateColumn, "Дата сдачи корректировки");
         table.setColumnWidth(correctionDateColumn, 85, Style.Unit.PX);
         table.addColumn(formKindColumn, "Тип формы");
-        table.setColumnWidth(formKindColumn, 150, Style.Unit.PX);
+        table.setColumnWidth(formKindColumn, 100, Style.Unit.PX);
         table.addColumn(formTypeColumn, "Вид формы");
+        table.setColumnWidth(formTypeColumn, 100, Style.Unit.PX);
         table.addColumn(yearColumn, "Год");
         table.addColumn(periodColumn, "Период");
         table.addColumn(monthColumn, "Месяц");
