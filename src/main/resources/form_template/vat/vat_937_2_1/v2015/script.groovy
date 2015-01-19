@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
- * Итоговые данные книги продаж
+ * Сведения из дополнительных листов книги продаж
  * formTemplateId=617
  */
 
