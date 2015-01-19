@@ -60,10 +60,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         justButton.setEnabled(enabled);
     }
 
-    public void setImg(String value) {
-        uploadButton.setImg(value);
-    }
-
     public interface IconResource extends ClientBundle{
         @Source("importIcon.png")
         ImageResource icon();
