@@ -466,7 +466,7 @@ public class FormDataServiceImpl implements FormDataService {
     private void checkPerformer(Logger logger, FormData formData) {
         if (TaxType.INCOME.equals(formData.getFormType().getTaxType()) &&
                 (FormDataKind.PRIMARY.equals(formData.getKind()) || FormDataKind.CONSOLIDATED.equals(formData.getKind())) &&
-                (formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null || formData.getSigners().size() == 0)) {
+                (formData.getPerformer() == null || formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null || formData.getSigners().size() == 0)) {
             logger.error("Форма «Исполнитель и подписанты» заполнена не полностью!");
         }
     }
