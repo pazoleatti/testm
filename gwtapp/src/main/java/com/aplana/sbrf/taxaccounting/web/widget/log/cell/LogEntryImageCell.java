@@ -24,7 +24,7 @@ public class LogEntryImageCell extends AbstractCell<LogEntry> {
 	@Override
 	public void render(com.google.gwt.cell.client.Cell.Context context,
 			LogEntry value, SafeHtmlBuilder sb) {
-		if(value.getLevel() == LogLevel.ERROR){
+		if(value != null && value.getLevel() == LogLevel.ERROR){
 			SafeHtml render = templates.cell(DEFAULT_URL);
 			sb.append(render);
 		}
