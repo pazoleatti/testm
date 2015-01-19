@@ -16,6 +16,8 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -58,8 +60,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         justButton.setEnabled(enabled);
     }
 
-    public void setImg(String value) {
-        uploadButton.setImg(value);
+    public interface IconResource extends ClientBundle{
+        @Source("importIcon.png")
+        ImageResource icon();
     }
 
     private String value;
