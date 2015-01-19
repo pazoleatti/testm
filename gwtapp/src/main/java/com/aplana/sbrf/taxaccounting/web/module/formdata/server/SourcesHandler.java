@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -47,15 +44,17 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
 
         /** Проверяем в скрипте источники-приемники для особенных форм */
         Map<String, Object> params = new HashMap<String, Object>();
-        List<FormToFormRelation> sourceList = new ArrayList<FormToFormRelation>();
-        Boolean sourcesProcessedByScript = null;
-        params.put("sourceList", sourceList);
-        params.put("sourcesProcessedByScript", sourcesProcessedByScript);
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<FormToFormRelation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
         scriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
 
-        if (sourcesProcessedByScript != null && sourcesProcessedByScript) {
+        if (sources.isSourcesProcessedByScript()) {
             //Скрипт возвращает все необходимые источники-приемники
-            relationList.addAll(sourceList);
+            if (sources.getSourceList() != null) {
+                relationList.addAll(sources.getSourceList());
+            }
         } else {
             //Получаем источники-приемники стандарртными методами ядра
             relationList = sourceService.getRelations(

@@ -6,8 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
- * (937.1 v2015) Итоговые данные книги покупок
- * formTemplate = 1606
+ * (937.1.1 v2015) Сведения из дополнительных листов книги покупок
+ * formTemplate = 616
  *
  * 1  rowNum                      № п/п
  * 2  typeCode 		              Код вида операции
