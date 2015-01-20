@@ -152,11 +152,11 @@
                         </g:HorizontalPanel>
                     </g:cell>
                     <g:cell horizontalAlignment="left" width="45%">
-                        <g:HorizontalPanel ui:field="propertyBlock" height="58px" addStyleNames="{style.centerBlock}" visible="false">
+                        <g:HorizontalPanel ui:field="propertyBlock" height="58px" addStyleNames="{style.centerBlock}">
                             <g:cell>
                                 <g:VerticalPanel spacing="2" horizontalAlignment="right" width="120px">
-                                    <g:Label text="Налоговый орган:" addStyleNames="{style.headerAttrName}"/>
-                                    <g:Label text="КПП:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="taxOrganCodeLabel" text="Налоговый орган:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="kppLabel" text="КПП:" addStyleNames="{style.headerAttrName}"/>
                                 </g:VerticalPanel>
                             </g:cell>
                             <g:cell>

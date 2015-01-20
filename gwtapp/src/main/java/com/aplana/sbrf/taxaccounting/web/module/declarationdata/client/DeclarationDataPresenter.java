@@ -87,7 +87,7 @@ public class DeclarationDataPresenter
 
         void setKpp(String kpp);
 
-        void setPropertyBlockVisible(boolean isVisible);
+        void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp);
 
         void startTimerReport(ReportType reportType);
 
@@ -161,11 +161,14 @@ public class DeclarationDataPresenter
 								getView().setDocDate(result.getDocDate());
                                 getView().setDepartment(result.getDepartment());
                                 if(taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT)){
-                                    getView().setPropertyBlockVisible(true);
+                                    getView().setPropertyBlockVisible(true, true);
                                     getView().setTaxOrganCode(result.getTaxOrganCode());
                                     getView().setKpp(result.getKpp());
+                                } else if (taxType.equals(TaxType.INCOME)){
+                                    getView().setPropertyBlockVisible(false, true);
+                                    getView().setKpp(result.getKpp());
                                 } else {
-                                    getView().setPropertyBlockVisible(false);
+                                    getView().setPropertyBlockVisible(false, false);
                                 }
 								getView()
 										.setBackButton(
@@ -268,7 +271,7 @@ public class DeclarationDataPresenter
 		if (accepted) {
 			LogCleanEvent.fire(this);
 			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
-			action.setAccepted(accepted);
+			action.setAccepted(true);
 			action.setDeclarationId(declarationId);
 			dispatcher
 					.execute(
