@@ -109,7 +109,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private ValidateXMLService validateXMLService;
 
-    private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s в %s, состояние - %s";
+    private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
 
     public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
@@ -620,14 +620,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
             DeclarationTemplate dt = declarationTemplateService.get(dd.getDeclarationTemplateId());
-            logger.error(DD_NOT_IN_RANGE,
-                    rp.getName(),
-                    rp.getTaxPeriod().getYear(),
+            logger.error(DD_NOT_IN_RANGE, rp.getName(), rp.getTaxPeriod().getYear(),
                     drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                             formatter.format(drp.getCorrectionDate())) : "",
-                    dt.getName(),
-                    departmentDao.getDepartment(dd.getDepartmentId()).getName(),
-                    dd.isAccepted()?"принята":"не принята");
+                    dt.getName(), dd.isAccepted()?"принята":"не принята");
         }
     }
 }

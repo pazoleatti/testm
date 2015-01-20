@@ -62,7 +62,7 @@ public class FormDataServiceImpl implements FormDataService {
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
-    private static final String FD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s в %s, состояние - %s";
+    private static final String FD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
 
     @Autowired
 	private FormDataDao formDataDao;
@@ -1254,14 +1254,10 @@ public class FormDataServiceImpl implements FormDataService {
             ReportPeriod rp = reportPeriodService.getReportPeriod(fd.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
             FormTemplate ft = formTemplateService.get(fd.getFormTemplateId());
-            logger.error(FD_NOT_IN_RANGE,
-                    rp.getName() + (fd.getPeriodOrder() != null?Months.fromId(fd.getPeriodOrder()).getTitle():""),
-                    rp.getTaxPeriod().getYear(),
+            logger.error(FD_NOT_IN_RANGE, rp.getName(), rp.getTaxPeriod().getYear(),
                     drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                             SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                    ft.getName(),
-                    departmentDao.getDepartment(fd.getDepartmentId()).getName(),
-                    fd.getState().getName());
+                    ft.getName(), fd.getState().getName());
         }
     }
 }
