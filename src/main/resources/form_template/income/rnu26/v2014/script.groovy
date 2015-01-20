@@ -15,7 +15,7 @@ import groovy.transform.Field
 // графа 1  - rowNumber
 // графа    - fix
 // графа 2  - issuer                    - зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
-// графа 3  - shareType                 - атрибут 847 - TYPE - «Типы акции», справочник 97 «Типы акции»
+// графа 3  - shareType                 - атрибут 846 - CODE - «Код», справочник 97 «Типы акции»
 // графа 4  - tradeNumber
 // графа 5  - currency                  - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
 // графа 6  - lotSizePrev
@@ -678,9 +678,9 @@ void addData(def xml, int headRowCount) {
 
         def xmlIndexCol
 
-        // графа 3 - атрибут 847 - TYPE - «Типы акции», справочник 97 «Типы акции»
+        // графа 3 - справочник 97 «Типы акции»
         xmlIndexCol = 3
-        newRow.shareType = getRecordIdImport(97, 'TYPE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        newRow.shareType = getRecordIdImport(97, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 4
         xmlIndexCol = 4
@@ -788,6 +788,11 @@ void addTransportData(def xml) {
         def record15 = getRecordImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // TODO http://jira.aplana.com/browse/SBRFACCTAX-7355
         // значение, встречается более одного раза в справочнике «Ценные бумаги»
+        /*def record84
+        def records = getProvider(84L).getRecords(getReportPeriodEndDate(), null, "CODE_CUR = " + record15?.record_id?.value?.toString(), null)
+        if (records != null && records.size() == 1) {
+            record84 = getRecordImport(84, 'CODE_CUR', record15?.record_id?.value?.toString(), rnuIndexRow, xmlIndexCol + colOffset)
+        }*/
         def record84 = getRecordImport(84, 'CODE_CUR', record15?.record_id?.value?.toString(), rnuIndexRow, xmlIndexCol + colOffset)
         newRow.currency = record84?.record_id?.value
         // графа 6
@@ -796,7 +801,7 @@ void addTransportData(def xml) {
         // графа 7
         xmlIndexCol = 7
         newRow.lotSizeCurrent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-         // графа 9
+        // графа 9
         xmlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 8
@@ -856,6 +861,9 @@ void addTransportData(def xml) {
         // графа 8
         xmlIndexCol = 8
         total.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 14
+        xmlIndexCol = 14
+        total.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 15
         xmlIndexCol = 15
         total.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -985,4 +993,17 @@ def getRate(def row, def date) {
 
 def isRubleCurrency(def currencyCode) {
     return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
+}
+
+/**
+ * Получение провайдера с использованием кеширования.
+ *
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
 }
