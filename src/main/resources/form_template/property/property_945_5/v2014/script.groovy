@@ -1351,14 +1351,14 @@ def getSources() {
                 FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                         departmentFormType.departmentId, currentPeriod.id, monthOrder)
                 def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
-                sourceList.add(formToFormRelation)
+                sources.sourceList.add(formToFormRelation)
             }
         } else {
             // квартальная форма
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                     departmentFormType.departmentId, currentPeriod.id, null)
             def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
-            sourceList.add(formToFormRelation)
+            sources.sourceList.add(formToFormRelation)
         }
     }
 
@@ -1377,22 +1377,22 @@ def getSources() {
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                     departmentFormType.departmentId, currentPeriod.id, null)
             def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
-            sourceList.add(formToFormRelation)
+            sources.sourceList.add(formToFormRelation)
             continue
         }
         // ежемесячные
         monthlyFormsPeriodsMap.each { period, monthOrders ->
             monthOrders.each { monthOrder ->
                 FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                        departmentFormType.departmentId, currentPeriod.id, monthOrder)
-                def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
-                sourceList.add(formToFormRelation)
+                        departmentFormType.departmentId, period.id, monthOrder)
+                def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, period, monthOrder)
+                sources.sourceList.add(formToFormRelation)
             }
         }
     }
 
-    sourcesProcessedByScript = true
-    return sourceList
+    sources.sourcesProcessedByScript = true
+    return sources.sourceList
 }
 
 /**
