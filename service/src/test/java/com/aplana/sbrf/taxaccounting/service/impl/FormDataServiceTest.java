@@ -737,6 +737,7 @@ public class FormDataServiceTest {
         fd.setDepartmentReportPeriodId(17);
         fd.setState(WorkflowState.ACCEPTED);
         fd.setFormTemplateId(1);
+        fd.setDepartmentId(0);
         ReportPeriod rp = new ReportPeriod();
         rp.setName("Период");
         TaxPeriod tp = new TaxPeriod();
@@ -755,6 +756,9 @@ public class FormDataServiceTest {
         when(periodService.getReportPeriod(fd.getReportPeriodId())).thenReturn(rp);
         when(departmentReportPeriodService.get(fd.getDepartmentReportPeriodId())).thenReturn(drp);
         when(formTemplateService.get(fd.getFormTemplateId())).thenReturn(ft);
+        Department department = new Department();
+        department.setName("Филиал");
+        when(departmentDao.getDepartment(fd.getDepartmentId())).thenReturn(department);
         for (Integer id : a){
             when(formDataDao.getWithoutRows(id)).thenReturn(fd);
         }
