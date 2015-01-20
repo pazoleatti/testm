@@ -289,7 +289,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 for (int i = 0; i < codes.length; i++) {
                     codes[i] = "'" + codes[i].trim() + "'";
                 }
-                if (codes != null && codes.length != 0) {
+                if (codes.length != 0) {
                     sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.tax_organ_code", Arrays.asList(codes)));
                 }
             }
@@ -299,7 +299,17 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
                 for (int i = 0; i < codes.length; i++) {
                     codes[i] = "'" + codes[i].trim() + "'";
                 }
-                if (codes != null && codes.length != 0) {
+                if (codes.length != 0) {
+                    sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.kpp", Arrays.asList(codes)));
+                }
+            }
+        } else if (filter.getTaxType() == TaxType.INCOME){
+            if (filter.getTaxOrganKpp() != null && !filter.getTaxOrganKpp().isEmpty()) {
+                String[] codes = filter.getTaxOrganKpp().split("; ");
+                for (int i = 0; i < codes.length; i++) {
+                    codes[i] = "'" + codes[i].trim() + "'";
+                }
+                if (codes.length != 0) {
                     sql.append(" AND ").append(SqlUtils.transformToSqlInStatement("dec.kpp", Arrays.asList(codes)));
                 }
             }
