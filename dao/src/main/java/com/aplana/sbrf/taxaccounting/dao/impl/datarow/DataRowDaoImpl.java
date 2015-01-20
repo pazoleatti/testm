@@ -212,7 +212,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
 		checkIndexesRange(formData, false, true, index);
 		index--;
-		Long ordBegin = getOrd(formData.getId(), index);
+		Long ordBegin = getOrd(formData.getId(), index, formData.isManual());
 		if (ordBegin == null) {
 			ordBegin = 0l;
 		}
@@ -246,7 +246,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param rows
 	 */
 	private void insertRows(FormData formData, int index, long ordBegin, List<DataRow<Cell>> rows) {
-		Long ordEnd = getOrd(formData.getId(), index + 1);
+		Long ordEnd = getOrd(formData.getId(), index + 1, formData.isManual());
 		long ordStep = ordEnd == null ?
 			DataRowDaoImplUtils.DEFAULT_ORDER_STEP :
 			DataRowDaoImplUtils.calcOrdStep(ordBegin, ordEnd, rows.size());
@@ -273,7 +273,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 sql = sql.replaceFirst("OVER \\(ORDER BY dr.ord\\)", "over ()");
             }
             getNamedParameterJdbcTemplate().update(sql, map);
-            ordEnd = getOrd(formData.getId(), index + 1);
+            ordEnd = getOrd(formData.getId(), index + 1, formData.isManual());
             ordStep = DataRowDaoImplUtils
                     .calcOrdStep(ordBegin, ordEnd, rows.size());
 		}
@@ -290,7 +290,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                                         TypeFlag toType) {
 		getJdbcTemplate()
 				.update("update DATA_ROW set TYPE = ? where FORM_DATA_ID = ? and TYPE = ?",
-						toType.getKey(), formDataId, fromType.getKey());
+                        toType.getKey(), formDataId, fromType.getKey());
 	}
 
 	private void physicalUpdateRowsType(final List<DataRow<Cell>> dataRows, final TypeFlag toType) {
@@ -417,10 +417,11 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * 
 	 * @param formDataId
 	 * @param dataRowIndex
-	 * @return
+	 * @param manual
+     * @return
 	 */
-	private Long getOrd(long formDataId, int dataRowIndex) {
-		String sql = "select ORD from (select row_number() over (order by ORD) as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId) RR where IDX = :dataRowIndex";
+	private Long getOrd(long formDataId, int dataRowIndex, boolean manual) {
+        String sql = "select ORD from (select row_number() over (order by ORD) as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId and manual = :manual) RR where IDX = :dataRowIndex";
         if (!isSupportOver()){
             sql = sql.replaceFirst("over \\(order by ORD\\)", "over ()");
         }
@@ -428,6 +429,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("formDataId", formDataId);
 		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
 		params.put("dataRowIndex", dataRowIndex);
+        params.put("manual", manual);
 		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
 		return list.isEmpty() ? null : DataAccessUtils.requiredSingleResult(list);
 	}
@@ -452,14 +454,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		try {
 			return DataAccessUtils.requiredSingleResult(getNamedParameterJdbcTemplate()
 					.query(sql, params,
-							new RowMapper<Pair<Long, Integer>>() {
-								@Override
-								public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
-									return new Pair<Long, Integer>(
-											SqlUtils.getLong(rs, "ord"),
-											SqlUtils.getInteger(rs, "idx"));
-								}
-							}));
+                            new RowMapper<Pair<Long, Integer>>() {
+                                @Override
+                                public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                                    return new Pair<Long, Integer>(
+                                            SqlUtils.getLong(rs, "ord"),
+                                            SqlUtils.getInteger(rs, "idx"));
+                                }
+                            }));
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException(ERROR_MSG_NO_ROWID, dataRowId, formDataId);
 		}
@@ -484,17 +486,17 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
         getNamedParameterJdbcTemplate()
 			.query(sql,
-					params,
-					new RowCallbackHandler() {
-						@Override
-						public void processRow(ResultSet rs) throws SQLException {
-							Integer type = SqlUtils.getInteger(rs, "type");
-							Long ord = SqlUtils.getLong(rs, "ord");
-							Long id = SqlUtils.getLong(rs, "id");
-							result.put(id, new Pair<Integer, Long>(type, ord));
-						}
-					}
-			);
+                    params,
+                    new RowCallbackHandler() {
+                        @Override
+                        public void processRow(ResultSet rs) throws SQLException {
+                            Integer type = SqlUtils.getInteger(rs, "type");
+                            Long ord = SqlUtils.getLong(rs, "ord");
+                            Long id = SqlUtils.getLong(rs, "id");
+                            result.put(id, new Pair<Integer, Long>(type, ord));
+                        }
+                    }
+            );
 		if (result.size() != dataRowIds.size()) {
 			throw new DaoException(ERROR_MSG_NO_ROWID);
 		}
