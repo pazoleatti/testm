@@ -333,4 +333,13 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         }
         return usersList;
     }
+
+    @Override
+    public void delete(List<Integer> reportPeriodIds) {
+        try {
+            ifrsDao.delete(reportPeriodIds);
+        } catch (Exception e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        }
+    }
 }
