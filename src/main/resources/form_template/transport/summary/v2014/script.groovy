@@ -71,6 +71,14 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
+    case FormDataEvent.ADD_ROW:
+        addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW:
+        if (currentDataRow?.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
+        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -390,7 +398,7 @@ def checkTaKpp(def row, def errorMsg) {
             " and LOWER(TAX_ORGAN_CODE) = LOWER('${row.taxAuthority?.toString()}') " +
             " and LOWER(KPP) = LOWER('${row.kpp?.toString()}')")
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() != 1) {
+    if (records.size() < 1) {
         logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     }
 }
@@ -955,4 +963,29 @@ void checkRegionId() {
     if (formDataDepartment.regionId == null) {
         throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
     }
+}
+
+void addNewRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def index
+    if (currentDataRow == null || currentDataRow.getIndex() == -1 || currentDataRow.getAlias() == 'total') {
+        index = getDataRow(dataRows, 'totalC').getIndex()
+    } else if (currentDataRow.getAlias() == null) {
+        index = currentDataRow.getIndex() + 1
+    } else {
+        def alias = currentDataRow.getAlias()
+        if (alias.contains('total')) {
+            index = getDataRow(dataRows, alias).getIndex()
+        } else {
+            index = getDataRow(dataRows, 'total' + alias).getIndex()
+        }
+    }
+    def newRow = formData.createDataRow()
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias("Редактируемое поле")
+    }
+    dataRows.add(index - 1, newRow)
+    dataRowHelper.save(dataRows)
 }
