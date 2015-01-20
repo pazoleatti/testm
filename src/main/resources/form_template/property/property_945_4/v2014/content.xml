@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>true</fixedRows>
+    <fixedRows>false</fixedRows>
     <name>Расчёт налога на имущество по кадастровой стоимости</name>
     <fullName>Расчёт налога на имущество по кадастровой стоимости</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
