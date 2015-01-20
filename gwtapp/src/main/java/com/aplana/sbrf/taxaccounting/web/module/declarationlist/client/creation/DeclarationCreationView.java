@@ -277,11 +277,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE_D);
         }
 
-        boolean isCodeKppVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT);
-        codePanel.setVisible(isCodeKppVisible);
+        boolean isCodeKppVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME);
+        boolean isCodeVisible = taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT);
+        codePanel.setVisible(isCodeVisible);
         kppPanel.setVisible(isCodeKppVisible);
-
-        kppPanel.setVisible(taxType.equals(TaxType.INCOME));
 
         declarationTypeId.setVisible(true);
     }
