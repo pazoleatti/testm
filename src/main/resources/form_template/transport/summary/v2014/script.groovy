@@ -69,6 +69,15 @@ switch (formDataEvent) {
         checkRegionId()
         consolidation()
         calc()
+        logicCheck()
+        break
+    case FormDataEvent.ADD_ROW:
+        addNewRow()
+        break
+    case FormDataEvent.DELETE_ROW:
+        if (currentDataRow?.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -128,10 +137,6 @@ def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
 @Field
 def reportDay = null
-
-// Надо ли выполнять проверку графы 24 в логических проверках
-@Field
-def needCheckTaxRate = true
 
 @Field
 def calendarStartDate = null
@@ -272,7 +277,7 @@ def calc() {
         }
 
         // Графа 24 (Налоговая ставка)
-        row.taxRate = calc24(row, region, errorMsg)
+        row.taxRate = calc24(row, region, errorMsg, false)
 
         def partRight = null
         if (row.partRight != null && row.partRight ==~ /\d{1,10}\/\d{1,10}/) {
@@ -393,7 +398,7 @@ def checkTaKpp(def row, def errorMsg) {
             " and LOWER(TAX_ORGAN_CODE) = LOWER('${row.taxAuthority?.toString()}') " +
             " and LOWER(KPP) = LOWER('${row.kpp?.toString()}')")
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() != 1) {
+    if (records.size() < 1) {
         logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     }
 }
@@ -458,11 +463,9 @@ void logicCheck() {
         // 8. Проверка налоговой ставки ТС
         // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
         // приведённой в алгоритме расчёта «графы 24» Табл. 3
-        if (needCheckTaxRate) {
-            // получение региона по ОКТМО
-            def region = getRegionByOKTMO(row.okato, errorMsg)
-            calc24(row, region, errorMsg)
-        }
+        // получение региона по ОКТМО
+        def region = getRegionByOKTMO(row.okato, errorMsg)
+        calc24(row, region, errorMsg, true)
 
         // 9. Проверка на корректность заполнения кода НО и КПП согласно справочнику параметров представления деклараций
         checkTaKpp(row, errorMsg)
@@ -475,12 +478,12 @@ void logicCheck() {
 def getRegionByOKTMO(def oktmoCell, def errorMsg) {
     def reportDate = getReportDate()
 
-    def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue?.substring(0, 2)
-    if (oktmo3.equals("719")) {
+    def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue?.substring(0, 3)
+    if ("719".equals(oktmo3)) {
         return getRecord(4, 'CODE', '89', null, null, reportDate);
-    } else if (oktmo3.equals("718")) {
+    } else if ("718".equals(oktmo3)) {
         return getRecord(4, 'CODE', '86', null, null, reportDate);
-    } else if (oktmo3.equals("118")) {
+    } else if ("118".equals(oktmo3)) {
         return getRecord(4, 'CODE', '83', null, null, reportDate);
     } else {
         def filter = "OKTMO_DEFINITION like '" + oktmo3?.substring(0, 2) + "%'"
@@ -855,11 +858,9 @@ void placeError(DataRow row, String alias, ArrayList<String> errorFields, String
  * Графа 14 (Налоговая ставка)
  * Скрипт для вычисления налоговой ставки
  */
-def calc24(def row, def region, def errorMsg) {
-    needCheckTaxRate = false
-    def tsTypeCode
+def calc24(def row, def region, def errorMsg, def check) {
     if (row.tsTypeCode != null && row.years != null && row.taxBase != null) {
-        tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
+        def tsTypeCode = getRefBookValue(42, row.tsTypeCode)?.CODE?.stringValue
 
         // запрос по выборке данных из справочника
         def query = " and DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() +
@@ -878,7 +879,7 @@ def calc24(def row, def region, def errorMsg) {
          */
         def regionSqlPartID = " and DICT_REGION_ID = " + region?.record_id?.numberValue
         def regionSqlPartNull = " and DICT_REGION_ID is null"
-        def queryLike = "CODE LIKE '" + tsTypeCode.substring(0, 2) + "%'" + query
+        def queryLike = "CODE LIKE '" + tsTypeCode.substring(0, 3) + "%'" + query
         def queryLikeStrictly = "CODE LIKE '" + tsTypeCode + "'" + query
 
         def reportDate = getReportDate()
@@ -900,10 +901,25 @@ def calc24(def row, def region, def errorMsg) {
 
         if (record != null) {
             return record.record_id.numberValue
-        } else {
-            logger.error(errorMsg + "Для заданных параметров ТС («Код вида ТС», «Налоговая база», " +
-                    "«Единица измерения налоговой базы по ОКЕИ», «Количество полных месяцев владения», «Код ОКТМО») " +
-                    "в справочнике «Ставки транспортного налога» не найдена соответствующая налоговая ставка ТС!")
+        } else if (check) {
+            def String taxBaseOkeiUnit = getRefBookValue(12, row.taxBaseOkeiUnit).CODE.value ?: ''
+            def String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = " + row.okato?.toString()
+            def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
+            def String declarationRegionId = ''
+            def String regionId = ''
+            if (records != null && records.size() == 1) {
+                declarationRegionId = getRefBookValue(4, records[0].DECLARATION_REGION_ID.value)?.CODE?.value ?: ''
+                regionId = getRefBookValue(4, records[0].REGION_ID.value)?.CODE?.value ?: ''
+            }
+            // дополнить 0 слева если значении меньше четырех
+            logger.error(errorMsg + "Для заданных параметров ТС (" +
+                    "«Код субъекта РФ представителя декларации» = «" + declarationRegionId + "», " +
+                    "«Код субъекта РФ» = «" + regionId + "», " +
+                    "«Код вида ТС» = «" + tsTypeCode + "», " +
+                    "«Количество лет, прошедших с года выпуска ТС» = «" + row.years + "», " +
+                    "«Налоговая база» (мощность) = «" + row.taxBase + "», " +
+                    "«Единица измерения налоговой базы по ОКЕИ» = «" + taxBaseOkeiUnit + "»" +
+                    ") в справочнике «Ставки транспортного налога» не найдена соответствующая налоговая ставка ТС!")
         }
     } else {
         placeError(row, 'taxRate', ['tsTypeCode', 'years', 'taxBase'], errorMsg)
@@ -947,4 +963,29 @@ void checkRegionId() {
     if (formDataDepartment.regionId == null) {
         throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
     }
+}
+
+void addNewRow() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def index
+    if (currentDataRow == null || currentDataRow.getIndex() == -1 || currentDataRow.getAlias() == 'total') {
+        index = getDataRow(dataRows, 'totalC').getIndex()
+    } else if (currentDataRow.getAlias() == null) {
+        index = currentDataRow.getIndex() + 1
+    } else {
+        def alias = currentDataRow.getAlias()
+        if (alias.contains('total')) {
+            index = getDataRow(dataRows, alias).getIndex()
+        } else {
+            index = getDataRow(dataRows, 'total' + alias).getIndex()
+        }
+    }
+    def newRow = formData.createDataRow()
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias("Редактируемое поле")
+    }
+    dataRows.add(index - 1, newRow)
+    dataRowHelper.save(dataRows)
 }

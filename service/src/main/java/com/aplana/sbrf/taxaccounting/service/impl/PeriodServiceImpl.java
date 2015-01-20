@@ -378,6 +378,9 @@ public class PeriodServiceImpl implements PeriodService {
                             return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
                         }
                     } else {
+                        if (drp.isBalance() != balancePeriod) {
+                            return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
+                        }
                         filter = new DepartmentReportPeriodFilter();
                         filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
                         filter.setDepartmentIdList(Arrays.asList(departmentId));

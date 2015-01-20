@@ -52,6 +52,14 @@ switch (formDataEvent) {
         checkPrevForm()
         logicCheck()
         break
+    case FormDataEvent.ADD_ROW:
+        formDataService.addRow(formData, currentDataRow, null, null)
+        break
+    case FormDataEvent.DELETE_ROW:
+        if (currentDataRow?.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
+        break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -1351,14 +1359,14 @@ def getSources() {
                 FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                         departmentFormType.departmentId, currentPeriod.id, monthOrder)
                 def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
-                sourceList.add(formToFormRelation)
+                sources.sourceList.add(formToFormRelation)
             }
         } else {
             // квартальная форма
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                     departmentFormType.departmentId, currentPeriod.id, null)
             def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
-            sourceList.add(formToFormRelation)
+            sources.sourceList.add(formToFormRelation)
         }
     }
 
@@ -1377,22 +1385,22 @@ def getSources() {
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                     departmentFormType.departmentId, currentPeriod.id, null)
             def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
-            sourceList.add(formToFormRelation)
+            sources.sourceList.add(formToFormRelation)
             continue
         }
         // ежемесячные
         monthlyFormsPeriodsMap.each { period, monthOrders ->
             monthOrders.each { monthOrder ->
                 FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                        departmentFormType.departmentId, currentPeriod.id, monthOrder)
-                def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
-                sourceList.add(formToFormRelation)
+                        departmentFormType.departmentId, period.id, monthOrder)
+                def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, period, monthOrder)
+                sources.sourceList.add(formToFormRelation)
             }
         }
     }
 
-    sourcesProcessedByScript = true
-    return sourceList
+    sources.sourcesProcessedByScript = true
+    return sources.sourceList
 }
 
 /**

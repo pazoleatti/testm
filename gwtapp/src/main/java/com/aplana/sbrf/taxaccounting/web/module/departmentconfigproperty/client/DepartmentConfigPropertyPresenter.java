@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -12,8 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetDepartmentTreeDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -42,6 +43,9 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private static final long TABLE_INCOME_REFBOOK_ID = 330L;
     private static final long INCOME_REFBOOK_ID = 33L;
 
+    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
+            "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
+    private static final String EDIT_FOUND_TEXT_D = "Настройки используются для форм/уведомлений. Желаете внести изменения в Настройки?";
 
     private Department userDepartment;
 
@@ -325,39 +329,81 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         return true;
     }
 
-    private void saveData(List<Map<String, TableCell>> rows) {
+    private void saveData(final List<Map<String, TableCell>> rows) {
         if (!checkBeforeSave(rows)) {
             return;
         }
-        SaveDepartmentRefBookValuesAction action = new SaveDepartmentRefBookValuesAction();
-        action.setRows(rows);
-        action.setRecordId(recordId);
+        LogCleanEvent.fire(DepartmentConfigPropertyPresenter.this);
+
+        final GetCheckDeclarationAction action = new GetCheckDeclarationAction();
         action.setReportPeriodId(getView().getReportPeriodId());
-        action.setDepartmentId(getView().getDepartmentId());
-        action.setNotTableParams(getView().getNonTableParams());
-        action.setRefBookId(getCurrentRefBookId());
-        action.setSlaveRefBookId(getCurrentTableRefBookId());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<SaveDepartmentRefBookValuesResult>() {
-                    @Override
-                    public void onSuccess(SaveDepartmentRefBookValuesResult result) {
+        action.setDepartment(getView().getDepartmentId());
+        action.setTaxType(getView().getTaxType());
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetCheckDeclarationResult>() {
+                            void save() {
+                                SaveDepartmentRefBookValuesAction saveAction = new SaveDepartmentRefBookValuesAction();
+                                saveAction.setRows(rows);
+                                saveAction.setRecordId(recordId);
+                                saveAction.setReportPeriodId(getView().getReportPeriodId());
+                                saveAction.setDepartmentId(getView().getDepartmentId());
+                                saveAction.setNotTableParams(getView().getNonTableParams());
+                                saveAction.setRefBookId(getCurrentRefBookId());
+                                saveAction.setSlaveRefBookId(getCurrentTableRefBookId());
+                                dispatcher.execute(saveAction, CallbackUtils
+                                        .defaultCallback(new AbstractCallback<SaveDepartmentRefBookValuesResult>() {
+                                            @Override
+                                            public void onSuccess(SaveDepartmentRefBookValuesResult result) {
+                                                if (result.isHasFatalError()) {
+                                                    switch (result.getErrorType()) {
+                                                        case HAS_DUPLICATES:
+                                                            Dialog.errorMessage("Версия не сохранена. Обнаружены фатальные ошибки!");
+                                                            break;
+                                                        case INCORRECT_FIELDS:
+                                                            Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
+                                                            break;
+                                                    }
 
-                        if (result.isHasFatalError()) {
-                            switch (result.getErrorType()) {
-                                case HAS_DUPLICATES:
-                                    Dialog.errorMessage("Версия не сохранена. Обнаружены фатальные ошибки!");
-                                    break;
-                                case INCORRECT_FIELDS:
-                                    Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
-                                    break;
+                                                    LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+                                                } else {
+                                                    getData();
+                                                }
+                                            }
+                                        }, DepartmentConfigPropertyPresenter.this));
                             }
+                            @Override
+                            public void onSuccess(final GetCheckDeclarationResult result) {
+                                if (result.getUuid() != null) {
+                                    LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+                                }
+                                if (result.isDeclarationFormFound()) {
+                                    Dialog.confirmMessage(getView().getTaxType().equals(TaxType.DEAL) ? EDIT_FOUND_TEXT_D : EDIT_FOUND_TEXT,
+                                            new DialogHandler() {
+                                                @Override
+                                                public void yes() {
+                                                    super.yes();
+                                                    getView().setEditMode(true);
 
-                            LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
-                        } else {
-                            getData();
-                        }
-                    }
-                }, this));
+                                                    AddLogAction addLogAction = new AddLogAction();
+                                                    addLogAction.setOldUUID(result.getUuid());
+                                                    addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
+                                                            "Для актуализации данных в найденных экземплярах налоговых/форм деклараций их необходимо рассчитать/обновить")));
+                                                    dispatcher.execute(addLogAction, CallbackUtils
+                                                            .defaultCallback(new AbstractCallback<AddLogResult>() {
+                                                                @Override
+                                                                public void onSuccess(AddLogResult result) {
+                                                                    LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+                                                                }
+                                                            }, DepartmentConfigPropertyPresenter.this));
+                                                    save();
+                                                }
+                                            });
+                                } else {
+                                    save();
+                                }
+                            }
+                        }, this));
     }
 
     private boolean checkBeforeSave(List<Map<String, TableCell>> rows) {
