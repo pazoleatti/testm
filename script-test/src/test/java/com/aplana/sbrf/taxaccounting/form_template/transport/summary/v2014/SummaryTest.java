@@ -172,7 +172,6 @@ public class SummaryTest extends ScriptTestBase {
         when(testHelper.getDepartmentService().get(DEPARTMENT_ID)).thenReturn(department);
 
         // DataRowHelper НФ-источника
-
         when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
 
         // Консолидация
@@ -180,7 +179,8 @@ public class SummaryTest extends ScriptTestBase {
         testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(11, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
-        checkLogger();
+
+        Assert.assertTrue("Logger must contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     @Test
