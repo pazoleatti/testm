@@ -212,7 +212,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
 		checkIndexesRange(formData, false, true, index);
 		index--;
-		Long ordBegin = getOrd(formData.getId(), index);
+		Long ordBegin = getOrd(formData.getId(), index, formData.isManual());
 		if (ordBegin == null) {
 			ordBegin = 0l;
 		}
@@ -246,7 +246,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param rows
 	 */
 	private void insertRows(FormData formData, int index, long ordBegin, List<DataRow<Cell>> rows) {
-		Long ordEnd = getOrd(formData.getId(), index + 1);
+		Long ordEnd = getOrd(formData.getId(), index + 1, formData.isManual());
 		long ordStep = ordEnd == null ?
 			DataRowDaoImplUtils.DEFAULT_ORDER_STEP :
 			DataRowDaoImplUtils.calcOrdStep(ordBegin, ordEnd, rows.size());
@@ -273,7 +273,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 sql = sql.replaceFirst("OVER \\(ORDER BY dr.ord\\)", "over ()");
             }
             getNamedParameterJdbcTemplate().update(sql, map);
-            ordEnd = getOrd(formData.getId(), index + 1);
+            ordEnd = getOrd(formData.getId(), index + 1, formData.isManual());
             ordStep = DataRowDaoImplUtils
                     .calcOrdStep(ordBegin, ordEnd, rows.size());
 		}
@@ -419,8 +419,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param dataRowIndex
 	 * @return
 	 */
-	private Long getOrd(long formDataId, int dataRowIndex) {
-		String sql = "select ORD from (select row_number() over (order by ORD) as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId) RR where IDX = :dataRowIndex";
+	private Long getOrd(long formDataId, int dataRowIndex, boolean manual) {
+		String sql = "select ORD from (select row_number() over (order by ORD) as IDX, ORD from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId and manual = :manual) RR where IDX = :dataRowIndex";
         if (!isSupportOver()){
             sql = sql.replaceFirst("over \\(order by ORD\\)", "over ()");
         }
@@ -428,6 +428,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("formDataId", formDataId);
 		params.put("types", Arrays.asList(TypeFlag.ADD.getKey(), TypeFlag.SAME.getKey()));
 		params.put("dataRowIndex", dataRowIndex);
+        params.put("manual", manual);
 		List<Long> list = getNamedParameterJdbcTemplate().queryForList(sql, params, Long.class);
 		return list.isEmpty() ? null : DataAccessUtils.requiredSingleResult(list);
 	}
@@ -739,14 +740,21 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         for (DataRow<Cell> row : dataRows) {
             dataRowIds.add(row.getId());
         }
-        String sqlSelectOrds = "SELECT ord FROM data_row WHERE " + SqlUtils.transformToSqlInStatement("id", dataRowIds) + " ORDER BY ord";
-        final List<Long> ords = getJdbcTemplate().queryForList(sqlSelectOrds, Long.class);
+        String sqlSelectOrds = "SELECT id, ord FROM data_row WHERE " + SqlUtils.transformToSqlInStatement("id", dataRowIds) + " ORDER BY ord";
+        final Map<Long, Long> ords = new HashMap<Long, Long>();
+        getJdbcTemplate().query(sqlSelectOrds, new RowMapper<Object>() {
+            @Override
+            public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+                ords.put(rs.getLong("id"), rs.getLong("ord"));
+                return null;
+            }
+        });
 
         StringBuilder sql = new StringBuilder("MERGE INTO data_row dr USING (");
         // задать строке по id соответствующий ord
         for (int i = 0; i < dataRows.size(); i++) {
             DataRow<Cell> row = dataRows.get(i);
-            Long ord = ords.get(i);
+            Long ord = ords.get(row.getId());
             sql.append("\n\t");
             sql.append("SELECT ").append(row.getId());
             if (i == 0) {
