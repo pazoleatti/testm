@@ -9446,7 +9446,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -9462,7 +9462,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -9478,7 +9478,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -10992,7 +10992,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -11008,7 +11008,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -11024,7 +11024,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -15384,7 +15384,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -15400,7 +15400,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -15416,7 +15416,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -21707,7 +21707,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -21723,7 +21723,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -21739,7 +21739,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -32302,7 +32302,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -32318,7 +32318,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
@@ -32334,7 +32334,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page" isBlankWhenNull="true">
-				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
 					<property name="ireport.layer" value="1"/>
 				</reportElement>
 				<box>
