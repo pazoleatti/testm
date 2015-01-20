@@ -6,3 +6,8 @@ alter table data_cell add constraint data_cell_chk_min_dvalue check (dvalue >= t
 --http://jira.aplana.com/browse/SBRFACCTAX-10063: Увеличение размерности поля
 ALTER TABLE log_system MODIFY declaration_type_name VARCHAR2(1000);
 
+
+------------------------------------------------------------------------------------------------------
+COMMIT;
+EXIT;
+

@@ -29,6 +29,9 @@ public class RefBookValueSerializable implements Serializable {
 	}
 
 	public void setStringValue(String stringValue) {
+		stringValue = changeGermanQuotes(stringValue);
+		stringValue = changeEnglishSingleQuotes(stringValue);
+		stringValue = changeEnglishDoubleQuotes(stringValue);
 		this.stringValue = stringValue;
 	}
 
@@ -70,5 +73,35 @@ public class RefBookValueSerializable implements Serializable {
 		else if (dateValue != null) return dateValue;
 		else if (referenceValue != null) return referenceValue;
 		else return null;
+	}
+
+	/**
+	 * Заменить немецкие кавычки („лапки“) на машинописные ""
+	 *
+	 * @param stringValue „строка с немецкими кавычками“
+	 * @return "строка с машинописными кавычками"
+	 */
+	private String changeGermanQuotes(String stringValue) {
+		return stringValue.replaceAll("„", "\"").replaceAll("“", "\"");
+	}
+
+	/**
+	 * Заменить английские одиночные кавычки (‘английские одиночные’) на машинописные ""
+	 *
+	 * @param stringValue ‘строка с одиночными английскими кавычками’
+	 * @return "строка с машинописными кавычками"
+	 */
+	private String changeEnglishSingleQuotes(String stringValue) {
+		return stringValue.replaceAll("‘", "\"").replaceAll("’", "\"");
+	}
+
+	/**
+	 * Заменить английские двойные кавычки (“английские двойные”) на машинописные ""
+	 *
+	 * @param stringValue “строка с двойными английскими кавычками”
+	 * @return "строка с машинописными кавычками"
+	 */
+	private String changeEnglishDoubleQuotes(String stringValue) {
+		return stringValue.replaceAll("”", "\"");
 	}
 }

@@ -946,14 +946,14 @@ void checkRegionId() {
 /** Получить результат для события FormDataEvent.GET_SOURCES. */
 def getSources() {
     def reportPeriods = []
-    def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
-    def monthOrder = currentPeriod?.order
+    def monthOrder = formData.periodOrder
     def monthInQuarter = 3
     def needPrevPeriod = monthOrder % monthInQuarter == 1
     // для месяцев не являющиеся первыми месяцами кварталов использовать все приемники
     def useAll = !needPrevPeriod
 
     // текущий период используется всегда
+    def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
     reportPeriods.add(currentPeriod)
 
     // получить предыдущий период
@@ -987,9 +987,11 @@ def getSources() {
                     if (reportPeriod != currentPeriod && destinationDepartmentFormType.formTypeId == destinationFormTypeId) {
                         // если это не текущий период, то использовать только приемники 945.5
                         formDestinations.add(destinationDepartmentFormType)
-                    } else if (reportPeriod == currentPeriod && (destinationDepartmentFormType.formTypeId == destinationFormTypeId || monthOrder == 1)) {
-                        // если это текущий период, то использовать приемники исключая 945.5
-                        // если это текущий период и январь, то использовать все приемники
+                    } else if (reportPeriod == currentPeriod && destinationDepartmentFormType.formTypeId == destinationFormTypeId && monthOrder == 1) {
+                        // если это текущий период и январь и приемник 945.5, то использовать приемник
+                        formDestinations.add(destinationDepartmentFormType)
+                    } else if (reportPeriod == currentPeriod && (destinationDepartmentFormType.formTypeId != destinationFormTypeId)) {
+                        // если это текущий период и (январь или не 945.5), то использовать приемник
                         formDestinations.add(destinationDepartmentFormType)
                     }
                 }
@@ -1005,11 +1007,11 @@ def getSources() {
     }
 
     // проходим по периодам источников и приемников
-    addToResult(sourceList, periodDestinationMap, false)
-    addToResult(sourceList, periodSourceMap, true)
+    addToResult(sources.sourceList, periodDestinationMap, false)
+    addToResult(sources.sourceList, periodSourceMap, true)
 
-    sourcesProcessedByScript = true
-    return sourceList
+    sources.sourcesProcessedByScript = true
+    return sources.sourceList
 }
 
 /**

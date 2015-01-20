@@ -158,3 +158,213 @@ end DEP_REP_PER_BEFORE_INS_UPD;
 
 -----------------------------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-9732: Правила для проверки на уровне БД справочника "Подразделения"
+CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_DELETE"
+before delete on department
+for each row
+declare
+    pragma autonomous_transaction;
+
+    vCurrentDepartmentID number(9) := :old.id;
+    vCurrentDepartmentType number(9) := :old.type;
+    vHasLinks number(1) := -1;
+    vHasDescendant number(1) := -1;
+begin
+--Подразделение с типом "Банк"(type=1) не может быть удалено
+if vCurrentDepartmentType=1 then
+   raise_application_error(-20001, 'Подразделение с типом "Банк" не может быть удалено');
+end if; 
+
+--Существуют дочерние подразделения
+select count(*) into vHasDescendant
+from department
+start with parent_id = vCurrentDepartmentID
+connect by parent_id = prior id;
+
+if vHasDescendant != 0 then
+   raise_application_error(-20002, 'Подразделение, имеющее дочерние подразделения, не может быть удалено');
+end if;
+
+--Ссылочная целостность
+--FORM_DATA
+select count(*) into  vHasLinks from form_data fd
+join department_report_period drp on drp.id = fd.department_report_period_id and drp.department_id = vCurrentDepartmentID;
+
+if vHasLinks !=0 then
+   raise_application_error(-20003, 'Подразделение не может быть удалено, если на него существует ссылка в FORM_DATA');   
+end if;
+
+--DECLARATION_DATA
+select count(*) into  vHasLinks from declaration_data dd
+join department_report_period drp on drp.id = dd.department_report_period_id and drp.department_id = vCurrentDepartmentID;
+
+if vHasLinks !=0 then
+   raise_application_error(-20004, 'Подразделение не может быть удалено, если на него существует ссылка в DECLARATION_DATA');   
+end if;
+
+--SEC_USER
+select count(*) into  vHasLinks from sec_user where department_id = vCurrentDepartmentID;
+
+if vHasLinks !=0 then
+   raise_application_error(-20005, 'Подразделение не может быть удалено, если на него существует ссылка в SEC_USER');   
+end if;
+
+--REF_BOOK_VALUE
+select count(*) into  vHasLinks from ref_book_value rbv
+join ref_book_attribute rba on rba.id = rbv.attribute_id and rba.reference_id = 30 
+where rbv.reference_value = vCurrentDepartmentID;
+
+if vHasLinks !=0 then
+   raise_application_error(-20006, 'Подразделение не может быть удалено, если на него существует ссылка в REF_BOOK_VALUE');   
+end if;
+
+
+end department_before_delete;
+/
+
+CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_INS_UPD"
+  before insert or update on department
+  for each row
+declare
+  pragma autonomous_transaction;
+
+  vCurrentDepartmentID number(9) := :new.id;
+  vCurrentDepartmentType number(9) := :new.type;
+  vFormerDepartmentType number(9) := :old.type;
+  vCurrentDepartmentIsActive number(1) := :new.is_active;
+  vCurrentDepartmentSbrfCode varchar2(255) := :new.sbrf_code;
+   
+  vParentDepartmentID number(9) := :new.parent_id;
+  vFormerParentDepartmentID number(9) := :old.parent_id;
+  vParentDepartmentIsActive number(1) := -1;
+  vParentDepartmentType number(9) := -1;
+  
+  vTBHasChanged number(1) := -1;
+  vAmITheOnlyOne number(9) := -1;
+  vHasLinks number(9) := -1;
+  vHasActiveDescendant number(9) := -1;
+  vIsSbrfCodeUnique number(9) := -1;
+  vHasLoop number(1) := -1;
+begin
+  -- Получение данных о (новом) родителе
+  if vParentDepartmentID is not null then
+    select is_active, type into vParentDepartmentIsActive, vParentDepartmentType
+    from department 
+    where id =  vParentDepartmentID;
+  end if;
+
+  -- Общие проверки при обновлении/добавлении записей
+  if vCurrentDepartmentIsActive = 1 and vParentDepartmentID is not null and vParentDepartmentIsActive <> 1 then
+     raise_application_error(-20101, 'Подразделение с признаком IS_ACTIVE=1 не может иметь родительское подразделение с признаком IS_ACTIVE=0');   
+  end if;
+  -------------------------------------------------------------------
+  if updating('type') and vCurrentDepartmentIsActive = 0 then
+    select count(*) into vHasActiveDescendant 
+    from department
+    where is_active = 1
+    start with parent_id = vCurrentDepartmentID  
+    connect by parent_id = prior id;
+    
+    if vHasActiveDescendant <> 0 then
+       raise_application_error(-20102, 'Неактивное подразделение не может иметь активные дочерние подразделения');
+    end if;    
+  end if;  
+  
+  -------------------------------------------------------------------
+  
+  if vCurrentDepartmentType = 1 and vParentDepartmentID is not null then
+     raise_application_error(-20103, 'Подразделение типа "Банк" не может иметь родительское подраздение');
+  end if; 
+  
+  -------------------------------------------------------------------
+  
+  if vCurrentDepartmentType <> 1 and vParentDepartmentID is null then
+     raise_application_error(-20104, 'Все подразделения (за исключение типа "Банк") должны иметь родительское подраздение');
+  end if; 
+  
+  -------------------------------------------------------------------
+  select count(*) into vAmITheOnlyOne 
+  from department 
+  where id <>  vCurrentDepartmentID and type = 1;
+  
+  if vCurrentDepartmentType = 1 and vAmITheOnlyOne <> 0  then 
+     raise_application_error(-20105, 'Возможно существование только одного подразделения с типом "Банк"');
+  end if;
+  
+  -------------------------------------------------------------------
+  
+  if vCurrentDepartmentType = 2 and vParentDepartmentType <> 1 then
+     raise_application_error(-20106, 'Подразделение с "ТБ" должно иметь родительское подразделение с типом "Банк"');
+  end if; 
+  
+  -------------------------------------------------------------------
+  select count(distinct sbrf_code) into vIsSbrfCodeUnique 
+  from department
+  where is_active = 1 and sbrf_code = vCurrentDepartmentSbrfCode and id <> vCurrentDepartmentID;
+  
+  if vIsSbrfCodeUnique <> 0 then
+     raise_application_error(-20107, 'Значение атрибута "Код подразделения в нотации СБРФ" не уникально среди активных подразделений');
+  end if; 
+  
+  -------------------------------------------------------------------
+  if vFormerDepartmentType = 1 and vCurrentDepartmentType <> 1 then
+     raise_application_error(-20108, 'Для подразделения с типом "Банк" атрибут типа не может быть изменен');
+  end if;
+  -------------------------------------------------------------------
+  if updating('type') and vFormerDepartmentType = 2 then
+    select count(*) into vHasLinks from department_report_period drp
+    join report_period rp on rp.id = drp.report_period_id
+    join tax_period tp on tp.id = rp.tax_period_id and tp.tax_type in ('P', 'T')
+    where drp.department_id = vCurrentDepartmentID;
+    
+    if vHasLinks <> 0 then
+       raise_application_error(-20109, 'Операция смена типа для подразделение уровня "ТБ" недопустима, если существуют зависимые данные в DEPARTMENT_REPORT_PERIOD для налогов на транспорт и имущество');
+    end if;
+  end if;
+  
+  -------------------------------------------------------------------
+  if updating('parent_id') then
+    select count(distinct id) into vTBHasChanged
+    from department
+    where type = 2
+    start with id in (vParentDepartmentID, vFormerParentDepartmentID)
+    connect by id = prior parent_id;
+    
+    if vTBHasChanged > 1 then 
+       raise_application_error(-20110, 'Подразделение не может быть перенесено в поддерево другого ТБ');
+    end if; 
+  end if;
+  
+  -------------------------------------------------------------------
+  if updating('type') and vFormerDepartmentType in (3, 4) then
+     select count(*) into vHasLinks
+     from sec_user
+     where department_id = vCurrentDepartmentID;
+     
+     if vHasLinks <> 0 then 
+        raise_application_error(-20111, 'Операции смена типа для подразделений с типами "ЦСКО, ПЦП", "Управление" недопустимы, если существуют связанные записи в SEC_USER');
+     end if; 
+  end if;
+  
+  -------------------------------------------------------------------
+  if updating('parent_id') then
+     select case when exists
+      (select 1 
+      from department 
+      where id = vParentDepartmentID
+      start with id = vCurrentDepartmentID
+      connect by nocycle parent_id = prior id) then 1 else 0 end into vHasLoop
+      from dual; 
+      
+      if vHasLoop = 1 then 
+        raise_application_error(-20112, 'Подразделение не может входить в иерархию своих дочерних подразделений');
+     end if; 
+      
+  end if;
+  
+  
+  -------------------------------------------------------------------
+end DEPARTMENT_BEFORE_INS_UPD;
+/
+
+COMMIT;
+EXIT;
