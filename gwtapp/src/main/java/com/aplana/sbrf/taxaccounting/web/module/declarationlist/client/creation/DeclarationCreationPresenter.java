@@ -147,7 +147,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
                 || (filter.getDeclarationTypeId() == null)
                 || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT))
                 && (filter.getTaxOrganCode() == null || filter.getTaxOrganCode().isEmpty()))
-                || (taxType.equals(TaxType.INCOME)
+                || ((taxType.equals(TaxType.PROPERTY) || taxType.equals(TaxType.TRANSPORT) || taxType.equals(TaxType.INCOME))
                 && (filter.getTaxOrganKpp() == null || filter.getTaxOrganKpp().isEmpty()))
         ){
             Dialog.errorMessage("Создание декларации", "Заполнены не все параметры декларации");

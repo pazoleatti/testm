@@ -18,10 +18,12 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -33,7 +35,7 @@ import static org.mockito.Mockito.when;
  */
 public class SummaryTest extends ScriptTestBase {
     private static final int TYPE_ID = 203;
-    private static final int SOURCE_TYPE_ID = 204;
+    private static final int SOURCE_TYPE_ID = 201;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -169,12 +171,16 @@ public class SummaryTest extends ScriptTestBase {
 
         when(testHelper.getDepartmentService().get(DEPARTMENT_ID)).thenReturn(department);
 
+        // DataRowHelper НФ-источника
+        when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
+
         // Консолидация
         testHelper.initRowData();
         testHelper.execute(FormDataEvent.COMPOSE);
-        Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(11, testHelper.getDataRowHelper().getAll().size());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
 
-        checkLogger();
+        Assert.assertTrue("Logger must contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     @Test
@@ -188,5 +194,51 @@ public class SummaryTest extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertTrue("Logger must contain error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+    }
+
+    /**
+     * Проверить загруженные данные, а также выполнение расчетов и логических проверок.
+     */
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+
+        // графа 11
+        Assert.assertEquals("12.00.2012", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(1).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.00.2012", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(2).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.00.2011", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(5).getCell("regDate").getDateValue())));
+        Assert.assertEquals("20.00.2008", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(8).getCell("regDate").getDateValue())));
+
+        // графа 12
+        Assert.assertEquals("12.00.2014", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(1).getCell("regDateEnd").getDateValue())));
+
+        // графа 13
+        Assert.assertEquals(12.0, dataRows.get(1).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+        Assert.assertEquals(23.0, dataRows.get(2).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+        Assert.assertEquals(34.0, dataRows.get(5).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+        Assert.assertEquals(56.0, dataRows.get(8).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+
+        // графа 14
+        Assert.assertEquals(1, dataRows.get(1).getCell("taxBaseOkeiUnit").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("taxBaseOkeiUnit").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(5).getCell("taxBaseOkeiUnit").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(8).getCell("taxBaseOkeiUnit").getNumericValue().intValue());
+
+        // графа 15
+        Assert.assertEquals("2008", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(1).getCell("createYear").getDateValue())));
+        Assert.assertEquals("2012", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(2).getCell("createYear").getDateValue())));
+        Assert.assertEquals("2001", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(5).getCell("createYear").getDateValue())));
+        Assert.assertEquals("2011", String.valueOf(new SimpleDateFormat("yyyy").format(dataRows.get(8).getCell("createYear").getDateValue())));
+
+        // графа 20
+        Assert.assertEquals(12.0, dataRows.get(1).getCell("periodStartCost").getNumericValue().doubleValue(), 0.0);
+
+        // графа 21
+        Assert.assertEquals(1, dataRows.get(1).getCell("ownMonths").getNumericValue().intValue());
+        Assert.assertEquals(12, dataRows.get(2).getCell("ownMonths").getNumericValue().intValue());
+        Assert.assertEquals(12, dataRows.get(5).getCell("ownMonths").getNumericValue().intValue());
+        Assert.assertEquals(12, dataRows.get(8).getCell("ownMonths").getNumericValue().intValue());
+
+        // Графа 26
+        Assert.assertEquals(1, dataRows.get(1).getCell("benefitMonths").getNumericValue().intValue());
+
     }
 }

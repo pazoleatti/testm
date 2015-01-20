@@ -51,6 +51,14 @@ switch (formDataEvent) {
         checkPrevForm()
         logicCheck()
         break
+    case FormDataEvent.ADD_ROW:
+        formDataService.addRow(formData, currentDataRow, null, null)
+        break
+    case FormDataEvent.DELETE_ROW:
+        if (currentDataRow?.getAlias() == null) {
+            formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
+        }
+        break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
