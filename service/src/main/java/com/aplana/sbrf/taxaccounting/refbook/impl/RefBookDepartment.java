@@ -45,7 +45,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String FILTER_BY_DEPARTMENT = "DEPARTMENT_ID = %d";
 
     public static final Long REF_BOOK_ID = RefBookDepartmentDao.REF_BOOK_ID;
-    private static final String ERROR_MESSAGE = "Подразделение не сохранено, обнаружены фатальные ошибки!";
+    private static final String ERROR_MESSAGE = "Подразделение не может быть отредактировано, так как были обнаружены фатальные ошибки!";
+    private static final String ERROR_MESSAGE_CREATE =  "Подразделение не может быть создано, обнаружены фатальные ошибки!";
     private static final String DEPARTMENT_TABLE_NAME = "DEPARTMENT";
     private static final String DEPARTMENT_TYPE_ATTRIBUTE = "TYPE";
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
@@ -258,7 +259,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 Map<String, RefBookValue> refBookValueMap = records.get(0).getValues();
                 checkCorrectness(logger, null, attributes, records);
                 if (logger.containsLevel(LogLevel.ERROR))
-                    throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
+                    throw new ServiceLoggerException(ERROR_MESSAGE_CREATE,
                             logEntryService.save(logger.getEntries()));
                 Department newDepartment = new Department();    //TODO (aivanov 22.10.14) newDepartment нигде дальше не используется
                 newDepartment.setName(records.get(0).getValues().get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue());
@@ -269,7 +270,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 createPeriods(depId, fromCode(refBookValueMap.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()),
                         terrBankId);
                 if (logger.containsLevel(LogLevel.ERROR))
-                    throw new ServiceLoggerException("Подразделение не создано, обнаружены фатальные ошибки!",
+                    throw new ServiceLoggerException(ERROR_MESSAGE_CREATE,
                             logEntryService.save(logger.getEntries()));
 
                 logger.info("Подразделение создано");
@@ -361,15 +362,16 @@ public class RefBookDepartment implements RefBookDataProvider {
                 boolean isChangeTB = oldTBId != 0 && oldTBId != newTBId;
 
                 if (isChangeTB)
-                    throw new ServiceLoggerException("Невозможно переместить подразделение в состав другого территориального банка!",
+                    throw new ServiceLoggerException(
+                            "Подразделение не может быть отредактировано, так как невозможно его переместить в состав другого территориального банка!",
                             logEntryService.save(logger.getEntries()));
 
                 if (isChangeType){
                     switch (oldType){
                         //3 шаг
                         case ROOT_BANK :
-                            logger.error("Подразделению не может быть изменен тип \"Банк\"!\"");
-                            throw new ServiceLoggerException(ERROR_MESSAGE,
+                            throw new ServiceLoggerException(
+                                    "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"Банк\"!\"",
                                     logEntryService.save(logger.getEntries()));
                             //4 шаг
                         case TERR_BANK:
@@ -384,7 +386,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                                             period.getTaxPeriod().getTaxType().getName(),
                                             period.getName(),
                                             period.getTaxPeriod().getYear());
-                                throw new ServiceLoggerException("Подразделению не может быть изменен тип \"ТБ\", если для него существует период!",
+                                throw new ServiceLoggerException(
+                                        "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"ТБ\", если для него существует период!",
                                         logEntryService.save(logger.getEntries()));
                             }
                             break;
@@ -399,7 +402,10 @@ public class RefBookDepartment implements RefBookDataProvider {
                             if (!users.isEmpty()){
                                 for (TAUserView user : users)
                                     logger.error("Пользователь %s назначен подразделению %s", user.getName(), dep.getName());
-                                throw new ServiceLoggerException("Невозможно изменить тип \"Управление\", если подразделению назначены пользователи!", logEntryService.save(logger.getEntries()));
+                                throw new ServiceLoggerException(
+                                        "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"Управление\", если ему назначены пользователи!",
+                                        logEntryService.save(logger.getEntries())
+                                );
                             }
                             break;
                     }
@@ -529,17 +535,24 @@ public class RefBookDepartment implements RefBookDataProvider {
                 int depId = uniqueRecordIds.get(0).intValue();
                 List<Integer> childIds = departmentService.getAllChildrenIds(depId);
                 if (!childIds.isEmpty() && childIds.size() > 1){
-                    logger.error("Обнаружены подчиненные подразделения для %s", departmentService.getDepartment(depId).getName());
-                    throw new ServiceLoggerException("Подразделение не удалено!", logEntryService.save(logger.getEntries()));
+                    throw new ServiceLoggerException(
+                            "Подразделение не может быть удалено, так как обнаружены подчиненные подразделения для %s!",
+                            logEntryService.save(logger.getEntries()),
+                            departmentService.getDepartment(depId).getName());
                 }
                 // проверка использования подразделения в гарантиях
                 Department department = departmentService.getDepartment(depId);
                 if (department.isGarantUse()) {
-                    logger.error("Подразделение используется в АС \"Гарантии\"");
+                    throw new ServiceLoggerException(
+                            "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!\"",
+                            null);
                 }
                 isInUsed(department, logger);
                 if (logger.containsLevel(LogLevel.ERROR) || logger.containsLevel(LogLevel.WARNING) && !force)
-                    return;
+                    throw new ServiceLoggerException(
+                            "Подразделение не может быть удалено, так как обнаружены ссылки на подразделение!",
+                            logEntryService.save(logger.getEntries())
+                    );
 
                 //Удаление назначений НФ, у которых совпадает исполнитель с подразделением
                 List<Long> dftIds = departmentFormTypeService.getIdsByPerformerId(depId);
@@ -694,7 +707,10 @@ public class RefBookDepartment implements RefBookDataProvider {
             //Проверяем аттрибут "действующее подразделение" у родительского подразделения
             Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
             if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
-                logger.error("Подразделению не может быть установлен признак \"Действующее\", если оно находится в составе недействующего подразделения!");
+                throw new ServiceLoggerException(
+                        "Подразделение не может быть создано, так как ему не может быть установлен признак \"Действующее\", если оно находится в составе недействующего подразделения!",
+                        logEntryService.save(logger.getEntries())
+                );
             }
         }else {
             Department currDepartment = departmentService.getDepartment(recordId.intValue());
@@ -705,8 +721,10 @@ public class RefBookDepartment implements RefBookDataProvider {
                 List<Department> childIds = departmentService.getAllChildren(recordId.intValue());
                 for (Department child : childIds){
                     if (recordId != child.getId() && child.isActive()){
-                        logger.error("Подразделение не может быть недействующим, если в его составе есть действующие подразделения!");
-                        return;
+                        throw new ServiceLoggerException(
+                                "Подразделение не может быть отредактировано, так как нельзя установить для него признак \"Недействующее\", если в его составе находится действующее подразделение!",
+                                logEntryService.save(logger.getEntries())
+                        );
                     }
                 }
             }
@@ -716,7 +734,10 @@ public class RefBookDepartment implements RefBookDataProvider {
             //Проверяем аттрибут "действующее подразделение" у родительского подразделения
             Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
             if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
-                logger.error("Подразделение не может быть действующим, если оно находится в составе недействующего подразделения!");
+                throw new ServiceLoggerException(
+                        "Подразделение не может быть отредактировано, так как нельзя установить для него признак \"Действующее\", если оно находится в составе недействующего подразделения!",
+                        logEntryService.save(logger.getEntries())
+                );
             }
         }
 

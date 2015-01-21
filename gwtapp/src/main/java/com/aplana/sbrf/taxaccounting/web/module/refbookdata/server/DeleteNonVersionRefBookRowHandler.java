@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -47,9 +46,6 @@ public class DeleteNonVersionRefBookRowHandler extends AbstractActionHandler<Del
         if (action.getRecordsId().size() > 0) {
             logger.setTaUserInfo(securityService.currentUserInfo());
             refBookDataProvider.deleteRecordVersions(logger, action.getRecordsId(), action.isOkDelete());
-            if (logger.containsLevel(LogLevel.ERROR))
-                throw new ServiceLoggerException("Удаление невозможно, обнаружены ссылки на подразделение",
-                        logEntryService.save(logger.getEntries()));
             if (logger.containsLevel(LogLevel.WARNING)){
                 result.setWarning(true);
             }
