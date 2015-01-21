@@ -417,7 +417,12 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля (графа 1..9, 11..15, 21)
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        if (formDataEvent == FormDataEvent.COMPOSE) {
+            checkNonEmptyColumns(row, index, ['taxAuthority', 'kpp'], logger, false)
+            checkNonEmptyColumns(row, index, nonEmptyColumns - ['taxAuthority', 'kpp'], logger, true)
+        } else {
+            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+        }
 
         def benefitCode = row.taxBenefitCode ?: (row.taxBenefitCodeDecrease ?: (row.benefitCodeReduction ?: null))
         def sum = row.benefitSum
