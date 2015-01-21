@@ -710,7 +710,7 @@ void importTransportData() {
     addTransportData(xml)
 
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalSumColumns, logger, true)
+    checkTotalSum(dataRows, totalSumColumns, logger, false)
 }
 
 void addTransportData(def xml) {
