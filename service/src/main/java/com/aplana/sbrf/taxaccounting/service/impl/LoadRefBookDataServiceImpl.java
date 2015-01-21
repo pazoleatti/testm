@@ -82,7 +82,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final Map<String, List<Pair<Boolean, Long>>> avgCostMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
     // Сообщения, которые не учтены в постановка
-    private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников %s.";
+    private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников. %s";
 
     static {
         // TODO Левыкин: Каждый конкретный справочник будет загружаться только архивом или только простым файлом, не обоими способами
@@ -178,6 +178,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     }
                     if (!check) {
                         log(userInfo, LogData.L16, logger, fileName);
+                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile, null, logger);
                         return new ImportCounter();
                     }
                     log(userInfo, LogData.L15, logger, fileName);
