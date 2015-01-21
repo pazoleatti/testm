@@ -77,6 +77,9 @@ public class SummaryTest extends ScriptTestBase {
                             Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                             map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
                             map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            map.put("TAX_ORGAN_CODE", new RefBookValue(RefBookAttributeType.STRING, "taxA"));
+                            map.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "kpp"));
+
                             result.add(map);
                         } else if (filter.toLowerCase().contains("OKTMO_DEFINITION like ".toLowerCase()) || filter.toLowerCase().contains("CODE like ".toLowerCase())) {
                             Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
@@ -163,6 +166,40 @@ public class SummaryTest extends ScriptTestBase {
                     }
                 });
 
+        when(sourceTestHelper.getRefBookFactory().get(anyLong())).then(
+                new Answer<RefBook>() {
+                    @Override
+                    public RefBook answer(InvocationOnMock invocation) throws Throwable {
+                        RefBook result = new RefBook();
+                        result.setName("ref_book_" + invocation.getArguments()[0]);
+                        return result;
+                    }
+                });
+
+        when(sourceTestHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        String filter = (String)invocation.getArguments()[2];
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+                        if (filter.startsWith("TAX_BENEFIT_ID = ") && filter.endsWith(" and DECLARATION_REGION_ID = 1")) {
+                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                            if (filter.contains("TAX_BENEFIT_ID = 2")) {
+                                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                            }
+                            if (filter.contains("TAX_BENEFIT_ID = 3")) {
+                                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                            }
+                            if (filter.contains("TAX_BENEFIT_ID = 1"))  {
+                                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            }
+                            result.add(map);
+                        }
+                        return result;
+                    }
+                });
+
         sourceTestHelper.execute(FormDataEvent.IMPORT);
         sourceDataRowHelper.save(sourceTestHelper.getDataRowHelper().getAll());
 
@@ -202,17 +239,18 @@ public class SummaryTest extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
 
         // графа 11
-        Assert.assertEquals("12.00.2012", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(1).getCell("regDate").getDateValue())));
-        Assert.assertEquals("12.00.2012", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(2).getCell("regDate").getDateValue())));
-        Assert.assertEquals("12.00.2011", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(5).getCell("regDate").getDateValue())));
-        Assert.assertEquals("20.00.2008", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(8).getCell("regDate").getDateValue())));
+        // TODO mm -> MM
+        Assert.assertEquals("12.01.2012", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(1).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.01.2012", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(2).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.02.2011", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(5).getCell("regDate").getDateValue())));
+        Assert.assertEquals("20.01.2008", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(8).getCell("regDate").getDateValue())));
 
         // графа 12
-        Assert.assertEquals("12.00.2014", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(1).getCell("regDateEnd").getDateValue())));
+        Assert.assertEquals("12.01.2014", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(1).getCell("regDateEnd").getDateValue())));
 
         // графа 13
         Assert.assertEquals(12.0, dataRows.get(1).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
-        Assert.assertEquals(23.0, dataRows.get(2).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
+        Assert.assertNull(dataRows.get(2).getCell("taxBase").getNumericValue());
         Assert.assertEquals(34.0, dataRows.get(5).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
         Assert.assertEquals(56.0, dataRows.get(8).getCell("taxBase").getNumericValue().doubleValue(), 0.0);
 
@@ -231,14 +269,47 @@ public class SummaryTest extends ScriptTestBase {
         // графа 20
         Assert.assertEquals(12.0, dataRows.get(1).getCell("periodStartCost").getNumericValue().doubleValue(), 0.0);
 
+        //графа 2, 3
+        Assert.assertEquals("taxA", dataRows.get(1).getCell("taxAuthority").getStringValue());
+        Assert.assertEquals("kpp", dataRows.get(2).getCell("kpp").getStringValue());
+
         // графа 21
-        Assert.assertEquals(1, dataRows.get(1).getCell("ownMonths").getNumericValue().intValue());
         Assert.assertEquals(12, dataRows.get(2).getCell("ownMonths").getNumericValue().intValue());
-        Assert.assertEquals(12, dataRows.get(5).getCell("ownMonths").getNumericValue().intValue());
-        Assert.assertEquals(12, dataRows.get(8).getCell("ownMonths").getNumericValue().intValue());
+
+        // Графа 23
+        Assert.assertEquals(0.3333, dataRows.get(1).getCell("coef362").getNumericValue().doubleValue(), 0.0);
+
+        // Графа 24
+        Assert.assertEquals("12/1", dataRows.get(1).getCell("partRight").getStringValue());
+        Assert.assertEquals("23/1", dataRows.get(2).getCell("partRight").getStringValue());
+
+        // Графа 25
+        Assert.assertEquals(48, dataRows.get(1).getCell("calculatedTaxSum").getNumericValue().intValue());
+        Assert.assertNull(dataRows.get(2).getCell("calculatedTaxSum").getNumericValue());
 
         // Графа 26
         Assert.assertEquals(1, dataRows.get(1).getCell("benefitMonths").getNumericValue().intValue());
 
+        // Графа 29
+        Assert.assertEquals(0.3333, dataRows.get(1).getCell("coefKl").getNumericValue().doubleValue(), 0.0);
+        Assert.assertNull(dataRows.get(2).getCell("coefKl").getNumericValue());
+
+        // Графа 31
+        Assert.assertNull(dataRows.get(1).getCell("benefitSum").getNumericValue());
+        Assert.assertNull(dataRows.get(5).getCell("benefitSum").getNumericValue());
+        Assert.assertEquals(1045.23, dataRows.get(8).getCell("benefitSum").getNumericValue().doubleValue(), 0.0);
+
+        // Графа 33
+        Assert.assertNull(dataRows.get(1).getCell("benefitSumDecrease").getNumericValue());
+        Assert.assertEquals(7.71, dataRows.get(5).getCell("benefitSumDecrease").getNumericValue().doubleValue(), 0.0);
+        Assert.assertNull(dataRows.get(8).getCell("benefitSumDecrease").getNumericValue());
+
+        // Графа 35
+        Assert.assertEquals(-0.96, dataRows.get(1).getCell("benefitSumReduction").getNumericValue().doubleValue(), 0.0);
+        Assert.assertNull(dataRows.get(5).getCell("benefitSumReduction").getNumericValue());
+        Assert.assertNull(dataRows.get(8).getCell("benefitSumReduction").getNumericValue());
+
+        // Графа 37
+        Assert.assertEquals(49.00, dataRows.get(1).getCell("taxSumToPay").getNumericValue().doubleValue(), 0.0);
     }
 }
