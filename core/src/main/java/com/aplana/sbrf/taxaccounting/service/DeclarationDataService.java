@@ -34,7 +34,15 @@ public interface DeclarationDataService {
      * @param docDate - дата обновления декларации
      */
 	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate);
-	
+
+    /**
+     * Формирование Pdf отчета
+     * @param logger
+     * @param declarationData
+     * @param userInfo
+     */
+    void setPdfDataBlobs(Logger logger,
+                         DeclarationData declarationData, TAUserInfo userInfo);
 	/**
 	 * Получить декларацию
 	 * @param declarationDataId идентификатор декларации

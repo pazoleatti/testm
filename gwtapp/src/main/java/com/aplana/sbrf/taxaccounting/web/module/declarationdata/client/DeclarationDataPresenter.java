@@ -205,8 +205,13 @@ public class DeclarationDataPresenter
                 .defaultCallbackNoLock(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
-                        if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
+                        if (ReportType.PDF_DEC.equals(reportType) && result.getExistXMLReport() != null) {
+                            getView().stopTimerReport(reportType);
+                            onTimerReport(ReportType.XML_DEC, false);
+                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
                             if (ReportType.XML_DEC.equals(reportType)) {
+                                onTimerReport(ReportType.PDF_DEC, false);
+                            } else if (ReportType.PDF_DEC.equals(reportType)) {
                                 getView().setPdf(result.getPdf());
                             }
                             getView().updatePrintReportButtonName(reportType, true);
@@ -214,6 +219,8 @@ public class DeclarationDataPresenter
                             getView().stopTimerReport(reportType);
                             if (ReportType.XML_DEC.equals(reportType)) {
                                 getView().showNoPdf("Область предварительного просмотра");
+                            } else if (ReportType.PDF_DEC.equals(reportType)) {
+                                getView().showNoPdf("Декларация заполнена данными. Размер декларации превышает максимально допустимый, печатное представление и форма предварительного просмотра недоступны");
                             }
                             if (!isTimer) {
                                 getView().updatePrintReportButtonName(reportType, false);
@@ -221,6 +228,8 @@ public class DeclarationDataPresenter
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (ReportType.XML_DEC.equals(reportType)) {
                                 getView().showNoPdf("Заполнение декларации данными");
+                            } else if (ReportType.PDF_DEC.equals(reportType)) {
+                                getView().showNoPdf("Декларация заполнена данными. Идет формирование формы предварительного просмотра");
                             }
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -250,11 +259,7 @@ public class DeclarationDataPresenter
 									public void onSuccess(
 											RecalculateDeclarationDataResult result) {
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-										MessageEvent.fire(
-												DeclarationDataPresenter.this,
-                                                !taxType.equals(TaxType.DEAL) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D);
-										revealPlaceRequest();
-                                        getView().startTimerReport(ReportType.XML_DEC);
+                                        onTimerReport(ReportType.XML_DEC, false);
 									}
 
                                     @Override

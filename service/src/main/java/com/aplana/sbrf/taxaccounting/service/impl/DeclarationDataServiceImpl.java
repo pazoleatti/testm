@@ -378,6 +378,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return getBytesFromInputstream(reportService.getDec(userInfo, id, ReportType.PDF_DEC));
 	}
 
+    @Override
+    public void setPdfDataBlobs(Logger logger,
+                                     DeclarationData declarationData, TAUserInfo userInfo) {
+        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
+        if (xmlUuid != null) {
+            InputStream xml = blobDataService.get(xmlUuid).getInputStream();
+            JasperPrint jasperPrint = fillReport(xml,
+                    declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
+
+            reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
+            try {
+                reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
+            } catch (IOException e) {
+                throw new ServiceException(e.getLocalizedMessage(), e);
+            }
+        } else {
+            throw new ServiceException("Декларация не сформирована");
+        }
+    }
+
     // расчет декларации
     private void setDeclarationBlobs(Logger logger,
                                      DeclarationData declarationData, Date docDate, TAUserInfo userInfo) {
@@ -394,16 +414,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""), ReportType.XML_DEC);
 
         validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE);
-        // Заполнение отчета и экспорт в формате PDF
-        JasperPrint jasperPrint = fillReport(xml,
-                declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
-
-        reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
-        try {
-            reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
-        } catch (IOException e) {
-            throw new ServiceException(e.getLocalizedMessage(), e);
-        }
     }
 
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
@@ -439,9 +449,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static JasperPrint fillReport(String xml, InputStream jasperTemplate) {
+    private static JasperPrint fillReport(InputStream xml, InputStream jasperTemplate) {
         try {
-            InputSource inputSource = new InputSource(new StringReader(xml));
+            InputSource inputSource = new InputSource(xml);
             Document document = JRXmlUtils.parse(inputSource);
 
             Map<String, Object> params = new HashMap<String, Object>();
