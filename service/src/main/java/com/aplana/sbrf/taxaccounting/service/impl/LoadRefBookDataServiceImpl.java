@@ -140,15 +140,28 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         for (String path : refBookDirectoryList) {
             // Набор файлов, которые уже обработали
             Set<String> ignoreFileSet = new HashSet<String>();
+            // Файлы которые надо перенести в каталог ошибок
+            List<String> errorFileList = new ArrayList<String>();
             // Если изначально нет подходящих файлов то выдаем отдельную ошибку
             List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, mappingMap.keySet(),
-                    loadedFileNameList, logger, wrongImportCounter);
+                    loadedFileNameList, errorFileList, logger, wrongImportCounter);
 
             if (workFilesList.isEmpty()) {
                 log(userInfo, LogData.L31, logger, refBookName);
-                return wrongImportCounter;
             }
 
+            if (move) {
+                for (String fileName : errorFileList) {
+                    FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
+                    if (currentFile.isFile()){
+                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile, null, logger);
+                    }
+                }
+            }
+
+            if (workFilesList.isEmpty()) {
+                return wrongImportCounter;
+            }
             // Обработка всех подходящих файлов, с получением списка на каждой итерации
             for (String fileName : workFilesList) {
                 ignoreFileSet.add(fileName);
@@ -461,8 +474,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
     private List<String> getWorkTransportFiles(TAUserInfo userInfo, String folderPath, Set<String> ignoreFileSet,
-                                               Set<String> mappingSet, List<String> loadedFileNameList, Logger logger,
-                                               ImportCounter wrongImportCounter) {
+                                               Set<String> mappingSet, List<String> loadedFileNameList,
+                                               List<String> errorFileList, Logger logger, ImportCounter wrongImportCounter) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
@@ -483,6 +496,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 }
             } else {
                 log(userInfo, LogData.L4, logger, candidateStr, folderPath);
+                errorFileList.add(candidateStr);
                 wrongImportCounter.add(new ImportCounter(0, 1));
             }
         }
