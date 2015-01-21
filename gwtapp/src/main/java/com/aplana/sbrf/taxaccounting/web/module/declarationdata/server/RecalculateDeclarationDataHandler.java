@@ -59,32 +59,40 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
+        int userId = userInfo.getUser().getId();
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
-        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24); //ставим такую блокировку т.к. стандартная на 1 час
+        LockData lockData = lockDataService.lock(key, userId, LockData.STANDARD_LIFE_TIME * 24); //ставим такую блокировку т.к. стандартная на 1 час
         if (lockData == null) {
             try {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", action.getDeclarationId());
                 params.put("docDate", action.getDocDate());
-                params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
+                params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
                 params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
                 try {
                     declarationDataService.deleteReport(action.getDeclarationId(), false);
-                    // отменяем задания на формирование XLSX
+                    // отменяем задания на формирование XLSX и PDF
+                    String keyPdf = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.PDF_DEC);
+                    if (lockDataService.getLock(keyPdf) != null) {
+                        List<Integer> waitingUserIds = lockDataService.getUsersWaitingForLock(keyPdf);
+                        for (int waitingUserId : waitingUserIds)
+                            if (waitingUserId != userId) lockDataService.addUserWaitingForLock(key, waitingUserId);
+                        lockDataService.unlock(keyPdf, 0, true);
+                    }
                     lockDataService.unlock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.EXCEL_DEC), 0, true);
                     // ставим задачу в очередь
-                    lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                    lockDataService.addUserWaitingForLock(key, userId);
                     asyncManager.executeAsync(ReportType.XML_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
                 } catch (AsyncTaskException e) {
-                    lockDataService.unlock(key, userInfo.getUser().getId());
+                    lockDataService.unlock(key, userId);
                     logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");
                 }
                 result.setUuid(logEntryService.save(logger.getEntries()));
             } catch(Exception e) {
                 try {
-                    lockDataService.unlock(key, userInfo.getUser().getId());
+                    lockDataService.unlock(key, userId);
                 } catch (ServiceException e2) {
                     if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
                         throw new ActionException(e2);

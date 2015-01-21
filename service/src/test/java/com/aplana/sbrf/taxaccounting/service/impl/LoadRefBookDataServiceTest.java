@@ -182,11 +182,11 @@ public class LoadRefBookDataServiceTest {
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
         // Каталог загрузки
-        Assert.assertEquals(1, uploadFolder.list().length);
+        Assert.assertEquals(0, uploadFolder.list().length);
         // Архив
         Assert.assertEquals(0, archiveFolder.list().length);
         // Ошибки
-        Assert.assertEquals(0, errorFolder.list().length);
+        Assert.assertEquals(1, errorFolder.list().length);
     }
 
     // Успешный импорт Diasoft — Эмитенты
