@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -63,4 +62,11 @@ public interface IfrsDataService {
     void deleteReport(DeclarationData declarationData, TAUserInfo userInfo);
 
     List<Integer> getIfrsUsers();
+
+    /**
+     * Удалить записи об отчетности
+     *
+     * @param reportPeriodIds список идентификаторов отчетных периодов
+     */
+    void delete(List<Integer> reportPeriodIds);
 }

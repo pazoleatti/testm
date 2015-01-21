@@ -6,13 +6,16 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -20,18 +23,19 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.view.client.*;
-import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
 
 
 /**
@@ -41,7 +45,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
 
     private static final String TABLE_ROW_ID_PREFIX = "tableRP";
 
-    private SingleSelectionModel<IfrsRow> selectionModel;
+    private MultiSelectionModel<IfrsRow> selectionModel;
 
     interface Binder extends UiBinder<Widget, IfrsView> {
     }
@@ -56,6 +60,9 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     LinkButton create;
 
     @UiField
+    LinkButton delete;
+
+    @UiField
     FlexiblePager pager;
 
     @UiField
@@ -68,12 +75,27 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
 
     private Timer timer;
     private List<IfrsRow> records;
+    private HandlerRegistration selectionHandlerRegistration;
+
+    private DefaultSelectionEventManager<IfrsRow> multiSelectManager = createCustomManager(
+            new DefaultSelectionEventManager.CheckboxEventTranslator<IfrsRow>()
+    );
+
+    private CheckBoxHeader checkBoxHeader = new CheckBoxHeader();
 
     @Inject
     @UiConstructor
     public IfrsView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
         init();
+        table.setSelectionModel(selectionModel, multiSelectManager);
+        selectionHandlerRegistration = selectionModel.addSelectionChangeHandler(
+                new SelectionChangeEvent.Handler() {
+                    @Override
+                    public void onSelectionChange(SelectionChangeEvent event) {
+                        onSelection();
+                    }
+                });
     }
 
     private void init() {
@@ -91,8 +113,16 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
 
     private void setupTables() {
         mapLinkButton =  new HashMap<Integer, LinkButton>();
-        selectionModel = new SingleSelectionModel<IfrsRow>();
+        selectionModel = new MultiSelectionModel<IfrsRow>();
         table.setSelectionModel(selectionModel);
+
+        Column<IfrsRow, Boolean> checkBox = new Column<IfrsRow, Boolean>(new CheckboxCell(true, false)) {
+            @Override
+            public Boolean getValue(IfrsRow object) {
+                return (object == null) ? null : selectionModel.isSelected(object);
+            }
+        };
+
         TextColumn<IfrsRow> yearColumn = new TextColumn<IfrsRow>() {
             @Override
             public String getValue(IfrsRow object) {
@@ -116,6 +146,18 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
                 return object;
             }
         };
+
+        checkBoxHeader.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                for (IfrsRow row : table.getVisibleItems()) {
+                    selectionModel.setSelected(row, event.getValue());
+                }
+            }
+        });
+
+        table.addColumn(checkBox, checkBoxHeader);
+        table.setColumnWidth(checkBox, 2, Style.Unit.EM);
 
         table.addResizableColumn(yearColumn, "Год");
         table.setColumnWidth(yearColumn, 3.5, Style.Unit.EM);
@@ -173,6 +215,23 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
         table.setRowData(start, records);
     }
 
+    private void onSelection() {
+        int selectedItemCount = selectionModel.getSelectedSet().size();
+        int visibleItemCount = table.getVisibleItemCount();
+
+        if (selectedItemCount < visibleItemCount) {
+            checkBoxHeader.setValue(false);
+        } else if (selectedItemCount == visibleItemCount) {
+            checkBoxHeader.setValue(true);
+        }
+
+        if (selectedItemCount > 0) {
+            delete.setEnabled(true);
+        } else {
+            delete.setEnabled(false);
+        }
+    }
+
     @Override
     public void assignDataProvider(int pageSize, AbstractDataProvider<IfrsRow> data) {
         table.setPageSize(pageSize);
@@ -198,14 +257,6 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     @Override
     public List<Integer> getReportPeriodIds() {
         return periodPickerPopup.getValue();
-    }
-
-    @Override
-    public Integer getReportPeriodId() {
-        IfrsRow selectedObject = selectionModel.getSelectedObject();
-        if (selectedObject != null)
-            return selectedObject.getReportPeriodId();
-        return null;
     }
 
     @Override
@@ -240,5 +291,10 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
     @UiHandler("create")
     public void onCreateClick(ClickEvent event) {
         getUiHandlers().onClickCreate();
+    }
+
+    @UiHandler("delete")
+    public void onDeleteClicked(ClickEvent event) {
+        getUiHandlers().onDeleteClicked(selectionModel.getSelectedSet());
     }
 }

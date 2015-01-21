@@ -30,6 +30,13 @@ public interface IfrsDao {
     IfrsData get(Integer reportPeriodId);
 
     /**
+     * Удалить записи об отчетности
+     *
+     * @param reportPeriodIds список идентификаторов отчетных периодов
+     */
+    void delete(List<Integer> reportPeriodIds);
+
+    /**
      * Поиск записей об отчетности для МСФО по отчетным периодам
      * @param reportPeriodIds список отчетных периодов
      * @return списко отчетностей для МСФО
