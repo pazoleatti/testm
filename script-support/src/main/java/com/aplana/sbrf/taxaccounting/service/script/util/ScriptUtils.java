@@ -581,6 +581,12 @@ public final class ScriptUtils {
                             break;
                     }
 
+                    if ("".equals(value1)) {
+                        value1 = null;
+                    }
+                    if ("".equals(value2)) {
+                        value2 = null;
+                    }
                     if (value1 != null || value2 != null) {
                         if (value1 == null ^ value2 == null) {
                             // Если одна из них null, то null всегда в конец

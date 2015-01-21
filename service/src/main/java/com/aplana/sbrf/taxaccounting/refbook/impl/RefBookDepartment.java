@@ -443,6 +443,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
                 //Сохранение
                 refBookDepartmentDao.update(uniqueRecordId.intValue(), records, refBook.getAttributes());
+                logger.info("Подразделение сохранено");
 
                 auditService.add(FormDataEvent.UPDATE_DEPARTMENT, logger.getTaUserInfo(), uniqueRecordId.intValue(),
                         null, null, null, null,
