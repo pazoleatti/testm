@@ -1,5 +1,6 @@
 package form_template.income.rnu26.v2014
 
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
@@ -14,15 +15,15 @@ import groovy.transform.Field
 
 // графа 1  - rowNumber
 // графа    - fix
-// графа 2  - issuer                    - зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+// графа 2  - issuer                    - текст, было: зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
 // графа 3  - shareType                 - атрибут 846 - CODE - «Код», справочник 97 «Типы акции»
 // графа 4  - tradeNumber
-// графа 5  - currency                  - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+// графа 5  - currency                  - текст, было: атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
 // графа 6  - lotSizePrev
 // графа 7  - lotSizeCurrent
 // графа 8  - reserveCalcValuePrev
 // графа 9  - cost
-// графа 10 - signSecurity              - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+// графа 10 - signSecurity              - текст, было: зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
 // графа 11 - marketQuotation
 // графа 12 - rubCourse                 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
 // графа 13 - marketQuotationInRub
@@ -101,8 +102,8 @@ def allColumns = ['rowNumber', 'fix', 'issuer', 'shareType', 'tradeNumber', 'cur
 
 // Редактируемые атрибуты (графа 3..6, 7, 9, 11, 12)
 @Field
-def editableColumns = ['shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
-        'cost', 'marketQuotation', 'rubCourse']
+def editableColumns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
+        'cost', 'signSecurity', 'marketQuotation', 'rubCourse']
 
 // Автозаполняемые атрибуты
 @Field
@@ -110,13 +111,16 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1..3, 5..9, 13, 14)
 @Field
-def nonEmptyColumns = ['shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
-                       'marketQuotationInRub', 'costOnMarketQuotation']
+def nonEmptyColumns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
+                       'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
 @Field
 def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+
+@Field
+def groupColumns = ['issuer', 'tradeNumber']
 
 // Дата окончания отчетного периода
 @Field
@@ -213,7 +217,7 @@ void calc() {
             row.reserveRecovery = calc17(row)
         }
         // для подитоговых значений
-        def issuerId = getRefBookValue(84, row.currency)?.ISSUER?.value
+        def issuerId = getSubAliasName(row)
         if (issuerId != null && !totalGroups.contains(issuerId)) {
             totalGroups.add(issuerId)
         }
@@ -366,7 +370,7 @@ void logicCheck() {
         }
 
         // 18. Проверка итоговых значений по эмитентам
-        def issuerId = getRefBookValue(84, row.currency)?.ISSUER?.value
+        def issuerId = getSubAliasName(row)
         if (issuerId != null && !totalGroups.contains(issuerId)) {
             totalGroups.add(issuerId)
         }
@@ -388,7 +392,7 @@ void logicCheck() {
         try {
             subTotalRow = getDataRow(dataRows, totalRowAlias)
         } catch(IllegalArgumentException e) {
-            def issuerName = getRefBookValue(100, group.toLong())?.FULL_NAME?.value
+            def issuerName = row.issuer
             loggerError(null, "Итоговые значения по эмитенту $issuerName не рассчитаны! Необходимо рассчитать данные формы.")
             continue
         }
@@ -397,7 +401,7 @@ void logicCheck() {
 
         // сравнить строки
         if (isDiffRow(subTotalRow, tmpRow, totalColumns)) {
-            def issuerName = getRefBookValue(100, group.toLong())?.FULL_NAME?.value
+            def issuerName = row.issuer
             loggerError(subTotalRow, "Итоговые значения по эмитенту $issuerName рассчитаны неверно!")
         }
     }
@@ -552,8 +556,7 @@ def BigDecimal calc17(def row) {
 
 /** Получить признак ценной бумаги. */
 def getSign(def row) {
-    def signId = getRefBookValue(84, row.currency)?.SIGN?.value
-    return getRefBookValue(62, signId)?.CODE?.value
+    return row.signSecurity
 }
 
 def roundValue(def value, def int precision) {
@@ -678,6 +681,10 @@ void addData(def xml, int headRowCount) {
 
         def xmlIndexCol
 
+        // графа 2
+        xmlIndexCol = 2
+        row.issuer =  row.cell[xmlIndexCol].text()
+
         // графа 3 - справочник 97 «Типы акции»
         xmlIndexCol = 3
         newRow.shareType = getRecordIdImport(97, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -686,31 +693,9 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol = 4
         newRow.tradeNumber = row.cell[xmlIndexCol].text()
 
-        // графа 5 - атрибут 810 - CODE_CUR - "Цифровой код валюты выпуска", справочник 84 "Ценные бумаги"
+        // графа 5
         xmlIndexCol = 5
-        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
-        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле CODE_CUR
-        def record84 = getRecordImport(84, 'CODE_CUR', record15?.record_id?.value?.toString(), xlsIndexRow, xmlIndexCol + colOffset)
-        newRow.currency = record84?.record_id?.value
-
-        // графа 2 - зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
-        xmlIndexCol = 2
-        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        if (record84 != null && record100 != null) {
-            def value1 = record100?.record_id?.value?.toString()
-            def value2 = record84?.ISSUER?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-
-        // графа 10 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
-        xmlIndexCol = 10
-        def record62 = getRecordImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        if (record84 != null && record62 != null) {
-            def value1 = record62?.record_id?.value?.toString()
-            def value2 = record84?.SIGN?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        newRow.currency = row.cell[xmlIndexCol].text()
 
         // графа 6
         xmlIndexCol = 6
@@ -723,6 +708,9 @@ void addData(def xml, int headRowCount) {
         // графа 9
         xmlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+
+        // графа 10
+        newRow.signSecurity = row.cell[xmlIndexCol].text()
 
         // графа 11
         xmlIndexCol = 11
@@ -775,8 +763,7 @@ void addTransportData(def xml) {
 
         // графа 2
         xmlIndexCol = 2
-        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        newRow.issuer = record100?.record_id?.value
+        newRow.issuer = row.cell[xmlIndexCol].text()
         // графа 3
         xmlIndexCol = 3
         newRow.shareType = getRecordIdImport(97, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -785,16 +772,7 @@ void addTransportData(def xml) {
         newRow.tradeNumber = row.cell[xmlIndexCol].text()
         // графа 5
         xmlIndexCol = 5
-        def record15 = getRecordImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // TODO http://jira.aplana.com/browse/SBRFACCTAX-7355
-        // значение, встречается более одного раза в справочнике «Ценные бумаги»
-        /*def record84
-        def records = getProvider(84L).getRecords(getReportPeriodEndDate(), null, "CODE_CUR = " + record15?.record_id?.value?.toString(), null)
-        if (records != null && records.size() == 1) {
-            record84 = getRecordImport(84, 'CODE_CUR', record15?.record_id?.value?.toString(), rnuIndexRow, xmlIndexCol + colOffset)
-        }*/
-        def record84 = getRecordImport(84, 'CODE_CUR', record15?.record_id?.value?.toString(), rnuIndexRow, xmlIndexCol + colOffset)
-        newRow.currency = record84?.record_id?.value
+        newRow.currency = row.cell[xmlIndexCol].text()
         // графа 6
         xmlIndexCol = 6
         newRow.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -809,8 +787,7 @@ void addTransportData(def xml) {
         newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 10
         xmlIndexCol = 10
-        def record62 = getRecordImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        newRow.signSecurity = record62?.record_id?.value
+        newRow.signSecurity = row.cell[xmlIndexCol].text()
         // графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -895,7 +872,7 @@ def updateIndexes(def dataRows) {
 def getGroupRows(def dataRows, def issuer) {
     def rows = []
     dataRows.each { row ->
-        if (row.getAlias() == null && getRefBookValue(84, row.currency)?.ISSUER?.value == issuer) {
+        if (row.getAlias() == null && getSubAliasName(row) == issuer) {
             rows.add(row)
         }
     }
@@ -914,8 +891,8 @@ def getCalcTotalRow(def dataRows) {
  * @param issuer эмитент
  * @param totalRowAlias псевдоним сформированной строки
  */
-def getCalcSubtotalsRow(def dataRows, def issuer, def totalRowAlias) {
-    def title = getRefBookValue(100, issuer)?.FULL_NAME?.value + ' итог'
+def getCalcSubtotalsRow(def dataRows, def String issuer, def totalRowAlias) {
+    def title = issuer.substring(0, issuer.indexOf("|")) + ' итог'
     return getTotalRow(dataRows, title, totalRowAlias)
 }
 
@@ -940,18 +917,24 @@ def getTotalRow(def dataRows, def value, def alias) {
 
 // Отсорировать данные (по графе 2, 4)
 void sort(def dataRows) {
-    dataRows.sort { def a, def b ->
-        // графа 2  - issuer (справочник)
-        // графа 4  - tradeNumber
+    dataRows.sort({ DataRow a, DataRow b ->
+        sortRow(groupColumns, a, b)
+    })
 
-        def valueA = (a.currency ? getIssuerName(a.currency) : null)
-        def valueB = (b.currency ? getIssuerName(b.currency) : null)
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.save(dataRows);
+}
 
-        if (valueA == valueB) {
-            return a.tradeNumber <=> b.tradeNumber
+int sortRow(List<String> params, DataRow a, DataRow b) {
+    for (String param : params) {
+        def aD = a.getCell(param).value
+        def bD = b.getCell(param).value
+
+        if (aD != bD) {
+            return aD <=> bD
         }
-        return valueA <=> valueA
     }
+    return 0
 }
 
 /**
@@ -972,27 +955,21 @@ def getPrevRowByColumn4(def prevDataRows, def column4Value) {
     return null
 }
 
-def getIssuerName(def record84Id) {
-    def issuerId = getRefBookValue(84, record84Id.toLong())?.ISSUER?.value
-    return getRefBookValue(100, issuerId)?.FULL_NAME?.value
-}
-
 def getRate(def row, def date) {
     def currency = row.currency
     if (date == null || currency == null) {
         return null
     }
-    def currencyId = getRefBookValue(84, currency.toLong())?.CODE_CUR?.value
-    if (!isRubleCurrency(currencyId)) {
+    if (!isRubleCurrency(currency)) {
         def res = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
-                'CODE_NUMBER', currencyId.toString(), date, row.getIndex(), getColumnName(row, "currency"), logger, false)
+                'CODE_NUMBER', currency, date, row.getIndex(), getColumnName(row, "currency"), logger, false)
         return res?.RATE?.numberValue
     }
     return 1;
 }
 
 def isRubleCurrency(def currencyCode) {
-    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
+    return currencyCode != null ? currencyCode in ['810', '643'] : false
 }
 
 /**
@@ -1006,4 +983,8 @@ def getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
+}
+
+def getSubAliasName(def row){
+    return row.issuer +"|"+ row.currency +"|"+ row.signSecurity
 }

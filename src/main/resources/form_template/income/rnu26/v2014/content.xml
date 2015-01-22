@@ -25,15 +25,14 @@
         <maxLength>500</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>issuer</alias>
         <checking>false</checking>
         <name>Эмитент</name>
         <order>3</order>
         <width>10</width>
-        <parentAlias>currency</parentAlias>
-        <refBookAttributeId>809</refBookAttributeId>
-        <refBookAttributeId2>868</refBookAttributeId2>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>shareType</alias>
@@ -54,16 +53,14 @@
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>currency</alias>
         <checking>false</checking>
         <name>Валюта выпуска ценной бумаги</name>
         <order>6</order>
         <width>7</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>810</nameAttributeId>
-        <refBookAttributeId>810</refBookAttributeId>
-        <refBookAttributeId2>64</refBookAttributeId2>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>lotSizePrev</alias>
@@ -101,15 +98,14 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
         <name>Признак ценной бумаги на текущую отчетную дату</name>
         <order>11</order>
         <width>7</width>
-        <parentAlias>currency</parentAlias>
-        <refBookAttributeId>869</refBookAttributeId>
-        <refBookAttributeId2>621</refBookAttributeId2>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>marketQuotation</alias>
@@ -175,16 +171,16 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Редактируемая</alias>
-        <backColor>LIGHT_BLUE</backColor>
-        <bold>false</bold>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
