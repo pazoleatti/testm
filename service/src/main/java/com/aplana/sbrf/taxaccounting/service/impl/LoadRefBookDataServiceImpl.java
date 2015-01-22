@@ -178,8 +178,12 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     }
                     if (!check) {
                         log(userInfo, LogData.L16, logger, fileName);
-                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile, null, logger);
-                        return new ImportCounter();
+                        fail++;
+                        if (move) {
+                            moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile, null, logger);
+                        }
+                        log(userInfo, LogData.L20, logger, currentFile.getName());
+                        continue;
                     }
                     log(userInfo, LogData.L15, logger, fileName);
                 } else {
