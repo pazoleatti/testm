@@ -66,6 +66,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     Label taxOrganCode;
     @UiField
     Label kpp;
+    @UiField
+    Label taxOrganCodeLabel;
+    @UiField
+    Label kppLabel;
 
 	@UiField
 	PdfViewerView pdfViewer;
@@ -80,7 +84,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 	@UiField
     DateMaskBoxPicker dateBox;
 
-    private Timer timerExcel, timerXML;
+    private Timer timerExcel, timerXML, timerPDF;
 
 	@Inject
 	@UiConstructor
@@ -92,6 +96,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 try {
                     getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, true);
                 } catch (Exception e) {
+                    //Nothing
                 }
             }
         };
@@ -102,12 +107,24 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 try {
                     getUiHandlers().onTimerReport(ReportType.XML_DEC, true);
                 } catch (Exception e) {
+                    //Nothing
+                }
+            }
+        };
+
+        timerPDF = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerReport(ReportType.PDF_DEC, true);
+                } catch (Exception e) {
                 }
             }
         };
 
         timerExcel.cancel();
         timerXML.cancel();
+        timerPDF.cancel();
 	}
 
     @Override
@@ -195,8 +212,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void setPropertyBlockVisible(boolean isVisible) {
-        propertyBlock.setVisible(isVisible);
+    public void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp) {
+        taxOrganCode.setVisible(isVisibleTaxOrgan);
+        taxOrganCodeLabel.setVisible(isVisibleTaxOrgan);
+        kpp.setVisible(isVisibleKpp);
+        kppLabel.setVisible(isVisibleKpp);
     }
 
     @Override
@@ -284,16 +304,21 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             } else {
                 downloadExcelButton.setText("Сформировать xlsx");
             }
-        } else {
+        } else if (ReportType.XML_DEC.equals(reportType)) {
             if (isLoad) {
                 downloadXmlButton.setVisible(true);
                 downloadXmlButton.setText("Выгрузить в XML");
-                downloadExcelButton.setVisible(true);
-                getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, false);
                 timerXML.cancel();
             } else {
                 downloadXmlButton.setVisible(false);
-                downloadXmlButton.setText("Сформировать XML");
+                downloadExcelButton.setVisible(false);
+            }
+        } else if (ReportType.PDF_DEC.equals(reportType)) {
+            if (isLoad) {
+                downloadExcelButton.setVisible(true);
+                getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, false);
+                timerPDF.cancel();
+            } else {
                 downloadExcelButton.setVisible(false);
             }
         }
@@ -304,9 +329,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         if (ReportType.EXCEL_DEC.equals(reportType)) {
             timerExcel.scheduleRepeating(10000);
             timerExcel.run();
-        } else {
+        } else if (ReportType.XML_DEC.equals(reportType)) {
             timerXML.scheduleRepeating(10000);
             timerXML.run();
+        } else if (ReportType.PDF_DEC.equals(reportType)) {
+            timerPDF.scheduleRepeating(10000);
+            timerPDF.run();
         }
     }
 
@@ -314,8 +342,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     public void stopTimerReport(ReportType reportType) {
         if (ReportType.EXCEL_DEC.equals(reportType)) {
             timerExcel.cancel();
-        } else {
+        } else if (ReportType.XML_DEC.equals(reportType)) {
             timerXML.cancel();
+        } else if (ReportType.PDF_DEC.equals(reportType)) {
+            timerPDF.cancel();
         }
     }
 

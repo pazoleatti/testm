@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
@@ -11,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
@@ -48,7 +48,7 @@ public class FormDataServiceTest {
     @Autowired
     ReportPeriodDao reportPeriodDao;
     @Autowired
-    DepartmentDao departmentDao;
+    DepartmentService departmentService;
 
     @Autowired
     private FormDataServiceImpl formDataService;
@@ -133,7 +133,7 @@ public class FormDataServiceTest {
         formData1.setDepartmentId(1);
         when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), 1, null)).thenReturn(formData1);
         when(formDataDao.get(formData1.getId(), false)).thenReturn(formData);
-        when(departmentDao.getDepartment(formData1.getDepartmentId())).thenReturn(department);
+        when(departmentService.getDepartment(formData1.getDepartmentId())).thenReturn(department);
 
         doAnswer(new Answer<Object>() {
             @Override
@@ -195,7 +195,7 @@ public class FormDataServiceTest {
     }
 
     @Test
-    public void existFormDataTest() {
+    public void existFormDataTest() throws ParseException {
 
         Logger logger = new Logger();
 
@@ -213,6 +213,7 @@ public class FormDataServiceTest {
         formData.setDepartmentId(1);
         formData.setReportPeriodId(1);
         formData.setId(1l);
+        formData.setDepartmentReportPeriodId(1);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setState(WorkflowState.CREATED);
@@ -220,6 +221,7 @@ public class FormDataServiceTest {
         formData1.setDepartmentId(1);
         formData1.setReportPeriodId(2);
         formData1.setId(2l);
+        formData1.setDepartmentReportPeriodId(2);
 
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setId(1);
@@ -242,6 +244,11 @@ public class FormDataServiceTest {
             add(2l);
         }};
 
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp);
+        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("01.01.2014"));
+        when(departmentReportPeriodService.get(formData1.getDepartmentReportPeriodId())).thenReturn(drp1);
 
         when(formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1)).thenReturn(list);
         when(formDataDao.getWithoutRows(1)).thenReturn(formData);
@@ -250,11 +257,17 @@ public class FormDataServiceTest {
         when(reportPeriodDao.get(1)).thenReturn(reportPeriod);
         when(reportPeriodDao.get(2)).thenReturn(reportPeriod1);
 
-        when(departmentDao.getDepartment(1)).thenReturn(department);
+        when(departmentService.getDepartment(1)).thenReturn(department);
 
         Assert.assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
-        Assert.assertEquals("Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\"", logger.getEntries().get(0).getMessage());
-        Assert.assertEquals("Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\"", logger.getEntries().get(1).getMessage());
+        Assert.assertEquals(
+                "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период\" 2014 для макета",
+                logger.getEntries().get(0).getMessage()
+        );
+        Assert.assertEquals(
+                "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период\" 2014 с датой сдачи корректировки 01.01.2014 для макета",
+                logger.getEntries().get(1).getMessage()
+        );
     }
 
     /**
@@ -758,7 +771,7 @@ public class FormDataServiceTest {
         when(formTemplateService.get(fd.getFormTemplateId())).thenReturn(ft);
         Department department = new Department();
         department.setName("Филиал");
-        when(departmentDao.getDepartment(fd.getDepartmentId())).thenReturn(department);
+        when(departmentService.getDepartment(fd.getDepartmentId())).thenReturn(department);
         for (Integer id : a){
             when(formDataDao.getWithoutRows(id)).thenReturn(fd);
         }

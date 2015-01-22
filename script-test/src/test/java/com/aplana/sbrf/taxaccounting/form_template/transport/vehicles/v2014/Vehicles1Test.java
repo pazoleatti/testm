@@ -206,13 +206,13 @@ public class Vehicles1Test extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
 
         // графа 11
-        Assert.assertEquals("12.00.2012", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(1).getCell("regDate").getDateValue())));
-        Assert.assertEquals("12.00.2012", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(2).getCell("regDate").getDateValue())));
-        Assert.assertEquals("12.00.2011", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(4).getCell("regDate").getDateValue())));
-        Assert.assertEquals("20.00.2008", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(6).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.01.2012", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(1).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.01.2012", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(2).getCell("regDate").getDateValue())));
+        Assert.assertEquals("12.02.2011", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(4).getCell("regDate").getDateValue())));
+        Assert.assertEquals("20.01.2008", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(6).getCell("regDate").getDateValue())));
 
         // графа 12
-        Assert.assertEquals("12.00.2014", String.valueOf(new SimpleDateFormat("dd.mm.yyyy").format(dataRows.get(1).getCell("regDateEnd").getDateValue())));
+        Assert.assertEquals("12.01.2014", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(1).getCell("regDateEnd").getDateValue())));
 
         // графа 13
         Assert.assertEquals(12.0, dataRows.get(1).getCell("taxBase").getNumericValue().doubleValue(), 0.0);

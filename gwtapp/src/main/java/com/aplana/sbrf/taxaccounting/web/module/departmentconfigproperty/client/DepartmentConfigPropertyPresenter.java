@@ -383,8 +383,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                 @Override
                                                 public void yes() {
                                                     super.yes();
-                                                    getView().setEditMode(true);
-
                                                     AddLogAction addLogAction = new AddLogAction();
                                                     addLogAction.setOldUUID(result.getUuid());
                                                     addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,

@@ -33,6 +33,7 @@ import com.gwtplatform.mvp.client.proxy.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by lhaziev on 22.10.2014.
@@ -54,7 +55,6 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
         void updateTable();
         void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
         List<Integer> getReportPeriodIds();
-        Integer getReportPeriodId();
         void startTimer();
         void stopTimer();
         void updateStatus(Map<Integer, IfrsRow.StatusIfrs> statusMap);
@@ -161,6 +161,19 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
                                 getView().updateStatus(result.getIfrsStatusMap());
                         }
                 }, IfrsPresenter.this).addCallback(new ManualRevealCallback<GetIrfsDataResult>(IfrsPresenter.this)));
+    }
+
+    @Override
+    public void onDeleteClicked(Set<IfrsRow> records) {
+        DeleteIfrsDataAction action = new DeleteIfrsDataAction();
+        action.setReportPeriodIds(records);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(
+                new AbstractCallback<DeleteIfrsDataResult>() {
+                    @Override
+                    public void onSuccess(DeleteIfrsDataResult result) {
+                        getView().updateTable();
+                    }
+                }, IfrsPresenter.this).addCallback(new ManualRevealCallback<DeleteIfrsDataResult>(IfrsPresenter.this)));
     }
 
     private class TableDataProvider extends AsyncDataProvider<IfrsRow> {

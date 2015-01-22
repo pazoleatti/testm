@@ -1,59 +1,46 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDeclarationData;
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("DeclarationDataServiceTest.xml")
 public class DeclarationDataServiceImplTest {
 
     private static String TEST_XML_FILE_NAME = "com/aplana/sbrf/taxaccounting/service/impl/declaration.xml";
 
-    private DeclarationDataServiceImpl service;
-	private DeclarationDataDao declarationDataDao;
-    @SuppressWarnings("unused")
-	private DeclarationTemplateService declarationTemplateService;
-	@SuppressWarnings("unused")
-	private DeclarationDataScriptingService declarationDataScriptingService;
+    @Autowired
+    DeclarationDataServiceImpl declarationDataService;
+    @Autowired
+	DeclarationDataDao declarationDataDao;
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    PeriodService periodService;
+    @Autowired
+    DepartmentService departmentService;
 
-	@Before
-	public void tearUp() {
-		service = new DeclarationDataServiceImpl();
-	
-		declarationDataDao = mock(DeclarationDataDao.class);
-		DeclarationData declarationData1 = mockDeclarationData(1l, 1, false, 1, 1);
-		DeclarationData declarationData2 = mockDeclarationData(2l, 2, false, 1, 1);
-		when(declarationDataDao.get(1)).thenReturn(declarationData1);
-		when(declarationDataDao.get(2)).thenReturn(declarationData2);
-		ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
-
-		//DeclarationDataScriptingService declarationDataScriptingService = mock(DeclarationDataScriptingService.class);
-		//(declarationDataScriptingService.executeScript(any(TAUser.class) ,any(DeclarationData.class), any(FormDataEvent.class), any(Logger.class), any(Map.class)))
-				
-		ReflectionTestUtils.setField(service, "declarationDataScriptingService", declarationDataScriptingService);
-		
-		DeclarationDataAccessService declarationDataAccessService = mock(DeclarationDataAccessService.class);
-		//when(declarationDataAccessService.canRefresh(USER_ID, 1)).thenReturn(true);
-		//when(declarationDataAccessService.canRefresh(USER_ID, 2)).thenReturn(false);
-		ReflectionTestUtils.setField(service, "declarationDataAccessService", declarationDataAccessService);
-
-
-	}
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
 	////////////////
 	// TODO: (sgoryachkin)
@@ -71,9 +58,9 @@ public class DeclarationDataServiceImplTest {
 			TAUserInfo userInfo = new TAUserInfo();
 			userInfo.setIp("192.168.72.16");
 			userInfo.setUser(mockUser(10,  Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-			service.calculate(logger, 1l, userInfo, new Date());
+			declarationDataService.calculate(logger, 1l, userInfo, new Date());
 		} catch (ServiceException e) {
-			
+			//Nothing
 		}
 		
 		// Verify
@@ -86,7 +73,7 @@ public class DeclarationDataServiceImplTest {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp("192.168.72.16");
 		userInfo.setUser(mockUser(10,  2, TARole.ROLE_CONTROL));
-		service.calculate(logger, 2l, userInfo, new Date());
+		declarationDataService.calculate(logger, 2l, userInfo, new Date());
 	}
 
     @Test
@@ -96,7 +83,7 @@ public class DeclarationDataServiceImplTest {
     }
 
     @Test
-    public void existDeclarationTest() {
+    public void existDeclarationTest() throws ParseException {
 
         Logger logger = new Logger();
 
@@ -113,12 +100,14 @@ public class DeclarationDataServiceImplTest {
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(1);
         declarationData.setId(1l);
+        declarationData.setDepartmentReportPeriodId(1);
 
         DeclarationData declarationData1 = new DeclarationData();
         declarationData1.setDeclarationTemplateId(1);
         declarationData1.setDepartmentId(1);
         declarationData1.setReportPeriodId(2);
         declarationData1.setId(2l);
+        declarationData1.setDepartmentReportPeriodId(2);
 
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setId(1);
@@ -141,38 +130,38 @@ public class DeclarationDataServiceImplTest {
             add(2l);
         }};
 
-        declarationDataDao = mock(DeclarationDataDao.class);
-        ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
-
         when(declarationDataDao.getDeclarationIds(1, 1)).thenReturn(list);
         when(declarationDataDao.get(1)).thenReturn(declarationData);
         when(declarationDataDao.get(2)).thenReturn(declarationData1);
 
-        DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
-        ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp);
+        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setCorrectionDate(SDF.parse("01.01.2014"));
+        when(departmentReportPeriodService.get(declarationData1.getDepartmentReportPeriodId())).thenReturn(drp1);
 
-        when(declarationTemplateDao.get(1)).thenReturn(declarationTemplate);
+        when(declarationTemplateService.get(1)).thenReturn(declarationTemplate);
 
-        ReportPeriodDao reportPeriodDao = mock(ReportPeriodDao.class);
-        ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
+        when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
+        when(periodService.getReportPeriod(declarationData1.getReportPeriodId())).thenReturn(reportPeriod1);
 
-        when(reportPeriodDao.get(1)).thenReturn(reportPeriod);
-        when(reportPeriodDao.get(2)).thenReturn(reportPeriod1);
+        when(departmentService.getDepartment(1)).thenReturn(department);
 
-        DepartmentDao departmentDao = mock(DepartmentDao.class);
-        ReflectionTestUtils.setField(service, "departmentDao", departmentDao);
-
-        when(departmentDao.getDepartment(1)).thenReturn(department);
-
-        assertTrue(service.existDeclaration(1, 1, logger.getEntries()));
-        assertEquals("Существует экземпляр \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\"", logger.getEntries().get(0).getMessage());
-        assertEquals("Существует экземпляр \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\"", logger.getEntries().get(1).getMessage());
+        assertTrue(declarationDataService.existDeclaration(1, 1, logger.getEntries()));
+        assertEquals(
+                "Существует экземпляр декларации \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период\" 2014 для макета",
+                logger.getEntries().get(0).getMessage()
+        );
+        assertEquals(
+                "Существует экземпляр декларации \"Тестовый тип декларации\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период\" 2014 с датой сдачи корректировки 01.01.2014 для макета",
+                logger.getEntries().get(1).getMessage()
+        );
     }
 
     @Test
     public void getXmlSAXParserTest() {
         DeclarationDataAccessService declarationDataAccessService = mock(DeclarationDataAccessService.class);
-        ReflectionTestUtils.setField(service, "declarationDataAccessService", declarationDataAccessService);
+        ReflectionTestUtils.setField(declarationDataService, "declarationDataAccessService", declarationDataAccessService);
 
         String uuid1 = UUID.randomUUID().toString().toLowerCase();
         String uuid2 = UUID.randomUUID().toString().toLowerCase();
@@ -185,7 +174,7 @@ public class DeclarationDataServiceImplTest {
         BlobDataService blobDataService = mock(BlobDataService.class);
         when(blobDataService.get(uuid1)).thenReturn(blobData1);
         when(blobDataService.get(uuid2)).thenReturn(blobData2);
-        ReflectionTestUtils.setField(service, "blobDataService", blobDataService);
+        ReflectionTestUtils.setField(declarationDataService, "blobDataService", blobDataService);
 
         long declarationDataId1 = 1, declarationDataId2 = 2;
         TAUserInfo userInfo = new TAUserInfo();
@@ -193,9 +182,9 @@ public class DeclarationDataServiceImplTest {
         ReportService reportService = mock(ReportService.class);
         when(reportService.getDec(userInfo, declarationDataId1, ReportType.XML_DEC)).thenReturn(uuid1);
         when(reportService.getDec(userInfo, declarationDataId2, ReportType.XML_DEC)).thenReturn(uuid2);
-        ReflectionTestUtils.setField(service, "reportService", reportService);
+        ReflectionTestUtils.setField(declarationDataService, "reportService", reportService);
 
-        assertEquals(service.getXmlDataDocDate(declarationDataId1, userInfo), new GregorianCalendar(2014, Calendar.NOVEMBER, 12).getTime());
-        assertEquals(service.getXmlDataFileName(declarationDataId2, userInfo), "NO_PRIB_7750_7750_7707083893777777777_20141112_D63A8CB3-C93D-483C-BED5-81F4EC69B549");
+        assertEquals(declarationDataService.getXmlDataDocDate(declarationDataId1, userInfo), new GregorianCalendar(2014, Calendar.NOVEMBER, 12).getTime());
+        assertEquals(declarationDataService.getXmlDataFileName(declarationDataId2, userInfo), "NO_PRIB_7750_7750_7707083893777777777_20141112_D63A8CB3-C93D-483C-BED5-81F4EC69B549");
     }
 }

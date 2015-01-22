@@ -245,5 +245,10 @@ public interface DepartmentService {
      */
     void setUsedByGarant(int depId, boolean used);
 
-
+    /**
+     * Используемое наименование подразделения для печати
+     * @param departmentId id подразделения
+     * @return строка наименования
+     */
+    String getReportDepartmentName(int departmentId);
 }

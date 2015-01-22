@@ -9,11 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Интерфейс для работы с отчетностями МСФО
@@ -96,6 +99,20 @@ public class IfrsDaoImpl extends AbstractDao implements IfrsDao {
             return null;
         } catch (DataAccessException e) {
             throw new DaoException("Не удалось получить данные." + e.toString());
+        }
+    }
+
+    @Override
+    public void delete(List<Integer> reportPeriodIds) {
+        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("reportPeriodIds", reportPeriodIds);
+        try {
+            List<String> blobDataIds = getNamedParameterJdbcTemplate().queryForList(
+                    "SELECT blob_data_id FROM ifrs_data WHERE report_period_id IN (:reportPeriodIds)", parameterSource, String.class);
+            SqlParameterSource blobDataIdsSource = new MapSqlParameterSource("blobDataIdsSource", blobDataIds);
+            getNamedParameterJdbcTemplate().update("DELETE FROM ifrs_data WHERE report_period_id IN (:reportPeriodIds)", parameterSource);
+            getNamedParameterJdbcTemplate().update("DELETE FROM blob_data WHERE id IN (:blobDataIdsSource)", blobDataIdsSource);
+        } catch (DataAccessException e) {
+            throw new DaoException("Не удалось удалить данные.", e);
         }
     }
 

@@ -8,5 +8,6 @@
     <jdbc:initialize-database>
         <jdbc:script location="classpath:data/TaxPeriod.sql" encoding="UTF-8"/>
     	<jdbc:script location="classpath:data/ReportPeriod.sql" encoding="UTF-8"/>
+    	<jdbc:script location="classpath:data/IfrsData.sql" encoding="UTF-8"/>
     </jdbc:initialize-database>
 </beans>

@@ -101,6 +101,8 @@
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
                             <style:LinkButton ui:field="create" text="Создать отчетность"
                                               img="resources/img/add.png" title="Создание отчетности для МСФО"/>
+                            <style:LinkButton ui:field="delete" text="Удалить отчетность" enabled="false"
+                                              img="resources/img/row-delete.png" title="Удаление отчетности для МСФО"/>
                         </style:LeftBar>
                     </g:HorizontalPanel>
                     <g:ResizeLayoutPanel addStyleNames="{style.table}" ui:field="tablePanel">

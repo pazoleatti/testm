@@ -179,9 +179,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                                 // Ошибка копирования сущности из архива
                                 log(userInfo, LogData.L33, logger, entry.getName(), e.getMessage());
                                 fail++;
+								LOG.error(e.getMessage(), e);
                             }  catch (ServiceException se) {
                                 log(userInfo, LogData.L33, logger, entry.getName(), se.getMessage());
                                 fail++;
+								LOG.error(se.getMessage(), se);
                             }
                         } else {
                             fail++;
@@ -191,9 +193,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     // Ошибка копирования из архива
                     log(userInfo, LogData.L33, logger, fileName, e.getMessage());
                     fail++;
+					LOG.error(e.getMessage(), e);
                 } catch (ServiceException se) {
                     log(userInfo, LogData.L33, logger, fileName, se.getMessage());
                     fail++;
+					LOG.error(se.getMessage(), se);
                 } finally {
                     IOUtils.closeQuietly(zais);
                 }
@@ -222,9 +226,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         // Ошибка копирования файла
                         log(userInfo, LogData.L33, logger, fileName, e.getMessage());
                         fail++;
+						LOG.error(e.getMessage(), e);
                     } catch (ServiceException se) {
                         log(userInfo, LogData.L33, logger, fileName, se.getMessage());
                         fail++;
+						LOG.error(se.getMessage(), se);
                     }
                 } else {
                     fail++;
@@ -381,7 +387,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             return checkResult;
         } catch (Exception e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
             log(userInfo, LogData.L37, logger, fileName, e.getMessage());
             return null;
         }

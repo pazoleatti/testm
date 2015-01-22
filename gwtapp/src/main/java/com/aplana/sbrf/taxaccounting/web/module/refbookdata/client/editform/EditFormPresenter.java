@@ -254,11 +254,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
 
                                     }
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
-                                    }
                                 }, this));
 			} else {
                 //Редактирование версии
@@ -291,24 +286,19 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 renameDialogPresenter.getView().cleanDates();
 
                                 dispatchAsync.execute(action,
-                                        CallbackUtils.defaultCallbackNoModalError(
+                                        CallbackUtils.defaultCallback(
                                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                                     @Override
                                                     public void onSuccess(SaveRefBookRowVersionResult result) {
                                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                                         if (result.isException()) {
-                                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+                                                            Dialog.errorMessage("Редактирование подразделения", "Обнаружены фатальные ошибки!");
                                                         } else {
                                                             depType = newDepType;
                                                             setIsFormModified(false);
                                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                                         }
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(Throwable caught) {
-                                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
                                                     }
                                                 }, EditFormPresenter.this));
                             }

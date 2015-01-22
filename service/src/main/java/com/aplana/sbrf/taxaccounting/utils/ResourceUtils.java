@@ -49,13 +49,13 @@ public final class ResourceUtils {
                 if (!checkExist || file.exists()) {
                     return new FileWrapper(file);
                 } else {
-                    throw new ServiceException("Запрашиваемый ресурс не найден либо отсутствуют необходимые права");
+                    throw new ServiceException("Запрашиваемый ресурс не найден либо отсутствуют необходимые права.");
                 }
             }
         } catch (MalformedURLException e) {
             throw new ServiceException("Неправильный формат URL до ресурса", e);
         } catch (IOException e) {
-            throw new ServiceException("Запрашиваемый ресурс не найден либо отсутствуют необходимые права", e);
+            throw new ServiceException("Запрашиваемый ресурс не найден либо отсутствуют необходимые права.", e);
         }
     }
 
@@ -88,9 +88,9 @@ public final class ResourceUtils {
                 return new FileInputStream(file);
             }
         } catch (MalformedURLException e) {
-            throw new ServiceException("Неправильный формат URL до ресурса", e);
+            throw new ServiceException("Неправильный формат URL до ресурса.", e);
         } catch (IOException e) {
-            throw new ServiceException("Запрашиваемый ресурс не найден либо отсутствуют необходимые права", e);
+            throw new ServiceException("Запрашиваемый ресурс не найден либо отсутствуют необходимые права.", e);
         }
     }
 }

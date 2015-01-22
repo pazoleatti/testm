@@ -132,7 +132,7 @@ public class DeclarationListView extends
     @Override
     public void initTable(TaxType taxType) {
         Style tableStyle = tableWrapper.getElement().getStyle();
-        tableStyle.setProperty("top", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY) ?
+        tableStyle.setProperty("top", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY || taxType == TaxType.INCOME) ?
                 TABLE_TOP2 : TABLE_TOP1, Style.Unit.PX);
 
         clearTable();
@@ -252,6 +252,8 @@ public class DeclarationListView extends
             declarationTable.addColumn(departmentColumn, declarationTable.createResizableHeader(DEPARTMENT_TITLE, departmentColumn));
             if (taxType == TaxType.PROPERTY || taxType == TaxType.TRANSPORT) {
                 declarationTable.addColumn(declarationTaxOrganColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_TITLE, declarationTaxOrganColumn));
+                declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
+            } else if (taxType == TaxType.INCOME){
                 declarationTable.addColumn(declarationTaxOrganKppColumn, declarationTable.createResizableHeader(TAX_ORGAN_CODE_KPP_TITLE, declarationTaxOrganKppColumn));
             }
             declarationTable.addColumn(reportPeriodColumn, reportPeriodHeader);

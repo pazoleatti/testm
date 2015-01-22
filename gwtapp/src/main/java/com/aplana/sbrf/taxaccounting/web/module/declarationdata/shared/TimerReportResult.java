@@ -13,6 +13,8 @@ public class TimerReportResult implements Result {
     }
     private StatusReport existReport;
     private Pdf pdf;
+    private StatusReport existXMLReport; // только для PDF отчетов, отображается статус формированяи PDF
+
 
     public StatusReport getExistReport() {
         return existReport;
@@ -28,5 +30,13 @@ public class TimerReportResult implements Result {
 
     public void setPdf(Pdf pdf) {
         this.pdf = pdf;
+    }
+
+    public StatusReport getExistXMLReport() {
+        return existXMLReport;
+    }
+
+    public void setExistXMLReport(StatusReport existXMLReport) {
+        this.existXMLReport = existXMLReport;
     }
 }
