@@ -951,6 +951,11 @@ def getSources() {
     def needPrevPeriod = monthOrder % monthInQuarter == 1
     // для месяцев не являющиеся первыми месяцами кварталов использовать все приемники
     def useAll = !needPrevPeriod
+    def hasPrevPeriod = true
+    // ожидаемый номер предыдущего периода
+    def expectedPrevPeriodOrder = null
+    // ожидаемый год предыдущего периода
+    def expectedPrevPeriodYear = null
 
     // текущий период используется всегда
     def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -960,9 +965,19 @@ def getSources() {
     // если первый месяц квартала (order = 1, 4, 7, 10) (так как для 945.1 период смещен на один месяц вперед, то это последний месяц в его смещенных периодах)
     // тогда надо получить приемник для предыдущего месяца (3, 6, 9) (предыдущей месяц - будет последний месяц в нормальных кварталах)
     if (needPrevPeriod) {
-        def prevPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-        if (prevPeriod) {
-            reportPeriods.add(prevPeriod)
+        // получить предыдущий период
+        def prevReportPeriod = reportPeriodService.getPrevReportPeriod(currentPeriod.id)
+        if (prevReportPeriod != null) {
+            // ожидаемый номер предыдущего периода
+            expectedPrevPeriodOrder = (currentPeriod.order == 1 ? 4 : currentPeriod.order - 1)
+            // ожидаемый год предыдущего периода
+            expectedPrevPeriodYear = (currentPeriod.order == 1 ? currentPeriod.taxPeriod.year - 1 : currentPeriod.order)
+            if (prevReportPeriod.order == expectedPrevPeriodOrder && expectedPrevPeriodYear == prevReportPeriod.taxPeriod.year) {
+                reportPeriods.add(prevReportPeriod)
+            } else {
+                // номер в налоговом периоде или год предыдущего периода отличается от ожидаемого (т.е. отсутстует ожидаемый предыдущий период)
+                hasPrevPeriod = false
+            }
         }
     }
 
@@ -970,6 +985,8 @@ def getSources() {
     def periodDestinationMap = [:]
     // мапа с периодами и источниками (период -> список источников)
     def periodSourceMap = [:]
+    // приемники отсутствующего предыдущего периода
+    def missingDestinationDepartmentFormTypes = []
     reportPeriods.each { reportPeriod ->
         def start = reportPeriodService.getCalendarStartDate(reportPeriod.id).time
         def end = reportPeriodService.getEndDate(reportPeriod.id).time
@@ -990,9 +1007,13 @@ def getSources() {
                     } else if (reportPeriod == currentPeriod && destinationDepartmentFormType.formTypeId == destinationFormTypeId && monthOrder == 1) {
                         // если это текущий период и январь и приемник 945.5, то использовать приемник
                         formDestinations.add(destinationDepartmentFormType)
-                    } else if (reportPeriod == currentPeriod && (destinationDepartmentFormType.formTypeId != destinationFormTypeId)) {
-                        // если это текущий период и (январь или не 945.5), то использовать приемник
+                    } else if (reportPeriod == currentPeriod && destinationDepartmentFormType.formTypeId != destinationFormTypeId) {
+                        // если это текущий период и не 945.5), то использовать приемник
                         formDestinations.add(destinationDepartmentFormType)
+                    }
+                    // если нужно было получить предыдущий период, но его не существует, то надо запонить приемники 945.5 текущего периода
+                    if (needPrevPeriod && !hasPrevPeriod && reportPeriod == currentPeriod && destinationDepartmentFormType.formTypeId == destinationFormTypeId) {
+                        missingDestinationDepartmentFormTypes.add(destinationDepartmentFormType)
                     }
                 }
             }
@@ -1009,6 +1030,24 @@ def getSources() {
     // проходим по периодам источников и приемников
     addToResult(sources.sourceList, periodDestinationMap, false)
     addToResult(sources.sourceList, periodSourceMap, true)
+
+    def periodNames = [
+            1 : "1 квартал",
+            2 : "полгодие",
+            3 : "девять месяцев",
+            4 : "год",
+    ]
+    // добавляем приемники предыдущего отсутствующего периода
+    missingDestinationDepartmentFormTypes.each { departmentFormType ->
+        def tmpFormData = null
+        def isSource = false
+        def periodName= periodNames[expectedPrevPeriodOrder]
+        def periodYear = expectedPrevPeriodYear
+        def tmpMonthOrder = (expectedPrevPeriodOrder == 4 ? "" : currentPeriod.name)
+
+        FormToFormRelation formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, periodYear, periodName, tmpMonthOrder)
+        sources.sourceList.add(formToFormRelation)
+    }
 
     sources.sourcesProcessedByScript = true
     return sources.sourceList
@@ -1029,24 +1068,7 @@ def addToResult(def resultList, def periodDepartmentFormTypesMap, def isSource) 
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                     departmentFormType.departmentId, period.id, monthOrder)
 
-            FormToFormRelation formToFormRelation = new FormToFormRelation()
-            formToFormRelation.fullDepartmentName = getDepartmentFullName(departmentFormType.departmentId)
-            formToFormRelation.performer = getDepartmentById(departmentFormType.performerId);
-            formToFormRelation.formDataKind = departmentFormType.kind
-            formToFormRelation.source = isSource
-            formToFormRelation.month = (monthOrder ? Formats.getRussianMonthNameWithTier(monthOrder) : null)
-            formToFormRelation.year = period.taxPeriod.year
-            formToFormRelation.periodName = period.name
-            if (tmpFormData != null) {
-                formToFormRelation.created = true
-                formToFormRelation.formType = tmpFormData.formType
-                formToFormRelation.state = tmpFormData.state
-                formToFormRelation.formDataId = tmpFormData.id
-                formToFormRelation.correctionDate = departmentReportPeriodService.get(tmpFormData.departmentReportPeriodId)?.correctionDate
-            } else {
-                formToFormRelation.formType = getFormTypeById(departmentFormType.formTypeId)
-                formToFormRelation.created = false
-            }
+            FormToFormRelation formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, period.taxPeriod.year, period.name, monthOrder)
             resultList.add(formToFormRelation)
         }
     }
@@ -1085,4 +1107,36 @@ def isMonthlyForm(def formTemplateId, def periodId) {
         monthlyMap[key] = formDataService.getFormTemplate(formTemplateId, periodId)?.monthly
     }
     return monthlyMap[key]
+}
+
+/**
+ * Получить запись для источника-приемника.
+ *
+ * @param tmpFormData нф
+ * @param departmentFormType информация об источнике приемнике
+ * @param isSource признак источника
+ * @param periodYear год периода
+ * @param periodName название периода
+ * @param monthOrder номер месяца (для ежемесячной формы)
+ */
+def getFormToFormRelation(def tmpFormData, def departmentFormType, def isSource, def periodYear, def periodName, def monthOrder) {
+    FormToFormRelation formToFormRelation = new FormToFormRelation()
+    formToFormRelation.fullDepartmentName = getDepartmentFullName(departmentFormType.departmentId)
+    formToFormRelation.performer = getDepartmentById(departmentFormType.performerId);
+    formToFormRelation.formDataKind = departmentFormType.kind
+    formToFormRelation.source = isSource
+    formToFormRelation.month = (monthOrder ? Formats.getRussianMonthNameWithTier(monthOrder) : null)
+    formToFormRelation.year = periodYear
+    formToFormRelation.periodName = periodName
+    if (tmpFormData != null) {
+        formToFormRelation.created = true
+        formToFormRelation.formType = tmpFormData.formType
+        formToFormRelation.state = tmpFormData.state
+        formToFormRelation.formDataId = tmpFormData.id
+        formToFormRelation.correctionDate = departmentReportPeriodService.get(tmpFormData.departmentReportPeriodId)?.correctionDate
+    } else {
+        formToFormRelation.formType = getFormTypeById(departmentFormType.formTypeId)
+        formToFormRelation.created = false
+    }
+    return formToFormRelation
 }
