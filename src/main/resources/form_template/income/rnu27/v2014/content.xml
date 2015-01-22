@@ -8,14 +8,13 @@
         облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
     </fullName>
     <code>РНУ-27</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <type>1</type>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -63,7 +62,7 @@
         <width>5</width>
         <parentAlias>regNumber</parentAlias>
         <refBookAttributeId>810</refBookAttributeId>
-        <refBookAttributeId2>64</refBookAttributeId2>
+        <refBookAttributeId2>65</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>prev</alias>
@@ -175,16 +174,16 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Редактируемая</alias>
-        <backColor>LIGHT_BLUE</backColor>
-        <bold>false</bold>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>

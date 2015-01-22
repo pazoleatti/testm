@@ -524,7 +524,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 5 - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
         xmlIndexCol = 5
-        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        def record15 = getRecordImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         if (record84 != null && record15 != null) {
             def value1 = record15?.record_id?.value?.toString()
             def value2 = record84?.CODE_CUR?.value?.toString()
@@ -546,15 +546,6 @@ void addData(def xml, int headRowCount) {
         // Графа 9
         xlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
-        // Графа 10 - зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
-        xmlIndexCol = 10
-        def record62 = getRecordImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        if (record84 != null && record62 != null) {
-            def value1 = record62?.record_id?.value?.toString()
-            def value2 = record84?.SIGN?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
 
         // Графа 11
         xmlIndexCol = 11
@@ -953,7 +944,7 @@ void addTransportData(def xml) {
         newRow.tradeNumber = row.cell[4].text()
         // Графа 5 - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
         xmlIndexCol = 5
-        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        def record15 = getRecordImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         if (record84 != null && record15 != null) {
             def value1 = record15?.record_id?.value?.toString()
             def value2 = record84?.CODE_CUR?.value?.toString()
@@ -971,14 +962,6 @@ void addTransportData(def xml) {
         // Графа 9
         xlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // Графа 10 - зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
-        xmlIndexCol = 10
-        def record62 = getRecordImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        if (record84 != null && record62 != null) {
-            def value1 = record62?.record_id?.value?.toString()
-            def value2 = record84?.SIGN?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
         // Графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
