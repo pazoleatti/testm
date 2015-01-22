@@ -50,7 +50,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def columns = (getBalancePeriod() ? allColumns - ['rowNumber']: editableColumns)
+        def columns = (getBalancePeriod() ? allColumns - ['rowNumber'] : editableColumns)
         formDataService.addRow(formData, currentDataRow, columns, allColumns - columns)
         break
     case FormDataEvent.DELETE_ROW:
@@ -97,13 +97,13 @@ def refBookCache = [:]
 // все атрибуты
 @Field
 def allColumns = ['rowNumber', 'fix', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
-        'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
-        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+                  'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
+                  'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 // Редактируемые атрибуты (графа 3..6, 7, 9, 11, 12)
 @Field
 def editableColumns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
-        'cost', 'signSecurity', 'marketQuotation', 'rubCourse']
+                       'cost', 'signSecurity', 'marketQuotation', 'rubCourse']
 
 // Автозаполняемые атрибуты
 @Field
@@ -117,7 +117,7 @@ def nonEmptyColumns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSiz
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
 @Field
 def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
-        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+                    'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 @Field
 def groupColumns = ['issuer', 'tradeNumber']
@@ -217,7 +217,7 @@ void calc() {
             row.reserveRecovery = calc17(row)
         }
         // для подитоговых значений
-        def issuerId = getSubAliasName(row)
+        def Integer issuerId = getSubAliasName(row)
         if (issuerId != null && !totalGroups.contains(issuerId)) {
             totalGroups.add(issuerId)
         }
@@ -229,7 +229,7 @@ void calc() {
     // добавить подитоговые значения
     updateIndexes(dataRows)
     def i = 0
-    for (def group : totalGroups) {
+    for (def Integer group : totalGroups) {
         // получить строки группы
         def rows = getGroupRows(dataRows, group)
         // получить алиас для подитоговой строки по ГРН
@@ -370,7 +370,7 @@ void logicCheck() {
         }
 
         // 18. Проверка итоговых значений по эмитентам
-        def issuerId = getSubAliasName(row)
+        def Integer issuerId = getSubAliasName(row)
         if (issuerId != null && !totalGroups.contains(issuerId)) {
             totalGroups.add(issuerId)
         }
@@ -382,7 +382,7 @@ void logicCheck() {
     }
 
     // 18. Проверка подитоговых значений
-    for (def group : totalGroups) {
+    for (def Integer group : totalGroups) {
         // получить строки группы
         def rows = getGroupRows(dataRows, group)
         // получить алиас для подитоговой строки
@@ -391,8 +391,8 @@ void logicCheck() {
         def subTotalRow
         try {
             subTotalRow = getDataRow(dataRows, totalRowAlias)
-        } catch(IllegalArgumentException e) {
-            def issuerName = row.issuer
+        } catch (IllegalArgumentException e) {
+            def issuerName = getIssueName(group)
             loggerError(null, "Итоговые значения по эмитенту $issuerName не рассчитаны! Необходимо рассчитать данные формы.")
             continue
         }
@@ -401,7 +401,7 @@ void logicCheck() {
 
         // сравнить строки
         if (isDiffRow(subTotalRow, tmpRow, totalColumns)) {
-            def issuerName = row.issuer
+            def issuerName = getIssueName(group)
             loggerError(subTotalRow, "Итоговые значения по эмитенту $issuerName рассчитаны неверно!")
         }
     }
@@ -410,7 +410,7 @@ void logicCheck() {
     def totalRow = null
     try {
         totalRow = getDataRow(dataRows, 'total')
-    } catch(IllegalArgumentException e) {
+    } catch (IllegalArgumentException e) {
         loggerError(null, "Итоговые значения не рассчитаны! Необходимо рассчитать данные формы.")
     }
 
@@ -612,15 +612,15 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 1)
 
     def headerMapping = [
-            (xml.row[0].cell[0]):  getColumnName(tmpRow, 'rowNumber'),
-            (xml.row[0].cell[2]):  getColumnName(tmpRow, 'issuer'),
-            (xml.row[0].cell[3]):  getColumnName(tmpRow, 'shareType'),
-            (xml.row[0].cell[4]):  getColumnName(tmpRow, 'tradeNumber'),
-            (xml.row[0].cell[5]):  getColumnName(tmpRow, 'currency'),
-            (xml.row[0].cell[6]):  getColumnName(tmpRow, 'lotSizePrev'),
-            (xml.row[0].cell[7]):  getColumnName(tmpRow, 'lotSizeCurrent'),
-            (xml.row[0].cell[8]):  getColumnName(tmpRow, 'reserveCalcValuePrev'),
-            (xml.row[0].cell[9]):  getColumnName(tmpRow, 'cost'),
+            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNumber'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'issuer'),
+            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'shareType'),
+            (xml.row[0].cell[4]) : getColumnName(tmpRow, 'tradeNumber'),
+            (xml.row[0].cell[5]) : getColumnName(tmpRow, 'currency'),
+            (xml.row[0].cell[6]) : getColumnName(tmpRow, 'lotSizePrev'),
+            (xml.row[0].cell[7]) : getColumnName(tmpRow, 'lotSizeCurrent'),
+            (xml.row[0].cell[8]) : getColumnName(tmpRow, 'reserveCalcValuePrev'),
+            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'cost'),
             (xml.row[0].cell[10]): getColumnName(tmpRow, 'signSecurity'),
             (xml.row[0].cell[11]): getColumnName(tmpRow, 'marketQuotation'),
             (xml.row[0].cell[12]): getColumnName(tmpRow, 'rubCourse'),
@@ -629,7 +629,7 @@ void importData() {
             (xml.row[0].cell[15]): getColumnName(tmpRow, 'reserveCalcValue'),
             (xml.row[0].cell[16]): getColumnName(tmpRow, 'reserveCreation'),
             (xml.row[0].cell[17]): getColumnName(tmpRow, 'reserveRecovery'),
-            (xml.row[1].cell[0]):  '1'
+            (xml.row[1].cell[0]) : '1'
     ]
     (2..17).each { index ->
         headerMapping.put((xml.row[1].cell[index]), index.toString())
@@ -683,7 +683,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 2
         xmlIndexCol = 2
-        row.issuer =  row.cell[xmlIndexCol].text()
+        newRow.issuer = row.cell[xmlIndexCol].text()
 
         // графа 3 - справочник 97 «Типы акции»
         xmlIndexCol = 3
@@ -869,7 +869,7 @@ def updateIndexes(def dataRows) {
  * @param dataRows строки формы
  * @param issuer эмитент
  */
-def getGroupRows(def dataRows, def issuer) {
+def getGroupRows(def dataRows, def Integer issuer) {
     def rows = []
     dataRows.each { row ->
         if (row.getAlias() == null && getSubAliasName(row) == issuer) {
@@ -891,9 +891,20 @@ def getCalcTotalRow(def dataRows) {
  * @param issuer эмитент
  * @param totalRowAlias псевдоним сформированной строки
  */
-def getCalcSubtotalsRow(def dataRows, def String issuer, def totalRowAlias) {
-    def title = issuer.substring(0, issuer.indexOf("|")) + ' итог'
+def getCalcSubtotalsRow(def dataRows, def Integer issuer, def totalRowAlias) {
+    def String title = getIssueName(issuer) + ' итог'
     return getTotalRow(dataRows, title, totalRowAlias)
+}
+
+def String getIssueName(def Integer issuer) {
+    def retStr = ""
+    mapIssuers.each { key, value ->
+        if (issuer.equals(value)) {
+            retStr = key.substring(0, key.indexOf("|"))
+            return
+        }
+    }
+    return retStr
 }
 
 /**
@@ -985,6 +996,18 @@ def getProvider(def long providerId) {
     return providerCache.get(providerId)
 }
 
-def getSubAliasName(def row){
-    return row.issuer +"|"+ row.currency +"|"+ row.signSecurity
+def Integer getSubAliasName(def row) {
+    if (row.getAlias() != null) {
+        return -1
+    }
+    def String value = row.issuer + "|" + row.currency + "|" + row.signSecurity
+    if (!mapIssuers.containsKey(value)) {
+        mapIssuers.put(value, ++x)
+    }
+    return mapIssuers.get(value)
 }
+
+@Field
+def Map<String, Integer> mapIssuers = [:]
+@Field
+def x = 0
