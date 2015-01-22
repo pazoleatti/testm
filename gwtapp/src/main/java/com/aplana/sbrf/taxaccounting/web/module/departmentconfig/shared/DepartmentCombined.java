@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared;
 
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 
@@ -20,13 +21,17 @@ public class DepartmentCombined implements Serializable {
     private List<Long> departmentId;
     private List<Long> dictRegionId;
     private List<Long> oktmo;
+    @Size(min = 10, max = 10, message = "ИНН должен содержать 10 цифр")
     private String inn;
+    @Size(min = 9, max = 9, message = "КПП должен содержать 9 цифр")
     private String kpp;
     private String taxOrganCode;
     private List<Long> okvedCode;
     private String phone;
     private List<Long> reorgFormCode;
+    @Size(min = 10, max = 10, message = "ИНН реорганизованной организации должен содержать 10 цифр")
     private String reorgInn;
+    @Size(min = 9, max = 9, message = "КПП реорганизованной организации должен содержать 9 цифр")
     private String reorgKpp;
     //Наименование для титульного листя, Приложения № 5
     private String name, additionalName;

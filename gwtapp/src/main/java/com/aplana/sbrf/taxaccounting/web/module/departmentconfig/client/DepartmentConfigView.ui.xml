@@ -250,7 +250,7 @@
                                             <g:Label text="ИНН реорганизованной организации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <aplana:TextBox ui:field="reorgInn" width="150px"/>
+                                            <aplana:TextBox ui:field="reorgInn" width="150px" maxLength="10"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle" ui:field="reorgKppPanel">
@@ -258,7 +258,7 @@
                                             <g:Label text="КПП реорганизованной организации:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
-                                            <aplana:TextBox ui:field="reorgKpp" width="150px"/>
+                                            <aplana:TextBox ui:field="reorgKpp" width="150px" maxLength="9"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                 </g:VerticalPanel>
