@@ -102,7 +102,7 @@ def allColumns = ['rowNumber', 'fix', 'issuer', 'shareType', 'tradeNumber', 'cur
 
 // Редактируемые атрибуты (графа 3..6, 7, 9, 11, 12)
 @Field
-def editableColumns = ['issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
+def editableColumns = ['issuer', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
                        'cost', 'signSecurity', 'marketQuotation', 'rubCourse']
 
 // Автозаполняемые атрибуты
@@ -671,11 +671,11 @@ void addData(def xml, int headRowCount) {
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
-        (getBalancePeriod() ? (allColumns - ['rowNumber', 'currency']) : editableColumns).each {
+        (getBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        (getBalancePeriod() ? ['rowNumber', 'currency'] : autoFillColumns).each {
+        (getBalancePeriod() ? ['rowNumber'] : autoFillColumns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
@@ -753,11 +753,11 @@ void addTransportData(def xml) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        (getBalancePeriod() ? (allColumns - ['rowNumber', 'currency']) : editableColumns).each {
+        (getBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        (getBalancePeriod() ? ['rowNumber', 'currency'] : autoFillColumns).each {
+        (getBalancePeriod() ? ['rowNumber'] : autoFillColumns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
