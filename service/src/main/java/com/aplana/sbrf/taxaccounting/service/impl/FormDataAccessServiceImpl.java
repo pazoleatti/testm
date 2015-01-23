@@ -723,6 +723,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 filter.setDepartmentIdList(Arrays.asList(departmentDeclarationType.getDepartmentId()));
                 filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
                 filter.setIsActive(departmentReportPeriod.isActive());
+                filter.setIsBalance(departmentReportPeriod.isBalance());
+                filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
                 List<Integer> ids = departmentReportPeriodDao.getListIdsByFilter(filter);
                 if (ids.size() > 1) {
                     throw new ServiceException("Не удалось получить приемники");

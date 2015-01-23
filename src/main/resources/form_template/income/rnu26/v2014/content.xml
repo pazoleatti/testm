@@ -26,15 +26,14 @@
         <maxLength>500</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>issuer</alias>
         <checking>false</checking>
         <name>Эмитент</name>
         <order>3</order>
         <width>10</width>
-        <parentAlias>currency</parentAlias>
-        <refBookAttributeId>809</refBookAttributeId>
-        <refBookAttributeId2>868</refBookAttributeId2>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>shareType</alias>
@@ -43,8 +42,8 @@
         <order>4</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>847</nameAttributeId>
-        <refBookAttributeId>847</refBookAttributeId>
+        <nameAttributeId>846</nameAttributeId>
+        <refBookAttributeId>846</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>tradeNumber</alias>
@@ -55,16 +54,14 @@
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>currency</alias>
         <checking>false</checking>
         <name>Валюта выпуска ценной бумаги</name>
         <order>6</order>
         <width>7</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>810</nameAttributeId>
-        <refBookAttributeId>810</refBookAttributeId>
-        <refBookAttributeId2>64</refBookAttributeId2>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>lotSizePrev</alias>
@@ -102,15 +99,14 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
         <name>Признак ценной бумаги на текущую отчетную дату</name>
         <order>11</order>
         <width>7</width>
-        <parentAlias>currency</parentAlias>
-        <refBookAttributeId>869</refBookAttributeId>
-        <refBookAttributeId2>621</refBookAttributeId2>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>marketQuotation</alias>
