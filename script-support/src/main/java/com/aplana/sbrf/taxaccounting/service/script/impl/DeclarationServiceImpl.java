@@ -139,7 +139,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             Map<String, RefBookValue> departmentParam = departmentParams.get(0);
 
             Calendar calendar = Calendar.getInstance();
-            if (declarationTaxType == TaxType.PROPERTY || declarationTaxType == TaxType.TRANSPORT) {
+            if (declarationTaxType == TaxType.PROPERTY || declarationTaxType == TaxType.TRANSPORT || declarationTaxType == TaxType.INCOME) {
                 stringBuilder.append('_').
                         append(taxOrganCode).
                         append('_').
