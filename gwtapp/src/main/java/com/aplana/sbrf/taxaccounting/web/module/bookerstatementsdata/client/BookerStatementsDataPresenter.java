@@ -77,6 +77,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
 
         String getBookerReportType();
 
+        void setBackButton(String link);
     }
 
     @Inject
@@ -154,6 +155,7 @@ public class BookerStatementsDataPresenter extends Presenter<BookerStatementsDat
         super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
+        getView().setBackButton("#" + BookerStatementsTokens.bookerStatements);
         if (request.getParameterNames().contains(BookerStatementsDataTokens.DEPARTMENT_ID)) {
             departmentId = Integer.parseInt(request.getParameter(BookerStatementsDataTokens.DEPARTMENT_ID, null));
         }
