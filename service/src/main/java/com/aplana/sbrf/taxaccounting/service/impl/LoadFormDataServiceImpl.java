@@ -476,14 +476,14 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
 
             // Это файл, а не директория и соответствует формату имени ТФ
-            if (TransportDataParam.isValidName(candidateStr)) {
-                FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
-                if (candidateFile.isFile()) {
+            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+            if (candidateFile.isFile()) {
+                if (TransportDataParam.isValidName(candidateStr)) {
                     retVal.add(candidateStr);
+                } else {
+                    log(userInfo, LogData.L4, logger, candidateStr, folderPath);
+                    wrongImportCounter.add(new ImportCounter(0, 1));
                 }
-            } else {
-                log(userInfo, LogData.L4, logger, candidateStr, folderPath);
-                wrongImportCounter.add(new ImportCounter(0, 1));
             }
         }
         return retVal;
