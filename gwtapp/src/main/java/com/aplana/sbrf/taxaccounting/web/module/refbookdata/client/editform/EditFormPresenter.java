@@ -328,11 +328,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                         }
                                     }
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
-                                    }
                                 }, this));
 			}
 		} catch (BadValueException bve) {
