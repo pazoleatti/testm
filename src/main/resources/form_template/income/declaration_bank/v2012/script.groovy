@@ -21,21 +21,21 @@ def boolean newDeclaration = false;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
-        checkDeparmentParams(LogLevel.WARNING)
+        checkDepartmentParams(LogLevel.WARNING)
         break
     case FormDataEvent.CHECK : // проверить
-        checkDeparmentParams(LogLevel.ERROR)
+        checkDepartmentParams(LogLevel.ERROR)
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
-        checkDeparmentParams(LogLevel.ERROR)
+        checkDepartmentParams(LogLevel.ERROR)
         logicCheck()
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED: // отменить принятие
         сancelAccepted()
         break
     case FormDataEvent.CALCULATE:
-        checkDeparmentParams(LogLevel.WARNING)
+        checkDepartmentParams(LogLevel.WARNING)
         generateXML()
         break
     default:
@@ -49,8 +49,20 @@ def providerCache = [:]
 // Кэш значений справочника
 @Field
 def refBookCache = [:]
+@Field
+def recordCache = [:]
+
+// значение подразделения из справочника 33
+@Field
+def departmentParam = null
+
+// значение подразделения из справочника 330 (таблица)
+@Field
+def departmentParamTable = null
 
 // Дата окончания отчетного периода
+@Field
+def getEndDate = null
 @Field
 def reportPeriodEndDate = null
 
@@ -66,28 +78,25 @@ def getRefBookValue(def long refBookId, def recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-void checkDeparmentParams(LogLevel logLevel) {
-    def departmentId = declarationData.departmentId
+void checkDepartmentParams(LogLevel logLevel) {
 
     // Параметры подразделения
-    def departmentParam = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
-
-    if (departmentParam == null ||  departmentParam.size() ==0 || departmentParam.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения!")
-    }
-
-    departmentParam = departmentParam.get(0)
+    def departmentParam = getDepartmentParam()
+    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam.record_id.value)
 
     // Проверки подразделения
-    def List<String> errorList = getErrorDepartment(departmentParam)
+    def List<String> errorList = getErrorTable(departmentParamIncomeRow)
     for (String error : errorList) {
         logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
     }
+    errorList = getErrorDepartment(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+    }
+
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
-        def name = departmentParam.NAME.stringValue
-        name = name == null ? "!" : " для $name!"
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s", error, name))
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений!", error))
     }
 }
 
@@ -217,32 +226,40 @@ void generateXML() {
 
     def departmentId = declarationData.departmentId
     def reportPeriodId = declarationData.reportPeriodId
+    def departmentParamId = getDepartmentParam().record_id.value
 
     // справочник "Параметры подразделения по налогу на прибыль" - начало
     def incomeParams = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
     if (incomeParams == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения!')
     }
-    def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
-    def taxOrganCode = incomeParams?.TAX_ORGAN_CODE?.value
-    def okvedCode = getRefBookValue(34, incomeParams?.OKVED_CODE?.value)?.CODE?.value
-    def phone = incomeParams?.PHONE?.value
-    def name = incomeParams?.NAME?.value
+
+    def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
+    def incomeParamsTable = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)?.get(0)
+    if (incomeParamsTable == null) {
+        throw new Exception('Ошибка при получении настроек обособленного подразделения!')
+    }
+
+    def reorgFormCode = getRefBookValue(5, incomeParamsTable?.REORG_FORM_CODE?.value)?.CODE?.value
+    def taxOrganCode = incomeParamsTable?.TAX_ORGAN_CODE?.value
+    def okvedCode = getRefBookValue(34, incomeParamsTable?.OKVED_CODE?.value)?.CODE?.value
+    def phone = incomeParamsTable?.PHONE?.value
+    def name = incomeParamsTable?.NAME?.value
     def inn = incomeParams?.INN?.value
-    def kpp = incomeParams?.KPP?.value
-    def reorgInn = incomeParams?.REORG_INN?.value
-    def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getRefBookValue(96, incomeParams?.OKTMO?.value)?.CODE?.value?.substring(0,8)
-    def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
+    def kpp = incomeParamsTable?.KPP?.value
+    def reorgInn = incomeParamsTable?.REORG_INN?.value
+    def reorgKpp = incomeParamsTable?.REORG_KPP?.value
+    def oktmo = getRefBookValue(96, incomeParamsTable?.OKTMO?.value)?.CODE?.value?.substring(0,8)
+    def signatoryId = getRefBookValue(35, incomeParamsTable?.SIGNATORY_ID?.value)?.CODE?.value
     def taxRate = incomeParams?.TAX_RATE?.value
     def sumTax = incomeParams?.SUM_TAX?.value // вместо departmentParamIncome.externalTaxSum
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
-    def taxPlaceTypeCode = getRefBookValue(2, incomeParams?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
-    def signatorySurname = incomeParams?.SIGNATORY_SURNAME?.value
-    def signatoryFirstName = incomeParams?.SIGNATORY_FIRSTNAME?.value
-    def signatoryLastName = incomeParams?.SIGNATORY_LASTNAME?.value
-    def approveDocName = incomeParams?.APPROVE_DOC_NAME?.value
-    def approveOrgName = incomeParams?.APPROVE_ORG_NAME?.value
+    def taxPlaceTypeCode = getRefBookValue(2, incomeParamsTable?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
+    def signatorySurname = incomeParamsTable?.SIGNATORY_SURNAME?.value
+    def signatoryFirstName = incomeParamsTable?.SIGNATORY_FIRSTNAME?.value
+    def signatoryLastName = incomeParamsTable?.SIGNATORY_LASTNAME?.value
+    def approveDocName = incomeParamsTable?.APPROVE_DOC_NAME?.value
+    def approveOrgName = incomeParamsTable?.APPROVE_ORG_NAME?.value
     def sumDividends = incomeParams?.SUM_DIVIDENDS?.value
     // справочник "Параметры подразделения по налогу на прибыль" - конец
 
@@ -1709,16 +1726,13 @@ def roundValue(def value, def precision) {
     ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
-List<String> getErrorDepartment(record) {
+List<String> getErrorTable(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.NAME?.value == null || record.NAME.value.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.OKTMO == null || record.OKTMO.value == null) {
         errorList.add("«Код по ОКТМО»")
-    }
-    if (record.INN?.value == null || record.INN.value.isEmpty()) {
-        errorList.add("«ИНН»")
     }
     if (record.KPP?.value == null || record.KPP.value.isEmpty()) {
         errorList.add("«КПП»")
@@ -1753,6 +1767,15 @@ List<String> getErrorDepartment(record) {
     }
     if (record.TAX_PLACE_TYPE_CODE?.value == null) {
         errorList.add("«Код места, по которому представляется документ»")
+    }
+    errorList
+}
+
+List<String> getErrorDepartment(record) {
+    List<String> errorList = new ArrayList<String>()
+
+    if (record.INN == null || record.INN.value.isEmpty()) {
+        errorList.add("«ИНН»")
     }
     if (record.TAX_RATE?.value == null) {
         errorList.add("«Ставка налога»")
@@ -1823,4 +1846,30 @@ def getReportPeriod9month(def reportPeriod) {
         return reportPeriod;
     }
     return null;
+}
+
+// Получить параметры подразделения (из справочника 33)
+def getDepartmentParam() {
+    if (departmentParam == null) {
+        def departmentId = declarationData.departmentId
+        def departmentParamList = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
+}
+
+// Получить параметры подразделения (из справочника 330)
+def getDepartmentParamTable(def departmentParamId) {
+    if (departmentParamTable == null) {
+        def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
+        def departmentParamTableList = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)
+        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParamTable = departmentParamTableList.get(0)
+    }
+    return departmentParamTable
 }
