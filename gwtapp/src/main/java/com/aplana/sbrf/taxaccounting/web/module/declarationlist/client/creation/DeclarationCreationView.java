@@ -91,6 +91,12 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         taxOrganKpp.setEnabled(false);
         correctionPanel.setVisible(false);
         declarationTypeId.setPeriodDates(new Date(), new Date());
+        declarationTypeId.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Long>> event) {
+                updateEnabled();
+            }
+        });
         taxOrganCode.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Long>> event) {
@@ -132,15 +138,15 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @Override
     public void updateEnabled() {
         boolean departmentSelected =  departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty();
-        boolean taxOrganCodeSelected = !codePanel.isVisible() || departmentSelected && taxOrganCode.getValue() != null && !taxOrganCode.getValue().isEmpty();
+        boolean taxOrganCodeSelected = departmentSelected && taxOrganCode.getValue() != null && !taxOrganCode.getValue().isEmpty();
         boolean periodSelected = periodPicker.getValue() != null && !periodPicker.getValue().isEmpty();
         boolean correctionDateSelected = correctionDate.getText() != null && !correctionDate.getText().isEmpty();
-
+        boolean declarationTypeIdSelected = declarationTypeId.getValue() != null && !declarationTypeId.getValue().isEmpty();
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(periodSelected);
         declarationTypeId.setEnabled(departmentSelected);
         taxOrganCode.setEnabled(refBookEnabled && departmentSelected);
-        taxOrganKpp.setEnabled(refBookEnabled && taxOrganCodeSelected);
+        taxOrganKpp.setEnabled(refBookEnabled && (codePanel.isVisible() ? taxOrganCodeSelected : declarationTypeIdSelected));
         // дата корректировки
         correctionPanel.setVisible(departmentSelected && correctionDateSelected);
     }
