@@ -494,15 +494,15 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             }
 
             // Это файл, а не директория и соответствует формату имени ТФ
-            if (mappingMatch(candidateStr, mappingSet) != null) {
-                FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
-                if (candidateFile.isFile()) {
+            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+            if (candidateFile.isFile()) {
+                if (mappingMatch(candidateStr, mappingSet) != null) {
                     retVal.add(candidateStr);
+                } else {
+                    log(userInfo, LogData.L4, logger, candidateStr, folderPath);
+                    errorFileList.add(candidateStr);
+                    wrongImportCounter.add(new ImportCounter(0, 1));
                 }
-            } else {
-                log(userInfo, LogData.L4, logger, candidateStr, folderPath);
-                errorFileList.add(candidateStr);
-                wrongImportCounter.add(new ImportCounter(0, 1));
             }
         }
         // Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.
