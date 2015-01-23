@@ -30,12 +30,13 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import javax.validation.*;
 import java.util.*;
 
 /**
@@ -81,17 +82,17 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     private HandlerRegistration resizeHandler;
     private Timer resizeTimer;
 
-	@UiField
-	TextBox inn,
-			kpp,
-			phone,
-			taxOrganCode,
-			reorgInn,
-			reorgKpp,
-			signatorySurname,
-			signatoryFirstname,
-			signatoryLastname,
-			formatVersion;
+    @UiField
+    TextBox inn,
+            kpp,
+            phone,
+            taxOrganCode,
+            reorgInn,
+            reorgKpp,
+            signatorySurname,
+            signatoryFirstname,
+            signatoryLastname,
+            formatVersion;
 
 	@UiField
 	TextArea approveDocName,
@@ -325,7 +326,24 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event) {
-		getUiHandlers().save(driver.flush(), currentReportPeriodId, currentDepartmentId);
+		DepartmentCombined departmentCombined = driver.flush();
+		ValidatorFactory factory = Validation.byDefaultProvider().configure().buildValidatorFactory();
+		Validator validator = factory.getValidator();
+		Set<ConstraintViolation<DepartmentCombined>> violations = validator.validate(departmentCombined);
+
+        if (!violations.isEmpty()) {
+            StringBuilder errorMessage = new StringBuilder();
+            Iterator<ConstraintViolation<DepartmentCombined>> iterator = violations.iterator();
+            while (iterator.hasNext()) {
+                errorMessage.append(iterator.next().getMessage());
+                if (iterator.hasNext()) errorMessage.append(", ");
+            }
+            String error = errorMessage.toString();
+            Dialog.errorMessage(error);
+        } else {
+            getUiHandlers().save(departmentCombined, currentReportPeriodId, currentDepartmentId);
+        }
+
         driver.edit(data);
 
         if (dereferenceValues != null) {
@@ -545,7 +563,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Override
 	public void setReportPeriodActive(boolean reportPeriodActive) {
 		isReportPeriodActive = reportPeriodActive;
-		editButton.setEnabled(currentReportPeriodId != null && isReportPeriodActive);
+		editButton.setEnabled(currentReportPeriodId != null);
     }
 
     @Override

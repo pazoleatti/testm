@@ -7,15 +7,16 @@
     <fullName>(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных
         облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
     </fullName>
-    <header>1111-27</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+    <code>РНУ-27</code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <numerationType>CROSS</numerationType>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -69,7 +70,7 @@
         <width>5</width>
         <parentAlias>regNumber</parentAlias>
         <refBookAttributeId>810</refBookAttributeId>
-        <refBookAttributeId2>64</refBookAttributeId2>
+        <refBookAttributeId2>65</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>prev</alias>
