@@ -30,13 +30,12 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import javax.validation.*;
 import java.util.*;
 
 /**
@@ -82,17 +81,17 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     private HandlerRegistration resizeHandler;
     private Timer resizeTimer;
 
-    @UiField
-    TextBox inn,
-            kpp,
-            phone,
-            taxOrganCode,
-            reorgInn,
-            reorgKpp,
-            signatorySurname,
-            signatoryFirstname,
-            signatoryLastname,
-            formatVersion;
+	@UiField
+	TextBox inn,
+			kpp,
+			phone,
+			taxOrganCode,
+			reorgInn,
+			reorgKpp,
+			signatorySurname,
+			signatoryFirstname,
+			signatoryLastname,
+			formatVersion;
 
 	@UiField
 	TextArea approveDocName,
@@ -326,41 +325,31 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event) {
-		DepartmentCombined departmentCombined = driver.flush();
-		ValidatorFactory factory = Validation.byDefaultProvider().configure().buildValidatorFactory();
-		Validator validator = factory.getValidator();
-		Set<ConstraintViolation<DepartmentCombined>> violations = validator.validate(departmentCombined);
+		if (isValid()) {
+			getUiHandlers().save(driver.flush(), currentReportPeriodId, currentDepartmentId);
 
-        if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder();
-            Iterator<ConstraintViolation<DepartmentCombined>> iterator = violations.iterator();
-            while (iterator.hasNext()) {
-                errorMessage.append(iterator.next().getMessage());
-                if (iterator.hasNext()) errorMessage.append(", ");
-            }
-            String error = errorMessage.toString();
-            Dialog.errorMessage(error);
-        } else {
-            getUiHandlers().save(departmentCombined, currentReportPeriodId, currentDepartmentId);
-        }
+			driver.edit(data);
 
-        driver.edit(data);
+			if (dereferenceValues != null) {
+				// Обновление разыменованных значений
+				dereferenceValues.clear();
+				dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
+				dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
+				dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
+				dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
+				dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
+				dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
+				dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
+				dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
+			}
+		} else {
+			Dialog.errorMessage("Есть ошибки заполнения формы");
+		}
 
-        if (dereferenceValues != null) {
-            // Обновление разыменованных значений
-            dereferenceValues.clear();
-            dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
-            dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
-            dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
-            dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
-            dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
-            dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
-            dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
-            dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
-        }
+
     }
 
-    @UiHandler("deleteButton")
+	@UiHandler("deleteButton")
     public void onDelete(ClickEvent event){
         Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
             @Override
@@ -617,4 +606,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             }
         }
     }
+
+	/**
+	 * Проверка корректности полей
+	 *
+	 * @return true - все поля валидны, false - не все поля валидны
+	 */
+	private boolean isValid() {
+		return inn.isValid() && kpp.isValid() && reorgInn.isValid() && reorgKpp.isValid();
+	}
 }
