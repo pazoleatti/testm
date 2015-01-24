@@ -552,7 +552,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Override
 	public void setReportPeriodActive(boolean reportPeriodActive) {
 		isReportPeriodActive = reportPeriodActive;
-		editButton.setEnabled(currentReportPeriodId != null && isReportPeriodActive);
+		editButton.setEnabled(currentReportPeriodId != null);
     }
 
     @Override

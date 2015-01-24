@@ -121,7 +121,7 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
                     }
                 };
                 column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
-                dataTable.addResizableSortableColumn(column, header.getName());
+                dataTable.addResizableColumn(column, header.getName());
                 dataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
             }
         }
@@ -211,5 +211,10 @@ public class BookerStatementsDataView extends ViewWithUiHandlers<BookerStatement
     @Override
     public String getBookerReportType() {
         return title.getText();
+    }
+
+    @Override
+    public void setBackButton(String link) {
+        returnAnchor.setHref(link);
     }
 }
