@@ -57,8 +57,6 @@ def departmentParamTable = null
 
 // Дата окончания отчетного периода
 @Field
-def getEndDate = null
-@Field
 def reportPeriodEndDate = null
 
 def getEndDate() {
@@ -147,7 +145,7 @@ void generateXML(def xmlBankData) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения')
     }
 
-    def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
+    def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
     def incomeParamsTable = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)?.get(0)
     if (incomeParamsTable == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения!')
@@ -251,7 +249,7 @@ void generateXML(def xmlBankData) {
 
     def xmlbuilder = new MarkupBuilder(xml)
     xmlbuilder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 10 : 5, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 10 : 5, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
@@ -502,7 +500,7 @@ def getDepartmentParam() {
 // Получить параметры подразделения (из справочника 330)
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamTable == null) {
-        def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
+        def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения")
