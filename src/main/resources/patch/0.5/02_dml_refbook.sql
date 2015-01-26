@@ -6,5 +6,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 
 --------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-10201: Изменение размерности поля "Группа" в справочнике "Амортизационные группы"
+update ref_book_attribute set max_length=2 where id = 643;
 COMMIT;
 EXIT;
