@@ -35,6 +35,11 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 	private final String selectedCellStyle;
 	private final boolean isStriped;
 
+    //Переменная инициализируется когда инициализируется во время инициализации таблицы
+    //потом меняется при добавлении новой строки.
+    //Сделано чтобы очищать правильно globalSpans при добавлении новой строки
+    private int rowCountWhenInitialize;
+
 	private Map<Integer, Collection<Integer>> globalSpans = new HashMap<Integer, Collection<Integer>>();
 
 	/**
@@ -56,10 +61,15 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		firstColumnStyle = " " + style.firstColumn();
 		lastColumnStyle = " " + style.lastColumn();
 		selectedCellStyle = " " + style.selectedRowCell();
+        rowCountWhenInitialize = cellTable.getRowCount();
 	}
 
 	@Override
 	public void buildRowImpl(T rowValue, int absRowIndex) {
+        if (cellTable.getRowCount() != rowCountWhenInitialize){
+            globalSpans.clear();
+            rowCountWhenInitialize = cellTable.getRowCount();
+        }
 		// Calculate the row styles.
 		SelectionModel<? super T> selectionModel = cellTable.getSelectionModel();
 		boolean isSelected =
@@ -184,11 +194,6 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 		tr.endTR();
 		// После билда всех строк очищаем список спанов
 		int curPage = (int)Math.ceil(absRowIndex/cellTable.getPageSize());
-
-        // если это механизм перевыделения то очищаем список
-        if(cellTable.getKeyboardSelectedRow()!= 0){
-            globalSpans.clear();
-        }
 
 		if (cellTable.getVisibleItems().size() == (absRowIndex+1 - (cellTable.getPageSize()*curPage))) {
 			globalSpans.clear();
