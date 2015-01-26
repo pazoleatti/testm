@@ -224,19 +224,10 @@ void generateXML() {
 
     def departmentId = declarationData.departmentId
     def reportPeriodId = declarationData.reportPeriodId
-    def departmentParamId = getDepartmentParam().record_id.value
 
-    // справочник "Параметры подразделения по налогу на прибыль" - начало
-    def incomeParams = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
-    if (incomeParams == null) {
-        throw new Exception('Ошибка при получении настроек обособленного подразделения!')
-    }
-
-    def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
-    def incomeParamsTable = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)?.get(0)
-    if (incomeParamsTable == null) {
-        throw new Exception('Ошибка при получении настроек обособленного подразделения!')
-    }
+    // Параметры подразделения
+    def incomeParams = getDepartmentParam()
+    def incomeParamsTable = getDepartmentParamTable(incomeParams.record_id.value)
 
     def reorgFormCode = getRefBookValue(5, incomeParamsTable?.REORG_FORM_CODE?.value)?.CODE?.value
     def taxOrganCode = incomeParamsTable?.TAX_ORGAN_CODE?.value
@@ -993,11 +984,12 @@ void generateXML() {
                     if (dataRowsAdvance != null && !dataRowsAdvance.isEmpty()) {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
-                                def naimOP = null
-                                def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
+                                def naimOP = "TODO"
+                                // TODO http://jira.aplana.com/browse/SBRFACCTAX-10199
+                                /*def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
                                 if (record33 != null) {
                                     naimOP = record33?.ADDITIONAL_NAME?.value
-                                }
+                                }*/
                                 // 0..n
                                 РаспрНалСубРФ(
                                         ТипНП: typeNP,
