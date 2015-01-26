@@ -82,7 +82,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final Map<String, List<Pair<Boolean, Long>>> avgCostMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
     // Сообщения, которые не учтены в постановка
-    private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников %s.";
+    private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников. %s";
 
     static {
         // TODO Левыкин: Каждый конкретный справочник будет загружаться только архивом или только простым файлом, не обоими способами
@@ -140,15 +140,28 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         for (String path : refBookDirectoryList) {
             // Набор файлов, которые уже обработали
             Set<String> ignoreFileSet = new HashSet<String>();
+            // Файлы которые надо перенести в каталог ошибок
+            List<String> errorFileList = new ArrayList<String>();
             // Если изначально нет подходящих файлов то выдаем отдельную ошибку
             List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, mappingMap.keySet(),
-                    loadedFileNameList, logger, wrongImportCounter);
+                    loadedFileNameList, errorFileList, logger, wrongImportCounter);
 
             if (workFilesList.isEmpty()) {
                 log(userInfo, LogData.L31, logger, refBookName);
-                return wrongImportCounter;
             }
 
+            if (move) {
+                for (String fileName : errorFileList) {
+                    FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
+                    if (currentFile.isFile()){
+                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile, null, logger);
+                    }
+                }
+            }
+
+            if (workFilesList.isEmpty()) {
+                return wrongImportCounter;
+            }
             // Обработка всех подходящих файлов, с получением списка на каждой итерации
             for (String fileName : workFilesList) {
                 ignoreFileSet.add(fileName);
@@ -165,7 +178,12 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     }
                     if (!check) {
                         log(userInfo, LogData.L16, logger, fileName);
-                        return new ImportCounter();
+                        fail++;
+                        if (move) {
+                            moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile, null, logger);
+                        }
+                        log(userInfo, LogData.L20, logger, currentFile.getName());
+                        continue;
                     }
                     log(userInfo, LogData.L15, logger, fileName);
                 } else {
@@ -461,8 +479,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
     private List<String> getWorkTransportFiles(TAUserInfo userInfo, String folderPath, Set<String> ignoreFileSet,
-                                               Set<String> mappingSet, List<String> loadedFileNameList, Logger logger,
-                                               ImportCounter wrongImportCounter) {
+                                               Set<String> mappingSet, List<String> loadedFileNameList,
+                                               List<String> errorFileList, Logger logger, ImportCounter wrongImportCounter) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
         for (String candidateStr : catalogFile.list()) {
@@ -476,14 +494,15 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             }
 
             // Это файл, а не директория и соответствует формату имени ТФ
-            if (mappingMatch(candidateStr, mappingSet) != null) {
-                FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
-                if (candidateFile.isFile()) {
+            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+            if (candidateFile.isFile()) {
+                if (mappingMatch(candidateStr, mappingSet) != null) {
                     retVal.add(candidateStr);
+                } else {
+                    log(userInfo, LogData.L4, logger, candidateStr, folderPath);
+                    errorFileList.add(candidateStr);
+                    wrongImportCounter.add(new ImportCounter(0, 1));
                 }
-            } else {
-                log(userInfo, LogData.L4, logger, candidateStr, folderPath);
-                wrongImportCounter.add(new ImportCounter(0, 1));
             }
         }
         // Система сортирует файлы по возрастанию по значению блоков VVV.RR в имени файла.

@@ -293,7 +293,11 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
+            // флаг того что форма уже создана
+            boolean formWasCreated = false;
             if (formData != null) {
+                // 13А.1 Существует и имеет статус "Создана"
+                formWasCreated = true;
                 log(userInfo, LogData.L13, logger);
             }
 
@@ -303,7 +307,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             try {
                 // Загрузка
                 result = importFormData(userInfo, departmentId, currentFile, formData, formType, formTemplate,
-                        departmentReportPeriod, formDataKind, transportDataParam, localLogger);
+                        departmentReportPeriod, formDataKind, transportDataParam, formWasCreated, localLogger);
 
                 // Вывод скрипта в область уведомлений
                 logger.getEntries().addAll(localLogger.getEntries());
@@ -337,11 +341,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                                    FormType formType,
                                    FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod,
                                    FormDataKind formDataKind, TransportDataParam transportDataParam,
-                                   Logger localLogger) {
+                                   boolean formWasCreated, Logger localLogger) {
         String reportPeriodName = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " - "
                 + departmentReportPeriod.getReportPeriod().getName();
 
-        boolean formCreated = false;
         boolean success = false;
         // Если формы нет, то создаем
         if (formData == null) {
@@ -355,7 +358,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             long formDataId = formDataService.createFormData(localLogger, userInfo, formTemplateId,
                     departmentReportPeriod.getId(), formDataKind, month);
             formData = formDataDao.get(formDataId, false);
-            formCreated = true;
         } else {
             formData.initFormTemplateParams(formTemplate);
         }
@@ -368,7 +370,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     userInfo.getUser().getId()));
 
         try {
-            // Скрипт
+            // 15 Скрипт
             InputStream inputStream = currentFile.getInputStream();
             try {
                 formDataService.importFormData(localLogger, userInfo, formData.getId(), formData.isManual(), inputStream,
@@ -385,16 +387,19 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             Department formDepartment = departmentDao.getDepartment(departmentReportPeriod.getDepartmentId());
 
-            // Перенос в архив
+            // 16 если форма не была создана
+            if (!formWasCreated) {
+                log(userInfo, LogData.L18, localLogger, formType.getName(), formDepartment.getName(), reportPeriodName);
+            }
+            // 17 Перенос в архив
             if (moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, departmentId, localLogger), currentFile, localLogger)) {
-                if (formCreated) {
-                    log(userInfo, LogData.L18, localLogger, formType.getName(), formDepartment.getName(), reportPeriodName);
-                }
-
-                // Сохранение
+                // 18 Сохранение
                 formDataService.saveFormData(localLogger, userInfo, formData);
 
-                log(userInfo, LogData.L19, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
+                if (formWasCreated) {
+                    // 13А.2 НФ корректно заполнена значениями из ТФ.
+                    log(userInfo, LogData.L19, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
+                }
                 success = true;
             } else {
                 // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
@@ -406,7 +411,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             lockDataService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(), userInfo.getUser().getId());
         }
 
-        // Загрузка формы завершена
+        // 20 Загрузка формы завершена
         log(userInfo, LogData.L20, localLogger, currentFile.getName());
         return success;
     }
@@ -476,14 +481,14 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
 
             // Это файл, а не директория и соответствует формату имени ТФ
-            if (TransportDataParam.isValidName(candidateStr)) {
-                FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
-                if (candidateFile.isFile()) {
+            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+            if (candidateFile.isFile()) {
+                if (TransportDataParam.isValidName(candidateStr)) {
                     retVal.add(candidateStr);
+                } else {
+                    log(userInfo, LogData.L4, logger, candidateStr, folderPath);
+                    wrongImportCounter.add(new ImportCounter(0, 1));
                 }
-            } else {
-                log(userInfo, LogData.L4, logger, candidateStr, folderPath);
-                wrongImportCounter.add(new ImportCounter(0, 1));
             }
         }
         return retVal;

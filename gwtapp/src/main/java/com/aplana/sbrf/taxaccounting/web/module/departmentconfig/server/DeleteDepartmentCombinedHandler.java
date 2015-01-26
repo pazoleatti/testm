@@ -51,7 +51,7 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
     private SecurityService securityService;
 
     private static final String SUCCESS_INFO = "Настройки подразделения в период %s - %s были удалены";
-    private static final String SUCCESS_INFO_SHORT = "Настройки подразделения в период %s";
+    private static final String SUCCESS_INFO_SHORT = "Настройки подразделения в период %s были удалены";
 
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 

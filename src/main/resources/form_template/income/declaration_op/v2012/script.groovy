@@ -20,17 +20,17 @@ def boolean newDeclaration = false;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
-        checkDeparmentParams(LogLevel.WARNING)
+        checkDepartmentParams(LogLevel.WARNING)
         checkDeclarationBank()
         break
     case FormDataEvent.CHECK : // проверить
-        checkDeparmentParams(LogLevel.ERROR)
+        checkDepartmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
-        checkDeparmentParams(LogLevel.ERROR)
+        checkDepartmentParams(LogLevel.ERROR)
         break
     case FormDataEvent.CALCULATE:
-        checkDeparmentParams(LogLevel.WARNING)
+        checkDepartmentParams(LogLevel.WARNING)
         def xmlBankData = checkDeclarationBank()
         generateXML(xmlBankData)
         break
@@ -44,6 +44,16 @@ def providerCache = [:]
 // Кэш значений справочника
 @Field
 def refBookCache = [:]
+@Field
+def recordCache = [:]
+
+// значение подразделения из справочника 33
+@Field
+def departmentParam = null
+
+// значение подразделения из справочника 330 (таблица)
+@Field
+def departmentParamTable = null
 
 // Дата окончания отчетного периода
 @Field
@@ -61,29 +71,25 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-void checkDeparmentParams(LogLevel logLevel) {
-    def departmentId = declarationData.departmentId
+void checkDepartmentParams(LogLevel logLevel) {
 
     // Параметры подразделения
-    def departmentParam = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
-
-    if (departmentParam == null ||  departmentParam.size() == 0 || departmentParam.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-    }
-
-    departmentParam = departmentParam.get(0)
-
+    def departmentParam = getDepartmentParam()
+    def departmentParamIncomeRow = getDepartmentParamTable(departmentParam.record_id.value)
 
     // Проверки подразделения
-    def List<String> errorList = getErrorDepartment(departmentParam)
+    def List<String> errorList = getErrorTable(departmentParamIncomeRow)
     for (String error : errorList) {
         logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
     }
+    errorList = getErrorDepartment(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+    }
+
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
-        def name = departmentParam.NAME.stringValue
-        name = name == null ? "!" : " для $name!"
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений%s", error, name))
+        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений!", error))
     }
 }
 
@@ -138,26 +144,33 @@ void generateXML(def xmlBankData) {
     if (incomeParams == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения')
     }
+
+    def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
+    def incomeParamsTable = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)?.get(0)
+    if (incomeParamsTable == null) {
+        throw new Exception('Ошибка при получении настроек обособленного подразделения!')
+    }
+
     if (!xmlBankData)
         return
-    def reorgFormCode = getRefBookValue(5, incomeParams?.REORG_FORM_CODE?.value)?.CODE?.value
-    def taxOrganCode = incomeParams?.TAX_ORGAN_CODE?.value
-    def okvedCode = getRefBookValue(34, incomeParams?.OKVED_CODE?.value)?.CODE?.value
-    def phone = incomeParams?.PHONE?.value
-    def name = incomeParams?.NAME?.value
+    def reorgFormCode = getRefBookValue(5, incomeParamsTable?.REORG_FORM_CODE?.value)?.CODE?.value
+    def taxOrganCode = incomeParamsTable?.TAX_ORGAN_CODE?.value
+    def okvedCode = getRefBookValue(34, incomeParamsTable?.OKVED_CODE?.value)?.CODE?.value
+    def phone = incomeParamsTable?.PHONE?.value
+    def name = incomeParamsTable?.NAME?.value
     def inn = incomeParams?.INN?.value
-    def kpp = incomeParams?.KPP?.value
-    def reorgInn = incomeParams?.REORG_INN?.value
-    def reorgKpp = incomeParams?.REORG_KPP?.value
-    def oktmo = getOkato(incomeParams?.OKTMO?.value)
-    def signatoryId = getRefBookValue(35, incomeParams?.SIGNATORY_ID?.value)?.CODE?.value
-    def formatVersion = incomeParams?.FORMAT_VERSION?.value
-    def taxPlaceTypeCode = getRefBookValue(2, incomeParams?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
-    def signatorySurname = incomeParams?.SIGNATORY_SURNAME?.value
-    def signatoryFirstName = incomeParams?.SIGNATORY_FIRSTNAME?.value
-    def signatoryLastName = incomeParams?.SIGNATORY_LASTNAME?.value
-    def approveDocName = incomeParams?.APPROVE_DOC_NAME?.value
-    def approveOrgName = incomeParams?.APPROVE_ORG_NAME?.value
+    def kpp = incomeParamsTable?.KPP?.value
+    def reorgInn = incomeParamsTable?.REORG_INN?.value
+    def reorgKpp = incomeParamsTable?.REORG_KPP?.value
+    def oktmo = getOkato(incomeParamsTable?.OKTMO?.value)
+    def signatoryId = getRefBookValue(35, incomeParamsTable?.SIGNATORY_ID?.value)?.CODE?.value
+    def formatVersion = incomeParamsTable?.FORMAT_VERSION?.value
+    def taxPlaceTypeCode = getRefBookValue(2, incomeParamsTable?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
+    def signatorySurname = incomeParamsTable?.SIGNATORY_SURNAME?.value
+    def signatoryFirstName = incomeParamsTable?.SIGNATORY_FIRSTNAME?.value
+    def signatoryLastName = incomeParamsTable?.SIGNATORY_LASTNAME?.value
+    def approveDocName = incomeParamsTable?.APPROVE_DOC_NAME?.value
+    def approveOrgName = incomeParamsTable?.APPROVE_ORG_NAME?.value
     // справочник "Параметры подразделения по налогу на прибыль" - конец
 
     /** Отчётный период. */
@@ -236,7 +249,7 @@ void generateXML(def xmlBankData) {
 
     def xmlbuilder = new MarkupBuilder(xml)
     xmlbuilder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 10 : 5, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 10 : 5, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
@@ -389,16 +402,13 @@ def roundValue(def value, def precision) {
     ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
-List<String> getErrorDepartment(record) {
+List<String> getErrorTable(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.NAME?.stringValue == null || record.NAME.stringValue.isEmpty()) {
         errorList.add("«Наименование подразделения»")
     }
     if (record.OKTMO?.referenceValue == null) {
         errorList.add("«ОКТМО»")
-    }
-    if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
-        errorList.add("«ИНН»")
     }
     if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
         errorList.add("«КПП»")
@@ -445,6 +455,15 @@ List<String> getErrorVersion(record) {
     errorList
 }
 
+List<String> getErrorDepartment(record) {
+    List<String> errorList = new ArrayList<String>()
+
+    if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
+        errorList.add("«ИНН»")
+    }
+    errorList
+}
+
 /**
  * Получение провайдера с использованием кеширования
  * @param providerId
@@ -463,4 +482,30 @@ def getOkato(def id) {
         okato = getRefBookValue(96, id)?.CODE?.stringValue
     }
     return okato
+}
+
+// Получить параметры подразделения (из справочника 33)
+def getDepartmentParam() {
+    if (departmentParam == null) {
+        def departmentId = declarationData.departmentId
+        def departmentParamList = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
+}
+
+// Получить параметры подразделения (из справочника 330)
+def getDepartmentParamTable(def departmentParamId) {
+    if (departmentParamTable == null) {
+        def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
+        def departmentParamTableList = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)
+        if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParamTable = departmentParamTableList.get(0)
+    }
+    return departmentParamTable
 }

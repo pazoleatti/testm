@@ -1020,6 +1020,10 @@ a, a:visited, a:hover {
     margin-right: -1px;
 }
 
+.gwt-TextBox-invalid {
+    border: 1px solid red!important;
+}
+
 .gwt-TextBox-readonly {
     color: #888;
 }

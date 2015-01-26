@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style.table;
 
-import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.dom.client.*;
@@ -128,10 +127,6 @@ public abstract class ResizableHeader<T> extends Header<String> {
             }
             mover.appendChild(right);
             source.appendChild(mover);
-            if (getCell() instanceof SortingHeaderCell) {
-                // для сортировочной ячейки добавляем элемент-партнера для НЕскрытия стрелочки
-                ((SortingHeaderCell) getCell()).setNotHideElement(mover);
-            }
         }
 
         private SpanElement createSpanElement(String styleClassName, String title, double left) {
@@ -187,10 +182,6 @@ public abstract class ResizableHeader<T> extends Header<String> {
         private void cleanUp() {
             handler.removeHandler();
             mover.removeFromParent();
-            if (getCell() instanceof SortingHeaderCell) {
-                // для сортировочной ячейки удаляем элемент-партнера для НЕскрытия стрелочки
-                ((SortingHeaderCell) getCell()).removeNotHideElement(mover);
-            }
             current = null;
         }
 
@@ -230,10 +221,6 @@ public abstract class ResizableHeader<T> extends Header<String> {
                 resizeLine.removeFromParent();
                 dragCallback.dragFinished();
                 columnResized(Math.max(clientX - header.getAbsoluteLeft(), MINIMUM_COLUMN_WIDTH));
-                if (getCell() instanceof SortingHeaderCell) {
-                    // для сортировочной ячейки сдвигаем позицию стрелочки
-                    ((SortingHeaderCell) getCell()).refreshPosition(header);
-                }
             }
         }
 

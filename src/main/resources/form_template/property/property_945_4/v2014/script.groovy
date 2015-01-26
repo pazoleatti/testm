@@ -222,9 +222,9 @@ void logicCheck() {
         def is201 = isRefBook201ForCalc16(row)
         def records = getRecords(row, is201)
         if (records == null || records.isEmpty()) {
-            if (is201) {
+            if (is201 && row.subject != null) {
                 // 1. Проверка существования налоговой ставки по заданному субъекту
-                logger.error(errorMsg + "В справочнике «Ставки налога на имущество» не найдена налоговая ставка (дата актуальности записи = ${getReportPeriodEndDate().format('dd.MM.yyyy')}, код субъекта РФ представителя декларации = «${getRefBookValue(30, formDataDepartment.regionId)?.NAME?.value?:''}», код субъекта РФ = «${getRefBookValue(4, row.subject)?.CODE?.value}»)!")
+                logger.error(errorMsg + "В справочнике «Ставки налога на имущество» не найдена налоговая ставка (дата актуальности записи = ${getReportPeriodEndDate().format('dd.MM.yyyy')}, код субъекта РФ представителя декларации = «${getRefBookValue(4, formDataDepartment.regionId)?.CODE?.value?:''}», код субъекта РФ = «${getRefBookValue(4, row.subject)?.CODE?.value}»)!")
             }
         }
     }
@@ -502,7 +502,7 @@ def getTenure(def sourceRow) {
 def getRecords(def row, def is201) {
     if (!is201) {
         return Arrays.asList(getRefBookValue(203, row.taxBenefitCode))
-    } else {
+    } else if (row.subject != null) {
         def provider = formDataService.getRefBookProvider(refBookFactory, 201, providerCache)
         def filter = "DECLARATION_REGION_ID = ${formDataDepartment.regionId} and REGION_ID = ${row.subject}"
         if (recordsMap[filter] == null) {
@@ -510,6 +510,7 @@ def getRecords(def row, def is201) {
         }
         return recordsMap[filter]
     }
+    return null
 }
 
 // Расчет подитогового значения

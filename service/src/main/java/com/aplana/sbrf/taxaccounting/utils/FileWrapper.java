@@ -240,15 +240,54 @@ public class FileWrapper {
     private static boolean checkAccess(String path, boolean write, boolean folder) {
         try {
             FileWrapper folderOrFile = ResourceUtils.getSharedResource(path);
-            if (folder && folderOrFile.isFile()
-                    || !folder && folderOrFile.isDirectory()
-                    || write && !folderOrFile.canWrite()
-                    || !write && !folderOrFile.canRead()) {
+            if (folderOrFile.exists()) {
+                if (folder) {
+                    if (write) {
+                        if (folderOrFile.canWrite()) {
+                            String filePath = path + File.separator + System.currentTimeMillis() + ".txt";
+                            File testFile = new File(filePath);
+                            try {
+                                testFile.createNewFile();
+                                testFile.delete();
+                                return true;
+                            } catch (IOException e) {
+                                return false;
+                            }
+                        }
+                    } else {
+                        if (folderOrFile.canRead()) {
+                            return folderOrFile.list() != null;
+                        }
+                    }
+                    return false;
+                } else {
+                    if (write) {
+                        try {
+                            OutputStream writer = folderOrFile.getOutputStream();
+                            writer.close();
+                            return true;
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    } else {
+                        if (folderOrFile.canRead()) {
+                            try {
+                                InputStream reader = folderOrFile.getInputStream();
+                                reader.close();
+                                return true;
+                            } catch (Exception e) {
+                                return false;
+                            }
+                        }
+                    }
+                    return false;
+                }
+            } else {
                 return false;
             }
         } catch (ServiceException e) {
             return false;
         }
-        return true;
     }
+
 }

@@ -41,8 +41,6 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
     private ValueListBox<WorkflowState> formStatePicker;
 
-	private Map<Integer, String> declarationTypeMap;
-
     private TextBox taxOrganisationPicker;
 
     private TextBox kppPicker;
@@ -152,8 +150,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
 
 	@Override
 	public void setDeclarationTypeMap(Map<Integer, String> declarationTypeMap){
-		this.declarationTypeMap = declarationTypeMap;
-		declarationTypePicker.setValue(null);
+        declarationTypePicker.setValue(null);
         if ((declarationTypeMap == null) || declarationTypeMap.isEmpty()) {
             /**
              * TODO продумать как сделать правильней,
@@ -188,7 +185,8 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         }
 
         Style style = separator.getElement().getStyle();
-        style.setProperty("height", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY) ? 65 : 22, Style.Unit.PX);
+        style.setProperty("height", (taxType == TaxType.TRANSPORT || taxType == TaxType.PROPERTY ||
+                taxType == TaxType.INCOME) ? 65 : 22, Style.Unit.PX);
 
         switch (taxType) {
             case DEAL:
@@ -197,6 +195,9 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             case PROPERTY:
             case TRANSPORT:
                 fillTransportAndProperty();
+                break;
+            case INCOME:
+                fillIncome();
                 break;
             default:
                 fillDefault();
@@ -330,6 +331,61 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         horizontalPanel.setCellWidth(departmentPicker, "30%");
         horizontalPanel.setCellWidth(reportPeriodPicker, "30%");
         horizontalPanel.setCellWidth(declarationTypePicker, "30%");
+        panel.add(horizontalPanel);
+    }
+
+    private void fillIncome() {
+        HorizontalPanel horizontalPanel = new HorizontalPanel();
+        horizontalPanel.setWidth("100%");
+        VerticalPanel verticalPanel1 = new VerticalPanel();
+        VerticalPanel verticalPanel2 = new VerticalPanel();
+        VerticalPanel verticalPanel3 = new VerticalPanel();
+        VerticalPanel verticalPanel4 = new VerticalPanel();
+        VerticalPanel verticalPanel5 = new VerticalPanel();
+        VerticalPanel verticalPanel6 = new VerticalPanel();
+        VerticalPanel verticalPanel7 = new VerticalPanel();
+
+        verticalPanel2.setWidth("100%");
+        verticalPanel3.setWidth("100%");
+        verticalPanel5.setWidth("100%");
+        verticalPanel7.setWidth("100%");
+
+        horizontalPanel.add(verticalPanel1);
+        horizontalPanel.add(verticalPanel2);
+        horizontalPanel.add(verticalPanel3);
+        horizontalPanel.add(verticalPanel4);
+        horizontalPanel.add(verticalPanel5);
+        horizontalPanel.add(verticalPanel6);
+        horizontalPanel.add(verticalPanel7);
+
+        horizontalPanel.setCellWidth(verticalPanel2, "33%");
+        horizontalPanel.setCellWidth(verticalPanel5, "33%");
+        horizontalPanel.setCellWidth(verticalPanel7, "33%");
+
+        Label label = getLabel("Период:", false);
+        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        verticalPanel1.add(label);
+
+        label = getLabel("Подразделение:", false);
+        verticalPanel1.add(label);
+        verticalPanel2.add(reportPeriodPicker);
+        verticalPanel2.add(departmentPicker);
+        verticalPanel3.add(correctionTag);
+
+        label = getLabel("Вид декларации:");
+        verticalPanel4.add(label);
+
+        label = getLabel("Состояние:");
+        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        verticalPanel4.add(label);
+        verticalPanel5.add(declarationTypePicker);
+        verticalPanel5.add(formStatePicker);
+
+        label = getLabel("КПП:");
+        label.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+        verticalPanel6.add(label);
+        verticalPanel7.add(kppPicker);
+
         panel.add(horizontalPanel);
     }
 

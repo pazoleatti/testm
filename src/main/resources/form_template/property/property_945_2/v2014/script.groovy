@@ -167,7 +167,7 @@ void addPrevDataRows() {
         return
     }
     def prevFormData = formDataService.getFormDataPrev(formData)
-    def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
+    def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.getAllSaved() : null)
 
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     if (reportPeriod.order == 1){

@@ -64,47 +64,69 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     public void execute(final Map<String, Object> params) {
         log.debug("AbstractAsyncTask has been started");
         final String lock = (String) params.get(LOCKED_OBJECT.name());
-        Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
-        try {
-            if (lockService.isLockExists(lock, lockDateEnd)) {
-                log.debug("Async task lock exists");
-                Logger logger = new Logger();
-                //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                executeBusinessLogic(params, logger);
-                if (!lockService.isLockExists(lock, lockDateEnd)) {
-                    //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
-                    //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
-                    throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
-                }
-                sendNotifications(lock, getNotificationMsg(params), logEntryService.save(logger.getEntries()));
-                lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
-            }
-        } catch (final Exception e) {
-            log.error(e, e);
-            if (lockService.isLockExists(lock, lockDateEnd)) {
-                transactionHelper.executeInNewTransaction(new TransactionLogic() {
-                    @Override
-                    public void execute() {
-                        if (e instanceof ServiceLoggerException) {
-                            sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                        } else {
-                            sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), null);
+        final Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
+        transactionHelper.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public void execute() {
+                try {
+                    if (lockService.isLockExists(lock, lockDateEnd)) {
+                        log.debug("Async task lock exists");
+                        final Logger logger = new Logger();
+                        //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
+                        executeBusinessLogic(params, logger);
+                        if (!lockService.isLockExists(lock, lockDateEnd)) {
+                            //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
+                            //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
+                            throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                         }
-                        lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+                        sendNotifications(lock, getNotificationMsg(params), logEntryService.save(logger.getEntries()));
+                    } else {
+                        throw new RuntimeException("Задача \"" + getAsyncTaskName() + "\" больше не актуальна.");
                     }
+                } catch (final Exception e) {
+                    log.error(e, e);
+                    if (lockService.isLockExists(lock, lockDateEnd)) {
+                        transactionHelper.executeInNewTransaction(new TransactionLogic() {
+                            @Override
+                            public void execute() {
+                                if (e instanceof ServiceLoggerException) {
+                                    sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                                } else {
+                                    sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), null);
+                                }
+                                lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+                            }
 
-                    @Override
-                    public Object executeWithReturn() {
-                        return null;
+                            @Override
+                            public Object executeWithReturn() {
+                                return null;
+                            }
+                        });
                     }
-                });
+                    if (e instanceof ServiceLoggerException) {
+                        throw new ServiceLoggerException("Не удалось выполнить асинхронную задачу", ((ServiceLoggerException) e).getUuid());
+                    } else {
+                        throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
+                    }
+                }
             }
-            if (e instanceof ServiceLoggerException) {
-                throw new ServiceLoggerException("Не удалось выполнить асинхронную задачу", ((ServiceLoggerException) e).getUuid());
-            } else {
-                throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
+
+            @Override
+            public Object executeWithReturn() {
+                return null;
             }
-        }
+        });
+        executePostLogic(params);
+        lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+    }
+
+    /**
+     * Выполнение работ после завершения основной задачи и отправки уведомлений
+     * Действия выполняются в отдельной транзакции
+     * @param params
+     */
+    protected void executePostLogic(Map<String, Object> params) {
+        //
     }
 
     /**

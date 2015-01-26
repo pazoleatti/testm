@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style;
 
-import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.ResizableHeader;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.cell.client.AbstractCell;
@@ -60,10 +59,6 @@ public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
         super.addColumn(col, this.createResizableHeader(headerString, col, cell));
     }
 
-    public void addResizableSortableColumn(Column<T, ?> col, String headerString){
-        addResizableColumn(col, headerString, new SortingHeaderCell());
-    }
-
     public void addResizableColumn(Column<T, ?> col, String headerString, double width, Unit unit){
         super.addColumn(col, this.createResizableHeader(headerString, col));
         setColumnWidth(col, width, unit);
@@ -71,11 +66,6 @@ public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
 
     public void addResizableColumn(Column<T, ?> col, String headerString, AbstractCell<String> cell, double width, Unit unit){
         super.addColumn(col, this.createResizableHeader(headerString, col, cell));
-        setColumnWidth(col, width, unit);
-    }
-
-    public void addResizableSortableColumn(Column<T, ?> col, String headerString, double width, Unit unit){
-        addResizableColumn(col, headerString, new SortingHeaderCell());
         setColumnWidth(col, width, unit);
     }
 

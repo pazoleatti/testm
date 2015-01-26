@@ -189,9 +189,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     public void onSuccess(SaveDepartmentCombinedResult result) {
                                         LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid(), false);
                                         if (!result.isHasError()) {
-                                            if (result.isDeclarationFormFound()) {
-                                                Dialog.infoMessage(getView().getTaxType().equals(TaxType.DEAL) ? SAVE_FOUND_TEXT_D : SAVE_FOUND_TEXT);
-                                            }
                                             getView().reloadDepartmentParams();
                                         }
                                     }

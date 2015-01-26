@@ -16,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * 
@@ -53,6 +51,9 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
     @Autowired
     private PeriodService reportPeriodService;
 
+    @Autowired
+    private FormDataScriptingService scriptingService;
+
 	public DeleteFormDataHandler() {
 		super(DeleteFormDataAction.class);
 	}
@@ -70,78 +71,73 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
         }
 
         FormData formData = action.getFormData();
-        // Отчетный период подразделения НФ
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
-                formData.getDepartmentReportPeriodId());
 
-        // Назначения источников
-        List<DepartmentFormType> sourceList = sourceService.getDFTSourcesByDFT(
-                departmentReportPeriod.getDepartmentId().intValue(), formData.getFormType().getId(), formData.getKind(),
-                departmentReportPeriod.getReportPeriod().getCalendarStartDate(),
-                departmentReportPeriod.getReportPeriod().getEndDate());
+        /** Проверяем в скрипте источники-приемники для особенных форм */
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<FormToFormRelation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+        scriptingService.executeScript(securityService.currentUserInfo(), formData, FormDataEvent.GET_SOURCES, logger, params);
 
-        // По назначениям
-        for (DepartmentFormType departmentFormType : sourceList) {
-            if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), formData.getReportPeriodId())) {
-                //не проверяем формы с неактивными макетами(или с макетами у которых изменили период актуальноси)
-                continue;
+        if (sources.isSourcesProcessedByScript()) {
+            //Скрипт возвращает все необходимые источники-приемники
+            if (sources.getSourceList() != null) {
+                for (FormToFormRelation source : sources.getSourceList()) {
+                    if (source.getState() == WorkflowState.ACCEPTED) {
+                        if (source.getMonth() != null && !source.getMonth().isEmpty()) {
+                            logger.error("Найдена форма-источник «%s» «%s» в текущем периоде в месяце «%s», которая имеет статус \"Принята\"!",
+                                    source.getFormType().getName(), source.getFullDepartmentName(), source.getMonth());
+                        } else {
+                            logger.error("Найдена форма-источник «%s» «%s» в текущем периоде, которая имеет статус \"Принята\"!",
+                                    source.getFormType().getName(), source.getFullDepartmentName());
+                        }
+                    }
+                }
             }
-            DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-            filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
-            filter.setReportPeriodIdList(Arrays.asList(formData.getReportPeriodId()));
-            filter.setIsCorrection(departmentReportPeriod.getCorrectionDate() != null);
-            filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
+        } else {
+            // Отчетный период подразделения НФ
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
+                    formData.getDepartmentReportPeriodId());
 
-            List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
-            if (departmentReportPeriodList == null || departmentReportPeriodList.isEmpty()) {
-                // Подходящий отчетный период подразделения не найден
-                continue;
-            }
+            // Назначения источников
+            List<DepartmentFormType> sourceList = sourceService.getDFTSourcesByDFT(
+                    departmentReportPeriod.getDepartmentId().intValue(), formData.getFormType().getId(), formData.getKind(),
+                    departmentReportPeriod.getReportPeriod().getCalendarStartDate(),
+                    departmentReportPeriod.getReportPeriod().getEndDate());
 
-            if (departmentReportPeriodList.size() != 1) {
-                throw new ServiceException("Найдено более одного отчетного периода подразделения!");
-            }
+            // По назначениям
+            for (DepartmentFormType departmentFormType : sourceList) {
+                if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), formData.getReportPeriodId())) {
+                    //не проверяем формы с неактивными макетами(или с макетами у которых изменили период актуальноси)
+                    continue;
+                }
+                DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+                filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
+                filter.setReportPeriodIdList(Arrays.asList(formData.getReportPeriodId()));
+                filter.setIsCorrection(departmentReportPeriod.getCorrectionDate() != null);
+                filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
-            // Отчетный период подразделения НФ-источника
-            DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodList.get(0);
-
-            Integer formTemplateId = formTemplateService.getActiveFormTemplateId(departmentFormType.getFormTypeId(), sourceDepartmentReportPeriod.getReportPeriod().getId());
-
-            if (!formTemplateService.isMonthly(formTemplateId)) {
-                // Экземпляр НФ-источника
-                FormData sourceFormData = formDataService.findFormData(departmentFormType.getFormTypeId(),
-                        departmentFormType.getKind(), sourceDepartmentReportPeriod.getId(),
-                        action.getFormData().getPeriodOrder());
-
-                if (sourceFormData == null) {
-                    // Экземпляр НФ не найден
+                List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
+                if (departmentReportPeriodList == null || departmentReportPeriodList.isEmpty()) {
+                    // Подходящий отчетный период подразделения не найден
                     continue;
                 }
 
-                // Полное наименование подразделения
-                String departmentName = departmentService.getParentsHierarchy(departmentFormType.getDepartmentId());
-
-                if (sourceFormData.getState() == WorkflowState.ACCEPTED) {
-                    logger.error("Найдена форма-источник «%s» «%s» в текущем периоде, которая имеет статус \"Принята\"!",
-                            sourceFormData.getFormType().getName(), departmentName);
-                }
-            } else {
-                List<Months> availableMonthList;
-                if (action.getFormData().getPeriodOrder() == null) {
-                    availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
-                } else {
-                    availableMonthList = new ArrayList<Months>();
-                    availableMonthList.add(Months.fromId(action.getFormData().getPeriodOrder()));
+                if (departmentReportPeriodList.size() != 1) {
+                    throw new ServiceException("Найдено более одного отчетного периода подразделения!");
                 }
 
-                for (Months months: availableMonthList) {
-                    if (months == null)
-                        continue;
+                // Отчетный период подразделения НФ-источника
+                DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodList.get(0);
 
+                Integer formTemplateId = formTemplateService.getActiveFormTemplateId(departmentFormType.getFormTypeId(), sourceDepartmentReportPeriod.getReportPeriod().getId());
+
+                if (!formTemplateService.isMonthly(formTemplateId)) {
                     // Экземпляр НФ-источника
                     FormData sourceFormData = formDataService.findFormData(departmentFormType.getFormTypeId(),
                             departmentFormType.getKind(), sourceDepartmentReportPeriod.getId(),
-                            months.getId());
+                            action.getFormData().getPeriodOrder());
 
                     if (sourceFormData == null) {
                         // Экземпляр НФ не найден
@@ -152,9 +148,40 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
                     String departmentName = departmentService.getParentsHierarchy(departmentFormType.getDepartmentId());
 
                     if (sourceFormData.getState() == WorkflowState.ACCEPTED) {
-                        // Есть принятый источник
-                        logger.error("Найдена форма-источник «%s» «%s» в текущем периоде в месяце «%s», которая имеет статус \"Принята\"!",
-                                sourceFormData.getFormType().getName(), departmentName, months.getTitle());
+                        logger.error("Найдена форма-источник «%s» «%s» в текущем периоде, которая имеет статус \"Принята\"!",
+                                sourceFormData.getFormType().getName(), departmentName);
+                    }
+                } else {
+                    List<Months> availableMonthList;
+                    if (action.getFormData().getPeriodOrder() == null) {
+                        availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
+                    } else {
+                        availableMonthList = new ArrayList<Months>();
+                        availableMonthList.add(Months.fromId(action.getFormData().getPeriodOrder()));
+                    }
+
+                    for (Months months: availableMonthList) {
+                        if (months == null)
+                            continue;
+
+                        // Экземпляр НФ-источника
+                        FormData sourceFormData = formDataService.findFormData(departmentFormType.getFormTypeId(),
+                                departmentFormType.getKind(), sourceDepartmentReportPeriod.getId(),
+                                months.getId());
+
+                        if (sourceFormData == null) {
+                            // Экземпляр НФ не найден
+                            continue;
+                        }
+
+                        // Полное наименование подразделения
+                        String departmentName = departmentService.getParentsHierarchy(departmentFormType.getDepartmentId());
+
+                        if (sourceFormData.getState() == WorkflowState.ACCEPTED) {
+                            // Есть принятый источник
+                            logger.error("Найдена форма-источник «%s» «%s» в текущем периоде в месяце «%s», которая имеет статус \"Принята\"!",
+                                    sourceFormData.getFormType().getName(), departmentName, months.getTitle());
+                        }
                     }
                 }
             }

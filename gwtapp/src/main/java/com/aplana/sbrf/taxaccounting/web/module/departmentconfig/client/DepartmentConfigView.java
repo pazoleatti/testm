@@ -325,24 +325,31 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("saveButton")
 	public void onSave(ClickEvent event) {
-		getUiHandlers().save(driver.flush(), currentReportPeriodId, currentDepartmentId);
-        driver.edit(data);
+		if (isValid()) {
+			getUiHandlers().save(driver.flush(), currentReportPeriodId, currentDepartmentId);
 
-        if (dereferenceValues != null) {
-            // Обновление разыменованных значений
-            dereferenceValues.clear();
-            dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
-            dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
-            dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
-            dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
-            dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
-            dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
-            dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
-            dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
-        }
+			driver.edit(data);
+
+			if (dereferenceValues != null) {
+				// Обновление разыменованных значений
+				dereferenceValues.clear();
+				dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
+				dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
+				dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
+				dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
+				dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
+				dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
+				dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
+				dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
+			}
+		} else {
+			Dialog.errorMessage("Есть ошибки заполнения формы");
+		}
+
+
     }
 
-    @UiHandler("deleteButton")
+	@UiHandler("deleteButton")
     public void onDelete(ClickEvent event){
         Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
             @Override
@@ -545,7 +552,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     @Override
 	public void setReportPeriodActive(boolean reportPeriodActive) {
 		isReportPeriodActive = reportPeriodActive;
-		editButton.setEnabled(currentReportPeriodId != null && isReportPeriodActive);
+		editButton.setEnabled(currentReportPeriodId != null);
     }
 
     @Override
@@ -599,4 +606,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             }
         }
     }
+
+	/**
+	 * Проверка корректности полей
+	 *
+	 * @return true - все поля валидны, false - не все поля валидны
+	 */
+	private boolean isValid() {
+		return inn.isValid() && kpp.isValid() && reorgInn.isValid() && reorgKpp.isValid();
+	}
 }

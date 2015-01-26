@@ -170,13 +170,6 @@ public interface DepartmentDao {
     List<Integer> getDepartmentIdsByExecutors(List<Integer> departments);
 
     /**
-     * Используемое наименование подразделения для печати
-     * @param departmentId id подразделения
-     * @return строка наименования
-     */
-    String getReportDepartmentName(int departmentId);
-
-    /**
      * Все подразделения, которым назначены формы, которые являются источниками данных для форм,
      * назначенных подразделениям departments
      */

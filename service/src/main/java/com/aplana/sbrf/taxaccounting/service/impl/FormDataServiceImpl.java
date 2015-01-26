@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
@@ -55,7 +54,8 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String XLSM_EXT = "xlsm";
-    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"";
+    public static final String MSG_IS_EXIST_FORM =
+            "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\" %d%s для макета";
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
@@ -83,7 +83,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Autowired
 	private ReportPeriodDao reportPeriodDao;
 	@Autowired
-	private DepartmentDao departmentDao;
+	private DepartmentService departmentService;
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
@@ -285,7 +285,7 @@ public class FormDataServiceImpl implements FormDataService {
             performer = new FormDataPerformer();
             performer.setName(" ");
             performer.setPrintDepartmentId(departmentReportPeriod.getDepartmentId());
-            performer.setReportDepartmentName(departmentDao.getReportDepartmentName(departmentReportPeriod.getDepartmentId()));
+            performer.setReportDepartmentName(departmentService.getReportDepartmentName(departmentReportPeriod.getDepartmentId()));
         }
         formData.setPerformer(performer);
 
@@ -842,7 +842,7 @@ public class FormDataServiceImpl implements FormDataService {
                     errorsList.add(String.format("«%s» %s, %s, «%s» заблокирована пользователем %s, %s",
                                     formTemplate.getName(), destinationDFT.getKind().getName(),
                                     reportPeriod.getTaxPeriod().getYear()+" "+reportPeriod.getName(),
-                                    departmentDao.getDepartment(destinationDFT.getDepartmentId()).getName(),
+                                    departmentService.getDepartment(destinationDFT.getDepartmentId()).getName(),
                                     userService.getUser(lockData.getUserId()).getName(), sdf.format(lockData.getDateBefore())));
                 } else {
                     lockedForms.add(lockKey);
@@ -902,7 +902,7 @@ public class FormDataServiceImpl implements FormDataService {
                 } else if (destinationForm != null) {
                     String formName = destinationForm.getFormType().getName();
                     String kindName = destinationForm.getKind().getName();
-                    String departmentName = departmentDao.getDepartment(destinationForm.getDepartmentId()).getName();
+                    String departmentName = departmentService.getDepartment(destinationForm.getDepartmentId()).getName();
                     deleteFormData(logger, userInfo, destinationForm.getId(), formData.isManual());
                     logger.info("%s: Расформирована налоговая форма-приемник: Подразделение: «%s», Тип: «%s», Вид: «%s».",
                             FormDataEvent.COMPOSE.getTitle(), departmentName, kindName, formName);
@@ -992,12 +992,16 @@ public class FormDataServiceImpl implements FormDataService {
             for (long formDataId : formDataIds) {
                 FormData formData = formDataDao.getWithoutRows(formDataId);
                 ReportPeriod period = reportPeriodDao.get(formData.getReportPeriodId());
+                DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
 
                 logger.error(MSG_IS_EXIST_FORM,
                         formData.getFormType().getName(),
                         kind.getName(),
-                        departmentDao.getDepartment(departmentId).getName(),
-                        period.getName() + " " + period.getTaxPeriod().getYear());
+                        departmentService.getDepartment(departmentId).getName(),
+                        period.getName() + (formData.getPeriodOrder() != null?Months.fromId(formData.getPeriodOrder()).getTitle():""),
+                        period.getTaxPeriod().getYear(),
+                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "");
             }
         }
         return !formDataIds.isEmpty();
@@ -1260,7 +1264,7 @@ public class FormDataServiceImpl implements FormDataService {
                     drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                             SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
                     ft.getName(),
-                    departmentDao.getDepartment(fd.getDepartmentId()).getName(),
+                    departmentService.getDepartment(fd.getDepartmentId()).getName(),
                     fd.getState().getName());
         }
     }

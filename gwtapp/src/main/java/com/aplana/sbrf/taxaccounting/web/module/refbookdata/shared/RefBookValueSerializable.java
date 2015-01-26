@@ -29,9 +29,12 @@ public class RefBookValueSerializable implements Serializable {
 	}
 
 	public void setStringValue(String stringValue) {
-		stringValue = changeGermanQuotes(stringValue);
-		stringValue = changeEnglishSingleQuotes(stringValue);
-		stringValue = changeEnglishDoubleQuotes(stringValue);
+		if (stringValue != null) {
+			stringValue = changeGermanQuotes(stringValue);
+			stringValue = changeEnglishSingleQuotes(stringValue);
+			stringValue = changeEnglishDoubleQuotes(stringValue);
+		}
+
 		this.stringValue = stringValue;
 	}
 
