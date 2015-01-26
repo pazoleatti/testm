@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.style;
 
-import com.aplana.sbrf.taxaccounting.web.widget.cell.SortingHeaderCell;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.ResizableHeader;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -50,10 +49,6 @@ public class GenericCellTable<T> extends CellTable<T>{
         super.addColumn(col, this.createResizableHeader(headerString, col, cell));
     }
 
-    public void addResizableSortableColumn(Column<T, ?> col, String headerString){
-        addResizableColumn(col, headerString, new SortingHeaderCell());
-    }
-
     public void removeAllColumns() {
         for (int i = 0; i < getColumnCount(); i++) {
             removeColumn(i);
@@ -67,11 +62,6 @@ public class GenericCellTable<T> extends CellTable<T>{
 
     public void addResizableColumn(Column<T, ?> col, String headerString, AbstractCell<String> cell, double width, Unit unit){
         super.addColumn(col, this.createResizableHeader(headerString, col, cell));
-        setColumnWidth(col, width, unit);
-    }
-
-    public void addResizableSortableColumn(Column<T, ?> col, String headerString, double width, Unit unit){
-        addResizableColumn(col, headerString, new SortingHeaderCell());
         setColumnWidth(col, width, unit);
     }
 

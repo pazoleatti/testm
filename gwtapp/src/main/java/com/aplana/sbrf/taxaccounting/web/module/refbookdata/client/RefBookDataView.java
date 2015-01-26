@@ -177,7 +177,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
             }
             column.setSortable(true);
-			refBookDataTable.addResizableSortableColumn(column, header.getName());
+			refBookDataTable.addResizableColumn(column, header.getName());
 			refBookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
 	}
