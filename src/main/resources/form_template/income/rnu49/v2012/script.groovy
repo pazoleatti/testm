@@ -823,7 +823,7 @@ void deleteNotFixedRows(def dataRows) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 22, 0)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 23, 0)
     addTransportData(xml)
 }
 
