@@ -633,7 +633,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     rp.getTaxPeriod().getYear(),
                     drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                             formatter.format(drp.getCorrectionDate())) : "",
-                    dt.getName(), dd.isAccepted()?"принята":"не принята");
+                    dt.getName(),
+                    dd.isAccepted()?"принята":"не принята");
         }
     }
 }
