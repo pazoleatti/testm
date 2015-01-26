@@ -244,13 +244,15 @@ public class FileWrapper {
                 if (folder) {
                     if (write) {
                         if (folderOrFile.canWrite()) {
-                            String filePath = path + File.separator + System.currentTimeMillis() + ".txt";
-                            File testFile = new File(filePath);
+                            final String separator = path.contains("/") ? "/" : "\\";
+                            String filePath = path + separator + "test_folder_" + System.currentTimeMillis() + separator;
+                            FileWrapper testFile = ResourceUtils.getSharedResource(filePath, false);
                             try {
-                                testFile.createNewFile();
+                                testFile.mkDirs();
                                 testFile.delete();
                                 return true;
-                            } catch (IOException e) {
+                            } catch (Exception e) {
+                                e.printStackTrace();
                                 return false;
                             }
                         }
@@ -267,6 +269,7 @@ public class FileWrapper {
                             writer.close();
                             return true;
                         } catch (Exception e) {
+                            e.printStackTrace();
                             return false;
                         }
                     } else {
@@ -276,6 +279,7 @@ public class FileWrapper {
                                 reader.close();
                                 return true;
                             } catch (Exception e) {
+                                e.printStackTrace();
                                 return false;
                             }
                         }
@@ -286,8 +290,8 @@ public class FileWrapper {
                 return false;
             }
         } catch (ServiceException e) {
+            e.printStackTrace();
             return false;
         }
     }
-
 }
