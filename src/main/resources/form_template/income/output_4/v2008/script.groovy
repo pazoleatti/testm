@@ -1,4 +1,4 @@
-package form_template.income.output3.v2012
+package form_template.income.output_4.v2008
 
 /**
  * Сведения о суммах налога на прибыль, уплаченного Банком за рубежом
