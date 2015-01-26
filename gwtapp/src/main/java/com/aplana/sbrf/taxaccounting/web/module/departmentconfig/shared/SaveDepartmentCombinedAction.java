@@ -14,6 +14,7 @@ public class SaveDepartmentCombinedAction extends UnsecuredActionImpl<SaveDepart
     private Integer period;
     private TaxType taxType;
     private Integer department;
+    String oldUUID;
 
     public DepartmentCombined getDepartmentCombined() {
         return departmentCombined;
@@ -45,6 +46,14 @@ public class SaveDepartmentCombinedAction extends UnsecuredActionImpl<SaveDepart
 
     public void setDepartment(Integer department) {
         this.department = department;
+    }
+
+    public String getOldUUID() {
+        return oldUUID;
+    }
+
+    public void setOldUUID(String oldUUID) {
+        this.oldUUID = oldUUID;
     }
 
     @Override

@@ -103,7 +103,6 @@ class Main {
                     'guarantees_involvement': 401,
                     'interbank_credits': 389,
                     'letter_of_credit': 386,
-                    'matrix': 400,
                     'nondeliverable': 392,
                     'notification': -1,
                     'organization_matching': 410,
@@ -123,9 +122,11 @@ class Main {
             ],
             'income': [
                     'advanceDistribution': 500,
+                    'app2': 415,
                     'app5': 372,
                     'declaration_bank': -1,
                     'declaration_bank_1': -1,
+                    'declaration_bank_2': -1,
                     'declaration_op': -1,
                     'declaration_op_1': -1,
                     'f7_8': 362,
@@ -135,10 +136,13 @@ class Main {
                     'outcome_simple': 304,
                     'output1': 306,
                     'output1_1': 411,
+                    'output1_2': 414,
                     'output2': 307,
                     'output2_1': 413,
+                    'output2_2': 10460,
                     'output3': 308,
                     'output3_1': 412,
+                    'output_4': 10540,
                     'rnu107': -1,
                     'rnu108': -1,
                     'rnu110': -1,
@@ -215,18 +219,17 @@ class Main {
                     'vat_724_6': 604,
                     'vat_724_7': 605,
                     'vat_937_1': 606,
+                    'vat_937_1_1': 616,
                     'vat_937_1_13': 607,
-                    'vat_937_2_13': 609,
-                    'vat_937_2': 608
+                    'vat_937_2': 608,
+                    'vat_937_2_1': 617,
+                    'vat_937_2_13': 609
             ],
             'transport': [
                     'benefit_vehicles': 202,
                     'declaration': -1,
-                    'declaration_1': -1,
                     'summary': 200,
-                    'summary_1': 203,
-                    'vehicles': 201,
-                    'vehicles_1': 204
+                    'vehicles': 201
             ],
             'property': [
                     'declaration': -1,

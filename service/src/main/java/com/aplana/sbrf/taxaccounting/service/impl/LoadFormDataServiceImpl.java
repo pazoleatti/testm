@@ -229,6 +229,11 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
+            if (departmentReportPeriod.getCorrectionDate() != null) {
+                String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
+                log(userInfo, LogData.L8, logger, formType.getName(), reportPeriodName);
+            }
+
             // ЭЦП
             List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
             if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {

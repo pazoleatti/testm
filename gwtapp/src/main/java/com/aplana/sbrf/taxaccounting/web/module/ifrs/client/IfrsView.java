@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.ifrs.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.model.IfrsRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -295,6 +297,11 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
 
     @UiHandler("delete")
     public void onDeleteClicked(ClickEvent event) {
-        getUiHandlers().onDeleteClicked(selectionModel.getSelectedSet());
+        Dialog.confirmMessage("Удаление отчетности", "Вы действительно хотите удалить выбранную отчетность?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onDeleteClicked(selectionModel.getSelectedSet());
+            }
+        });
     }
 }
