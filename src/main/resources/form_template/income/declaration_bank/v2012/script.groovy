@@ -62,8 +62,6 @@ def departmentParamTable = null
 
 // Дата окончания отчетного периода
 @Field
-def getEndDate = null
-@Field
 def reportPeriodEndDate = null
 
 def getEndDate() {
@@ -108,8 +106,8 @@ void logicCheck() {
         return
     }
     def empty = 0
-
-    // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
+    // TODO   http://jira.aplana.com/browse/SBRFACCTAX-10192
+    /*// Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
     def nalVipl311 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалВыпл311.text())
     def nalIschisl = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчисл.text())
     if (nalVipl311 != null && nalIschisl != null &&
@@ -131,7 +129,7 @@ void logicCheck() {
     if (nalVipl311Sub != null && nalIschislSub != null &&
             nalVipl311Sub > nalIschislSub) {
         logger.error('Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)!')
-    }
+    }*/
 
     // Проверки Приложения № 1 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные доходы (всего)»)
     // (ВнеРеалДохПр + ВнеРеалДохСт + ВнеРеалДохБезв + ВнеРеалДохИзл + ВнеРеалДохВРасх + ВнеРеалДохРынЦБДД + ВнеРеалДохКор) < ВнеРеалДохВс
@@ -234,7 +232,7 @@ void generateXML() {
         throw new Exception('Ошибка при получении настроек обособленного подразделения!')
     }
 
-    def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
+    def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
     def incomeParamsTable = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)?.get(0)
     if (incomeParamsTable == null) {
         throw new Exception('Ошибка при получении настроек обособленного подразделения!')
@@ -661,7 +659,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 9 : 2, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 9 : 2, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
@@ -1774,7 +1772,7 @@ List<String> getErrorTable(record) {
 List<String> getErrorDepartment(record) {
     List<String> errorList = new ArrayList<String>()
 
-    if (record.INN == null || record.INN.value.isEmpty()) {
+    if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
     }
     if (record.TAX_RATE?.value == null) {
@@ -1864,7 +1862,7 @@ def getDepartmentParam() {
 // Получить параметры подразделения (из справочника 330)
 def getDepartmentParamTable(def departmentParamId) {
     if (departmentParamTable == null) {
-        def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
+        def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
             throw new Exception("Ошибка при получении настроек обособленного подразделения")
