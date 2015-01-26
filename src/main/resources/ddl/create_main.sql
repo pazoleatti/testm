@@ -866,3 +866,14 @@ comment on column configuration_email.name is 'Код параметра';
 comment on column configuration_email.value is 'Значение параметра';
 comment on column configuration_email.description is 'Описание параметра';
 --------------------------------------------------------------------------------------------------------
+create global temporary table data_row_temp
+(
+  ID  NUMBER(18) not null primary key,
+  ORD NUMBER(18) not null
+)
+on commit delete rows;
+
+comment on table data_row_temp is 'Временная таблица для сортировки строк';
+comment on column data_row_temp.id is 'Идентификатор записи';
+comment on column data_row_temp.ord is 'Число, соотвествующее номеру строки по порядку';
+--------------------------------------------------------------------------------------------------------

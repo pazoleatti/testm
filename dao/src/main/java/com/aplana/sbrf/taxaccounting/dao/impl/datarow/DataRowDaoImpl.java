@@ -744,7 +744,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         String sqlSelectOrds = "SELECT ord FROM data_row WHERE " + SqlUtils.transformToSqlInStatement("id", dataRowIds) + " ORDER BY ord";
         final List<Long> ords = getJdbcTemplate().queryForList(sqlSelectOrds, Long.class);
 
-        StringBuilder sql = new StringBuilder("MERGE INTO data_row dr USING (");
+        StringBuilder sql = new StringBuilder("INSERT INTO data_row_temp ");
         // задать строке по id соответствующий ord
         for (int i = 0; i < dataRows.size(); i++) {
             DataRow<Cell> row = dataRows.get(i);
@@ -763,8 +763,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 sql.append(" UNION ALL");
             }
         }
-        sql.append("\n) ords ON (dr.id = ords.id) WHEN MATCHED THEN UPDATE SET dr.ord = ords.ord");
+		getJdbcTemplate().update(sql.toString());
 
+        sql = new StringBuilder("MERGE INTO data_row dr USING data_row_temp ords ON (dr.id = ords.id) " +
+				"WHEN MATCHED THEN UPDATE SET dr.ord = ords.ord");
         getJdbcTemplate().update(sql.toString());
     }
 }
