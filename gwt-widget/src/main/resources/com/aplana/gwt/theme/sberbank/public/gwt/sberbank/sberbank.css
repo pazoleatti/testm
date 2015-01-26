@@ -1016,7 +1016,6 @@ a, a:visited, a:hover {
 .gwt-TextBox {
     border: 1px solid green;
     padding: 2px 0 2px 2px;
-    margin-left: -1px;
     margin-right: -1px;
 }
 
