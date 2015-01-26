@@ -33,6 +33,7 @@ import com.gwtplatform.mvp.client.proxy.ManualRevealCallback;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -109,19 +110,14 @@ public class AdminPresenter
 	 * 
 	 * Загружается список шаблонов форм и складывается в список для выбора.
 	 * 
-	 * @param request
-	 *            запрос
+	 * @param request запрос
 	 */
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
 		super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-        String url = AdminConstants.NameTokens.formTemplateVersionList + ";" + AdminConstants.NameTokens.formTypeId;
-        if ((lstHistory.get(0) == null || !lstHistory.get(0).startsWith(url)) &&
-                (lstHistory.get(1) == null || !lstHistory.get(1).startsWith(url))) {
-            previousFilter = null;
-        }
+        resetSearchFilter();
         filterPresenter.initFilter(previousFilter);
 	}
 
@@ -219,5 +215,32 @@ public class AdminPresenter
         updateFormData();
         if (event.getUuid() != null)
             LogAddEvent.fire(this, event.getUuid());
+    }
+
+    /**
+     * Сбросить фильтр поиска при возврате на страницу
+     */
+    private void resetSearchFilter() {
+        boolean reset = true;
+
+        List<String> urls = new ArrayList<String>();
+        urls.add(AdminConstants.NameTokens.formTemplateMainPage + ";" + AdminConstants.NameTokens.formTemplateId);
+        urls.add(AdminConstants.NameTokens.formTemplateVersionList + ";" + AdminConstants.NameTokens.formTypeId);
+        urls.add(AdminConstants.NameTokens.formTemplateInfoPage + ";" + AdminConstants.NameTokens.formTemplateId);
+        urls.add(AdminConstants.NameTokens.formTemplateScriptCodePage + ";" + AdminConstants.NameTokens.formTemplateId);
+        urls.add(AdminConstants.NameTokens.formTemplateColumnPage + ";" + AdminConstants.NameTokens.formTemplateId);
+        urls.add(AdminConstants.NameTokens.formTemplateStylePage + ";" + AdminConstants.NameTokens.formTemplateId);
+        urls.add(AdminConstants.NameTokens.formTemplateRowPage + ";" + AdminConstants.NameTokens.formTemplateId);
+        urls.add(AdminConstants.NameTokens.formTemplateHeaderPage + ";" + AdminConstants.NameTokens.formTemplateId);
+        urls.add(AdminConstants.NameTokens.formTemplateImpexPage + ";" + AdminConstants.NameTokens.formTemplateId);
+
+        for (String url : urls) {
+            if (lstHistory.get(1) == null || lstHistory.get(1).startsWith(url)) {
+                reset = false;
+                break;
+            }
+        }
+
+        if (reset) previousFilter = null;
     }
 }
