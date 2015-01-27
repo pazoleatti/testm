@@ -144,7 +144,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
         for (String fileName : workFilesList) {
             ignoreFileSet.add(fileName);
-            FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
+            FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
 
             // Обработка файла
             TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
@@ -474,7 +474,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private List<String> getWorkTransportFiles(TAUserInfo userInfo, String folderPath, Set<String> ignoreFileSet,
                                                List<String> loadedFileNameList, Logger logger, ImportCounter wrongImportCounter) {
         List<String> retVal = new LinkedList<String>();
-        FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
+        FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath + "/");
         for (String candidateStr : catalogFile.list()) {
             if (ignoreFileSet != null && ignoreFileSet.contains(candidateStr)) {
                 continue;
@@ -486,7 +486,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
 
             // Это файл, а не директория и соответствует формату имени ТФ
-            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + "/" + candidateStr);
             if (candidateFile.isFile()) {
                 if (TransportDataParam.isValidName(candidateStr)) {
                     retVal.add(candidateStr);
