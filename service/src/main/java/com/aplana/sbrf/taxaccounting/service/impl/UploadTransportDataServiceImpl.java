@@ -248,7 +248,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private boolean copyFileFromStream(TAUserInfo userInfo, InputStream inputStream, String folderPath, String fileName, Logger logger)
             throws IOException {
         if (folderPath != null) {
-            FileWrapper file = ResourceUtils.getSharedResource(folderPath + fileName, false);
+            FileWrapper file = ResourceUtils.getSharedResource(folderPath + "/" + fileName, false);
             boolean exist = file.exists();
             OutputStream outputStream = file.getOutputStream();
             IOUtils.copy(inputStream, outputStream);
