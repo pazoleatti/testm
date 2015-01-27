@@ -28,28 +28,25 @@
         <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>issuer</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Эмитент</name>
         <order>3</order>
         <width>20</width>
-        <parentAlias>regNumber</parentAlias>
-        <refBookAttributeId>809</refBookAttributeId>
-        <refBookAttributeId2>868</refBookAttributeId2>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>regNumber</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Государственный регистрационный номер</name>
         <order>4</order>
         <width>8</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>813</nameAttributeId>
-        <refBookAttributeId>813</refBookAttributeId>
-        <searchEnabled>true</searchEnabled>
+        <maxLength>30</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>tradeNumber</alias>
@@ -61,16 +58,16 @@
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>currency</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Валюта выпуска облигации</name>
         <order>6</order>
         <width>5</width>
-        <parentAlias>regNumber</parentAlias>
-        <refBookAttributeId>810</refBookAttributeId>
-        <refBookAttributeId2>65</refBookAttributeId2>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>prev</alias>
@@ -112,16 +109,15 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Признак ценной бумаги на текущую отчётную дату</name>
         <order>11</order>
         <width>7</width>
-        <parentAlias>regNumber</parentAlias>
-        <refBookAttributeId>869</refBookAttributeId>
-        <refBookAttributeId2>621</refBookAttributeId2>
+        <maxLength>1</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>marketQuotation</alias>

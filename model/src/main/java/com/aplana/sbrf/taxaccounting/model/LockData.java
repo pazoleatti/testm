@@ -14,8 +14,10 @@ public final class LockData {
     public enum LockObjects {
         REF_BOOK,
         DECLARATION_DATA,
+        DECLARATION_CREATE,
         FORM_DATA,
         FORM_DATA_IMPORT,
+        FORM_DATA_CREATE,
         DECLARATION_TEMPLATE,
         FORM_TEMPLATE,
         LOG_SYSTEM_BACKUP,

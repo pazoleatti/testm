@@ -43,14 +43,24 @@ public class DiffServiceImpl implements DiffService {
                 // TODO Левыкин: алгоритм можно улучшить, применив нечеткое сравнение строк, но скажется на производительности
                 // Если патч сообщает о изменении, а количество строк не совпадает, то первые соответствующие строки
                 // считаем измененными, а остальные добавленными или удаленными
-                if ((i < originalSize && i < revisedSize - 1)) {
-                    diffList.add(new Diff(originalStartIndex + i, revisedStartIndex + i, DiffType.CHANGE));
-                } else if (i >= originalSize) {
-                    diffList.add(new Diff(null, revisedStartIndex + i, DiffType.INSERT));
-                } else if ((i >= revisedSize - 1)) {
-                    if (i == maxIndex - 1) {
-                        diffList.add(new Diff(originalStartIndex + i, revisedStartIndex, DiffType.CHANGE));
-                    } else {
+                if (revisedSize == 1) {
+                    if ((i < originalSize && i < revisedSize - 1)) {
+                        diffList.add(new Diff(originalStartIndex + i, revisedStartIndex + i, DiffType.CHANGE));
+                    } else if (i >= originalSize) {
+                        diffList.add(new Diff(null, revisedStartIndex + i, DiffType.INSERT));
+                    } else if ((i >= revisedSize - 1)) {
+                        if (i == maxIndex - 1) {
+                            diffList.add(new Diff(originalStartIndex + i, revisedStartIndex, DiffType.CHANGE));
+                        } else {
+                            diffList.add(new Diff(originalStartIndex + i, null, DiffType.DELETE));
+                        }
+                    }
+                } else {
+                    if (i < originalSize && i < revisedSize) {
+                        diffList.add(new Diff(originalStartIndex + i, revisedStartIndex + i, DiffType.CHANGE));
+                    } else if (i >= originalSize) {
+                        diffList.add(new Diff(null, revisedStartIndex + i, DiffType.INSERT));
+                    } else if (i >= revisedSize) {
                         diffList.add(new Diff(originalStartIndex + i, null, DiffType.DELETE));
                     }
                 }

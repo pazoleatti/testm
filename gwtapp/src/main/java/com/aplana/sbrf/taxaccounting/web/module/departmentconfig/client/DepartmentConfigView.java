@@ -367,7 +367,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("editButton")
 	public void onEdit(ClickEvent event) {
-		if (currentDepartmentId != null && currentReportPeriodId != null && isReportPeriodActive) {
+		if (currentDepartmentId != null && currentReportPeriodId != null) {
             getUiHandlers().edit(currentReportPeriodId, currentDepartmentId);
 		}
 	}

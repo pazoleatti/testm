@@ -32,7 +32,7 @@
         <name>Эмитент</name>
         <order>3</order>
         <width>10</width>
-        <maxLength>2000</maxLength>
+        <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -54,14 +54,15 @@
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>currency</alias>
         <checking>false</checking>
         <name>Валюта выпуска ценной бумаги</name>
         <order>6</order>
         <width>7</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>lotSizePrev</alias>
@@ -105,7 +106,7 @@
         <name>Признак ценной бумаги на текущую отчетную дату</name>
         <order>11</order>
         <width>7</width>
-        <maxLength>2000</maxLength>
+        <maxLength>1</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

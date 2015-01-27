@@ -45,8 +45,8 @@ public class DiffServiceTest {
         diffList = diffService.computeDiff(Arrays.asList("AAA", "BBB", "CCC"), Arrays.asList("AAA", "BBB"));
         Assert.assertEquals(1, diffList.size());
         Diff diff = diffList.get(0);
-        Assert.assertEquals(DiffType.CHANGE, diff.getDiffType());
-        Assert.assertEquals(2, diff.getRevisedRowNumber().intValue());
+        Assert.assertEquals(DiffType.DELETE, diff.getDiffType());
+        Assert.assertNull(diff.getRevisedRowNumber());
         Assert.assertNotNull(diff.getOriginalRowNumber());
         Assert.assertEquals(2, diff.getOriginalRowNumber().intValue());
         // Добавлена строка
@@ -73,8 +73,8 @@ public class DiffServiceTest {
         List<Diff> diffList = diffService.computeDiff(streamToLines(getOriginalInputStream()),
                 streamToLines(getRevisedInputStream()));
         Assert.assertEquals(8, diffList.size());
-        DiffType[] diffTypes = new DiffType[]{DiffType.CHANGE, DiffType.INSERT, DiffType.CHANGE, DiffType.DELETE,
-                DiffType.CHANGE, DiffType.CHANGE, DiffType.INSERT, DiffType.INSERT};
+        DiffType[] diffTypes = new DiffType[]{DiffType.CHANGE, DiffType.INSERT, DiffType.CHANGE, DiffType.CHANGE,
+                DiffType.DELETE, DiffType.DELETE, DiffType.INSERT, DiffType.INSERT};
         for (int i = 0; i < diffList.size(); i++) {
             Assert.assertEquals(diffTypes[i], diffList.get(i).getDiffType());
         }

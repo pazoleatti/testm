@@ -21,7 +21,7 @@ import java.math.RoundingMode
 // графа 5  - lotSizeCurrent
 // графа 6  - reserve
 // графа 7  - cost
-// графа 8  - signSecurity          атрибут 621 CODE "Код признака" - справочник 62 "Признаки ценных бумаг"
+// графа 8  - signSecurity         текст, было: атрибут 621 CODE "Код признака" - справочник 62 "Признаки ценных бумаг"
 // графа 9  - marketQuotation
 // графа 10 - costOnMarketQuotation
 // графа 11 - reserveCalcValue
@@ -187,7 +187,7 @@ void calc() {
             row.costOnMarketQuotation = calc10(row)
 
             // графа 11
-            def sign = getSign(row.signSecurity)
+            def sign = getSign(row)
             row.reserveCalcValue = calc11(row, sign)
 
             // графа 12
@@ -301,7 +301,7 @@ void logicCheck() {
         }
 
         // 5. Проверка необращающихся акций (графа 8, 11, 12)
-        def sign = getSign(row.signSecurity)
+        def sign = getSign(row)
         if (sign == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
             rowWarning(logger, row, errorMsg + 'облигации необращающиеся, графы 11 и 12 ненулевые!')
         }
@@ -534,12 +534,10 @@ def BigDecimal calc4(def dataRowsOld, def row) {
         return 0
     } else {
         if (prevMatchRow.signSecurity != null && row.signSecurity != null) {
-            def valPrev = getRefBookValue(62, prevMatchRow.signSecurity)
-            def val = getRefBookValue(62, row.signSecurity)
-            if (valPrev?.CODE?.stringValue == '+' && val?.CODE?.stringValue == '-') {
+            if (prevMatchRow.signSecurity == '+' && row.signSecurity == '-') {
                 return prevMatchRow.lotSizePrev
             }
-            if (valPrev?.CODE?.stringValue == '-' && val?.CODE?.stringValue == '+') {
+            if (prevMatchRow.signSecurity == '-' && row.signSecurity == '+') {
                 return 0
             }
         }
@@ -702,7 +700,7 @@ void addData(def xml, int headRowCount) {
         // Графа 7
         newRow.cost = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
         // Графа 8
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), xlsIndexRow, 8 + colOffset)
+        newRow.signSecurity = row.cell[8].text()
         // Графа 9
         newRow.marketQuotation = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
@@ -755,7 +753,7 @@ void addTransportData(def xml) {
         // графа 7
         newRow.cost = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
         // графа 8
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), rnuIndexRow, 8 + colOffset)
+        newRow.signSecurity = row.cell[8].text()
         // графа 9
         newRow.marketQuotation = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
         // графа 10
@@ -806,8 +804,8 @@ void addTransportData(def xml) {
 }
 
 /** Получить признак ценной бумаги. */
-def getSign(def recordId) {
-    return getRefBookValue(62, recordId)?.CODE?.value
+def getSign(def row) {
+    return row.signSecurity
 }
 
 BigDecimal roundTo2(BigDecimal value) {
