@@ -59,7 +59,7 @@ public class CheckSettingExistHandler extends AbstractActionHandler<CheckSetting
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentId();
         RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
         ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
-        List<Pair<Long, Long>> existSettings = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
+        List<Long> existSettings = provider.getUniqueRecordIds(period.getCalendarStartDate(), filter);
         if (existSettings == null || existSettings.isEmpty()) {
             result.setSettingsExist(false);
         } else {

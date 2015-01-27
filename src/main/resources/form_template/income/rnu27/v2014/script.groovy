@@ -20,15 +20,17 @@ import groovy.transform.Field
 
 // графа 1  - number
 // графа    - fix
-// графа 2  - issuer                    - зависит от графы 3 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
-// графа 3  - regNumber                 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
+// графа 2  - issuer                    - текст, было: зависит от графы 3 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+// графа 3  - regNumber                 - текст, было: атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
 // графа 4  - tradeNumber
-// графа 5  - currency                  - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+// графа 5  - currency                  - справочник "Общероссийский классификатор валют", отображаемый атрибут "Код валюты. Буквенный",
+//                                          было: зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+
 // графа 6  - prev
 // графа 7  - current
 // графа 8  - reserveCalcValuePrev
 // графа 9  - cost
-// графа 10 - signSecurity              - зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+// графа 10 - signSecurity              - текст, было: зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
 // графа 11 - marketQuotation
 // графа 12 - rubCourse                 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
 // графа 13 - marketQuotationInRub
@@ -58,7 +60,7 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW:
         def columns = editableColumns
         if (isBalancePeriod()) {
-            columns = allColumns - ['number', 'issuer', 'currency', 'signSecurity']
+            columns = allColumns - ['number']
         }
         def autoFillColumns = allColumns - columns
         formDataService.addRow(formData, currentDataRow, columns, autoFillColumns)
@@ -117,9 +119,9 @@ def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'curren
         'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
-// Редактируемые атрибуты (графа 3, 4, 6, 7, 9, 11, 12)
 @Field
-def editableColumns = ['regNumber', 'tradeNumber', 'prev', 'current', 'cost', 'marketQuotation', 'rubCourse']
+def editableColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current', 'cost', 'signSecurity',
+                       'marketQuotation', 'rubCourse']
 
 // Группируемые атрибуты (графа 2, 3, 4)
 @Field
@@ -127,8 +129,8 @@ def groupColumns = ['issuer', 'regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..5, 8, 13..17)
 @Field
-def nonEmptyColumns = ['regNumber', 'tradeNumber', 'reserveCalcValuePrev', 'costOnMarketQuotation', 'reserveCalcValue',
-                       'reserveCreation', 'recovery']
+def nonEmptyColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
+                       'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
 @Field
@@ -261,11 +263,10 @@ def logicCheck() {
                 loggerError(row, errorMsg + "Графы 8 и 17 ненулевые!")
             }
             // 7. Проверка необращающихся облигаций (графа 10 = «x»)
-            if (getSign(row.regNumber) == "-" && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
+            if (row.signSecurity == "-" && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 rowWarning(logger, row, errorMsg + "Облигации необращающиеся, графы 15 и 16 ненулевые!")
             }
-            if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null &&
-                    getSign(row.regNumber) == "+") {
+            if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null && row.signSecurity == "+") {
                 // 8. Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
                     loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
@@ -312,7 +313,7 @@ def logicCheck() {
             // 1. Проверка на заполнение поля «<Наименование поля>»
             checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
-            if (getCurrencyCode(row.regNumber) in ['810', '643']) {
+            if (isRubleCurrency(row.currency)) {
                 // 17. Проверка графы 11
                 if (row.marketQuotation != null) {
                     loggerError(row, errorMsg + "Неверно заполнена графа «Рыночная котировка одной ценной бумаги в иностранной валюте»!")
@@ -346,7 +347,7 @@ def logicCheck() {
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
                     def tmpRow = getPrevRowWithoutAlias(dataRows, row)
-                    def regNumber = getRefBookValue(84, tmpRow?.regNumber)?.REG_NUM?.value
+                    def regNumber = tmpRow.regNumber
                     loggerError(null, "Итоговые значения по «$regNumber» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -359,7 +360,7 @@ def logicCheck() {
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
                     def tmpRow = getPrevRowWithoutAlias(dataRows, row)
-                    def issuer = getIssuerName(tmpRow?.regNumber)
+                    def issuer = tmpRow.issuer
                     loggerError(null, "Итоговые значения для «$issuer» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -413,6 +414,10 @@ def logicCheck() {
             logger.warn("Существует несколько строк с номерами сделок: \${foundMany.join(', ')}")
         }
     }
+}
+
+def isRubleCurrency(def currencyCode) {
+    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
 }
 
 // Импорт данных
@@ -508,73 +513,48 @@ void addData(def xml, int headRowCount) {
 
         def xmlIndexCol
 
-        // Графа 1
-        xmlIndexCol = 0
-
-        // Графа 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
-        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
-        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
-        xmlIndexCol = 3
-        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        newRow.regNumber = record84?.record_id?.value
-
-        // Графа 2 - зависит от графы 3 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+        // Графа 2
         xmlIndexCol = 2
-        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        if (record84 != null && record100 != null) {
-            def value1 = record100?.record_id?.value?.toString()
-            def value2 = record84?.ISSUER?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-
+        newRow.issuer = row.cell[xmlIndexCol].text()
+        // Графа 3
+        xmlIndexCol = 3
+        newRow.regNumber = row.cell[xmlIndexCol].text()
         // Графа 4
-        newRow.tradeNumber = row.cell[4].text()
-
-        // Графа 5 - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 4
+        newRow.tradeNumber = row.cell[xmlIndexCol].text()
+        // Графа 5
         xmlIndexCol = 5
-        def record15 = getRecordImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        if (record84 != null && record15 != null) {
-            def value1 = record15?.record_id?.value?.toString()
-            def value2 = record84?.CODE_CUR?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-
+        newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // Графа 6
         xmlIndexCol = 6
         newRow.prev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // Графа 7
         xmlIndexCol = 7
         newRow.current = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // Графа 8
         xmlIndexCol = 8
         newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // Графа 9
-        xlIndexCol = 9
+        xmlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
+        // Графа 10
+        xmlIndexCol = 10
+        newRow.signSecurity = row.cell[xmlIndexCol].text()
         // Графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // Графа 12
         xmlIndexCol = 12
         newRow.rubCourse = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // Графа 14
         xmlIndexCol = 14
         newRow.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // Графа 15
         xmlIndexCol = 15
         newRow.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // Графа 16
         xmlIndexCol = 16
         newRow.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // Графа 17
         xmlIndexCol = 17
         newRow.recovery = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -598,8 +578,8 @@ void addAllStatic(def dataRows) {
         int j = 0
 
         // графа 3 - грн - regNumber
-        def regNum = getRefBookValue(84, row?.regNumber)?.REG_NUM?.value
-        def nextRegNum = getRefBookValue(84, nextRow?.regNumber)?.REG_NUM?.value
+        def regNum = row?.regNumber
+        def nextRegNum = nextRow?.regNumber
         if (row.getAlias() == null && nextRow == null || regNum != nextRegNum) {
             def itogRegNumberRow = calcItogRegNumber(i)
             dataRows.add(i + 1, itogRegNumberRow)
@@ -607,8 +587,8 @@ void addAllStatic(def dataRows) {
         }
 
         // графа 2 - эмитент - issuer
-        def issuer = getIssuerName(row?.regNumber)
-        def nextIssuer = getIssuerName(nextRow?.regNumber)
+        def issuer = row.issuer
+        def nextIssuer = nextRow?.issuer
         if (row.getAlias() == null && nextRow == null || issuer != nextIssuer) {
             def itogIssuerRow = calcItogIssuer(i)
             dataRows.add(i + 2, itogIssuerRow)
@@ -629,7 +609,7 @@ def calcItogIssuer(int i) {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     for (int j = i; j >= 0; j--) {
         if (getRow(dataRows, j).getAlias() == null) {
-            tIssuer = getIssuerName(getRow(dataRows, j).regNumber)
+            tIssuer = getRow(dataRows, j).issuer
             break
         }
     }
@@ -644,7 +624,7 @@ def calcItogIssuer(int i) {
         def srow = getRow(dataRows, j)
 
         if (srow.getAlias() == null) {
-            def issuerName = getIssuerName(getRow(dataRows, j).regNumber)
+            def issuerName = getRow(dataRows, j).issuer
             if (issuerName != tIssuer) {
                 break
             }
@@ -673,7 +653,7 @@ def calcItogRegNumber(int i) {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     for (int j = i; j >= 0; j--) {
         if (getRow(dataRows, j).getAlias() == null) {
-            tRegNumber = getRefBookValue(84, getRow(dataRows, j).regNumber)?.REG_NUM?.value
+            tRegNumber = getRow(dataRows, j).regNumber
             break
         }
     }
@@ -689,7 +669,7 @@ def calcItogRegNumber(int i) {
         def srow = getRow(dataRows, j)
 
         if (srow.getAlias() == null) {
-            if (getRefBookValue(84, srow.regNumber)?.REG_NUM?.value != tRegNumber) {
+            if (srow.regNumber != tRegNumber) {
                 break
             }
 
@@ -734,14 +714,14 @@ BigDecimal calc8(DataRow row, def dataPrevRows) {
 }
 
 BigDecimal calc11(DataRow row) {
-    if (getCurrencyCode(row.regNumber) in ['810', '643']) {
+    if (isRubleCurrency(row.currency)) {
         return null
     }
     return row.marketQuotation
 }
 
 BigDecimal calc12(DataRow row) {
-    if (getCurrencyCode(row.regNumber) in ['810', '643']) {
+    if (isRubleCurrency(row.currency)) {
         return null
     }
     return row.rubCourse
@@ -767,7 +747,7 @@ BigDecimal calc14(DataRow row) {
 
 BigDecimal calc15(DataRow row) {
     def tmp = BigDecimal.ZERO
-    if (row.regNumber != null && getSign(row.regNumber) == '+') {
+    if (row.signSecurity == '+') {
         if (row.costOnMarketQuotation == null) {
             tmp = null
         } else {
@@ -830,24 +810,6 @@ void setTotalStyle(def row) {
     allColumns.each {
         row.getCell(it).setStyleAlias('Контрольные суммы')
     }
-}
-
-/** Получить название эмитента. */
-def getIssuerName(def record84Id) {
-    def issuerId = getRefBookValue(84, record84Id?.toLong())?.ISSUER?.value
-    return getRefBookValue(100, issuerId)?.FULL_NAME?.value
-}
-
-/** Получить цифровой код валюты. */
-def getCurrencyCode(def record84Id) {
-    def record15Id = getRefBookValue(84, record84Id?.toLong())?.CODE_CUR?.value
-    return getRefBookValue(15, record15Id)?.CODE?.value
-}
-
-/** Получить признак ценной бумаги. */
-def getSign(def record84Id) {
-    def record62Id = getRefBookValue(84, record84Id?.toLong())?.SIGN?.value
-    return getRefBookValue(62, record62Id)?.CODE?.value
 }
 
 /**
@@ -941,30 +903,18 @@ void addTransportData(def xml) {
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
 
-        // Графа 3 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
-        // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
-        // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
-        xmlIndexCol = 3
-        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, true)
-        newRow.regNumber = record84?.record_id?.value
-        // Графа 2 - зависит от графы 3 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
+        // Графа 2
         xmlIndexCol = 2
-        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        if (record84 != null && record100 != null) {
-            def value1 = record100?.record_id?.value?.toString()
-            def value2 = record84?.ISSUER?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        newRow.issuer = row.cell[xmlIndexCol].text()
+        // Графа 3
+        xmlIndexCol = 3
+        newRow.regNumber = row.cell[xmlIndexCol].text()
         // Графа 4
-        newRow.tradeNumber = row.cell[4].text()
-        // Графа 5 - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+        xmlIndexCol = 4
+        newRow.tradeNumber = row.cell[xmlIndexCol].text()
+        // Графа 5
         xmlIndexCol = 5
-        def record15 = getRecordImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        if (record84 != null && record15 != null) {
-            def value1 = record15?.record_id?.value?.toString()
-            def value2 = record84?.CODE_CUR?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
+        newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // Графа 6
         xmlIndexCol = 6
         newRow.prev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -975,8 +925,11 @@ void addTransportData(def xml) {
         xmlIndexCol = 8
         newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // Графа 9
-        xlIndexCol = 9
+        xmlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // Графа 10
+        xmlIndexCol = 10
+        newRow.signSecurity = row.cell[xmlIndexCol].text()
         // Графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -1025,7 +978,7 @@ void addTransportData(def xml) {
         xmlIndexCol = 8
         total.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // Графа 9
-        xlIndexCol = 9
+        xmlIndexCol = 9
         total.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // Графа 14
         xmlIndexCol = 14
