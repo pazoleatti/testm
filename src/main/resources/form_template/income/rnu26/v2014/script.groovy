@@ -974,7 +974,7 @@ def getRate(def row, def date) {
     }
     if (!isRubleCurrency(currency)) {
         def res = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
-                'CODE_NUMBER', currencyId.toString(), date, row.getIndex(), getColumnName(row, "currency"), logger, false)
+                'CODE_NUMBER', currency.toString(), date, row.getIndex(), getColumnName(row, "currency"), logger, false)
         return res?.RATE?.numberValue
     }
     return 1;
