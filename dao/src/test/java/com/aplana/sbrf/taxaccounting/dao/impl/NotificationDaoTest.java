@@ -11,15 +11,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.springframework.util.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.util.Assert.isNull;
+import static org.springframework.util.Assert.notNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"NotificationDaoTest.xml"})
@@ -144,10 +144,13 @@ public class NotificationDaoTest {
         List<DepartmentPair> departments = new ArrayList<DepartmentPair>();
         departments.add(new DepartmentPair(2,1));
         departments.add(new DepartmentPair(3,1));
+        departments.add(new DepartmentPair(null,1));
         notificationDao.deleteList(1, departments);
         result = notificationDao.get(1, 2, 1);
         isNull(result);
         result = notificationDao.get(1, 3, 1);
+        isNull(result);
+        result = notificationDao.get(1, null, 1);
         isNull(result);
     }
 
