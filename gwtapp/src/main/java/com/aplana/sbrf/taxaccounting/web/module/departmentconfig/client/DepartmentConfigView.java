@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.CheckSettingExistAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
@@ -351,28 +352,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("deleteButton")
     public void onDelete(ClickEvent event){
-        Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
-            @Override
-            public void yes() {
-                super.yes();
-                getUiHandlers().delete(driver.flush(), currentReportPeriodId, currentDepartmentId);
-
-                driver.edit(data);
-
-                if (dereferenceValues != null) {
-                    // Обновление разыменованных значений
-                    dereferenceValues.clear();
-                    dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
-                    dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
-                    dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
-                    dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
-                    dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
-                    dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
-                    dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
-                    dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
-                }
-            }
-        });
+        getUiHandlers().delete(driver.flush(), currentReportPeriodId, currentDepartmentId);
     }
 
 	@UiHandler("cancelButton")
@@ -402,7 +382,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("editButton")
 	public void onEdit(ClickEvent event) {
-		if (currentDepartmentId != null && currentReportPeriodId != null && isReportPeriodActive) {
+		if (currentDepartmentId != null && currentReportPeriodId != null) {
             getUiHandlers().edit(currentReportPeriodId, currentDepartmentId);
 		}
 	}
@@ -574,6 +554,24 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
     public void removeResizeHandler() {
         if (resizeHandler != null) {
             resizeHandler.removeHandler();
+        }
+    }
+
+    @Override
+    public void update() {
+        driver.edit(data);
+
+        if (dereferenceValues != null) {
+            // Обновление разыменованных значений
+            dereferenceValues.clear();
+            dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
+            dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
+            dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
+            dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
+            dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
+            dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
+            dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
+            dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
         }
     }
 

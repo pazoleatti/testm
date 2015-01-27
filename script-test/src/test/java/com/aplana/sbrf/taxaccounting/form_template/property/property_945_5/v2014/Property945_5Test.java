@@ -119,7 +119,7 @@ public class Property945_5Test extends ScriptTestBase {
     public void addDelRowTest() {
         // Добавление (в этой форме ручного добавления нет)
         testHelper.execute(FormDataEvent.ADD_ROW);
-        Assert.assertEquals(testHelper.getFormTemplate().getRows().size() + 1, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
 

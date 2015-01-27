@@ -152,6 +152,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         Integer getCurrentDepartmentId();
 
         void removeResizeHandler();
+
+        void update();
     }
 
     @Inject
@@ -164,6 +166,8 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
     @Override
     public void save(final DepartmentCombined combinedDepartmentParam, final Integer period, final Integer department) {
+        final String[] uuid = {""};
+
         if (combinedDepartmentParam == null || department == null || period == null) {
             return;
         }
@@ -175,81 +179,109 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         action.setDepartment(department);
         action.setTaxType(getView().getTaxType());
         dispatcher.execute(action,
-            CallbackUtils.defaultCallback(
-                new AbstractCallback<GetCheckDeclarationResult>() {
-                    void save() {
-                        SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
-                        action.setDepartmentCombined(combinedDepartmentParam);
-                        action.setReportPeriodId(period);
-                        action.setTaxType(getView().getTaxType());
-                        action.setDepartment(department);
-                        dispatcher.execute(action, CallbackUtils
-                                .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
-                                    @Override
-                                    public void onSuccess(SaveDepartmentCombinedResult result) {
-                                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid(), false);
-                                        if (!result.isHasError()) {
-                                            getView().reloadDepartmentParams();
-                                        }
-                                    }
-                                }, DepartmentConfigPresenter.this));
-                    }
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetCheckDeclarationResult>() {
+                            void save() {
+                                SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
+                                action.setDepartmentCombined(combinedDepartmentParam);
+                                action.setReportPeriodId(period);
+                                action.setTaxType(getView().getTaxType());
+                                action.setDepartment(department);
+                                action.setOldUUID(uuid[0]);
+                                dispatcher.execute(action, CallbackUtils
+                                        .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
+                                            @Override
+                                            public void onSuccess(SaveDepartmentCombinedResult result) {
+                                                LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                                                if (!result.isHasError()) {
+                                                    getView().reloadDepartmentParams();
+                                                }
+                                            }
+                                        }, DepartmentConfigPresenter.this));
+                            }
 
-                    @Override
-                    public void onSuccess(final GetCheckDeclarationResult result) {
-                        isControlUnp = result.isControlUnp();
-                        if (result.getUuid() != null) {
-                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                        }
-                        if (result.isDeclarationFormFound()) {
-                            Dialog.confirmMessage(EDIT_FOUND_TEXT,
-                                    new DialogHandler() {
-                                        @Override
-                                        public void yes() {
-                                            super.yes();
+                            @Override
+                            public void onSuccess(final GetCheckDeclarationResult result) {
+                                isControlUnp = result.isControlUnp();
+                                uuid[0] = result.getUuid();
+                                if (uuid[0] != null) {
+                                    LogAddEvent.fire(DepartmentConfigPresenter.this, uuid[0]);
+                                }
+                                if (result.isDeclarationFormFound()) {
+                                    Dialog.confirmMessage(EDIT_FOUND_TEXT,
+                                            new DialogHandler() {
+                                                @Override
+                                                public void yes() {
+                                                    super.yes();
 
-                                            AddLogAction addLogAction = new AddLogAction();
-                                            addLogAction.setOldUUID(result.getUuid());
-                                            addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
-                                                    "Для актуализации данных в найденных экземплярах налоговых/форм деклараций их необходимо рассчитать/обновить")));
-                                            dispatcher.execute(addLogAction, CallbackUtils
-                                                    .defaultCallback(new AbstractCallback<AddLogResult>() {
-                                                        @Override
-                                                        public void onSuccess(AddLogResult result) {
-                                                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                                                        }
-                                                    }, DepartmentConfigPresenter.this));
-                                            save();
-                                        }
-                                    });
-                        } else {
-                            save();
-                        }
-                    }
-                }, this));
+                                                    AddLogAction addLogAction = new AddLogAction();
+                                                    addLogAction.setOldUUID(uuid[0]);
+                                                    addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
+                                                            "Для актуализации данных в найденных экземплярах налоговых/форм деклараций их необходимо рассчитать/обновить")));
+                                                    dispatcher.execute(addLogAction, CallbackUtils
+                                                            .defaultCallback(new AbstractCallback<AddLogResult>() {
+                                                                @Override
+                                                                public void onSuccess(AddLogResult result) {
+                                                                    LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                                                                }
+                                                            }, DepartmentConfigPresenter.this));
+                                                    save();
+                                                }
+                                            });
+                                } else {
+                                    save();
+                                }
+                            }
+                        }, this));
     }
 
     @Override
-    public void delete(DepartmentCombined combinedDepartmentParam, Integer period, Integer department) {
-        if (combinedDepartmentParam == null || department == null || period == null) {
-            return;
-        }
-
-        LogCleanEvent.fire(DepartmentConfigPresenter.this);
-
-        DeleteDepartmentCombinedAction action = new DeleteDepartmentCombinedAction();
-        action.setDepartmentCombined(combinedDepartmentParam);
-        action.setReportPeriodId(period);
-        action.setTaxType(getView().getTaxType());
-        action.setDepartment(department);
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<DeleteDepartmentCombinedResult>() {
+    public void delete(final DepartmentCombined combinedDepartmentParam, final Integer period, final Integer department) {
+//        Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
+//            @Override
+//            public void yes() {
+//
+//            });
+        CheckSettingExistAction settingExistAction = new CheckSettingExistAction();
+        settingExistAction.setDepartmentId(department.longValue());
+        settingExistAction.setReportPeriodId(period);
+        settingExistAction.setTaxType(getView().getTaxType());
+        dispatcher.execute(settingExistAction, CallbackUtils
+                .defaultCallback(new AbstractCallback<CheckSettingExistResult>() {
                     @Override
-                    public void onSuccess(DeleteDepartmentCombinedResult result) {
-                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                        getView().reloadDepartmentParams();
+                    public void onSuccess(CheckSettingExistResult result) {
+                        if (result.isSettingsExist()) {
+                            Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    super.yes();
+                                    if (combinedDepartmentParam != null && department != null && period != null) {
+                                        LogCleanEvent.fire(DepartmentConfigPresenter.this);
+
+                                        DeleteDepartmentCombinedAction action = new DeleteDepartmentCombinedAction();
+                                        action.setDepartmentCombined(combinedDepartmentParam);
+                                        action.setReportPeriodId(period);
+                                        action.setTaxType(getView().getTaxType());
+                                        action.setDepartment(department);
+                                        dispatcher.execute(action, CallbackUtils
+                                                .defaultCallback(new AbstractCallback<DeleteDepartmentCombinedResult>() {
+                                                    @Override
+                                                    public void onSuccess(DeleteDepartmentCombinedResult result) {
+                                                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                                                        getView().reloadDepartmentParams();
+                                                    }
+                                                }, DepartmentConfigPresenter.this));
+                                    }
+                                    getView().update();
+                                }
+                            });
+                        } else {
+                            Dialog.errorMessage("Удаление настроек не выполнено", "Удаление настроек выбранного " +
+                                    "подразделения и периода не может быть выполнено, т.к. данная версия настроек не создана");
+                        }
                     }
-                }, this));
+                }, DepartmentConfigPresenter.this));
+
     }
 
     @Override

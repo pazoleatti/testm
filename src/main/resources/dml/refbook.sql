@@ -424,7 +424,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (641,70,'Код','CODE',2,1,null,null,1,0,10,1,1,null,null,0,1);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (642,70,'Значение','VALUE',1,2,null,null,1,null,30,1,2,null,null,0,250);
 
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (643,71,'Группа','GROUP',2,1,null,null,1,0,10,1,1,null,null,0,1);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (643,71,'Группа','GROUP',2,1,null,null,1,0,10,1,1,null,null,0,2);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (644,71,'Интервал согласно ст. 258 НК РФ','INTERVAL',1,2,null,null,1,null,45,0,0,null,null,0,255);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (645,71,'Срок полезного использования (месяцев)','TERM',2,3,null,null,1,0,10,0,0,null,null,0,3);
 

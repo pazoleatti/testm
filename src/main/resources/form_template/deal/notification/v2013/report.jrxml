@@ -669,10 +669,6 @@ $F{ФормРеорг}]]></variableExpression>
 :
 ($F{КПП2}+"---------").substring( 0,9)]]></initialValueExpression>
 	</variable>
-	<variable name="StrAll" class="java.lang.String">
-		<variableExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5)]]></variableExpression>
-		<initialValueExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5)]]></initialValueExpression>
-	</variable>
 	<variable name="Tlf" class="java.lang.String">
 		<variableExpression><![CDATA[$F{Тлф} == null ?
 "--------------------"
@@ -744,8 +740,6 @@ $F{ДатаДок}]]></variableExpression>
 :
 ($F{НаимОрг_Р2}.replace( " ", "-" )+"----------------------------------------------------------------------------------------------------------------------------------------------------------------").substring(0,160)]]></variableExpression>
 	</variable>
-	<!-- 100 листов -->
-	<!--<filterExpression><![CDATA[Integer.parseInt($F{НомПорСд})<34]]></filterExpression>-->
 	<title>
 		<band height="842" splitType="Stretch">
 			<textField>
@@ -921,35 +915,42 @@ $F{ДатаДок}]]></variableExpression>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="00e14cfa-bd68-42c2-b93f-7920319dd31e" style="mark" x="369" y="23" width="15" height="20"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="acf82af6-7747-4114-b346-26816409b094" style="mark" x="384" y="23" width="15" height="20"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="bf83667f-21d3-4589-be82-44fe9a5d4463" style="mark" x="399" y="23" width="15" height="20"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="5b1eeb8d-3b74-41b8-9a88-158a27c9dba6" style="mark" x="414" y="23" width="15" height="20"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="5b1eeb8d-3b74-41b8-9a88-158a27c9dba6" style="mark" x="429" y="23" width="15" height="20"/>
+				<textElement>
+					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(5)]]></textFieldExpression>
 			</textField>
 			<rectangle>
 				<reportElement uuid="ef780db3-37cc-4551-a8c7-e0a882e65dfb" x="1" y="1" width="12" height="12" backcolor="#000000"/>
@@ -1046,7 +1047,7 @@ $F{ДатаДок}]]></variableExpression>
 				<text><![CDATA[Данное уведомление составлено на]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="c4b6056c-102c-47c0-940f-203f0247ac5c" x="263" y="353" width="57" height="20"/>
+				<reportElement uuid="c4b6056c-102c-47c0-940f-203f0247ac5c" x="280" y="353" width="57" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="9" pdfFontName="Arial.TTF" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
@@ -4898,35 +4899,42 @@ $F{ДатаДок}]]></variableExpression>
 				<textElement>
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement uuid="59ce013a-2018-42e6-a56b-3b4cb8486028" style="mark" x="199" y="353" width="15" height="20"/>
 				<textElement>
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement uuid="42eacc83-0ccd-44a0-83fa-b5ae4e786463" style="mark" x="214" y="353" width="15" height="20"/>
 				<textElement>
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement uuid="e911a907-6285-4979-885c-0195a9ef5b2f" style="mark" x="229" y="353" width="15" height="20"/>
 				<textElement>
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement uuid="a0d19db0-7208-41ed-9696-91d20378ae0f" style="mark" x="244" y="353" width="15" height="20"/>
 				<textElement>
 					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="a0d19db0-7208-41ed-9696-91d20378ae0f" style="mark" x="259" y="353" width="15" height="20"/>
+				<textElement>
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(5)]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="ebc883d5-bbb1-4b9f-8faf-2ab4f67eb7fa" style="mark" x="535" y="353" width="15" height="20"/>
@@ -5496,35 +5504,42 @@ $F{ДатаДок}]]></variableExpression>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="5460ff2b-8258-4f3b-8084-2f415b1cf44b" style="mark" x="369" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="63495934-1f1e-454c-a33b-946b9aa95623" style="mark" x="384" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="158fa2b9-f7a4-4cb5-a539-2bde0dfcb4f0" style="mark" x="399" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="2876157f-8b65-4275-a1af-e6cbb52d0276" style="mark" x="414" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Page">
+				<reportElement uuid="2876157f-8b65-4275-a1af-e6cbb52d0276" style="mark" x="429" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(5)]]></textFieldExpression>
 			</textField>
 			<rectangle>
 				<reportElement uuid="2035d222-4b11-4ac2-a6b7-bbd1db4faa14" x="1" y="1" width="12" height="12" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
@@ -7150,35 +7165,42 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="4613e02f-85d1-42ad-a4e8-b0aef09bdb17" style="mark" x="369" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="97a65f5c-9f46-4d76-9ed2-57fdd7540d62" style="mark" x="384" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="d8e61271-b9a9-436b-ac80-f57d5fc65126" style="mark" x="399" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="2b48a9a0-b639-4374-b8e5-d8b97d68ca29" style="mark" x="414" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Page">
+				<reportElement uuid="2b48a9a0-b639-4374-b8e5-d8b97d68ca29" style="mark" x="429" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(5)]]></textFieldExpression>
 			</textField>
 			<rectangle>
 				<reportElement uuid="3f4a558b-0026-40f8-8dfa-8b6d5501ac72" x="1" y="1" width="12" height="12" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
@@ -11355,35 +11377,42 @@ $F{Ист259}]]></textFieldExpression>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(0)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(0)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="fb4166be-1bf3-4c11-83bd-0add1ed701a9" style="mark" x="369" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(1)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(1)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="035a4c88-7c8e-491f-a7a9-ec526bf43dd3" style="mark" x="384" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(2)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="03990c0e-7730-4bf3-b6a7-8462d03040d9" style="mark" x="399" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(3)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Page">
 				<reportElement uuid="cf3d710c-8cdf-425c-93ec-4c5e712d06f6" style="mark" x="414" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
 				<textElement>
 					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[("0000"+$V{PAGE_NUMBER}).substring(("0000"+$V{PAGE_NUMBER}).length()-5).charAt(4)]]></textFieldExpression>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Page">
+				<reportElement uuid="cf3d710c-8cdf-425c-93ec-4c5e712d06f6" style="mark" x="429" y="23" width="15" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font fontName="Courier New" size="16" isBold="true" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(5)]]></textFieldExpression>
 			</textField>
 			<rectangle>
 				<reportElement uuid="46d1d97e-94ab-4ebf-9682-c60b29591501" x="1" y="1" width="12" height="12" isPrintWhenDetailOverflows="true" backcolor="#000000"/>

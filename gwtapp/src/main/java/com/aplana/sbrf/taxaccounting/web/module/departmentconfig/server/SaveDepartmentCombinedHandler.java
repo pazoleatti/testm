@@ -270,7 +270,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                     logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), "\"-\""));
                 }
             }
-            result.setUuid(logEntryService.save(logger.getEntries()));
+            result.setUuid(logEntryService.update(logger.getEntries(), action.getOldUUID()));
             if (logger.containsLevel(LogLevel.ERROR)) {
                 result.setHasError(true);
             }
