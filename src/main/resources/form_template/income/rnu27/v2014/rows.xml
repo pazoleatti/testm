@@ -4,14 +4,14 @@
         <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="fix" colSpan="2" rowSpan="1" stringValue="Общий итог" styleAlias="Контрольные суммы"/>
         <cell alias="issuer" colSpan="1" rowSpan="1"/>
-        <cell alias="regNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="regNumber" colSpan="1" rowSpan="1"/>
         <cell alias="tradeNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-        <cell alias="currency" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="currency" colSpan="1" rowSpan="1"/>
         <cell alias="prev" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="current" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="reserveCalcValuePrev" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="cost" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-        <cell alias="signSecurity" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="signSecurity" colSpan="1" rowSpan="1"/>
         <cell alias="marketQuotation" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="rubCourse" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="marketQuotationInRub" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
