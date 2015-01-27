@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -84,8 +85,14 @@ public class FormDataServiceTest {
         reportPeriod.setTaxPeriod(taxPeriod);
 
         FormData formData = mock(FormData.class);
-
         when(formData.getReportPeriodId()).thenReturn(1);
+
+		TAUserService userService = mock(TAUserService.class);
+		TAUser user = new TAUser();
+		user.setId(666);
+		user.setLogin("MockUser");
+		when(userService.getUser(666)).thenReturn(user);
+		ReflectionTestUtils.setField(formDataService, "userService", userService);
     }
     /**
      * Тест удаления приемника при распринятии последнего источника
@@ -792,4 +799,33 @@ public class FormDataServiceTest {
                 SIMPLE_DATE_FORMAT.parse("01.01.2012"), null, logger
         );
     }
+
+	@Test
+	public void checkLockedMeTest() throws ParseException {
+	    int exceptionCount = 0;
+
+		LockData lockData = new LockData();
+		lockData.setUserId(666);
+		lockData.setDateBefore(SIMPLE_DATE_FORMAT.parse("30.10.1983"));
+
+		TAUser user = new TAUser();
+		user.setId(31);
+		user.setLogin("admin");
+		try {
+			formDataService.checkLockedMe(lockData, user);
+		} catch (ServiceException e) {
+			Assert.assertEquals("Объект заблокирован другим пользователем (\"MockUser\", срок \"00:00 30.10.1983\")", e.getMessage());
+			exceptionCount++;
+		}
+		try {
+			formDataService.checkLockedMe(null, user);
+		} catch (ServiceException e) {
+			Assert.assertEquals("Блокировка не найдена. Объект должен быть заблокирован текущим пользователем", e.getMessage());
+			exceptionCount++;
+		}
+		user.setId(666);
+		formDataService.checkLockedMe(lockData, user);
+
+		Assert.assertEquals(2, exceptionCount);
+	}
 }
