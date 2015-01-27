@@ -740,6 +740,7 @@ void importTransportData() {
 
 void addTransportData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -812,6 +813,11 @@ void addTransportData(def xml) {
         newRow.reserveRecovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
 
         rows.add(newRow)
+
+        if (rows.size() > 1000) {
+            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+            rows.clear()
+        }
     }
 
     if (xml.rowTotal.size() == 1) {
@@ -854,7 +860,11 @@ void addTransportData(def xml) {
 
         rows.add(total)
     }
-    dataRowHelper.save(rows)
+
+    if(rows.size()> 0){
+        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+    }
+
 }
 
 // обновить индексы строк
