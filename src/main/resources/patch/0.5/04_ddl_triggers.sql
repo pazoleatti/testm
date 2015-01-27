@@ -158,6 +158,7 @@ end DEP_REP_PER_BEFORE_INS_UPD;
 
 -----------------------------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-9732: Правила для проверки на уровне БД справочника "Подразделения"
+--http://jira.aplana.com/browse/SBRFACCTAX-10226 +
 CREATE OR REPLACE TRIGGER "DEPARTMENT_BEFORE_DELETE"
 before delete on department
 for each row
@@ -335,7 +336,7 @@ begin
   end if;
 
   -------------------------------------------------------------------
-  if updating('type') and vFormerDepartmentType in (3, 4) and vFormerDepartmentType<>vCurrentDepartmentType then
+  if updating('type') and vFormerDepartmentType in (3, 4) and vCurrentDepartmentType not in (3, 4) then
      select count(*) into vHasLinks
      from sec_user
      where department_id = vCurrentDepartmentID;
