@@ -235,7 +235,6 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             declarationDataFilter.setTaxType(action.getTaxType());
             PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(declarationDataFilter);
             for(DeclarationDataSearchResultItem item: page) {
-                logger.warn(String.format(action.getTaxType().equals(TaxType.DEAL) ? DECLARATION_WARN_D : DECLARATION_WARN, item.getDeclarationType(), departmentName, periodName));
                 result.setDeclarationFormFound(true);
             }
 

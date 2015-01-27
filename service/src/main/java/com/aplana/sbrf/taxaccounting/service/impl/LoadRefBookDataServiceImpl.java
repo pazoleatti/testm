@@ -152,7 +152,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
             if (move) {
                 for (String fileName : errorFileList) {
-                    FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
+                    FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
                     if (currentFile.isFile()){
                         moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile, null, logger);
                     }
@@ -165,7 +165,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             // Обработка всех подходящих файлов, с получением списка на каждой итерации
             for (String fileName : workFilesList) {
                 ignoreFileSet.add(fileName);
-                FileWrapper currentFile = ResourceUtils.getSharedResource(path + fileName);
+                FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
 
                 // ЭЦП
                 List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
@@ -482,7 +482,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                                Set<String> mappingSet, List<String> loadedFileNameList,
                                                List<String> errorFileList, Logger logger, ImportCounter wrongImportCounter) {
         List<String> retVal = new LinkedList<String>();
-        FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath);
+        FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath + "/");
         for (String candidateStr : catalogFile.list()) {
             if (ignoreFileSet != null && ignoreFileSet.contains(candidateStr)) {
                 continue;
@@ -494,7 +494,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             }
 
             // Это файл, а не директория и соответствует формату имени ТФ
-            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + candidateStr);
+            FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + "/" + candidateStr);
             if (candidateFile.isFile()) {
                 if (mappingMatch(candidateStr, mappingSet) != null) {
                     retVal.add(candidateStr);

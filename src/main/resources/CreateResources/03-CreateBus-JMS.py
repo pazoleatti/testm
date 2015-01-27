@@ -118,6 +118,8 @@ if SIBDestinationsId[0] != '':
 if SIBDestinationNotFound:
 	print 'Initiated the creation of an service integration bus destinations'
 	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBShortAsyncDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ serverName +'"]')
+	print 'Modifying a bus destination'
+	AdminTask.modifySIBDestination(["-bus", SIBusName, "-name", SIBShortAsyncDestinationName, "-maxFailedDeliveries", "0"])	
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	
@@ -137,6 +139,8 @@ if SIBDestinationsId[0] != '':
 if SIBDestinationNotFound:
 	print 'Initiated the creation of an service integration bus destinations'
 	print 'id='+ AdminTask.createSIBDestination('[-bus "'+ SIBusName +'" -name "'+ SIBLongAsyncDestinationName +'" -type Queue -node "'+ nodeName +'" -server "'+ serverName +'"]')
+	print 'Modifying a bus destination'
+	AdminTask.modifySIBDestination(["-bus", SIBusName, "-name", SIBLongAsyncDestinationName, "-maxFailedDeliveries", "0"])	
 	AdminConfig.save()
 	print 'Configuration is saved.'
 	

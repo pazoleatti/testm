@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.CheckSettingExistAction;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
@@ -31,8 +30,8 @@ import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -328,21 +327,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	public void onSave(ClickEvent event) {
 		if (isValid()) {
 			getUiHandlers().save(driver.flush(), currentReportPeriodId, currentDepartmentId);
-
-			driver.edit(data);
-
-			if (dereferenceValues != null) {
-				// Обновление разыменованных значений
-				dereferenceValues.clear();
-				dereferenceValues.put(dictRegionId.getAttributeId(), dictRegionId.getDereferenceValue());
-				dereferenceValues.put(reorgFormCode.getAttributeId(), reorgFormCode.getDereferenceValue());
-				dereferenceValues.put(signatoryId.getAttributeId(), signatoryId.getDereferenceValue());
-				dereferenceValues.put(taxPlaceTypeCode.getAttributeId(), taxPlaceTypeCode.getDereferenceValue());
-				dereferenceValues.put(obligation.getAttributeId(), obligation.getDereferenceValue());
-				dereferenceValues.put(oktmo.getAttributeId(), oktmo.getDereferenceValue());
-				dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
-				dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
-			}
+			update();
 		} else {
 			Dialog.errorMessage("Есть ошибки заполнения формы");
 		}
@@ -382,7 +367,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@UiHandler("editButton")
 	public void onEdit(ClickEvent event) {
-		if (currentDepartmentId != null && currentReportPeriodId != null && isReportPeriodActive) {
+		if (currentDepartmentId != null && currentReportPeriodId != null) {
             getUiHandlers().edit(currentReportPeriodId, currentDepartmentId);
 		}
 	}
