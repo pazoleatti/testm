@@ -18,12 +18,12 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.StringReader;
@@ -1199,7 +1199,7 @@ public final class ScriptUtils {
      * Используется при импорте из транспортного файла
      */
     @SuppressWarnings("unused")
-    public static GPathResult getTransportXML(BufferedInputStream inputStream, ImportService importService, String fileName, int columnCount, int totalCount) {
+    public static GPathResult getTransportXML(BufferedInputStream inputStream, ImportService importService, String fileName, final int columnCount, final int totalCount) {
         checkBeforeGetXml(inputStream, fileName);
 
         if (!fileName.endsWith(".rnu")) {
@@ -1212,7 +1212,65 @@ public final class ScriptUtils {
         } catch (IOException e) {
             throw new ServiceException(e.getMessage());
         }
+/**
+ * TODO SAX почему-то менее производителен чем DOM - лучше перепроверить
+        DefaultHandler handler = new DefaultHandler() {
+            // в файле rnu по умолчанию пропускаются первые две строки
+            int rowIndex = 2;
+            boolean isBeginTotalRows = false;
+            int rowTotalCount = 0;
 
+            @Override
+            public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+                if (qName.equalsIgnoreCase("row")) {
+                    rowIndex++;
+                    if (attributes.getIndex("count") != -1) {
+                        Integer count = Integer.valueOf(attributes.getValue("count"));
+                        if (count != columnCount + 2) {
+                            throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+                        }
+                    }
+                    return;
+                } else if (!isBeginTotalRows) {
+                    isBeginTotalRows = true;
+                    // после строк с данными через одну пустую должны быть итоги
+                    rowIndex += 2;
+                }
+                // проверка на итоги идет только если они ожидаются
+                if (totalCount != 0) {
+                    if (qName.equalsIgnoreCase("rowTotal")) {
+                        rowTotalCount++;
+                        rowIndex++;
+                        if (attributes.getIndex("count") != -1) {
+                            Integer count = Integer.valueOf(attributes.getValue("count"));
+                            if (count != columnCount + 2) {
+                                throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void endDocument() throws SAXException {
+                // сверяем кол-во строк итогов
+                if (totalCount != 0 && rowTotalCount != totalCount) {
+                    throw new ServiceException(ROW_FILE_WRONG, rowIndex);
+                }
+            }
+        };
+
+        try {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser saxParser = factory.newSAXParser();
+            InputSource inputSource = new InputSource();
+            inputSource.setCharacterStream(new StringReader(xmlString));
+            // парсим xml
+            saxParser.parse(inputSource, handler);
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
+        }
+*/
         // в файле rnu по умолчанию пропускаются первые две строки
         int rowIndex = 2;
         try {
