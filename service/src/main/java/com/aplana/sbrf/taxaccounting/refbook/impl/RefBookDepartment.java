@@ -912,9 +912,11 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<Integer> childIds = departmentService.getAllChildrenIds(department.getId());
         //>1 т.к. запрос всегда как минимум возвращает переданный id
         boolean isChild = !childIds.isEmpty() && childIds.size() > 1 && childIds.contains(department.getId());
-        if (isChild)
+        if (isChild) {
             logger.error("Подразделение %s не может быть указано как родительское, т.к. входит в иерархию подчинённости подразделения %s",
                     parentDep.getName(), department.getName());
+            throw  new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
+        }
     }
 
     private String assembleMessage(Map<String, RefBookValue> records){

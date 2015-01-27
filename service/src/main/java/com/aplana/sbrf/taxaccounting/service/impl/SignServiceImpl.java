@@ -86,7 +86,7 @@ public class SignServiceImpl implements SignService {
                 //Проверяем по всем возможным БОК
                 for (String keyName : listFileNames){
                     int total = 0;
-                    FileWrapper dbOfpk = ResourceUtils.getSharedResource(keyFolderPath + keyName);
+                    FileWrapper dbOfpk = ResourceUtils.getSharedResource(keyFolderPath + "/" + keyName);
                     if (dbOfpk.isDirectory())
                         continue;
                     //-------------- загрузка базы БОК --------------------------------
@@ -125,7 +125,7 @@ public class SignServiceImpl implements SignService {
      * @param dir
      */
     private void initEncryptLibrary(String dir){
-        FileWrapper resourceDir = ResourceUtils.getSharedResource(dir);
+        FileWrapper resourceDir = ResourceUtils.getSharedResource(dir + "/");
         if (!resourceDir.isDirectory())
             throw new ServiceException("Необходимо указать директорию с библиотекой ЭЦП");
 
@@ -134,7 +134,7 @@ public class SignServiceImpl implements SignService {
         for (String fileName : listFiles) {
             if (!DLL_PATTERN.matcher(fileName).matches())
                 continue;
-            FileWrapper resourceFile = ResourceUtils.getSharedResource(dir + fileName);
+            FileWrapper resourceFile = ResourceUtils.getSharedResource(dir + "/" + fileName);
             try {
                 System.load(resourceFile.getPath());
             } catch (UnsatisfiedLinkError linkError){

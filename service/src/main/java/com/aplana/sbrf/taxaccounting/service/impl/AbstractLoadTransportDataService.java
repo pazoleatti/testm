@@ -143,7 +143,7 @@ public abstract class AbstractLoadTransportDataService {
      * Каталог/Текущий_год/Текущий_месяц/Текущий_день_месяца/
      */
     private FileWrapper createPath(String rootPath, Calendar calendar) {
-        FileWrapper errorFolderDst = ResourceUtils.getSharedResource(rootPath + calendar.get(Calendar.YEAR)
+        FileWrapper errorFolderDst = ResourceUtils.getSharedResource(rootPath + "/" + calendar.get(Calendar.YEAR)
                 + "/" + Months.fromId(calendar.get(Calendar.MONTH) + 1).getTitle()
                 + "/" + String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)) + "/", false);
         errorFolderDst.mkDirs();
