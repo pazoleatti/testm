@@ -9,6 +9,12 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 update ref_book_attribute set max_length=2 where id = 643;
 
 --------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-10120: Гонения на букву Ё
+update form_type set name = translate(name, 'Ёё', 'Ее') where name <> translate(name, 'Ёё', 'Ее');
+update form_template set name = translate(name, 'Ёё', 'Ее') where name <> translate(name, 'Ёё', 'Ее');
+update form_template set fullname = translate(fullname, 'Ёё', 'Ее') where name <> translate(fullname, 'Ёё', 'Ее');
+update declaration_type set name = translate(name, 'Ёё', 'Ее') where name <> translate(name, 'Ёё', 'Ее');
+update declaration_template set name = translate(name, 'Ёё', 'Ее') where name <> translate(name, 'Ёё', 'Ее');
 
 COMMIT;
 EXIT;
