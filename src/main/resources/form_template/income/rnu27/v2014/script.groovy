@@ -58,7 +58,8 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW:
         def columns = editableColumns
         if (isBalancePeriod()) {
-            columns = allColumns - ['number', 'issuer', 'currency', 'signSecurity']
+            columns = allColumns - ['number', 'issuer', 'currency', 'signSecurity', 'reserveCalcValuePrev', 'marketQuotationInRub',
+                                    'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
         }
         def autoFillColumns = allColumns - columns
         formDataService.addRow(formData, currentDataRow, columns, autoFillColumns)
