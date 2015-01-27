@@ -8,14 +8,13 @@
         налогообложения
     </fullName>
     <code>РНУ-25</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <type>1</type>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -80,15 +79,14 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
         <name>Признак ценной бумаги на текущую отчётную дату</name>
         <order>9</order>
         <width>10</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>622</nameAttributeId>
-        <refBookAttributeId>621</refBookAttributeId>
+        <maxLength>1</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>marketQuotation</alias>

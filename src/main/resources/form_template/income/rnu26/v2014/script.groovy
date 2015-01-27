@@ -18,7 +18,8 @@ import groovy.transform.Field
 // графа 2  - issuer                    - текст, было: зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
 // графа 3  - shareType                 - атрибут 846 - CODE - «Код», справочник 97 «Типы акции»
 // графа 4  - tradeNumber
-// графа 5  - currency                  - текст, было: атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
+// графа 5  - currency                  - справочник "Общероссийский классификатор валют", отображаемый атрибут "Код валюты. Буквенный",
+//                                              было: атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
 // графа 6  - lotSizePrev
 // графа 7  - lotSizeCurrent
 // графа 8  - reserveCalcValuePrev
@@ -702,7 +703,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 5
         xmlIndexCol = 5
-        newRow.currency = row.cell[xmlIndexCol].text()
+        newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
         // графа 6
         xmlIndexCol = 6
@@ -779,7 +780,7 @@ void addTransportData(def xml) {
         newRow.tradeNumber = row.cell[xmlIndexCol].text()
         // графа 5
         xmlIndexCol = 5
-        newRow.currency = row.cell[xmlIndexCol].text()
+        newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 6
         xmlIndexCol = 6
         newRow.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -980,14 +981,14 @@ def getRate(def row, def date) {
     }
     if (!isRubleCurrency(currency)) {
         def res = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
-                'CODE_NUMBER', currency, date, row.getIndex(), getColumnName(row, "currency"), logger, false)
+                'CODE_NUMBER', currencyId.toString(), date, row.getIndex(), getColumnName(row, "currency"), logger, false)
         return res?.RATE?.numberValue
     }
     return 1;
 }
 
 def isRubleCurrency(def currencyCode) {
-    return currencyCode != null ? currencyCode in ['810', '643'] : false
+    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
 }
 
 // Сортировка групп и строк
