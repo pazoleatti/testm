@@ -172,6 +172,7 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
                     @Override
                     public void onSuccess(DeleteIfrsDataResult result) {
                         getView().updateTable();
+                        LogCleanEvent.fire(IfrsPresenter.this);
                     }
                 }, IfrsPresenter.this).addCallback(new ManualRevealCallback<DeleteIfrsDataResult>(IfrsPresenter.this)));
     }
