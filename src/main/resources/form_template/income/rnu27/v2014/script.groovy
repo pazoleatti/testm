@@ -58,8 +58,7 @@ switch (formDataEvent) {
     case FormDataEvent.ADD_ROW:
         def columns = editableColumns
         if (isBalancePeriod()) {
-            columns = allColumns - ['number', 'issuer', 'currency', 'signSecurity', 'reserveCalcValuePrev', 'marketQuotationInRub',
-                                    'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+            columns = allColumns - ['number', 'issuer', 'currency', 'signSecurity']
         }
         def autoFillColumns = allColumns - columns
         formDataService.addRow(formData, currentDataRow, columns, autoFillColumns)
@@ -496,7 +495,13 @@ void addData(def xml, int headRowCount) {
 
         def newRow = formData.createDataRow()
         newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
+        def editableIColumns = editableColumns
+
+        if (isBalancePeriod()) {
+            editableIColumns = allColumns - ['number', 'issuer', 'currency', 'signSecurity']
+        }
+
+        editableIColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
@@ -925,7 +930,13 @@ void addTransportData(def xml) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        editableColumns.each {
+
+        def editableTColumns = editableColumns
+        if (isBalancePeriod()) {
+            editableTColumns = allColumns - ['number', 'issuer', 'currency', 'signSecurity']
+        }
+
+        editableTColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }

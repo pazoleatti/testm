@@ -161,9 +161,10 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
         StringBuilder sql = new StringBuilder("delete from notification where REPORT_PERIOD_ID = ? and (");
         for (int i = 0; i < departments.size(); i++) {
             DepartmentPair pair = departments.get(i);
-            sql.append("(SENDER_DEPARTMENT_ID=").append(pair.getDepartmentId())
-                    .append(" and RECEIVER_DEPARTMENT_ID ").append(pair.getParentDepartmentId() == null
-		            ? " is null " : " = " + pair.getParentDepartmentId()).append(")");
+            sql.append("(SENDER_DEPARTMENT_ID ")
+                    .append(pair.getDepartmentId() == null ? "is null " :  " = " +  pair.getDepartmentId())
+                    .append(" and RECEIVER_DEPARTMENT_ID ")
+                    .append(pair.getParentDepartmentId() == null ? " is null " : " = " + pair.getParentDepartmentId()).append(")");
             if (i < departments.size() - 1) {
                 sql.append(" or ");
             }
