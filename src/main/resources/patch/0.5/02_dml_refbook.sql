@@ -22,5 +22,9 @@ update form_type set name = trim(name) where name <> trim(name);
 update declaration_type set name = trim(name) where name <> trim(name);
 update declaration_template set name = trim(name) where name <> trim(name);
 
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-10249: Сделать справочники "Ценные бумаги" и "Эмитенты" редактируемыми
+update ref_book set read_only = 0 where id in (84, 100);
+
 COMMIT;
 EXIT;
