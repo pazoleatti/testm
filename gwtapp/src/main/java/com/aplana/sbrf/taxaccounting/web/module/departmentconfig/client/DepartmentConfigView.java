@@ -384,7 +384,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		editButton.setVisible(!isEditMode);
         periodPickerPopup.setEnabled(!isEditMode);
         departmentPicker.setEnabled(!isEditMode);
-        editButton.setEnabled(currentDepartmentId != null && currentReportPeriodId != null && isReportPeriodActive);
+        editButton.setEnabled(currentDepartmentId != null && currentReportPeriodId != null);
         saveButton.setVisible(isEditMode);
         deleteButton.setVisible(isEditMode);
 		cancelButton.setVisible(isEditMode);
