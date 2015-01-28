@@ -308,7 +308,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 }
 
                 dispatchAsync.execute(action,
-                        CallbackUtils.defaultCallbackNoModalError(
+                        CallbackUtils.defaultCallback(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {
