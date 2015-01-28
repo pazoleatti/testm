@@ -534,6 +534,13 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
 
                 int depId = uniqueRecordIds.get(0).intValue();
+                Department department = departmentService.getDepartment(depId);
+
+                // Проверка типа подразделения
+                if (department.getType().equals(DepartmentType.ROOT_BANK)) {
+                    throw new ServiceException("Подразделение не может быть удалено, так как оно имеет тип \"Банк\"!");
+                }
+
                 List<Integer> childIds = departmentService.getAllChildrenIds(depId);
                 if (!childIds.isEmpty() && childIds.size() > 1){
                     throw new ServiceLoggerException(
@@ -542,7 +549,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                             departmentService.getDepartment(depId).getName());
                 }
                 // проверка использования подразделения в гарантиях
-                Department department = departmentService.getDepartment(depId);
                 if (department.isGarantUse()) {
                     throw new ServiceLoggerException(
                             "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!\"",
