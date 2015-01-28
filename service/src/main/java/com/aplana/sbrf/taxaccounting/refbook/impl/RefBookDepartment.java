@@ -685,17 +685,18 @@ public class RefBookDepartment implements RefBookDataProvider {
             for (String error : errors) {
                 logger.error(error);
             }
-            throw new ServiceLoggerException("Обнаружено некорректное значение атрибута", logEntryService.save(logger.getEntries()));
+            return;
         }
 
         //Получаем записи у которых совпали значения уникальных атрибутов
         List<Pair<String,String>> matchedRecords = refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
         if (matchedRecords != null && !matchedRecords.isEmpty()) {
             for (Pair<String,String> pair : matchedRecords) {
-                logger.error(String.format("Нарушено требование к уникальности, уже существует подразделение %s с такими значениями атрибута \"%s\"!",
-                        pair.getFirst(), pair.getSecond()));
+                logger.error(
+                        String.format("Нарушено требование к уникальности, уже существует действующее подразделение %s с такими значениями атрибута \"%s\"!",
+                        pair.getFirst(), pair.getSecond())
+                );
             }
-            throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
         }
 
 
