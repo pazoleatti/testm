@@ -550,7 +550,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 // проверка использования подразделения в гарантиях
                 if (department.isGarantUse()) {
                     throw new ServiceLoggerException(
-                            "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!\"",
+                            "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!",
                             null);
                 }
                 isInUsed(department, logger);
