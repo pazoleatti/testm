@@ -57,8 +57,8 @@ public class UploadDataRowsHandler extends
     public DataRowResult execute(UploadDataRowsAction action, ExecutionContext context) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         //Пытаемся установить блокировку на операцию импорта в текущую нф
-        LockData lockData = lockDataService.lock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual(),
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        String key = LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual();
+        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
         Logger logger = new Logger();
         if (lockData == null) {
             try {
@@ -76,10 +76,13 @@ public class UploadDataRowsHandler extends
                 result.setUuid(logEntryService.save(logger.getEntries()));
                 return result;
             } catch (Exception e) {
-                try {
-                    lockDataService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual(), userInfo.getUser().getId());
-                } catch (Exception e2) {}
                 throw new ServiceLoggerException("Не удалось выполнить операцию импорта данных в налоговую форму", logEntryService.save(logger.getEntries()));
+            } finally {
+                try {
+                    if (lockDataService.isLockExists(key)) {
+                        lockDataService.unlock(key, userInfo.getUser().getId());
+                    }
+                } catch (Exception e2) {}
             }
         } else {
             throw new ActionException("Операция импорта данных в текущую налоговую форму уже выполняется другим пользователем!");
