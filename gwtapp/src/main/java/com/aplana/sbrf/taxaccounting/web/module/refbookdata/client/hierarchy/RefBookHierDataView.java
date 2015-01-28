@@ -180,6 +180,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
+    public RefBookTreeItem getItemById(Long recordId) {
+        return refbookDataTree.getUiTreeItem(recordId).getRefBookTreeItem();
+    }
+
+    @Override
     public void deleteItem(Long id){
         refbookDataTree.deleteRecord(id);
     }
