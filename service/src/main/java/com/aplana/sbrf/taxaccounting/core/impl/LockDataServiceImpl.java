@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -25,6 +27,7 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS)
 public class LockDataServiceImpl implements LockDataService {
+    private static final Log log = LogFactory.getLog(LockDataServiceImpl.class);
 
 	private static final long SLEEP_TIME = 500; //шаг времени между проверками освобождения блокировки, миллисекунды
 
@@ -112,8 +115,8 @@ public class LockDataServiceImpl implements LockDataService {
                                         "пользователем \"%s\"(%s).", blocker.getLogin(), blocker.getId()));
                             }
                             dao.deleteLock(key);
-                        } else if (!force) {
-                            throw new ServiceException(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
+                        } else {
+                            log.warn(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
                         }
                     }
                 } catch (ServiceException e) {

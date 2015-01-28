@@ -47,8 +47,8 @@ public class DeclarationDataPresenter
 	@NameToken(DeclarationDataTokens.declarationData)
     public interface MyProxy extends ProxyPlace<DeclarationDataPresenter>, Place {}
 
-    public static final String DECLARATION_UPDATE_MSG = "Декларация рассчитана";
-    public static final String DECLARATION_UPDATE_MSG_D = "Уведомление рассчитано";
+    public static final String DECLARATION_UPDATE_MSG = "Декларация заполнена данными.";
+    public static final String DECLARATION_UPDATE_MSG_D = " Уведомление заполнено данными.";
 
     public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить декларацию?";
     public static final String DECLARATION_DELETE_Q_D = "Вы уверены, что хотите удалить уведомление?";
@@ -215,21 +215,23 @@ public class DeclarationDataPresenter
                                 getView().setPdf(result.getPdf());
                             }
                             getView().updatePrintReportButtonName(reportType, true);
-                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
+                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и нет блокировки(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(reportType);
                             if (ReportType.XML_DEC.equals(reportType)) {
                                 getView().showNoPdf("Область предварительного просмотра");
                             } else if (ReportType.PDF_DEC.equals(reportType)) {
-                                getView().showNoPdf("Декларация заполнена данными. Размер декларации превышает максимально допустимый, печатное представление и форма предварительного просмотра недоступны");
+                                getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
+                                        " Печатное представление и форма предварительного просмотра недоступны");
                             }
                             if (!isTimer) {
                                 getView().updatePrintReportButtonName(reportType, false);
                             }
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (ReportType.XML_DEC.equals(reportType)) {
-                                getView().showNoPdf("Заполнение декларации данными");
+                                getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");
                             } else if (ReportType.PDF_DEC.equals(reportType)) {
-                                getView().showNoPdf("Декларация заполнена данными. Идет формирование формы предварительного просмотра");
+                                getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
+                                        " Идет формирование формы предварительного просмотра");
                             }
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -246,7 +248,7 @@ public class DeclarationDataPresenter
 	@Override
 	public void onRecalculateClicked(Date docDate) {
 		LogCleanEvent.fire(this);
-        getView().showNoPdf("Заполнение декларации данными");
+        getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);

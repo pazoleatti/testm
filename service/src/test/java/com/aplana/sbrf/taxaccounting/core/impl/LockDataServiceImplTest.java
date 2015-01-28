@@ -63,18 +63,8 @@ public class LockDataServiceImplTest {
 	}
 
 	@Test (expected = ServiceException.class)
-	public void unlockTest() {
-		service.unlock("z", 1); // попытка разблокировать несуществующую блокировку
-	}
-
-	@Test (expected = ServiceException.class)
 	public void unlockTest2() {
 		service.unlock("a", 1); // попытка разблокировать другим пользователем
-	}
-
-	@Test (expected = ServiceException.class)
-	public void unlockTest3() {
-		service.unlock("b", 1); // попытка разблокировать просроченную блокировку
 	}
 
 	@Test
