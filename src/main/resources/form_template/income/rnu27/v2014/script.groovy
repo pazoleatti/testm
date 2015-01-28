@@ -294,9 +294,7 @@ def logicCheck() {
             if (!isConsolidated && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
-                        rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
-                                "Если «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, " +
-                                "то «графа 6» = «графа 7» формы РНУ-27 за предыдущий отчётный период")
+                        rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 6» (${row.prev}) текущей строки РНУ-27 за текущий период = «Графе 7» (${rowPrev.current}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
                     }
                 }
             }
@@ -304,9 +302,7 @@ def logicCheck() {
             if (!isConsolidated && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
-                        loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
-                                "Если  «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, " +
-                                "то графа 8 = графа 15 формы РНУ-27 за предыдущий отчётный период")
+                        loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${rowPrev.reserveCalcValuePrev}) текущей строки РНУ-27 за текущий период= «Графе 15» (${row.reserveCalcValue}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
                     }
                 }
             }
@@ -374,11 +370,11 @@ def logicCheck() {
         def itogo = getDataRow(dataRows, 'total')
         // 13.
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
-            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
+            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 (${itogo.prev}) = «Итого» по графе 7 (${itogoPrev.current}) формы РНУ-27 за предыдущий отчётный период")
         }
         // 14.
         if (itogo != null && itogoPrev != null && itogo.reserveCalcValuePrev != itogoPrev.reserveCalcValue) {
-            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 = «Итого» по графе 15 формы РНУ-27 за предыдущий отчётный период")
+            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 (${itogo.reserveCalcValuePrev}) = «Итого» по графе 15 (${itogoPrev.reserveCalcValue}) формы РНУ-27 за предыдущий отчётный период")
         }
     }
 
