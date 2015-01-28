@@ -235,7 +235,7 @@ void generateXML() {
     def phone = incomeParamsTable?.PHONE?.value
     def name = incomeParamsTable?.NAME?.value
     def inn = incomeParams?.INN?.value
-    def kpp = incomeParamsTable?.KPP?.value
+    def kpp = declarationData.kpp
     def reorgInn = incomeParamsTable?.REORG_INN?.value
     def reorgKpp = incomeParamsTable?.REORG_KPP?.value
     def oktmo = getRefBookValue(96, incomeParamsTable?.OKTMO?.value)?.CODE?.value?.substring(0,8)
@@ -1723,9 +1723,6 @@ List<String> getErrorTable(record) {
     }
     if (record.OKTMO == null || record.OKTMO.value == null) {
         errorList.add("«Код по ОКТМО»")
-    }
-    if (record.KPP?.value == null || record.KPP.value.isEmpty()) {
-        errorList.add("«КПП»")
     }
     if (record.TAX_ORGAN_CODE?.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
         errorList.add("«Код налогового органа»")
