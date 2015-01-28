@@ -233,5 +233,83 @@ drop table record_mapping;
 
 
 ----------------------------------------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-10183: 0.5. Удалить атрибуты сумм, выплаченных за пределами РФ, из формы настроек подразделения для налога на прибыль
+-- 1. Для подразделения "ЦА/УНП" создать назначение для выходной НФ «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом».
+insert into department_form_type (id, department_id, form_type_id, kind)
+select seq_department_form_type.nextval, 1, 10540, 5 from dual;
+
+-- 2. Создать выходную НФ «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом» для каждого отчетного периода подразделения ЦА/УНП по налогу на прибыль.
+insert into form_data (id, form_template_id, state, kind, department_report_period_id, return_sign)
+select seq_form_data.nextval, 10800, 1, 5, drp.id, 0  
+from tax_period tp
+join report_period rp on rp.tax_period_id = tp.id and tp.tax_type = 'I'
+join department_report_period drp on drp.report_period_id = rp.id and department_id = 1 and drp.correction_date is null;
+
+insert into data_row (id, form_data_id, ord, type, manual, alias)
+select seq_data_row.nextval, fd.id, t.ord, 0, 0, t.alias from form_data fd
+cross join (SELECT row_number() over(order by id) ord, alias FROM ref_book_attribute where id in (205, 206)) t            
+where form_template_id = 10800;
+
+-- 3. Заполнить графу "Сумма уплаченного налога" данными атрибутов «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде», «Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода» формы настроек подразделения, которая соответствует периоду и подразделению НФ.
+--    В случае если на форме настроек подразделений атрибут суммы не заполнен, то заполнить графу "Сумма уплаченного налога" значением "0".
+insert into data_cell (row_id, column_id, nvalue, svalue, editable)
+with rbv_data as (
+select rbr.version, 
+coalesce(lead(rbr.version) over (partition by rbv.attribute_id order by version) - interval '1' day, to_date('31.12.9999', 'DD.MM.YYYY')) end_version, 
+rbv.attribute_id, 
+coalesce(rbv.number_value, 0) number_value
+from ref_book_value rbv
+join ref_book_record rbr on rbr.id = rbv.record_id and rbv.attribute_id in (205, 206) 
+join ref_book_value b on b.record_id = rbr.id and b.attribute_id = 192 and b.reference_value = 1
+)
+select dr.id, fc.id as form_column_id,
+case when fc.alias = 'rowNumber' then row_number() over (partition by fd.id, fc.alias order by dr.ord)
+     when fc.alias = 'taxName' then null
+     when fc.alias = 'taxSum' and dr.ord = 1 then coalesce((select number_value from rbv_data a where a.attribute_id = 205 and rp.calendar_start_date between a.version and a.end_version), 0)
+     when fc.alias = 'taxSum' and dr.ord = 2 then coalesce((select number_value from rbv_data a where a.attribute_id = 206 and rp.calendar_start_date between a.version and a.end_version), 0)
+     else null end nvalue,
+case when fc.type <> 'S' then null
+     when fc.alias = 'taxName' and dr.ord = 1 then (select name from ref_book_attribute where id = 205)  
+     when fc.alias = 'taxName' and dr.ord = 2 then (select name from ref_book_attribute where id = 206)  
+     else null end svalue,   
+1 editable
+from data_row dr
+join form_data fd on fd.id = dr.form_data_id
+join form_column fc on fc.form_template_id = fd.form_template_id
+join department_report_period drp on drp.id = fd.department_report_period_id  
+join report_period rp on rp.id = drp.report_period_id
+where form_data_id in (select id from form_data where form_template_id = 10800);
+
+-- 4. Перевести НФ в состояние "Принята".
+update form_data set state=4 where form_template_id = 10800;
+
+-- Отлогировать создание в log_business
+insert into log_business (id, log_date, event_id, roles, form_data_id, user_login, user_department_name)
+select seq_log_business.nextval, current_timestamp, 1, a.roles, fd.id, a.login, a.user_department_name  id from form_data fd
+cross join
+(
+select u.login, d.name as user_department_name, a.roles 
+from sec_user u
+join department d on d.id = u.department_id
+cross join
+   (
+   SELECT LTRIM(SYS_CONNECT_BY_PATH(name, ', '),', ') roles
+       FROM ( SELECT id, name,
+               ROW_NUMBER() OVER (ORDER BY name) FILA
+        FROM sec_role sr
+        join sec_user_role sur on sur.role_id = sr.id
+        where sur.user_id = 0)
+        WHERE CONNECT_BY_ISLEAF = 1 
+        START WITH FILA = 1
+        CONNECT BY PRIOR FILA = FILA - 1
+   ) a
+where u.id = 0
+) a
+where form_template_id = 10800;
+
+-- 5. Удалить атрибуты «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде», «Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода» с формы настроек подразделения для налога на прибыль
+delete from ref_book_value where attribute_id in (205, 206);
+delete from ref_book_attribute where id in (205, 206);
+
 COMMIT;
 EXIT;
