@@ -12,9 +12,15 @@ update ref_book_attribute set max_length=2 where id = 643;
 --http://jira.aplana.com/browse/SBRFACCTAX-10120: Гонения на букву Ё
 update form_type set name = translate(name, 'Ёё', 'Ее') where name <> translate(name, 'Ёё', 'Ее');
 update form_template set name = translate(name, 'Ёё', 'Ее') where name <> translate(name, 'Ёё', 'Ее');
-update form_template set fullname = translate(fullname, 'Ёё', 'Ее') where name <> translate(fullname, 'Ёё', 'Ее');
+update form_template set fullname = translate(fullname, 'Ёё', 'Ее') where fullname <> translate(fullname, 'Ёё', 'Ее');
 update declaration_type set name = translate(name, 'Ёё', 'Ее') where name <> translate(name, 'Ёё', 'Ее');
 update declaration_template set name = translate(name, 'Ёё', 'Ее') where name <> translate(name, 'Ёё', 'Ее');
+
+update form_template set name = trim(name) where name <> trim(name);
+update form_template set fullname = trim(fullname) where fullname <> trim(fullname);
+update form_type set name = trim(name) where name <> trim(name);
+update declaration_type set name = trim(name) where name <> trim(name);
+update declaration_template set name = trim(name) where name <> trim(name);
 
 COMMIT;
 EXIT;
