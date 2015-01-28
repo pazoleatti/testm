@@ -21,7 +21,9 @@ import java.math.RoundingMode
 // графа 5  - lotSizeCurrent
 // графа 6  - reserve
 // графа 7  - cost
-// графа 8  - signSecurity         текст, было: атрибут 621 CODE "Код признака" - справочник 62 "Признаки ценных бумаг"
+// графа 10 - signSecurity              - справочник "Признак ценных бумаг", отображаемый атрибут "Код признака"
+//                                              было: текст,
+//                                              было: атрибут 621 CODE "Код признака" - справочник 62 "Признаки ценных бумаг"
 // графа 9  - marketQuotation
 // графа 10 - costOnMarketQuotation
 // графа 11 - reserveCalcValue
@@ -532,10 +534,10 @@ def BigDecimal calc4(def dataRowsOld, def row) {
         return 0
     } else {
         if (prevMatchRow.signSecurity != null && row.signSecurity != null) {
-            if (prevMatchRow.signSecurity == '+' && row.signSecurity == '-') {
-                return prevMatchRow.lotSizePrev
+            if (getSign(prevMatchRow) == '+' && getSign(row) == '-') {
+                return prevMatchRow.lotSizeCurrent
             }
-            if (prevMatchRow.signSecurity == '-' && row.signSecurity == '+') {
+            if (getSign(prevMatchRow) == '-' && getSign(row) == '+') {
                 return 0
             }
         }
@@ -698,7 +700,7 @@ void addData(def xml, int headRowCount) {
         // Графа 7
         newRow.cost = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
         // Графа 8
-        newRow.signSecurity = row.cell[8].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), xlsIndexRow, 8 + colOffset)
         // Графа 9
         newRow.marketQuotation = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
@@ -751,7 +753,7 @@ void addTransportData(def xml) {
         // графа 7
         newRow.cost = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
         // графа 8
-        newRow.signSecurity = row.cell[8].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), rnuIndexRow, 8 + colOffset)
         // графа 9
         newRow.marketQuotation = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
         // графа 10
@@ -803,7 +805,7 @@ void addTransportData(def xml) {
 
 /** Получить признак ценной бумаги. */
 def getSign(def row) {
-    return row.signSecurity
+    return getRefBookValue(62, row.signSecurity)?.CODE?.value
 }
 
 BigDecimal roundTo2(BigDecimal value) {
