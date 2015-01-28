@@ -166,6 +166,27 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
+            // ЭЦП
+            List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
+            if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                boolean check = false;
+                try {
+                    check = signService.checkSign(currentFile.getPath(), 0);
+                } catch (Exception e) {
+                    log(userInfo, LogData.L36, logger, e.getMessage());
+                }
+                if (!check) {
+                    log(userInfo, LogData.L16, logger, fileName);
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L16.getText())), logger);
+                    fail++;
+                    continue;
+                }
+                log(userInfo, LogData.L15, logger, fileName);
+            } else {
+                log(userInfo, LogData.L15_1, logger, fileName);
+            }
+
             // Указан несуществующий код подразделения
             if (formDepartment == null) {
                 log(userInfo, LogData.L5, logger, fileName);
@@ -185,15 +206,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
-            // Указан недопустимый код периода
-            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
-            if (reportPeriod == null) {
-                log(userInfo, LogData.L7, logger, fileName);
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), fileName))), logger);
-                fail++;
-                continue;
-            }
             formTypeId = formType.getId();
 
             FormDataKind formDataKind = FormDataKind.PRIMARY;
@@ -214,6 +226,16 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 formDataKind = FormDataKind.ADDITIONAL;
             }
 
+            // Указан недопустимый код периода
+            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
+            if (reportPeriod == null) {
+                log(userInfo, LogData.L7, logger, fileName);
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), fileName))), logger);
+                fail++;
+                continue;
+            }
+
             // Последний отчетный период подразделения для указанного отчетного периода
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getLast(formDepartment.getId(),
                     reportPeriod.getId());
@@ -232,27 +254,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (departmentReportPeriod.getCorrectionDate() != null) {
                 String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
                 log(userInfo, LogData.L8, logger, formType.getName(), reportPeriodName);
-            }
-
-            // ЭЦП
-            List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
-            if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
-                boolean check = false;
-                try {
-                    check = signService.checkSign(currentFile.getPath(), 0);
-                } catch (Exception e) {
-                    log(userInfo, LogData.L36, logger, e.getMessage());
-                }
-                if (!check) {
-                    log(userInfo, LogData.L16, logger, fileName);
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L16.getText())), logger);
-                    fail++;
-                    continue;
-                }
-                log(userInfo, LogData.L15, logger, fileName);
-            } else {
-                log(userInfo, LogData.L15_1, logger, fileName);
             }
 
             // Поиск экземпляра НФ
@@ -395,16 +396,15 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // 16 если форма не была создана
             if (!formWasCreated) {
                 log(userInfo, LogData.L18, localLogger, formType.getName(), formDepartment.getName(), reportPeriodName);
+            } else {
+                // 13А.2 НФ корректно заполнена значениями из ТФ.
+                log(userInfo, LogData.L19, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
             }
             // 17 Перенос в архив
             if (moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, departmentId, localLogger), currentFile, localLogger)) {
                 // 18 Сохранение
                 formDataService.saveFormData(localLogger, userInfo, formData);
 
-                if (formWasCreated) {
-                    // 13А.2 НФ корректно заполнена значениями из ТФ.
-                    log(userInfo, LogData.L19, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
-                }
                 success = true;
             } else {
                 // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок

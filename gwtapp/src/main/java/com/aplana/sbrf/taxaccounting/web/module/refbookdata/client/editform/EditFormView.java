@@ -68,6 +68,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     private boolean canVersion = true;
     private boolean isNeedToReload = false;
 
+    private Map<String, RefBookValueSerializable> inputRecord;
+
 	@Inject
 	@UiConstructor
 	public EditFormView(final Binder uiBinder) {
@@ -235,8 +237,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 @Override
                 public void onValueChange(ValueChangeEvent event) {
                     if (getUiHandlers() != null) {
-                        checkValueChange(col, widget, event.getValue());
                         getUiHandlers().valueChanged(col.getAlias(), event.getValue());
+                        checkValueChange(col, widget, event.getValue());
                     }
                 }
             });
@@ -300,8 +302,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 	@Override
     @SuppressWarnings("unchecked")
 	public void fillInputFields(Map<String, RefBookValueSerializable> record) {
+        inputRecord = record;
 		if (record == null) {
             boolean textFieldFound = false;
+
 			for (Map.Entry<RefBookColumn, HasValue> entry : widgets.entrySet()) {
                 HasValue widget = entry.getValue();
                 RefBookColumn column = entry.getKey();
@@ -356,6 +360,44 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		}
         updateRefBookPickerPeriod();
 	}
+
+    @Override
+    public boolean checkChanges() {
+        if (inputRecord == null) return false;
+        Map<String, RefBookValueSerializable> map;
+        try {
+            map = getFieldsValues();
+        } catch (BadValueException e) {
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+        for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
+            RefBookValueSerializable recordValue = inputRecord.get(w.getKey().getAlias());
+            RefBookValueSerializable mapValue = map.get(w.getKey().getAlias());
+            if (recordValue == null) {
+                if (mapValue == null)
+                    continue;
+                else
+                    return true;
+            } if (mapValue == null) {
+                return true;
+            } else if (recordValue.getValue() != null) {
+                if (recordValue.getValue().equals(mapValue.getValue())) {
+                    continue;
+                } else {
+                    return true;
+                }
+            } else if (mapValue.getValue() == null) {
+                continue;
+            } else {
+                return true;
+            }
+
+        }
+
+        return false;
+    }
 
 	@Override
     @SuppressWarnings("unchecked")

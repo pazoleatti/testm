@@ -437,8 +437,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
                     checkCycle(dep, parentDep, logger);
                     if (logger.containsLevel(LogLevel.ERROR))
-                        throw new ServiceLoggerException(ERROR_MESSAGE,
-                                logEntryService.save(logger.getEntries()));
+                        throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
                 }
 
                 //Сохранение
@@ -921,7 +920,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (isChild) {
             logger.error("Подразделение %s не может быть указано как родительское, т.к. входит в иерархию подчинённости подразделения %s",
                     parentDep.getName(), department.getName());
-            throw  new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
         }
     }
 
