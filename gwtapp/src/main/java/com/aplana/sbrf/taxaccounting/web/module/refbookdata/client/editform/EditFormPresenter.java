@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
@@ -80,6 +81,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void setAllVersionField(boolean isVisible);
         void cleanFields();
         void cleanErrorFields();
+        boolean checkChanges();
     }
 
     protected final RenameDialogPresenter renameDialogPresenter;
@@ -118,6 +120,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
             return;
         }
+        if (currentUniqueRecordId != null && getView().checkChanges()) {
+            setIsFormModified(true);
+        }
         if (isFormModified) {
             Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
@@ -135,6 +140,23 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                     }
                     SetFormMode.fire(EditFormPresenter.this, mode);
                 }
+
+                @Override
+                public void no() {
+                    super.no();
+                    RollbackTableRowSelection.fire(EditFormPresenter.this, currentUniqueRecordId);
+                }
+
+                @Override
+                public void cancel() {
+                    no();
+                }
+
+                @Override
+                public void close() {
+                    no();
+                }
+
             });
         } else {
             showRecord(refBookRecordId);
@@ -308,7 +330,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 }
 
                 dispatchAsync.execute(action,
-                        CallbackUtils.defaultCallbackNoModalError(
+                        CallbackUtils.defaultCallback(
                                 new AbstractCallback<SaveRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(SaveRefBookRowVersionResult result) {

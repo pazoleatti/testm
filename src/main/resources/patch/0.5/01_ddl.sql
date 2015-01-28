@@ -6,7 +6,13 @@ alter table data_cell add constraint data_cell_chk_min_dvalue check (dvalue >= t
 --http://jira.aplana.com/browse/SBRFACCTAX-10063: Увеличение размерности поля
 ALTER TABLE log_system MODIFY declaration_type_name VARCHAR2(1000);
 
-
+--http://jira.aplana.com/browse/SBRFACCTAX-10212: Оптимизация сортировки строк НФ
+create global temporary table data_row_temp
+(
+  ID  NUMBER(18) not null primary key,
+  ORD NUMBER(18) not null
+)
+on commit delete rows;
 ------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

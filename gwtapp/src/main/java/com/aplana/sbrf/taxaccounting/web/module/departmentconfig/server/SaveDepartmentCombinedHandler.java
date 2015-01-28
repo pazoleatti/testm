@@ -97,15 +97,13 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
             departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(depCombined.getDepartmentId().get(0).intValue()));
             departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
-            departmentReportPeriodFilter.setIsActive(true);
             List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
             DepartmentReportPeriod departmentReportPeriod = null;
             if (departmentReportPeriodList.size() == 1) {
                 departmentReportPeriod = departmentReportPeriodList.get(0);
             }
-            // Нет ни одного открытого отчетного периода подразделений включая корректирующие
-            if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
-                throw new ActionException("Выбранный отчетный период закрыт!");
+            if (departmentReportPeriod == null) {
+                throw new ActionException("Не найден отчетный период!");
             }
 
             Long refBookId = null;
@@ -269,7 +267,13 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                     logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), "\"-\""));
                 }
             }
-            result.setUuid(logEntryService.update(logger.getEntries(), action.getOldUUID()));
+
+            if (action.getOldUUID() == null) {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+            } else {
+                result.setUuid(logEntryService.update(logger.getEntries(), action.getOldUUID()));
+            }
+
             if (logger.containsLevel(LogLevel.ERROR)) {
                 result.setHasError(true);
             }

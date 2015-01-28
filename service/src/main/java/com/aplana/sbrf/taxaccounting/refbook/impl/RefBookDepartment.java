@@ -437,8 +437,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
                     checkCycle(dep, parentDep, logger);
                     if (logger.containsLevel(LogLevel.ERROR))
-                        throw new ServiceLoggerException(ERROR_MESSAGE,
-                                logEntryService.save(logger.getEntries()));
+                        throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
                 }
 
                 //Сохранение
@@ -534,6 +533,13 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
 
                 int depId = uniqueRecordIds.get(0).intValue();
+                Department department = departmentService.getDepartment(depId);
+
+                // Проверка типа подразделения
+                if (department.getType().equals(DepartmentType.ROOT_BANK)) {
+                    throw new ServiceException("Подразделение не может быть удалено, так как оно имеет тип \"Банк\"!");
+                }
+
                 List<Integer> childIds = departmentService.getAllChildrenIds(depId);
                 if (!childIds.isEmpty() && childIds.size() > 1){
                     throw new ServiceLoggerException(
@@ -542,10 +548,9 @@ public class RefBookDepartment implements RefBookDataProvider {
                             departmentService.getDepartment(depId).getName());
                 }
                 // проверка использования подразделения в гарантиях
-                Department department = departmentService.getDepartment(depId);
                 if (department.isGarantUse()) {
                     throw new ServiceLoggerException(
-                            "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!\"",
+                            "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!",
                             null);
                 }
                 isInUsed(department, logger);
@@ -686,7 +691,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             for (String error : errors) {
                 logger.error(error);
             }
-            throw new ServiceLoggerException("Обнаружено некорректное значение атрибута", logEntryService.save(logger.getEntries()));
+            return;
         }
 
         //Получаем записи у которых совпали значения уникальных атрибутов
@@ -696,7 +701,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                 logger.error(String.format("Нарушено требование к уникальности, уже существует подразделение %s с такими значениями атрибута \"%s\"!",
                         pair.getFirst(), pair.getSecond()));
             }
-            throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
         }
 
 
@@ -915,7 +919,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (isChild) {
             logger.error("Подразделение %s не может быть указано как родительское, т.к. входит в иерархию подчинённости подразделения %s",
                     parentDep.getName(), department.getName());
-            throw  new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
         }
     }
 
