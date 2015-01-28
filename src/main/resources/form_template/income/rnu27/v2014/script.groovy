@@ -30,7 +30,9 @@ import groovy.transform.Field
 // графа 7  - current
 // графа 8  - reserveCalcValuePrev
 // графа 9  - cost
-// графа 10 - signSecurity              - текст, было: зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+// графа 10 - signSecurity              - справочник "Признак ценных бумаг", отображаемый атрибут "Код признака"
+//                                              было: текст,
+//                                              было: зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
 // графа 11 - marketQuotation
 // графа 12 - rubCourse                 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
 // графа 13 - marketQuotationInRub
@@ -261,10 +263,11 @@ def logicCheck() {
                 loggerError(row, errorMsg + "Графы 8 и 17 ненулевые!")
             }
             // 7. Проверка необращающихся облигаций (графа 10 = «x»)
-            if (row.signSecurity == "-" && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
+            def sign = getSign(row)
+            if (sign == "-" && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 rowWarning(logger, row, errorMsg + "Облигации необращающиеся, графы 15 и 16 ненулевые!")
             }
-            if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null && row.signSecurity == "+") {
+            if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null && sign == "+") {
                 // 8. Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
                     loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
@@ -414,6 +417,11 @@ def logicCheck() {
     }
 }
 
+/** Получить признак ценной бумаги. */
+def getSign(def row) {
+    return getRefBookValue(62, row.signSecurity)?.CODE?.value
+}
+
 def isRubleCurrency(def currencyCode) {
     return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
 }
@@ -531,7 +539,7 @@ void addData(def xml, int headRowCount) {
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // Графа 10
         xmlIndexCol = 10
-        newRow.signSecurity = row.cell[xmlIndexCol].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // Графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -739,7 +747,7 @@ BigDecimal calc14(DataRow row) {
 
 BigDecimal calc15(DataRow row) {
     def tmp = BigDecimal.ZERO
-    if (row.signSecurity == '+') {
+    if (getSign(row) == '+') {
         if (row.costOnMarketQuotation == null) {
             tmp = null
         } else {
@@ -914,7 +922,7 @@ void addTransportData(def xml) {
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // Графа 10
         xmlIndexCol = 10
-        newRow.signSecurity = row.cell[xmlIndexCol].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // Графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)

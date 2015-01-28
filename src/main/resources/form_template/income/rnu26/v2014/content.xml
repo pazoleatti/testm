@@ -22,7 +22,7 @@
         <name>fix</name>
         <order>2</order>
         <width>0</width>
-        <maxLength>500</maxLength>
+        <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -99,14 +99,15 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
         <name>Признак ценной бумаги на текущую отчетную дату</name>
         <order>11</order>
         <width>7</width>
-        <maxLength>1</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>622</nameAttributeId>
+        <refBookAttributeId>621</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>marketQuotation</alias>

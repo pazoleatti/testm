@@ -24,7 +24,9 @@ import groovy.transform.Field
 // графа 7  - lotSizeCurrent
 // графа 8  - reserveCalcValuePrev
 // графа 9  - cost
-// графа 10 - signSecurity              - текст, было: зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+// графа 10 - signSecurity              - справочник "Признак ценных бумаг", отображаемый атрибут "Код признака"
+//                                              было: текст,
+//                                              было: зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
 // графа 11 - marketQuotation
 // графа 12 - rubCourse                 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
 // графа 13 - marketQuotationInRub
@@ -557,7 +559,7 @@ def BigDecimal calc17(def row) {
 
 /** Получить признак ценной бумаги. */
 def getSign(def row) {
-    return row.signSecurity
+    return getRefBookValue(62, row.signSecurity)?.CODE?.value
 }
 
 def roundValue(def value, def int precision) {
@@ -685,42 +687,33 @@ void addData(def xml, int headRowCount) {
         // графа 2
         xmlIndexCol = 2
         newRow.issuer = row.cell[xmlIndexCol].text()
-
         // графа 3 - справочник 97 «Типы акции»
         xmlIndexCol = 3
         newRow.shareType = getRecordIdImport(97, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 4
         xmlIndexCol = 4
         newRow.tradeNumber = row.cell[xmlIndexCol].text()
-
         // графа 5
         xmlIndexCol = 5
         newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 6
         xmlIndexCol = 6
         newRow.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 7
         xmlIndexCol = 7
         newRow.lotSizeCurrent = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 9
         xmlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 10
-        newRow.signSecurity = row.cell[xmlIndexCol].text()
-
+        xmlIndexCol = 10
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 12 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
         xmlIndexCol = 12
         newRow.rubCourse = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // + графа 13 - так как после импорта эта графа 13 не должна пересчитываться
         xmlIndexCol = 13
         newRow.marketQuotationInRub = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -789,7 +782,7 @@ void addTransportData(def xml) {
         newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 10
         xmlIndexCol = 10
-        newRow.signSecurity = row.cell[xmlIndexCol].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
