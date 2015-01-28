@@ -399,7 +399,7 @@ begin
   end if;
 
   -------------------------------------------------------------------
-  if updating('type') and vFormerDepartmentType in (3, 4) and vFormerDepartmentType<>vCurrentDepartmentType then
+  if updating('type') and vFormerDepartmentType in (3, 4) and vCurrentDepartmentType not in (3, 4) then
      select count(*) into vHasLinks
      from sec_user
      where department_id = vCurrentDepartmentID;
