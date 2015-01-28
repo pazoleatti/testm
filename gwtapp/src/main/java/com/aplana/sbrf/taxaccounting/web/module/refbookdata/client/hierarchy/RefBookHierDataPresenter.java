@@ -82,6 +82,8 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         RefBookTreeItem getSelectedItem();
 
+        RefBookTreeItem getItemById(Long recordId);
+
         void deleteItem(Long id);
 
         void updateItem(Long id, Long newParentId, String newName);
@@ -158,7 +160,8 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onRollbackTableRowSelection(RollbackTableRowSelection event) {
-        getView().setSelected(event.getRecordId());
+        RefBookTreeItem parentRefBookItem = getView().getItemById(event.getRecordId());
+        getView().setSelection(parentRefBookItem);
     }
 
     @Override

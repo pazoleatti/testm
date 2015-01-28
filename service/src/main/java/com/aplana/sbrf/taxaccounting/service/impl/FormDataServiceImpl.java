@@ -40,8 +40,9 @@ import java.util.*;
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
-
+	public static final int FORM_DATA_LOCK_TIMEOUT = 6 * 3600000;
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
     private static final Calendar CALENDAR = Calendar.getInstance();
     private static final Date MAX_DATE;
     static {
@@ -138,12 +139,12 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
-        loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, formDataEvent);
+        loadFormData(logger, userInfo, formDataId, isManual, false, inputStream, fileName, formDataEvent);
     }
 
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, isManual, inputStream, fileName, FormDataEvent.IMPORT);
+        loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT);
         if (lockService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual)) {
             lockService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual, userInfo.getUser().getId());
         } else {
@@ -156,10 +157,10 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     @Transactional
     public void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, false, inputStream, fileName, FormDataEvent.MIGRATION);
+        loadFormData(logger, userInfo, formDataId, false, false, inputStream, fileName, FormDataEvent.MIGRATION);
     }
 
-    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, boolean isInner, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
@@ -217,9 +218,9 @@ public class FormDataServiceImpl implements FormDataService {
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Есть критические ошибки при выполнения скрипта",
+                throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта",
                         logEntryService.save(logger.getEntries()));
-            } else {
+            } else if (isInner) {
                 logger.info("Данные загружены");
             }
 
@@ -829,7 +830,6 @@ public class FormDataServiceImpl implements FormDataService {
         try {
             // Проверяем блокировку приемников
             List<String> errorsList = new ArrayList<String>();
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd.MM.yyyy");
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
                 String periodOrder = ((destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) && formData.getPeriodOrder() != null) ?
                         String.valueOf(formData.getPeriodOrder()) : "";
@@ -843,7 +843,7 @@ public class FormDataServiceImpl implements FormDataService {
                                     formTemplate.getName(), destinationDFT.getKind().getName(),
                                     reportPeriod.getTaxPeriod().getYear()+" "+reportPeriod.getName(),
                                     departmentService.getDepartment(destinationDFT.getDepartmentId()).getName(),
-                                    userService.getUser(lockData.getUserId()).getName(), sdf.format(lockData.getDateBefore())));
+                                    userService.getUser(lockData.getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateBefore())));
                 } else {
                     lockedForms.add(lockKey);
                 }
@@ -928,7 +928,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
         checkLockAnotherUser(lockService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId,
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), null,  userInfo.getUser());
+                userInfo.getUser().getId(), FORM_DATA_LOCK_TIMEOUT), null,  userInfo.getUser());
 		dataRowDao.rollback(formDataId);
 	}
 
@@ -1223,10 +1223,16 @@ public class FormDataServiceImpl implements FormDataService {
                     logEntryService.save(logger.getEntries()));
     }
 
-    private void checkLockedMe(LockData lockData, TAUser user){
+    void checkLockedMe(LockData lockData, TAUser user){
+		if (lockData == null) {
+			throw new ServiceException("Блокировка не найдена. Объект должен быть заблокирован текущим пользователем");
+		}
         if (lockData.getUserId() != user.getId()) {
-            throw new ServiceException("Объект не заблокирован текущим пользователем");
+            throw new ServiceException(String.format("Объект заблокирован другим пользователем (\"%s\", срок \"%s\")",
+					userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateBefore())));
         }
+		// продлеваем пользовательскую блокировку
+		lockService.extend(lockData.getKey(), user.getId(), FORM_DATA_LOCK_TIMEOUT);
     }
 
     @Override
