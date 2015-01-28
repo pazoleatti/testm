@@ -159,7 +159,7 @@ void generateXML(def xmlBankData) {
     def phone = incomeParamsTable?.PHONE?.value
     def name = incomeParamsTable?.NAME?.value
     def inn = incomeParams?.INN?.value
-    def kpp = incomeParamsTable?.KPP?.value
+    def kpp = declarationData.kpp
     def reorgInn = incomeParamsTable?.REORG_INN?.value
     def reorgKpp = incomeParamsTable?.REORG_KPP?.value
     def oktmo = getOkato(incomeParamsTable?.OKTMO?.value)
@@ -409,9 +409,6 @@ List<String> getErrorTable(record) {
     }
     if (record.OKTMO?.referenceValue == null) {
         errorList.add("«ОКТМО»")
-    }
-    if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
-        errorList.add("«КПП»")
     }
     if (record.TAX_ORGAN_CODE?.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
         errorList.add("«Код налогового органа»")
