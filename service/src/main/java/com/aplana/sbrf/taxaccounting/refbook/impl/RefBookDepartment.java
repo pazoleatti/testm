@@ -550,7 +550,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 // проверка использования подразделения в гарантиях
                 if (department.isGarantUse()) {
                     throw new ServiceLoggerException(
-                            "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!\"",
+                            "Подразделение не может быть удалено, так как оно используется в АС \"Гарантии\"!",
                             null);
                 }
                 isInUsed(department, logger);
@@ -698,10 +698,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         List<Pair<String,String>> matchedRecords = refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
         if (matchedRecords != null && !matchedRecords.isEmpty()) {
             for (Pair<String,String> pair : matchedRecords) {
-                logger.error(
-                        String.format("Нарушено требование к уникальности, уже существует действующее подразделение %s с такими значениями атрибута \"%s\"!",
-                        pair.getFirst(), pair.getSecond())
-                );
+                logger.error(String.format("Нарушено требование к уникальности, уже существует подразделение %s с такими значениями атрибута \"%s\"!",
+                        pair.getFirst(), pair.getSecond()));
             }
         }
 
