@@ -396,16 +396,15 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // 16 если форма не была создана
             if (!formWasCreated) {
                 log(userInfo, LogData.L18, localLogger, formType.getName(), formDepartment.getName(), reportPeriodName);
+            } else {
+                // 13А.2 НФ корректно заполнена значениями из ТФ.
+                log(userInfo, LogData.L19, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
             }
             // 17 Перенос в архив
             if (moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, departmentId, localLogger), currentFile, localLogger)) {
                 // 18 Сохранение
                 formDataService.saveFormData(localLogger, userInfo, formData);
 
-                if (formWasCreated) {
-                    // 13А.2 НФ корректно заполнена значениями из ТФ.
-                    log(userInfo, LogData.L19, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
-                }
                 success = true;
             } else {
                 // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
