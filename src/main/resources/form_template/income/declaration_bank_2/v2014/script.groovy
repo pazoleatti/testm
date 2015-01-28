@@ -141,7 +141,7 @@ void generateXML() {
     def phone = incomeParamsTable?.PHONE?.value
     def name = incomeParamsTable?.NAME?.value
     def inn = incomeParams?.INN?.value
-    def kpp = incomeParamsTable?.KPP?.value
+    def kpp = declarationData.kpp
     def reorgInn = incomeParamsTable?.REORG_INN?.value
     def reorgKpp = incomeParamsTable?.REORG_KPP?.value
     def oktmo = getRefBookValue(96, incomeParamsTable?.OKTMO?.value)?.CODE?.value?.substring(0,8)
