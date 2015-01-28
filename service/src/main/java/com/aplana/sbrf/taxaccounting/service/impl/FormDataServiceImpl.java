@@ -40,7 +40,7 @@ import java.util.*;
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
-
+	public static final int FORM_DATA_LOCK_TIMEOUT = 6 * 3600000;
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
     private static final Calendar CALENDAR = Calendar.getInstance();
@@ -928,7 +928,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
         checkLockAnotherUser(lockService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId,
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME), null,  userInfo.getUser());
+                userInfo.getUser().getId(), FORM_DATA_LOCK_TIMEOUT), null,  userInfo.getUser());
 		dataRowDao.rollback(formDataId);
 	}
 
@@ -1231,6 +1231,8 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceException(String.format("Объект заблокирован другим пользователем (\"%s\", срок \"%s\")",
 					userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateBefore())));
         }
+		// продлеваем пользовательскую блокировку
+		lockService.extend(lockData.getKey(), user.getId(), FORM_DATA_LOCK_TIMEOUT);
     }
 
     @Override
