@@ -38,7 +38,7 @@ update declaration_template set name = trim(name) where name <> trim(name);
 update ref_book set read_only = 0 where id in (84, 100);
 ----------------------------------------------------------------------------------------------------------------
 -- изменение ширины
---UPDATE REF_BOOK_ATTRIBUTE SET IS_UNIQUE = 2 WHERE ID = 2111;
+UPDATE REF_BOOK_ATTRIBUTE SET IS_UNIQUE = 2 WHERE ID = 2111;
 UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 5 WHERE ID = 3304;
 UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 5 WHERE ID = 3305;
 UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3307;
