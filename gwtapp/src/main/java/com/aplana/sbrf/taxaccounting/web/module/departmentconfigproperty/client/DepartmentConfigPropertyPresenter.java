@@ -118,8 +118,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         void addResizeHandler();
 
         void setIsUnp(boolean isUnp);
-
-        void showUnpOnlyBlock(boolean show);
     }
 
     @Inject
@@ -467,7 +465,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                         public void onSuccess(GetDepartmentResult result) {
                             boolean isUnp = "99_6200_00".equals(result.getDepartment().getSbrfCode());//УНП
                             getView().setIsUnp(isUnp);
-                            getView().showUnpOnlyBlock(isUnp);
                         }
                     }, this));
         }
