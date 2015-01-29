@@ -21,7 +21,9 @@ import java.math.RoundingMode
 // графа 5  - lotSizeCurrent
 // графа 6  - reserve
 // графа 7  - cost
-// графа 8  - signSecurity         текст, было: атрибут 621 CODE "Код признака" - справочник 62 "Признаки ценных бумаг"
+// графа 10 - signSecurity              - справочник "Признак ценных бумаг", отображаемый атрибут "Код признака"
+//                                              было: текст,
+//                                              было: атрибут 621 CODE "Код признака" - справочник 62 "Признаки ценных бумаг"
 // графа 9  - marketQuotation
 // графа 10 - costOnMarketQuotation
 // графа 11 - reserveCalcValue
@@ -339,13 +341,19 @@ void logicCheck() {
         }
 
         // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
-        if (!isBalancePeriod() && !isConsolidated && checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', prevDataRows)) {
-            loggerError(row, "РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 3» формы РНУ-25 за предыдущий отчётный период, то «графа 4» = «графа 5» формы РНУ-25 за предыдущий отчётный период.")
+        if (!isBalancePeriod() && !isConsolidated) {
+            def result = checkOld(row, 'tradeNumber', 'lotSizePrev', 'lotSizeCurrent', prevDataRows)
+            if (result) {
+                loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 4» (${row.lotSizePrev}) текущей строки РНУ-25 за текущий период = «Графе 5» ($result) строки РНУ-25 за предыдущий период, значение «Графы 3» которой соответствует значению «Графы 3» РНУ-25 за текущий период.")
+            }
         }
 
         // 12. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 6, 11 (за предыдущий период) )
-        if (!isBalancePeriod() && !isConsolidated && checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', prevDataRows)) {
-            loggerError(row, "РНУ сформирован некорректно! " + errorMsg + "Не выполняется условие: Если «графа 3» = «графа 6» формы РНУ-25 за предыдущий отчётный период, то «графа 3» = «графа 11» формы РНУ-25 за предыдущий отчётный период.")
+        if (!isBalancePeriod() && !isConsolidated) {
+            def result = checkOld(row, 'tradeNumber', 'reserve', 'reserveCalcValue', prevDataRows)
+            if (result) {
+                loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 6» (${row.reserve}) текущей строки РНУ-25 за текущий период = «Графе 11» ($result) строки РНУ-25 за предыдущий период, значение «Графы 3» которой соответствует значению «Графы 3» РНУ-25 за текущий период.")
+            }
         }
 
         // 15. Обязательность заполнения поля графы 1..3, 5..13
@@ -373,13 +381,11 @@ void logicCheck() {
 
         // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))
         if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
-            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 4 = " +
-                    "«Общий итог» по графе 5 формы РНУ-25 за предыдущий отчётный период.")
+            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 4 (${totalRow.lotSizePrev}) = «Общий итог» по графе 5 (${totalRowOld.lotSizeCurrent}) Формы РНУ-25 за предыдущий отчетный период.")
         }
         // 14. Проверка корректности заполнения РНУ (графа 6, 11 (за предыдущий период))
         if (totalRow.reserve != totalRowOld.reserveCalcValue) {
-            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 6 = " +
-                    "«Общий итог» по графе 11 формы РНУ-25 за предыдущий отчётный период.")
+            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 6 (${totalRow.reserve})= «Общий итог» по графе 11 (${totalRowOld.reserveCalcValue}) формы РНУ-25 за предыдущий отчётный период")
         }
     }
 
@@ -426,7 +432,7 @@ def getNewRow() {
 }
 
 /**
- * Сверить данные с предыдущим периодом.
+ * Сверить данные с предыдущим периодом. Если данные отличаются, то вернуть предыдущее значение
  *
  * @param row строка нф текущего периода
  * @param likeColumnName псевдоним графы по которому ищутся соответствующиеся строки
@@ -436,18 +442,18 @@ def getNewRow() {
  */
 def checkOld(def row, def likeColumnName, def curColumnName, def prevColumnName, def dataRowsOld) {
     if (dataRowsOld == null || row.getCell(likeColumnName).value == null) {
-        return false
+        return null
     }
     for (def prevRow : dataRowsOld) {
-        if (prevRow.getAlias() != null || prevRow.getAlias() != '') {
+        if (prevRow.getAlias() != null) {
             continue
         }
         if (row.getCell(likeColumnName).value == prevRow.getCell(likeColumnName).value &&
                 row.getCell(curColumnName).value != prevRow.getCell(prevColumnName).value) {
-            return true
+            return prevRow.getCell(prevColumnName).value
         }
     }
-    return false
+    return null
 }
 
 /** Получить строки за предыдущий отчетный период. */
@@ -534,10 +540,10 @@ def BigDecimal calc4(def dataRowsOld, def row) {
         return 0
     } else {
         if (prevMatchRow.signSecurity != null && row.signSecurity != null) {
-            if (prevMatchRow.signSecurity == '+' && row.signSecurity == '-') {
-                return prevMatchRow.lotSizePrev
+            if (getSign(prevMatchRow) == '+' && getSign(row) == '-') {
+                return prevMatchRow.lotSizeCurrent
             }
-            if (prevMatchRow.signSecurity == '-' && row.signSecurity == '+') {
+            if (getSign(prevMatchRow) == '-' && getSign(row) == '+') {
                 return 0
             }
         }
@@ -700,7 +706,7 @@ void addData(def xml, int headRowCount) {
         // Графа 7
         newRow.cost = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
         // Графа 8
-        newRow.signSecurity = row.cell[8].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), xlsIndexRow, 8 + colOffset)
         // Графа 9
         newRow.marketQuotation = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
 
@@ -753,7 +759,7 @@ void addTransportData(def xml) {
         // графа 7
         newRow.cost = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
         // графа 8
-        newRow.signSecurity = row.cell[8].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), rnuIndexRow, 8 + colOffset)
         // графа 9
         newRow.marketQuotation = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
         // графа 10
@@ -805,7 +811,7 @@ void addTransportData(def xml) {
 
 /** Получить признак ценной бумаги. */
 def getSign(def row) {
-    return row.signSecurity
+    return getRefBookValue(62, row.signSecurity)?.CODE?.value
 }
 
 BigDecimal roundTo2(BigDecimal value) {
