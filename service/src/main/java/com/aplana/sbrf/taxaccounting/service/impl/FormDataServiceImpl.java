@@ -619,8 +619,8 @@ public class FormDataServiceImpl implements FormDataService {
             //Устанавливаем блокировку на текущую нф
             List<String> lockedObjects = new ArrayList<String>();
             int userId = userInfo.getUser().getId();
+            checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
             LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
-            checkLockAnotherUser(lockData, logger,  userInfo.getUser());
             if (lockData == null) {
                 try {
                     //Блокировка установлена
