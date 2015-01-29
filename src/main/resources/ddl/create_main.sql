@@ -877,3 +877,12 @@ comment on table data_row_temp is 'Временная таблица для со
 comment on column data_row_temp.id is 'Идентификатор записи';
 comment on column data_row_temp.ord is 'Число, соотвествующее номеру строки по порядку';
 --------------------------------------------------------------------------------------------------------
+create table configuration_lock
+(
+key varchar2(100) not null,
+timeout number(9) not null
+);
+
+comment on table configuration_lock is 'Параметры блокировок';
+comment on column configuration_lock.key is 'Ключ блокировки';
+comment on column configuration_lock.timeout is 'Таймаут блокировки';

@@ -85,3 +85,4 @@ drop table department;
 drop table department_type;
 drop table async_task_type;
 drop table configuration_email;
+drop table configuration_lock;
