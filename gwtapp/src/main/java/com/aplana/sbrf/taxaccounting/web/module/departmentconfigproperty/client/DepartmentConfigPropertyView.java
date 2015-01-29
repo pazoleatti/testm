@@ -153,10 +153,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiField
     DoubleBox taxRate;
     @UiField
-    LongBox sumTax;
-    @UiField
-    LongBox sumDividends;
-    @UiField
     Button saveButton;
     @UiField
     Button deleteButton;
@@ -174,10 +170,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     Panel versionBlock;
     @UiField
     Panel taxRateBlock;
-    @UiField
-    Panel sumTaxBlock;
-    @UiField
-    Panel sumDividendsBlock;
 
     @UiField
     Label editModeLabel;
@@ -250,8 +242,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         formatVersion.addValueChangeHandler(valueChangeHandler);
         version.addValueChangeHandler(valueChangeHandler);
         taxRate.addValueChangeHandler(valueChangeHandlerDouble);
-        sumTax.addValueChangeHandler(valueChangeHandlerLong);
-        sumDividends.addValueChangeHandler(valueChangeHandlerLong);
         resizeTimer = new Timer() {
             @Override
             public void run() {
@@ -427,17 +417,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             taxRateCell.setType(RefBookAttributeType.NUMBER);
             taxRateCell.setNumberValue(taxRate.getValue());
             params.put("TAX_RATE", taxRateCell);
-
-            TableCell sumTaxCell = new TableCell();
-            sumTaxCell.setType(RefBookAttributeType.NUMBER);
-            sumTaxCell.setNumberValue(sumTax.getValue() == null ? null : sumTax.getValue().longValue());
-            params.put("SUM_TAX", sumTaxCell);
-
-            TableCell sumDividendsCell = new TableCell();
-            sumDividendsCell.setType(RefBookAttributeType.NUMBER);
-            sumDividendsCell.setNumberValue(sumDividends.getValue() == null ? null : sumDividends.getValue().longValue());
-            params.put("SUM_DIVIDENDS", sumDividendsCell);
-
         }
 
         return params;
@@ -449,8 +428,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         initTable(taxType);
         versionBlock.setVisible(false);
         taxRateBlock.setVisible(false);
-        sumTaxBlock.setVisible(false);
-        sumDividendsBlock.setVisible(false);
         if (taxType == TaxType.TRANSPORT) {
             taxTypeLbl.setText("Транспортный налог");
         } else if (taxType == TaxType.PROPERTY) {
@@ -458,8 +435,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             taxTypeLbl.setText("Налог на имущество");
         } else if (taxType == TaxType.INCOME) {
             taxRateBlock.setVisible(true);
-            sumTaxBlock.setVisible(true);
-            sumDividendsBlock.setVisible(true);
             taxTypeLbl.setText("Налог на прибыль");
         }
     }
@@ -487,15 +462,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             taxRate.setValue(itemList.get("TAX_RATE").getNumberValue() == null
                                     ? null
                                     : itemList.get("TAX_RATE").getNumberValue().doubleValue());
-
-
-            sumTax.setValue(itemList.get("SUM_TAX").getNumberValue() == null
-                                    ? null
-                                    : itemList.get("SUM_TAX").getNumberValue().longValue());
-
-            sumDividends.setValue(itemList.get("SUM_DIVIDENDS").getNumberValue() == null
-                                    ? null
-                                    : itemList.get("SUM_DIVIDENDS").getNumberValue().longValue());
         }
     }
 
@@ -505,8 +471,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         formatVersion.setText("");
         version.setText("");
         taxRate.setValue(null);
-        sumTax.setValue(null);
-        sumDividends.setValue(null);
     }
 
     @Override
@@ -624,8 +588,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         inn.setEnabled(isEditMode);
         version.setEnabled(isEditMode);
         taxRate.setEnabled(isEditMode);
-        sumTax.setEnabled(isEditMode);
-        sumDividends.setEnabled(isEditMode);
         formatVersion.setEnabled(isEditMode);
 
         editModeLabel.setVisible(isEditMode);
@@ -759,12 +721,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void setIsUnp(boolean isUnp) {
         this.isUnp = isUnp;
-    }
-
-    @Override
-    public void showUnpOnlyBlock(boolean show) {
-        sumDividendsBlock.setVisible(show);
-        sumTaxBlock.setVisible(show);
     }
 
     /**

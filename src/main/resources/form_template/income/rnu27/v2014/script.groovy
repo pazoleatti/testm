@@ -30,7 +30,9 @@ import groovy.transform.Field
 // графа 7  - current
 // графа 8  - reserveCalcValuePrev
 // графа 9  - cost
-// графа 10 - signSecurity              - текст, было: зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+// графа 10 - signSecurity              - справочник "Признак ценных бумаг", отображаемый атрибут "Код признака"
+//                                              было: текст,
+//                                              было: зависит от графы 3 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
 // графа 11 - marketQuotation
 // графа 12 - rubCourse                 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
 // графа 13 - marketQuotationInRub
@@ -263,10 +265,11 @@ def logicCheck() {
                 loggerError(row, errorMsg + "Графы 8 и 17 ненулевые!")
             }
             // 7. Проверка необращающихся облигаций (графа 10 = «x»)
-            if (row.signSecurity == "-" && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
+            def sign = getSign(row)
+            if (sign == "-" && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
                 rowWarning(logger, row, errorMsg + "Облигации необращающиеся, графы 15 и 16 ненулевые!")
             }
-            if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null && row.signSecurity == "+") {
+            if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null && sign == "+") {
                 // 8. Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
                     loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
@@ -293,9 +296,7 @@ def logicCheck() {
             if (!isConsolidated && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
-                        rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
-                                "Если «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, " +
-                                "то «графа 6» = «графа 7» формы РНУ-27 за предыдущий отчётный период")
+                        rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 6» (${row.prev}) текущей строки РНУ-27 за текущий период = «Графе 7» (${rowPrev.current}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
                     }
                 }
             }
@@ -303,9 +304,7 @@ def logicCheck() {
             if (!isConsolidated && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
-                        loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
-                                "Если  «графа 4» = «графа 4» формы РНУ-27 за предыдущий отчётный период, " +
-                                "то графа 8 = графа 15 формы РНУ-27 за предыдущий отчётный период")
+                        loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${rowPrev.reserveCalcValuePrev}) текущей строки РНУ-27 за текущий период= «Графе 15» (${row.reserveCalcValue}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
                     }
                 }
             }
@@ -373,11 +372,11 @@ def logicCheck() {
         def itogo = getDataRow(dataRows, 'total')
         // 13.
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
-            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 = «Итого» по графе 7 формы РНУ-27 за предыдущий отчётный период")
+            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 (${itogo.prev}) = «Итого» по графе 7 (${itogoPrev.current}) формы РНУ-27 за предыдущий отчётный период")
         }
         // 14.
         if (itogo != null && itogoPrev != null && itogo.reserveCalcValuePrev != itogoPrev.reserveCalcValue) {
-            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 = «Итого» по графе 15 формы РНУ-27 за предыдущий отчётный период")
+            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 (${itogo.reserveCalcValuePrev}) = «Итого» по графе 15 (${itogoPrev.reserveCalcValue}) формы РНУ-27 за предыдущий отчётный период")
         }
     }
 
@@ -414,6 +413,11 @@ def logicCheck() {
             logger.warn("Существует несколько строк с номерами сделок: \${foundMany.join(', ')}")
         }
     }
+}
+
+/** Получить признак ценной бумаги. */
+def getSign(def row) {
+    return getRefBookValue(62, row.signSecurity)?.CODE?.value
 }
 
 def isRubleCurrency(def currencyCode) {
@@ -539,7 +543,7 @@ void addData(def xml, int headRowCount) {
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // Графа 10
         xmlIndexCol = 10
-        newRow.signSecurity = row.cell[xmlIndexCol].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // Графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -747,7 +751,7 @@ BigDecimal calc14(DataRow row) {
 
 BigDecimal calc15(DataRow row) {
     def tmp = BigDecimal.ZERO
-    if (row.signSecurity == '+') {
+    if (getSign(row) == '+') {
         if (row.costOnMarketQuotation == null) {
             tmp = null
         } else {
@@ -929,7 +933,7 @@ void addTransportData(def xml) {
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // Графа 10
         xmlIndexCol = 10
-        newRow.signSecurity = row.cell[xmlIndexCol].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // Графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)

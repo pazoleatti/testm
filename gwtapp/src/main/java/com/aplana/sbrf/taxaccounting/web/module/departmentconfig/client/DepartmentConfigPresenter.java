@@ -44,7 +44,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     private static final String SAVE_FOUND_TEXT = "В Системе созданы формы/декларации, использующие старую версию Настроек. Для вступления изменений в силу каждую налоговую форму/декларацию нужно обновить вручную.";
     private static final String SAVE_FOUND_TEXT_D = "В Системе созданы формы/уведомления использующие старую версию Настроек. Для вступления изменений в силу каждую форму/уведомление нужно обновить вручную.";
 
-    private static final String EDIT_FOUND_TEXT = "Найдены экземпляры налоговых форм/деклараций, " +
+    private static final String EDIT_FOUND_TEXT = "В периоде \"%s\" найдены экземпляры налоговых форм/деклараций, " +
+            "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
+    private static final String EDIT_FOUND_TEXT_D = "В периоде \"%s\" найдены экземпляры форм/уведомлений, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
 
     private final DispatchAsync dispatcher;
@@ -208,7 +210,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                     LogAddEvent.fire(DepartmentConfigPresenter.this, uuid[0]);
                                 }
                                 if (result.isDeclarationFormFound()) {
-                                    Dialog.confirmMessage(EDIT_FOUND_TEXT,
+                                    Dialog.confirmMessage(((getView().getTaxType().equals(TaxType.DEAL) ? EDIT_FOUND_TEXT_D : EDIT_FOUND_TEXT)).replace("%s", result.getReportPeriodName()),
                                             new DialogHandler() {
                                                 @Override
                                                 public void yes() {
@@ -237,11 +239,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
     @Override
     public void delete(final DepartmentCombined combinedDepartmentParam, final Integer period, final Integer department) {
-//        Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
-//            @Override
-//            public void yes() {
-//
-//            });
         CheckSettingExistAction settingExistAction = new CheckSettingExistAction();
         settingExistAction.setDepartmentId(department.longValue());
         settingExistAction.setReportPeriodId(period);

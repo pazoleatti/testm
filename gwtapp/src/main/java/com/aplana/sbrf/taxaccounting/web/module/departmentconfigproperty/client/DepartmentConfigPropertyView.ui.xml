@@ -188,22 +188,6 @@
                                     </g:cell>
 
                                 </g:HorizontalPanel>
-                                <g:HorizontalPanel ui:field="sumTaxBlock" width="100%" spacing="1" verticalAlignment="middle" visible="false">
-                                    <g:cell width="1%" height="100px">
-                                        <g:Label text="Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде:" addStyleNames="{style.leftLabels}"/>
-                                    </g:cell>
-                                    <g:cell width="99%">
-                                        <aplana:LongBox ui:field="sumTax" width="100px" enabled="false"/>
-                                    </g:cell>
-                                </g:HorizontalPanel>
-                                <g:HorizontalPanel ui:field="sumDividendsBlock" width="100%" spacing="1" verticalAlignment="middle" visible="false">
-                                    <g:cell width="1%" height="100px">
-                                        <g:Label text="Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде:" addStyleNames="{style.leftLabels}"/>
-                                    </g:cell>
-                                    <g:cell width="99%">
-                                        <aplana:LongBox ui:field="sumDividends" width="100px" enabled="false"/>
-                                    </g:cell>
-                                </g:HorizontalPanel>
                             </g:VerticalPanel>
                         </g:HorizontalPanel>
                     </g:FormPanel>

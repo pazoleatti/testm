@@ -236,19 +236,21 @@ drop table record_mapping;
 -- http://jira.aplana.com/browse/SBRFACCTAX-10183: 0.5. Удалить атрибуты сумм, выплаченных за пределами РФ, из формы настроек подразделения для налога на прибыль
 -- 1. Для подразделения "ЦА/УНП" создать назначение для выходной НФ «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом».
 insert into department_form_type (id, department_id, form_type_id, kind)
-select seq_department_form_type.nextval, 1, 10540, 5 from dual;
+select seq_department_form_type.nextval, 1, 417, 5 from dual where exists(select 1 from ref_book_attribute where id in (205, 206));
 
 -- 2. Создать выходную НФ «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом» для каждого отчетного периода подразделения ЦА/УНП по налогу на прибыль.
 insert into form_data (id, form_template_id, state, kind, department_report_period_id, return_sign)
-select seq_form_data.nextval, 10800, 1, 5, drp.id, 0  
+select seq_form_data.nextval, 417, 4, 5, drp.id, 0  
 from tax_period tp
 join report_period rp on rp.tax_period_id = tp.id and tp.tax_type = 'I'
-join department_report_period drp on drp.report_period_id = rp.id and department_id = 1 and drp.correction_date is null;
+join department_report_period drp on drp.report_period_id = rp.id and department_id = 1 and drp.correction_date is null
+where exists(select 1 from ref_book_attribute where id in (205, 206));
 
 insert into data_row (id, form_data_id, ord, type, manual, alias)
 select seq_data_row.nextval, fd.id, t.ord, 0, 0, t.alias from form_data fd
 cross join (SELECT row_number() over(order by id) ord, alias FROM ref_book_attribute where id in (205, 206)) t            
-where form_template_id = 10800;
+where form_template_id = 417
+	and exists(select 1 from ref_book_attribute where id in (205, 206));
 
 -- 3. Заполнить графу "Сумма уплаченного налога" данными атрибутов «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде», «Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода» формы настроек подразделения, которая соответствует периоду и подразделению НФ.
 --    В случае если на форме настроек подразделений атрибут суммы не заполнен, то заполнить графу "Сумма уплаченного налога" значением "0".
@@ -278,10 +280,8 @@ join form_data fd on fd.id = dr.form_data_id
 join form_column fc on fc.form_template_id = fd.form_template_id
 join department_report_period drp on drp.id = fd.department_report_period_id  
 join report_period rp on rp.id = drp.report_period_id
-where form_data_id in (select id from form_data where form_template_id = 10800);
-
--- 4. Перевести НФ в состояние "Принята".
-update form_data set state=4 where form_template_id = 10800;
+where form_data_id in (select id from form_data where form_template_id = 417)
+	and exists(select 1 from ref_book_attribute where id in (205, 206));
 
 -- Отлогировать создание в log_business
 insert into log_business (id, log_date, event_id, roles, form_data_id, user_login, user_department_name)
@@ -305,7 +305,7 @@ cross join
    ) a
 where u.id = 0
 ) a
-where form_template_id = 10800;
+where form_template_id = 417 and exists(select 1 from ref_book_attribute where id in (205, 206));
 
 -- 5. Удалить атрибуты «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде», «Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода» с формы настроек подразделения для налога на прибыль
 delete from ref_book_value where attribute_id in (205, 206);

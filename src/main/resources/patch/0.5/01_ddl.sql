@@ -13,6 +13,25 @@ create global temporary table data_row_temp
   ORD NUMBER(18) not null
 )
 on commit delete rows;
+comment on table data_row_temp is 'Временная таблица для сортировки строк';
+comment on column data_row_temp.id is 'Идентификатор записи';
+comment on column data_row_temp.ord is 'Число, соотвествующее номеру строки по порядку';
+
+--http://jira.aplana.com/browse/SBRFACCTAX-10267: Добавить в БД новый тип асинхронной задачи "Генерация pdf-файла"
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (7, 'Генерация pdf-файла', 'ejb/taxaccounting/async-task.jar/PdfGeneratorAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+
+--http://jira.aplana.com/browse/SBRFACCTAX-10284: Таблица для параметров блокировок
+create table configuration_lock
+(
+key varchar2(100) not null,
+timeout number(9) not null
+);
+
+alter table configuration_lock add constraint configuration_lock_pk primary key (key);
+
+comment on table configuration_lock is 'Параметры блокировок';
+comment on column configuration_lock.key is 'Ключ блокировки';
+comment on column configuration_lock.timeout is 'Таймаут блокировки';
 ------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

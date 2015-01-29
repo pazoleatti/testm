@@ -51,15 +51,21 @@ void importFromXML() {
     def defaultDate = sdf.parse('1970.01.01')
     def fileRecords = getFileRecords(inputStream)
 
-    def tmpMap = [:]
-    def tmpList = (-9..9)
-    tmpList.each {
-        tmpMap[it] = []
-    }
+    // def tmpMap = [:]
+    // def tmpList = (-9..9)
+    // tmpList.each {
+    //     tmpMap[it] = []
+    // }
 
     // в начало сообщении добавлять «Номер счета <BSSCH>: » (и текст существующего декоратора у logger'а)
     LogMessageDecorator oldDecorator = logger.getMessageDecorator()
     logger.setMessageDecorator(getLogMessageDecorator(oldDecorator))
+
+    // мапа для хранения мап новыми записями по дате начала записи для операции 6
+    // (дата начала записи -> мапа для хранения списка новых записей по дате окончания записи (дата окончания записи -> список записей))
+    def newRecords6Map = [:]
+    // мапа для хранения мап новыми записями по дате начала записи для операции 9
+    def newRecords9Map = [:]
 
     for (def row : fileRecords) {
         def BSSCH    = row?.BSSCH?.value    // Номер счета
@@ -77,11 +83,11 @@ void importFromXML() {
 
         // список всех версий записи по номеру счета
         def versionDateMap = getVersionDate(BSSCH, dataProvider)
-        log("$BSSCH=======date = " + date)
+        // log("$BSSCH=======date = " + date)
         if (versionDateMap != null) {
             // поиск актуальной версии среди всех версии записи
             actualRecordId = getActualRecordId(versionDateMap, date, dataProvider)
-            log("$BSSCH=======actualRecordId = $actualRecordId")
+            // log("$BSSCH=======actualRecordId = $actualRecordId")
             if (actualRecordId) {
                 def recordVersionsFlag = getRecordVersionsFlag(versionDateMap, actualRecordId)
                 isFirstVersionRecord = recordVersionsFlag.isFirst
@@ -97,8 +103,8 @@ void importFromXML() {
             // не найдено записей, то по таблице 19:
             // 6.
             if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH)) {
-                tmpMap[6].add(BSSCH)
-                log("$BSSCH=======6. ")
+                // tmpMap[6].add(BSSCH)
+                // log("$BSSCH=======6. ")
                 // должны быть выполнены шаги 4-6 сценария [3] раздела 3.1.7.1. -  создания элемента справочника
                 def versionFrom = (BEG_DATE ?: defaultDate)
                 def versionTo = END_DATE
@@ -106,23 +112,29 @@ void importFromXML() {
                 refBookRecord.setRecordId(null)
                 refBookRecord.setValues(['ACCOUNT' : row.BSSCH, 'ACCOUNT_NAME' : row.NMBSP])
 
-                dataProvider.createRecordVersionWithoutLock(logger, versionFrom, versionTo, [refBookRecord])
+                // сохранить изменения по 9ой операции
+                saveChanges(newRecords9Map, dataProvider)
+                // добавить текущую запись для вставки
+                addRecord(newRecords6Map, versionFrom, versionTo, refBookRecord)
             } else {
-                tmpMap[-6].add(BSSCH)
-                log("$BSSCH=======6 false. ")
+                // tmpMap[-6].add(BSSCH)
+                // log("$BSSCH=======6 false. ")
             }
             continue
         }
+
+        // сохранить изменения по 6ой операции
+        saveChanges(newRecords6Map, dataProvider)
 
         def recId = actualRecordId
         def record = dataProvider.getRecordData(actualRecordId)
         def accountName = record?.ACCOUNT_NAME?.value
         RefBookRecordVersion recordVersion = dataProvider.getRecordVersionInfo(actualRecordId)
 
-        log("$BSSCH======recordVersion.versionStart = ${recordVersion.versionStart}")
-        log("$BSSCH======recordVersion.versionEnd   = ${recordVersion.versionEnd}")
-        log("$BSSCH====== isFirstVersionRecord = $isFirstVersionRecord")
-        log("$BSSCH====== isLastVersionRecord = $isLastVersionRecord")
+        // log("$BSSCH======recordVersion.versionStart = ${recordVersion.versionStart}")
+        // log("$BSSCH======recordVersion.versionEnd   = ${recordVersion.versionEnd}")
+        // log("$BSSCH====== isFirstVersionRecord = $isFirstVersionRecord")
+        // log("$BSSCH====== isLastVersionRecord = $isLastVersionRecord")
 
         // сравнения с датой начала актуальности системы и даты из тф (если версия записи в системе одна то с BEG_DATE, если версии в системе несколько, то с DATE)
         def startDateFlag = ((isFirstVersionRecord ? BEG_DATE : DATE) == recordVersion.versionStart)
@@ -132,19 +144,19 @@ void importFromXML() {
         // 1, 2, 3 - Запись должна быть проигнорирована при загрузке
         if (NMBSP == accountName) {
             if (DATE <= BEG_DATE && BEG_DATE == recordVersion.versionStart && END_DATE == recordVersion.versionEnd) {
-                tmpMap[1].add(BSSCH)
-                log("$BSSCH=======1. ")
+                // tmpMap[1].add(BSSCH)
+                // log("$BSSCH=======1. ")
                 // операция 1
                 continue
             } else if ((DATE > BEG_DATE && (END_DATE == null || DATE <= END_DATE)) && startDateFlag && endDateFlag) {
-                tmpMap[2].add(BSSCH)
-                log("$BSSCH=======2. ")
+                // tmpMap[2].add(BSSCH)
+                // log("$BSSCH=======2. ")
                 // операция 2
                 continue
             } else if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
                     END_DATE == recordVersion.versionEnd) {
-                tmpMap[3].add(BSSCH)
-                log("$BSSCH=======3. ")
+                // tmpMap[3].add(BSSCH)
+                // log("$BSSCH=======3. ")
                 // операция 3
                 continue
             }
@@ -154,19 +166,22 @@ void importFromXML() {
             def edit = false
             if (DATE <= BEG_DATE && BEG_DATE == recordVersion.versionStart && END_DATE == recordVersion.versionEnd) {
                 // операция 4
-                tmpMap[4].add(BSSCH)
-                log("$BSSCH=======4. ")
+                // tmpMap[4].add(BSSCH)
+                // log("$BSSCH=======4. ")
                 edit = true
             } else if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
                     END_DATE == recordVersion.versionEnd) {
                 // операция 5
-                tmpMap[5].add(BSSCH)
-                log("$BSSCH=======5. ")
+                // tmpMap[5].add(BSSCH)
+                // log("$BSSCH=======5. ")
                 edit = true
             }
             if (edit) {
                 // Запись справочника должна быть отредактирована: NMBSP должно быть присвоено атрибуту Наименование счета справочника Системы
                 record?.ACCOUNT_NAME?.value = NMBSP
+
+                // сохранить изменения по 9ой операции
+                saveChanges(newRecords9Map, dataProvider)
 
                 dataProvider.updateRecordVersionWithoutLock(logger, recId, null, null, record);
                 continue
@@ -175,18 +190,21 @@ void importFromXML() {
         // 7.
         if (DATE <= BEG_DATE && conditionForOperation8(BEG_DATE == recordVersion.versionStart, END_DATE == recordVersion.versionEnd)) {
             if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH)) {
-                log("$BSSCH=======7. ")
-                tmpMap[7].add(BSSCH)
+                // log("$BSSCH=======7. ")
+                // tmpMap[7].add(BSSCH)
                 // операция 7
                 // должны быть выполнены шаги 4-8 сценария [3] раздела 3.1.7.3 - редактирование версии элемента справочника
                 def versionFrom = (BEG_DATE ?: defaultDate)
                 def versionTo = END_DATE
                 record?.ACCOUNT_NAME?.value = NMBSP
 
+                // сохранить изменения по 9ой операции
+                saveChanges(newRecords9Map, dataProvider)
+
                 dataProvider.updateRecordVersionWithoutLock(logger, recId, versionFrom, versionTo, record)
             } else {
-                tmpMap[-7].add(BSSCH)
-                log("$BSSCH=======7 false. ")
+                // tmpMap[-7].add(BSSCH)
+                // log("$BSSCH=======7 false. ")
             }
             continue
         }
@@ -195,18 +213,21 @@ void importFromXML() {
         if (isLastVersionRecord && DATE > BEG_DATE && (END_DATE != null && DATE > END_DATE) &&
                 END_DATE != recordVersion.versionEnd) {
             if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH)) {
-                tmpMap[8].add(BSSCH)
-                log("$BSSCH=======8. ")
+                // tmpMap[8].add(BSSCH)
+                // log("$BSSCH=======8. ")
                 // операция 8
                 // должны быть выполнены шаги 4-8 сценария [3] раздела 3.1.7.3 - редактирование версии элемента справочника
                 def versionFrom = recordVersion.versionStart
                 def versionTo = END_DATE
                 record?.ACCOUNT_NAME?.value = NMBSP
 
+                // сохранить изменения по 9ой операции
+                saveChanges(newRecords9Map, dataProvider)
+
                 dataProvider.updateRecordVersionWithoutLock(logger, recId, versionFrom, versionTo, record)
             } else {
-                tmpMap[-8].add(BSSCH)
-                log("$BSSCH=======8 false. ")
+                // tmpMap[-8].add(BSSCH)
+                // log("$BSSCH=======8 false. ")
             }
             continue
         }
@@ -214,8 +235,8 @@ void importFromXML() {
         // 9.
         if (DATE > BEG_DATE && (END_DATE == null || DATE <= END_DATE)) {
             if (checkEndBegDates(BEG_DATE, END_DATE, BSSCH)) {
-                tmpMap[9].add(BSSCH)
-                log("$BSSCH=======9. ")
+                // tmpMap[9].add(BSSCH)
+                // log("$BSSCH=======9. ")
                 // операция 9
                 // Иначе должны быть выполнены шаги 5 и 6 сценария [3] раздела 3.1.7.2 - создания версии элемента справочника
                 def versionFrom = DATE
@@ -225,20 +246,25 @@ void importFromXML() {
                 refBookRecord.setRecordId(rbRecordId)
                 refBookRecord.setValues(['ACCOUNT' : row.BSSCH, 'ACCOUNT_NAME' : row.NMBSP])
 
-                dataProvider.createRecordVersionWithoutLock(logger, versionFrom, versionTo, [refBookRecord])
+                // добавить текущую запись для вставки
+                addRecord(newRecords9Map, versionFrom, versionTo, refBookRecord)
             } else {
-                tmpMap[-9].add(BSSCH)
-                log("$BSSCH=======9 false. ")
+                // tmpMap[-9].add(BSSCH)
+                // log("$BSSCH=======9 false. ")
             }
             continue
         }
     }
 
+    // сохранить изменения по 6ой и 9ой операции
+    saveChanges(newRecords6Map, dataProvider)
+    saveChanges(newRecords9Map, dataProvider)
+
     // TODO (Ramil Timerbaev) потом убрать
-    tmpList.each {
-        def value = tmpMap[it]
-        log("========== $it = " + value.size())
-    }
+    // tmpList.each {
+    //     def value = tmpMap[it]
+    //     log("========== $it = " + value.size())
+    // }
 
     if (logger.containsLevel(LogLevel.ERROR)) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
@@ -463,4 +489,46 @@ def getLogMessageDecorator(LogMessageDecorator oldDecorator) {
         }
     }
     return logMessageDecorator
+}
+
+/**
+ * Добавить запись в мапу для хранения мап со списками записей.
+ *
+ * @param recordsMap мап для хранения мап со списками записей
+ * @param versionFrom дата начала актуальности записи
+ * @param versionTo дата окончания актуальности записи
+ * @param refBookRecord запись для добавления
+ */
+void addRecord(def recordsMap, def versionFrom, def versionTo, def refBookRecord) {
+    // если на дату versionFrom были записи, то добавить новую запись
+    if (recordsMap[versionFrom]) {
+        // если на дату versionTo были записи. то добавить новую запись туда
+        if (recordsMap[versionFrom][versionTo]) {
+            recordsMap[versionFrom][versionTo].add(refBookRecord)
+        } else {
+            // записей до этого не было, добавить новый список с одной новой записью
+            recordsMap[versionFrom][versionTo] = [refBookRecord]
+        }
+    } else {
+        // на дату versionFrom не было записей, добавляем на эту запись мапу и на дату окончания versionTo добавить новый список с одной новой записью
+        recordsMap[versionFrom] = [:]
+        recordsMap[versionFrom][versionTo] = [refBookRecord]
+    }
+}
+
+/**
+ * Добавить записи из мап с записями в базу.
+ *
+ * @param recordsMap мапа для хранения мап со списком записей
+ * @param dataProvider для доступа к справочнику
+ */
+void saveChanges(def recordsMap, def dataProvider) {
+    if (!recordsMap.isEmpty()) {
+        recordsMap.each { versionFrom, map ->
+            map.each { versionTo, newRecords ->
+                dataProvider.createRecordVersionWithoutLock(logger, versionFrom, versionTo, newRecords)
+            }
+        }
+        recordsMap.clear()
+    }
 }
