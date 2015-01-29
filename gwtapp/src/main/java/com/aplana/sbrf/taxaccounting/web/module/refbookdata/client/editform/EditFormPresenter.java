@@ -223,12 +223,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 return;
             }
             Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
-            //TODO : Специфические для справочника подразделений проверки. Подумать над возможностью избавиться
-            if (isDepartments && modifiedFields.containsKey("TYPE") &&
-                    map.get("TYPE").getReferenceValue().intValue() != 1 &&  map.get("PARENT_ID").getReferenceValue() == null){
-                Dialog.errorMessage("Родительское подразделение должно быть заполнено!");
-                return;
-            }
 			if (currentUniqueRecordId == null) {
                 //Создание новой версии
                 AddRefBookRowVersionAction action = new AddRefBookRowVersionAction();
@@ -249,7 +243,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 final RecordChanges recordChanges = fillRecordChanges(recordId, map, action.getVersionFrom(), action.getVersionTo());
 
                 dispatchAsync.execute(action,
-                        CallbackUtils.defaultCallbackNoModalError(
+                        CallbackUtils.defaultCallback(
                                 new AbstractCallback<AddRefBookRowVersionResult>() {
                                     @Override
                                     public void onSuccess(AddRefBookRowVersionResult result) {
