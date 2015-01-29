@@ -12,6 +12,7 @@ public class GetCheckDeclarationResult implements Result {
     private boolean declarationFormFound = false;
     private boolean hasError = false;
     private boolean isControlUnp;
+    private String reportPeriodName;
 
     public boolean isControlUnp() {
         return isControlUnp;
@@ -43,5 +44,13 @@ public class GetCheckDeclarationResult implements Result {
 
     public void setHasError(boolean hasError) {
         this.hasError = hasError;
+    }
+
+    public String getReportPeriodName() {
+        return reportPeriodName;
+    }
+
+    public void setReportPeriodName(String reportPeriodName) {
+        this.reportPeriodName = reportPeriodName;
     }
 }

@@ -24,7 +24,9 @@ import groovy.transform.Field
 // графа 7  - lotSizeCurrent
 // графа 8  - reserveCalcValuePrev
 // графа 9  - cost
-// графа 10 - signSecurity              - текст, было: зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
+// графа 10 - signSecurity              - справочник "Признак ценных бумаг", отображаемый атрибут "Код признака"
+//                                              было: текст,
+//                                              было: зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
 // графа 11 - marketQuotation
 // графа 12 - rubCourse                 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
 // графа 13 - marketQuotationInRub
@@ -337,16 +339,12 @@ void logicCheck() {
 
             // 13. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
             if (prevRow != null && row.lotSizePrev != prevRow.lotSizeCurrent) {
-                rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
-                        "Если «графа 4» = «графа 4» формы РНУ-26 за предыдущий отчётный период, " +
-                        "то «графа 6» = «графа 7» формы РНУ-26 за предыдущий отчётный период.")
+                rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 6» (${row.lotSizePrev}) текущей строки РНУ-26 за текущий период = «Графе 7» (${prevRow.lotSizeCurrent}) строки РНУ-26 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-26 за текущий период.")
             }
 
             // 14. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 8, 15 (за предыдущий период) )
             if (prevRow != null && row.reserveCalcValuePrev != prevRow.reserveCalcValue) {
-                loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: " +
-                        "Если «графа 4» = «графа 4» формы РНУ-26 за предыдущий отчётный период, " +
-                        "то «графа 8» = «графа 15» формы РНУ-26 за предыдущий отчётный период.")
+                loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${row.reserveCalcValuePrev}) текущей строки РНУ-26 за текущий период = «Графе 15» (${prevRow.reserveCalcValue}) строки РНУ-26 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-26 за текущий период.")
             }
         }
 
@@ -425,14 +423,12 @@ void logicCheck() {
 
         // 15. Проверка корректности заполнения РНУ (графа 6, 7 (за предыдущий период))
         if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
-            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: " +
-                    "«Итого» по графе 6 = «Итого» по графе 7 формы РНУ-26 за предыдущий отчётный период.")
+            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по «Графе 6» (${totalRow.lotSizePrev}) = «Общий итог» по графе 7 (${totalRowOld.lotSizeCurrent}) формы РНУ-26 за предыдущий отчётный период")
         }
 
         // 16. Проверка корректности заполнения РНУ (графа 8, 15 (за предыдущий период))
         if (totalRow.reserveCalcValuePrev != totalRowOld.reserveCalcValue) {
-            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: " +
-                    "«Итого» по графе 8 = «Итого» по графе 15 формы РНУ-26 за предыдущий отчётный период.")
+            loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по «Графе 8» (${totalRow.reserveCalcValuePrev}) = «Общий итог» по графе 15 (${totalRowOld.reserveCalcValue}) формы РНУ-26 за предыдущий отчётный период")
         }
     }
 
@@ -562,7 +558,7 @@ def BigDecimal calc17(def row) {
 
 /** Получить признак ценной бумаги. */
 def getSign(def row) {
-    return row.signSecurity
+    return getRefBookValue(62, row.signSecurity)?.CODE?.value
 }
 
 def roundValue(def value, def int precision) {
@@ -692,42 +688,33 @@ void addData(def xml, int headRowCount) {
         // графа 2
         xmlIndexCol = 2
         newRow.issuer = row.cell[xmlIndexCol].text()
-
         // графа 3 - справочник 97 «Типы акции»
         xmlIndexCol = 3
         newRow.shareType = getRecordIdImport(97, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 4
         xmlIndexCol = 4
         newRow.tradeNumber = row.cell[xmlIndexCol].text()
-
         // графа 5
         xmlIndexCol = 5
         newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 6
         xmlIndexCol = 6
         newRow.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 7
         xmlIndexCol = 7
         newRow.lotSizeCurrent = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 9
         xmlIndexCol = 9
         newRow.cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 10
-        newRow.signSecurity = row.cell[xmlIndexCol].text()
-
+        xmlIndexCol = 10
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
         // графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // графа 12 - абсолюбтное значение поля «Курс валюты» справочника «Курсы валют» валюты из «Графы 5» отчетную дату
         xmlIndexCol = 12
         newRow.rubCourse = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
         // + графа 13 - так как после импорта эта графа 13 не должна пересчитываться
         xmlIndexCol = 13
         newRow.marketQuotationInRub = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -747,6 +734,7 @@ void importTransportData() {
 
 void addTransportData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -795,7 +783,7 @@ void addTransportData(def xml) {
         newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 10
         xmlIndexCol = 10
-        newRow.signSecurity = row.cell[xmlIndexCol].text()
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 11
         xmlIndexCol = 11
         newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -819,6 +807,11 @@ void addTransportData(def xml) {
         newRow.reserveRecovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
 
         rows.add(newRow)
+
+        if (rows.size() > 1000) {
+            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+            rows.clear()
+        }
     }
 
     if (xml.rowTotal.size() == 1) {
@@ -861,7 +854,11 @@ void addTransportData(def xml) {
 
         rows.add(total)
     }
-    dataRowHelper.save(rows)
+
+    if(rows.size()> 0){
+        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+    }
+
 }
 
 // обновить индексы строк
@@ -981,7 +978,7 @@ def getRate(def row, def date) {
     }
     if (!isRubleCurrency(currency)) {
         def res = formDataService.getRefBookRecord(22, recordCache, providerCache, refBookCache,
-                'CODE_NUMBER', currencyId.toString(), date, row.getIndex(), getColumnName(row, "currency"), logger, false)
+                'CODE_NUMBER', currency.toString(), date, row.getIndex(), getColumnName(row, "currency"), logger, false)
         return res?.RATE?.numberValue
     }
     return 1;

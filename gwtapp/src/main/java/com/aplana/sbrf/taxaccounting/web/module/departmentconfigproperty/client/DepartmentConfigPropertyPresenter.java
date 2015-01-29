@@ -43,9 +43,10 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private static final long TABLE_INCOME_REFBOOK_ID = 330L;
     private static final long INCOME_REFBOOK_ID = 33L;
 
-    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
+    private static final String EDIT_FOUND_TEXT = "В периоде \"%s\" найдены экземпляры налоговых форм/деклараций, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
-    private static final String EDIT_FOUND_TEXT_D = "Настройки используются для форм/уведомлений. Желаете внести изменения в Настройки?";
+    private static final String EDIT_FOUND_TEXT_D = "В периоде \"%s\" найдены экземпляры форм/уведомлений, " +
+            "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
 
     private Department userDepartment;
 
@@ -378,7 +379,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                     LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
                                 }
                                 if (result.isDeclarationFormFound()) {
-                                    Dialog.confirmMessage(getView().getTaxType().equals(TaxType.DEAL) ? EDIT_FOUND_TEXT_D : EDIT_FOUND_TEXT,
+                                    Dialog.confirmMessage(((getView().getTaxType().equals(TaxType.DEAL) ? EDIT_FOUND_TEXT_D : EDIT_FOUND_TEXT)).replace("%s", result.getReportPeriodName()),
                                             new DialogHandler() {
                                                 @Override
                                                 public void yes() {
