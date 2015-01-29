@@ -239,11 +239,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
     @Override
     public void delete(final DepartmentCombined combinedDepartmentParam, final Integer period, final Integer department) {
-//        Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
-//            @Override
-//            public void yes() {
-//
-//            });
         CheckSettingExistAction settingExistAction = new CheckSettingExistAction();
         settingExistAction.setDepartmentId(department.longValue());
         settingExistAction.setReportPeriodId(period);
