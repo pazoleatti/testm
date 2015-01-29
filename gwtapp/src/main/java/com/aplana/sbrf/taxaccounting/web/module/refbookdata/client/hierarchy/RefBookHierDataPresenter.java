@@ -409,7 +409,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     @Override
     public void onCleanEditForm() {
         editFormPresenter.cleanFields();
-        editFormPresenter.setCurrentUniqueRecordId(-1l);
+        editFormPresenter.setCurrentUniqueRecordId(null);
     }
 
     @Override
