@@ -13,6 +13,9 @@ create global temporary table data_row_temp
   ORD NUMBER(18) not null
 )
 on commit delete rows;
+
+--http://jira.aplana.com/browse/SBRFACCTAX-10267: Добавить в БД новый тип асинхронной задачи "Генерация pdf-файла"
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (7, 'Генерация pdf-файла', 'ejb/taxaccounting/async-task.jar/PdfGeneratorAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
 ------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
