@@ -537,7 +537,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
                 // Проверка типа подразделения
                 if (department.getType().equals(DepartmentType.ROOT_BANK)) {
-                    throw new ServiceException("Подразделение не может быть удалено, так как оно имеет тип \"Банк\"!");
+                    throw new ServiceLoggerException("Подразделение не может быть удалено, так как оно имеет тип \"Банк\"!", null);
                 }
 
                 List<Integer> childIds = departmentService.getAllChildrenIds(depId);
