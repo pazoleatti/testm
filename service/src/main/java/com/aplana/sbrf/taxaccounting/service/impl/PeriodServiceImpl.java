@@ -902,4 +902,9 @@ public class PeriodServiceImpl implements PeriodService {
     public ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year) {
         return reportPeriodDao.getByTaxTypedCodeYear(taxType, code, year);
     }
+
+    @Override
+    public List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate) {
+        return reportPeriodDao.getReportPeriodsByDate(taxType, startDate, endDate);
+    }
 }

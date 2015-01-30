@@ -44,9 +44,9 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     private static final String SAVE_FOUND_TEXT = "В Системе созданы формы/декларации, использующие старую версию Настроек. Для вступления изменений в силу каждую налоговую форму/декларацию нужно обновить вручную.";
     private static final String SAVE_FOUND_TEXT_D = "В Системе созданы формы/уведомления использующие старую версию Настроек. Для вступления изменений в силу каждую форму/уведомление нужно обновить вручную.";
 
-    private static final String EDIT_FOUND_TEXT = "В периоде \"%s\" найдены экземпляры налоговых форм/деклараций, " +
+    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
-    private static final String EDIT_FOUND_TEXT_D = "В периоде \"%s\" найдены экземпляры форм/уведомлений, " +
+    private static final String EDIT_FOUND_TEXT_D = "В периоде %s найдены экземпляры форм/уведомлений, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
 
     private final DispatchAsync dispatcher;

@@ -10,7 +10,6 @@ public class GetCheckDeclarationResult implements Result {
     // Список всех подразделений
     private String uuid;
     private boolean declarationFormFound = false;
-    private boolean hasError = false;
     private boolean isControlUnp;
     private String reportPeriodName;
 
@@ -36,14 +35,6 @@ public class GetCheckDeclarationResult implements Result {
 
     public void setDeclarationFormFound(boolean declarationFormFound) {
         this.declarationFormFound = declarationFormFound;
-    }
-
-    public boolean isHasError() {
-        return hasError;
-    }
-
-    public void setHasError(boolean hasError) {
-        this.hasError = hasError;
     }
 
     public String getReportPeriodName() {
