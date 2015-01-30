@@ -366,7 +366,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         if (inputRecord == null) return false;
         Map<String, RefBookValueSerializable> map;
         try {
-            map = getFieldsValues();
+            map = getFieldsValues(false);
         } catch (BadValueException e) {
             return true;
         } catch (Exception e) {
@@ -380,10 +380,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                     continue;
                 else
                     return true;
-            } if (mapValue == null) {
+            }
+            if (mapValue == null) {
                 return true;
             } else if (recordValue.getValue() != null) {
-                if (recordValue.getValue().equals(mapValue.getValue())) {
+                if (recordValue.getValue() instanceof String && equalsCleanStrings(recordValue.getValue().toString(), mapValue.getValue().toString()) ||
+                        recordValue.getValue().equals(mapValue.getValue())) {
                     continue;
                 } else {
                     return true;
@@ -399,9 +401,13 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         return false;
     }
 
-	@Override
+    @Override
+    public Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException {
+        return getFieldsValues(true);
+    }
+
     @SuppressWarnings("unchecked")
-	public Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException {
+    private Map<String, RefBookValueSerializable> getFieldsValues(boolean checkRequired) throws BadValueException {
 		Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
 		for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
 			RefBookValueSerializable value = new RefBookValueSerializable();
@@ -426,8 +432,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                                 number = null;
                             }
                         }
-                        checkRequired(field.getKey(), number);
-						if (number != null) {
+                        if (checkRequired) checkRequired(field.getKey(), number);
+                        if (number != null) {
                             int fractionalPart = number.scale();
                             int integerPart = number.precision();
                             integerPart = fractionalPart < integerPart ? (integerPart - fractionalPart) : 0;
@@ -450,7 +456,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 					case STRING:
 						String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
 								null : (String)field.getValue().getValue();
-						checkRequired(field.getKey(), string);
+						if (checkRequired) checkRequired(field.getKey(), string);
                         Integer maxLength = field.getKey().getMaxLength();
                         if (maxLength == null) maxLength = MAX_STRING_VALUE_LENGTH;
 						if (string!= null && string.length() > maxLength) {
@@ -464,14 +470,14 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 						break;
 					case DATE:
 						Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
-						checkRequired(field.getKey(), date);
-						value.setAttributeType(RefBookAttributeType.DATE);
+                        if (checkRequired) checkRequired(field.getKey(), date);
+                        value.setAttributeType(RefBookAttributeType.DATE);
 						value.setDateValue(date);
 						break;
 					case REFERENCE:
                         Long longValue = (field.getValue().getValue() == null || ((List<Long>) field.getValue().getValue()).isEmpty()) ? null : ((List<Long>)field.getValue().getValue()).get(0);
-						checkRequired(field.getKey(), longValue);
-						value.setAttributeType(RefBookAttributeType.REFERENCE);
+                        if (checkRequired) checkRequired(field.getKey(), longValue);
+                        value.setAttributeType(RefBookAttributeType.REFERENCE);
 						value.setReferenceValue(longValue);
 						break;
 					default:
@@ -600,5 +606,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCancelClicked();
 		}
+    }
+
+    private boolean equalsCleanStrings(String first, String second) {
+        return StringUtils.cleanString(first).equals(StringUtils.cleanString(second));
     }
 }
