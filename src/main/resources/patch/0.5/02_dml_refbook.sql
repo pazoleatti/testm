@@ -1,12 +1,26 @@
 --http://jira.aplana.com/browse/SBRFACCTAX-9997: Новые атрибуты в справочник параметров подразделений по НДС
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 15 WHERE ID = 856;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 16 WHERE ID = 857;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 17 WHERE ID = 858;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 18 WHERE ID = 859;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 19 WHERE ID = 860;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 20 WHERE ID = 861;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 21 WHERE ID = 862;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 23 WHERE ID = 864;
+MERGE INTO ref_book_attribute tgt
+USING
+(
+	SELECT 856 ID, 15 ORD FROM DUAL
+	UNION ALL
+	SELECT 857 ID, 16 ORD FROM DUAL
+	UNION ALL
+	SELECT 858 ID, 17 ORD FROM DUAL
+	UNION ALL
+	SELECT 859 ID, 18 ORD FROM DUAL
+	UNION ALL
+	SELECT 860 ID, 19 ORD FROM DUAL
+	UNION ALL
+	SELECT 861 ID, 20 ORD FROM DUAL
+	UNION ALL
+	SELECT 862 ID, 21 ORD FROM DUAL
+	UNION ALL
+	SELECT 864 ID, 23 ORD FROM DUAL
+) src
+ON (tgt.id = src.id)
+WHEN MATCHED THEN
+     UPDATE SET tgt.ord = src.ord;
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (981, 98, 'Код формы реорганизации и ликвидации', 'REORG_FORM_CODE', 4, 12, 5, 13, 1, null, 10, 0, 0, null, null, 0, null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (982, 98, 'ИНН реорганизованного обособленного подразделения', 'REORG_INN', 1, 13, null, null, 1, null, 10, 0, 0, null, null, 0, 10);
