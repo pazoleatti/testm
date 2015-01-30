@@ -1335,6 +1335,7 @@ public class SourceServiceImpl implements SourceService {
         filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
         // Список всех отчетных периодов
         List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
+        //TODO: код похож на дублирующий из метода com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao.getLast
         // Приемник в корректирующем периоде может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
         // периоды удаляем из списка
         if (departmentReportPeriod.getCorrectionDate() != null) {
