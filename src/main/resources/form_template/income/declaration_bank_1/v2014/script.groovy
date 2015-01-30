@@ -19,16 +19,33 @@ import groovy.xml.MarkupBuilder
 @Field
 def boolean newDeclaration = true;
 
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDepartmentParams(LogLevel.WARNING)
+        sourceCheck(true, LogLevel.WARNING)
         break
     case FormDataEvent.CHECK : // проверить
         checkDepartmentParams(LogLevel.ERROR)
+        sourceCheck(true, LogLevel.ERROR)
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
         checkDepartmentParams(LogLevel.ERROR)
+        sourceCheck(true, LogLevel.ERROR)
         logicCheck()
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED: // отменить принятие
@@ -36,6 +53,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
+        sourceCheck(true, LogLevel.WARNING)
         generateXML()
         break
     default:
@@ -98,6 +116,25 @@ void checkDepartmentParams(LogLevel logLevel) {
     }
 }
 
+// Проверка налоговой формы источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом» (данная форма-источник создана и находится в статусе «Принята»)
+private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
+    def sourceFormTypeId = 417
+    def sourceFormType = formTypeService.get(sourceFormTypeId)
+    def success = true
+
+    def departmentId = declarationData.getDepartmentId()
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+    def departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    if (departmentFormType == null) {
+        if (loggerNeed) {
+            logger.log(logLevel, "Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята» (налоговая форма не назначена источником декларации Банка/назначена источником, но не создана/назначена источником, создана, но не принята). Строка 240 Листа 02 декларации заполнена значением «0»!")
+        }
+        success = false
+    }
+    return success
+}
+
 /** Логические проверки. */
 void logicCheck() {
     // получение данных из xml'ки
@@ -106,8 +143,8 @@ void logicCheck() {
         return
     }
     def empty = 0
-    // TODO   http://jira.aplana.com/browse/SBRFACCTAX-10192
-    /*// Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
+
+    // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
     def nalVipl311 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалВыпл311.text())
     def nalIschisl = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчисл.text())
     if (nalVipl311 != null && nalIschisl != null &&
@@ -129,7 +166,7 @@ void logicCheck() {
     if (nalVipl311Sub != null && nalIschislSub != null &&
             nalVipl311Sub > nalIschislSub) {
         logger.error('Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)!')
-    }*/
+    }
 
     // Проверки Приложения № 1 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные доходы (всего)»)
     // (ВнеРеалДохПр + ВнеРеалДохСт + ВнеРеалДохБезв + ВнеРеалДохИзл + ВнеРеалДохВРасх + ВнеРеалДохРынЦБДД + ВнеРеалДохКор) < ВнеРеалДохВс
@@ -340,6 +377,9 @@ void generateXML() {
     /** форма «Остатки по начисленным авансовым платежам». */
     def dataRowsRemains = getDataRows(formDataCollection, 309, FormDataKind.PRIMARY)
 
+    /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
+    def dataRowsSum = getDataRows(formDataCollection, 417, FormDataKind.ADDITIONAL)
+
     /*
      * Получение значении декларации за предыдущий период.
      */
@@ -512,7 +552,12 @@ void generateXML() {
     /** НалИсчисл. Код строки декларации 180. */
     def nalIschisl = nalIschislFB + nalIschislSub
     /** НалВыпл311. Код строки декларации 240. */
-    def nalVipl311 = getLong(sumTax)
+    def nalVipl311
+    if (!sourceCheck(false, LogLevel.WARNING)) {
+        nalVipl311 = 0
+    } else {
+        nalVipl311 = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
+    }
     /** НалВыпл311ФБ. Код строки декларации 250. */
     def nalVipl311FB = getLong(nalVipl311 * 2 / 20)
     /** НалВыпл311Суб. Код строки декларации 260. */
@@ -984,12 +1029,10 @@ void generateXML() {
                     if (dataRowsAdvance != null && !dataRowsAdvance.isEmpty()) {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
-                                def naimOP = "TODO"
-                                // TODO http://jira.aplana.com/browse/SBRFACCTAX-10199
-                                /*def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
+                                def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
                                 if (record33 != null) {
-                                    naimOP = record33?.ADDITIONAL_NAME?.value
-                                }*/
+                                    def naimOP = record33?.ADDITIONAL_NAME?.value
+                                }
                                 // 0..n
                                 РаспрНалСубРФ(
                                         ТипНП: typeNP,
@@ -1141,7 +1184,7 @@ void generateXML() {
                             nalBaza04 = getSimpleIncomeSumRows8(dataRowsSimpleIncome, [14010])
                             stavNal = 9
                             nalDivNeRFPred = nalDivNeRFPredOld + nalDivNeRFOld
-                            nalDivNeRF = (sumDividends ?: 0)
+                            nalDivNeRF = (getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_DIVIDENDS') ?: 0)
                             break
                         case 5:
                             nalBaza04 = 0
@@ -1650,6 +1693,23 @@ def getTotalFromForm(def dataRows, def columnName) {
     if (dataRows != null && !dataRows.isEmpty()) {
         def totalRow = getDataRow(dataRows, 'total')
         return getLong(totalRow.getCell(columnName).value)
+    }
+    return 0
+}
+
+/**
+ * Получить значение ячейки фиксированной строки из налоговой формы.
+ *
+ * @param dataRows строки нф
+ * @param columnName название столбца
+ * @param alias алиас строки
+ * @return значение столбца
+ *
+ */
+def getAliasFromForm(def dataRows, def columnName, def alias) {
+    if (dataRows != null && !dataRows.isEmpty()) {
+        def aliasRow = getDataRow(dataRows, alias)
+        return getLong(aliasRow.getCell(columnName).value)
     }
     return 0
 }
