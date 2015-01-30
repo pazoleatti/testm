@@ -248,7 +248,8 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
         return WidgetUtils.isWasChange(ps.getRefBookAttrId(), newPs.getRefBookAttrId()) ||
                 WidgetUtils.isWasChange(ps.isMultiSelect(), newPs.isMultiSelect()) ||
                 WidgetUtils.isWasChange(ps.getSearchPattern(), newPs.getSearchPattern()) ||
-                WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate());
+                WidgetUtils.isWasChange(ps.getVersionDate(), newPs.getVersionDate()) ||
+                newPs.isNeedReload();
     }
 
     /* Создание и заполнения модели экшена для загрузки с сервера*/
