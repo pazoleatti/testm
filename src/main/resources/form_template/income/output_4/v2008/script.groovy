@@ -2,7 +2,7 @@ package form_template.income.output_4.v2008
 
 /**
  * Сведения о суммах налога на прибыль, уплаченного Банком за рубежом
- * formTemplate = 10800
+ * formTemplateId=417
  *
  * графа 1 - rowNum
  * графа 2 - name
