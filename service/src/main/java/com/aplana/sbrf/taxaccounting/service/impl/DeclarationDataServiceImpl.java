@@ -580,7 +580,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
-        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         checkLock(lockData, userInfo.getUser());
         return lockData;
     }

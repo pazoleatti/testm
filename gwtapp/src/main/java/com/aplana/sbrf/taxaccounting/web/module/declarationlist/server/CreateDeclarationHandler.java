@@ -56,7 +56,8 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
         TAUserInfo userInfo = securityService.currentUserInfo();
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + command.getDeclarationTypeId() + "_" + command.getTaxType().getName() + "_" + command.getDepartmentId() + "_" + command.getReportPeriodId() + "_" + command.getTaxOrganKpp() + "_" + command.getTaxOrganCode();
 
-        if (lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME) == null) {
+        if (lockDataService.lock(key, userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_CREATE)) == null) {
             //Если блокировка успешно установлена
             try {
                 DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(command.getDepartmentId(),

@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -164,6 +165,12 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             throw new LockException("Ошибка при добавлении пользователя в список ожидающих объект блокировки (%s, %s). %s", key, userId, e.getMessage());
         }
 
+    }
+
+    @Override
+    @Cacheable(value = "PermanentData", key = "'LockTimeout_'+#lockObject.name()")
+    public int getLockTimeout(LockData.LockObjects lockObject) {
+        return getJdbcTemplate().queryForInt("select timeout from configuration_lock where key = ? ", lockObject.name());
     }
 
     private static final class LockDataMapper implements RowMapper<LockData> {
