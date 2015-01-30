@@ -13,7 +13,7 @@ public final class StringUtils {
         if (uncleanString != null) {
             String cleanString = uncleanString.trim();
             cleanString = cleanString.replaceAll("\\s{2,}", " ");
-            cleanString = cleanString.replaceAll("['`«»]", "\"");
+            cleanString = cleanString.replaceAll("['`«»„“‘’”]", "\"");
             return cleanString;
         } else {
             return null;
