@@ -58,7 +58,8 @@ public class UploadDataRowsHandler extends
         TAUserInfo userInfo = securityService.currentUserInfo();
         //Пытаемся установить блокировку на операцию импорта в текущую нф
         String key = LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual();
-        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
         Logger logger = new Logger();
         if (lockData == null) {
             try {

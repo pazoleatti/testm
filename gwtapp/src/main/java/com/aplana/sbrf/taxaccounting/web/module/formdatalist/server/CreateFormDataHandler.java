@@ -72,7 +72,8 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 		Logger logger = new Logger();
         String key = LockData.LockObjects.FORM_DATA_CREATE.name() + "_" + action.getFormDataTypeId() + "_" + action.getFormDataKindId() + "_" + action.getDepartmentId() + "_" + action.getReportPeriodId() + "_" + action.getMonthId();
 
-        if (lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME) == null) {
+        if (lockDataService.lock(key, userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
             //Если блокировка успешно установлена
             try {
                 // Подставляется последний отчетный период подразделения

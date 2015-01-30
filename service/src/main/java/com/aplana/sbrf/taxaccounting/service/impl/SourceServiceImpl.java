@@ -1335,7 +1335,7 @@ public class SourceServiceImpl implements SourceService {
         filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
         // Список всех отчетных периодов
         List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
-        // Приемник может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
+        // Приемник в корректирующем периоде может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
         // периоды удаляем из списка
         if (departmentReportPeriod.getCorrectionDate() != null) {
             List<DepartmentReportPeriod> delList = new LinkedList<DepartmentReportPeriod>();

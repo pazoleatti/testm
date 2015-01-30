@@ -43,9 +43,9 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private static final long TABLE_INCOME_REFBOOK_ID = 330L;
     private static final long INCOME_REFBOOK_ID = 33L;
 
-    private static final String EDIT_FOUND_TEXT = "В периоде \"%s\" найдены экземпляры налоговых форм/деклараций, " +
+    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
-    private static final String EDIT_FOUND_TEXT_D = "В периоде \"%s\" найдены экземпляры форм/уведомлений, " +
+    private static final String EDIT_FOUND_TEXT_D = "В периоде %s найдены экземпляры форм/уведомлений, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
 
     private Department userDepartment;

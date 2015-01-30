@@ -24,8 +24,6 @@ public final class LockData {
         IFRS
     }
 
-    public static final int STANDARD_LIFE_TIME = 3600000;  // 1 час
-
 	/* Идентификатор блокировки */
 	private String key;
 	/* Код пользователя, установившего блокировку*/

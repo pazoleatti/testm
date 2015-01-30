@@ -13,3 +13,5 @@ INSERT INTO sec_role (id, alias, name) VALUES (3, 'ROLE_CONTROL_UNP', 'Конт�
 
 INSERT INTO lock_data (key, user_id, date_before) VALUES ('a', 0, TIMESTAMP '2013-01-01 00:05:00.000000');
 INSERT INTO lock_data (key, user_id, date_before) VALUES ('b', 1, TIMESTAMP '2013-01-01 00:00:00.000000');
+
+insert into configuration_lock (key, timeout) values ('FORM_DATA', 1);

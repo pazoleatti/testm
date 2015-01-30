@@ -62,7 +62,8 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         String key = ifrsDataService.generateTaskKey(action.getReportPeriodId());
-        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24); //ставим такую блокировку т.к. стандартная на 1 час
+        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.IFRS));
         if (lockData == null) {
             try {
                 Map<String, Object> params = new HashMap<String, Object>();

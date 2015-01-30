@@ -56,7 +56,7 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
                 relationList.addAll(sources.getSourceList());
             }
         } else {
-            //Получаем источники-приемники стандарртными методами ядра
+            //Получаем источники-приемники стандартными методами ядра
             relationList = sourceService.getRelations(
                     formData.getDepartmentId(),
                     formData.getFormType().getId(),
