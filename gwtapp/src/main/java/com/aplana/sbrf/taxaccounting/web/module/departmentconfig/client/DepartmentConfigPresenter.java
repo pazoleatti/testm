@@ -219,7 +219,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                                     AddLogAction addLogAction = new AddLogAction();
                                                     addLogAction.setOldUUID(uuid[0]);
                                                     addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
-                                                            "Для актуализации данных в найденных экземплярах налоговых/форм деклараций их необходимо рассчитать/обновить")));
+                                                            "Для актуализации данных в найденных экземплярах налоговых форм/деклараций их необходимо рассчитать/обновить")));
                                                     dispatcher.execute(addLogAction, CallbackUtils
                                                             .defaultCallback(new AbstractCallback<AddLogResult>() {
                                                                 @Override
