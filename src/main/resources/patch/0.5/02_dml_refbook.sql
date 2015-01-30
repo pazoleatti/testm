@@ -7,9 +7,6 @@ UPDATE REF_BOOK_ATTRIBUTE SET ORD = 19 WHERE ID = 860;
 UPDATE REF_BOOK_ATTRIBUTE SET ORD = 20 WHERE ID = 861;
 UPDATE REF_BOOK_ATTRIBUTE SET ORD = 21 WHERE ID = 862;
 UPDATE REF_BOOK_ATTRIBUTE SET ORD = 23 WHERE ID = 864;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 12 WHERE ID = 981;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 13 WHERE ID = 982;
-UPDATE REF_BOOK_ATTRIBUTE SET ORD = 14 WHERE ID = 983;
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (981, 98, 'Код формы реорганизации и ликвидации', 'REORG_FORM_CODE', 4, 12, 5, 13, 1, null, 10, 0, 0, null, null, 0, null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (982, 98, 'ИНН реорганизованного обособленного подразделения', 'REORG_INN', 1, 13, null, null, 1, null, 10, 0, 0, null, null, 0, 10);
