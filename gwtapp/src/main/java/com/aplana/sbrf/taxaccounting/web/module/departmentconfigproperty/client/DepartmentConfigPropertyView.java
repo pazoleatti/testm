@@ -141,7 +141,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     interface Binder extends UiBinder<Widget, DepartmentConfigPropertyView> {
     }
 
-    private AsyncDataProviderWithSortableTable dataProvider;
     @UiField
     DataGrid<DataRow<Cell>> table;
     @UiField

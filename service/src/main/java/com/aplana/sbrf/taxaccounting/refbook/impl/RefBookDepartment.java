@@ -52,7 +52,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
     private static final String DEPARTMENT_ACTIVE_NAME = "IS_ACTIVE";
-    private static final String DEPARTMENT_GARANT_USE = "GARANT_USE";
 
     @Autowired
     RefBookDao refBookDao;

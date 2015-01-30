@@ -53,8 +53,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Autowired
     private FormDataDao formDataDao;
     @Autowired
-    private ReportPeriodDao reportPeriodDao;
-    @Autowired
     private TransactionHelper tx;
     @Autowired
     private FormDataService formDataService;

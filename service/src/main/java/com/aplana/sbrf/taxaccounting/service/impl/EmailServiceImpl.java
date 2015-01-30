@@ -32,9 +32,6 @@ public class EmailServiceImpl implements EmailService {
 	static final Log Log = LogFactory.getLog(EmailServiceImpl.class);
 
     @Autowired
-    private ConfigurationDao configurationDao;
-
-    @Autowired
     private RefBookFactory refBookFactory;
 
     @Override

@@ -48,9 +48,6 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     @Autowired
     private LockDataService lockDataService;
 
-    @Autowired
-    private TAUserService userService;
-
     public RecalculateDeclarationDataHandler() {
         super(RecalculateDeclarationDataAction.class);
     }

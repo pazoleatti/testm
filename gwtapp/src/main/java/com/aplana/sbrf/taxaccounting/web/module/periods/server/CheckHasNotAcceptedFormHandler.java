@@ -27,15 +27,6 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
     }
 
     @Autowired
-    private FormDataService formDataService;
-
-    @Autowired
-    private PeriodService periodService;
-
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
     private DeclarationDataSearchService declarationDataService;
 
     @Autowired
