@@ -672,7 +672,21 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
         periodPickerPopup.setPeriods(reportPeriods);
-        periodPickerPopup.setValue(Arrays.asList(reportPeriods.get(0).getId()));
+        ReportPeriod maxPeriod = getMaxPeriod(reportPeriods);
+        periodPickerPopup.setValue(maxPeriod == null ? null : Arrays.asList(maxPeriod.getId()));
+    }
+
+    private ReportPeriod getMaxPeriod(List<ReportPeriod> reportPeriods) {
+        if (reportPeriods == null || reportPeriods.isEmpty()) {
+            return null;
+        }
+        ReportPeriod maxPeriod = reportPeriods.get(0);
+        for (ReportPeriod per : reportPeriods) {
+            if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
+                maxPeriod = per;
+            }
+        }
+        return maxPeriod;
     }
 
     @Override

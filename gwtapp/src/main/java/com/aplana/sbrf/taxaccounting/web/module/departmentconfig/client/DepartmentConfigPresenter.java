@@ -360,12 +360,25 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
                                 // По-умолчанию последний
                                 if (result.getReportPeriods() != null && !result.getReportPeriods().isEmpty()) {
-                                    getView().setReportPeriod(result.getReportPeriods().get(0).getId());
+                                    getView().setReportPeriod(getMaxPeriod(result.getReportPeriods()).getId());
                                 }
 
                                 reloadDepartmentParams(getView().getCurrentDepartmentId(), getView().getTaxType(), getView().getCurrentReportPeriodId());
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
+    }
+
+    private ReportPeriod getMaxPeriod(List<ReportPeriod> reportPeriods) {
+        if (reportPeriods == null || reportPeriods.isEmpty()) {
+            return null;
+        }
+        ReportPeriod maxPeriod = reportPeriods.get(0);
+        for (ReportPeriod per : reportPeriods) {
+            if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
+                maxPeriod = per;
+            }
+        }
+        return maxPeriod;
     }
 
     @Override
