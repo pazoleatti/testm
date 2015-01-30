@@ -120,7 +120,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
             return;
         }
-        if (currentUniqueRecordId != null && getView().checkChanges()) {
+        if (mode.equals(FormMode.EDIT) && currentUniqueRecordId != null && getView().checkChanges()) {
             setIsFormModified(true);
         }
         if (isFormModified) {
