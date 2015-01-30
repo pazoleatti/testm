@@ -860,7 +860,7 @@ public class FormDataServiceImpl implements FormDataService {
                                 destinationForm.getFormType().getName(), destinationForm.getKind().getName(),
                                 destinationDepartmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()+" "+destinationDepartmentReportPeriod.getReportPeriod().getName(),
                                 departmentService.getDepartment(destinationForm.getDepartmentId()).getName(),
-                                userService.getUser(lockData.getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateBefore())));
+                                userService.getUser(lockData.getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())));
                     } else {
                         lockedForms.add(lockKey);
                     }

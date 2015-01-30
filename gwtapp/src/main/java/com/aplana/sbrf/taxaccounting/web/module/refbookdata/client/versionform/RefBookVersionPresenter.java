@@ -210,7 +210,6 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
                             editFormPresenter.setVersionMode(true);
                             editFormPresenter.setCurrentUniqueRecordId(null);
-                            editFormPresenter.setMode(mode);
                             editFormPresenter.setRecordId(null);
 
                             GetRefBookAttributesAction action = new GetRefBookAttributesAction();
@@ -223,6 +222,8 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                                     getView().resetRefBookElements();
                                                     getView().setTableColumns(result.getColumns());
                                                     editFormPresenter.init(refBookId, result.getColumns());
+                                                    editFormPresenter.setMode(mode);
+                                                    editFormPresenter.show(uniqueRecordId);
                                                     getView().setRange(new Range(0, getView().getPageSize()));
                                                     if (result.isReadOnly()){
                                                         setMode(FormMode.READ);

@@ -221,7 +221,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                     @Override
                     public void onGetValuesCount(Integer count) {
                         if (count != null && count < 100 && count>0) {
-                            refbookDataTree.selectFirstItenOnLoad();
                             loadAndSelect();
                         } else if (count != null && count == 0){
                             pickerState.setSetIds(new ArrayList<Long>(0));
