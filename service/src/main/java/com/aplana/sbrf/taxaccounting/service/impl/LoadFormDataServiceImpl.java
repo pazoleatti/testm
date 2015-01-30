@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -31,6 +32,14 @@ import java.util.*;
 @Service
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService implements LoadFormDataService {
+
+    private static final String LOCK_MSG = "Обработка данных транспортного файла не выполнена, " +
+            "т.к. в данный момент выполняется изменение данных формы %s " +
+            "для подразделения %s " +
+            "в периоде %s, " +
+            "инициированное пользователем %s " +
+            "в %s.";
+    private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -56,6 +65,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private LockDataService lockDataService;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
+    @Autowired
+    private TAUserService userService;
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
@@ -373,8 +384,14 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 TAUser.SYSTEM_USER_ID,
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
         if (lockData!=null)
-            throw new ServiceException(String.format(LockDataService.LOCK_DATA, userInfo.getUser().getName(),
-                    userInfo.getUser().getId()));
+            throw new ServiceException(String.format(
+                    LOCK_MSG,
+                    formData.getKind().getName() + ": " + formData.getFormType().getName(),
+                    departmentService.getDepartment(formData.getDepartmentId()).getName(),
+                    reportPeriodName,
+                    userService.getUser(lockData.getUserId()).getName(),
+                    SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())
+            ));
 
         try {
             // 15 Скрипт

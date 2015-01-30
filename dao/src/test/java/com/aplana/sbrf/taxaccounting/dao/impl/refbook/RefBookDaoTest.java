@@ -657,7 +657,7 @@ public class RefBookDaoTest {
 		refBookDao.dereferenceValues(4L, recordIds);
 	}
 
-    //@Test
+    @Test
     public void getMatchedRecordsByUniqueAttributesIncome102() {
         String opuCode = "code";
         List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
