@@ -34,7 +34,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	public LockData get(String key) {
 		try {
             return getJdbcTemplate().queryForObject(
-					"SELECT key, user_id, date_before FROM lock_data WHERE key = ?",
+					"SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ?",
 					new Object[] {key},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
@@ -50,7 +50,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date dateBefore) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_before FROM lock_data WHERE key = ? and date_before = ?",
+                    "SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ? and date_before = ?",
                     new Object[] {key, dateBefore},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
@@ -180,6 +180,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 			result.setKey(rs.getString("key"));
 			result.setUserId(rs.getInt("user_id"));
 			result.setDateBefore(rs.getTimestamp("date_before"));
+            result.setDateLock(rs.getTimestamp("date_lock"));
 			return result;
 		}
 	}
