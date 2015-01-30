@@ -33,6 +33,16 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3322,330,'Наименование документа, подтверждающего полномочия представителя','APPROVE_DOC_NAME',1,21,null,null,1,null,100,0,0,null,null,0,120);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3323,330,'Наименование организации-представителя налогоплательщика','APPROVE_ORG_NAME',1,22,null,null,1,null,100,0,0,null,null,0,1000);
 
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 5 WHERE ID = 3304;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 5 WHERE ID = 3305;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3307;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3308;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3319;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3320;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3321;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3322;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3323;
+
 --------------------------------------------------------------------------------------------------------------------------
 -- Перенос данных
 
