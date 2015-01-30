@@ -765,13 +765,15 @@ create table lock_data
 (
   key varchar2(1000) not null,
   user_id number(9) not null,
-  date_before date not null
+  date_before date not null,
+  date_lock date default current_date not null
 );
 
 comment on table lock_data is 'Информация о блокировках';
 comment on column lock_data.key is 'Код блокировки';
 comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
 comment on column lock_data.date_before is 'Срок истечения блокировки';
+comment on column lock_data.date_lock is 'Дата установки блокировки';
 
 --------------------------------------------------------------------------------------------------------
 create table department_type
