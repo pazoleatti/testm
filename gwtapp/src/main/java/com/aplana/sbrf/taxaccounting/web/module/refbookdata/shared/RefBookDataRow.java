@@ -31,6 +31,12 @@ public class RefBookDataRow implements Serializable {
         RefBookDataRow that = (RefBookDataRow) o;
 
         return refBookRowId.equals(that.refBookRowId);
-
     }
+
+	@Override
+	public int hashCode() {
+		int result = refBookRowId != null ? refBookRowId.hashCode() : 0;
+		result = 31 * result + (values != null ? values.hashCode() : 0);
+		return result;
+	}
 }

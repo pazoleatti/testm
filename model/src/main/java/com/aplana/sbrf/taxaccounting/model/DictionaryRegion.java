@@ -51,4 +51,13 @@ public class DictionaryRegion {
         }
         return false;
     }
+
+	@Override
+	public int hashCode() {
+		int result = code != null ? code.hashCode() : 0;
+		result = 31 * result + (name != null ? name.hashCode() : 0);
+		result = 31 * result + (okato != null ? okato.hashCode() : 0);
+		result = 31 * result + (okatoDefinition != null ? okatoDefinition.hashCode() : 0);
+		return result;
+	}
 }
