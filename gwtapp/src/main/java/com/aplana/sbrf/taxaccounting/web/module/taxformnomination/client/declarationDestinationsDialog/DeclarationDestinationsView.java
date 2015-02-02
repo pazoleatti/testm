@@ -84,6 +84,13 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
                 updateCreateButtonStatus();
             }
         });
+
+        init();
+    }
+
+    private void init() {
+        departmentPicker.setValue(null);
+        declarationTypeId.setValue(null);
     }
 
 	@UiHandler("cancelButton")
@@ -145,6 +152,4 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
             continueButton.setEnabled(false);
         }
     }
-
-
 }
