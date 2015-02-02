@@ -86,11 +86,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(depCombined.getDepartmentId().get(0).intValue()));
             departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
             List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
-            DepartmentReportPeriod departmentReportPeriod = null;
-            if (departmentReportPeriodList.size() == 1) {
-                departmentReportPeriod = departmentReportPeriodList.get(0);
-            }
-            if (departmentReportPeriod == null) {
+            if (departmentReportPeriodList.isEmpty()) {
                 throw new ActionException("Не найден отчетный период!");
             }
 

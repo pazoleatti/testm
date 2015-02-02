@@ -28,7 +28,6 @@ public class TAUsersReportBuilder extends AbstractReportBuilder {
 
 
     public TAUsersReportBuilder(List<TAUserView> taUserList) {
-        super("Список_пользователей_", ".xlsx");
         this.taUserList = taUserList;
         this.workBook = new XSSFWorkbook();
         this.sheet = workBook.createSheet("Список пользователей");
