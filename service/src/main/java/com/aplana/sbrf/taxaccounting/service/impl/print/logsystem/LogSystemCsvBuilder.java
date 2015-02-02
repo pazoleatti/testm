@@ -31,7 +31,6 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
     private List<LogSearchResultItem> items;
 
     public LogSystemCsvBuilder(List<LogSearchResultItem> items) throws IOException {
-        super("", "");
         this.items = items;
     }
 
@@ -53,6 +52,42 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
     @Override
     protected void fillFooter() {
         //No need to implement
+    }
+
+    @Override
+    protected byte[] flushBlobData() throws IOException {
+        String fileName = String.format(PATTER_LOG_FILE_NAME,
+                SDF_LOG_NAME.format(items.get(items.size() - 1).getLogDate()),
+                SDF_LOG_NAME.format(items.get(0).getLogDate()));
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        File file = new File(tmpDir + File.separator + fileName + ".csv");
+        FileWriter fileWriter = new FileWriter(file);
+        FileReader fileReader = new FileReader(file);
+        try {
+            CSVWriter csvWriter = new CSVWriter(fileWriter, ';');
+
+            csvWriter.writeNext(headers);
+            for (LogSearchResultItem resultItem : items) {
+                csvWriter.writeNext(assemble(resultItem));
+            }
+            csvWriter.close();
+
+            File zipFile = new File(tmpDir + File.separator + fileName + POSTFIX);
+            ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
+            ZipEntry zipEntry = new ZipEntry(file.getName());
+            zout.putNextEntry(zipEntry);
+            zout.write(IOUtils.toByteArray(new FileReader(file), ENCODING));
+            zout.close();
+
+            return IOUtils.toByteArray(fileReader);
+        } catch (IOException e) {
+            throw new IOException(e);
+        } finally {
+            IOUtils.closeQuietly(fileWriter);
+            IOUtils.closeQuietly(fileReader);
+            if (!file.delete())
+                logger.warn(String.format("Временнный файл %s не был удален.", file.getName()));
+        }
     }
 
     private String[] assemble(LogSearchResultItem item){

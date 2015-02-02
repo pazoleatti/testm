@@ -369,10 +369,6 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
         }
 
-        if (getRate(row, getReportPeriodEndDate()) != row.rubCourse) {
-            loggerError(row, errorMsg + "Значение графы «${getColumnName(row, 'rubCourse')}» отсутствует в справочнике «Курсы валют»!")
-        }
-
         // 18. Проверка итоговых значений по эмитентам
         def Integer issuerId = getSubAliasName(row)
         if (issuerId != null && !totalGroups.contains(issuerId)) {

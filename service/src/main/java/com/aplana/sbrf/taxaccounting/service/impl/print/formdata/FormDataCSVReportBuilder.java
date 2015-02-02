@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.formdata;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.io.IOUtils;
@@ -24,12 +23,8 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
     boolean isShowChecked;
     RefBookValue refBookValue;
 
-    public FormDataCSVReportBuilder() {
-        super("", "");
-    }
 
     public FormDataCSVReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<Cell>> dataRows, RefBookValue refBookValue) {
-        this();
         this.data = data.getData();
         this.dataRows = dataRows;
         formTemplate = data.getFormTemplate();

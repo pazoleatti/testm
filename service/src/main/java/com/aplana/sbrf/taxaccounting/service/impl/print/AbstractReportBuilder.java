@@ -6,10 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,14 +26,6 @@ public abstract class AbstractReportBuilder {
     protected static final int cellWidthMax = 100;
 
     protected Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
-
-    private String fileName;
-    private String postfix;
-
-    protected AbstractReportBuilder(String fileName, String postfix) {
-        this.fileName = fileName;
-        this.postfix = postfix;
-    }
 
     /**
      * Формирование отчета. Условно разбит на шесть частей.

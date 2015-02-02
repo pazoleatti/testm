@@ -119,6 +119,9 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
         if (result.isReadOnly() != action.isReadOnly()) {
             // Запросили на редактирование, а вернули на чтение
+            if (result.getLockedByUser() != null && !result.getLockedByUser().isEmpty())                         {
+                throw new ActionException("Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.");
+            }
             String msg = result.getFormDataAccessParams().isCanEdit() ? CLOSED_PERIOD_MESSAGE : RESTRICT_EDIT_MESSAGE;
             throw new ActionException("Нельзя открыть налоговую форму в режиме редактирования. " + msg);
         }

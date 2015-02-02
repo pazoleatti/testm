@@ -215,7 +215,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 	@Override
 	public void onSaveClicked(boolean isEditButtonClicked) {
-        final String title = (currentUniqueRecordId != null ? "Версия не сохранена" : "Версия не создана");
+        final String title = (currentUniqueRecordId != null ? "Запись не сохранена" : "Запись не создана");
 		try {
             LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
@@ -337,7 +337,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {
-                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+                                            Dialog.errorMessage("Запись не сохранена", "Обнаружены фатальные ошибки!");
                                         } else {
                                             depType = newDepType;
                                             setIsFormModified(false);

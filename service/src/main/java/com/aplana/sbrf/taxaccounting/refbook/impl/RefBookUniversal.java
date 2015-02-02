@@ -259,10 +259,10 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (logger != null) {
                 logger.error(e);
                 logger.clear(LogLevel.INFO);
-                throw new ServiceLoggerException("Версия не сохранена. Обнаружены фатальные ошибки!",
+                throw new ServiceLoggerException("Запись не сохранена. Обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
-                throw new ServiceException("Версия не сохранена. Обнаружены фатальные ошибки!");
+                throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!");
             }
         }
     }
@@ -651,10 +651,10 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (logger != null) {
                 logger.error(e);
                 logger.clear(LogLevel.INFO);
-                throw new ServiceLoggerException("Версия не сохранена, обнаружены фатальные ошибки!",
+                throw new ServiceLoggerException("Запись не сохранена, обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
-                throw new ServiceException("Версия не сохранена, обнаружены фатальные ошибки!");
+                throw new ServiceException("Запись не сохранена, обнаружены фатальные ошибки!");
             }
         }
     }
@@ -742,10 +742,10 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (logger != null) {
                 logger.error(e);
                 logger.clear(LogLevel.INFO);
-                throw new ServiceLoggerException("Версия не сохранена. Обнаружены фатальные ошибки!",
+                throw new ServiceLoggerException("Запись не сохранена. Обнаружены фатальные ошибки!",
                         logEntryService.save(logger.getEntries()));
             } else {
-                throw new ServiceException("Версия не сохранена. Обнаружены фатальные ошибки!");
+                throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!");
             }
         }
     }
