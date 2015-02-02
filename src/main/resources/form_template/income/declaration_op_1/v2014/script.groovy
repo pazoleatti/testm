@@ -139,6 +139,8 @@ void generateXML(def xmlBankData) {
     def kbk2 = '18210101012021000110'
     def typeNP = '1'
 
+    def departmentParamId = getDepartmentParam().record_id.value
+
     // справочник "Параметры подразделения по налогу на прибыль" - начало
     def incomeParams = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = ${declarationData.departmentId}", null)?.get(0)
     if (incomeParams == null) {
