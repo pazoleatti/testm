@@ -1270,6 +1270,7 @@ public class SourceServiceImpl implements SourceService {
                 formToFormRelation.setCreated(false);
                 formToFormRelation.setFormType(formTypeDao.get(departmentFormType.getFormTypeId()));
                 formToFormRelation.setFormDataKind(departmentFormType.getKind());
+                formToFormRelation.setYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
             } else {
                 // Источников нет
                 return null;
