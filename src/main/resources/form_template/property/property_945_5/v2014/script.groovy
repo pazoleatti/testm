@@ -1316,7 +1316,7 @@ def getDepartmentById(def id) {
 /** Получить тип фомры по id. */
 def getFormTypeById(def id) {
     if (formTypeMap[id] == null) {
-        formTypeMap[id] = formTypeService.get(sourceFormTypeId)
+        formTypeMap[id] = formTypeService.get(id)
     }
     return formTypeMap[id]
 }
