@@ -267,7 +267,7 @@ void consolidationBank(def dataRows) {
     // получить консолидированные формы из источников
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        def child = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             for (def row : formDataService.getDataRowHelper(child).getAllCached()) {
                 if (row.getAlias() == null) {
@@ -308,7 +308,7 @@ void consolidationSummary(def dataRows) {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     // Предыдущий отчётный период
-    def formDataOld = formDataService.getFormDataPrev(formData, formData.departmentId)
+    def formDataOld = formDataService.getFormDataPrev(formData)
     if (formDataOld != null && reportPeriod.order != 1) {
         def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.getAll()
         //графа 6
@@ -324,15 +324,15 @@ void consolidationSummary(def dataRows) {
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        def isMonth = it.formTypeId in [332] //ежемесячная
+        def isMonth = it.formTypeId in [332, 341, 344, 362] //ежемесячная
         def children = []
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
-                def child = formDataService.findMonth(it.formTypeId, it.kind, it.departmentId, reportPeriod.taxPeriod.id, periodOrder)
+                def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriod.id, periodOrder)
                 children.add(child)
             }
         } else {
-            children.add(formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId))
+            children.add(formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder))
         }
         for (def child in children) {
             if (child != null) {
@@ -627,7 +627,7 @@ def calcColumn6(def dataRows, def aliasRows) {
  * Получить данные формы "расходы простые" (id = 304)
  */
 def getFormDataSimple() {
-    return formDataService.find(304, formData.kind, formDataDepartment.id, formData.reportPeriodId)
+    return formDataService.getLast(304, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
 }
 
 /**
@@ -827,10 +827,10 @@ void addData(def xml, int headRowCount) {
             curRow[it] = null
         }
 
-        knu = normalize(curRow.consumptionTypeId)
-        group = normalize(curRow.consumptionGroup)
+        knu = normalize(getOwnerValue(curRow, 'consumptionTypeId'))
+        group = normalize(getOwnerValue(curRow, 'consumptionGroup'))
         //type = normalize(curRow.consumptionTypeByOperation)
-        num = normalize(curRow.consumptionBuhSumAccountNumber)
+        num = normalize(getOwnerValue(curRow, 'consumptionBuhSumAccountNumber'))
 
         def xmlIndexCol = 0
 
