@@ -22,7 +22,6 @@ import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 import java.util.*;
 
-
 public class DeclarationCreationView extends PopupViewWithUiHandlers<DeclarationCreationUiHandlers>
         implements DeclarationCreationPresenter.MyView {
 
@@ -70,10 +69,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @UiField
     Button cancelButton;
 
-
-    final private Map<Integer, DeclarationType> declarationTypesMap = new LinkedHashMap<Integer, DeclarationType>();
-
-    private boolean refBookEnabled = false;
+    private boolean refBookEnabled;
 
     @Inject
     public DeclarationCreationView(Binder uiBinder, EventBus eventBus) {

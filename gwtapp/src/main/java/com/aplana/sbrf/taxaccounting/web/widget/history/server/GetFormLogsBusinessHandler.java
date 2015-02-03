@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.history.server;
 
 import com.aplana.sbrf.taxaccounting.model.LogBusiness;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.widget.history.shared.GetFormLogsBusinessAction;
@@ -29,9 +28,6 @@ public class GetFormLogsBusinessHandler extends
 
 	@Autowired
 	private TAUserService userService;
-
-	@Autowired
-	private DepartmentService departmentService;
 
 	@Override
 	public GetLogsBusinessResult execute(GetFormLogsBusinessAction action,

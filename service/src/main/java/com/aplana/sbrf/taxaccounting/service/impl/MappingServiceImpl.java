@@ -143,12 +143,15 @@ public class MappingServiceImpl implements MappingService {
 
                 // Вызов скрипта
                 formDataService.lock(formDataId, userInfo);
-                formDataService.migrationFormData(logger, userInfo, formDataId, inputStream, filename);
+                try {
+                    formDataService.migrationFormData(logger, userInfo, formDataId, inputStream, filename);
 
-                formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId, false));
-                // Принудительно выставлен статус "Принята"
-                formDataDao.updateState(formDataId, WorkflowState.ACCEPTED);
-                formDataService.unlock(formDataId, userInfo);
+                    formDataService.saveFormData(logger, userInfo, formDataDao.get(formDataId, false));
+                    // Принудительно выставлен статус "Принята"
+                    formDataDao.updateState(formDataId, WorkflowState.ACCEPTED);
+                } finally {
+                    formDataService.unlock(formDataId, userInfo);
+                }
             } else {
                 isAlreadyCreated = true;
             }

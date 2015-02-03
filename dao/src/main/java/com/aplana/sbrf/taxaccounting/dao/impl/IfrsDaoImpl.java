@@ -28,9 +28,6 @@ import java.util.List;
 @Transactional(readOnly=true)
 public class IfrsDaoImpl extends AbstractDao implements IfrsDao {
 
-    @Autowired
-    private ReportPeriodDao reportPeriodDao;
-
     private class IfrsDataMapper implements RowMapper<IfrsData> {
         @Override
         public IfrsData mapRow(ResultSet rs, int index) throws SQLException {

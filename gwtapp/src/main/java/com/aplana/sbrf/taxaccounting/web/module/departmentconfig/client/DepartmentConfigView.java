@@ -76,7 +76,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	private TaxType currentTaxType = TaxType.INCOME;
 
 	// Признак открытости выбранного отчетного периода
-	private boolean isReportPeriodActive = false;
+	private boolean isReportPeriodActive;
 
     private HandlerRegistration resizeHandler;
     private Timer resizeTimer;

@@ -30,9 +30,6 @@ public class GetDeclarationLogsBusinessHandler extends
 	@Autowired
 	private TAUserService userService;
 
-	@Autowired
-	private DepartmentService departmentService;
-
 	@Override
 	public GetLogsBusinessResult execute(GetDeclarationLogsBusinessAction action,
 			ExecutionContext context) throws ActionException {

@@ -216,6 +216,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         if (getUiHandlers() != null) {
             pickerState.setSearchPattern(filterText.getValue());
             if (filterText.getValue()!= null && !filterText.getValue().isEmpty()){
+                pickerState.setNeedReload(false);
                 refbookDataTree.checkCount(filterText.getValue().trim(), new CheckValuesCountHandler() {
                     @Override
                     public void onGetValuesCount(Integer count) {
@@ -233,6 +234,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                     }
                 });
             } else {
+                pickerState.setNeedReload(true);
                 loadAndSelect();
             }
 

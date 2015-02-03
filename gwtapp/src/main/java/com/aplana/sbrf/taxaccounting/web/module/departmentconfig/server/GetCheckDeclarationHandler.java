@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetCheckDeclarationAction;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -45,9 +43,6 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
     private DeclarationDataSearchService declarationDataSearchService;
 
     @Autowired
-    private SourceService departmentFormTypService;
-
-    @Autowired
     private DataRowService dataRowService;
 
     @Autowired
@@ -57,13 +52,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
     private LogEntryService logEntryService;
 
     @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
     private SecurityService securityService;
-
-    @Autowired
-    private RefBookFactory rbFactory;
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
@@ -81,8 +70,8 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
         result.setReportPeriodName(periodName);
         DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
-        departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(action.getDepartment()));
-        departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
+        departmentReportPeriodFilter.setDepartmentIdList(asList(action.getDepartment()));
+        departmentReportPeriodFilter.setReportPeriodIdList(asList(action.getReportPeriodId()));
         departmentReportPeriodFilter.setIsActive(true);
         List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
         DepartmentReportPeriod departmentReportPeriod = null;

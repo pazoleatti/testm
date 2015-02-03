@@ -254,6 +254,8 @@ alter table ifrs_data add constraint ifrs_data_fk_blob_data foreign key (blob_da
 
 alter table configuration_email add constraint configuration_email_pk primary key (id);
 alter table configuration_email add constraint configuration_email_unqname unique (name);
+
+alter table configuration_lock add constraint configuration_lock_pk primary key (key);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);

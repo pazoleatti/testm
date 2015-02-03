@@ -17,6 +17,7 @@ public class PickerState{
     private String filter;
     private String searchPattern;
     private List<Long> setIds = new LinkedList<Long>();
+    private boolean needReload;
 
     private PickerContext pickerContext;
 
@@ -97,6 +98,14 @@ public class PickerState{
 
     public void setSetIds(List<Long> setIds) {
         this.setIds = setIds;
+    }
+
+    public boolean isNeedReload() {
+        return needReload;
+    }
+
+    public void setNeedReload(boolean needReload) {
+        this.needReload = needReload;
     }
 
     @Override
