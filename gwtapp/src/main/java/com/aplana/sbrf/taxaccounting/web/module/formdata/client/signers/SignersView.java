@@ -9,10 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicke
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.cell.client.TextInputCell;
+import com.google.gwt.cell.client.*;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -189,7 +186,6 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     public void onUpSigner(ClickEvent event) {
         FormDataSigner signer = selectionModel.getSelectedObject();
         int ind = clonedSigners.indexOf(signer);
-
         if (signer != null && ind > 0) {
                 FormDataSigner exchange = clonedSigners.get(ind - 1);
                 clonedSigners.set(ind - 1, signer);
@@ -205,8 +201,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     public void onDownSigner(ClickEvent event) {
         FormDataSigner signer = selectionModel.getSelectedObject();
         int ind = clonedSigners.indexOf(signer);
-
-        if (signer != null && ind < clonedSigners.size() - 1) {
+        if (signer != null && ind >= 0 && ind < clonedSigners.size() - 1) {
                 FormDataSigner exchange = clonedSigners.get(ind + 1);
                 clonedSigners.set(ind + 1, signer);
                 signer.setOrd(ind + 2);
@@ -352,8 +347,8 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
                 dataProvider.removeDataDisplay(signersTable);
                 columnSortEventRegistration.removeHandler();
             }
-            nameCell = new TextInputCell();
-            positionCell = new TextInputCell();
+            nameCell = new EditTextCell();
+            positionCell = new EditTextCell();
         }
 
         Column<FormDataSigner, String> nameColumn = new Column<FormDataSigner, String>(nameCell) {
