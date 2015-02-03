@@ -321,5 +321,20 @@ where form_template_id = 417 and exists(select 1 from ref_book_attribute where i
 delete from ref_book_value where attribute_id in (205, 206);
 delete from ref_book_attribute where id in (205, 206);
 
+-- Информация об исполнителе налоговой формы
+insert into form_data_performer (form_data_id, name, print_department_id, report_department_name)
+  select fd.id, ' ' as name, d.id as print_department_id, d.name as report_department_name
+  from form_data fd
+  cross join
+  (
+  select id, substr(sys_connect_by_path(name, '/'), 2) name
+  from department
+  where id = 1
+  start with parent_id = 0
+  connect by prior id = parent_id
+  ) d
+  where form_template_id = 417 and not exists (select 1 from form_data_performer t where t.form_data_id = fd.id);
+  
+
 COMMIT;
 EXIT;
