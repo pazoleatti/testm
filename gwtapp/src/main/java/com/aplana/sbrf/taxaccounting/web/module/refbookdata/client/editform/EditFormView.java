@@ -384,15 +384,12 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
             if (mapValue == null) {
                 return true;
             } else if (recordValue.getValue() != null) {
-                if (recordValue.getValue() instanceof String && equalsCleanStrings(recordValue.getValue().toString(), mapValue.getValue().toString()) ||
-                        recordValue.getValue().equals(mapValue.getValue())) {
-                    continue;
-                } else {
+                if (!(recordValue.getValue() instanceof String && equalsCleanStrings(recordValue.getValue().toString(), mapValue.getValue().toString()) ||
+                        recordValue.getValue() instanceof BigDecimal && mapValue.getValue() != null && ((BigDecimal)recordValue.getValue()).compareTo((BigDecimal)mapValue.getValue()) == 0 ||
+                        recordValue.getValue().equals(mapValue.getValue()))) {
                     return true;
                 }
-            } else if (mapValue.getValue() == null) {
-                continue;
-            } else {
+            } else if (mapValue.getValue() != null) {
                 return true;
             }
 
