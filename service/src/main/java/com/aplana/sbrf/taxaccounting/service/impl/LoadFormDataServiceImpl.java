@@ -198,6 +198,16 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 log(userInfo, LogData.L15_1, logger, fileName);
             }
 
+            log(userInfo, LogData.L15_FD, logger, fileName);
+            if (transportDataParam.getMonth() == null) {
+                log(userInfo, LogData.L15_RP, logger, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                        getFileNamePart(reportPeriodCode), getFileNamePart(year));
+            } else {
+                log(userInfo, LogData.L15_M, logger, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                        getFileNamePart(reportPeriodCode), getFileNamePart(year),
+                        getFileNamePart(transportDataParam.getMonth()));
+            }
+
             // Указан несуществующий код подразделения
             if (formDepartment == null) {
                 log(userInfo, LogData.L5, logger, fileName);
@@ -515,5 +525,15 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         }
         return retVal;
+    }
+
+    /**
+     * Вывод частей имени файла с учетом возможного null-значения
+     */
+    private String getFileNamePart(Object obj) {
+        if (obj == null) {
+            return "";
+        }
+        return obj.toString();
     }
 }
