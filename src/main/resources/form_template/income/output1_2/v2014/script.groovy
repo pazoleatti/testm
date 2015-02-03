@@ -1,7 +1,10 @@
 package form_template.income.output1_2.v2014
 
+import au.com.bytecode.opencsv.CSVReader
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -320,66 +323,132 @@ void addData(def xml, def headRowCount) {
     dataRowHelper.save(rows)
 }
 
-void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 31, 0)
-    addTransportData(xml)
-}
-
-void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        rnuIndexRow++
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-
-        def xmlIndexCol = 1
-
-        // графа 1
-        newRow.taCategory = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 2
-        newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графs 3-7
-        for (alias in ['taxPeriod', 'emitent', 'inn', 'decreeNumber', 'dividendType']) {
-            newRow[alias] = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-        }
-
-        // графы 8-31
-        for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
-                       'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
-                       'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
-                       'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
-                       'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
-                       'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']) {
-            newRow[alias] = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-        }
-        rows.add(newRow)
-    }
-    dataRowHelper.save(rows)
-}
-
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, null, null)
     dataRowHelper.saveSort()
+}
+
+void importTransportData() {
+    int COLUMN_COUNT = 31
+    int TOTAL_ROW_COUNT = 0
+    int ROW_MAX = 1000
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\''
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
+
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+
+    if (ImportInputStream == null) {
+        logger.error("Поток данных не должен быть пустым")
+    }
+    if (UploadFileName == null || "".equals(UploadFileName.trim())) {
+        logger.error("Имя файла не может быть пустым")
+    }
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
+    def dataRows = []
+    String[] rowCells
+    // количество пустых строк
+    int countEmptyRow = 0
+    int fileRowIndex = 0 // номер строки в файле
+    int rowIndex = 0// номер строки в НФ
+    int totalRowCount = 0// счетчик кол-ва итогов
+    while ((rowCells = reader.readNext()) != null) {
+        fileRowIndex++
+        // если еще не было пустых строк, то это первая строка - заголовок
+        if (rowCells.length == 1 && rowCells[0].length() < 1) { // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+            if (countEmptyRow > 0) {
+                totalRowCount++
+                // итоговая строка
+                addRow(dataRows, reader.readNext(), COLUMN_COUNT, fileRowIndex, ++rowIndex, true)
+                break
+            }
+            countEmptyRow++
+            continue
+        }
+        // обычная строка
+        if (countEmptyRow != 0 && !addRow(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex, false)){
+            break
+        }
+        rowCells = null // очищаем кучу
+        // периодически сбрасываем строки
+        if (dataRows.size() > ROW_MAX) {
+            dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
+            dataRows.clear()
+        }
+    }
+    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
+        logger.error(ROW_FILE_WRONG, fileRowIndex)
+    }
+    reader.close()
+    if (dataRows.size() != 0) {
+        dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
+        dataRows.clear()
+    }
+}
+
+// Добавляет строку в текущий буфер строк
+boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, boolean isTotal) {
+    if (rowCells == null || isTotal) {
+        return true
+    }
+
+    def DataRow newRow = formData.createDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, fileRowIndex)
+        return false
+    }
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    def int colOffset = 1
+    def int colIndex = 1
+
+    // графа 1
+    newRow.taCategory = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 2
+    newRow.financialYear = parseDate(pure(rowCells[colIndex]), "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графs 3-7
+    for (alias in ['taxPeriod', 'emitent', 'inn', 'decreeNumber', 'dividendType']) {
+        newRow[alias] = pure(rowCells[colIndex])
+        colIndex++
+    }
+
+    // графы 8-31
+    for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
+                   'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
+                   'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
+                   'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
+                   'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
+                   'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']) {
+        newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+        colIndex++
+    }
+    dataRowsCut.add(newRow)
+    return true
+}
+
+static String pure(String cell) {
+    return StringUtils.cleanString(cell).intern()
 }
