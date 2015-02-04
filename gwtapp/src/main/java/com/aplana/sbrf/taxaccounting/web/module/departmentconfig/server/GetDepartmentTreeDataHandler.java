@@ -73,7 +73,7 @@ public class GetDepartmentTreeDataHandler extends AbstractActionHandler<GetDepar
         }
 
         result.setAvailableDepartments(avSet);
-        result.setReportPeriods(periodService.getAllPeriodsByTaxType(action.getTaxType(), true));
+        result.setReportPeriods(periodService.getPeriodsByTaxTypeAndDepartments(action.getTaxType(), new ArrayList<Integer>(avSet)));
 
         return result;
     }
