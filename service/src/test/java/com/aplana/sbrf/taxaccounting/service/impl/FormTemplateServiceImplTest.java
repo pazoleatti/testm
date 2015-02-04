@@ -36,8 +36,6 @@ public class FormTemplateServiceImplTest extends Assert {
 
     private List<DepartmentReportPeriod> departmentReportPeriodList;
 
-    ReportPeriodDao reportPeriodDao;
-
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     FormTemplateDao formTemplateDao;
@@ -87,7 +85,6 @@ public class FormTemplateServiceImplTest extends Assert {
         when(formTemplateDao.get(FORM_TEMPLATE_ID)).thenReturn(formTemplateFromDB);
 
         departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
-        reportPeriodDao = mock(ReportPeriodDao.class);
         formDataService = mock(FormDataService.class);
 
         formTemplateEdited = SerializationUtils.clone(formTemplateFromDB);
@@ -119,7 +116,6 @@ public class FormTemplateServiceImplTest extends Assert {
         autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
         when(departmentReportPeriodDao.getClosedForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(new ArrayList<DepartmentReportPeriod>(0));
-        ReflectionTestUtils.setField(formTemplateService, "reportPeriodDao", reportPeriodDao);
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
 
         verify(formDataService, times(1)).batchUpdatePreviousNumberRow(any(FormTemplate.class));
@@ -139,8 +135,6 @@ public class FormTemplateServiceImplTest extends Assert {
         autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
         when(departmentReportPeriodDao.getClosedForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(departmentReportPeriodList);
-
-        ReflectionTestUtils.setField(formTemplateService, "reportPeriodDao", reportPeriodDao);
 
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
 

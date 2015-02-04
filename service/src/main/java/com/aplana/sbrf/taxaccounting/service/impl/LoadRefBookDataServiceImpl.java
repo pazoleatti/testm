@@ -63,6 +63,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final String REGION_NAME = "справочника «Субъекты РФ»";
     private static final String ACCOUNT_PLAN_NAME = "справочника «План счетов»";
     private static final String DIASOFT_NAME = "справочников Diasoft";
+    private static final String NSI_NAME = "справочников ЦАС НСИ";
     private static final String AVG_COST_NAME = "справочника «Средняя стоимость транспортных средств»";
     private static final String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
 
@@ -82,7 +83,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private static final Map<String, List<Pair<Boolean, Long>>> avgCostMappingMap = new HashMap<String, List<Pair<Boolean, Long>>>();
 
     // Сообщения, которые не учтены в постановка
-    private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов справочников. %s";
+    private static final String IMPORT_REF_BOOK_ERROR = "Ошибка при загрузке транспортных файлов %s. %s";
 
     static {
         // TODO Левыкин: Каждый конкретный справочник будет загружаться только архивом или только простым файлом, не обоими способами
@@ -357,7 +358,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false, loadedFileNameList));
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
-            logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
+            logger.error(IMPORT_REF_BOOK_ERROR, NSI_NAME, e.getMessage());
             return importCounter;
         }
         log(userInfo, LogData.L24, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
@@ -378,7 +379,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     diasoftMappingMap, DIASOFT_NAME, true, loadedFileNameList);
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
-            logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
+            logger.error(IMPORT_REF_BOOK_ERROR, DIASOFT_NAME, e.getMessage());
             return importCounter;
         }
         log(userInfo, LogData.L24, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
@@ -399,7 +400,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     avgCostMappingMap, AVG_COST_NAME, true, loadedFileNameList);
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
-            logger.error(IMPORT_REF_BOOK_ERROR, e.getMessage());
+            logger.error(IMPORT_REF_BOOK_ERROR, AVG_COST_NAME, e.getMessage());
             return importCounter;
         }
         log(userInfo, LogData.L24, logger, importCounter.getSuccessCounter(), importCounter.getFailCounter());
