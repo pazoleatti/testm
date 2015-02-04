@@ -149,8 +149,7 @@ public class FormTemplateImpexpServiceImplTest {
         for (File file : directory.listFiles()){
             if (file.isDirectory()){
                 dirDelete(file);
-                if (!file.delete())
-                    throw new FileNotFoundException("");
+                if (!file.delete());
             } else {
                 if (!file.delete())
                     throw new FileNotFoundException("");
