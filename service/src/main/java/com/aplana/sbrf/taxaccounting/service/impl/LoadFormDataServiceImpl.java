@@ -38,7 +38,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             "для подразделения %s " +
             "в периоде %s, " +
             "инициированное пользователем %s " +
-            "в %s.";
+            "в %s";
     private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
 
     @Autowired
