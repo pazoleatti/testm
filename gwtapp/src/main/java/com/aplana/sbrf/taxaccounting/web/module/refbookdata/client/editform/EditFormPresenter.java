@@ -145,6 +145,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 public void no() {
                     super.no();
                     RollbackTableRowSelection.fire(EditFormPresenter.this, currentUniqueRecordId);
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
 
                 @Override

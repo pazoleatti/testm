@@ -141,7 +141,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onAddRowClicked() {
-        //getView().updateMode(FormMode.CREATE);
+        getView().updateMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
 		editFormPresenter.show(null);
 	}
