@@ -282,6 +282,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 					}, this));
 		} else {
             getView().activateVersion(false);
+            getView().setLockInformation(false, null, null);
         }
 	}
 
