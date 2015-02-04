@@ -128,7 +128,7 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 
 	@Override
 	public void onAddRowClicked() {
-        //setMode(FormMode.CREATE);
+        setMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
         if (isHierarchy){
             //http://jira.aplana.com/browse/SBRFACCTAX-10062
