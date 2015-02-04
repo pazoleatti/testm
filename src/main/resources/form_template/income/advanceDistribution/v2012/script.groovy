@@ -493,7 +493,6 @@ void logicalCheckBeforeCalc() {
         def index = row.getIndex()
         def errorMsg = "Строка ${index}: "
         if (row.regionBankDivision != null) {
-            //departmentParam = getRefBookValue(30L, row.regionBankDivision)
             departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
                     row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
