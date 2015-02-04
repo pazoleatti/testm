@@ -239,7 +239,6 @@ public class SummaryTest extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
 
         // графа 11
-        // TODO mm -> MM
         Assert.assertEquals("12.01.2012", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(1).getCell("regDate").getDateValue())));
         Assert.assertEquals("12.01.2012", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(2).getCell("regDate").getDateValue())));
         Assert.assertEquals("12.02.2011", String.valueOf(new SimpleDateFormat("dd.MM.yyyy").format(dataRows.get(5).getCell("regDate").getDateValue())));

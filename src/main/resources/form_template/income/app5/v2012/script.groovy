@@ -233,6 +233,8 @@ void logicCheck() {
         if (row.getAlias() != null) {
             continue
         }
+        def index = row.getIndex()
+        def errorMsg = "Строка $index: "
 
         def departmentParam
         if (row.regionBankDivision != null) {
@@ -429,7 +431,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 5
         indexCol = 5
-        newRow.kpp = getNumber(row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
+        newRow.kpp = row.cell[indexCol].text()
 
         // графа 6
         indexCol = 6
@@ -498,7 +500,7 @@ void addTransportData(def xml) {
         // графа 4
         newRow.divisionName = row.cell[4].text()
         // графа 5
-        newRow.kpp = getNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        newRow.kpp = row.cell[5].text()
         // графа 6
         newRow.avepropertyPricerageCost = getNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset)
         // графа 7
