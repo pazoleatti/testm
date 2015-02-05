@@ -138,6 +138,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                         field.put("PARENT_ID", refBookParent);
                         getView().fillInputFields(field);
                     }
+                    getView().cleanErrorFields();
                     SetFormMode.fire(EditFormPresenter.this, mode);
                 }
 
