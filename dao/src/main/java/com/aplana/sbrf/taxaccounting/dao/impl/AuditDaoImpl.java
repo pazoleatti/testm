@@ -9,12 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -88,6 +86,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         //2б,4б
         PreparedStatementData ps = new PreparedStatementData();
         ps.appendQuery("with ");
+        //Судя по постановке, выборка SAMPLE_NUMBER.S_10 пустой быть не
         ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
                 SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45_s_55_join)));
@@ -142,8 +141,52 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusinessForOper(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds) {
-        availableDepIds.put(SAMPLE_NUMBER.S_45, new ArrayList<Integer>(0));
-        return getLogsBusinessForControl(filter, availableDepIds);
+        //2б
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("with ");
+        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
+                SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                !availableDepIds.get(SAMPLE_NUMBER.S_55).isEmpty() ?
+                        SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)) :
+                        "1=1"));
+        ps.appendQuery(
+                String.format(LOG_SYSTEM_DATA_BY_FILTER,
+                        filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE ?
+                                "case when ls.declaration_type_name is not null then ls.declaration_type_name else ls.form_type_name end as type_name, "
+                                :
+                                ""
+                ));
+        ps.appendQuery("WHERE (");
+        //Фильтрация 2а
+        ps.appendQuery(String.format(DEPARTMENT_SOURCES_CLAUSE,
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
+        ps.appendQuery(" OR ");
+        //1.Отображение всех событий с кодами 1, 2, 3, 6, 10*, 40*, 7, 90*
+        ps.appendQuery(String.format("( %s AND %s )",
+                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%"))));
+        ps.appendQuery(" OR ");
+        //3.Отображение всех событий с кодами 90*
+        ps.appendQuery(String.format("( %s AND %s )",
+                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
+        ps.appendQuery(" )");
+
+        appendSelectWhereClause(ps, filter, " AND ");
+        appendEndOrderClause(ps, filter);
+
+        try {
+            List<LogSearchResultItem> records = getJdbcTemplate().query(ps.getQuery().toString(),
+                    ps.getParams().toArray(),
+                    new AuditRowMapper());
+            return new PagingResult<LogSearchResultItem>(records, !records.isEmpty()?records.get(0).getCnt():0);
+        } catch (DataAccessException e){
+            logger.error("", e);
+            throw new DaoException("", e);
+        }
     }
 
     @Override

@@ -138,6 +138,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                         field.put("PARENT_ID", refBookParent);
                         getView().fillInputFields(field);
                     }
+                    getView().cleanErrorFields();
                     SetFormMode.fire(EditFormPresenter.this, mode);
                 }
 
@@ -268,7 +269,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         getView().cleanErrorFields();
                                         getView().fillVersionData(data, currentRefBookId, newId);
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
-                                        //SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                        SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
 
                                     }
                                 }, this));
@@ -314,7 +315,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                         } else {
                                                             depType = newDepType;
                                                             setIsFormModified(false);
-                                                            //SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                                            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                                         }
                                                     }
                                                 }, EditFormPresenter.this));
@@ -342,7 +343,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         } else {
                                             depType = newDepType;
                                             setIsFormModified(false);
-                                            //SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                         }
                                     }
                                 }, this));
@@ -360,6 +361,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 @Override
                                 public void onSuccess(SaveLogEntriesResult result) {
                                     LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
+                                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                 }
                             }, this));
         }

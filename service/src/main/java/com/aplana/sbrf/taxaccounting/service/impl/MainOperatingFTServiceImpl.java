@@ -177,8 +177,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         if (formTemplates != null && !formTemplates.isEmpty()){
             for (FormTemplate formTemplate : formTemplates){
                 versionOperatingService.isUsedVersion(formTemplate.getId(), typeId, formTemplate.getStatus(), formTemplate.getVersion(), null, logger);
-                checkError(logger, DELETE_TEMPLATE_MESSAGE);
             }
+            checkError(logger, DELETE_TEMPLATE_MESSAGE);
             //Получение фейковых значений
         }
         versionOperatingService.checkDestinationsSources(typeId, (Date) null, null, logger);
