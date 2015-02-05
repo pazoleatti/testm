@@ -47,7 +47,8 @@ public interface AuditDao {
     Date lastArchiveDate();
 
     /**
-     * Возвращает записи ЖА для определенной роли{@link com.aplana.sbrf.taxaccounting.model.TARole}, подразделение которых является источником/приемником для соответствующей роли выборке
+     * Возвращает записи ЖА для определенной роли{@link com.aplana.sbrf.taxaccounting.model.TARole},
+     * подразделение которых является источником/приемником для соответствующей роли выборке
      * http://conf.aplana.com/pages/viewpage.action?pageId=14813541
      * @param availableDepIds параметры передающие список доступных подразделений
      * @return данные
