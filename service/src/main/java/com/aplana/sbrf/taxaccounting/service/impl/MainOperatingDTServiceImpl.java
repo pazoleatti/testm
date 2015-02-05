@@ -138,8 +138,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             for (DeclarationTemplate declarationTemplate : templates){
                 versionOperatingService.isUsedVersion(declarationTemplate.getId(), declarationTemplate.getType().getId(),
                         declarationTemplate.getStatus(), declarationTemplate.getVersion(), null, logger);
-                checkError(logger, DELETE_TEMPLATE_MESSAGE);
             }
+            checkError(logger, DELETE_TEMPLATE_MESSAGE);
         }
         versionOperatingService.checkDestinationsSources(typeId, (Date) null, null, logger);
         checkError(logger, DELETE_TEMPLATE_MESSAGE);

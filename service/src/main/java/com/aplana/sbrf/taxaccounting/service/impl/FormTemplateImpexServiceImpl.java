@@ -55,6 +55,7 @@ public class FormTemplateImpexServiceImpl implements
 	private final static String HEADERS_FILE = "headers.xml";
     private static String[] strings = new String[]{VERSION_FILE, CONTENT_FILE, SCRIPT_FILE, ROWS_FILE, HEADERS_FILE};
 	private final static String ENCODING = "UTF-8";
+    private final static String REG_EXP = "[^\\d\\sA-Za-z'-]";
 
     private static final Log logger = LogFactory.getLog(FormTemplateImpexServiceImpl.class);
 
@@ -185,12 +186,8 @@ public class FormTemplateImpexServiceImpl implements
     }
 
     //Удаление временных паоок
+    @SuppressWarnings("all")
     private void dirTempDelete(File directory){
-        if (directory.listFiles() == null){
-            if (!directory.delete())
-                logger.warn("Faild to delete file " + directory);
-            return;
-        }
         for (File file : directory.listFiles()){
             if (file.isDirectory()){
                 dirTempDelete(file);
@@ -201,6 +198,10 @@ public class FormTemplateImpexServiceImpl implements
                     logger.warn("Faild to delete file " + file);
             }
         }
+        if (directory.listFiles() == null || directory.listFiles().length==0){
+            if (!directory.delete())
+                logger.warn("Faild to delete file " + directory);
+        }
     }
 
     private void exportDecTemplates(ZipArchiveOutputStream zipOutputStream){
@@ -208,29 +209,32 @@ public class FormTemplateImpexServiceImpl implements
         File temFolder;
         try {
             temFolder = File.createTempFile(DEC_TEMPLATES_FOLDER, "");
-            temFolder.delete();
+            if (!temFolder.delete()){
+                logger.error(String.format("Can't delete file %s for declarations with goal to create dir .",
+                        temFolder.getPath()));
+            }
             if (!temFolder.mkdir())
                 logger.error("Can't create directory for declarations");
         } catch (IOException e) {
             throw new ServiceException("Ошибки при создании временной директории.");
         }
-        List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getByFilter(null);
+        List<DeclarationTemplate> declarationTemplates = declarationTemplateService.listAll();
         ArrayList<String> paths = new ArrayList<String>(declarationTemplates.size());
         for (DeclarationTemplate template : declarationTemplates){
+            template.getType().setName(Translator.transliterate(template.getType().getName()));
             String folderTemplateName =
                     Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
                             template.getType().getTaxType().name().toLowerCase(),
                             template.getType().getId(),
                             template.getType().getName().length() > MAX_NAME_OF_DIR ?
-                                    template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim()
-                                    : template.getType().getName(),
+                                    template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
+                                    : template.getType().getName().trim().replaceAll(REG_EXP,""),
                             SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion())));
-            paths.add(folderTemplateName);
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
                 folderTemplate.delete();
                 if (!folderTemplate.mkdirs())
-                    logger.warn("Can't create temporary directory");
+                    logger.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
                 //
                 FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
                 tempFile.write("1.0".getBytes());
@@ -249,6 +253,7 @@ public class FormTemplateImpexServiceImpl implements
                     tempFile.write(dtJrxm.getBytes(ENCODING));
                 tempFile.close();
 
+                paths.add(folderTemplateName);
             } catch (IOException e) {
                 logger.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
                 throw new ServiceException("Ошибки при создании временной директории.");
@@ -296,9 +301,11 @@ public class FormTemplateImpexServiceImpl implements
         File temFolder;
         try {
             temFolder = File.createTempFile(FORM_TEMPLATES_FOLDER, "");
-            temFolder.delete();
+            if (!temFolder.delete()){
+                logger.error(String.format("Can't delete file %s for taxforms with goal to create dir .", temFolder.getPath()));
+            }
             if (!temFolder.mkdir())
-                logger.error("");
+                logger.error("Can't create directory for taxforms.");
         } catch (IOException e) {
             logger.error("Ошибки при создании временной директории.",e);
             throw new ServiceException("Ошибки при создании временной директории.");
@@ -307,20 +314,22 @@ public class FormTemplateImpexServiceImpl implements
         List<FormTemplate> formTemplates = formTemplateService.listAll();
         ArrayList<String> paths = new ArrayList<String>(formTemplates.size());
         for (FormTemplate template : formTemplates){
+            template.getType().setName(Translator.transliterate(template.getType().getName()));
             String folderTemplateName =
-                    Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
+                   String.format(TEMPLATE_OF_FOLDER_NAME,
                             template.getType().getTaxType().name().toLowerCase(),
                             template.getType().getId(),
                             template.getType().getName().length() > MAX_NAME_OF_DIR ?
-                                    template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim()
-                                    : template.getType().getName(),
-                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion())));
-            paths.add(folderTemplateName);
+                                    template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
+                                    : template.getType().getName().trim().replaceAll(REG_EXP, ""),
+                            SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion()));
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
                 folderTemplate.delete();
-                if (!folderTemplate.mkdirs())
-                    logger.warn("Can't create temporary directory");
+                if (!folderTemplate.mkdirs()){
+                    logger.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
+                    continue;
+                }
                 //
                 FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
                 tempFile.write("1.0".getBytes());
@@ -356,6 +365,7 @@ public class FormTemplateImpexServiceImpl implements
 
                 }
                 tempFile.close();
+                paths.add(folderTemplateName);
 
             } catch (IOException e) {
                 logger.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);

@@ -277,8 +277,7 @@ void generateXML() {
     def reorgKpp = incomeParamsTable?.REORG_KPP?.value
     def oktmo = getRefBookValue(96, incomeParamsTable?.OKTMO?.value)?.CODE?.value?.substring(0,8)
     def signatoryId = getRefBookValue(35, incomeParamsTable?.SIGNATORY_ID?.value)?.CODE?.value
-    def taxRate = incomeParams?.TAX_RATE?.value
-    def sumTax = incomeParams?.SUM_TAX?.value // вместо departmentParamIncome.externalTaxSum
+    def taxRate = incomeParams?.TAX_RATE?.value ?: 0
     def formatVersion = incomeParams?.FORMAT_VERSION?.value
     def taxPlaceTypeCode = getRefBookValue(2, incomeParamsTable?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
     def signatorySurname = incomeParamsTable?.SIGNATORY_SURNAME?.value
@@ -286,16 +285,7 @@ void generateXML() {
     def signatoryLastName = incomeParamsTable?.SIGNATORY_LASTNAME?.value
     def approveDocName = incomeParamsTable?.APPROVE_DOC_NAME?.value
     def approveOrgName = incomeParamsTable?.APPROVE_ORG_NAME?.value
-    def sumDividends = incomeParams?.SUM_DIVIDENDS?.value
     // справочник "Параметры подразделения по налогу на прибыль" - конец
-
-    // Проверки значений справочника "Параметры подразделения по налогу на прибыль"
-    if (taxRate == null) {
-        taxRate = 0
-    }
-    if (sumTax == null) {
-        sumTax = 0
-    }
 
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(reportPeriodId)
@@ -1827,9 +1817,6 @@ List<String> getErrorDepartment(record) {
     }
     if (record.TAX_RATE?.value == null) {
         errorList.add("«Ставка налога»")
-    }
-    if (record.SUM_TAX?.value == null) {
-        errorList.add("«Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»")
     }
     errorList
 }

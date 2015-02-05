@@ -128,11 +128,11 @@
                         <style:LinkButton img="resources/img/unlock-16.png" text="Открыть корректирующий период"
                                           ui:field="openCorrectPeriod" visible="false"/>
                         <style:LinkButton img="resources/img/lock-16.png" text="Закрыть период"
-                                          ui:field="closePeriod"/>
+                                          ui:field="closePeriod" visible="false"/>
                         <style:LinkButton img="resources/img/pencil-16.png" text="Редактировать период"
                                           ui:field="editPeriod" visible="false"/>
                         <style:LinkButton img="resources/img/row-delete.png" text="Удалить период"
-                                          ui:field="removePeriod"/>
+                                          ui:field="removePeriod" visible="false"/>
                         <style:LinkButton img="resources/img/available-check-16.png" text="Назначить срок сдачи"
                                           ui:field="setDeadlineButton" visible="false"/>
                     </style:LeftBar>

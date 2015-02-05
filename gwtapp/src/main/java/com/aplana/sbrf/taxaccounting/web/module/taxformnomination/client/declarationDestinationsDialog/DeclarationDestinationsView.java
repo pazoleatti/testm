@@ -88,7 +88,8 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
         init();
     }
 
-    private void init() {
+    @Override
+    public void init() {
         departmentPicker.setValue(null);
         declarationTypeId.setValue(null);
     }
