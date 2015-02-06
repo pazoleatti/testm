@@ -142,29 +142,29 @@
         <maxLength>259</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Стоимость покупок по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в
             валюте счета-фактуры
         </name>
         <order>15</order>
         <width>7</width>
-        <maxLength>20</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>nds</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в
             рублях и копейках
         </name>
         <order>16</order>
         <width>7</width>
-        <maxLength>20</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <styles>
         <alias>Раздел 2 уровня</alias>

@@ -1,7 +1,6 @@
 package form_template.vat.vat_937_2_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -85,16 +84,25 @@ def refBookCache = [:]
 
 @Field
 def allColumns = ['rowNumber', 'opTypeCode', 'invoiceNumDate', 'invoiceCorrNumDate', 'corrInvoiceNumDate', 'corrInvCorrNumDate', 'buyerName', 'buyerInnKpp', 'mediatorName', 'mediatorInnKpp',
-                  'paymentDocNumDat', 'currNameCode saleCostACurr', 'saleCostARub', 'saleCostB18', 'saleCostB1', ' saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
+        'paymentDocNumDate', 'currNameCode', 'saleCostACurr', 'saleCostARub', 'saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
 
-// Редактируемые атрибуты (графа 3..6, 8)
+// TODO (Ramil Timerbaev) пока редактируемыми сделал все поля кроме нумерации
+// Редактируемые атрибуты (графа )
 @Field
-//TODO:Добавить алиасы редактируемых колонок, когда будут известны
-def editableColumns = []
+def editableColumns = allColumns - 'rowNumber'
 
-// Проверяемые на пустые значения атрибуты для разделов 1, 2, 3
+// Автозаполняемые атрибуты
 @Field
-def nonEmptyColumns1 = ['rowNumber', 'opTypeCode', 'invoiceNumDate']
+def autoFillColumns = allColumns - editableColumns
+
+// TODO (Ramil Timerbaev)
+// Атрибуты итоговых строк для которых вычисляются суммы (графа )
+@Field
+def totalSumColumns = []
+
+// Признак периода ввода остатков
+@Field
+def isBalancePeriod
 
 @Field
 def startDate = null
@@ -173,22 +181,350 @@ void consolidation() {
     //TODO: Реализовать данный метод, когда будет известна логика.
 }
 
-// Получение импортируемых данных
 void importData() {
-    //TODO: Реализовать метод.
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNumber'), null)
+
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 20, 3)
+
+    def headerMapping = [
+            (xml.row[0].cell[0])  : getColumnName(tmpRow, 'rowNumber'),
+            (xml.row[0].cell[1])  : getColumnName(tmpRow, 'opTypeCode'),
+            (xml.row[0].cell[2])  : getColumnName(tmpRow, 'invoiceNumDate'),
+            (xml.row[0].cell[3])  : getColumnName(tmpRow, 'invoiceCorrNumDate'),
+            (xml.row[0].cell[4])  : getColumnName(tmpRow, 'corrInvoiceNumDate'),
+            (xml.row[0].cell[5])  : getColumnName(tmpRow, 'corrInvCorrNumDate'),
+            (xml.row[0].cell[6])  : getColumnName(tmpRow, 'buyerName'),
+            (xml.row[0].cell[7])  : getColumnName(tmpRow, 'buyerInnKpp'),
+
+            (xml.row[0].cell[8])  : 'Сведения о посреднике (комиссионере, агенте)',
+            (xml.row[1].cell[8])  : 'наименование посредника',
+            (xml.row[1].cell[9])  : 'ИНН/КПП посредника',
+
+            (xml.row[0].cell[10]) : getColumnName(tmpRow, 'paymentDocNumDate'),
+            (xml.row[0].cell[11]) : getColumnName(tmpRow, 'currNameCode'),
+
+            (xml.row[0].cell[12]) : 'Стоимость продаж по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС)',
+            (xml.row[1].cell[12]) : 'в валюте счета-фактуры',
+            (xml.row[1].cell[13]) : 'в рублях и копейках',
+
+            (xml.row[0].cell[14]) : 'Стоимость продаж, облагаемых налогом, по счету-фактуре, разница стоимости по корректировочному счету-фактуре (без НДС) в рублях и копейках, по ставке',
+            (xml.row[1].cell[14]) : '18 процентов',
+            (xml.row[1].cell[15]) : '10 процентов',
+            (xml.row[1].cell[16]) : '0 процентов',
+
+            (xml.row[0].cell[17]) : 'Сумма НДС по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках, по ставке',
+            (xml.row[1].cell[17]) : '8 процентов',
+            (xml.row[1].cell[18]) : '10 процентов',
+
+            (xml.row[0].cell[19]) : getColumnName(tmpRow, 'bonifSalesSum')
+    ]
+    (0..19).each { index ->
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+
+    addData(xml, 2)
 }
 
-// Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    //TODO: Реализовать данный метод, когда будет известна логика.
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+
+    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
+    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
+
+    def xmlIndexRow = -1
+    def int rowIndex = 1
+    def rows = []
+
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
+
+        /* Пропуск строк шапок */
+        if (xmlIndexRow <= headRowCount) {
+            continue
+        }
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == "") {
+            continue
+        }
+
+        def newRow = getNewRow()
+        newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
+
+        // Графа 2
+        def xmlIndexCol = 1
+        newRow.opTypeCode = row.cell[xmlIndexCol].text()
+
+        // Графа 3
+        xmlIndexCol++
+        newRow.invoiceNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 4
+        xmlIndexCol++
+        newRow.invoiceCorrNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 5
+        xmlIndexCol++
+        newRow.corrInvoiceNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 6
+        xmlIndexCol++
+        newRow.corrInvCorrNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 7
+        xmlIndexCol++
+        newRow.buyerName = row.cell[xmlIndexCol].text()
+
+        // Графа 8
+        xmlIndexCol++
+        newRow.buyerInnKpp = row.cell[xmlIndexCol].text()
+
+        // Графа 9
+        xmlIndexCol++
+        newRow.mediatorName = row.cell[xmlIndexCol].text()
+
+        // Графа 10
+        xmlIndexCol++
+        newRow.mediatorInnKpp = row.cell[xmlIndexCol].text()
+
+        // Графа 11
+        xmlIndexCol++
+        newRow.paymentDocNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 12
+        xmlIndexCol++
+        newRow.currNameCode = row.cell[xmlIndexCol].text()
+
+        // Графа 13
+        xmlIndexCol++
+        newRow.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 14
+        xmlIndexCol++
+        newRow.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 15
+        xmlIndexCol++
+        newRow.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 16
+        xmlIndexCol++
+        newRow.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 17
+        xmlIndexCol++
+        newRow.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 18
+        xmlIndexCol++
+        newRow.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 19
+        xmlIndexCol++
+        newRow.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 20
+        xmlIndexCol++
+        newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+    dataRowHelper.save(rows)
 }
 
+// TODO: После получения постановки при необходимости удалить данный метод
 void importTransportData() {
-    //TODO: Реализовать данный метод при необходимости.
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 20, 0)
+    addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalSumColumns, logger, false)
 }
 
+// TODO: После получения постановки при необходимости исправить или удалить данный метод
 void addTransportData(def xml) {
-    //TODO: Реализовать данный метод при необходимости.
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def int rnuIndexRow = 2
+    def int colOffset = 1
+
+    def rows = []
+    def int rowIndex = 1
+
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
+
+        def newRow = getNewRow()
+        newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(rnuIndexRow)
+
+        // Графа 2
+        def xmlIndexCol = 2
+        newRow.opTypeCode = row.cell[xmlIndexCol].text()
+
+        // Графа 3
+        xmlIndexCol++
+        newRow.invoiceNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 4
+        xmlIndexCol++
+        newRow.invoiceCorrNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 5
+        xmlIndexCol++
+        newRow.corrInvoiceNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 6
+        xmlIndexCol++
+        newRow.corrInvCorrNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 7
+        xmlIndexCol++
+        newRow.buyerName = row.cell[xmlIndexCol].text()
+
+        // Графа 8
+        xmlIndexCol++
+        newRow.buyerInnKpp = row.cell[xmlIndexCol].text()
+
+        // Графа 9
+        xmlIndexCol++
+        newRow.mediatorName = row.cell[xmlIndexCol].text()
+
+        // Графа 10
+        xmlIndexCol++
+        newRow.mediatorInnKpp = row.cell[xmlIndexCol].text()
+
+        // Графа 11
+        xmlIndexCol++
+        newRow.paymentDocNumDate = row.cell[xmlIndexCol].text()
+
+        // Графа 12
+        xmlIndexCol++
+        newRow.currNameCode = row.cell[xmlIndexCol].text()
+
+        // Графа 13
+        xmlIndexCol++
+        newRow.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 14
+        xmlIndexCol++
+        newRow.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 15
+        xmlIndexCol++
+        newRow.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 16
+        xmlIndexCol++
+        newRow.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 17
+        xmlIndexCol++
+        newRow.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 18
+        xmlIndexCol++
+        newRow.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 19
+        xmlIndexCol++
+        newRow.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 20
+        xmlIndexCol++
+        newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
+    }
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = getTotalRow()
+
+        // TODO (Ramil Timerbaev) когда будет готово чтз, уточнить какие графы испольвовать
+        // Графа 13
+        def xmlIndexCol = 13
+        total.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 14
+        xmlIndexCol++
+        total.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 15
+        xmlIndexCol++
+        total.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 16
+        xmlIndexCol++
+        total.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 17
+        xmlIndexCol++
+        total.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 18
+        xmlIndexCol++
+        total.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 19
+        xmlIndexCol++
+        total.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 20
+        xmlIndexCol++
+        total.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(total)
+    }
+    dataRowHelper.save(rows)
+}
+
+/** Получить новую строку с заданными стилями. */
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
+    columns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return newRow
+}
+
+/** Получить пустую итоговую строку со стилями. */
+def getTotalRow() {
+    def total = formData.createDataRow()
+    total.setAlias('total')
+    // TODO (Ramil Timerbaev) возможно надо будет добавить скрытый столбец fix
+    // total.КАКАЯ_ТО_СТРОКА = 'Итого'
+    // total.getCell('КАКАЯ_ТО_СТРОКА').colSpan = 2
+    allColumns.each {
+        total.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return total
+}
+
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
+    }
+    return isBalancePeriod
 }
 
 // Сортировка групп и строк
