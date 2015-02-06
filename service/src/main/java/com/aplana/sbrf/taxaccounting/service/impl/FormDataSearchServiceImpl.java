@@ -183,7 +183,9 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
 
         // Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
         // Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl
-        if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // Контролер УНП без принудительной фильтрации
+        } else if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
             // Операторы дополнительно фильтруются по подразделениям и типам форм
             // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
             departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),

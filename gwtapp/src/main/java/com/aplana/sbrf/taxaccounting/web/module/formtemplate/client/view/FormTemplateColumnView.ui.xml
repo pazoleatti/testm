@@ -37,7 +37,7 @@
 
                     <g:HorizontalPanel height="30px">
                         <g:Label width="150px">Имя</g:Label>
-                        <g:TextBox width="400%" ui:field="nameBox"/>
+                        <g:TextBox width="600px" ui:field="nameBox"/>
                     </g:HorizontalPanel>
 
                     <u:ColumnAttributeEditor ui:field="columnAttributeEditor"/>
@@ -71,7 +71,7 @@
 
                     <g:HorizontalPanel height="30px" ui:field="refBookPanel">
                         <g:Label width="150px">Справочник</g:Label>
-                        <g:ValueListBox width="200px" ui:field="refBookBox"/>
+                        <g:ValueListBox width="600px" ui:field="refBookBox"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px" ui:field="refBooktAttrParentPanel">
@@ -81,13 +81,13 @@
 
                     <g:HorizontalPanel height="30px" ui:field="refBookAttrPanel">
                         <g:Label width="150px">Отображаемый атрибут</g:Label>
-                        <g:ValueListBox width="200px" ui:field="refBookAttrBox"/>
-                        <g:ValueListBox addStyleNames="{style.marginLeft10}" width="200px" ui:field="refBookAttrRefBox"/>
+                        <g:ValueListBox width="600px" ui:field="refBookAttrBox"/>
+                        <g:ValueListBox addStyleNames="{style.marginLeft10}" width="600px" ui:field="refBookAttrRefBox"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px" ui:field="refBookAttrFilterPanel">
                         <g:Label width="150px">Фильтры</g:Label>
-                        <g:TextArea width="200px" ui:field="refBookAttrFilterArea"/>
+                        <g:TextArea width="600px" ui:field="refBookAttrFilterArea"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px" ui:field="autoNumerationPanel">
