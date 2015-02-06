@@ -221,14 +221,14 @@ public class FormTemplateImpexServiceImpl implements
         List<DeclarationTemplate> declarationTemplates = declarationTemplateService.listAll();
         ArrayList<String> paths = new ArrayList<String>(declarationTemplates.size());
         for (DeclarationTemplate template : declarationTemplates){
-            template.getType().setName(Translator.transliterate(template.getType().getName()));
+            String translatedName = Translator.transliterate(template.getType().getName());
             String folderTemplateName =
                     Translator.transliterate(String.format(TEMPLATE_OF_FOLDER_NAME,
                             template.getType().getTaxType().name().toLowerCase(),
                             template.getType().getId(),
-                            template.getType().getName().length() > MAX_NAME_OF_DIR ?
-                                    template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
-                                    : template.getType().getName().trim().replaceAll(REG_EXP,""),
+                            translatedName.length() > MAX_NAME_OF_DIR
+                                    ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
+                                    : translatedName.trim().replaceAll(REG_EXP,""),
                             SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion())));
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
@@ -314,14 +314,14 @@ public class FormTemplateImpexServiceImpl implements
         List<FormTemplate> formTemplates = formTemplateService.listAll();
         ArrayList<String> paths = new ArrayList<String>(formTemplates.size());
         for (FormTemplate template : formTemplates){
-            template.getType().setName(Translator.transliterate(template.getType().getName()));
+            String translatedName = Translator.transliterate(template.getType().getName());
             String folderTemplateName =
                    String.format(TEMPLATE_OF_FOLDER_NAME,
                             template.getType().getTaxType().name().toLowerCase(),
                             template.getType().getId(),
-                            template.getType().getName().length() > MAX_NAME_OF_DIR ?
-                                    template.getType().getName().substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
-                                    : template.getType().getName().trim().replaceAll(REG_EXP, ""),
+                            translatedName.length() > MAX_NAME_OF_DIR
+                                    ? translatedName.substring(0, MAX_NAME_OF_DIR).trim().replaceAll(REG_EXP,"")
+                                    : translatedName.trim().replaceAll(REG_EXP, ""),
                             SIMPLE_DATE_FORMAT_YEAR.format(template.getVersion()));
             try {
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
