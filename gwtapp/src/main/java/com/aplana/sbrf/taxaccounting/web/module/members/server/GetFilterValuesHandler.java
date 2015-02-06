@@ -43,7 +43,7 @@ public class GetFilterValuesHandler extends AbstractActionHandler<GetFilterValue
 
         // исключаем роль гарантий из списка если пользователи бизнес контролеры, для админа можно
         // http://conf.aplana.com/pages/diffpagesbyversion.action?pageId=10486850&selectedPageVersions=41&selectedPageVersions=42
-        if (currentUser.hasRole(TARole.ROLE_CONTROL_UNP) || currentUser.hasRole(TARole.ROLE_CONTROL_NS)) {
+        if (!currentUser.hasRole(TARole.ROLE_ADMIN) && (currentUser.hasRole(TARole.ROLE_CONTROL_UNP) || currentUser.hasRole(TARole.ROLE_CONTROL_NS))) {
             for (int i = allRoles.size() - 1; i >= 0; i--) {
                 TARole role = allRoles.get(i);
                 if (TARole.ROLE_GARANT.equals(role.getAlias())) {
