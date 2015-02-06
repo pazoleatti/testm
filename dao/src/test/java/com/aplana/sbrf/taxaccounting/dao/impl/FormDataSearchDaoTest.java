@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +31,6 @@ public class FormDataSearchDaoTest {
 	@Test
 	public void testFindByFilter() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
-		filter.setAccessFilterType(AccessFilterType.ALL);
 		
 		final long TOTAL_RECORDS_COUNT = formDataSearchDao.findByFilter(filter).size();
 		List<FormDataSearchResultItem> res;
@@ -94,12 +92,11 @@ public class FormDataSearchDaoTest {
 	@Test
 	public void findForCurrentDepartmentTest() {
         FormDataDaoFilter filter = new FormDataDaoFilter();
-        filter.setAccessFilterType(AccessFilterType.AVAILABLE_DEPARTMENTS);
-        filter.setAvailableDepartmentIds(asList(1, 2, 3));
+        filter.setDepartmentIds(asList(1, 2, 3));
         List<FormDataSearchResultItem> res = formDataSearchDao.findByFilter(filter);
         assertIdsEquals(new long[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, res);
 
-        filter.setAvailableDepartmentIds(asList(3));
+        filter.setDepartmentIds(asList(3));
         res = formDataSearchDao.findByFilter(filter);
         assertIdsEquals(new long[]{3, 6, 9, 12, 15, 18}, res);
     }
@@ -107,9 +104,8 @@ public class FormDataSearchDaoTest {
     @Test
     public void findForCurrentDepartmentWithKindTest() {
         FormDataDaoFilter filter = new FormDataDaoFilter();
-        filter.setAccessFilterType(AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND);
-        filter.setAvailableDepartmentIds(asList(1));
-        filter.setAvailableFormDataKinds(asList(FormDataKind.CONSOLIDATED));
+        filter.setDepartmentIds(asList(1));
+        filter.setFormDataKind(asList(FormDataKind.CONSOLIDATED));
         List<FormDataSearchResultItem> res = formDataSearchDao.findByFilter(filter);
         assertIdsEquals(new long[]{1, 7, 13}, res);
     }
@@ -117,7 +113,6 @@ public class FormDataSearchDaoTest {
 	//@Test
 	public void testFindPage() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
-		filter.setAccessFilterType(AccessFilterType.ALL);
 		
 		PagingParams pageParams = new PagingParams(0, 0);
 		PagingResult<FormDataSearchResultItem> res;
@@ -135,7 +130,6 @@ public class FormDataSearchDaoTest {
     @Test
     public void testFindIdsByFilter() {
         FormDataDaoFilter filter = new FormDataDaoFilter();
-        filter.setAccessFilterType(AccessFilterType.ALL);
         List<Long> res = formDataSearchDao.findIdsByFilter(filter);
 
         assertArrayEquals(new Long[]{18l, 17l, 16l, 15l, 14l, 13l, 12l, 11l, 10l, 9l, 8l, 7l, 6l, 5l, 4l, 3l, 2l, 1l}, res.toArray());
@@ -149,7 +143,6 @@ public class FormDataSearchDaoTest {
 	//@Test
 	public void testFindPageSorting() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
-		filter.setAccessFilterType(AccessFilterType.ALL);
 		
 		PagingParams pageParams = new PagingParams(0, 5);
 		
@@ -204,7 +197,6 @@ public class FormDataSearchDaoTest {
 	@Test
 	public void testGetCount() {
 		FormDataDaoFilter filter = new FormDataDaoFilter();
-		filter.setAccessFilterType(AccessFilterType.ALL);
 		
 		assertEquals(18, formDataSearchDao.getCount(filter));
 		
