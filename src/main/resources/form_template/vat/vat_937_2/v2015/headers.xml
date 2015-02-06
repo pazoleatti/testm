@@ -55,7 +55,7 @@
         <cell alias="saleCostB10" colSpan="1" rowSpan="1" value="10 процентов"/>
         <cell alias="saleCostB0" colSpan="1" rowSpan="1" value="0 процентов"/>
         <cell alias="vatSum18" colSpan="1" rowSpan="1" value="18 процентов"/>
-        <cell alias="vatSum10" colSpan="1" rowSpan="1" value=" 10 процентов"/>
+        <cell alias="vatSum10" colSpan="1" rowSpan="1" value="10 процентов"/>
         <cell alias="bonifSalesSum" colSpan="1" rowSpan="1"
               value="Стоимость продаж, освобождаемых от налога, по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках"/>
     </row>
