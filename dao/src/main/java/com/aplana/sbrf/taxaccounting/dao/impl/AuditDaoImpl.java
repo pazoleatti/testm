@@ -164,13 +164,17 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery(" OR ");
         //1.Отображение всех событий с кодами 1, 2, 3, 6, 10*, 40*, 7, 90*
         ps.appendQuery(String.format("( %s AND %s )",
-                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                !availableDepIds.get(SAMPLE_NUMBER.S_10).isEmpty() ?
+                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)) :
+                        "1=1",
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%"))));
         ps.appendQuery(" OR ");
         //3.Отображение всех событий с кодами 90*
         ps.appendQuery(String.format("( %s AND %s )",
-                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)),
+                !availableDepIds.get(SAMPLE_NUMBER.S_55).isEmpty() ?
+                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)) :
+                        "1=1",
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
         ps.appendQuery(" )");
