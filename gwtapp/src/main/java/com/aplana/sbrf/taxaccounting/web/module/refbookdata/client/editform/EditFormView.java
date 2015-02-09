@@ -399,6 +399,15 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
     @Override
+    public void updateInputFields() {
+        try {
+            inputRecord = getFieldsValues(false);
+        } catch (BadValueException e) {
+            //Nothing
+        }
+    }
+
+    @Override
     public Map<String, RefBookValueSerializable> getFieldsValues() throws BadValueException {
         return getFieldsValues(true);
     }

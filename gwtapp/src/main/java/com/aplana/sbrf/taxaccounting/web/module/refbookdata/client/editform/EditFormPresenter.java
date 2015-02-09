@@ -82,6 +82,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void cleanFields();
         void cleanErrorFields();
         boolean checkChanges();
+
+        /**
+         * Метод обновляет переменную, которая используется при проверке измения полей.
+         * Обновляется после сохранения изменений.
+         */
+        void updateInputFields();
     }
 
     protected final RenameDialogPresenter renameDialogPresenter;
@@ -270,7 +276,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         getView().fillVersionData(data, currentRefBookId, newId);
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                         SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
-
+                                        getView().updateInputFields();
                                     }
                                 }, this));
 			} else {
@@ -316,6 +322,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                             depType = newDepType;
                                                             setIsFormModified(false);
                                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                                            getView().updateInputFields();
                                                         }
                                                     }
                                                 }, EditFormPresenter.this));
@@ -344,6 +351,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                             depType = newDepType;
                                             setIsFormModified(false);
                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                            getView().updateInputFields();
                                         }
                                     }
                                 }, this));
