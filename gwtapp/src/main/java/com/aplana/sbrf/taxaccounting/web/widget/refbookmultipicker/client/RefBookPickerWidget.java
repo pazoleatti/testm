@@ -214,7 +214,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         modalPanel.hide();
     }
 
-    private void clear(){
+    private void clearSelection() {
         if (state.getSetIds() != null) {
             state.getSetIds().clear();
         }
@@ -226,6 +226,10 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             refBookView.unselectAll(null);
         }
         updateUIState();
+    }
+
+    private void clear(){
+        clearSelection();
         prevState.setValues(state);
 
         isEnabledFireChangeEvent = true;
@@ -323,7 +327,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             state.setSetIds(null);
             prevState.setValues(state);
             clearSearchPattern();
-            clear();
+            clearSelection();
             if (!isManualUpdate) {
                 refBookView.load(state);
                 updateUIState();
