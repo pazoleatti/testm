@@ -126,7 +126,7 @@ def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'co
         'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 @Field
-def groupColumns = ['issuer', 'tradeNumber']
+def groupColumns = ['issuer']
 
 // Дата окончания отчетного периода
 @Field
