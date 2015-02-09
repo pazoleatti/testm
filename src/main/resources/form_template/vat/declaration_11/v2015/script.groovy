@@ -1,9 +1,13 @@
 package form_template.vat.declaration_11.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
+import groovy.xml.MarkupBuilder
+
+import java.text.SimpleDateFormat
 
 /**
  * Декларация по НДС (раздел 11)
@@ -84,5 +88,44 @@ List<String> getErrorVersion(record) {
 }
 
 void generateXML() {
-    // TODO
+    // Параметры подразделения
+    def departmentParam = getDepartmentParam()
+
+    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
+    def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value
+    def okato = getOkato(departmentParam?.OKTMO?.value)
+    def taxPlaceTypeCode = getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
+    def signatoryId = getRefBookValue(35, departmentParam?.SIGNATORY_ID?.value)?.CODE?.value
+    def name = departmentParam?.NAME?.value
+    def inn = departmentParam?.INN?.value
+    def kpp = departmentParam?.KPP?.value
+    def formatVersion = departmentParam?.FORMAT_VERSION?.value
+    def surname = departmentParam?.SIGNATORY_SURNAME?.value
+    def firstname = departmentParam?.SIGNATORY_FIRSTNAME?.value
+    def lastname = departmentParam?.SIGNATORY_LASTNAME?.value
+    def approveDocName = departmentParam?.APPROVE_DOC_NAME?.value
+    def approveOrgName = departmentParam?.APPROVE_ORG_NAME?.value
+    def reorgINN = departmentParam?.REORG_INN?.value
+    def reorgKPP = departmentParam?.REORG_KPP?.value
+
+    def fileId = TaxType.VAT.declarationPrefix + ".11" + "_" +
+            declarationData.taxOrganCode + "_" +
+            declarationData.taxOrganCode + "_" +
+            inn + "" + declarationData.kpp + "_" +
+            (new SimpleDateFormat("yyyyMMdd")).format(Calendar.getInstance().getTime()) + "_" +
+            UUID.randomUUID().toString().toUpperCase()
+    def index = "0000110"
+    def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
+
+    // TODO получение остальных данных для заполнения
+
+    def builder = new MarkupBuilder(xml)
+    builder.Файл(
+            ИдФайл: fileId,
+            ВерсПрог: applicationVersion,
+            ВерсФорм: formatVersion,
+            Индекс: index,
+            НомКорр: corrNumber) {
+        // TODO заполнение
+    }
 }

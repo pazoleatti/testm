@@ -361,7 +361,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                 @Override
                                 public void onSuccess(SaveLogEntriesResult result) {
                                     LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                 }
                             }, this));
         }

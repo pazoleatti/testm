@@ -364,6 +364,10 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
                     "from department dep\n" +
                     "start with dep.parent_id in (select id from department where parent_id is null)\n" +
                     "connect by prior dep.id = dep.parent_id\n" +
+                    "union\n" +
+                    "select dep.id as dep_id, dep.shortname as path\n" +
+                    "from department dep\n" +
+                    "where parent_id is null" +
                 ")\n" +
                 "select us.id, us.name, us.login, us.email, us.is_active as active, roless.role_concat as role_names, us.department_id as dep_id, deps.path\n" +
                 "from sec_user us, arg_rls roless, deps deps\n" +
