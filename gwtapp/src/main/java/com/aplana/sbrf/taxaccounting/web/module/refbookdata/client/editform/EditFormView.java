@@ -576,6 +576,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
+                allVersion.setVisible(false);
                 break;
             case EDIT:
                 save.setEnabled(true);
@@ -583,6 +584,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
+                allVersion.setVisible(true);
                 break;
             case READ:
             case VIEW:
@@ -591,6 +593,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 versionStart.setEnabled(false);
                 versionEnd.setEnabled(false);
                 updateWidgetsVisibility(false);
+                allVersion.setVisible(true);
                 break;
         }
     }
