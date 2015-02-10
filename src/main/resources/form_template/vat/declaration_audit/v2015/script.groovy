@@ -306,7 +306,7 @@ void logicCheck() {
     // 1. Существующие экземпляры декларации по НДС (раздел 8/8.1/9/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     declarations().each { id, name ->
-        def declarationData = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
+        def declarationData = declarationService.getLast(id, declarationData.departmentId, reportPeriod.id)
         if (declarationData != null && !declarationData.accepted) {
             logger.error("Экземпляр декларации вида «$name» текущего периода и подразделения не находится в состоянии «Принята»!")
         }
@@ -344,7 +344,7 @@ def Map<Long, Expando> getParts() {
     if (declarationParts == null) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
         declarations().each { id, name ->
-            def declarationData = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
+            def declarationData = declarationService.getLast(id, declarationData.departmentId, reportPeriod.id)
 
             def result = new Expando()
             result.id = id

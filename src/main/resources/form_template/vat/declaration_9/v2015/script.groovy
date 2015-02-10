@@ -2,6 +2,7 @@ package form_template.vat.declaration_9.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -21,11 +22,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK:
         checkDepartmentParams(LogLevel.ERROR)
-        //logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
         checkDepartmentParams(LogLevel.ERROR)
-        //logicCheck()
+        checkDeclarationFNS()
+        break
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
+        checkDeclarationFNS()
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
@@ -127,5 +130,15 @@ void generateXML() {
             Индекс: index,
             НомКорр: corrNumber) {
         // TODO заполнение
+    }
+}
+
+def checkDeclarationFNS() {
+    def declarationFnsId = 4
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def declarationData = declarationService.getLast(declarationFnsId, declarationData.departmentId, reportPeriod.id)
+    if (declarationData != null && bankDeclarationData.accepted) {
+        def String event = (formDataEvent == FormDataEvent.MOVE_CREATED_TO_ACCEPTED) ? "Принять данную декларацию" : "Отменить принятие данной декларации"
+        throw new ServiceException('%s невозможно, так как в текущем периоде и подразделении принята "Декларация по НДС (раздел 1-7)', event)
     }
 }
