@@ -5,6 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
+import org.springframework.jndi.JndiTemplate
+import javax.sql.DataSource
+import java.text.SimpleDateFormat
+
 /**
  * Форма "(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций,
  *                                                  РДР, ADR, GDR и опционов эмитента в целях налогообложения".
@@ -247,7 +251,35 @@ void calc() {
     }
 
     updateIndexes(dataRows)
-    dataRowHelper.save(dataRows)
+
+    // только для 0.3.9
+    dataRowHelper.clear()
+    def rows = []
+    dataRows.each { row ->
+        rows.add(row)
+        if (rows.size() > 100) {
+            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+            rows.clear()
+        }
+    }
+    if (rows.size() > 0) {
+        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+        rows.clear()
+}
+
+    def dataSourceName = 'java:comp/env/jdbc/TaxAccDS'
+    try {
+        def template = new JndiTemplate()
+        def DataSource dataSource = template.lookup(dataSourceName)
+        def connection = dataSource.connection
+        def stmt = connection.createStatement()
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        stmt.executeUpdate("update object_lock set lock_time = to_date('" + sdf.format(new Date()) + "', 'DD.MM.YYYY HH24:MI:SS') " +
+                "where object_id = ${formData.id} and class = 'com.aplana.sbrf.taxaccounting.model.FormData' and user_id = " + user.id)
+        connection.close()
+    } catch (Exception ex) {
+        logger.error("Ошибка: ${ex.getLocalizedMessage()}")
+    }
 }
 
 // Логические проверки
