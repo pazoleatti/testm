@@ -762,7 +762,7 @@ BigDecimal calc16(DataRow row) {
     def tmp = null
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            tmp = (row.marketQuotation ?: 0) - (row.prev ?: 0)
+            tmp = row.reserveCalcValue - row.reserveCalcValuePrev
         } else {
             tmp = BigDecimal.ZERO
         }
