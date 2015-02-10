@@ -240,12 +240,12 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
             performer = new FormDataPerformer();
         }
 
-        if (name.getText().isEmpty()) {
+        if (name.getText().trim().isEmpty()) {
             Dialog.warningMessage("Необходимо ввести ФИО исполнителя");
             return;
         }
 
-        if (phone.getText().isEmpty()) {
+        if (phone.getText().trim().isEmpty()) {
             Dialog.warningMessage("Необходимо ввести телефон исполнителя");
             return;
         }
@@ -276,7 +276,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 
     private boolean validateSigners() {
         for (FormDataSigner signer : clonedSigners) {
-            if (signer.getName().isEmpty() || signer.getPosition().isEmpty()) {
+            if (signer.getName().trim().isEmpty() || signer.getPosition().trim().isEmpty()) {
                 Dialog.warningMessage("Необходимо заполнить поля ФИО и Должность всех подписантов.");
                 return false;
             }
