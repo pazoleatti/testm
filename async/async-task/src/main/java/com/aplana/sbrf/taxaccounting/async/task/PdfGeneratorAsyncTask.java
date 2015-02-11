@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
@@ -35,6 +36,9 @@ public class PdfGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private DeclarationDataScriptingService scriptingService;
+
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         log.debug("PdfGeneratorAsyncTask has been started");
@@ -45,8 +49,16 @@ public class PdfGeneratorAsyncTask extends AbstractAsyncTask {
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
-            //declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.REPORT, logger, null);
-            declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo);
+            Map<String, Object> scriptParams = new HashMap<String, Object>();
+            ScriptProcessedModel scriptProcessedModel = new ScriptProcessedModel();
+            scriptProcessedModel.setProcessedByScript(false);
+            scriptParams.put("scriptProcessedModel", scriptProcessedModel);
+            scriptParams.put("needPdf", true);
+            scriptParams.put("needXlsx", false);
+            scriptingService.executeScript(userInfo, declarationData, FormDataEvent.REPORT, logger, scriptParams);
+            if (!scriptProcessedModel.isProcessedByScript()) {
+                declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo);
+            }
         }
         log.debug("PdfGeneratorAsyncTask has been finished");
     }

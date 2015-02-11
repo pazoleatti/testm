@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
@@ -42,6 +43,9 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
 
+    @Autowired
+    private DeclarationDataScriptingService scriptingService;
+
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         log.debug("XlsxGeneratorAsyncTask has been started");
@@ -50,7 +54,20 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        reportService.createDec(declarationDataId, blobDataService.create(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationDataId, userInfo)), ""), ReportType.EXCEL_DEC);
+        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+        if (declarationData != null) {
+            Map<String, Object> scriptParams = new HashMap<String, Object>();
+            ScriptProcessedModel scriptProcessedModel = new ScriptProcessedModel();
+            scriptProcessedModel.setProcessedByScript(false);
+            scriptParams.put("scriptProcessedModel", scriptProcessedModel);
+            scriptParams.put("needPdf", false);
+            scriptParams.put("needXlsx", true);
+            scriptingService.executeScript(userInfo, declarationData, FormDataEvent.REPORT, logger, scriptParams);
+            if (!scriptProcessedModel.isProcessedByScript()) {reportService.createDec(declarationDataId,
+                    blobDataService.create(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationDataId, userInfo)), ""), ReportType.EXCEL_DEC);
+            }
+        }
+
         log.debug("XlsxGeneratorAsyncTask has been finished");
     }
 
