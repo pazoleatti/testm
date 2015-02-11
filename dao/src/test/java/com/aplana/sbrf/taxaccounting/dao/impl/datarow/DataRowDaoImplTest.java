@@ -649,36 +649,6 @@ public class DataRowDaoImplTest extends Assert {
         Assert.assertNull(dataRows.get(1).get("dateColumn"));
     }
 
-    /**
-     * Проверить генерацию автонумеруемых граф для последовательной нумерации
-     */
-    @Test
-		public void getRowsWhenSerialAutoNumeration() {
-        FormData fd = formDataDao.get(1000, false);
-        List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
-        String alias = "autoNumerationColumn";
-        Assert.assertEquals(1L, rows.get(0).get(alias));
-        Assert.assertNull(rows.get(1).get(alias));
-        Assert.assertEquals(2L, rows.get(2).get(alias));
-        Assert.assertEquals(3L, rows.get(3).get(alias));
-        Assert.assertNull(rows.get(4).get(alias));
-    }
-
-    /**
-     * Проверить генерацию автонумеруемых граф для сквозной нумерации
-     */
-    @Test
-    public void getRowsWhenCrossAutoNumeration() {
-        FormData fd = formDataDao.get(1000, false);
-        fd.setPreviousRowNumber(5);
-        List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
-        Assert.assertTrue(Integer.valueOf(rows.get(0).get("autoNumerationColumn").toString()).equals(6));
-        Assert.assertNull(rows.get(1).get("autoNumerationColumn"));
-        Assert.assertTrue(Integer.valueOf(rows.get(2).get("autoNumerationColumn").toString()).equals(7));
-        Assert.assertTrue(Integer.valueOf(rows.get(3).get("autoNumerationColumn").toString()).equals(8));
-        Assert.assertNull(rows.get(4).get("autoNumerationColumn"));
-    }
-
     @Test
     public void copyRowsTest() {
         FormData fd1 = formDataDao.get(11, false);
