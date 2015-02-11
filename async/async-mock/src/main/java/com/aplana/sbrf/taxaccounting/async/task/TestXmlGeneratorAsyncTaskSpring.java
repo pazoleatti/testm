@@ -119,7 +119,8 @@ public class TestXmlGeneratorAsyncTaskSpring extends AbstractAsyncTask {
             // если по каким-либо причинам существует блокировка на формирование PDF отчета, то удаляем такую блокировку
             lockDataService.unlock(key,  0, true);
         }
-        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 24);
+        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         if (lockData == null) {
             Map<String, Object> paramsPdf = new HashMap<String, Object>();
             paramsPdf.put("declarationDataId", declarationDataId);

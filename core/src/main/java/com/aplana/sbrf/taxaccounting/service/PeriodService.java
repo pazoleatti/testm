@@ -287,4 +287,12 @@ public interface PeriodService {
      * Отчетный период по коду и году
      */
     ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);
+
+    /**
+     * Возвращает все периоды по виду налога, которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
+     * @param taxType Вид налога
+     * @param startDate Начало периода
+     * @param endDate Конец периода
+     */
+    List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
 }

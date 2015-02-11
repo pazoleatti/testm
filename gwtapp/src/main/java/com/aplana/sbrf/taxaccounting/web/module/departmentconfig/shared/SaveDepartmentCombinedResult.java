@@ -7,10 +7,8 @@ import com.gwtplatform.dispatch.shared.Result;
  */
 public class SaveDepartmentCombinedResult implements Result {
 
-
     private String uuid;
     private boolean hasError = false;
-    private boolean declarationFormFound = false;
 
     public String getUuid() {
         return uuid;
@@ -26,13 +24,5 @@ public class SaveDepartmentCombinedResult implements Result {
 
     public void setHasError(boolean hasError) {
         this.hasError = hasError;
-    }
-
-    public boolean isDeclarationFormFound() {
-        return declarationFormFound;
-    }
-
-    public void setDeclarationFormFound(boolean declarationFormFound) {
-        this.declarationFormFound = declarationFormFound;
     }
 }

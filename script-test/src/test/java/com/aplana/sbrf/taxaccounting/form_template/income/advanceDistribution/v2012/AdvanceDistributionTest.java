@@ -81,6 +81,23 @@ public class AdvanceDistributionTest extends ScriptTestBase {
                         return formData;
                     }
                 });
+
+        FormType formType = new FormType();
+        formType.setName("Форма");
+        formType.setCode("A");
+        formType.setId(1);
+
+        when(testHelper.getFormTypeService().get(any(Integer.class))).thenReturn(formType);
+
+        DepartmentFormType departmentFormType = new DepartmentFormType();
+        departmentFormType.setKind(KIND);
+        departmentFormType.setDepartmentId(DEPARTMENT_ID);
+        // идентификатор шаблона источников (Сведения о налогах, выплаченных за рубежом)
+        int sourceTypeId = 417;
+        departmentFormType.setFormTypeId(sourceTypeId);
+        departmentFormType.setId(1);
+        when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
+                any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
     }
 
     @Test
@@ -132,8 +149,8 @@ public class AdvanceDistributionTest extends ScriptTestBase {
         DepartmentFormType departmentFormType = new DepartmentFormType();
         departmentFormType.setKind(KIND);
         departmentFormType.setDepartmentId(DEPARTMENT_ID);
-        // идентификатор шаблона источников (Приложение 5)
-        int sourceTypeId = 372;
+        // идентификатор шаблона источников
+        int sourceTypeId = 417;
         departmentFormType.setFormTypeId(sourceTypeId);
         departmentFormType.setId(1);
         when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
@@ -187,8 +204,8 @@ public class AdvanceDistributionTest extends ScriptTestBase {
         // Консолидация
         testHelper.execute(FormDataEvent.COMPOSE);
 
-        // должны получить 3 строки в приемнике: 1 строка из источника и 2 итоговые
-        Assert.assertEquals(3, testHelper.getDataRowHelper().getAll().size());
+        // должны получить 2 строки в приемнике: 1 строка из источника и 1 итоговая
+        Assert.assertEquals(2, testHelper.getDataRowHelper().getAll().size());
 
         checkLogger();
     }

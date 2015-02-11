@@ -53,7 +53,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        def columns = (isBalancePeriod() ? allColumns - ['rowNumber']: editableColumns)
+        def columns = (getBalancePeriod() ? allColumns - ['rowNumber'] : editableColumns)
         formDataService.addRow(formData, currentDataRow, columns, allColumns - columns)
         break
     case FormDataEvent.DELETE_ROW:
@@ -71,7 +71,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, logger)
+        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
         calc()
         logicCheck()
         break
@@ -86,9 +86,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
-        break
-    case FormDataEvent.SORT_ROWS:
-        sortFormDataRows()
         break
 }
 
@@ -123,10 +120,10 @@ def nonEmptyColumns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSiz
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
 @Field
 def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
-        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+                    'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 @Field
-def groupColumns = ['issuer', 'tradeNumber']
+def groupColumns = ['issuer']
 
 // Дата окончания отчетного периода
 @Field
@@ -204,7 +201,7 @@ void calc() {
     def totalGroups = []
 
     for (row in dataRows) {
-        if (!isBalancePeriod() && !isConsolidated) {
+        if (!getBalancePeriod() && !isConsolidated) {
             // строка из предыдущего периода
             def prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
             // графа 6
@@ -283,7 +280,7 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
 
         // 1. Проверка на заполнение поля
-        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
 
         // 4. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
         if (row.lotSizeCurrent == 0 && row.reserveCalcValuePrev != row.reserveRecovery) {
@@ -309,22 +306,22 @@ void logicCheck() {
         // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
         def tmp = (row.reserveCalcValue ?: 0) - (row.reserveCalcValuePrev ?: 0)
         if (sign == '+' && tmp > 0 && row.reserveRecovery != 0) {
-            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно! Графа 17 ненулевая')
         }
 
         // 9. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 16)
         if (sign == '+' && tmp < 0 && row.reserveCreation != 0) {
-            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно! Графа 16 ненулевая')
         }
 
         // 10. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
         if (sign == '+' && tmp == 0 && (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
-            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно! Графы 16 и 17 ненулевые')
         }
 
         // 11. Проверка корректности формирования резерва (графа 8, 15, 16, 17)
         if ((row.reserveCalcValuePrev ?: 0) + (row.reserveCreation ?: 0) != (row.reserveCalcValue ?: 0) + (row.reserveRecovery ?: 0)) {
-            loggerError(row, errorMsg + 'Резерв сформирован неверно!')
+            loggerError(row, errorMsg + 'Резерв сформирован неверно! Сумма граф 8 и 16 не равна сумме граф 15 и 17')
         }
 
         // 12. Проверка на положительные значения при наличии созданного резерва
@@ -334,7 +331,7 @@ void logicCheck() {
         }
 
         def prevRow = null
-        if (!isBalancePeriod() && !isConsolidated) {
+        if (!getBalancePeriod() && !isConsolidated) {
             prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
 
             // 13. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
@@ -351,7 +348,7 @@ void logicCheck() {
         // 15, 16 проверки идут после проверки 18
 
         // 17. Арифметическая проверка графы 8, 13..17
-        if (!isBalancePeriod()) {
+        if (!getBalancePeriod()) {
             // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
             def needValue = [:]
             def arithmeticCheckAlias = ['marketQuotationInRub', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
@@ -367,10 +364,6 @@ void logicCheck() {
             needValue['reserveCreation'] = calc16(row)
             needValue['reserveRecovery'] = calc17(row)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
-        }
-
-        if (getRate(row, getReportPeriodEndDate()) != row.rubCourse) {
-            loggerError(row, errorMsg + "Значение графы «${getColumnName(row, 'rubCourse')}» отсутствует в справочнике «Курсы валют»!")
         }
 
         // 18. Проверка итоговых значений по эмитентам
@@ -434,7 +427,7 @@ void logicCheck() {
 
     // 19. Проверка итогового значений по всей форме
     if (totalRow != null) {
-        checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
+        checkTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
     }
 
     // 3. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде
@@ -469,11 +462,11 @@ void logicCheck() {
 
 /** Получить данные за предыдущий отчетный период. */
 def getPrevDataRows() {
-    if (isBalancePeriod() || isConsolidated) {
+    if (getBalancePeriod() || isConsolidated) {
         return null
     }
 
-    def formDataOld = formDataService.getFormDataPrev(formData)
+    def formDataOld = formDataService.getFormDataPrev(formData, formDataDepartment.id)
     return formDataOld != null ? formDataService.getDataRowHelper(formDataOld).allCached : null
 }
 
@@ -571,7 +564,7 @@ def roundValue(def value, def int precision) {
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
 void loggerError(def row, def msg) {
-    if (isBalancePeriod()) {
+    if (getBalancePeriod()) {
         rowWarning(logger, row, msg)
     } else {
         rowError(logger, row, msg)
@@ -580,7 +573,7 @@ void loggerError(def row, def msg) {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (!isConsolidated && !isBalancePeriod()) {
+    if (!isConsolidated && !getBalancePeriod()) {
         formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
     }
 }
@@ -599,11 +592,9 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// Признак периода ввода остатков для отчетного периода подразделения
-def isBalancePeriod() {
+def getBalancePeriod() {
     if (isBalancePeriod == null) {
-        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
-        isBalancePeriod = departmentReportPeriod.isBalance()
+        isBalancePeriod = reportPeriodService.isBalancePeriod(formData.reportPeriodId, formData.departmentId)
     }
     return isBalancePeriod
 }
@@ -616,15 +607,15 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 1)
 
     def headerMapping = [
-            (xml.row[0].cell[0]):  getColumnName(tmpRow, 'rowNumber'),
-            (xml.row[0].cell[2]):  getColumnName(tmpRow, 'issuer'),
-            (xml.row[0].cell[3]):  getColumnName(tmpRow, 'shareType'),
-            (xml.row[0].cell[4]):  getColumnName(tmpRow, 'tradeNumber'),
-            (xml.row[0].cell[5]):  getColumnName(tmpRow, 'currency'),
-            (xml.row[0].cell[6]):  getColumnName(tmpRow, 'lotSizePrev'),
-            (xml.row[0].cell[7]):  getColumnName(tmpRow, 'lotSizeCurrent'),
-            (xml.row[0].cell[8]):  getColumnName(tmpRow, 'reserveCalcValuePrev'),
-            (xml.row[0].cell[9]):  getColumnName(tmpRow, 'cost'),
+            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNumber'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'issuer'),
+            (xml.row[0].cell[3]) : getColumnName(tmpRow, 'shareType'),
+            (xml.row[0].cell[4]) : getColumnName(tmpRow, 'tradeNumber'),
+            (xml.row[0].cell[5]) : getColumnName(tmpRow, 'currency'),
+            (xml.row[0].cell[6]) : getColumnName(tmpRow, 'lotSizePrev'),
+            (xml.row[0].cell[7]) : getColumnName(tmpRow, 'lotSizeCurrent'),
+            (xml.row[0].cell[8]) : getColumnName(tmpRow, 'reserveCalcValuePrev'),
+            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'cost'),
             (xml.row[0].cell[10]): getColumnName(tmpRow, 'signSecurity'),
             (xml.row[0].cell[11]): getColumnName(tmpRow, 'marketQuotation'),
             (xml.row[0].cell[12]): getColumnName(tmpRow, 'rubCourse'),
@@ -633,7 +624,7 @@ void importData() {
             (xml.row[0].cell[15]): getColumnName(tmpRow, 'reserveCalcValue'),
             (xml.row[0].cell[16]): getColumnName(tmpRow, 'reserveCreation'),
             (xml.row[0].cell[17]): getColumnName(tmpRow, 'reserveRecovery'),
-            (xml.row[1].cell[0]):  '1'
+            (xml.row[1].cell[0]) : '1'
     ]
     (2..17).each { index ->
         headerMapping.put((xml.row[1].cell[index]), index.toString())
@@ -675,11 +666,11 @@ void addData(def xml, int headRowCount) {
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
-        (isBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
+        (getBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        (isBalancePeriod() ? ['rowNumber'] : autoFillColumns).each {
+        (getBalancePeriod() ? ['rowNumber'] : autoFillColumns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
@@ -749,11 +740,11 @@ void addTransportData(def xml) {
 
         def newRow = formData.createDataRow()
         newRow.setIndex(rowIndex++)
-        (isBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
+        (getBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
-        (isBalancePeriod() ? ['rowNumber'] : autoFillColumns).each {
+        (getBalancePeriod() ? ['rowNumber'] : autoFillColumns).each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
 
@@ -988,17 +979,17 @@ def isRubleCurrency(def currencyCode) {
     return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
 }
 
-// Сортировка групп и строк
-void sortFormDataRows() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), dataRows.find { it.getAlias() == 'total' }, true)
-    dataRowHelper.saveSort()
-}
-
-// Получение подитоговых строк
-def getSubTotalRows(def dataRows) {
-    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+/**
+ * Получение провайдера с использованием кеширования.
+ *
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
 }
 
 def Integer getSubAliasName(def row) {

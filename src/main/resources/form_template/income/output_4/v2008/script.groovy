@@ -1,12 +1,16 @@
 package form_template.income.output_4.v2008
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import groovy.transform.Field
+
 /**
  * Сведения о суммах налога на прибыль, уплаченного Банком за рубежом
- * formTemplate = 10800
+ * formTemplateId=417
  *
  * графа 1 - rowNum
  * графа 2 - name
- * графа 3 - sum
+ * графа 3 - taxSum
  *
  * @author Bulat Kinzyabulatov
  */
@@ -34,7 +38,7 @@ switch (formDataEvent) {
 }
 
 @Field
-def nonEmptyColumns = ['sum']
+def nonEmptyColumns = ['taxSum']
 
 def logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -55,7 +59,7 @@ void importData() {
     def headerMapping = [
             (xml.row[0].cell[0]) : getColumnName(tmpRow, 'rowNum'),
             (xml.row[0].cell[1]) : getColumnName(tmpRow, 'name'),
-            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'sum'),
+            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'taxSum'),
             (xml.row[1].cell[0]) : '1',
             (xml.row[1].cell[1]) : '2',
             (xml.row[1].cell[2]) : '3',

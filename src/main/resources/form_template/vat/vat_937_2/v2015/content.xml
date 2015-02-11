@@ -183,29 +183,29 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>vatSum18</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Сумма НДС по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках, по
             ставке. 18 процентов
         </name>
         <order>18</order>
         <width>6</width>
-        <maxLength>20</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>vatSum10</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Сумма НДС по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках, по
             ставке. 10 процентов
         </name>
         <order>19</order>
         <width>6</width>
-        <maxLength>20</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>bonifSalesSum</alias>
@@ -219,6 +219,13 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
     <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>

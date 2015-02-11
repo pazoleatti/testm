@@ -27,6 +27,9 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.SignService"/>
     </bean>
     <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TAUserService"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.core.api.LockDataService"/>
     </bean>
 

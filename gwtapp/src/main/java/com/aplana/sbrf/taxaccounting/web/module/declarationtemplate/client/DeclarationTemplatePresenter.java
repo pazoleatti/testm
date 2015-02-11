@@ -290,6 +290,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 					}, this).addCallback(new ManualRevealCallback<GetDeclarationResult>(DeclarationTemplatePresenter.this)));
         } else {
             getView().activateButton(false);
+            getView().setLockInformation(false, null, null);
         }
 	}
 

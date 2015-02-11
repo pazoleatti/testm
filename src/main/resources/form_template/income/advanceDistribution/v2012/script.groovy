@@ -98,16 +98,16 @@ def refBookCache = [:]
 // Все атрибуты
 @Field
 def allColumns = ['number', 'regionBank', 'fix', 'regionBankDivision', 'divisionName', 'kpp', 'propertyPrice',
-        'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
-        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
-        'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
-        'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax']
+                  'workersCount', 'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+                  'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka', 'taxSum',
+                  'taxSumOutside', 'taxSumToPay', 'taxSumToReduction',
+                  'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                  'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+                  'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum', 'amountTax']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['regionBankDivision', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'minimizeTaxSum', 'amountTax']
+def editableColumns = ['regionBankDivision', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit', 'minimizeTaxSum', 'amountTax']
 
 // Автозаполняемые атрибуты
 @Field
@@ -116,13 +116,13 @@ def autoFillColumns = allColumns - editableColumns
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['regionBank', 'regionBankDivision',
-        'divisionName', 'kpp', 'propertyPrice', 'workersCount',
-        'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
-        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
-        'taxSum', 'taxSumOutside', 'taxSumToPay',
-        'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod']
+                       'divisionName', 'kpp', 'propertyPrice', 'workersCount',
+                       'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
+                       'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
+                       'taxSum', 'taxSumOutside', 'taxSumToPay',
+                       'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                       'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+                       'everyMonthForFourthKvartalNextPeriod']
 
 // Группируемые атрибуты
 @Field
@@ -131,11 +131,11 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 // Атрибуты для итогов
 @Field
 def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
-        'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
-        'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
-        'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
-        'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
+                    'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
+                    'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
+                    'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
+                    'everyMonthForThirdKvartalNextPeriod',
+                    'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
 
 @Field
 def formDataCache = [:]
@@ -144,7 +144,7 @@ def helperCache = [:]
 
 @Field
 def summaryMap = [301 : "Доходы, учитываемые в простых РНУ", 302 : "Сводная форма начисленных доходов",
-        303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
+                  303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
 
 @Field
 def startDate = null
@@ -205,11 +205,14 @@ void calc() {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     def departmentParamsDate = getReportPeriodEndDate() - 1
 
+    // Получение строк формы "Сведения о суммах налога на прибыль, уплаченного Банком за рубежом"
+    def dataRowsSum = getDataRows(417, FormDataKind.ADDITIONAL)
+
     // Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде.
     def sumNal = 0
     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
     if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
-        sumNal = new BigDecimal(getValue(sumTaxRecords, 'SUM_TAX').doubleValue())
+        sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'R1')
     }
 
     def prevDataRows = getPrevDataRows()
@@ -227,16 +230,16 @@ void calc() {
             continue
         }
         // графа 4 - наименование подразделения в декларации
-        row.divisionName = incomeParam.ADDITIONAL_NAME?.stringValue
+        row.divisionName = calc4(row)
 
         // графа 5 - кпп
         row.kpp = incomeParam.KPP?.stringValue
 
         // графа 9 - Признак расчёта
-        row.calcFlag = incomeParam.get('TYPE').getReferenceValue()
+        row.calcFlag = calc9(row)
 
         // графа 10 - Обязанность по уплате налога
-        row.obligationPayTax = incomeParam.get('OBLIGATION').getReferenceValue()
+        row.obligationPayTax = calc10(row)
 
         // графа 11
         row.baseTaxOf = calc11(row, propertyPriceSumm, workersCountSumm)
@@ -290,10 +293,10 @@ void calc() {
     if (caRow != null) {
         // расчеты для строки ЦА (скорректированный)
         ['number', 'regionBankDivision', 'divisionName', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
-                'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
-                'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
-                'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
-                'everyMonthForFourthKvartalNextPeriod'].each { alias ->
+         'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
+         'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+         'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
+         'everyMonthForFourthKvartalNextPeriod'].each { alias ->
             caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue(), caTotalRow.getIndex())
         }
 
@@ -328,6 +331,65 @@ def calc2(def row) {
     } else {
         return departmentParam.get('PARENT_ID').getReferenceValue()
     }
+}
+
+def calc4(def row) {
+    def departmentParam
+    if (row.regionBankDivision != null) {
+        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
+                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+    }
+    def depParam = getDepParam(departmentParam)
+    def incomeParamTable = getIncomeParamTable(depParam)
+    for (int i = 0; i < incomeParamTable.size(); i++) {
+        if (row.kpp != null && row.kpp != '') {
+            if (incomeParamTable?.get(i)?.KPP?.stringValue == row.kpp) {
+                divisionName = incomeParamTable?.get(i)?.ADDITIONAL_NAME?.stringValue
+                break
+            }
+        }
+    }
+    return divisionName
+}
+
+def calc9(def row) {
+    def departmentParam
+    def calcFlag
+    if (row.regionBankDivision != null) {
+        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
+                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+    }
+    def depParam = getDepParam(departmentParam)
+    def incomeParamTable = getIncomeParamTable(depParam)
+    for (int i = 0; i < incomeParamTable.size(); i++) {
+        if (row.kpp != null && row.kpp != '') {
+            if (incomeParamTable?.get(i)?.KPP?.stringValue == row.kpp) {
+                calcFlag = incomeParamTable?.get(i)?.TYPE?.referenceValue
+                break
+            }
+        }
+    }
+    return calcFlag
+}
+
+def calc10(def row) {
+    def departmentParam
+    def obligationPayTax
+    if (row.regionBankDivision != null) {
+        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
+                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+    }
+    def depParam = getDepParam(departmentParam)
+    def incomeParamTable = getIncomeParamTable(depParam)
+    for (int i = 0; i < incomeParamTable.size(); i++) {
+        if (row.kpp != null && row.kpp != '') {
+            if (incomeParamTable?.get(i)?.KPP?.stringValue == row.kpp) {
+                obligationPayTax = incomeParamTable?.get(i)?.OBLIGATION?.referenceValue
+                break
+            }
+        }
+    }
+    return obligationPayTax
 }
 
 def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
@@ -398,16 +460,27 @@ def logicalCheck() {
 void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
+    def departmentParam
+    def departmentId = formData.getDepartmentId()
 
-    def departmentParamsDate = getReportPeriodEndDate() - 1
-    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", formData.departmentId.toString(), departmentParamsDate, -1, null, false)
-    if (sumTaxRecords == null || sumTaxRecords.isEmpty() || getValue(sumTaxRecords, 'SUM_TAX') == null) {
-        logger.error("Для подразделения «${formDataDepartment.name}» на форме настроек подразделений отсутствует атрибут «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+// Проверка назначения и назначения в статусе "Принята" формы-источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
+    def sourceFormTypeId = 417
+    def sourceFormType = formTypeService.get(sourceFormTypeId)
+
+    def departmentFormTypes = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate())
+    def departmentFormType = departmentFormTypes.find {
+        // совпадает подразделение и тип формы
+        it.departmentId == departmentId && it.formTypeId == sourceFormTypeId
     }
-
-    def sumTaxUnpRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
-    if (sumTaxUnpRecords == null || sumTaxUnpRecords.isEmpty() || getValue(sumTaxUnpRecords, 'SUM_TAX') == null) {
-        logger.error("В форме настроек подразделений (подразделение «УНП») не задано значение атрибута «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде»!")
+    if (departmentFormType == null) {
+        logger.error ("Не назначена источником налоговая форма «${sourceFormType.name}» в текущем периоде! Расчеты не могут быть выполнены.")
+    } else {
+        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+        if (departmentFormType.formTypeId == sourceFormTypeId && (child == null || child.state != WorkflowState.ACCEPTED)) {
+            def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+            logger.error("Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята». Расчеты не могут быть выполнены.")
+        }
     }
 
     def fieldNumber = 0
@@ -419,10 +492,9 @@ void logicalCheckBeforeCalc() {
         fieldNumber++
         def index = row.getIndex()
         def errorMsg = "Строка ${index}: "
-
-        def departmentParam
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookValue(30L, row.regionBankDivision)
+            departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
             logger.error(errorMsg + "Не найдено подразделение территориального банка!")
@@ -438,37 +510,37 @@ void logicalCheckBeforeCalc() {
             }
         }
 
-        def incomeParam
-        if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", departmentParamsDate, -1, null, false)
-        }
+        // Определение условий для проверок 2, 3, 4
+        def depParam = getDepParam(departmentParam)
+        def depId = depParam.get('CODE').getNumberValue().intValue()
+        def departmentName = depParam?.NAME?.stringValue
+        def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+        def incomeParamTable = getIncomeParamTable(depParam)
+
+        // 2. Проверка наличия формы настроек подразделения
         if (incomeParam == null || incomeParam.isEmpty()) {
-            logger.error(errorMsg + "Не найдены настройки подразделения!")
-        } else {
-            // графа 4 - наименование подразделения в декларации
-            String errorStr = errorMsg + "Для подразделения «${departmentParam.NAME.stringValue}» на форме настроек подразделений отсутствует значение атрибута «%s»!"
-            if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('ADDITIONAL_NAME')?.getStringValue() == null) {
-                logger.error(errorStr, "Наименование подразделения в декларации")
-            }
+            rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» не создана форма настроек подразделений!")
+        }
 
-            // графа 5 - кпп
-            if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('KPP')?.getStringValue() == null) {
-                logger.error(errorStr, "КПП")
-            }
-
-            // графа 9 - Признак расчёта
-            if (incomeParam?.get('TYPE')?.getReferenceValue() == null) {
-                logger.error(errorStr, "Признак расчёта")
-            }
-
-            // графа 10 - Обязанность по уплате налога
-            if (incomeParam?.get('OBLIGATION')?.getReferenceValue() == null) {
-                logger.error(errorStr, "Обязанность по уплате налога")
-            }
-
-            // графа 13
-            if (incomeParam?.get('record_id')?.getNumberValue() == null || incomeParam?.get('TAX_RATE')?.getNumberValue() == null) {
-                logger.error(errorStr, "Ставка налога в бюджет субъекта (%%)")
+        // 3. Проверка наличия строки с «КПП» в табличной части формы настроек подразделения
+        // 4. Проверка наличия значения «Наименование для Приложения №5» в форме настроек подразделения
+        for (int k = 0; k < incomeParamTable.size(); k++) {
+            if (row.kpp != null && row.kpp != '') {
+                if (incomeParamTable?.get(k)?.KPP?.stringValue == row.kpp) {
+                    if (incomeParamTable?.get(k)?.ADDITIONAL_NAME?.stringValue == null) {
+                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Наименование для «Приложения №5»!")
+                    }
+                    if (incomeParamTable?.get(k)?.TYPE?.referenceValue == null) {
+                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Признак расчета»!")
+                    }
+                    if (incomeParamTable?.get(k)?.OBLIGATION?.referenceValue == null) {
+                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Обязанность по уплате налога»!")
+                    }
+                    break
+                }
+                if (k == incomeParamTable.size() - 1) {
+                    rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений отсутствует строка с КПП «${row.kpp}»!")
+                }
             }
         }
     }
@@ -565,7 +637,7 @@ void checkDeclaration() {
     declarationType = 2    // Тип декларации которую проверяем (Налог на прибыль)
     declaration = declarationService.getLast(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
     if (declaration != null && declaration.isAccepted()) {
-        logger.error("Декларация банка находиться в статусе принята")
+        logger.error("Декларация банка находится в статусе принята")
     }
 }
 
@@ -911,7 +983,7 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
         row.taxSumToPay = 0
     } else {
         row.taxSumToPay = (row.taxSum > row.subjectTaxCredit + row.taxSumOutside ?
-            row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
+                row.taxSum - (row.subjectTaxCredit + row.taxSumOutside) : 0)
     }
 
     // графа 17
@@ -919,7 +991,7 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
         row.taxSumToReduction = 0
     } else {
         row.taxSumToReduction = (row.taxSum < row.subjectTaxCredit + row.taxSumOutside ?
-            (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
+                (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
     }
 
     // Значения граф этого же подразделения в форме пред. периода
@@ -957,7 +1029,7 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
         row.everyMonthForFourthKvartalNextPeriod = 0
     } else {
         row.everyMonthForFourthKvartalNextPeriod =
-            ((reportPeriod.order == 3) ? (row.taxSum - row.everyMonthForThirdKvartalNextPeriod) : 0)
+                ((reportPeriod.order == 3) ? (row.taxSum - row.everyMonthForThirdKvartalNextPeriod) : 0)
     }
 
     // графа 18 и 19 расчитывается в конце потому что требует значения графы 20, 21, 22
@@ -1045,4 +1117,74 @@ void sortFormDataRows() {
         sortRows(refBookService, logger, dataRows, [dataRows.find { it.getAlias() == 'ca' }], dataRows.find { it.getAlias() == 'total' }, true)
         dataRowHelper.saveSort()
     }
+}
+
+// Получить строки формы
+def getDataRows(def formId, def kind) {
+    //def formId = 417
+    //def formDataKind = FormDataKind.SUMMARY
+    def departmentId = formData.departmentId
+    def reportPeriodId = formData.reportPeriodId
+    def periodOrder = formData.periodOrder
+    def sourceFormData = formDataService.getLast(formId, kind, departmentId, reportPeriodId, periodOrder)
+    if (sourceFormData != null && sourceFormData.id != null)
+        return formDataService.getDataRowHelper(sourceFormData)?.allCached
+    return null
+}
+
+/**
+ * Получить значение ячейки фиксированной строки из налоговой формы.
+ *
+ * @param dataRows строки нф
+ * @param columnName название столбца
+ * @param alias алиас строки
+ * @return значение столбца
+ *
+ */
+def getAliasFromForm(def dataRows, def columnName, def alias) {
+    if (dataRows != null && !dataRows.isEmpty()) {
+        def aliasRow = getDataRow(dataRows, alias)
+        return aliasRow.getCell(columnName).value
+    }
+    return 0
+}
+
+/**
+ * Получение провайдера с использованием кеширования.
+ *
+ * @param providerId
+ * @return
+ */
+def getProvider(def long providerId) {
+    if (!providerCache.containsKey(providerId)) {
+        providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
+    }
+    return providerCache.get(providerId)
+}
+
+// Получение параметров подразделения, форма настроек которого будет использоваться
+// для получения данных (согласно алгоритму 6.2.5.8.7.1)
+def getDepParam(def departmentParam) {
+    def departmentId = departmentParam.get('CODE').getNumberValue().intValue()
+    def departmentType = departmentService.get(departmentId).getType()
+    if (departmentType.equals(departmentType.TERR_BANK)) {
+        depParam = departmentParam
+    } else {
+        def tbCode = (Integer) departmentParam.get('PARENT_ID').getReferenceValue()
+        def taxPlaningTypeCode = departmentService.get(tbCode).getType().MANAGEMENT.getCode()
+        depParam = getProvider(30).getRecords(getReportPeriodEndDate(), null, "PARENT_ID = ${departmentParam.get('PARENT_ID').getReferenceValue()} and TYPE = $taxPlaningTypeCode", null).get(0)
+    }
+    return depParam
+}
+
+// Получение параметров (справочник 330)
+def getIncomeParamTable(def depParam) {
+    def depId = depParam.get('CODE').getNumberValue().intValue()
+    def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+    if (incomeParam != null && !incomeParam.isEmpty()) {
+        def link = incomeParam.get(0).record_id.value
+        def incomeParamTable = getProvider(330).getRecords(getReportPeriodEndDate() - 1, null, "LINK = $link", null)
+        return incomeParamTable
+    }
+    return null
 }

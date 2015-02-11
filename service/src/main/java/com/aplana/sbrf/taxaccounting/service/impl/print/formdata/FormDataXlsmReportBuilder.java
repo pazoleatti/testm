@@ -40,8 +40,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 			.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)
 			+ "/acctax.xlsm";
 
-    private static final String FILE_NAME = "Налоговый_отчет_";
-    private static final String POSTFIX = ".xlsm";
     private static final int MERGE_REGIONS_NUM_BACK = 10;
 
 	private enum CellType{
@@ -150,7 +148,6 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     private Map<String, XSSFFont> fontMap = new HashMap<String, XSSFFont>();
 
     public FormDataXlsmReportBuilder() throws IOException {
-        super(FILE_NAME, POSTFIX);
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
             workBook = WorkbookFactory.create(templeteInputStream);

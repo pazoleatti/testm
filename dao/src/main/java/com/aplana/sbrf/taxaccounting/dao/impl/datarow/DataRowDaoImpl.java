@@ -41,6 +41,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
 
+    private static int ROW_MAX = 10000;
+
 	@Override
 	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowRange range) {
 		return physicalGetRows(fd, new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME}, range);
@@ -743,31 +745,29 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         for (DataRow<Cell> row : dataRows) {
             dataRowIds.add(row.getId());
         }
-        String sqlSelectOrds = "SELECT ord FROM data_row WHERE " + SqlUtils.transformToSqlInStatement("id", dataRowIds) + " ORDER BY ord";
-        final List<Long> ords = getJdbcTemplate().queryForList(sqlSelectOrds, Long.class);
 
-        StringBuilder sql = new StringBuilder("INSERT INTO data_row_temp ");
-        // задать строке по id соответствующий ord
-        for (int i = 0; i < dataRows.size(); i++) {
-            DataRow<Cell> row = dataRows.get(i);
-            Long ord = ords.get(i);
-            sql.append("\n\t");
-            sql.append("SELECT ").append(row.getId());
-            if (i == 0) {
-                sql.append(" id");
-            }
-            sql.append(", ").append(ord);
-            if (i == 0) {
-                sql.append(" ord");
-            }
-            sql.append(" FROM DUAL");
-            if (i < dataRows.size() - 1) {
-                sql.append(" UNION ALL");
-            }
+        final List<Long> ords = new ArrayList<Long>();
+        for (int i = 0; i < dataRowIds.size(); i += ROW_MAX) {
+            List<Long> subList = dataRowIds.subList(i, Math.min(i + ROW_MAX, dataRowIds.size()));
+            String sqlSelectOrds = "SELECT ord FROM data_row WHERE " + SqlUtils.transformToSqlInStatement("id", subList) + "";
+            ords.addAll(getJdbcTemplate().queryForList(sqlSelectOrds, Long.class));
         }
-		getJdbcTemplate().update(sql.toString());
+        Collections.sort(ords);
 
-        sql = new StringBuilder("MERGE INTO data_row dr USING data_row_temp ords ON (dr.id = ords.id) " +
+        getJdbcTemplate().batchUpdate("INSERT INTO data_row_temp (id, ord) VALUES (?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, dataRows.get(i).getId());
+                ps.setLong(2, ords.get(i));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return dataRows.size();
+            }
+        });
+
+        StringBuilder sql = new StringBuilder("MERGE INTO data_row dr USING data_row_temp ords ON (dr.id = ords.id) " +
 				"WHEN MATCHED THEN UPDATE SET dr.ord = ords.ord");
         getJdbcTemplate().update(sql.toString());
     }

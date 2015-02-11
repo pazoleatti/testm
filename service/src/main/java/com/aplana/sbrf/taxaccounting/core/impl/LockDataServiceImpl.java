@@ -235,6 +235,15 @@ public class LockDataServiceImpl implements LockDataService {
         }
     }
 
+    @Override
+    public int getLockTimeout(LockData.LockObjects lockObject) {
+        try {
+            return dao.getLockTimeout(lockObject);
+        } catch (Exception e) {
+            throw new ServiceException(String.format("Не удалось получить таймаут для блокировки объекта с ключом = %s",lockObject.name()), e);
+        }
+    }
+
     /**
 	 * Проверяет блокировку. Если срок ее действия вышел, то она удаляется
 	 */

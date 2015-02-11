@@ -1,8 +1,6 @@
 package form_template.vat.vat_937_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -26,7 +24,6 @@ import groovy.transform.Field
  * 15 cost                        Стоимость покупок по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры
  * 16 nds                         Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в рублях и копейках
  */
-
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -75,6 +72,24 @@ def calcColumns = []
 @Field
 def totalANonEmptyColumns = ['rowNum', 'typeCode', 'invoice', 'invoiceCorrection', 'cost', 'nds']
 
+// TODO (Ramil Timerbaev) пока редактируемыми сделал все поля кроме нумерации
+// Редактируемые атрибуты (графа )
+@Field
+def editableColumns = allColumns - 'rowNum'
+
+// Автозаполняемые атрибуты
+@Field
+def autoFillColumns = allColumns - editableColumns
+
+// Проверяемые на пустые значения атрибуты (графа )
+@Field
+def nonEmptyColumns = []
+
+// TODO (Ramil Timerbaev)
+// Атрибуты итоговых строк для которых вычисляются суммы (графа )
+@Field
+def totalSumColumns = ['nds']
+
 //TODO: Уточнить данное значение
 @Field
 def sizeDiff = 15
@@ -89,6 +104,10 @@ def calendarStartDate = null
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+// Признак периода ввода остатков
+@Field
+def isBalancePeriod
 
 @Field
 def dateFormat = 'dd.MM.yyyy'
@@ -141,204 +160,273 @@ def getReportPeriodEndDate() {
 
 // TODO: При необходимости исправить данный метод после получения постановки
 void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Налоговый период', null, 13, 4)
+    def tmpRow = formData.createDataRow()
+    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 4)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 16, 3)
 
     def headerMapping = [
-            (xml.row[0].cell[0]) : '№ п/п',
-            (xml.row[0].cell[1]) : 'Код вида операции',
-            (xml.row[0].cell[2]) : 'Номер и дата счета-фактуры продавца',
-            (xml.row[0].cell[3]) : 'Номер и дата исправления счета-фактуры продавца',
-            (xml.row[0].cell[4]): 'Номер и дата корректировочного счета-фактуры продавца',
-            (xml.row[0].cell[5]): 'Номер и дата исправления корректировочного счета-фактуры продавца',
-            (xml.row[0].cell[6]) : 'Номер и дата документа, подтверждающего уплату налога',
-            (xml.row[0].cell[7]): 'Дата принятия на учет товаров (работ, услуг), имущественных прав',
-            (xml.row[0].cell[8]) : 'Наименование продавца',
-            (xml.row[0].cell[9]) : 'ИНН/КПП продавца',
+            (xml.row[0].cell[0])  : getColumnName(tmpRow, 'rowNum'),
+            (xml.row[0].cell[1])  : getColumnName(tmpRow, 'typeCode'),
+            (xml.row[0].cell[2])  : getColumnName(tmpRow, 'invoice'),
+            (xml.row[0].cell[3])  : getColumnName(tmpRow, 'invoiceCorrecting'),
+            (xml.row[0].cell[4])  : getColumnName(tmpRow, 'invoiceCorrection'),
+            (xml.row[0].cell[5])  : getColumnName(tmpRow, 'invoiceCorrectingCorrection'),
+            (xml.row[0].cell[6])  : getColumnName(tmpRow, 'documentPay'),
+            (xml.row[0].cell[7])  : getColumnName(tmpRow, 'dateRegistration'),
+            (xml.row[0].cell[8])  : getColumnName(tmpRow, 'salesman'),
+            (xml.row[0].cell[9])  : getColumnName(tmpRow, 'salesmanInnKpp'),
             (xml.row[0].cell[10]) : 'Сведения о посреднике (комиссионере, агенте)',
-            (xml.row[0].cell[12]) : 'Номер таможенной декларации',
-            (xml.row[0].cell[13]) : 'Наименование и код валюты',
-            (xml.row[0].cell[14]) : 'Стоимость покупок по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры',
-            (xml.row[0].cell[15]) : 'Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в рублях и копейках',
+            (xml.row[0].cell[12]) : getColumnName(tmpRow, 'declarationNum'),
+            (xml.row[0].cell[13]) : getColumnName(tmpRow, 'currency'),
+            (xml.row[0].cell[14]) : getColumnName(tmpRow, 'cost'),
+            (xml.row[0].cell[15]) : getColumnName(tmpRow, 'nds'),
+
             (xml.row[1].cell[10]) : 'Наименование посредника',
             (xml.row[1].cell[11]) : 'ИНН/КПП посредника',
     ]
     (0..15).each { index ->
-        headerMapping.put((xml.row[4].cell[index]), (index + 1).toString())
+        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
     }
 
     checkHeaderEquals(headerMapping)
 
-    addData(xml, 4)
+    addData(xml, 2)
 }
 
 void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
 
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
-    // TODO: Исправить данный цикл после получения постановки
-    for (int i in [2, 4, 5, 6]) {
-        def row = xml.row[headRowCount + i]
-        def int xlsIndexRow = rowOffset + headRowCount + i
+    def xmlIndexRow = -1
+    def int rowIndex = 1
+    def rows = []
 
-        dataRows[i - 1].setImportIndex(xlsIndexRow)
+    for (def row : xml.row) {
+        xmlIndexRow++
+        def int xlsIndexRow = xmlIndexRow + rowOffset
 
-        // графа 1
-        def xmlIndexCol = 0
-        if (i != 2) { // пропускаем вторую строку
-            dataRows[i - 1].rowNum = row.cell[xmlIndexCol].text()
+        /* Пропуск строк шапок */
+        if (xmlIndexRow <= headRowCount) {
+            continue
         }
 
-        // графа 2
-        xmlIndexCol = 1
-        dataRows[i - 1].typeCode = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
+        }
 
-        // графа 3
-        xmlIndexCol = 2
-        dataRows[i - 1].invoice = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Пропуск итоговых строк
+        if (row.cell[0].text() == null || row.cell[0].text() == "") {
+            continue
+        }
 
-        // графа 4
-        xmlIndexCol = 3
-        dataRows[i - 1].invoiceCorrecting = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        def newRow = getNewRow()
+        newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(xlsIndexRow)
 
-        // графа 5
-        xmlIndexCol = 4
-        dataRows[i - 1].invoiceCorrection = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 2
+        def xmlIndexCol = 1
+        newRow.typeCode = row.cell[xmlIndexCol].text()
 
-        // графа 6
-        xmlIndexCol = 5
-        dataRows[i - 1].invoiceCorrectingCorrection = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 3
+        xmlIndexCol++
+        newRow.invoice = row.cell[xmlIndexCol].text()
 
-        // графа 7
-        xmlIndexCol = 6
-        dataRows[i - 1].documentPay = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 4
+        xmlIndexCol++
+        newRow.invoiceCorrecting = row.cell[xmlIndexCol].text()
 
-        // графа 8
-        xmlIndexCol = 7
-        dataRows[i - 1].dateRegistration = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 5
+        xmlIndexCol++
+        newRow.invoiceCorrection = row.cell[xmlIndexCol].text()
 
-        // графа 9
-        xmlIndexCol = 8
-        dataRows[i - 1].salesman = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 6
+        xmlIndexCol++
+        newRow.invoiceCorrectingCorrection = row.cell[xmlIndexCol].text()
 
-        // графа 10
-        xmlIndexCol = 9
-        dataRows[i - 1].salesmanInnKpp = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 7
+        xmlIndexCol++
+        newRow.documentPay = row.cell[xmlIndexCol].text()
 
-        // графа 11
-        xmlIndexCol = 10
-        dataRows[i - 1].agentName = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 8
+        xmlIndexCol++
+        newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
-        // графа 12
-        xmlIndexCol = 11
-        dataRows[i - 1].agentInnKpp = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 9
+        xmlIndexCol++
+        newRow.salesman = row.cell[xmlIndexCol].text()
 
-        // графа 13
-        xmlIndexCol = 12
-        dataRows[i - 1].declarationNum = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 10
+        xmlIndexCol++
+        newRow.salesmanInnKpp = row.cell[xmlIndexCol].text()
 
-        // графа 14
-        xmlIndexCol = 13
-        dataRows[i - 1].currency = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 11
+        xmlIndexCol++
+        newRow.agentName = row.cell[xmlIndexCol].text()
 
-        // графа 15
-        xmlIndexCol = 14
-        dataRows[i - 1].cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 12
+        xmlIndexCol++
+        newRow.agentInnKpp = row.cell[xmlIndexCol].text()
 
-        // графа 16
-        xmlIndexCol = 15
-        dataRows[i - 1].nds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 13
+        xmlIndexCol++
+        newRow.declarationNum = row.cell[xmlIndexCol].text()
+
+        // Графа 14
+        xmlIndexCol++
+        newRow.currency = row.cell[xmlIndexCol].text()
+
+        // Графа 15
+        xmlIndexCol++
+        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 16
+        xmlIndexCol++
+        newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
     }
+    dataRowHelper.save(rows)
 }
 
 // TODO: После получения постановки при необходимости удалить данный метод
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 16, 0)
     addTransportData(xml)
+
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    checkTotalSum(dataRows, totalSumColumns, logger, false)
 }
 
 // TODO: После получения постановки при необходимости исправить или удалить данный метод
 void addTransportData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
 
-    for (int i in [2, 4, 5, 6]) {
-        rnuIndexRow++
-        def row = xml.row[i - 1]
+    def rows = []
+    def int rowIndex = 1
 
-        // графа 1
-        def xmlIndexCol = 0
-        if (i != 2) { // пропускаем вторую строку
-            dataRows[i - 1].rowNum = row.cell[xmlIndexCol].text()
+    for (def row : xml.row) {
+        rnuIndexRow++
+
+        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+            break
         }
 
-        // графа 2
-        xmlIndexCol = 1
-        dataRows[i - 1].typeCode = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        def newRow = getNewRow()
+        newRow.setIndex(rowIndex++)
+        newRow.setImportIndex(rnuIndexRow)
 
-        // графа 3
-        xmlIndexCol = 2
-        dataRows[i - 1].invoice = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 2
+        def xmlIndexCol = 2
+        newRow.typeCode = row.cell[xmlIndexCol].text()
 
-        // графа 4
-        xmlIndexCol = 3
-        dataRows[i - 1].invoiceCorrecting = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 3
+        xmlIndexCol++
+        newRow.invoice = row.cell[xmlIndexCol].text()
 
-        // графа 5
-        xmlIndexCol = 4
-        dataRows[i - 1].invoiceCorrection = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 4
+        xmlIndexCol++
+        newRow.invoiceCorrecting = row.cell[xmlIndexCol].text()
 
-        // графа 6
-        xmlIndexCol = 5
-        dataRows[i - 1].invoiceCorrectingCorrection = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 5
+        xmlIndexCol++
+        newRow.invoiceCorrection = row.cell[xmlIndexCol].text()
 
-        // графа 7
-        xmlIndexCol = 6
-        dataRows[i - 1].documentPay = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 6
+        xmlIndexCol++
+        newRow.invoiceCorrectingCorrection = row.cell[xmlIndexCol].text()
 
-        // графа 8
-        xmlIndexCol = 7
-        dataRows[i - 1].dateRegistration = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 7
+        xmlIndexCol++
+        newRow.documentPay = row.cell[xmlIndexCol].text()
 
-        // графа 9
-        xmlIndexCol = 8
-        dataRows[i - 1].salesman = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 8
+        xmlIndexCol++
+        newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
-        // графа 10
-        xmlIndexCol = 9
-        dataRows[i - 1].salesmanInnKpp = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 9
+        xmlIndexCol++
+        newRow.salesman = row.cell[xmlIndexCol].text()
 
-        // графа 11
-        xmlIndexCol = 10
-        dataRows[i - 1].agentName = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 10
+        xmlIndexCol++
+        newRow.salesmanInnKpp = row.cell[xmlIndexCol].text()
 
-        // графа 12
-        xmlIndexCol = 11
-        dataRows[i - 1].agentInnKpp = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 11
+        xmlIndexCol++
+        newRow.agentName = row.cell[xmlIndexCol].text()
 
-        // графа 13
-        xmlIndexCol = 12
-        dataRows[i - 1].declarationNum = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 12
+        xmlIndexCol++
+        newRow.agentInnKpp = row.cell[xmlIndexCol].text()
 
-        // графа 14
-        xmlIndexCol = 13
-        dataRows[i - 1].currency = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 13
+        xmlIndexCol++
+        newRow.declarationNum = row.cell[xmlIndexCol].text()
 
-        // графа 15
-        xmlIndexCol = 14
-        dataRows[i - 1].cost = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 14
+        xmlIndexCol++
+        newRow.currency = row.cell[xmlIndexCol].text()
 
-        // графа 16
-        xmlIndexCol = 15
-        dataRows[i - 1].nds = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        // Графа 15
+        xmlIndexCol++
+        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        // Графа 16
+        xmlIndexCol++
+        newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
+        rows.add(newRow)
     }
-    dataRowHelper.save(dataRows)
+
+    if (xml.rowTotal.size() == 1) {
+        rnuIndexRow = rnuIndexRow + 2
+
+        def row = xml.rowTotal[0]
+
+        def total = getTotalRow()
+
+        // Графа 16
+        total.nds = parseNumber(row.cell[16].text(), rnuIndexRow, 16 + colOffset, logger, true)
+
+        rows.add(total)
+    }
+    dataRowHelper.save(rows)
 }
 
+/** Получить новую строку с заданными стилями. */
+def getNewRow() {
+    def newRow = formData.createDataRow()
+    def columns = (isBalancePeriod() ? allColumns - 'rowNum' : editableColumns)
+    columns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    return newRow
+}
 
+/** Получить пустую итоговую строку со стилями. */
+def getTotalRow() {
+    def total = formData.createDataRow()
+    total.setAlias('total')
+    // TODO (Ramil Timerbaev) возможно надо будет добавить скрытый столбец fix
+    // total.КАКАЯ_ТО_СТРОКА = 'Итого'
+    // total.getCell('КАКАЯ_ТО_СТРОКА').colSpan = 2
+    allColumns.each {
+        total.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return total
+}
+
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
+    }
+    return isBalancePeriod
+}

@@ -231,7 +231,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         int userId = logger.getTaUserInfo().getUser().getId();
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-        LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockService.lock(lockKey, userId,
+                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
                 //Блокировка установлена
@@ -243,7 +244,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
@@ -314,7 +316,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockService.lock(lockKey, userId,
+                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
                 //Блокировка установлена
@@ -326,7 +329,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
@@ -507,7 +511,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockService.lock(lockKey, userId,
+                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
                 //Блокировка установлена
@@ -519,7 +524,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);

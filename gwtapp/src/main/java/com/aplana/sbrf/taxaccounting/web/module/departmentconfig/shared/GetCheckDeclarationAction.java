@@ -10,7 +10,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class GetCheckDeclarationAction extends UnsecuredActionImpl<GetCheckDeclarationResult> implements ActionName {
 
-    TaxType taxType;
+    private TaxType taxType;
     private Integer period;
     private Integer department;
 

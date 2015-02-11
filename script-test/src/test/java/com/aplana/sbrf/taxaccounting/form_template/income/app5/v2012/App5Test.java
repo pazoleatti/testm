@@ -2,7 +2,11 @@ package com.aplana.sbrf.taxaccounting.form_template.income.app5.v2012;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -29,7 +33,7 @@ import static org.mockito.Mockito.when;
  */
 public class App5Test extends ScriptTestBase {
     private static final int TYPE_ID = 372;
-    private static final int DEPARTMENT_ID = 1;
+    private static final int DEPARTMENT_ID = 2;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final FormDataKind KIND = FormDataKind.PRIMARY;
@@ -73,6 +77,113 @@ public class App5Test extends ScriptTestBase {
                         }
                         Long departmentId = Long.valueOf(value5);
                         return testHelper.getFormDataService().getRefBookValue(refBookId, departmentId, new HashMap<String, Map<String, RefBookValue>>());
+                    }
+                });
+
+        Department department = new Department();
+        department.setId(DEPARTMENT_ID);
+        department.setName("Подразделение");
+        department.setType(DepartmentType.TERR_BANK);
+
+        when(testHelper.getDepartmentService().get(DEPARTMENT_ID)).thenReturn(department);
+
+        when(testHelper.getRefBookFactory().getDataProvider(any(Long.class))).thenAnswer(
+                new Answer<RefBookDataProvider>() {
+                    @Override
+                    public RefBookDataProvider answer(InvocationOnMock invocation) throws Throwable {
+                        return testHelper.getRefBookDataProvider();
+                    }
+                });
+
+        when(testHelper.getRefBookFactory().getDataProvider(33L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("TAX_RATE", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        result.add(map);
+
+                        map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        map.put("TAX_RATE", new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        result.add(map);
+
+                        map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                        map.put("TAX_RATE", new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
+
+        when(testHelper.getRefBookFactory().getDataProvider(30L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        String filter = (String)invocation.getArguments()[2];
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        if (filter.contains("DEPARTMENT_ID = 2")) {
+                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            map.put("CODE", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                            map.put("PARENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                            map.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                            result.add(map);
+
+                            map = new HashMap<String, RefBookValue>();
+                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                            map.put("CODE", new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                            map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "B"));
+                            map.put("PARENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 2L));
+                            map.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 2L));
+                            result.add(map);
+
+                            map = new HashMap<String, RefBookValue>();
+                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                            map.put("CODE", new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                            map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "C"));
+                            map.put("PARENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 3L));
+                            map.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 3L));
+                            result.add(map);
+
+                        }  else if (filter.equals("LINK = 1")) {
+                            Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            map.put("SUM_TAX", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            map.put("ADDITIONAL_NAME", new RefBookValue(RefBookAttributeType.STRING, "addNameA"));
+                            map.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "111111111"));
+                            map.put("LINK", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                            map.put("OBLIGATION", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                            result.add(map);
+
+                            map = new HashMap<String, RefBookValue>();
+                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                            map.put("SUM_TAX", new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                            map.put("ADDITIONAL_NAME", new RefBookValue(RefBookAttributeType.STRING, "addNameA"));
+                            map.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "111111111"));
+                            map.put("LINK", new RefBookValue(RefBookAttributeType.REFERENCE, 2L));
+                            map.put("OBLIGATION", new RefBookValue(RefBookAttributeType.REFERENCE, 2L));
+                            result.add(map);
+
+                            map = new HashMap<String, RefBookValue>();
+                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                            map.put("SUM_TAX", new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                            map.put("ADDITIONAL_NAME", new RefBookValue(RefBookAttributeType.STRING, "addNameA"));
+                            map.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "111111111"));
+                            map.put("LINK", new RefBookValue(RefBookAttributeType.REFERENCE, 3L));
+                            map.put("OBLIGATION", new RefBookValue(RefBookAttributeType.REFERENCE, 3L));
+                            result.add(map);
+
+                        }
+                        return result;
                     }
                 });
     }
@@ -130,7 +241,6 @@ public class App5Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
-        checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
 
@@ -147,26 +257,26 @@ public class App5Test extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         // графа 2
         for (int i = 0; i < dataRows.size() - 1; i++) {
-            Assert.assertEquals(1, dataRows.get(i).getCell("regionBank").getNumericValue().intValue());
+            Assert.assertEquals(2, dataRows.get(i).getCell("regionBank").getNumericValue().intValue());
         }
 
         // графа 3
         Assert.assertEquals(2, dataRows.get(0).getCell("regionBankDivision").getNumericValue().intValue());
         Assert.assertEquals(2, dataRows.get(1).getCell("regionBankDivision").getNumericValue().intValue());
         Assert.assertEquals(2, dataRows.get(2).getCell("regionBankDivision").getNumericValue().intValue());
-        Assert.assertEquals(3, dataRows.get(3).getCell("regionBankDivision").getNumericValue().intValue());
+        Assert.assertEquals(2, dataRows.get(2).getCell("regionBankDivision").getNumericValue().intValue());
 
         // графа 4
-        Assert.assertEquals("addNameB", dataRows.get(0).getCell("divisionName").getStringValue());
-        Assert.assertEquals("addNameB", dataRows.get(1).getCell("divisionName").getStringValue());
-        Assert.assertEquals("addNameB", dataRows.get(2).getCell("divisionName").getStringValue());
-        Assert.assertEquals("addNameC", dataRows.get(3).getCell("divisionName").getStringValue());
+        Assert.assertEquals("addNameA", dataRows.get(0).getCell("divisionName").getStringValue());
+        Assert.assertEquals("addNameA", dataRows.get(1).getCell("divisionName").getStringValue());
+        Assert.assertEquals("addNameA", dataRows.get(2).getCell("divisionName").getStringValue());
+        Assert.assertEquals("addNameA", dataRows.get(3).getCell("divisionName").getStringValue());
 
         // графа 5
-        Assert.assertEquals("kppB", dataRows.get(0).getCell("kpp").getStringValue());
-        Assert.assertEquals("kppB", dataRows.get(1).getCell("kpp").getStringValue());
-        Assert.assertEquals("kppB", dataRows.get(2).getCell("kpp").getStringValue());
-        Assert.assertEquals("kppC", dataRows.get(3).getCell("kpp").getStringValue());
+        Assert.assertEquals("111111111", dataRows.get(0).getCell("kpp").getStringValue());
+        Assert.assertEquals("111111111", dataRows.get(1).getCell("kpp").getStringValue());
+        Assert.assertEquals("111111111", dataRows.get(2).getCell("kpp").getStringValue());
+        Assert.assertEquals("111111111", dataRows.get(3).getCell("kpp").getStringValue());
 
         // графа 6..10
         String [] aliases = new String [] {"avepropertyPricerageCost", "workersCount", "subjectTaxCredit", "decreaseTaxSum", "taxRate"};

@@ -108,4 +108,9 @@ public class LockDataDaoTest {
 		dao.deleteLock("a");
 		Assert.assertNull(dao.get("a"));
 	}
+
+    @Test
+    public void getLockTimeoutTest() {
+        Assert.assertEquals(dao.getLockTimeout(LockData.LockObjects.FORM_DATA), 1);
+    }
 }

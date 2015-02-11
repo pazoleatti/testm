@@ -82,6 +82,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void cleanFields();
         void cleanErrorFields();
         boolean checkChanges();
+
+        /**
+         * Метод обновляет переменную, которая используется при проверке измения полей.
+         * Обновляется после сохранения изменений.
+         */
+        void updateInputFields();
     }
 
     protected final RenameDialogPresenter renameDialogPresenter;
@@ -120,7 +126,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
             return;
         }
-        if (currentUniqueRecordId != null && getView().checkChanges()) {
+        if (mode.equals(FormMode.EDIT) && currentUniqueRecordId != null && getView().checkChanges()) {
             setIsFormModified(true);
         }
         if (isFormModified) {
@@ -138,6 +144,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                         field.put("PARENT_ID", refBookParent);
                         getView().fillInputFields(field);
                     }
+                    getView().cleanErrorFields();
                     SetFormMode.fire(EditFormPresenter.this, mode);
                 }
 
@@ -145,6 +152,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 public void no() {
                     super.no();
                     RollbackTableRowSelection.fire(EditFormPresenter.this, currentUniqueRecordId);
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
 
                 @Override
@@ -169,7 +177,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 field.put("PARENT_ID", refBookParent);
                 getView().fillInputFields(field);
             }
-            SetFormMode.fire(EditFormPresenter.this, mode);
+            //SetFormMode.fire(EditFormPresenter.this, mode);
         }
     }
 
@@ -215,7 +223,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
 	@Override
 	public void onSaveClicked(boolean isEditButtonClicked) {
-        final String title = (currentUniqueRecordId != null ? "Версия не сохранена" : "Версия не создана");
+        final String title = (currentUniqueRecordId != null ? "Запись не сохранена" : "Запись не создана");
 		try {
             LogCleanEvent.fire(EditFormPresenter.this);
             if (canVersion && getView().getVersionFrom() == null) {
@@ -268,7 +276,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         getView().fillVersionData(data, currentRefBookId, newId);
                                         UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
                                         SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
-
+                                        getView().updateInputFields();
                                     }
                                 }, this));
 			} else {
@@ -314,6 +322,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                             depType = newDepType;
                                                             setIsFormModified(false);
                                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                                            getView().updateInputFields();
                                                         }
                                                     }
                                                 }, EditFormPresenter.this));
@@ -337,11 +346,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
                                         UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                         if (result.isException()) {
-                                            Dialog.errorMessage("Версия не сохранена", "Обнаружены фатальные ошибки!");
+                                            Dialog.errorMessage("Запись не сохранена", "Обнаружены фатальные ошибки!");
                                         } else {
                                             depType = newDepType;
                                             setIsFormModified(false);
                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                            getView().updateInputFields();
                                         }
                                     }
                                 }, this));

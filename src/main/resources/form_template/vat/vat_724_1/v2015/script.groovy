@@ -588,6 +588,10 @@ void addTransportData(def xml) {
         rnuIndexCol = 8
         newRow.ndsBookSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
+        // графа 9
+        rnuIndexCol = 9
+        newRow.ndsDealSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+
         totalColumns.each { alias ->
             def value1 = totalTmp.getCell(alias).value
             def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
@@ -595,7 +599,7 @@ void addTransportData(def xml) {
         }
 
         // Техническое поле(группа)
-        rnuIndexCol = 9
+        rnuIndexCol = 10
         def sectionIndex = row.cell[rnuIndexCol].text()
 
         if (mapRows[sectionIndex] == null) {

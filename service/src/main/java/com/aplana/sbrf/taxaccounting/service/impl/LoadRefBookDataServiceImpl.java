@@ -230,7 +230,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBookId;
                         int userId = userInfo.getUser().getId();
 
-                        LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+                        LockData lockData = lockService.lock(lockKey, userId,
+                                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                         RefBook refBook = refBookDao.get(refBookId);
                         if (lockData == null) {
                             try {
@@ -243,7 +244,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
                                         if (!lockedObjects.contains(referenceLockKey)) {
-                                            LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                                             if (referenceLockData == null) {
                                                 //Блокировка установлена
                                                 lockedObjects.add(referenceLockKey);

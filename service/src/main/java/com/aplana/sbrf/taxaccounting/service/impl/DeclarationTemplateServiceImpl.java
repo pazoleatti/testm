@@ -268,7 +268,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
         LockData objectLock = lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
-                userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+                userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_TEMPLATE));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
     }
 

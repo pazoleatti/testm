@@ -17,16 +17,33 @@ import groovy.xml.MarkupBuilder
  * TODO декларация нерабочая, еще настройки подразделения дожны поменяться
  */
 
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDepartmentParams(LogLevel.WARNING)
+        sourceCheck(true, LogLevel.WARNING)
         break
     case FormDataEvent.CHECK : // проверить
         checkDepartmentParams(LogLevel.ERROR)
+        sourceCheck(true, LogLevel.ERROR)
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
         checkDepartmentParams(LogLevel.ERROR)
+        sourceCheck(true, LogLevel.ERROR)
         logicCheck()
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED: // отменить принятие
@@ -34,6 +51,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
+        sourceCheck(true, LogLevel.WARNING)
         generateXML()
         break
     default:
@@ -103,6 +121,25 @@ void checkDepartmentParams(LogLevel logLevel) {
     for (String error : errorList) {
         logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений!", error))
     }
+}
+
+// Проверка налоговой формы источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом» (данная форма-источник создана и находится в статусе «Принята»)
+private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
+    def sourceFormTypeId = 417
+    def sourceFormType = formTypeService.get(sourceFormTypeId)
+    def success = true
+
+    def departmentId = declarationData.getDepartmentId()
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+    def departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    if (departmentFormType == null) {
+        if (loggerNeed) {
+            logger.log(logLevel, "Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята» (налоговая форма не назначена источником декларации Банка/назначена источником, но не создана/назначена источником, создана, но не принята). Строка 240 Листа 02 декларации заполнена значением «0»!")
+        }
+        success = false
+    }
+    return success
 }
 
 // Логические проверки.
@@ -176,6 +213,17 @@ void generateXML() {
 
     // Выходная Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
     def dataRowsApp2 = getDataRows(formDataCollection, 415, FormDataKind.ADDITIONAL)
+
+    /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
+    def dataRowsSum = getDataRows(formDataCollection, 417, FormDataKind.ADDITIONAL)
+
+    /** НалВыпл311. Код строки декларации 240. */
+    def nalVipl311
+    if (!sourceCheck(false, LogLevel.WARNING)) {
+        nalVipl311 = 0
+    } else {
+        nalVipl311 = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
+    }
 
     if (xml == null) {
         return
@@ -839,6 +887,23 @@ def getDataRows(def formDataCollection, def formTypeId, def kind) {
         dataRows += (formDataService.getDataRowHelper(form)?.getAll()?:[])
     }
     return dataRows.isEmpty() ? null : dataRows
+}
+
+/**
+ * Получить значение ячейки фиксированной строки из налоговой формы.
+ *
+ * @param dataRows строки нф
+ * @param columnName название столбца
+ * @param alias алиас строки
+ * @return значение столбца
+ *
+ */
+def getAliasFromForm(def dataRows, def columnName, def alias) {
+    if (dataRows != null && !dataRows.isEmpty()) {
+        def aliasRow = getDataRow(dataRows, alias)
+        return getLong(aliasRow.getCell(columnName).value)
+    }
+    return 0
 }
 
 // Получить параметры подразделения (из справочника 33)

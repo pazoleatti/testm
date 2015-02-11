@@ -70,13 +70,12 @@ public class LogAreaPresenter extends
 
     @Override
     public void onLogUpdate(LogAddEvent event) {
+        if (event.isClearPreviousLog()) {
+            clean();
+        }
         uuid = event.getUuid();
         if (uuid != null) {
             getView().setPrintLink(GWT.getHostPageBaseURL() + "download/logEntry/" + uuid);
-
-        }
-        if (event.isClearPreviousLog()) {
-            clean();
         }
         onRangeChange(0, getView().getLogEntriesView().getPageSize());
     }

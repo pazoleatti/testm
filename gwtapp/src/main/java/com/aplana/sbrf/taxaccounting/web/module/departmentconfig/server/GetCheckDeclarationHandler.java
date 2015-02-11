@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.GetCheckDeclarationAction;
@@ -16,7 +18,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -29,6 +33,7 @@ import static java.util.Arrays.asList;
 public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDeclarationAction, GetCheckDeclarationResult> {
 
     private static final String WARN_MSG = "\"%s\" %s, \"%s\", состояние - \"%s\"";
+    private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
     private TAUserService userService;
@@ -50,12 +55,17 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
 
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     private SecurityService securityService;
 
     @Autowired
+    private RefBookFactory rbFactory;
+
+    @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
+
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
 
     public GetCheckDeclarationHandler() {
         super(GetCheckDeclarationAction.class);
@@ -64,67 +74,107 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
     @Override
     public GetCheckDeclarationResult execute(GetCheckDeclarationAction action, ExecutionContext executionContext) throws ActionException {
         GetCheckDeclarationResult result = new GetCheckDeclarationResult();
-        Logger logger = new Logger();
+        result.setControlUnp(securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP));
 
+        Logger logger = new Logger();
         ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
-        String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
-        result.setReportPeriodName(periodName);
-        DepartmentReportPeriodFilter departmentReportPeriodFilter = new DepartmentReportPeriodFilter();
-        departmentReportPeriodFilter.setDepartmentIdList(asList(action.getDepartment()));
-        departmentReportPeriodFilter.setReportPeriodIdList(asList(action.getReportPeriodId()));
-        departmentReportPeriodFilter.setIsActive(true);
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
-        DepartmentReportPeriod departmentReportPeriod = null;
-        if (departmentReportPeriodList.size() == 1) {
-            departmentReportPeriod = departmentReportPeriodList.get(0);
+        List<Integer> reportPeriodIds = new ArrayList<Integer>();
+        ArrayList<Long> formTypeIds = new ArrayList<Long>();
+        Long refBookId = null;
+        switch (action.getTaxType()) {
+            case INCOME:
+                refBookId = RefBook.DEPARTMENT_CONFIG_INCOME;
+                formTypeIds.add(372L); // приложение 5
+                formTypeIds.add(500L); // сводная 5
+                break;
+            case TRANSPORT:
+                refBookId = RefBook.DEPARTMENT_CONFIG_TRANSPORT;
+                break;
+            case DEAL:
+                refBookId = RefBook.DEPARTMENT_CONFIG_DEAL;
+                break;
+            case VAT:
+                refBookId = RefBook.DEPARTMENT_CONFIG_VAT;
+                break;
+            case PROPERTY:
+                refBookId = RefBook.DEPARTMENT_CONFIG_PROPERTY;
+                break;
         }
-        String correctionDate = (departmentReportPeriod == null || departmentReportPeriod.getCorrectionDate() == null) ? "" :
-                "с датой сдачи корректировки \"" + (departmentReportPeriod.getCorrectionDate()) + "\"";
+        RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
+        String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartment();
+        List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
+        Date dateStart = period.getCalendarStartDate(), dateEnd;
+        if (recordPairs.size() != 0) {
+            //RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(recordPairs.get(0).getFirst());
+            dateEnd = provider.getRecordVersionInfo(recordPairs.get(0).getFirst()).getVersionEnd();
+            List<ReportPeriod> reportPeriodList = reportService.getReportPeriodsByDate(action.getTaxType(), dateStart, dateEnd);
+            if (reportPeriodList.isEmpty()){
+                return result;
+            }
+
+            for(ReportPeriod reportPeriod: reportPeriodList)
+                reportPeriodIds.add(reportPeriod.getId());
+
+            StringBuffer periodName = new StringBuffer();
+            periodName.append("с ");
+            periodName.append(SIMPLE_DATE_FORMAT.format(dateStart));
+            periodName.append(" по ");
+            if (dateEnd != null) {
+                periodName.append(SIMPLE_DATE_FORMAT.format(dateEnd));
+            } else {
+                periodName.append(" \"-\"");
+            }
+
+            result.setReportPeriodName(periodName.toString());
+        } else {
+            return result;
+        }
+
+        String periodName, correctionDate;
 
         DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
-        declarationDataFilter.setReportPeriodIds(asList(action.getReportPeriodId()));
+        declarationDataFilter.setReportPeriodIds(reportPeriodIds);
         declarationDataFilter.setDepartmentIds(asList(action.getDepartment()));
-        declarationDataFilter.setSearchOrdering(DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME);
-        declarationDataFilter.setStartIndex(0);
-        declarationDataFilter.setCountOfRecords(10);
         declarationDataFilter.setTaxType(action.getTaxType());
-        PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(declarationDataFilter);
-        for(DeclarationDataSearchResultItem item: page) {
-            logger.warn(String.format(WARN_MSG, periodName, correctionDate, item.getDeclarationType(), item.isAccepted() ? "Принята" : "Создана"));
+        List<DeclarationData> page = declarationDataSearchService.getDeclarationData(declarationDataFilter, DeclarationDataSearchOrdering.ID, false);
+        for(DeclarationData item: page) {
+            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(item.getDepartmentReportPeriodId());
+            periodName = departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
+            correctionDate = (departmentReportPeriod.getCorrectionDate() == null) ? "" :
+                    "с датой сдачи корректировки \"" + (departmentReportPeriod.getCorrectionDate()) + "\"";
+            logger.warn(String.format(WARN_MSG, periodName, correctionDate, declarationTemplateService.get(item.getDeclarationTemplateId()).getType().getName(), item.isAccepted() ? "Принята" : "Создана"));
             result.setDeclarationFormFound(true);
         }
 
-        FormDataFilter formDataFilter = new FormDataFilter();
-        formDataFilter.setReportPeriodIds(asList(action.getReportPeriodId()));
-        ArrayList<Long> formTypeIds = new ArrayList<Long>();
-        formTypeIds.add(372L); // приложение 5
-        formTypeIds.add(500L); // сводная 5
-        formDataFilter.setFormTypeId(formTypeIds);
-        formDataFilter.setFormState(WorkflowState.ACCEPTED);
-        formDataFilter.setTaxType(action.getTaxType());
-        TAUserInfo userInfo = userService.getSystemUserInfo();
-        boolean manual = true;
-        List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
-        for(Long formDataId : formDataIds) {
-            FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
-            PagingResult<DataRow<Cell>> resultDataRow = dataRowService.getDataRows(formDataId, null, true, manual);
-            for(DataRow<Cell> dataRow : resultDataRow) {
-                BigDecimal regionBankDivisionId = dataRow.getCell("regionBankDivision").getNumericValue();
-                if (regionBankDivisionId != null && regionBankDivisionId.intValue() == action.getDepartment()) {
-                    logger.warn(String.format(WARN_MSG, periodName, correctionDate, formData.getFormType().getName(), formData.getState().getName()));
-                    result.setDeclarationFormFound(true);
-                    break;
+        if (!formTypeIds.isEmpty()) {
+            FormDataFilter formDataFilter = new FormDataFilter();
+            formDataFilter.setReportPeriodIds(reportPeriodIds);
+            formDataFilter.setFormTypeId(formTypeIds);
+            formDataFilter.setTaxType(action.getTaxType());
+            TAUserInfo userInfo = userService.getSystemUserInfo();
+            boolean manual = true;
+            List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
+            for (Long formDataId : formDataIds) {
+                FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
+                PagingResult<DataRow<Cell>> resultDataRow = dataRowService.getDataRows(formDataId, null, true, manual);
+                for (DataRow<Cell> dataRow : resultDataRow) {
+                    BigDecimal regionBankDivisionId = dataRow.getCell("regionBankDivision").getNumericValue();
+                    if (regionBankDivisionId != null && regionBankDivisionId.intValue() == action.getDepartment()) {
+                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+                        periodName = departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
+                        correctionDate = (departmentReportPeriod.getCorrectionDate() == null) ? "" :
+                                "с датой сдачи корректировки \"" + (departmentReportPeriod.getCorrectionDate()) + "\"";
+                        logger.warn(String.format(WARN_MSG, periodName, correctionDate, formData.getFormType().getName(), formData.getState().getName()));
+                        result.setDeclarationFormFound(true);
+                        break;
+                    }
                 }
             }
         }
         // Запись ошибок в лог при наличии
         if (!logger.getEntries().isEmpty()) {
             result.setUuid(logEntryService.save(logger.getEntries()));
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                result.setHasError(true);
-            }
         }
-        result.setControlUnp(securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP));
         return result;
     }
 

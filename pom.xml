@@ -442,16 +442,6 @@
 								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							</manifest>
-							<manifestEntries>
-								<Built-Date>${maven.build.timestamp}</Built-Date>
-								<X-Git-Branch>${git.branch}</X-Git-Branch>
-								<X-Git-Tag>${git.tag}</X-Git-Tag>
-								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
-								<X-Git-Revision>${git.revision}</X-Git-Revision>
-								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
-								<X-Git>${git.buildnumber}(${maven.build.timestamp})</X-Git>
-                                <Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
-							</manifestEntries>
 						</archive>
 					</configuration>
 				</plugin>
@@ -474,16 +464,6 @@
 								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							</manifest>
-							<manifestEntries>
-								<Built-Date>${maven.build.timestamp}</Built-Date>
-								<X-Git-Branch>${git.branch}</X-Git-Branch>
-								<X-Git-Tag>${git.tag}</X-Git-Tag>
-								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
-								<X-Git-Revision>${git.revision}</X-Git-Revision>
-								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
-								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
-                                <Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
-							</manifestEntries>
 						</archive>
 					</configuration>
 				</plugin>
@@ -505,7 +485,6 @@
 								<X-Git-Commits-Count>${git.commitsCount}</X-Git-Commits-Count>
 								<X-Git-Revision>${git.revision}</X-Git-Revision>
 								<X-Git-Build-Number>${git.buildnumber}</X-Git-Build-Number>
-								<X-Git>${git.buildnumber}.${maven.build.timestamp}</X-Git>
 								<Url-Guarantee>${guaranteeUrl}</Url-Guarantee>
 							</manifestEntries>
 						</archive>
@@ -555,6 +534,11 @@
 							<goal>extract-buildnumber</goal>
 						</goals>
 						<phase>prepare-package</phase>
+                        <configuration>
+                            <javaScriptBuildnumberCallback>
+                                commitsCount + "." + shortRevision
+                            </javaScriptBuildnumberCallback>
+                        </configuration>
 					</execution>
 				</executions>
 			</plugin>

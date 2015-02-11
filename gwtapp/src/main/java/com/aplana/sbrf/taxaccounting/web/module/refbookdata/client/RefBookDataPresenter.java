@@ -141,7 +141,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
 	@Override
 	public void onAddRowClicked() {
-        //getView().updateMode(FormMode.CREATE);
+        getView().updateMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
 		editFormPresenter.show(null);
 	}
@@ -252,6 +252,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                                 setMode(mode);
                                                             }
                                                             getView().setRange(new Range(0, getView().getPageSize()));
+                                                            //т.к. не срабатывает событие onSelectionChange приповторном переходе
+                                                            editFormPresenter.show(recordId);
                                                             getProxy().manualReveal(RefBookDataPresenter.this);
                                                         }
                                                     }, RefBookDataPresenter.this));

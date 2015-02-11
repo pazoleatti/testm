@@ -77,4 +77,11 @@ public interface LockDataDao {
      * @param userId идентификатор пользователя
      */
     void addUserWaitingForLock(String key, int userId);
+
+    /**
+     * Получает таймаут для блокировки
+     * @param lockObject объект блокировки
+     * @return время в милисекундах
+     */
+    int getLockTimeout(LockData.LockObjects lockObject);
 }

@@ -121,7 +121,6 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
                     @Override
                     public void yes() {
                         getUiHandlers().save();
-                        getUiHandlers().close();
                     }
                 });
     }

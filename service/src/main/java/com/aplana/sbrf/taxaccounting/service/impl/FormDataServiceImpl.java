@@ -40,7 +40,6 @@ import java.util.*;
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
 
-	public static final int FORM_DATA_LOCK_TIMEOUT = 6 * 3600000;
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
     private static final Calendar CALENDAR = Calendar.getInstance();
@@ -619,7 +618,8 @@ public class FormDataServiceImpl implements FormDataService {
             List<String> lockedObjects = new ArrayList<String>();
             int userId = userInfo.getUser().getId();
             checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
-            LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+            LockData lockData = lockService.lock(lockKey, userId,
+                    lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
             if (lockData == null) {
                 try {
                     //Блокировка установлена
@@ -632,7 +632,8 @@ public class FormDataServiceImpl implements FormDataService {
                                 RefBook refBook = refBookDao.getByAttribute(attributeId);
                                 String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
                                 if (!lockedObjects.contains(referenceLockKey)) {
-                                    LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                                    LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                            lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                                     if (referenceLockData == null) {
                                         //Блокировка установлена
                                         lockedObjects.add(referenceLockKey);
@@ -827,24 +828,41 @@ public class FormDataServiceImpl implements FormDataService {
        List<String> lockedForms = new ArrayList<String>();
 
         try {
-            // Проверяем блокировку приемников
+            // Проверяем/устанавливаем блокировку приемников
             List<String> errorsList = new ArrayList<String>();
             for (DepartmentFormType destinationDFT : departmentFormTypes) {
-                String periodOrder = ((destinationDFT.getKind() == FormDataKind.PRIMARY || destinationDFT.getKind() == FormDataKind.CONSOLIDATED) && formData.getPeriodOrder() != null) ?
-                        String.valueOf(formData.getPeriodOrder()) : "";
-                String lockKey = formData.getReportPeriodId() + "." + periodOrder + "." + destinationDFT.getDepartmentId()
-                        + "." + destinationDFT.getFormTypeId() + "." + destinationDFT.getKind();
 
-                LockData lockData = lockService.lock(lockKey, userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME * 3);
-                if (lockData != null) {
-                    FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(destinationDFT.getFormTypeId(), formData.getReportPeriodId()));
-                    errorsList.add(String.format("«%s» %s, %s, «%s» заблокирована пользователем %s, %s",
-                                    formTemplate.getName(), destinationDFT.getKind().getName(),
-                                    reportPeriod.getTaxPeriod().getYear()+" "+reportPeriod.getName(),
-                                    departmentService.getDepartment(destinationDFT.getDepartmentId()).getName(),
-                                    userService.getUser(lockData.getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateBefore())));
-                } else {
-                    lockedForms.add(lockKey);
+                // Последний отчетный период подразделения
+                DepartmentReportPeriod destinationDepartmentReportPeriod =
+                        departmentReportPeriodService.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
+
+                if (destinationDepartmentReportPeriod == null) {
+                    continue;
+                }
+
+                // Экземпляр формы-приемника
+                FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
+                        destinationDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+                // Если форма распринимается при отсутствии экземпляра формы-приемника, то такую форму не обрабатываем.
+                if (destinationForm == null && workflowMove.getFromState() == WorkflowState.ACCEPTED) {
+                    continue;
+                }
+
+                if (destinationForm != null) {
+                    String lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + destinationForm.getId();
+                    LockData lockData = lockService.lock(lockKey,
+                            userInfo.getUser().getId(),
+                            lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+
+                    if (lockData != null) {
+                        errorsList.add(String.format("«%s» %s, %s, «%s» заблокирована пользователем %s, %s",
+                                destinationForm.getFormType().getName(), destinationForm.getKind().getName(),
+                                destinationDepartmentReportPeriod.getReportPeriod().getTaxPeriod().getYear()+" "+destinationDepartmentReportPeriod.getReportPeriod().getName(),
+                                departmentService.getDepartment(destinationForm.getDepartmentId()).getName(),
+                                userService.getUser(lockData.getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())));
+                    } else {
+                        lockedForms.add(lockKey);
+                    }
                 }
             }
             if (!errorsList.isEmpty()) {
@@ -927,7 +945,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
         checkLockAnotherUser(lockService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId,
-                userInfo.getUser().getId(), FORM_DATA_LOCK_TIMEOUT), null,  userInfo.getUser());
+                userInfo.getUser().getId(),
+                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
 		dataRowDao.rollback(formDataId);
 	}
 
@@ -1227,7 +1246,8 @@ public class FormDataServiceImpl implements FormDataService {
 					userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateBefore())));
         }
 		// продлеваем пользовательскую блокировку
-		lockService.extend(lockData.getKey(), user.getId(), FORM_DATA_LOCK_TIMEOUT);
+		lockService.extend(lockData.getKey(), user.getId(),
+                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
     }
 
     @Override
