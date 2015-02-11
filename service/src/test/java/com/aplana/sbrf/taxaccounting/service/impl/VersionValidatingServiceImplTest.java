@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.FormTypeService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.templateversion.VersionOperatingService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,6 +15,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Mockito.when;
@@ -32,11 +33,24 @@ public class VersionValidatingServiceImplTest {
     @Autowired
     FormTypeService formTypeService;
 
-    @Qualifier("versionValidatingService")
+    @Qualifier("versionFTValidatingService")
     @Autowired
-    VersionOperatingService versionOperatingService;
+    VersionOperatingService versionFTOperatingService;
+
     @Autowired
     SourceService sourceService;
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    PeriodService periodService;
+    @Autowired
+    DepartmentService departmentService;
+    @Autowired
+    FormDataDao formDataDao;
+    @Autowired
+    FormDataService formDataService;
+
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     private static int FORM_TEMPLATE_ID_F = 1;
     private static int FORM_TEMPLATE_ID_S = 2;
@@ -148,7 +162,7 @@ public class VersionValidatingServiceImplTest {
         FormTemplate formTemplate = formTemplateService.get(FORM_TEMPLATE_ID_F);
         Logger logger = new Logger();
 
-        versionOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(), formTemplate.getStatus(),
+        versionFTOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(), formTemplate.getStatus(),
                 formTemplate.getVersion(), actualEndVersion, logger);
     }
 
@@ -159,7 +173,7 @@ public class VersionValidatingServiceImplTest {
         calendar.set(2013, Calendar.JANUARY, 1);
         Logger logger = new Logger();
 
-        versionOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(), formTemplate.getStatus(),
+        versionFTOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(), formTemplate.getStatus(),
                 formTemplate.getVersion(), calendar.getTime(), logger);
     }
 
@@ -169,9 +183,93 @@ public class VersionValidatingServiceImplTest {
         calendar.set(2013, Calendar.DECEMBER, 31);
         Logger logger = new Logger();
 
-        versionOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(), formTemplate.getStatus(),
+        versionFTOperatingService.isIntersectionVersion(formTemplate.getId(), formTemplate.getType().getId(), formTemplate.getStatus(),
                 formTemplate.getVersion(), calendar.getTime(), logger);
         Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
+    }
+
+    @Test
+    public void isUsedVersionTest() throws ParseException {
+        Logger logger = new Logger();
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Тестовый тип НФ");
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setType(formType);
+        formTemplate.setId(1);
+
+        FormData formData = new FormData(formTemplate);
+        formData.setState(WorkflowState.CREATED);
+        formData.setKind(FormDataKind.SUMMARY);
+        formData.setDepartmentId(1);
+        formData.setReportPeriodId(1);
+        formData.setId(1l);
+        formData.setDepartmentReportPeriodId(1);
+
+        FormData formData1 = new FormData(formTemplate);
+        formData1.setState(WorkflowState.CREATED);
+        formData1.setKind(FormDataKind.SUMMARY);
+        formData1.setDepartmentId(1);
+        formData1.setReportPeriodId(2);
+        formData1.setId(2l);
+        formData1.setDepartmentReportPeriodId(2);
+
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setId(1);
+        taxPeriod.setYear(2014);
+        taxPeriod.setTaxType(TaxType.INCOME);
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(1);
+        reportPeriod.setTaxPeriod(taxPeriod);
+        reportPeriod.setName("Тестовый период");
+        ReportPeriod reportPeriod1 = new ReportPeriod();
+        reportPeriod1.setId(2);
+        reportPeriod1.setTaxPeriod(taxPeriod);
+        reportPeriod1.setName("Второй тестовый период");
+
+        Department department = new Department();
+        department.setName("Тестовое подразделение");
+
+        List<Long> list = new ArrayList<Long>() {{
+            add(1l);
+            add(2l);
+        }};
+
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp);
+        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("01.01.2014"));
+        when(departmentReportPeriodService.get(formData1.getDepartmentReportPeriodId())).thenReturn(drp1);
+
+        when(formDataDao.getWithoutRows(1)).thenReturn(formData);
+        when(formDataDao.getWithoutRows(2)).thenReturn(formData1);
+
+        when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
+        when(periodService.getReportPeriod(2)).thenReturn(reportPeriod1);
+
+        when(departmentService.getDepartment(1)).thenReturn(department);
+
+        when(formDataService.getFormDataListInActualPeriodByTemplate(formTemplate.getId(), SIMPLE_DATE_FORMAT.parse("01.01.2014")))
+        .thenReturn(list);
+
+        versionFTOperatingService.isUsedVersion(
+                formTemplate.getId(),
+                1,
+                VersionedObjectStatus.NORMAL,
+                SIMPLE_DATE_FORMAT.parse("01.01.2014"),
+                SIMPLE_DATE_FORMAT.parse("01.01.2014"),
+                logger);
+
+        Assert.assertEquals(
+                "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период\" 2014 для макета",
+                logger.getEntries().get(0).getMessage()
+        );
+        Assert.assertEquals(
+                "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период\" 2014 с датой сдачи корректировки 01.01.2014 для макета",
+                logger.getEntries().get(1).getMessage()
+        );
     }
 
 }

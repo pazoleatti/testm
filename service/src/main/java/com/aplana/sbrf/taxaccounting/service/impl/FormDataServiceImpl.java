@@ -55,8 +55,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String XLSM_EXT = "xlsm";
-    public static final String MSG_IS_EXIST_FORM =
-            "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\" %d%s для макета";
+    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"";
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
@@ -992,16 +991,12 @@ public class FormDataServiceImpl implements FormDataService {
             for (long formDataId : formDataIds) {
                 FormData formData = formDataDao.getWithoutRows(formDataId);
                 ReportPeriod period = reportPeriodDao.get(formData.getReportPeriodId());
-                DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
 
                 logger.error(MSG_IS_EXIST_FORM,
                         formData.getFormType().getName(),
                         kind.getName(),
                         departmentService.getDepartment(departmentId).getName(),
-                        period.getName() + (formData.getPeriodOrder() != null?Months.fromId(formData.getPeriodOrder()).getTitle():""),
-                        period.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "");
+                        period.getName() + " " + period.getTaxPeriod().getYear());
             }
         }
         return !formDataIds.isEmpty();
