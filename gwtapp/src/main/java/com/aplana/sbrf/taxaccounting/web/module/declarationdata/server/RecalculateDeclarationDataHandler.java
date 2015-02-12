@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -56,6 +57,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
 		TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
+        declarationDataService.preCalculationCheck(logger, action.getDeclarationId(), userInfo);
         int userId = userInfo.getUser().getId();
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
@@ -85,7 +87,10 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                     asyncManager.executeAsync(ReportType.XML_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);
-                    logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");
+                    logger.error("Ошибка при постановке в очередь задачи формирования декларации");
+                }
+                if (!logger.containsLevel(LogLevel.ERROR)) {
+                    logger.info("Декларация поставлена в очередь на формирование");
                 }
                 result.setUuid(logEntryService.save(logger.getEntries()));
             } catch(Exception e) {
