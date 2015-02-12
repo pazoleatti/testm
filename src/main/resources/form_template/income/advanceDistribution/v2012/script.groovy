@@ -232,9 +232,6 @@ void calc() {
         // графа 4 - наименование подразделения в декларации
         row.divisionName = calc4(row)
 
-        // графа 5 - кпп
-        row.kpp = incomeParam.KPP?.stringValue
-
         // графа 9 - Признак расчёта
         row.calcFlag = calc9(row)
 
