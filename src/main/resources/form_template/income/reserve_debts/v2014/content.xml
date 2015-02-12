@@ -17,7 +17,7 @@
         <alias>forLabel</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name></name>
+        <name> </name>
         <order>2</order>
         <width>0</width>
         <maxLength>255</maxLength>
