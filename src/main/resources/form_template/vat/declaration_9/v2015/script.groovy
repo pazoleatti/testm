@@ -42,6 +42,10 @@ switch (formDataEvent) {
 @Field
 def providerCache = [:]
 
+// Параметры подразделения
+@Field
+def departmentParam = null
+
 // Получение провайдера с использованием кеширования
 def getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
@@ -51,14 +55,8 @@ def getProvider(def long providerId) {
 }
 
 void checkDepartmentParams(LogLevel logLevel) {
-    def departmentId = declarationData.departmentId
-
     // Параметры подразделения
-    def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
-    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-    }
-    def departmentParam = departmentParamList?.get(0)
+    def departmentParam = getDepartmentParam()
 
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParam)
@@ -69,6 +67,19 @@ void checkDepartmentParams(LogLevel logLevel) {
     for (String error : errorList) {
         logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений", error))
     }
+}
+
+// Получить параметры подразделения
+def getDepartmentParam() {
+    if (departmentParam == null) {
+        def departmentId = declarationData.departmentId
+        def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
 }
 
 List<String> getErrorDepartment(record) {

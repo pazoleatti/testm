@@ -42,6 +42,10 @@ switch (formDataEvent) {
 @Field
 def providerCache = [:]
 
+// Параметры подразделения
+@Field
+def departmentParam = null
+
 // Получение провайдера с использованием кеширования
 def getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
@@ -51,14 +55,8 @@ def getProvider(def long providerId) {
 }
 
 void checkDepartmentParams(LogLevel logLevel) {
-    def departmentId = declarationData.departmentId
-
     // Параметры подразделения
-    def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
-    if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
-    }
-    def departmentParam = departmentParamList?.get(0)
+    def departmentParam = getDepartmentParam()
 
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParam)
@@ -69,6 +67,19 @@ void checkDepartmentParams(LogLevel logLevel) {
     for (String error : errorList) {
         logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений", error))
     }
+}
+
+// Получить параметры подразделения
+def getDepartmentParam() {
+    if (departmentParam == null) {
+        def departmentId = declarationData.departmentId
+        def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+        if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
+            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        }
+        departmentParam = departmentParamList?.get(0)
+    }
+    return departmentParam
 }
 
 List<String> getErrorDepartment(record) {
@@ -91,26 +102,10 @@ List<String> getErrorVersion(record) {
 }
 
 void generateXML() {
-    // Параметры подразделения
-    def departmentParam = getDepartmentParam()
-
     // атрибуты, заполняемые по настройкам подразделений
-    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
-    def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value
-    def okato = getOkato(departmentParam?.OKTMO?.value)
-    def taxPlaceTypeCode = getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
-    def signatoryId = getRefBookValue(35, departmentParam?.SIGNATORY_ID?.value)?.CODE?.value
-    def name = departmentParam?.NAME?.value
+    def departmentParam = getDepartmentParam()
     def inn = departmentParam?.INN?.value
-    def kpp = departmentParam?.KPP?.value
     def formatVersion = departmentParam?.FORMAT_VERSION?.value
-    def surname = departmentParam?.SIGNATORY_SURNAME?.value
-    def firstname = departmentParam?.SIGNATORY_FIRSTNAME?.value
-    def lastname = departmentParam?.SIGNATORY_LASTNAME?.value
-    def approveDocName = departmentParam?.APPROVE_DOC_NAME?.value
-    def approveOrgName = departmentParam?.APPROVE_ORG_NAME?.value
-    def reorgINN = departmentParam?.REORG_INN?.value
-    def reorgKPP = departmentParam?.REORG_KPP?.value
 
     // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".8" + "_" +
@@ -130,8 +125,8 @@ void generateXML() {
     def corrNumber9371
     for (def formData : formDataList) {
         if (formData.id == 607) {
-            def dataRows9371 = formDataService.getDataRowHelper(formData)?.getAll()
-            for (def row : dataRows9371) {
+            def sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+            for (def row : sourceDataRows) {
                 if (row.getAlias() != null) {
                     // заполняем строку 190 отдельно по итоговой строке
                     code190 = row.nds
@@ -139,12 +134,11 @@ void generateXML() {
                 }
                 rows9371.add(row)
             }
-
-            corrNumber9371 = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
+            corrNumber9371 = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
         }
     }
     if (corrNumber > 0) {
-        code001 = corrNumber == corrNumber9371 ? 0 : 1
+        code001 = (corrNumber == corrNumber9371) ? 0 : 1
     }
 
 
@@ -180,12 +174,26 @@ void generateXML() {
                     def code180 = row.todo
                     def code100 = row.todo
                     def code110 = row.todo
-                    def code130innUL = row.todo
-                    def code130kpp = row.todo
-                    def code130innFL = row.todo
+                    def String code130 = row.todo
+                    def code130inn
+                    def code130kpp
+                    def code140 = row.todo
+                    def code140inn
+                    def code140kpp
 
-                    // TODO как отличить ЮЛ от ФЛ?
-                    def boolean isUL = true
+                    // различаем юр. и физ. лица в строках 130 и 140
+                    def boolean isUL130 = false
+                    if (code130.contains("/")) {
+                        isUL130 = true
+                        code130inn = code130.substring(0, code130.indexOf("/"))
+                        code130kpp = code130.substring(code130.indexOf("/") + 1)
+                    }
+                    def boolean isUL140 = false
+                    if (code140.contains("/")) {
+                        isUL140 = true
+                        code140inn = code140.substring(0, code140.indexOf("/"))
+                        code140kpp = code140.substring(code140.indexOf("/") + 1)
+                    }
 
                     КнПокСтр(
                             НомерПор: code005,
@@ -209,26 +217,26 @@ void generateXML() {
                         )
                         ДатаУчТов { code120 }
                         СвПрод() {
-                            if (isUL) {
+                            if (isUL130) {
                                 СведЮЛ(
-                                        ИННЮЛ: code130innUL,
+                                        ИННЮЛ: code130inn,
                                         КПП: code130kpp
                                 )
                             } else {
                                 СведИП(
-                                        ИННФЛ: code130innFL
+                                        ИННФЛ: code130
                                 )
                             }
                         }
                         СвПос() {
-                            if (isUL) {
+                            if (isUL140) {
                                 СведЮЛ(
-                                        ИННЮЛ: code130innUL,
-                                        КПП: code130kpp
+                                        ИННЮЛ: code140inn,
+                                        КПП: code140kpp
                                 )
                             } else {
                                 СведИП(
-                                        ИННФЛ: code130innFL
+                                        ИННФЛ: code140
                                 )
                             }
                         }
