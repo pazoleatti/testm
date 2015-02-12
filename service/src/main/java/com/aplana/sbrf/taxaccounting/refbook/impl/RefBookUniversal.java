@@ -286,15 +286,17 @@ public class RefBookUniversal implements RefBookDataProvider {
             throw new ServiceException("Обнаружено некорректное значение атрибута");
         }
 
-        if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
-                !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
-                !refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) &&
-                !refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) &&
-                !refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) &&
-                !refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) &&
-                !refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) &&
-                !refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId())
-                ) {
+        //Признак настроек подразделений
+        boolean isConfig = refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) ||
+                refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) ||
+                refBookId.equals(RefBook.DEPARTMENT_CONFIG_DEAL) ||
+                refBookId.equals(RefBook.DEPARTMENT_CONFIG_VAT) ||
+                refBookId.equals(RefBook.DEPARTMENT_CONFIG_PROPERTY) ||
+                refBookId.equals(RefBook.WithTable.PROPERTY.getTableRefBookId()) ||
+                refBookId.equals(RefBook.WithTable.TRANSPORT.getTableRefBookId()) ||
+                refBookId.equals(RefBook.WithTable.INCOME.getTableRefBookId());
+
+        if (!isConfig) {
 
             //Проверка отсутствия конфликта с датой актуальности родительского элемента
             if (refBook.isHierarchic()) {
@@ -336,10 +338,11 @@ public class RefBookUniversal implements RefBookDataProvider {
                     throw new ServiceException("Нарушено требование к уникальности, уже существуют элементы "+attrNames+" в указанном периоде!");
                 }
             }
-
-            //Проверка ссылочных значений
-            refBookDao.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom, versionTo, attributes, records);
         }
+
+        //Проверка ссылочных значений
+        refBookDao.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom, versionTo,
+                attributes, records, isConfig);
     }
 
     /**

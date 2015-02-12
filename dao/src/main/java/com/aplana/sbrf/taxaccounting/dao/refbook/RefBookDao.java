@@ -568,8 +568,10 @@ public interface RefBookDao {
      * @param versionFrom дата актуальности новой версии
      * @param attributes  атрибуты справочника
      * @param records     новые значения полей элемента справочника
+     * @param isConfig    признак того, что проверка выполняется для настроек подразделений
      */
-    void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records);
+    void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo,
+                                  @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records, boolean isConfig);
 
     Map<String, RefBookValue> getRecordData(Long refBookId, String tableName, Long recordId);
 
