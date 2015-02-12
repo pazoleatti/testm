@@ -69,6 +69,15 @@ public interface DeclarationDataService {
 	 */
 	void check(Logger logger, long declarationDataId, TAUserInfo userInfo);
 
+    /**
+     * метод запускает скрипты с событием предрасчетные проверки
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @param logger - объект журнала
+     * @throws AccessDeniedException если у пользователя не хватает прав на удаление
+     */
+    void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo);
+
 	/**
 	 * Установить в декларации флаг принятия
 	 * @param logger - объект журнала

@@ -227,6 +227,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    public void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo) {
+        declarationDataScriptingService.executeScript(userInfo,
+                declarationDataDao.get(declarationDataId), FormDataEvent.PRE_CALCULATION_CHECK, logger, null);
+        // Проверяем ошибки
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Найдены ошибки при выполнении расчета декларации",
+                    logEntryService.save(logger.getEntries()));
+        }
+    }
+
+    @Override
     public DeclarationData get(long id, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         return declarationDataDao.get(id);
