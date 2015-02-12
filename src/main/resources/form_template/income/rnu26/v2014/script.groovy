@@ -100,13 +100,13 @@ def refBookCache = [:]
 // все атрибуты
 @Field
 def allColumns = ['rowNumber', 'fix', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
-                  'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
-                  'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+        'reserveCalcValuePrev', 'cost', 'signSecurity', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
+        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 // Редактируемые атрибуты (графа 3..6, 7, 9, 11, 12)
 @Field
 def editableColumns = ['issuer', 'issuer', 'shareType', 'tradeNumber', 'currency', 'lotSizePrev', 'lotSizeCurrent',
-                       'cost', 'signSecurity', 'marketQuotation', 'rubCourse']
+        'cost', 'signSecurity', 'marketQuotation', 'rubCourse']
 
 // Автозаполняемые атрибуты
 @Field
@@ -115,12 +115,12 @@ def autoFillColumns = allColumns - editableColumns
 // Проверяемые на пустые значения атрибуты (графа 1..3, 5..9, 13, 14)
 @Field
 def nonEmptyColumns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
-                       'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
+        'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
 @Field
 def totalColumns = ['lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
-                    'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
+        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery']
 
 @Field
 def groupColumns = ['issuer']
@@ -186,24 +186,19 @@ def getNumber(def value, def indexRow, def indexCol) {
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-
     deleteAllAliased(dataRows)
-
     // отсортировать/группировать
-    sort(dataRows)
-
+    dataRows = sort(dataRows)
     def reportDate = getReportDate()
-
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
-
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroups = []
-
+    def rowsMap = getTradeNumberObjectMap(prevDataRows)
     for (row in dataRows) {
         if (!getBalancePeriod() && !isConsolidated) {
             // строка из предыдущего периода
-            def prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
+            def prevRow = rowsMap[row.tradeNumber]
             // графа 6
             row.lotSizePrev = calc6(row, prevRow, prevDataRows)
             // графа 8
@@ -225,10 +220,8 @@ void calc() {
             totalGroups.add(issuerId)
         }
     }
-
     // добавить строку "итого"
     dataRows.add(getCalcTotalRow(dataRows))
-
     // добавить подитоговые значения
     updateIndexes(dataRows)
     def i = 0
@@ -245,11 +238,21 @@ void calc() {
         dataRows.add(lastRowIndex, subTotalRow)
         i++
     }
-
     updateIndexes(dataRows)
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    // запись
+    dataRowHelper.clear()
+    def rows = []
+    dataRows.each { row ->
+        rows.add(row)
+        if (rows.size() > 1000) {
+            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+            rows.clear()
+        }
+    }
+    if (rows.size() > 0) {
+        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+        rows.clear()
+    }
 }
 
 // Логические проверки
@@ -258,7 +261,6 @@ void logicCheck() {
     if (!dataRows) {
         return
     }
-
     // суммы строки общих итогов
     def totalSums = [:]
     totalColumns.each { alias ->
@@ -268,10 +270,9 @@ void logicCheck() {
     }
     // список групп кодов классификации для которых надо будет посчитать суммы
     def totalGroups = []
-
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
-
+    def rowsMap = getTradeNumberObjectMap(prevDataRows)
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -281,49 +282,40 @@ void logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !getBalancePeriod())
-
         // 4. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 8, 17)
         if (row.lotSizeCurrent == 0 && row.reserveCalcValuePrev != row.reserveRecovery) {
             rowWarning(logger, row, errorMsg + 'Графы 8 и 17 неравны!')
         }
-
         // 5. Проверка при нулевом значении размера лота на текущую отчётную дату (графа 7, 9, 14, 15)
         if (row.lotSizeCurrent == 0 && (row.cost != 0 || row.costOnMarketQuotation != 0 || row.reserveCalcValue != 0)) {
             rowWarning(logger, row, errorMsg + 'Графы 9, 14 и 15 ненулевые!')
         }
-
         // 6. Проверка при нулевом значении размера лота на предыдущую отчётную дату (графа 6, 8, 17)
         if (row.lotSizePrev == 0 && (row.reserveCalcValuePrev != 0 || row.reserveRecovery != 0)) {
             loggerError(row, errorMsg + 'Графы 8 и 17 ненулевые!')
         }
-
         // 7. Проверка необращающихся акций (графа 10, 15, 16)
         def sign = getSign(row)
         if (sign == '-' && (row.reserveCalcValue != 0 || row.reserveCreation != 0)) {
             rowWarning(logger, row, errorMsg + 'Акции необращающиеся, графы 15 и 16 ненулевые!')
         }
-
         // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
         def tmp = (row.reserveCalcValue ?: 0) - (row.reserveCalcValuePrev ?: 0)
         if (sign == '+' && tmp > 0 && row.reserveRecovery != 0) {
             loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно! Графа 17 ненулевая')
         }
-
         // 9. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 16)
         if (sign == '+' && tmp < 0 && row.reserveCreation != 0) {
             loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно! Графа 16 ненулевая')
         }
-
         // 10. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 10, 15, 17)
         if (sign == '+' && tmp == 0 && (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
             loggerError(row, errorMsg + 'Акции обращающиеся – резерв сформирован (восстановлен) некорректно! Графы 16 и 17 ненулевые')
         }
-
         // 11. Проверка корректности формирования резерва (графа 8, 15, 16, 17)
         if ((row.reserveCalcValuePrev ?: 0) + (row.reserveCreation ?: 0) != (row.reserveCalcValue ?: 0) + (row.reserveRecovery ?: 0)) {
             loggerError(row, errorMsg + 'Резерв сформирован неверно! Сумма граф 8 и 16 не равна сумме граф 15 и 17')
         }
-
         // 12. Проверка на положительные значения при наличии созданного резерва
         if (row.reserveCreation > 0 && (row.lotSizeCurrent < 0 || row.cost < 0 ||
                 row.costOnMarketQuotation < 0 || row.reserveCalcValue < 0)) {
@@ -332,21 +324,17 @@ void logicCheck() {
 
         def prevRow = null
         if (!getBalancePeriod() && !isConsolidated) {
-            prevRow = getPrevRowByColumn4(prevDataRows, row.tradeNumber)
-
+            prevRow = rowsMap[row.tradeNumber]
             // 13. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
             if (prevRow != null && row.lotSizePrev != prevRow.lotSizeCurrent) {
                 rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 6» (${row.lotSizePrev}) текущей строки РНУ-26 за текущий период = «Графе 7» (${prevRow.lotSizeCurrent}) строки РНУ-26 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-26 за текущий период.")
             }
-
             // 14. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 8, 15 (за предыдущий период) )
             if (prevRow != null && row.reserveCalcValuePrev != prevRow.reserveCalcValue) {
                 loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${row.reserveCalcValuePrev}) текущей строки РНУ-26 за текущий период = «Графе 15» (${prevRow.reserveCalcValue}) строки РНУ-26 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-26 за текущий период.")
             }
         }
-
         // 15, 16 проверки идут после проверки 18
-
         // 17. Арифметическая проверка графы 8, 13..17
         if (!getBalancePeriod()) {
             // для хранения правильных значении и сравнения с имеющимися при арифметических проверках
@@ -365,19 +353,16 @@ void logicCheck() {
             needValue['reserveRecovery'] = calc17(row)
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
         }
-
         // 18. Проверка итоговых значений по эмитентам
         def Integer issuerId = getSubAliasName(row)
         if (issuerId != null && !totalGroups.contains(issuerId)) {
             totalGroups.add(issuerId)
         }
-
         // 19. Проверка итогового значений по всей форме - подсчет сумм для общих итогов
         totalColumns.each { alias ->
             totalSums[alias] += (row.getCell(alias).value ?: 0)
         }
     }
-
     // 18. Проверка подитоговых значений
     for (def Integer group : totalGroups) {
         // получить строки группы
@@ -402,7 +387,6 @@ void logicCheck() {
             loggerError(subTotalRow, "Итоговые значения по эмитенту $issuerName рассчитаны неверно!")
         }
     }
-
     // получение итоговой строки
     def totalRow = null
     try {
@@ -410,7 +394,6 @@ void logicCheck() {
     } catch (IllegalArgumentException e) {
         loggerError(null, "Итоговые значения не рассчитаны! Необходимо рассчитать данные формы.")
     }
-
     if (totalRow != null && prevDataRows) {
         def totalRowOld = getDataRow(prevDataRows, 'total')
 
@@ -424,28 +407,23 @@ void logicCheck() {
             loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по «Графе 8» (${totalRow.reserveCalcValuePrev}) = «Общий итог» по графе 15 (${totalRowOld.reserveCalcValue}) формы РНУ-26 за предыдущий отчётный период")
         }
     }
-
     // 19. Проверка итогового значений по всей форме
     if (totalRow != null) {
         checkTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
     }
-
     // 3. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде
     if (prevDataRows) {
         def missContract = []
         def severalContract = []
+        def countMap = getTradeNumberCountMap(dataRows)
         prevDataRows.each { prevRow ->
             if (prevRow.getAlias() == null && prevRow.reserveCalcValue > 0) {
-                def count = 0
-                dataRows.each { row ->
-                    if (row.tradeNumber == prevRow.tradeNumber) {
-                        count++
-                    }
-                }
+                def tnum = prevRow.tradeNumber
+                def count = countMap[tnum]
                 if (count == 0) {
-                    missContract.add(prevRow.tradeNumber)
+                    missContract.add(tnum)
                 } else if (count > 1) {
-                    severalContract.add(prevRow.tradeNumber)
+                    severalContract.add(tnum)
                 }
             }
         }
@@ -923,13 +901,11 @@ def getTotalRow(def dataRows, def value, def alias) {
 }
 
 // Отсорировать данные (по графе 2, 4)
-void sort(def dataRows) {
+def sort(def dataRows) {
     dataRows.sort({ DataRow a, DataRow b ->
         sortRow(groupColumns, a, b)
     })
-
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.save(dataRows);
+    return dataRows
 }
 
 int sortRow(List<String> params, DataRow a, DataRow b) {
@@ -944,22 +920,27 @@ int sortRow(List<String> params, DataRow a, DataRow b) {
     return 0
 }
 
-/**
- * Получить строку предыдущего периода, в которой совпадают значения графы 4.
- *
- * @param prevDataRows данные предыдущего периода
- * @param column4Value значение графы 4
- */
-def getPrevRowByColumn4(def prevDataRows, def column4Value) {
-    if (column4Value == null || column4Value == '' || !prevDataRows) {
-        return null
+// Группирует данные по графе tradeNumber с сохранением одной из ссылок на соответствующую строку
+// Результат: Map[tradeNumber:row]
+def getTradeNumberObjectMap(def rows) {
+    def result = [:]
+    rows.each {
+        def tnum = it.tradeNumber
+        if (result[tnum] == null) result[tnum] = it
     }
-    for (def prevRow : prevDataRows) {
-        if (prevRow.tradeNumber == column4Value) {
-            return prevRow
-        }
+    return result
+}
+
+// Группирует данные по графе tradeNumber и считает количество строк, в которых данное значение встречается
+// Результат: Map[tradeNumber:count]
+def getTradeNumberCountMap(def rows) {
+    def result = [:]
+    rows.each {
+        def tnum = it.tradeNumber
+        def count = result[tnum]
+        result[tnum] = count == null ? 1 : ++count
     }
-    return null
+    return result
 }
 
 def getRate(def row, def date) {
