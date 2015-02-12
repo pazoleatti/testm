@@ -94,6 +94,7 @@ void generateXML() {
     // Параметры подразделения
     def departmentParam = getDepartmentParam()
 
+    // атрибуты, заполняемые по настройкам подразделений
     def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
     def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value
     def okato = getOkato(departmentParam?.OKTMO?.value)
@@ -111,6 +112,7 @@ void generateXML() {
     def reorgINN = departmentParam?.REORG_INN?.value
     def reorgKPP = departmentParam?.REORG_KPP?.value
 
+    // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".8" + "_" +
             declarationData.taxOrganCode + "_" +
             declarationData.taxOrganCode + "_" +
@@ -120,16 +122,120 @@ void generateXML() {
     def index = "0000080"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // TODO получение остальных данных для заполнения
+    // атрибуты, заполняемые по форме 937.1 (строки 001 и 190 отдельно, остальное в массиве rows9371)
+    def code001 = null
+    def code190 = null
+    def rows9371 = []
+    def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
+    def corrNumber9371
+    for (def formData : formDataList) {
+        if (formData.id == 607) {
+            def dataRows9371 = formDataService.getDataRowHelper(formData)?.getAll()
+            for (def row : dataRows9371) {
+                if (row.getAlias() != null) {
+                    // заполняем строку 190 отдельно по итоговой строке
+                    code190 = row.nds
+                    continue
+                }
+                rows9371.add(row)
+            }
+
+            corrNumber9371 = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
+        }
+    }
+    if (corrNumber > 0) {
+        code001 = corrNumber == corrNumber9371 ? 0 : 1
+    }
+
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
             ИдФайл: fileId,
             ВерсПрог: applicationVersion,
-            ВерсФорм: formatVersion,
-            Индекс: index,
-            НомКорр: corrNumber) {
-        // TODO заполнение
+            ВерсФорм: formatVersion) {
+        Документ(
+                Индекс: index,
+                НомКорр: corrNumber,
+                ПризнСвед8: code001
+        ) {
+            КнигаПокуп(
+                    СумНДСВсКПк: code190
+            ) {
+                for (def row : rows9371) {
+                    // TODO http://jira.aplana.com/browse/SBRFACCTAX-10383
+                    def code005 = row.todo
+                    def code010 = row.todo
+                    def code020 = row.todo
+                    def code030 = row.todo
+                    def code040 = row.todo
+                    def code050 = row.todo
+                    def code060 = row.todo
+                    def code070 = row.todo
+                    def code080 = row.todo
+                    def code090 = row.todo
+                    def code120 = row.todo
+                    def code150 = row.todo
+                    def code160 = row.todo
+                    def code170 = row.todo
+                    def code180 = row.todo
+                    def code100 = row.todo
+                    def code110 = row.todo
+                    def code130innUL = row.todo
+                    def code130kpp = row.todo
+                    def code130innFL = row.todo
+
+                    // TODO как отличить ЮЛ от ФЛ?
+                    def boolean isUL = true
+
+                    КнПокСтр(
+                            НомерПор: code005,
+                            НомСчФПрод: code020,
+                            ДатаСчФПрод: code030,
+                            НомИспрСчФ: code040,
+                            ДатаИспрСчФ: code050,
+                            НомКСчФПрод: code060,
+                            ДатаКСчФПрод: code070,
+                            НомИспрКСчФ: code080,
+                            ДатаИспрКСчФ: code090,
+                            НомТД: code150,
+                            ОКВ: code160,
+                            СтоимПокупВ: code170,
+                            СумНДСВыч: code180
+                    ) {
+                        КодВидОпер { code010 }
+                        ДокПдтвУпл(
+                                НомДокПдтвУпл: code100,
+                                ДатаДокПдтвУпл: code110
+                        )
+                        ДатаУчТов { code120 }
+                        СвПрод() {
+                            if (isUL) {
+                                СведЮЛ(
+                                        ИННЮЛ: code130innUL,
+                                        КПП: code130kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code130innFL
+                                )
+                            }
+                        }
+                        СвПос() {
+                            if (isUL) {
+                                СведЮЛ(
+                                        ИННЮЛ: code130innUL,
+                                        КПП: code130kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code130innFL
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
