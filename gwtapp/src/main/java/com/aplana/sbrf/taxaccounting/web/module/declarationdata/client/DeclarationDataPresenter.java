@@ -252,6 +252,7 @@ public class DeclarationDataPresenter
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);
+        action.setTaxType(taxType);
 		dispatcher
 				.execute(
 						action,
