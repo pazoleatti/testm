@@ -95,6 +95,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         type.setTaxType(event.getTaxType());
         formTemplate.setType(type);
         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
+        getView().setFormId(0);
         getView().setTitle(formTemplate.getName());
         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
         FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
@@ -121,6 +122,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                         formTemplate.getStyles().addAll(new ArrayList<FormStyle>());
                         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                                 with(AdminConstants.NameTokens.formTemplateId, "0").build());
+                        getView().setFormId(0);
                         getView().setTitle("");
                         TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
                         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
@@ -280,6 +282,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 					}, this));
 		} else {
             getView().activateVersion(false);
+            getView().setLockInformation(false, null, null);
         }
 	}
 

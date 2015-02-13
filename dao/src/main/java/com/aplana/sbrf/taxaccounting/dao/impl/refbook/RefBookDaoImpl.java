@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -2637,17 +2638,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private final static String CHECK_REFERENCE_VERSIONS_START = "select id from %s where VERSION < ? and %s";
 
-    private final static String CHECK_REFERENCE_VERSIONS_IN_PERIOD = "select id from (\n" +
+    private final static String CHECK_REFERENCE_VERSIONS_IN_PERIOD = "select id, versionStart, versionEnd from (\n" +
             "  select r.id, r.version as versionStart, (select min(version) - interval '1' day from %s rn where rn.ref_book_id = r.ref_book_id and rn.record_id = r.record_id and rn.version > r.version) as versionEnd \n" +
             "  from %s r\n" +
             "  where %s\n" +
             ") where (:versionTo is not null and :versionTo < versionStart) or (versionEnd is not null and versionEnd < :versionFrom)";
 
     @Override
-    public void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo, @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+    public void isReferenceValuesCorrect(final Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo,
+                                         @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records, final boolean isConfig) {
         if (attributes.size() > 0) {
             List<Long> in = new ArrayList<Long>();
-            Map<Long, String> attributeIds = new HashMap<Long, String>();
+            final Map<Long, String> attributeIds = new HashMap<Long, String>();
             for (RefBookRecord record : records) {
                 Map<String, RefBookValue> values = record.getValues();
                 for (RefBookAttribute attribute : attributes) {
@@ -2667,37 +2669,34 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("versionFrom", versionFrom);
                 params.put("versionTo", versionTo);
-                List<Long> result = getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Long>() {
+                getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
                     @Override
-                    public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return rs.getLong("id");
+                    public void processRow(ResultSet rs) throws SQLException {
+                        Long id = rs.getLong("id");
+                        Date versionStart = rs.getDate("versionStart");
+                        Date versionEnd = rs.getDate("versionEnd");
+                        logger.error("Период элемента, указанного в поле \"%s\" составляет %s - %s и не пересекается %s",
+                                attributeIds.get(id),
+                                sdf.format(versionStart),
+                                sdf.format(versionEnd),
+                                (isConfig ? "с отчетным периодом!" : "с периодом актуальности версии!"));
                     }
                 });
-                if (result != null && !result.isEmpty()) {
-                    if (logger != null) {
-                        for (Long id : result) {
-                            logger.error(attributeIds.get(id) + ": Период актуальности выбранного значения не пересекается с периодом актуальности версии!");
-                        }
-                    }
+
+                if (logger.containsLevel(LogLevel.ERROR)) {
                     throw new ServiceException("Обнаружено некорректное значение атрибута");
                 }
 
                 /** Проверяем не начинается ли период актуальности ссылочного атрибута раньше чем период актуальности текущей записи справочника */
                 sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, transformToSqlInStatement("id", in));
-                result = getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                getJdbcTemplate().query(sql, new RowCallbackHandler() {
                     @Override
-                    public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return rs.getLong("id");
-                    }
-                }, versionFrom);
-                if (result != null && !result.isEmpty()) {
-                    if (logger != null) {
-                        for (Long id : result) {
-                            logger.info(attributeIds.get(id) + ": Период актуальности выбранного значения меньше периода актуальности версии!");
-                        }
+                    public void processRow(ResultSet rs) throws SQLException {
+                        Long id = rs.getLong("id");
+                        logger.info(attributeIds.get(id) + ": Период актуальности выбранного значения меньше периода актуальности версии!");
 
                     }
-                }
+                }, versionFrom);
             }
         }
     }

@@ -87,30 +87,6 @@ public class TemplateHistoryView extends PopupViewWithUiHandlers<AplanaUiHandler
     }
 
     private void setTableColumns() {
-        // колонка Наименование декларации
-        Column<TemplateChangesExt, TemplateChangesExt> linkColumn = new Column<TemplateChangesExt, TemplateChangesExt>(
-                new AbstractCell<TemplateChangesExt>() {
-                    @Override
-                    public void render(Context context,
-                                       TemplateChangesExt templateChanges,
-                                       SafeHtmlBuilder sb) {
-                        if (templateChanges == null) {
-                            return;
-                        }
-                        String url = templateChanges.getTemplateChanges().getFormTemplateId() != null ?
-                                AdminConstants.NameTokens.formTemplateInfoPage + ";" + AdminConstants.NameTokens.formTemplateId + "="
-                                        + templateChanges.getTemplateChanges().getFormTemplateId() + "\">" + templateChanges.getTemplateChanges().getFormTemplateId() + "</a>" :
-                                DeclarationTemplateTokens.declarationTemplate + ";" + DeclarationTemplateTokens.declarationTemplateId + "="
-                                        + templateChanges.getTemplateChanges().getDeclarationTemplateId() + "\">" + templateChanges.getTemplateChanges().getDeclarationTemplateId() + "</a>";
-                        sb.appendHtmlConstant("<a href=\"#" + url + "</a>");
-                    }
-                }) {
-            @Override
-            public TemplateChangesExt getValue(TemplateChangesExt object) {
-                return object;
-            }
-        };
-
         TextColumn<TemplateChangesExt> eventColumn = new TextColumn<TemplateChangesExt>() {
             @Override
             public String getValue(TemplateChangesExt object) {
@@ -132,13 +108,10 @@ public class TemplateHistoryView extends PopupViewWithUiHandlers<AplanaUiHandler
             }
         };
 
-
-        versionHistoryCellTable.addResizableColumn(linkColumn, "Версия");
         versionHistoryCellTable.addResizableColumn(eventColumn, "Событие");
         versionHistoryCellTable.addResizableColumn(dateColumn, "Дата и время события");
         versionHistoryCellTable.addResizableColumn(userColumn, "Инициатор");
 
-        linkColumn.setDataStoreName(VersionHistorySearchOrdering.VERSION.name());
         eventColumn.setDataStoreName(VersionHistorySearchOrdering.EVENT.name());
         dateColumn.setDataStoreName(VersionHistorySearchOrdering.DATE.name());
         userColumn.setDataStoreName(VersionHistorySearchOrdering.USER.name());

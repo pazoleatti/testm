@@ -61,6 +61,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             "в связи с чем для нее не существует каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
     final static String U5 = "Начата загрузка транспортного файла «%s» в каталог загрузки.";
+    final static String U5_1 = "Из наименования транспортного файла получены следующие данные:";
     final static String U6_1 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s.";
     final static String U6_2 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s";
 
@@ -317,6 +318,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
             // Вывод результата разбора имени файла
             logger.info(U5, fileName);
+            logger.info(U5_1, fileName);
             if (transportDataParam.getMonth() == null) {
                 logger.info(U6_1, getFileNamePart(formCode), getFileNamePart(departmentCode),
                         getFileNamePart(reportPeriodCode), getFileNamePart(year));

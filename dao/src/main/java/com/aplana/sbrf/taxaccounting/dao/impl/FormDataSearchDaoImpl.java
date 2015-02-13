@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.FormDataSearchResultItemMapper;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -78,23 +77,6 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
             }
         }
 
-		// Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
-		// Эта реализация должна быть согласована с реализацией в FormDataAccessServiceImpl
-		if (filter.getAccessFilterType() == null) {
-			throw new IllegalArgumentException("AccessFilterType cannot be null");
-		}
-
-		if (filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS
-                || filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND) {
-            sql
-                .append(" and ")
-                .append(SqlUtils.transformToSqlInStatement("dp.id", filter.getAvailableDepartmentIds()));
-
-            if (filter.getAccessFilterType() == AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND) {
-                sql.append(" and fd.kind in ").append(SqlUtils.transformFormKindsToSqlInStatement(
-                        filter.getAvailableFormDataKinds()));
-            }
-        }
 	}
 
 	private void appendSelectClause(StringBuilder sql) {

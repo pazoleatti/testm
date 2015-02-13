@@ -204,6 +204,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList != null)
                     for (String value : valuesList) {
+                        // у папок smb в конце должен быть слеш (иначе возникенет ошибка при configurationParam.isFolder() == true и configurationParam.hasReadCheck() == true)
+                        if (configurationParam.isFolder()) {
+                            value = value + "/";
+                        }
                         // Проверка значения параметра "Проверять ЭЦП"
                         if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
                             signCheck(value, logger);

@@ -23,5 +23,12 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.SourceService"/>
     </bean>
-    <bean id="versionValidatingService" class="com.aplana.sbrf.taxaccounting.service.impl.templateversion.VersionFTOperatingServiceImpl" />
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService"/>
+    </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTypeService"/>
+    </bean>
+
+    <bean id="versionFTValidatingService" class="com.aplana.sbrf.taxaccounting.service.impl.templateversion.VersionFTOperatingServiceImpl" />
 </beans>

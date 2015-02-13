@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -31,6 +32,14 @@ import java.util.*;
 @Service
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService implements LoadFormDataService {
+
+    private static final String LOCK_MSG = "Обработка данных транспортного файла не выполнена, " +
+            "т.к. в данный момент выполняется изменение данных формы %s " +
+            "для подразделения %s " +
+            "в периоде %s, " +
+            "инициированное пользователем %s " +
+            "в %s";
+    private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -56,6 +65,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private LockDataService lockDataService;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
+    @Autowired
+    private TAUserService userService;
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
@@ -185,6 +196,16 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 log(userInfo, LogData.L15, logger, fileName);
             } else {
                 log(userInfo, LogData.L15_1, logger, fileName);
+            }
+
+            log(userInfo, LogData.L15_FD, logger, fileName);
+            if (transportDataParam.getMonth() == null) {
+                log(userInfo, LogData.L15_RP, logger, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                        getFileNamePart(reportPeriodCode), getFileNamePart(year));
+            } else {
+                log(userInfo, LogData.L15_M, logger, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                        getFileNamePart(reportPeriodCode), getFileNamePart(year),
+                        getFileNamePart(transportDataParam.getMonth()));
             }
 
             // Указан несуществующий код подразделения
@@ -370,10 +391,17 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
         // Блокировка
         LockData lockData = lockDataService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(),
-                TAUser.SYSTEM_USER_ID, LockData.STANDARD_LIFE_TIME);
+                userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
         if (lockData!=null)
-            throw new ServiceException(String.format(LockDataService.LOCK_DATA, userInfo.getUser().getName(),
-                    userInfo.getUser().getId()));
+            throw new ServiceException(String.format(
+                    LOCK_MSG,
+                    formData.getKind().getName() + ": " + formData.getFormType().getName(),
+                    departmentService.getDepartment(formData.getDepartmentId()).getName(),
+                    reportPeriodName,
+                    userService.getUser(lockData.getUserId()).getName(),
+                    SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())
+            ));
 
         try {
             // 15 Скрипт
@@ -497,5 +525,15 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         }
         return retVal;
+    }
+
+    /**
+     * Вывод частей имени файла с учетом возможного null-значения
+     */
+    private String getFileNamePart(Object obj) {
+        if (obj == null) {
+            return "";
+        }
+        return obj.toString();
     }
 }

@@ -219,7 +219,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 }
 
                 for (Map<String, RefBookValue> up : toUpdate) {
-                    providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), null, null, up);
+                    providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), rp.getCalendarStartDate(), null, up);
                 }
 
                 if (!deleteIds.isEmpty()) {

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataSearchDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.FormDataDaoFilter.AccessFilterType;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.util.FormTypeAlphanumericComparator;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -82,7 +81,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         if (formDataFilter.getTaxType() != null) {
             formDataDaoFilter.setTaxTypes(asList(formDataFilter.getTaxType()));
         }
-        formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
 
         List<Long> ids = formDataSearchDao.findIdsByFilter(formDataDaoFilter);
         return ids.isEmpty() ? new ArrayList<FormData>(0) :
@@ -162,24 +160,56 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         // ПОЛЬЗОВАТЕЛЬСКАЯ ФИЛЬТРАЦИЯ
 
         // Подразделения (могут быть не заданы - тогда все доступные по выборке 40 - http://conf.aplana.com/pages/viewpage.action?pageId=11380670)
-        List<Integer> departments = formDataFilter.getDepartmentIds();
-        if (departments == null || departments.isEmpty()) {
-            departments = departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()), null, null);
+        Set<Integer> departments = new HashSet<Integer>();
+        if (formDataFilter.getDepartmentIds() == null || formDataFilter.getDepartmentIds().isEmpty()) {
+            departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()), null, null));
+        } else {
+            departments.addAll(formDataFilter.getDepartmentIds());
         }
-        formDataDaoFilter.setDepartmentIds(departments);
         // Отчетные периоды
         formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
         // Типы форм
+        Set<FormDataKind> kinds = new HashSet<FormDataKind>(FormDataKind.values().length);
         if (formDataFilter.getFormDataKind() != null && !formDataFilter.getFormDataKind().isEmpty()) {
-            List<FormDataKind> list = new ArrayList<FormDataKind>(FormDataKind.values().length);
-            for(Long id: formDataFilter.getFormDataKind()){
-                list.add(FormDataKind.fromId(id.intValue()));
+            for (Long id: formDataFilter.getFormDataKind()){
+                kinds.add(FormDataKind.fromId(id.intValue()));
             }
-            formDataDaoFilter.setFormDataKind(list);
         } else {
-            formDataDaoFilter.setFormDataKind(formDataAccessService.getAvailableFormDataKind(userInfo, asList(formDataFilter.getTaxType())));
+            kinds.addAll(formDataAccessService.getAvailableFormDataKind(userInfo, asList(formDataFilter.getTaxType())));
         }
+
+        // ПРИНУДИТЕЛЬНАЯ ФИЛЬТРАЦИЯ
+
+        // Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
+        // Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl
+        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            // Контролер УНП без принудительной фильтрации
+        } else if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+            // Операторы дополнительно фильтруются по подразделениям и типам форм
+            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+            departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                    asList(formDataFilter.getTaxType()), null, null));
+            // Доступные типы
+            List<FormDataKind> formDataKindList = new LinkedList<FormDataKind>();
+            formDataKindList.add(FormDataKind.PRIMARY);
+            if (formDataFilter.getTaxType() == TaxType.INCOME) {
+                formDataKindList.add(FormDataKind.ADDITIONAL);
+                formDataKindList.add(FormDataKind.UNP);
+            }
+            kinds.addAll(formDataKindList);
+        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
+            // Контролеры дополнительно фильтруются по подразделениям
+            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
+            departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
+                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()), null, null));
+        } else {
+            throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
+        }
+        formDataDaoFilter.setDepartmentIds(new ArrayList<Integer>(departments));
+        formDataDaoFilter.setFormDataKind(new ArrayList<FormDataKind>(kinds));
+
         // Виды форм
         TAUser tAUser = userInfo.getUser();
         List<Long> formTypes = formDataFilter.getFormTypeId();
@@ -230,38 +260,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         }
         // Признак корректирующего периода
         formDataDaoFilter.setCorrectionTag(formDataFilter.getCorrectionTag());
-
-        // ПРИНУДИТЕЛЬНАЯ ФИЛЬТРАЦИЯ
-
-        // Добавляем условия для отбрасывания форм, на которые у пользователя нет прав доступа
-        // Эти условия должны быть согласованы с реализацией в FormDataAccessServiceImpl
-        if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
-            // Контролер УНП без принудительной фильтрации
-            formDataDaoFilter.setAccessFilterType(AccessFilterType.ALL);
-        } else if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
-            // Операторы дополнительно фильтруются по подразделениям и типам форм
-            formDataDaoFilter.setAccessFilterType(AccessFilterType.AVAILABLE_DEPARTMENTS_WITH_KIND);
-            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-            formDataDaoFilter.setAvailableDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    asList(formDataFilter.getTaxType()), null, null));
-            // Доступные типы
-            List<FormDataKind> formDataKindList = new LinkedList<FormDataKind>();
-            formDataKindList.add(FormDataKind.PRIMARY);
-            if (formDataFilter.getTaxType() == TaxType.INCOME) {
-                formDataKindList.add(FormDataKind.ADDITIONAL);
-                formDataKindList.add(FormDataKind.UNP);
-            }
-            formDataDaoFilter.setAvailableFormDataKinds(formDataKindList);
-        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
-                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
-            // Контролеры дополнительно фильтруются по подразделениям
-            formDataDaoFilter.setAccessFilterType(AccessFilterType.AVAILABLE_DEPARTMENTS);
-            // http://conf.aplana.com/pages/viewpage.action?pageId=11380670
-            formDataDaoFilter.setAvailableDepartmentIds(departmentService.getTaxFormDepartments(userInfo.getUser(),
-                    formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()), null, null));
-        } else {
-            throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
-        }
         return formDataDaoFilter;
     }
 }

@@ -23,9 +23,12 @@ import java.util.List;
 @Transactional
 public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
-    public static final String MSG_IS_USED_VERSION = "Существует экземпляр декларации в подразделении \"%s\" в периоде \"%s\" для макета!";
-    private static final String MSG_HAVE_DESTINATION = "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
-    private static final String MSG_HAVE_SOURCE = "Существует назначение декларации в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
+    public static final String MSG_IS_USED_VERSION =
+            "Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s\" %d%s для макета";
+    private static final String MSG_HAVE_DESTINATION =
+            "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
+    private static final String MSG_HAVE_SOURCE =
+            "Существует назначение декларации в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -43,20 +46,26 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     private PeriodService periodService;
     @Autowired
     private SourceService sourceService;
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     private Calendar calendar = Calendar.getInstance();
 
     @Override
     public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
-        if (!ddIds.isEmpty()){
-            for(Long id: ddIds) {
-                DeclarationData declarationData = declarationDataDao.get(id);
-                Department department = departmentService.getDepartment(declarationData.getDepartmentId());
-                ReportPeriod period = periodService.getReportPeriod(declarationData.getReportPeriodId());
+        for (long declarationId : ddIds) {
+            DeclarationData declarationData = declarationDataDao.get(declarationId);
+            ReportPeriod period = periodService.getReportPeriod(declarationData.getReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
 
-                logger.error(MSG_IS_USED_VERSION, department.getName(), period.getName() + " " + period.getTaxPeriod().getYear());
-            }
+            logger.error(String.format(MSG_IS_USED_VERSION,
+                    declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+                    departmentService.getDepartment(declarationData.getDepartmentId()).getName(),
+                    period.getName(),
+                    period.getTaxPeriod().getYear(),
+                    drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                            sdf.format(drp.getCorrectionDate())) : ""));
         }
 
     }

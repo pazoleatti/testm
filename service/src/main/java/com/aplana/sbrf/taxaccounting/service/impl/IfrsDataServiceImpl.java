@@ -325,7 +325,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     public List<Integer> getIfrsUsers() {
         List<Integer> usersList = new ArrayList<Integer>();
         MembersFilterData membersFilterData = new MembersFilterData() {{
-            setRoleIds(Arrays.asList(Long.valueOf(roleService.getByAlias(TARole.ROLE_CONTROL_UNP).getId())));
+            setRoleIds(Arrays.asList((long) roleService.getByAlias(TARole.ROLE_CONTROL_UNP).getId()));
         }};
         List<TAUserView> unpList = userService.getUsersByFilter(membersFilterData);
         for (TAUserView userView : unpList) {

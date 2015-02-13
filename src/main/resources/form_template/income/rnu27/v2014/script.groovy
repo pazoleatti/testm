@@ -272,21 +272,21 @@ def logicCheck() {
             if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null && sign == "+") {
                 // 8. Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev > 0 && row.recovery != 0) {
-                    loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
+                    loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно! Не выполняется условие: если «графа 15» – «графа 8» > 0, то «графа 17» = 0")
                 }
                 // 9. Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev < 0 && row.reserveCreation != 0) {
-                    loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
+                    loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно! Не выполняется условие: если «графа 15» – «графа 8» < 0, то «графа 16» = 0")
                 }
                 // 10. Проверка создания (восстановления) резерва по обращающимся облигациям (графа 10 = «+»)
                 if (row.reserveCalcValue - row.reserveCalcValuePrev == 0 && (row.reserveCreation != 0 || row.recovery != 0)) {
-                    loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно!")
+                    loggerError(row, errorMsg + "Облигации обращающиеся – резерв сформирован (восстановлен) некорректно! Не выполняется условие: если «графа 15» – «графа 8» = 0, то «графа 16» и «графа 17» = 0")
                 }
             }
             // 11. Проверка корректности формирования резерва
             if (row.reserveCalcValuePrev != null && row.reserveCreation != null && row.reserveCalcValue != null && row.recovery != null
                     && row.reserveCalcValuePrev + row.reserveCreation != row.reserveCalcValue + row.recovery) {
-                loggerError(row, errorMsg + "Резерв сформирован неверно!")
+                loggerError(row, errorMsg + "Резерв сформирован неверно! Сумма граф 8 и 16 должна быть равна сумме граф 15 и 17")
             }
             // 12. Проверка на положительные значения при наличии созданного резерва
             if (row.reserveCreation > 0 && (row.current <= 0 || row.cost <= 0 || row.costOnMarketQuotation <= 0 || row.reserveCalcValue <= 0)) {
@@ -768,7 +768,7 @@ BigDecimal calc16(DataRow row) {
     def tmp = null
     if (row.reserveCalcValue != null && row.reserveCalcValuePrev != null) {
         if (row.reserveCalcValue - row.reserveCalcValuePrev > 0) {
-            tmp = (row.marketQuotation ?: 0) - (row.prev ?: 0)
+            tmp = row.reserveCalcValue - row.reserveCalcValuePrev
         } else {
             tmp = BigDecimal.ZERO
         }

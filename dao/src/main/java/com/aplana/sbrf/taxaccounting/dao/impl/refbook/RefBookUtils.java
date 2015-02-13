@@ -82,10 +82,6 @@ public class RefBookUtils extends AbstractDao {
                     errors.add("\"" + a.getName() + "\": значение атрибута превышает максимально допустимое " + a.getMaxLength() + "!");
                 }
 
-                if ((a.getId() == 161L || a.getId() == 162L) && values.get(a.getAlias()).getStringValue() != null && values.get(a.getAlias()).getStringValue().contains("/")) {
-                    errors.add("Значение атрибута «" + a.getName() + "» не должно содержать символ «/»!");
-                }
-
                 if (a.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
                     Number number = values.get(a.getAlias()).getNumberValue();
                     if (number == null) {

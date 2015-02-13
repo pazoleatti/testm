@@ -390,7 +390,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         rightSM.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                rightCheckBoxHeader.setValue(rightSM.getSelectedSet().size() == rightTable.getRowCount());
+                rightCheckBoxHeader.setValue(rightTable.getRowCount() != 0 && rightSM.getSelectedSet().size() == rightTable.getRowCount());
                 assignButton.setEnabled(!rightSM.getSelectedSet().isEmpty() && leftSM.getSelectedObject() != null);
             }
         });
@@ -1004,8 +1004,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     private void clearRightTable() {
-        rightTable.setRowCount(0);
+        Set<DepartmentAssign> departmentAssignSet = rightSM.getSelectedSet();
+        for(DepartmentAssign departmentAssign: departmentAssignSet)
+            rightSM.setSelected(departmentAssign, false);
         rightSM.clear();
+        //rightTable.
+        rightTable.setRowCount(0);
     }
 
     private void clearDownTable() {

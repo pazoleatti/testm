@@ -98,8 +98,12 @@
 					<systemProperties>
 						<property>
 							<name>gwt.args</name>
-							<value>-out \${webAppDirectory}</value>
+							<value>-out target/gwt-test</value>
 						</property>
+                        <property>
+                            <name>gwt.persistentunitcache</name>
+                            <value>false</value>
+                        </property>
 					</systemProperties>
 				</configuration>
 			</plugin>

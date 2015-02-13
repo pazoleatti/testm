@@ -246,7 +246,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                     public void yes() {
                         driver.flush();
                         getUiHandlers().save();
-                        getUiHandlers().close();
                     }
                 });
 	}

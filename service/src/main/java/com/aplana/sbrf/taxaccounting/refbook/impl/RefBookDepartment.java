@@ -231,7 +231,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         int userId = logger.getTaUserInfo().getUser().getId();
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-        LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockService.lock(lockKey, userId,
+                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
                 //Блокировка установлена
@@ -243,7 +244,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
@@ -314,7 +316,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockService.lock(lockKey, userId,
+                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
                 //Блокировка установлена
@@ -326,7 +329,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
@@ -507,7 +511,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         int userId = logger.getTaUserInfo().getUser().getId();
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId, LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockService.lock(lockKey, userId,
+                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
                 //Блокировка установлена
@@ -519,7 +524,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                         RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
                         if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId, LockData.STANDARD_LIFE_TIME);
+                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);
@@ -660,32 +666,11 @@ public class RefBookDepartment implements RefBookDataProvider {
                 DepartmentType.fromCode(values.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()) :
                 null;
         Long parentDepartmentId = values.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue();
-        if (parentDepartmentId != null &&
-                type == DepartmentType.ROOT_BANK){
-            logger.error("Подразделение с типом \"Банк\" не может иметь родительское подразделение!");
-            return;
-        }
 
-        if (type != DepartmentType.ROOT_BANK && parentDepartmentId == null){
-            logger.error("Для подразделения должен быть указан код родительского подразделения!");
-            return;
-        }
-        if (rootBank != null && type == DepartmentType.ROOT_BANK && (recordId == null || rootBank.getId() != recordId.intValue())){
-            logger.error("Подразделение с типом \"Банк\" уже существует!");
-            return;
-        }
-        if (type != null && TERR_BANK.getCode() == type.getCode() &&
-                parentDepartmentId != null && rootBank != null && parentDepartmentId.intValue() != rootBank.getId()){
-            logger.error("Территориальный банк может быть подчинен только Банку!");
-            return;
-        }
+        // большинство проверок перенесены в скрипт подразделения на событие SAVE
 
-        List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
-        if (errors.size() > 0){
-            throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
-        }
         //Проверка корректности значений атрибутов
-        errors = RefBookUtils.checkRefBookAtributeValues(attributes, records);
+        List<String> errors = RefBookUtils.checkRefBookAtributeValues(attributes, records);
         if (!errors.isEmpty()){
             for (String error : errors) {
                 logger.error(error);
@@ -701,50 +686,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                         pair.getFirst(), pair.getSecond()));
             }
         }
-
-
-        //Новое подразделение не имеет смысла проверять
-        if (recordId == null) {
-            //Если нет родительского то это подразделение Банк
-            if (parentDepartmentId == null)
-                return;
-            //Проверяем аттрибут "действующее подразделение" у родительского подразделения
-            Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
-            if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
-                throw new ServiceLoggerException(
-                        "Подразделение не может быть создано, так как ему не может быть установлен признак \"Действующее\", если оно находится в составе недействующего подразделения!",
-                        logEntryService.save(logger.getEntries())
-                );
-            }
-        }else {
-            Department currDepartment = departmentService.getDepartment(recordId.intValue());
-            boolean isChangeActive = values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() != (currDepartment.isActive() ? 1 :0);
-            if (!isChangeActive)
-                return;
-            if(values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 0){
-                List<Department> childIds = departmentService.getAllChildren(recordId.intValue());
-                for (Department child : childIds){
-                    if (recordId != child.getId() && child.isActive()){
-                        throw new ServiceLoggerException(
-                                "Подразделение не может быть отредактировано, так как нельзя установить для него признак \"Недействующее\", если в его составе находится действующее подразделение!",
-                                logEntryService.save(logger.getEntries())
-                        );
-                    }
-                }
-            }
-            //Если нет родительского то это подразделение Банк
-            if (parentDepartmentId == null)
-                return;
-            //Проверяем аттрибут "действующее подразделение" у родительского подразделения
-            Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
-            if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
-                throw new ServiceLoggerException(
-                        "Подразделение не может быть отредактировано, так как нельзя установить для него признак \"Действующее\", если оно находится в составе недействующего подразделения!",
-                        logEntryService.save(logger.getEntries())
-                );
-            }
-        }
-
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11402881

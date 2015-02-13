@@ -51,22 +51,10 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     private RefBookFactory rbFactory;
 
     @Autowired
-    private DeclarationDataSearchService declarationDataSearchService;
-
-    @Autowired
-    private FormDataSearchService formDataSearchService;
-
-    @Autowired
-    private FormDataService formDataService;
-
-    @Autowired
     private LogEntryService logEntryService;
 
     @Autowired
-    DataRowService dataRowService;
-
-    @Autowired
-    DepartmentService departmentService;
+    private DepartmentService departmentService;
 
     @Autowired
     private SecurityService securityService;
@@ -95,11 +83,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             departmentReportPeriodFilter.setDepartmentIdList(Arrays.asList(depCombined.getDepartmentId().get(0).intValue()));
             departmentReportPeriodFilter.setReportPeriodIdList(Arrays.asList(action.getReportPeriodId()));
             List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(departmentReportPeriodFilter);
-            DepartmentReportPeriod departmentReportPeriod = null;
-            if (departmentReportPeriodList.size() == 1) {
-                departmentReportPeriod = departmentReportPeriodList.get(0);
-            }
-            if (departmentReportPeriod == null) {
+            if (departmentReportPeriodList.isEmpty()) {
                 throw new ActionException("Не найден отчетный период!");
             }
 
@@ -217,46 +201,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
             }
 
-            String periodName = period.getName() + " " + period.getTaxPeriod().getYear();
             String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
-
-
-            DeclarationDataFilter declarationDataFilter = new DeclarationDataFilter();
-            declarationDataFilter.setReportPeriodIds(asList(action.getReportPeriodId()));
-            declarationDataFilter.setDepartmentIds(asList(action.getDepartment()));
-            declarationDataFilter.setSearchOrdering(DeclarationDataSearchOrdering.DECLARATION_TYPE_NAME);
-            declarationDataFilter.setStartIndex(0);
-            declarationDataFilter.setCountOfRecords(10);
-            declarationDataFilter.setTaxType(action.getTaxType());
-            PagingResult<DeclarationDataSearchResultItem> page = declarationDataSearchService.search(declarationDataFilter);
-            for(DeclarationDataSearchResultItem item: page) {
-                result.setDeclarationFormFound(true);
-            }
-
-            FormDataFilter formDataFilter = new FormDataFilter();
-            formDataFilter.setReportPeriodIds(asList(action.getReportPeriodId()));
-            ArrayList<Long> formTypeIds = new ArrayList<Long>();
-            formTypeIds.add(372L); // приложение 5
-            formTypeIds.add(500L); // сводная 5
-            formDataFilter.setFormTypeId(formTypeIds);
-            formDataFilter.setFormState(WorkflowState.ACCEPTED);
-            formDataFilter.setTaxType(action.getTaxType());
-            TAUserInfo userInfo = userService.getSystemUserInfo();
-            boolean manual = true;
-            List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
-            for(Long formDataId : formDataIds) {
-                FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
-                PagingResult<DataRow<Cell>> resultDataRow = dataRowService.getDataRows(formDataId, null, true, manual);
-                for(DataRow<Cell> dataRow : resultDataRow) {
-                    BigDecimal regionBankDivisionId = dataRow.getCell("regionBankDivision").getNumericValue();
-                    if (regionBankDivisionId != null && regionBankDivisionId.intValue() == action.getDepartment()) {
-                        logger.warn(String.format(action.getTaxType().equals(TaxType.DEAL) ? FORM_WARN_S : FORM_WARN, formData.getFormType().getName(), departmentName, periodName));
-                        result.setDeclarationFormFound(true);
-                        break;
-                    }
-                }
-            }
-
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 if (recordVersion.getVersionEnd() != null) {
                     logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), sdf.format(recordVersion.getVersionEnd())));

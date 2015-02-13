@@ -8,8 +8,10 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -33,11 +35,11 @@ import java.util.Map;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class RecalculateDeclarationDataHandler extends AbstractActionHandler<RecalculateDeclarationDataAction, RecalculateDeclarationDataResult> {
-	@Autowired
-	private DeclarationDataService declarationDataService;
+    @Autowired
+    private DeclarationDataService declarationDataService;
 
-	@Autowired
-	private SecurityService securityService;
+    @Autowired
+    private SecurityService securityService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -54,12 +56,24 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
 
     @Override
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
-		TAUserInfo userInfo = securityService.currentUserInfo();
+        TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
+        try {
+            declarationDataService.preCalculationCheck(logger, action.getDeclarationId(), userInfo);
+        } catch (Exception e) {
+            String uuid;
+            if (e instanceof ServiceLoggerException) {
+                uuid = ((ServiceLoggerException) e).getUuid();
+            } else {
+                uuid = logEntryService.save(logger.getEntries());
+            }
+            throw new ServiceLoggerException("%s. Обнаружены фатальные ошибки", uuid, !TaxType.DEAL.equals(action.getTaxType())?"Декларация не может быть сформирована":"Уведомление не может быть сформировано");
+        }
         int userId = userInfo.getUser().getId();
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
-        LockData lockData = lockDataService.lock(key, userId, LockData.STANDARD_LIFE_TIME * 24); //ставим такую блокировку т.к. стандартная на 1 час
+        LockData lockData = lockDataService.lock(key, userId,
+                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)); //ставим такую блокировку т.к. стандартная на 1 час
         if (lockData == null) {
             try {
                 Map<String, Object> params = new HashMap<String, Object>();
@@ -84,7 +98,10 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                     asyncManager.executeAsync(ReportType.XML_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);
-                    logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");
+                    logger.error("Ошибка при постановке в очередь задачи формирования декларации.");
+                }
+                if (!logger.containsLevel(LogLevel.ERROR)) {
+                    logger.info("%s в очередь на формирование.", !TaxType.DEAL.equals(action.getTaxType())?"Декларация поставлена":"Уведомление поставлено");
                 }
                 result.setUuid(logEntryService.save(logger.getEntries()));
             } catch(Exception e) {

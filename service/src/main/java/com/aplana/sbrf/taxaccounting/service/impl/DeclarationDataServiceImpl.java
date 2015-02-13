@@ -64,9 +64,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private DeclarationTemplateService declarationTemplateService;
 
     @Autowired
-    private PeriodService periodService;
-
-    @Autowired
     private DepartmentService departmentService;
 
     @Autowired
@@ -110,7 +107,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
     public static final String MSG_IS_EXIST_DECLARATION =
-            "Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s\" %d%s для макета";
+            "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"";
 
     private static final Date MAX_DATE;
     private static final Calendar CALENDAR = Calendar.getInstance();
@@ -226,6 +223,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logEntryService.save(logger.getEntries()));
         } else {
             logger.info("Проверка завершена, ошибок не обнаружено");
+        }
+    }
+
+    @Override
+    public void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo) {
+        declarationDataScriptingService.executeScript(userInfo,
+                declarationDataDao.get(declarationDataId), FormDataEvent.PRE_CALCULATION_CHECK, logger, null);
+        // Проверяем ошибки
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Найдены ошибки при выполнении расчета декларации",
+                    logEntryService.save(logger.getEntries()));
         }
     }
 
@@ -545,16 +554,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (logs != null) {
             for (long declarationId : declarationIds) {
                 DeclarationData declarationData = declarationDataDao.get(declarationId);
-                ReportPeriod period = periodService.getReportPeriod(declarationData.getReportPeriodId());
-                DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
+                ReportPeriod period = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
 
                 logs.add(new LogEntry(LogLevel.ERROR, String.format(MSG_IS_EXIST_DECLARATION,
                         declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
                         departmentService.getDepartment(departmentId).getName(),
-                        period.getName(),
-                        period.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                formatter.format(drp.getCorrectionDate())) : "")));
+                        period.getName() + " " + period.getTaxPeriod().getYear())));
             }
         }
         return !declarationIds.isEmpty();
@@ -580,7 +585,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
-        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(), LockData.STANDARD_LIFE_TIME);
+        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         checkLock(lockData, userInfo.getUser());
         return lockData;
     }

@@ -25,44 +25,49 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
-    private static final String MSG_IS_USED_VERSION = "Существует экземпляр налоговой формы типа \"%s\" в подразделении \"%s\" в периоде \"%s\" для макета!";
-    private static final String MSG_HAVE_DESTINATION = "Существует назначение налоговой формы в качестве источника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
-    private static final String MSG_HAVE_SOURCE = "Существует назначение налоговой формы в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
+    private static final String MSG_IS_USED_VERSION =
+            "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\" %d%s для макета";
+    private static final String MSG_HAVE_DESTINATION =
+            "Существует назначение налоговой формы в качестве источника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
+    private static final String MSG_HAVE_SOURCE =
+            "Существует назначение налоговой формы в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
 
     @Autowired
     private FormDataDao formDataDao;
-
     @Autowired
     private FormTypeService formTypeService;
-
     @Autowired
     private FormTemplateService formTemplateService;
-
     @Autowired
     private FormDataService formDataService;
-
     @Autowired
     private DepartmentService departmentService;
-
     @Autowired
     private PeriodService periodService;
-
     @Autowired
     private SourceService sourceService;
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     private Calendar calendar = Calendar.getInstance();
 
     @Override
     public void isUsedVersion(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         List<Long> fdIds = formDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
-        if (!fdIds.isEmpty()){
-            for(Long id: fdIds) {
-                FormData formData = formDataDao.getWithoutRows(id);
-                Department department = departmentService.getDepartment(formData.getDepartmentId());
-                ReportPeriod period = periodService.getReportPeriod(formData.getReportPeriodId());
 
-                logger.error(MSG_IS_USED_VERSION, formData.getFormType().getName(), department.getName(), period.getName() + " " + period.getTaxPeriod().getYear());
-            }
+        for (long formDataId : fdIds) {
+            FormData formData = formDataDao.getWithoutRows(formDataId);
+            ReportPeriod period = periodService.getReportPeriod(formData.getReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+
+            logger.error(MSG_IS_USED_VERSION,
+                    formData.getFormType().getName(),
+                    formData.getKind().getName(),
+                    departmentService.getDepartment(formData.getDepartmentId()).getName(),
+                    period.getName() + (formData.getPeriodOrder() != null?Months.fromId(formData.getPeriodOrder()).getTitle():""),
+                    period.getTaxPeriod().getYear(),
+                    drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                            sdf.format(drp.getCorrectionDate())) : "");
         }
 
     }

@@ -41,9 +41,12 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     public interface MyProxy extends ProxyPlace<DepartmentConfigPresenter>, Place {
     }
 
-    private static final String EDIT_FOUND_TEXT = "В периоде \"%s\" найдены экземпляры налоговых форм/деклараций, " +
+    private static final String SAVE_FOUND_TEXT = "В Системе созданы формы/декларации, использующие старую версию Настроек. Для вступления изменений в силу каждую налоговую форму/декларацию нужно обновить вручную.";
+    private static final String SAVE_FOUND_TEXT_D = "В Системе созданы формы/уведомления использующие старую версию Настроек. Для вступления изменений в силу каждую форму/уведомление нужно обновить вручную.";
+
+    private static final String EDIT_FOUND_TEXT = "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
-    private static final String EDIT_FOUND_TEXT_D = "В периоде \"%s\" найдены экземпляры форм/уведомлений, " +
+    private static final String EDIT_FOUND_TEXT_D = "В периоде %s найдены экземпляры форм/уведомлений, " +
             "которые используют предыдущие значения формы настроек подразделения. Подтверждаете изменение настроек подразделения?";
 
     private final DispatchAsync dispatcher;
@@ -216,7 +219,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                                     AddLogAction addLogAction = new AddLogAction();
                                                     addLogAction.setOldUUID(uuid[0]);
                                                     addLogAction.setMessages(Arrays.asList(new LogEntry(LogLevel.WARNING,
-                                                            "Для актуализации данных в найденных экземплярах налоговых/форм деклараций их необходимо рассчитать/обновить")));
+                                                            "Для актуализации данных в найденных экземплярах налоговых форм/деклараций их необходимо рассчитать/обновить")));
                                                     dispatcher.execute(addLogAction, CallbackUtils
                                                             .defaultCallback(new AbstractCallback<AddLogResult>() {
                                                                 @Override
@@ -357,12 +360,25 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
                                 // По-умолчанию последний
                                 if (result.getReportPeriods() != null && !result.getReportPeriods().isEmpty()) {
-                                    getView().setReportPeriod(result.getReportPeriods().get(0).getId());
+                                    getView().setReportPeriod(getMaxPeriod(result.getReportPeriods()).getId());
                                 }
 
                                 reloadDepartmentParams(getView().getCurrentDepartmentId(), getView().getTaxType(), getView().getCurrentReportPeriodId());
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
+    }
+
+    private ReportPeriod getMaxPeriod(List<ReportPeriod> reportPeriods) {
+        if (reportPeriods == null || reportPeriods.isEmpty()) {
+            return null;
+        }
+        ReportPeriod maxPeriod = reportPeriods.get(0);
+        for (ReportPeriod per : reportPeriods) {
+            if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
+                maxPeriod = per;
+            }
+        }
+        return maxPeriod;
     }
 
     @Override

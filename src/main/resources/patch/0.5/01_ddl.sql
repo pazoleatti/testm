@@ -32,6 +32,21 @@ alter table configuration_lock add constraint configuration_lock_pk primary key 
 comment on table configuration_lock is 'Параметры блокировок';
 comment on column configuration_lock.key is 'Ключ блокировки';
 comment on column configuration_lock.timeout is 'Таймаут блокировки';
+
+insert into configuration_lock (key, timeout) values ('REF_BOOK', 3600000);
+insert into configuration_lock (key, timeout) values ('DECLARATION_DATA', 86400000);
+insert into configuration_lock (key, timeout) values ('DECLARATION_CREATE', 3600000);
+insert into configuration_lock (key, timeout) values ('FORM_DATA', 86400000);
+insert into configuration_lock (key, timeout) values ('FORM_DATA_IMPORT', 3600000);
+insert into configuration_lock (key, timeout) values ('FORM_DATA_CREATE', 3600000);
+insert into configuration_lock (key, timeout) values ('DECLARATION_TEMPLATE', 3600000);
+insert into configuration_lock (key, timeout) values ('FORM_TEMPLATE', 3600000);
+insert into configuration_lock (key, timeout) values ('LOG_SYSTEM_BACKUP', 3600000);
+insert into configuration_lock (key, timeout) values ('IFRS', 86400000);
+
+--http://jira.aplana.com/browse/SBRFACCTAX-10294: Добавить поля в LOCK_DATA
+alter table lock_data add date_lock date default current_date not null;
+comment on column lock_data.date_lock is 'Дата установки блокировки';
 ------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

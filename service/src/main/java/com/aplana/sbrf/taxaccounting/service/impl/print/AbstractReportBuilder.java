@@ -27,14 +27,6 @@ public abstract class AbstractReportBuilder {
 
     protected Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
 
-    private String fileName;
-    private String postfix;
-
-    protected AbstractReportBuilder(String fileName, String postfix) {
-        this.fileName = fileName;
-        this.postfix = postfix;
-    }
-
     /**
      * Формирование отчета. Условно разбит на шесть частей.
      * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,

@@ -166,6 +166,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     @Override
     public void onAddRowClicked() {
+        getView().updateMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
         editFormPresenter.show(null, getView().getSelectedItem());
         getView().clearSelected();
@@ -410,6 +411,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     public void onCleanEditForm() {
         editFormPresenter.cleanFields();
         editFormPresenter.setCurrentUniqueRecordId(null);
+        editFormPresenter.setAllVersionVisible(false);
     }
 
     @Override

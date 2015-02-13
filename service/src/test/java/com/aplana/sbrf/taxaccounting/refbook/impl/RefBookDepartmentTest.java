@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -53,7 +53,7 @@ public class RefBookDepartmentTest {
      */
     @Test
     public void testDeleteRecordVersionsWhenDepartmentTypeIsRootBank() throws Exception {
-        expectedException.expect(ServiceException.class);
+        expectedException.expect(ServiceLoggerException.class);
         expectedException.expectMessage("Подразделение не может быть удалено, так как оно имеет тип \"Банк\"!");
 
         Department department = new Department();

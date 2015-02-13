@@ -144,4 +144,11 @@ public interface LockDataService {
      * @return список идентификаторов пользователей
      */
     List<Integer> getUsersWaitingForLock(String key);
+
+    /**
+     * Получает таймаут для блокировки
+     * @param lockObject объект блокировки
+     * @return время в милисекундах
+     */
+    int getLockTimeout(LockData.LockObjects lockObject);
 }

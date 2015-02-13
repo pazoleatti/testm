@@ -24,14 +24,14 @@ public final class LockData {
         IFRS
     }
 
-    public static final int STANDARD_LIFE_TIME = 3600000;  // 1 час
-
 	/* Идентификатор блокировки */
 	private String key;
 	/* Код пользователя, установившего блокировку*/
 	private int userId;
 	/* Дата истечения блокировки */
 	private Date dateBefore;
+    /* Дата установки блокировки */
+    private Date dateLock;
 
 	public LockData(){
 	}
@@ -66,13 +66,21 @@ public final class LockData {
 		this.userId = userId;
 	}
 
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("LockData{");
-		sb.append("key='").append(key).append('\'');
-		sb.append(", userId=").append(userId);
-		sb.append(", dateBefore=").append(dateBefore);
-		sb.append('}');
-		return sb.toString();
-	}
+    public Date getDateLock() {
+        return dateLock;
+    }
+
+    public void setDateLock(Date dateLock) {
+        this.dateLock = dateLock;
+    }
+
+    @Override
+    public String toString() {
+        return "LockData{" +
+                "key='" + key + '\'' +
+                ", userId=" + userId +
+                ", dateBefore=" + dateBefore +
+                ", dateLock=" + dateLock +
+                '}';
+    }
 }

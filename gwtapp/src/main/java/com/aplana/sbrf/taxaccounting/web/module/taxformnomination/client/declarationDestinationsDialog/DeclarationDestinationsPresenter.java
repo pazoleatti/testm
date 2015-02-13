@@ -44,7 +44,8 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 						    public void onSuccess(AddDeclarationSourceResult result) {
 								UpdateTable.fire(DeclarationDestinationsPresenter.this, getView().getSelectedDepartments());
 							    LogAddEvent.fire(DeclarationDestinationsPresenter.this, result.getUuid());
-							    getView().hide();
+								getView().init();
+								getView().hide();
 						    }
 					    }, this));
     }
@@ -73,7 +74,9 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
         void updateLabel(TaxType taxType);
 
         void updateCreateButtonStatus();
-    }
+
+		void init();
+	}
 
     @Inject
     public DeclarationDestinationsPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync) {

@@ -33,6 +33,16 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3322,330,'Наименование документа, подтверждающего полномочия представителя','APPROVE_DOC_NAME',1,21,null,null,1,null,100,0,0,null,null,0,120);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3323,330,'Наименование организации-представителя налогоплательщика','APPROVE_ORG_NAME',1,22,null,null,1,null,100,0,0,null,null,0,1000);
 
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 5 WHERE ID = 3304;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 5 WHERE ID = 3305;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3307;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3308;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3319;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3320;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3321;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3322;
+UPDATE REF_BOOK_ATTRIBUTE SET WIDTH = 20 WHERE ID = 3323;
+
 --------------------------------------------------------------------------------------------------------------------------
 -- Перенос данных
 
@@ -310,6 +320,21 @@ where form_template_id = 417 and exists(select 1 from ref_book_attribute where i
 -- 5. Удалить атрибуты «Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде», «Сумма налога с выплаченных дивидендов за пределами Российской Федерации в последнем квартале отчётного периода» с формы настроек подразделения для налога на прибыль
 delete from ref_book_value where attribute_id in (205, 206);
 delete from ref_book_attribute where id in (205, 206);
+
+-- Информация об исполнителе налоговой формы
+insert into form_data_performer (form_data_id, name, print_department_id, report_department_name)
+  select fd.id, ' ' as name, d.id as print_department_id, d.name as report_department_name
+  from form_data fd
+  cross join
+  (
+  select id, substr(sys_connect_by_path(name, '/'), 2) name
+  from department
+  where id = 1
+  start with parent_id = 0
+  connect by prior id = parent_id
+  ) d
+  where form_template_id = 417 and not exists (select 1 from form_data_performer t where t.form_data_id = fd.id);
+  
 
 COMMIT;
 EXIT;

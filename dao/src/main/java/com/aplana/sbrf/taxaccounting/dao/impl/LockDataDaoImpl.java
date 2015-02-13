@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -33,7 +34,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	public LockData get(String key) {
 		try {
             return getJdbcTemplate().queryForObject(
-					"SELECT key, user_id, date_before FROM lock_data WHERE key = ?",
+					"SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ?",
 					new Object[] {key},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
@@ -49,7 +50,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date dateBefore) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_before FROM lock_data WHERE key = ? and date_before = ?",
+                    "SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ? and date_before = ?",
                     new Object[] {key, dateBefore},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
@@ -166,6 +167,12 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     }
 
+    @Override
+    @Cacheable(value = "PermanentData", key = "'LockTimeout_'+#lockObject.name()")
+    public int getLockTimeout(LockData.LockObjects lockObject) {
+        return getJdbcTemplate().queryForInt("select timeout from configuration_lock where key = ? ", lockObject.name());
+    }
+
     private static final class LockDataMapper implements RowMapper<LockData> {
 		@Override
         public LockData mapRow(ResultSet rs, int index) throws SQLException {
@@ -173,6 +180,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 			result.setKey(rs.getString("key"));
 			result.setUserId(rs.getInt("user_id"));
 			result.setDateBefore(rs.getTimestamp("date_before"));
+            result.setDateLock(rs.getTimestamp("date_lock"));
 			return result;
 		}
 	}

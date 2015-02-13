@@ -1270,6 +1270,8 @@ public class SourceServiceImpl implements SourceService {
                 formToFormRelation.setCreated(false);
                 formToFormRelation.setFormType(formTypeDao.get(departmentFormType.getFormTypeId()));
                 formToFormRelation.setFormDataKind(departmentFormType.getKind());
+                formToFormRelation.setYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
+                formToFormRelation.setPeriodName(departmentReportPeriod.getReportPeriod().getName());
             } else {
                 // Источников нет
                 return null;
@@ -1335,7 +1337,8 @@ public class SourceServiceImpl implements SourceService {
         filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
         // Список всех отчетных периодов
         List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
-        // Приемник может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
+        //TODO: код похож на дублирующий из метода com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao.getLast
+        // Приемник в корректирующем периоде может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
         // периоды удаляем из списка
         if (departmentReportPeriod.getCorrectionDate() != null) {
             List<DepartmentReportPeriod> delList = new LinkedList<DepartmentReportPeriod>();

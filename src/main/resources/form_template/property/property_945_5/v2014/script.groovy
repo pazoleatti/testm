@@ -1154,7 +1154,7 @@ def getRowBenefitCodes(def row) {
     if (!records) {
         // если записей нет, то ошибка
         def subject = getRefBookValue(4, subjectId)?.CODE?.value
-        def refBookName = getRefBookName(200L)
+        def refBookName = getRefBookName(203L)
         def categoryMessage = hasCategory ? "с категорией «${row.title}» " : "без категории "
         throw new Exception("Для кода субъекта $subject не предусмотрена налоговая льгота " + categoryMessage +
                 "(в справочнике «$refBookName» отсутствует необходимая запись)!")
@@ -1316,7 +1316,7 @@ def getDepartmentById(def id) {
 /** Получить тип фомры по id. */
 def getFormTypeById(def id) {
     if (formTypeMap[id] == null) {
-        formTypeMap[id] = formTypeService.get(sourceFormTypeId)
+        formTypeMap[id] = formTypeService.get(id)
     }
     return formTypeMap[id]
 }
