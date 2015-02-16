@@ -945,15 +945,30 @@ void importTransportData() {
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
+// Добавляет строку в текущий буфер строк
+boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, boolean isTotal) {
+    if (rowCells == null) {
+        return true
+    }
 
-        def editableTColumns = editableColumns
-        if (isBalancePeriod()) {
-            editableTColumns = allColumns - ['number', 'issuer', 'currency', 'signSecurity']
+    def DataRow newRow = formData.createDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return false
+    }
+
+    if (isTotal) {
+        newRow.setAlias('total')
+        newRow.fix = 'Общий итог'
+        newRow.getCell('fix').colSpan = 2
+        allColumns.each {
+            newRow.getCell(it).setStyleAlias('Контрольные суммы')
         }
-
-        editableTColumns.each {
+    } else {
+        editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
@@ -1042,44 +1057,8 @@ void importTransportData() {
     return true
 }
 
-        def row = xml.rowTotal[0]
-
-        def total = formData.createDataRow()
-        total.setAlias('total')
-        total.fix = 'Общий итог'
-        total.getCell('fix').colSpan = 2
-        allColumns.each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
-        }
-
-        // Графа 6
-        xmlIndexCol = 6
-        total.prev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // Графа 7
-        xmlIndexCol = 7
-        total.current = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // Графа 8
-        xmlIndexCol = 8
-        total.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // Графа 9
-        xmlIndexCol = 9
-        total.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // Графа 14
-        xmlIndexCol = 14
-        total.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // Графа 15
-        xmlIndexCol = 15
-        total.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // Графа 16
-        xmlIndexCol = 16
-        total.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // Графа 17
-        xmlIndexCol = 17
-        total.recovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        rows.add(total)
-    }
-    dataRowHelper.save(rows)
+static String pure(String cell) {
+    return StringUtils.cleanString(cell).intern()
 }
 
 // Сортировка групп и строк
@@ -1132,6 +1111,4 @@ void sortAddRows(def addRows, def dataRows) {
         sortRowsSimple(addRows)
         dataRows.addAll(addRows)
     }
-static String pure(String cell) {
-    return StringUtils.cleanString(cell).intern()
 }
