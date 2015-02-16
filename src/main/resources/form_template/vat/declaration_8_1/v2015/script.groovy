@@ -102,26 +102,12 @@ List<String> getErrorVersion(record) {
 }
 
 void generateXML() {
-    // Параметры подразделения
+    // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
-
-    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
-    def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value
-    def okato = getOkato(departmentParam?.OKTMO?.value)
-    def taxPlaceTypeCode = getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
-    def signatoryId = getRefBookValue(35, departmentParam?.SIGNATORY_ID?.value)?.CODE?.value
-    def name = departmentParam?.NAME?.value
     def inn = departmentParam?.INN?.value
-    def kpp = departmentParam?.KPP?.value
     def formatVersion = departmentParam?.FORMAT_VERSION?.value
-    def surname = departmentParam?.SIGNATORY_SURNAME?.value
-    def firstname = departmentParam?.SIGNATORY_FIRSTNAME?.value
-    def lastname = departmentParam?.SIGNATORY_LASTNAME?.value
-    def approveDocName = departmentParam?.APPROVE_DOC_NAME?.value
-    def approveOrgName = departmentParam?.APPROVE_ORG_NAME?.value
-    def reorgINN = departmentParam?.REORG_INN?.value
-    def reorgKPP = departmentParam?.REORG_KPP?.value
 
+    // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".81" + "_" +
             declarationData.taxOrganCode + "_" +
             declarationData.taxOrganCode + "_" +
@@ -131,16 +117,136 @@ void generateXML() {
     def index = "0000081"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // TODO получение остальных данных для заполнения
+    // атрибуты, заполняемые по форме 937.1.1 (строки 001, 005 и 190 отдельно, остальное в массиве rows93711)
+    def code001 = null
+    def code005 = null
+    def code190 = null // TODO
+    def rows93711 = []
+    def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
+    def corrNumber93711
+    for (def formData : formDataList) {
+        if (formData.id == 616) {
+            def sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+            for (def row : sourceDataRows) {
+                if (row.getAlias() != null) {
+                    // заполняем строку 005 отдельно по итоговой строке
+                    code005 = row.nds
+                    continue
+                }
+                rows93711.add(row)
+            }
+            corrNumber93711 = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+        }
+    }
+    if (corrNumber > 0) {
+        code001 = (corrNumber == corrNumber93711) ? 0 : 1
+    }
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
             ИдФайл: fileId,
             ВерсПрог: applicationVersion,
-            ВерсФорм: formatVersion,
-            Индекс: index,
-            НомКорр: corrNumber) {
-        // TODO заполнение
+            ВерсФорм: formatVersion) {
+        Документ(
+                Индекс: index,
+                НомКорр: corrNumber,
+                ПризнСвед81: code001
+        ) {
+            КнигаПокупДЛ(
+                    СумНДСИтКПк: code005,
+                    СумНДСИтП1Р8: code190
+            ) {
+                for (def row : rows93711) {
+                    // TODO http://jira.aplana.com/browse/SBRFACCTAX-10383
+                    def code008 = row.todo
+                    def code010 = row.todo
+                    def code020 = row.todo
+                    def code030 = row.todo
+                    def code040 = row.todo
+                    def code050 = row.todo
+                    def code060 = row.todo
+                    def code070 = row.todo
+                    def code080 = row.todo
+                    def code090 = row.todo
+                    def code120 = row.todo
+                    def code150 = row.todo
+                    def code160 = row.todo
+                    def code170 = row.todo
+                    def code180 = row.todo
+                    def code100 = row.todo
+                    def code110 = row.todo
+                    def code130 = row.todo
+                    def code130inn
+                    def code130kpp
+                    def code140 = row.todo
+                    def code140inn
+                    def code140kpp
+
+                    // различаем юр. и физ. лица в строках 130 и 140
+                    def boolean isUL130 = false
+                    def slashIndex = code130?.indexOf("/")
+                    if (slashIndex != 0) {
+                        isUL130 = true
+                        code130inn = code130.substring(0, slashIndex)
+                        code130kpp = code130.substring(slashIndex + 1)
+                    }
+                    def boolean isUL140 = false
+                    slashIndex = code140?.indexOf("/")
+                    if (slashIndex != 0) {
+                        isUL140 = true
+                        code140inn = code140.substring(0, slashIndex)
+                        code140kpp = code140.substring(slashIndex + 1)
+                    }
+
+                    КнПокДЛСтр(
+                            НомерПор: code008,
+                            НомСчФПрод: code020,
+                            ДатаСчФПрод: code030,
+                            НомИспрСчФ: code040,
+                            ДатаИспрСчФ: code050,
+                            НомКСчФПрод: code060,
+                            ДатаКСчФПрод: code070,
+                            НомИспрКСчФ: code080,
+                            ДатаИспрКСчФ: code090,
+                            НомТД: code150,
+                            ОКВ: code160,
+                            СтоимПокупВ: code170,
+                            СумНДС: code180
+                    ) {
+                        КодВидОпер { code010 }
+                        ДокПдтвУпл(
+                                НомДокПдтвУпл: code100,
+                                ДатаДокПдтвУпл: code110
+                        )
+                        ДатаУчТов { code120 }
+                        СвПрод() {
+                            if (isUL130) {
+                                СведЮЛ(
+                                        ИННЮЛ: code130inn,
+                                        КПП: code130kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code130
+                                )
+                            }
+                        }
+                        СвПос() {
+                            if (isUL140) {
+                                СведЮЛ(
+                                        ИННЮЛ: code140inn,
+                                        КПП: code140kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code140
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

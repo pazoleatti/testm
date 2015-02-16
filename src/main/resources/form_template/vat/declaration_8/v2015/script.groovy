@@ -141,7 +141,6 @@ void generateXML() {
         code001 = (corrNumber == corrNumber9371) ? 0 : 1
     }
 
-
     def builder = new MarkupBuilder(xml)
     builder.Файл(
             ИдФайл: fileId,
@@ -174,7 +173,7 @@ void generateXML() {
                     def code180 = row.todo
                     def code100 = row.todo
                     def code110 = row.todo
-                    def String code130 = row.todo
+                    def code130 = row.todo
                     def code130inn
                     def code130kpp
                     def code140 = row.todo
@@ -183,16 +182,18 @@ void generateXML() {
 
                     // различаем юр. и физ. лица в строках 130 и 140
                     def boolean isUL130 = false
-                    if (code130.contains("/")) {
+                    def slashIndex = code130?.indexOf("/")
+                    if (slashIndex != 0) {
                         isUL130 = true
-                        code130inn = code130.substring(0, code130.indexOf("/"))
-                        code130kpp = code130.substring(code130.indexOf("/") + 1)
+                        code130inn = code130.substring(0, slashIndex)
+                        code130kpp = code130.substring(slashIndex + 1)
                     }
                     def boolean isUL140 = false
-                    if (code140.contains("/")) {
+                    slashIndex = code140?.indexOf("/")
+                    if (slashIndex != 0) {
                         isUL140 = true
-                        code140inn = code140.substring(0, code140.indexOf("/"))
-                        code140kpp = code140.substring(code140.indexOf("/") + 1)
+                        code140inn = code140.substring(0, slashIndex)
+                        code140kpp = code140.substring(slashIndex + 1)
                     }
 
                     КнПокСтр(

@@ -137,10 +137,109 @@ void generateXML() {
     builder.Файл(
             ИдФайл: fileId,
             ВерсПрог: applicationVersion,
-            ВерсФорм: formatVersion,
-            Индекс: index,
-            НомКорр: corrNumber) {
-        // TODO заполнение
+            ВерсФорм: formatVersion) {
+        Документ(
+                Индекс: index,
+                НомКорр: corrNumber,
+                ПризнСвед10: code001
+        ) {
+            ЖУчВыстСчФ() {
+                for (def row : rows9371) {
+                    // TODO http://jira.aplana.com/browse/SBRFACCTAX-10383
+                    def code005 = row.todo
+                    def code010 = row.todo
+                    def code020 = row.todo
+                    def code030 = row.todo
+                    def code040 = row.todo
+                    def code050 = row.todo
+                    def code060 = row.todo
+                    def code070 = row.todo
+                    def code080 = row.todo
+                    def code090 = row.todo
+                    def code120 = row.todo
+                    def code150 = row.todo
+                    def code160 = row.todo
+                    def code170 = row.todo
+                    def code180 = row.todo
+                    def code100 = row.todo
+                    def code110 = row.todo
+                    def code130 = row.todo
+                    def code130inn
+                    def code130kpp
+                    def code140 = row.todo
+                    def code140inn
+                    def code140kpp
+
+                    // различаем юр. и физ. лица в строках 130 и 140
+                    def boolean isUL130 = false
+                    def slashIndex = code130?.indexOf("/")
+                    if (slashIndex != 0) {
+                        isUL130 = true
+                        code130inn = code130.substring(0, slashIndex)
+                        code130kpp = code130.substring(slashIndex + 1)
+                    }
+                    def boolean isUL140 = false
+                    slashIndex = code140?.indexOf("/")
+                    if (slashIndex != 0) {
+                        isUL140 = true
+                        code140inn = code140.substring(0, slashIndex)
+                        code140kpp = code140.substring(slashIndex + 1)
+                    }
+
+                    ЖУчВыстСчФСтр(
+                            НомерПор: code005,
+                            ДатаВыст: code020,
+                            НомСчФПрод: code030,
+                            ДатаСчФПрод: code040,
+                            НомИспрСчФ: code050,
+                            ДатаИспрСчФ: code060,
+                            НомКСчФПрод: code070,
+                            ДатаКСчФПрод: code080,
+                            НомИспрКСчФ: code090,
+                            ДатаИспрКСчФ: code150
+                    ) {
+                        КодВидОпер { code010 }
+                        СвПокуп() {
+                            if (isUL130) {
+                                СведЮЛ(
+                                        ИННЮЛ: code130inn,
+                                        КПП: code130kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code130
+                                )
+                            }
+                        }
+                        СвПосрДеят(
+                                НомСчФОтПрод: code,
+                                ДатаСчФОтПрод: code,
+                                ОКВ: code,
+                                СтоимТовСчФВс: code,
+                                СумНДССчФ: code,
+                                РазСтКСчФУм: code,
+                                РазСтКСчФУв: code,
+                                РазНДСКСчФУм: code,
+                                РазНДСКСчФУв: code
+                        )  {
+                            СвПрод() {
+                                if (isUL140) {
+                                    СведЮЛ(
+                                            ИННЮЛ: code140inn,
+                                            КПП: code140kpp
+                                    )
+                                } else {
+                                    СведИП(
+                                            ИННФЛ: code140
+                                    )
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
     }
 }
 

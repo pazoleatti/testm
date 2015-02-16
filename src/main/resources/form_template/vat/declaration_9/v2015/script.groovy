@@ -102,26 +102,12 @@ List<String> getErrorVersion(record) {
 }
 
 void generateXML() {
-    // Параметры подразделения
+    // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
-
-    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
-    def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value
-    def okato = getOkato(departmentParam?.OKTMO?.value)
-    def taxPlaceTypeCode = getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
-    def signatoryId = getRefBookValue(35, departmentParam?.SIGNATORY_ID?.value)?.CODE?.value
-    def name = departmentParam?.NAME?.value
     def inn = departmentParam?.INN?.value
-    def kpp = departmentParam?.KPP?.value
     def formatVersion = departmentParam?.FORMAT_VERSION?.value
-    def surname = departmentParam?.SIGNATORY_SURNAME?.value
-    def firstname = departmentParam?.SIGNATORY_FIRSTNAME?.value
-    def lastname = departmentParam?.SIGNATORY_LASTNAME?.value
-    def approveDocName = departmentParam?.APPROVE_DOC_NAME?.value
-    def approveOrgName = departmentParam?.APPROVE_ORG_NAME?.value
-    def reorgINN = departmentParam?.REORG_INN?.value
-    def reorgKPP = departmentParam?.REORG_KPP?.value
 
+    // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".9" + "_" +
             declarationData.taxOrganCode + "_" +
             declarationData.taxOrganCode + "_" +
@@ -131,16 +117,150 @@ void generateXML() {
     def index = "0000090"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // TODO получение остальных данных для заполнения
+    // атрибуты, заполняемые по форме 937.2 (строки 001 и 230-280 отдельно, остальное в массиве rows9372)
+    def code001 = null
+    def code230, code240, code250, code260, code270, code280
+    def rows9372 = []
+    def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
+    def corrNumber9372
+    for (def formData : formDataList) {
+        if (formData.id == 608) {
+            def sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+            for (def row : sourceDataRows) {
+                if (row.getAlias() != null) {
+                    // заполняем строки 230-280 отдельно по итоговой строке
+                    code230 = row.saleCostB18
+                    code240 = row.saleCostB10
+                    code250 = row.saleCostB0
+                    code260 = row.vatSum18
+                    code270 = row.vatSum10
+                    code280 = row.bonifSalesSum
+                    continue
+                }
+                rows9372.add(row)
+            }
+            corrNumber9372 = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+        }
+    }
+    if (corrNumber > 0) {
+        code001 = (corrNumber == corrNumber9372) ? 0 : 1
+    }
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
             ИдФайл: fileId,
             ВерсПрог: applicationVersion,
-            ВерсФорм: formatVersion,
-            Индекс: index,
-            НомКорр: corrNumber) {
-        // TODO заполнение
+            ВерсФорм: formatVersion) {
+        Документ(
+                Индекс: index,
+                НомКорр: corrNumber,
+                ПризнСвед9: code001
+        ) {
+            КнигаПрод(
+                    СтПродБезНДС18: code230,
+                    СтПродБезНДС10: code240,
+                    СтПродБезНДС0: code250,
+                    СумНДСВсКПр18: code260,
+                    СумНДСВсКПр10: code270,
+                    СтПродОсвВсКПр: code280
+            ) {
+                for (def row : rows9372) {
+
+                    def code005 = row.rowNumber
+                    def code010 = row.opTypeCode
+                    def code020 = getNumber(row.invoiceNumDate)
+                    def code030 = getDate(row.invoiceNumDate)
+                    def code040 = getNumber(row.invoiceCorrNumDate)
+                    def code050 = getDate(row.invoiceCorrNumDate)
+                    def code060 = getNumber(row.corrInvoiceNumDate)
+                    def code070 = getDate(row.corrInvoiceNumDate)
+                    def code080 = getNumber(row.corrInvCorrNumDate)
+                    def code090 = getDate(row.corrInvCorrNumDate)
+                    def code100 = row.buyerInnKpp
+                    def code110 = row.mediatorInnKpp
+                    def code120 = getNumber(row.paymentDocNumDate)
+                    def code130 = getDate(row.paymentDocNumDate)
+                    def code140 = getLastTextPart(row.currNameCode, "(\\w.{0,254}) ")
+                    def code150 = row.saleCostACurr
+                    def code160 = row.saleCostARub
+                    def code170 = row.saleCostB18
+                    def code180 = row.saleCostB10
+                    def code190 = row.saleCostB0
+                    def code200 = row.vatSum18
+                    def code210 = row.vatSum10
+                    def code220 = row.saleCostARub
+
+                    // различаем юр. и физ. лица в строках 100 и 110
+                    def code100inn, code100kpp, code110inn, code110kpp
+                    def boolean isUL130 = false
+                    def slashIndex = code100?.indexOf("/")
+                    if (slashIndex != 0) {
+                        isUL130 = true
+                        code100inn = code100.substring(0, slashIndex)
+                        code100kpp = code100.substring(slashIndex + 1)
+                    }
+                    def boolean isUL140 = false
+                    slashIndex = code110?.indexOf("/")
+                    if (slashIndex != 0) {
+                        isUL140 = true
+                        code110inn = code110.substring(0, slashIndex)
+                        code110kpp = code110.substring(slashIndex + 1)
+                    }
+
+                    КнПродСтр(
+                            НомерПор: code005,
+                            НомСчФПрод: code020,
+                            ДатаСчФПрод: code030,
+                            НомИспрСчФ: code040,
+                            ДатаИспрСчФ: code050,
+                            НомКСчФПрод: code060,
+                            ДатаКСчФПрод: code070,
+                            НомИспрКСчФ: code080,
+                            ДатаИспрКСчФ: code090,
+                            НомТД: code150,
+                            ОКВ: code140,
+                            СтоимПродСФВ: code150,
+                            СтоимПродСФ: code160,
+                            СтоимПродСФ18: code170,
+                            СтоимПродСФ10: code180,
+                            СтоимПродСФ0: code190,
+                            СумНДССФ18: code200,
+                            СумНДССФ10: code210,
+                            СтоимПродОсв: code220
+                    ) {
+                        КодВидОпер { code010 }
+                        ДокПдтвОпл(
+                                НомДокПдтвОпл: code120,
+                                ДатаДокПдтвОпл: code130
+                        )
+                        СвПокуп() {
+                            if (isUL130) {
+                                СведЮЛ(
+                                        ИННЮЛ: code100inn,
+                                        КПП: code100kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code110
+                                )
+                            }
+                        }
+                        СвПос() {
+                            if (isUL140) {
+                                СведЮЛ(
+                                        ИННЮЛ: code110inn,
+                                        КПП: code110kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code110
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -152,4 +272,23 @@ def checkDeclarationFNS() {
         def String event = (formDataEvent == FormDataEvent.MOVE_CREATED_TO_ACCEPTED) ? "Принять данную декларацию" : "Отменить принятие данной декларации"
         throw new ServiceException('%s невозможно, так как в текущем периоде и подразделении принята "Декларация по НДС (раздел 1-7)', event)
     }
+}
+
+def getNumber(def String str) {
+    if (str != null && str.length > 10) {
+        return str.substring(0, str.length - 10)
+    }
+    return null
+}
+
+def getDate(def String str) {
+    if (str != null && str.length > 10) {
+        return str.substring(str.length - 9)
+    }
+    return null
+}
+
+def getLastTextPart(String value, def pattern) {
+    def parts = value?.split(pattern)
+    return parts?.length == 2 ? parts[1] : null
 }
