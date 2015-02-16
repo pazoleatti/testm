@@ -125,7 +125,7 @@ def allColumns = ['number', 'fix', 'issuer', 'regNumber', 'tradeNumber', 'curren
 
 @Field
 def editableColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'prev', 'current', 'cost', 'signSecurity',
-                       'marketQuotation', 'rubCourse']
+                       'marketQuotation', 'rubCourse', 'costOnMarketQuotation', 'reserveCalcValue']
 
 // Группируемые атрибуты (графа 2, 3, 4)
 @Field
@@ -144,7 +144,7 @@ def totalColumns = ['prev', 'current', 'reserveCalcValuePrev', 'cost',
 // алиасы графов для арифметической проверки (графа )
 @Field
 def arithmeticCheckAlias = ['reserveCalcValuePrev', 'marketQuotation', 'rubCourse', 'marketQuotationInRub',
-        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
+        /*'costOnMarketQuotation', 'reserveCalcValue',*/ 'reserveCreation', 'recovery']
 
 // Дата окончания отчетного периода
 @Field
@@ -217,8 +217,8 @@ void calc() {
             row.marketQuotation = calc11(row)
             row.rubCourse = calc12(row)
             row.marketQuotationInRub = calc13(row)
-            row.costOnMarketQuotation = calc14(row)
-            row.reserveCalcValue = calc15(row)
+            //row.costOnMarketQuotation = calc14(row)
+            //row.reserveCalcValue = calc15(row)
             row.reserveCreation = calc16(row)
             row.recovery = calc17(row)
         }
@@ -332,8 +332,8 @@ def logicCheck() {
                         marketQuotation: calc11(row),
                         rubCourse: calc12(row),
                         marketQuotationInRub: calc13(row),
-                        costOnMarketQuotation: calc14(row),
-                        reserveCalcValue: calc15(row),
+                        //costOnMarketQuotation: calc14(row),
+                        //reserveCalcValue: calc15(row),
                         reserveCreation: calc16(row),
                         recovery: calc17(row)
                 ]
