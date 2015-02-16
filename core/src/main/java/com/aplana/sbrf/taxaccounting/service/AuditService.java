@@ -40,6 +40,13 @@ public interface AuditService {
     void removeRecords(List<LogSearchResultItem> itemList, TAUserInfo userInfo);
 
     /**
+     * Удаляем набор записей из журнала по фильтру
+     * @param filter фильтр для удаления записей
+     * @param firstRecord первая запись
+     */
+    void removeRecords(LogSystemFilter filter, LogSearchResultItem firstRecord, LogSearchResultItem lastRecord, TAUserInfo userInfo);
+
+    /**
      * Получение даты последней архивации
      * @return дата ахивации
      */

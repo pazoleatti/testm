@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.LogSystem;
+import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 
@@ -211,5 +213,19 @@ public class AuditDaoTest {
         LogSystemFilter restrictedLogSystemAuditFilter = (LogSystemFilter) method.invoke(auditDao, logSystemFilter);
         assertTrue(restrictedLogSystemAuditFilter.getFilter().length() <= LENGTH);
     }*/
+
+    @Test
+    @Transactional(readOnly = false)
+    public void testRemove(){
+        LogSystemFilter filter = new LogSystemFilter();
+        filter.setCountOfRecords(10);
+        filter.setStartIndex(0);
+        filter.setFromSearchDate(new Date(1304247365000l));
+        filter.setToSearchDate(new Date());
+        filter.setFilter("");
+        filter.setAuditFieldList(new ArrayList<Long>());
+
+        auditDao.removeRecords(filter);
+    }
 
 }

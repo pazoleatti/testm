@@ -270,6 +270,21 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         jt.update("delete from log_system where " + SqlUtils.transformToSqlInStatement("id", listIds));
     }
 
+
+    private final static String DELETE_RECORDS_BY_FILTER =
+            "delete from LOG_SYSTEM where id in (\n" +
+                    "  select ls.id\n" +
+                    "    from log_system ls \n" +
+                    "    WHERE  log_date <= :toDate \n" +
+                    ")";
+
+    @Override
+    public void removeRecords(final LogSystemFilter filter) {
+        getNamedParameterJdbcTemplate().update(
+                DELETE_RECORDS_BY_FILTER,
+                new HashMap<String, Object>(){{put("toDate", filter.getToSearchDate());}});
+    }
+
     @Override
     public Date lastArchiveDate() {
         try {

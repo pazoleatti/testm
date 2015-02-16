@@ -14,10 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 /**
  * User: avanteev
  */
@@ -59,7 +55,11 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                 if (records.isEmpty())
                     throw new ServiceException("Нет записей за указанную дату.");
                 result.setFileUuid(printingService.generateAuditCsv(records));
-                auditService.removeRecords(records, securityService.currentUserInfo());
+                auditService.removeRecords(
+                        action.getLogSystemFilter(),
+                        records.get(0),
+                        records.get(records.size()-1),
+                        securityService.currentUserInfo());
                 result.setCountOfRemoveRecords(records.getTotalCount());
                 return result;
             } finally{

@@ -41,6 +41,12 @@ public interface AuditDao {
     void removeRecords(List<Long> integers);
 
     /**
+     * Удалить информацию о логировании.
+     * @param integers идентификаторы
+     */
+    void removeRecords(LogSystemFilter filter);
+
+    /**
      * Дата последней архивации
      * @return дата
      */

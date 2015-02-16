@@ -120,6 +120,16 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
+    public void removeRecords(LogSystemFilter filter, LogSearchResultItem firstRecord, LogSearchResultItem lastRecord, TAUserInfo userInfo) {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        Date startDate = firstRecord.getLogDate();
+        Date endDate = lastRecord.getLogDate();
+        auditDao.removeRecords(filter);
+        StringBuilder message = new StringBuilder("Архивация событий ЖА за период: ").append(format.format(startDate)).append(" - ").append(format.format(endDate));
+        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, message.toString(), null, null);
+    }
+
+    @Override
     public Date getLastArchiveDate() {
         try {
             return auditDao.lastArchiveDate();
