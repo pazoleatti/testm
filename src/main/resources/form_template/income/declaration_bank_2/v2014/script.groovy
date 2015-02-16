@@ -222,7 +222,7 @@ void generateXML() {
     if (!sourceCheck(false, LogLevel.WARNING)) {
         nalVipl311 = 0
     } else {
-        nalVipl311 = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
+        nalVipl311 = getAliasFromForm(dataRowsSum, 'taxSum', 'R1')
     }
 
     if (xml == null) {
