@@ -61,7 +61,6 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
         break
@@ -78,21 +77,13 @@ switch (formDataEvent) {
         break
 }
 
-//// Кэши и константы
-@Field
-def providerCache = [:]
-@Field
-def recordCache = [:]
-@Field
-def refBookCache = [:]
-
 @Field
 def allColumns = ['rowNumber', 'opTypeCode', 'invoiceNumDate', 'invoiceCorrNumDate', 'corrInvoiceNumDate', 'corrInvCorrNumDate', 'buyerName', 'buyerInnKpp', 'mediatorName', 'mediatorInnKpp',
                   'paymentDocNumDate', 'currNameCode', 'saleCostACurr', 'saleCostARub', 'saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
 
 // Проверяемые на пустые значения атрибуты для разделов 1, 2, 3
 @Field
-def nonEmptyColumns = ['rowNumber', 'opTypeCode', 'invoiceNumDate']
+def nonEmptyColumns = ['opTypeCode', 'invoiceNumDate']
 
 // Редактируемые атрибуты (графа )
 @Field
@@ -130,16 +121,6 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                    def boolean required = true) {
-    if (value == null || value == '') {
-        return null
-    }
-    return formDataService.getRefBookRecordImport(refBookId, recordCache, providerCache, refBookCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
-}
-
 void addNewRow() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -167,7 +148,7 @@ void calc() {
     def totalRow = getDataRow(dataRows, 'total')
     def headRow = getDataRow(dataRows, 'head')
 
-    def bookTotalRow = getBookTotalRow(LogLevel.WARNING)
+    def bookTotalRow = getBookTotalRow(true)
     if (bookTotalRow) {
         totalSumColumns.each { column ->
             // Графы 14-19 фиксированной строки «Итого» заполнены согласно алгоритму
@@ -199,7 +180,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
 
         //	Если заполнена «Графа 6», то заполнена «Графа 5»
-        if (row.corrInvCorrNumDate != null && row.corrInvoiceNumDate == null){
+        if (row.corrInvCorrNumDate && row.corrInvoiceNumDate == null){
             loggerLog(row, String.format(FILLED_FILLED_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), getColumnName(row,'corrInvoiceNumDate')))
         }
         //	Если заполнена «Графа 12» и код валюты «Графы 12» заполнен и не равен «643», то заполнена «Графа 13а»
@@ -218,11 +199,11 @@ void logicCheck() {
             loggerLog(row, String.format(NOT_FILLED_FILLED_ERROR_MSG, index, getColumnName(row,'bonifSalesSum'), getColumnName(row,'saleCostARub')))
         }
         //	Если заполнена «Графа 14», то заполнена «Графа 17»
-        if (row.saleCostB18 != null && row.vatSum18 == null){
+        if (row.saleCostB18 && row.vatSum18 == null){
             loggerLog(row, String.format(FILLED_FILLED_ERROR_MSG, index, getColumnName(row,'saleCostB18'), getColumnName(row,'vatSum18')))
         }
         //	Если заполнена «Графа 15», то «Графа 18» заполнена
-        if (row.saleCostB10 != null && row.vatSum10 == null){
+        if (row.saleCostB10 && row.vatSum10 == null){
             loggerLog(row, String.format(FILLED_FILLED_ERROR_MSG, index, getColumnName(row,'saleCostB10'), getColumnName(row,'vatSum10')))
         }
         // Проверки форматов
@@ -231,31 +212,31 @@ void logicCheck() {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceNumDate'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 4
-        if (row.invoiceCorrNumDate != null && !checkFormat(row.invoiceCorrNumDate, "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrNumDate && !checkFormat(row.invoiceCorrNumDate, "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrNumDate'), "<Номер: тип поля «Число/3»/> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 5
-        if (row.corrInvoiceNumDate != null && !checkFormat(row.corrInvoiceNumDate.trim(), "^\\w.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvoiceNumDate && !checkFormat(row.corrInvoiceNumDate.trim(), "^\\w.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvoiceNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 6
-        if (row.corrInvCorrNumDate != null && !checkFormat(row.corrInvCorrNumDate.trim(), "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvCorrNumDate && !checkFormat(row.corrInvCorrNumDate.trim(), "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "<Номер: тип поля «Число/3»/> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 8
-        if (row.corrInvCorrNumDate != null && !checkFormat(row.corrInvCorrNumDate, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
+        if (row.corrInvCorrNumDate && !checkFormat(row.corrInvCorrNumDate, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
             loggerLog(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 10
-        if (row.mediatorInnKpp != null && !checkFormat(row.mediatorInnKpp, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
+        if (row.mediatorInnKpp && !checkFormat(row.mediatorInnKpp, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
             loggerLog(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'mediatorInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 11
-        if (row.paymentDocNumDate != null && !checkFormat(row.paymentDocNumDate.trim(), "^\\w.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.paymentDocNumDate && !checkFormat(row.paymentDocNumDate.trim(), "^\\w.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'paymentDocNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 12
-        if (row.currNameCode != null && !checkFormat(row.currNameCode.trim(), "^\\w.{0,254} \\w{3}\$")) {
+        if (row.currNameCode && !checkFormat(row.currNameCode.trim(), "^\\w.{0,254} \\w{3}\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'currNameCode'), "<Наименование: тип поля «Строка/255/»> <Код: тип поля «Строка/3/», формат «ХХХ»>"))
         }
         // графа 2
@@ -265,7 +246,7 @@ void logicCheck() {
     }
 
     def headRow = getDataRow(dataRows, 'head')
-    def bookTotalRow = getBookTotalRow(LogLevel.ERROR)
+    def bookTotalRow = getBookTotalRow()
     if (bookTotalRow) {
         def errorColumns = []
         totalSumColumns.each { column ->
@@ -275,7 +256,7 @@ void logicCheck() {
             }
         }
         if (!errorColumns.isEmpty()) {
-            loggerLog(bookTotalRow, "Строка ${headRow.getIndex()}: Итоговые значения рассчитаны неверно в графах: «${errorColumns.join("», «")}»!", LogLevel.ERROR)
+            loggerLog(bookTotalRow, "Строка ${headRow.getIndex()}: Итоговые значения рассчитаны неверно в графе «${getColumnName(bookTotalRow, column)}»!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
         }
     }
 
@@ -287,15 +268,17 @@ void logicCheck() {
  * @param logLevel
  * @return
  */
-def getBookTotalRow(LogLevel logLevel) {
+def getBookTotalRow(boolean skip = false) {
     int bookFormType = 608
     String bookFormTypeName = formTypeService.get(bookFormType).name
     List<DepartmentFormType> bookFormSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).findAll { it.formTypeId == bookFormType }
     // 1. ищем назначение
     if (bookFormSources == null || bookFormSources.isEmpty()) {
-        loggerLog(null, "Не назначена источником налоговая форма «$bookFormTypeName» в текущем периоде. " +
-                "Расчеты строки «Итого» не могут быть выполнены!", logLevel)
+        if (!skip) {
+            loggerLog(null, "Не назначена источником налоговая форма «$bookFormTypeName» в текущем периоде. " +
+                    "Расчеты строки «Итого» не могут быть выполнены!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
+        }
     } else {
         for (DepartmentFormType formDataSource in bookFormSources) {
             def bookFormData = formDataService.getLast(bookFormType, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
@@ -306,8 +289,10 @@ def getBookTotalRow(LogLevel logLevel) {
                     return getDataRow(bookDataRows, 'total')
                 }
             } else {
-                loggerLog(null, "Не найден экземпляр налоговой формы-источника «$bookFormTypeName» текущего периода " +
-                        "в статусе «Принята». Расчеты строки «Итого» не могут быть выполнены!", logLevel)
+                if (!skip) {
+                    loggerLog(null, "Не найден экземпляр налоговой формы-источника «$bookFormTypeName» текущего периода " +
+                            "в статусе «Принята». Расчеты строки «Итого» не могут быть выполнены!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
+                }
             }
         }
     }
@@ -353,16 +338,16 @@ void importData() {
             (xml.row[1].cell[16]) : '0 процентов',
 
             (xml.row[0].cell[17]) : 'Сумма НДС по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках, по ставке',
-            (xml.row[1].cell[17]) : '8 процентов',
+            (xml.row[1].cell[17]) : '18 процентов',
             (xml.row[1].cell[18]) : '10 процентов',
 
-            (xml.row[0].cell[19]) : getColumnName(tmpRow, 'bonifSalesSum')
+            (xml.row[0].cell[19]) : getColumnName(tmpRow, 'bonifSalesSum'),
+            (xml.row[2].cell[12]) : '13а',
+            (xml.row[2].cell[13]) : '13б'
     ]
     (0..11).each { index ->
         headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
     }
-    headerMapping.put((xml.row[2].cell[12]), '13а')
-    headerMapping.put((xml.row[2].cell[13]), '13б')
     (14..19).each { index ->
         headerMapping.put((xml.row[2].cell[index]), index.toString())
     }
@@ -376,14 +361,16 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def dataRows = dataRowHelper.allCached
+    def headRow = getDataRow(dataRows, 'head')
     def totalRow = getDataRow(dataRows, 'total')
+    totalSumColumns.each {headRow[it] = null}
 
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def xmlIndexRow = -1
     def int rowIndex = 1
-    def rows = []
+    def rows = [headRow]
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -503,7 +490,11 @@ void addTransportData(def xml) {
     def int rnuIndexRow = 2
     def int colOffset = 1
 
-    def rows = []
+    def dataRows = dataRowHelper.allCached
+    def headRow = getDataRow(dataRows, 'head')
+    totalSumColumns.each {headRow[it] = null}
+
+    def rows = [headRow]
     def int rowIndex = 1
 
     for (def row : xml.row) {
