@@ -1014,7 +1014,7 @@ boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowI
         newRow.tradeNumber = pure(rowCells[colIndex])
         // Графа 5
         colIndex = 5
-        newRow.currency = getRecordIdImport(15, 'CODE_2', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+        newRow.currency = getRecordIdImport(15, 'CODE_2', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
         // Графа 6
         colIndex = 6
         newRow.prev = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
@@ -1029,7 +1029,7 @@ boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowI
         newRow.cost = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
         // Графа 10
         colIndex = 10
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
         // Графа 11
         colIndex = 11
         newRow.marketQuotation = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)

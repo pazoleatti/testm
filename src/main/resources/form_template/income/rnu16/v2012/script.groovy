@@ -271,7 +271,7 @@ void addTransportData(def xml) {
 
         // проверка графы 3
         if (map != null) {
-            formDataService.checkReferenceValue(28, row.cell[3].text(), map.TYPE_INCOME?.stringValue, rnuIndexRow, 3 + colOffset, logger, true)
+            formDataService.checkReferenceValue(28, row.cell[3].text(), map.TYPE_INCOME?.stringValue, rnuIndexRow, 3 + colOffset, logger, false)
         }
 
         // графа 4

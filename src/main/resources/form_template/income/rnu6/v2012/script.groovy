@@ -594,12 +594,12 @@ void addTransportData(def xml) {
         }
 
         // графа 4 - поиск записи идет по графе 2
-        newRow.code = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset)
+        newRow.code = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset, false)
         def map = getRefBookValue(28, newRow.code)
 
         // графа 4 проверка
         if (map != null) {
-            formDataService.checkReferenceValue(28, row.cell[4].text(), map.NUMBER?.stringValue, rnuIndexRow, 4 + colOffset, logger, true)
+            formDataService.checkReferenceValue(28, row.cell[4].text(), map.NUMBER?.stringValue, rnuIndexRow, 4 + colOffset, logger, false)
         }
 
         // графа 3
@@ -612,7 +612,7 @@ void addTransportData(def xml) {
         newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", rnuIndexRow, 6 + colOffset, logger, true)
 
         // графа 7
-        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), rnuIndexRow, 7 + colOffset)
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), rnuIndexRow, 7 + colOffset, false)
 
         // графа 8
         newRow.rateOfTheBankOfRussia = parseNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset, logger, true)

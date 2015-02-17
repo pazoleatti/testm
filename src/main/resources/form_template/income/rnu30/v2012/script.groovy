@@ -625,7 +625,7 @@ void addTransportData(def xml) {
         if (isFirstSection(section)) {
             // графа 3
             xmlIndexCol = 3
-            newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+            newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
 
             // графа 5
             xmlIndexCol = 5

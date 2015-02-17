@@ -420,7 +420,7 @@ void addTransportData(def xml) {
         }
 
         // графа 2
-        newRow.balance = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset)
+        newRow.balance = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset, false)
         // графа 5
         newRow.sum = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
 

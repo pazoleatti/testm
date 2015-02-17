@@ -683,7 +683,7 @@ void addTransportData(def xml) {
         newRow.sellingPrice = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
         // графа 6
         xlsIndexCol = 6
-        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset)
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, false)
         // графа 7
         xlsIndexCol = 7
         newRow.rateBRBillDate = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)

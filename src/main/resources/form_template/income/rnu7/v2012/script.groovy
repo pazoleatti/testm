@@ -643,7 +643,7 @@ void addTransportData(def xml) {
         // графа 6
         newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", rnuIndexRow, 6 + colOffset, logger, true)
         // графа 7
-        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), rnuIndexRow, 7 + colOffset)
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), rnuIndexRow, 7 + colOffset, false)
         // графа 8
         newRow.rateOfTheBankOfRussia =  parseNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset, logger, true)
         // графа 9

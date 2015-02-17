@@ -494,9 +494,9 @@ void addTransportData(def xml) {
         newRow.setIndex(rowIndex++)
 
         // графа 2
-        newRow.regionBank = getRecordIdImport(30, 'NAME', row.cell[2].text(), rnuIndexRow, 2 + colOffset)
+        newRow.regionBank = getRecordIdImport(30, 'NAME', row.cell[2].text(), rnuIndexRow, 2 + colOffset, false)
         // графа 3
-        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), rnuIndexRow, 3 + colOffset)
+        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), rnuIndexRow, 3 + colOffset, false)
         // графа 4
         newRow.divisionName = row.cell[4].text()
         // графа 5

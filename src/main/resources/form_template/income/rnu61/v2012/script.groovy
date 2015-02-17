@@ -553,7 +553,7 @@ void addTransportData(def xml) {
         // графа 4
         newRow.nominal = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
         // графа 5
-        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[5].text(), rnuIndexRow, 5 + colOffset, false)
         // графа 6
         newRow.rateBRBill = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
         // графа 7

@@ -478,7 +478,7 @@ void addTransportData(def xml) {
 
         // графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
         rnuIndexCol = 3
-        record = getRecordImport(101, 'ACCOUNT', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        record = getRecordImport(101, 'ACCOUNT', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, false)
         newRow.number = record?.record_id?.value
 
         // графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
@@ -486,7 +486,7 @@ void addTransportData(def xml) {
             rnuIndexCol = 2
             def value1 = record?.ACCOUNT_NAME?.value?.toString()
             def value2 = row.cell[rnuIndexCol].text()
-            formDataService.checkReferenceValue(101, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(101, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, false)
         }
 
         // графа 4

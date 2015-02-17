@@ -731,13 +731,13 @@ void addTransportData(def xml) {
         newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         // графа 5
         xmlIndexCol = 5
-        def record71 = getRecordImport(71, 'GROUP', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        def record71 = getRecordImport(71, 'GROUP', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         newRow.amortGroup = record71?.record_id?.value
         // графа 6
         xmlIndexCol = 6
         if (record71 != null) {
             // графа 6 - зависит от графы 5 - атрибут 645 - TERM - "Срок полезного использования (месяцев)", справочник 71 "Амортизационные группы"
-            formDataService.checkReferenceValue(71, row.cell[xmlIndexCol].text(), record71?.TERM?.value?.toString(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(71, row.cell[xmlIndexCol].text(), record71?.TERM?.value?.toString(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         // графа 7
         xmlIndexCol = 7

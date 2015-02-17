@@ -1016,25 +1016,25 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 2 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
-        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         newRow.codeOKATO = record?.record_id?.value
         xmlIndexCol++
 
         // графа 3 - зависит от графы 2 - атрибут 841 - NAME - «Наименование», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
         if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
         // графа 4 - атрибут 422 - CODE - «Код вида ТС», справочник 42 «Коды видов транспортных средств»
         // http://jira.aplana.com/browse/SBRFACCTAX-8572 исправить загрузку Кода Вида ТС (убираю пробелы)
-        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text().replace(' ', ''), rnuIndexRow, xmlIndexCol + colOffset, true)
+        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text().replace(' ', ''), rnuIndexRow, xmlIndexCol + colOffset, false)
         newRow.tsTypeCode = record?.record_id?.value
         xmlIndexCol++
 
         // графа 5 - зависит от графы 4 - атрибут 423 - NAME - «Наименование вида транспортного средства», справочник 42 «Коды видов транспортных средств»
         if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
@@ -1043,7 +1043,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 7
-        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         xmlIndexCol++
 
         // графа 8
@@ -1067,7 +1067,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 13 - атрибут 57 - CODE - «Код единицы измерения», справочник 12 «Коды единиц измерения налоговой базы на основании ОКЕИ»
-        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         xmlIndexCol++
 
         // графа 14
@@ -1108,10 +1108,12 @@ void addTransportData(def xml) {
 
         // графа 23 - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
         if (row.cell[xmlIndexCol].text()) {
-            def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-            def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
-            def columnName = getColumnName(newRow, 'taxBenefitCode')
-            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, rnuIndexRow, xmlIndexCol + colOffset, true)
+            def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
+            if(recordId != null) {
+                def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
+                def columnName = getColumnName(newRow, 'taxBenefitCode')
+                newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, rnuIndexRow, xmlIndexCol + colOffset, true)
+            }
         }
         xmlIndexCol++
 
@@ -1120,7 +1122,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 25 - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
-        newRow.version = getRecordIdImport(208L, 'MODEL', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.version = getRecordIdImport(208L, 'MODEL', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         xmlIndexCol++
 
         // Техническое поле(группа)

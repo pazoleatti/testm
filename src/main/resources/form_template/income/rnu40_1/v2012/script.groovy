@@ -574,38 +574,38 @@ void addTransportData(def xml) {
 
         // графа 2 - атрибут 161 - NAME - "Наименование подразделения", справочник 30 "Подразделения"
         def xmlIndexCol = 2
-        def record30 = getRecordImport(30, 'NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        def record30 = getRecordImport(30, 'NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         newRow.name = record30?.record_id?.value
 
         // графа 1 - зависит от графы 2 - атрибут 166 - SBRF_CODE - "Код подразделения в нотации Сбербанка", справочник 30 "Подразделения"
         if (record30 != null) {
             xmlIndexCol = 1
-            formDataService.checkReferenceValue(30, row.cell[xmlIndexCol].text(), record30?.SBRF_CODE?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(30, row.cell[xmlIndexCol].text(), record30?.SBRF_CODE?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
         // графа 4 - атрибут 813 - REG_NUM - «Государственный регистрационный номер», справочник 84 «Ценные бумаги»
         // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
         // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
         xmlIndexCol = 4
-        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, true)
+        def record84 = getRecordImport(84, 'REG_NUM', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         newRow.registrationNumber = record84?.record_id?.value
 
         // графа 3 - зависит от графы 4 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
         xmlIndexCol = 3
-        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         if (record84 != null && record100 != null) {
             def value1 = record100?.record_id?.value?.toString()
             def value2 = record84?.ISSUER?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
         // графа 11 - зависит от графы 4 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
         xmlIndexCol = 11
-        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        def record15 = getRecordImport(15, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         if (record84 != null && record15 != null) {
             def value1 = record15?.record_id?.value?.toString()
             def value2 = record84?.CODE_CUR?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, xmlIndexCol + colOffset, logger, false)
         }
 
         // графа 5

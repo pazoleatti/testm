@@ -759,7 +759,7 @@ void addTransportData(def xml) {
         // графа 7
         newRow.cost = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
         // графа 8
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), rnuIndexRow, 8 + colOffset)
+        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), rnuIndexRow, 8 + colOffset, false)
         // графа 9
         newRow.marketQuotation = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
         // графа 10
