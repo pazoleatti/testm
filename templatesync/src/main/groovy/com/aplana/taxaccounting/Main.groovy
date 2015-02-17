@@ -212,6 +212,12 @@ class Main {
             'vat': [
                     'declaration_audit': -1,
                     'declaration_fns': -1,
+                    'declaration_8': -1,
+                    'declaration_8_1': -1,
+                    'declaration_9': -1,
+                    'declaration_9_1': -1,
+                    'declaration_10': -1,
+                    'declaration_11': -1,
                     'vat_724_1': 600,
                     'vat_724_2_1': 601,
                     'vat_724_2_2': 602,
