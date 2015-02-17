@@ -42,6 +42,9 @@ switch (formDataEvent) {
 @Field
 def providerCache = [:]
 
+@Field
+def empty = 0
+
 // Параметры подразделения
 @Field
 def departmentParam = null
@@ -117,42 +120,33 @@ void generateXML() {
     def index = "0000091"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // атрибуты, заполняемые по форме 937.2.1 (строки 001, 020-070 и 310-360 отдельно, остальное в массиве rows93721)
+    // атрибуты, заполняемые по форме 937.2.1 (строки 001, 020-070 и 310-360 отдельно, остальное в массиве sourceDataRows)
+    def sourceDataRows = []
     def code001 = null
     def code020, code030, code040, code050, code060, code070, code310, code320, code330, code340, code350, code360
-    def rows93721 = []
-    def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
-    def corrNumber93721
-    for (def formData : formDataList) {
+    def sourceCorrNumber
+    for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.id == 617) {
-            def sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-            for (def row : sourceDataRows) {
-                if (row.getAlias() != null) {
-                    continue
-                }
-                rows93721.add(row)
-            }
-            corrNumber93721 = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-
-            // заполняем строки 020-070 и 310-360 отдельно по итоговым строкам
-            def headRow = getDataRow(dataRows, 'head') // "Итого"
-            def totalRow = getDataRow(dataRows, 'total') // "Всего"
-            code020 = headRow.saleCostB18
-            code030 = headRow.saleCostB10
-            code040 = headRow.saleCostB0
-            code050 = headRow.vatSum18
-            code060 = headRow.vatSum10
-            code070 = headRow.bonifSalesSum
-            code310 = totalRow.saleCostB18
-            code320 = totalRow.saleCostB10
-            code330 = totalRow.saleCostB0
-            code340 = totalRow.vatSum18
-            code350 = totalRow.vatSum10
-            code360 = totalRow.bonifSalesSum
+            sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+            sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
         }
     }
+    def headRow = getDataRow(dataRows, 'head') // "Итого"
+    def totalRow = getDataRow(dataRows, 'total') // "Всего"
+    code020 = headRow?.saleCostB18 ?: empty
+    code030 = headRow?.saleCostB10 ?: empty
+    code040 = headRow?.saleCostB0 ?: empty
+    code050 = headRow?.vatSum18 ?: empty
+    code060 = headRow?.vatSum10 ?: empty
+    code070 = headRow?.bonifSalesSum ?: empty
+    code310 = totalRow?.saleCostB18 ?: empty
+    code320 = totalRow?.saleCostB10 ?: empty
+    code330 = totalRow?.saleCostB0 ?: empty
+    code340 = totalRow?.vatSum18 ?: empty
+    code350 = totalRow?.vatSum10 ?: empty
+    code360 = totalRow?.bonifSalesSum ?: empty
     if (corrNumber > 0) {
-        code001 = (corrNumber == corrNumber93721) ? 0 : 1
+        code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
     }
 
     def builder = new MarkupBuilder(xml)
@@ -179,8 +173,10 @@ void generateXML() {
                     СумНДСВсП1Р9_10: code350,
                     СтПродОсвП1Р9Вс: code360,
             ) {
-                for (def row : rows93721) {
-
+                for (def row : sourceDataRows) {
+                    if (row.getAlias() != null) {
+                        continue
+                    }
                     def code080 = row.rowNumber
                     def code090 = row.opTypeCode
                     def code180 = row.buyerInnKpp

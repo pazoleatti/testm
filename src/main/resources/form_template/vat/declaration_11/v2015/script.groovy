@@ -42,6 +42,9 @@ switch (formDataEvent) {
 @Field
 def providerCache = [:]
 
+@Field
+def empty = 0
+
 // Параметры подразделения
 @Field
 def departmentParam = null
@@ -102,26 +105,12 @@ List<String> getErrorVersion(record) {
 }
 
 void generateXML() {
-    // Параметры подразделения
+    // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
-
-    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
-    def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value
-    def okato = getOkato(departmentParam?.OKTMO?.value)
-    def taxPlaceTypeCode = getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
-    def signatoryId = getRefBookValue(35, departmentParam?.SIGNATORY_ID?.value)?.CODE?.value
-    def name = departmentParam?.NAME?.value
     def inn = departmentParam?.INN?.value
-    def kpp = departmentParam?.KPP?.value
     def formatVersion = departmentParam?.FORMAT_VERSION?.value
-    def surname = departmentParam?.SIGNATORY_SURNAME?.value
-    def firstname = departmentParam?.SIGNATORY_FIRSTNAME?.value
-    def lastname = departmentParam?.SIGNATORY_LASTNAME?.value
-    def approveDocName = departmentParam?.APPROVE_DOC_NAME?.value
-    def approveOrgName = departmentParam?.APPROVE_ORG_NAME?.value
-    def reorgINN = departmentParam?.REORG_INN?.value
-    def reorgKPP = departmentParam?.REORG_KPP?.value
 
+    // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".11" + "_" +
             declarationData.taxOrganCode + "_" +
             declarationData.taxOrganCode + "_" +
@@ -131,16 +120,125 @@ void generateXML() {
     def index = "0000110"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // TODO получение остальных данных для заполнения
+    // атрибуты, заполняемые по форме 937.3 (строка 001 отдельно, остальное в массиве sourceDataRows)
+    def sourceDataRows = []
+    def code001 = null
+    def sourceCorrNumber
+    for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
+        if (formData.id == 619) {
+            sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+            sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+        }
+    }
+    if (corrNumber > 0) {
+        code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
+    }
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
             ИдФайл: fileId,
             ВерсПрог: applicationVersion,
-            ВерсФорм: formatVersion,
-            Индекс: index,
-            НомКорр: corrNumber) {
-        // TODO заполнение
+            ВерсФорм: formatVersion) {
+        Документ(
+                Индекс: index,
+                НомКорр: corrNumber,
+                ПризнСвед11: code001
+        ) {
+            ЖУчПолучСчФ() {
+                for (def row : sourceDataRows) {
+                    if (row.getAlias() != null) {
+                        continue
+                    }
+                    // TODO http://jira.aplana.com/browse/SBRFACCTAX-10400
+                    def code005 = row.todo
+                    def code010 = row.todo
+                    def code020 = row.todo
+                    def code030 = row.todo
+                    def code040 = row.todo
+                    def code050 = row.todo
+                    def code060 = row.todo
+                    def code070 = row.todo
+                    def code080 = row.todo
+                    def code090 = row.todo
+                    def code100 = row.todo
+                    def code110 = row.todo
+                    def code120 = row.todo
+                    def code130 = row.todo
+                    def code140 = row.todo
+                    def code150 = row.todo
+                    def code160 = row.todo
+                    def code170 = row.todo
+                    def code180 = row.todo
+                    def code190 = row.todo
+                    def code200 = row.todo
+
+                    // различаем юр. и физ. лица в строках 110 и 120
+                    def code110inn, code110kpp, code120inn, code120kpp
+                    def boolean isUL110 = false
+                    def slashIndex = code110?.indexOf("/")
+                    if (slashIndex != 0) {
+                        isUL110 = true
+                        code110inn = code110.substring(0, slashIndex)
+                        code110kpp = code110.substring(slashIndex + 1)
+                    }
+                    def boolean isUL120 = false
+                    slashIndex = code120?.indexOf("/")
+                    if (slashIndex != 0) {
+                        isUL120 = true
+                        code120inn = code120.substring(0, slashIndex)
+                        code120kpp = code120.substring(slashIndex + 1)
+                    }
+
+                    ЖУчПолучСчФСтр(
+                            НомерПор: code005,
+                            ДатаПолуч: code010,
+                            НомСчФПрод: code030,
+                            ДатаСчФПрод: code040,
+                            НомИспрСчФ: code050,
+                            ДатаИспрСчФ: code060,
+                            НомКСчФПрод: code070,
+                            ДатаКСчФПрод: code080,
+                            НомИспрКСчФ: code090,
+                            ДатаИспрКСчФ: code100,
+                            КодВидСд: code130,
+                            ОКВ: code140,
+                            СтоимТовСчФВс: code150,
+                            СумНДССчФ: code160,
+                            РазСтКСчФУм: code170,
+                            РазСтКСчФУв: code180,
+                            РазНДСКСчФУм: code190,
+                            РазНДСКСчФУв: code200
+                    ) {
+                        КодВидОпер { code020 }
+                        СвПрод() {
+                            if (isUL110) {
+                                СведЮЛ(
+                                        ИННЮЛ: code110inn,
+                                        КПП: code110kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code110
+                                )
+                            }
+                        }
+                        СвКомис() {
+                            if (isUL120) {
+                                СведЮЛ(
+                                        ИННЮЛ: code120inn,
+                                        КПП: code120kpp
+                                )
+                            } else {
+                                СведИП(
+                                        ИННФЛ: code120
+                                )
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
     }
 }
 

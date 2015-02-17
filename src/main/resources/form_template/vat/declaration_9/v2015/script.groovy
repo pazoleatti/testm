@@ -42,6 +42,9 @@ switch (formDataEvent) {
 @Field
 def providerCache = [:]
 
+@Field
+def empty = 0
+
 // Параметры подразделения
 @Field
 def departmentParam = null
@@ -117,33 +120,26 @@ void generateXML() {
     def index = "0000090"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // атрибуты, заполняемые по форме 937.2 (строки 001 и 230-280 отдельно, остальное в массиве rows9372)
+    // атрибуты, заполняемые по форме 937.2 (строки 001 и 230-280 отдельно, остальное в массиве sourceDataRows)
+    def sourceDataRows = []
     def code001 = null
     def code230, code240, code250, code260, code270, code280
-    def rows9372 = []
-    def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
-    def corrNumber9372
-    for (def formData : formDataList) {
+    def sourceCorrNumber
+    for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.id == 608) {
-            def sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-            for (def row : sourceDataRows) {
-                if (row.getAlias() != null) {
-                    // заполняем строки 230-280 отдельно по итоговой строке
-                    code230 = row.saleCostB18
-                    code240 = row.saleCostB10
-                    code250 = row.saleCostB0
-                    code260 = row.vatSum18
-                    code270 = row.vatSum10
-                    code280 = row.bonifSalesSum
-                    continue
-                }
-                rows9372.add(row)
-            }
-            corrNumber9372 = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+            sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+            sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
         }
     }
+    def totalRow = getDataRow(sourceDataRows, 'total')
+    code230 = totalRow?.saleCostB18 ?: empty
+    code240 = totalRow?.saleCostB10 ?: empty
+    code250 = totalRow?.saleCostB0 ?: empty
+    code260 = totalRow?.vatSum18 ?: empty
+    code270 = totalRow?.vatSum10 ?: empty
+    code280 = totalRow?.bonifSalesSum ?: empty
     if (corrNumber > 0) {
-        code001 = (corrNumber == corrNumber9372) ? 0 : 1
+        code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
     }
 
     def builder = new MarkupBuilder(xml)
@@ -164,8 +160,10 @@ void generateXML() {
                     СумНДСВсКПр10: code270,
                     СтПродОсвВсКПр: code280
             ) {
-                for (def row : rows9372) {
-
+                for (def row : sourceDataRows) {
+                    if (row.getAlias() != null) {
+                        continue
+                    }
                     def code005 = row.rowNumber
                     def code010 = row.opTypeCode
                     def code020 = getNumber(row.invoiceNumDate)
@@ -192,17 +190,17 @@ void generateXML() {
 
                     // различаем юр. и физ. лица в строках 100 и 110
                     def code100inn, code100kpp, code110inn, code110kpp
-                    def boolean isUL130 = false
+                    def boolean isUL100 = false
                     def slashIndex = code100?.indexOf("/")
                     if (slashIndex != 0) {
-                        isUL130 = true
+                        isUL100 = true
                         code100inn = code100.substring(0, slashIndex)
                         code100kpp = code100.substring(slashIndex + 1)
                     }
-                    def boolean isUL140 = false
+                    def boolean isUL110 = false
                     slashIndex = code110?.indexOf("/")
                     if (slashIndex != 0) {
-                        isUL140 = true
+                        isUL110 = true
                         code110inn = code110.substring(0, slashIndex)
                         code110kpp = code110.substring(slashIndex + 1)
                     }
@@ -234,7 +232,7 @@ void generateXML() {
                                 ДатаДокПдтвОпл: code130
                         )
                         СвПокуп() {
-                            if (isUL130) {
+                            if (isUL100) {
                                 СведЮЛ(
                                         ИННЮЛ: code100inn,
                                         КПП: code100kpp
@@ -246,7 +244,7 @@ void generateXML() {
                             }
                         }
                         СвПос() {
-                            if (isUL140) {
+                            if (isUL110) {
                                 СведЮЛ(
                                         ИННЮЛ: code110inn,
                                         КПП: code110kpp

@@ -42,6 +42,9 @@ switch (formDataEvent) {
 @Field
 def providerCache = [:]
 
+@Field
+def empty = 0
+
 // Параметры подразделения
 @Field
 def departmentParam = null
@@ -117,28 +120,21 @@ void generateXML() {
     def index = "0000080"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0
 
-    // атрибуты, заполняемые по форме 937.1 (строки 001 и 190 отдельно, остальное в массиве rows9371)
+    // атрибуты, заполняемые по форме 937.1 (строки 001 и 190 отдельно, остальное в массиве sourceDataRows)
+    def sourceDataRows = []
     def code001 = null
     def code190 = null
-    def rows9371 = []
-    def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
-    def corrNumber9371
-    for (def formData : formDataList) {
-        if (formData.id == 607) {
-            def sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
-            for (def row : sourceDataRows) {
-                if (row.getAlias() != null) {
-                    // заполняем строку 190 отдельно по итоговой строке
-                    code190 = row.nds
-                    continue
-                }
-                rows9371.add(row)
-            }
-            corrNumber9371 = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+    def sourceCorrNumber
+    for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
+        if (formData.id == 606) {
+            sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
+            sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
         }
     }
+    def totalRow = getDataRow(sourceDataRows, 'total')
+    code190 = totalRow?.nds ?: empty
     if (corrNumber > 0) {
-        code001 = (corrNumber == corrNumber9371) ? 0 : 1
+        code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
     }
 
     def builder = new MarkupBuilder(xml)
@@ -154,33 +150,32 @@ void generateXML() {
             КнигаПокуп(
                     СумНДСВсКПк: code190
             ) {
-                for (def row : rows9371) {
-                    // TODO http://jira.aplana.com/browse/SBRFACCTAX-10383
-                    def code005 = row.todo
-                    def code010 = row.todo
-                    def code020 = row.todo
-                    def code030 = row.todo
-                    def code040 = row.todo
-                    def code050 = row.todo
-                    def code060 = row.todo
-                    def code070 = row.todo
-                    def code080 = row.todo
-                    def code090 = row.todo
-                    def code120 = row.todo
-                    def code150 = row.todo
-                    def code160 = row.todo
-                    def code170 = row.todo
-                    def code180 = row.todo
-                    def code100 = row.todo
-                    def code110 = row.todo
-                    def code130 = row.todo
-                    def code130inn
-                    def code130kpp
-                    def code140 = row.todo
-                    def code140inn
-                    def code140kpp
+                for (def row : sourceDataRows) {
+                    if (row.getAlias() != null) {
+                        continue
+                    }
+                    def code005 = row.rowNum
+                    def code010 = row.typeCode
+                    def code020 = getNumber(row.invoice)
+                    def code030 = getDate(row.invoice)
+                    def code040 = getNumber(row.invoiceCorrecting)
+                    def code050 = getDate(row.invoiceCorrecting)
+                    def code060 = getNumber(row.invoiceCorrection)
+                    def code070 = getDate(row.invoiceCorrection)
+                    def code080 = getNumber(row.invoiceCorrectingCorrection)
+                    def code090 = getDate(row.invoiceCorrectingCorrection)
+                    def code100 = getDate(row.documentPay)
+                    def code110 = getDate(row.documentPay)
+                    def code120 = row.dateRegistration
+                    def code130 = row.salesmanInnKpp
+                    def code140 = row.agentInnKpp
+                    def code150 = row.declarationNum
+                    def code160 = getLastTextPart(row.currency, "(\\w.{0,254}) ")
+                    def code170 = row.cost
+                    def code180 = row.nds
 
                     // различаем юр. и физ. лица в строках 130 и 140
+                    def code130inn, code130kpp, code140inn, code140kpp
                     def boolean isUL130 = false
                     def slashIndex = code130?.indexOf("/")
                     if (slashIndex != 0) {
@@ -256,4 +251,23 @@ def checkDeclarationFNS() {
         def String event = (formDataEvent == FormDataEvent.MOVE_CREATED_TO_ACCEPTED) ? "Принять данную декларацию" : "Отменить принятие данной декларации"
         throw new ServiceException('%s невозможно, так как в текущем периоде и подразделении принята "Декларация по НДС (раздел 1-7)', event)
     }
+}
+
+def getNumber(def String str) {
+    if (str != null && str.length > 10) {
+        return str.substring(0, str.length - 10)
+    }
+    return null
+}
+
+def getDate(def String str) {
+    if (str != null && str.length > 10) {
+        return str.substring(str.length - 9)
+    }
+    return null
+}
+
+def getLastTextPart(String value, def pattern) {
+    def parts = value?.split(pattern)
+    return parts?.length == 2 ? parts[1] : null
 }
