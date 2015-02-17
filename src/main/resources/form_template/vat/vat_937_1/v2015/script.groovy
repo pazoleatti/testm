@@ -138,7 +138,7 @@ void logicCheck() {
         }
         // Проверки форматов
         // графа 3
-        if (row.invoice == null || !checkFormat(row.invoice.trim(), "^\\w.{0,999}( ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4}))?\$")) {
+        if (row.invoice == null || !checkFormat(row.invoice.trim(), "^\\S.{0,999}( ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4}))?\$")) {
             loggerError(row, String.format("Строка %s: Графа «%s» заполнена неверно! Ожидаемое значение: «%s». Только номер обязателен для заполнения.", index, getColumnName(row,'invoice'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 4
@@ -146,7 +146,7 @@ void logicCheck() {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrecting'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 5
-        if (row.invoiceCorrection && !checkFormat(row.invoiceCorrection.trim(), "^\\w.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrection && !checkFormat(row.invoiceCorrection.trim(), "^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrection'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 6
@@ -154,7 +154,7 @@ void logicCheck() {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrectingCorrection'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 7
-        if (row.documentPay && !checkFormat(row.documentPay.trim(), "^\\w.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.documentPay && !checkFormat(row.documentPay.trim(), "^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'documentPay'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата» формат, «ДД.ММ.ГГГГ»>"))
         }
         // графа 10
@@ -166,7 +166,7 @@ void logicCheck() {
             loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'agentInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 14
-        if (row.currency && !checkFormat(row.currency.trim(), "^\\w.{0,254} \\w{3}\$")) {
+        if (row.currency && !checkFormat(row.currency.trim(), "^\\S.{0,254} \\S{3}\$")) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'currency'), "<Наименование: тип поля «Строка/255/»> <Код: тип поля «Строка/3/», формат «ХХХ»>"))
         }
         // графа 2

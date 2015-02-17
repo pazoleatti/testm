@@ -15,9 +15,9 @@ import groovy.transform.Field
 // графа 1 -  rowNumber
 // графа 2 -  opTypeCode ограничение 01-28
 // графа 3 -  invoiceNumDate ограничение <Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>
-// графа 4 -  invoiceCorrNumDate <Номер: тип поля «Число/3»/> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>
+// графа 4 -  invoiceCorrNumDate <Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>
 // графа 5 -  corrInvoiceNumDate <Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>
-// графа 6 -  corrInvCorrNumDate <Номер: тип поля «Число/3»/> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>
+// графа 6 -  corrInvCorrNumDate <Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>
 // графа 7 -  buyerName
 // графа 8 -  buyerInnKpp ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)
 // графа 9 -  mediatorName
@@ -184,8 +184,8 @@ void logicCheck() {
             loggerLog(row, String.format(FILLED_FILLED_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), getColumnName(row,'corrInvoiceNumDate')))
         }
         //	Если заполнена «Графа 12» и код валюты «Графы 12» заполнен и не равен «643», то заполнена «Графа 13а»
-        if (row.currNameCode == null || checkFormat(row.currNameCode.trim(), "^\\w.{0,254} \\w{3}\$")) {
-            String currency = getLastTextPart(row.currNameCode, "(\\w.{0,254}) ")
+        if (row.currNameCode == null || checkFormat(row.currNameCode.trim(), "^\\S.{0,254} \\S{3}\$")) {
+            String currency = getLastTextPart(row.currNameCode, "(\\S.{0,254}) ")
             if (currency != null && !'643'.equals(currency) && row.saleCostACurr == null){
                 loggerLog(row, String.format(FILLED_CURRENCY_ERROR_MSG, index, getColumnName(row,'currNameCode'), getColumnName(row,'currNameCode'), getColumnName(row,'saleCostACurr')))
             }
@@ -208,35 +208,35 @@ void logicCheck() {
         }
         // Проверки форматов
         // графа 3
-        if (row.invoiceNumDate == null || !checkFormat(row.invoiceNumDate.trim(), "^\\w.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceNumDate == null || !checkFormat(row.invoiceNumDate.trim(), "^\\S.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceNumDate'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 4
         if (row.invoiceCorrNumDate && !checkFormat(row.invoiceCorrNumDate, "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
-            loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrNumDate'), "<Номер: тип поля «Число/3»/> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
+            loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 5
-        if (row.corrInvoiceNumDate && !checkFormat(row.corrInvoiceNumDate.trim(), "^\\w.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvoiceNumDate && !checkFormat(row.corrInvoiceNumDate.trim(), "^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvoiceNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 6
         if (row.corrInvCorrNumDate && !checkFormat(row.corrInvCorrNumDate.trim(), "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
-            loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "<Номер: тип поля «Число/3»/> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
+            loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 8
-        if (row.corrInvCorrNumDate && !checkFormat(row.corrInvCorrNumDate, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
-            loggerLog(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
+        if (row.buyerInnKpp && !checkFormat(row.buyerInnKpp, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
+            loggerLog(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'buyerInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 10
         if (row.mediatorInnKpp && !checkFormat(row.mediatorInnKpp, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
             loggerLog(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'mediatorInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 11
-        if (row.paymentDocNumDate && !checkFormat(row.paymentDocNumDate.trim(), "^\\w.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.paymentDocNumDate && !checkFormat(row.paymentDocNumDate.trim(), "^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'paymentDocNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 12
-        if (row.currNameCode && !checkFormat(row.currNameCode.trim(), "^\\w.{0,254} \\w{3}\$")) {
+        if (row.currNameCode && !checkFormat(row.currNameCode.trim(), "^\\S.{0,254} \\S{3}\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'currNameCode'), "<Наименование: тип поля «Строка/255/»> <Код: тип поля «Строка/3/», формат «ХХХ»>"))
         }
         // графа 2
