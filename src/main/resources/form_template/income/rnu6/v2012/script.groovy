@@ -353,7 +353,7 @@ void logicCheck() {
             }
         }
 
-        // 9. Арифметические проверки расчета неитоговых строк
+        // 8. Арифметические проверки расчета неитоговых строк
         if (!isBalancePeriod()) {
             needValue['rateOfTheBankOfRussia'] = calc8(row)
             needValue['taxAccountingRuble'] = calc10(row)
@@ -361,8 +361,8 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
         }
 
-        // 12. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
-        // 13. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
+        // 11. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
+        // 12. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         if (row.ruble && row.docDate != null) {
             def Date date = row.docDate
             def Date from = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.' + (Integer.valueOf(new SimpleDateFormat('yyyy').format(date)) - 3))
@@ -390,14 +390,14 @@ void logicCheck() {
                 rowWarning(logger, row, "Операция, указанная в строке " + row.getIndex() +
                         ", в налоговом учете за последние 3 года не проходила!")
             }
-            if (isFind && !(sum > row.ruble)) {
+            if (isFind && row.ruble > sum) {
                 rowWarning(logger, row, errorMsg + "Операция в налоговом учете имеет сумму, меньше чем указано " +
                         "в бухгалтерском учете! См. РНУ-6 в отчетных периодах: ${periods.join(", ")}.")
             }
         }
     }
 
-    // 8 . Проверка на уникальность записи по налоговому учету
+    // 7. Проверка на уникальность записи по налоговому учету
     for (def map : uniq456.keySet()) {
         def rowList = uniq456.get(map)
         if (rowList.size() > 1) {
@@ -407,10 +407,10 @@ void logicCheck() {
         }
     }
 
-    // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
+    // 9. Арифметические проверки расчета итоговых строк «Итого по КНУ»
     checkSubTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 
-    // 11. Арифметические проверки расчета строки общих итогов
+    // 10. Арифметические проверки расчета строки общих итогов
     checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 }
 
