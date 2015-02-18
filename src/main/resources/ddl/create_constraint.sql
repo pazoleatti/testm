@@ -255,6 +255,15 @@ alter table configuration_email add constraint configuration_email_pk primary ke
 alter table configuration_email add constraint configuration_email_unqname unique (name);
 
 alter table configuration_lock add constraint configuration_lock_pk primary key (key);
+
+alter table form_data_consolidation add constraint form_data_consolidation_pk primary key (source_form_data_id, target_form_data_id);
+alter table form_data_consolidation add constraint form_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
+alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id);
+
+alter table declaration_data_consolidation add constraint decl_data_consolidation_pk primary key (source_form_data_id, target_declaration_data_id);
+alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
+alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id);
+
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);

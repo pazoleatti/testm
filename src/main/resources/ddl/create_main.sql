@@ -888,3 +888,26 @@ timeout number(9) not null
 comment on table configuration_lock is 'Параметры блокировок';
 comment on column configuration_lock.key is 'Ключ блокировки';
 comment on column configuration_lock.timeout is 'Таймаут блокировки';
+--------------------------------------------------------------------------------------------------------
+create table form_data_consolidation
+(
+source_form_data_id number(9) not null,
+target_form_data_id number(9) not null
+);
+
+comment on table form_data_consolidation is 'Сведения о консолидации налоговых форм в налоговые формы';
+comment on column form_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
+comment on column form_data_consolidation.target_form_data_id is 'Идентификатор НФ приемника';
+--------------------------------------------------------------------------------------------------------
+
+create table declaration_data_consolidation
+(
+source_form_data_id number(9) not null,
+target_declaration_data_id number(9) not null
+);
+
+comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм в декларации';
+comment on column declaration_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
+comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор декларации приемника';
+
+
