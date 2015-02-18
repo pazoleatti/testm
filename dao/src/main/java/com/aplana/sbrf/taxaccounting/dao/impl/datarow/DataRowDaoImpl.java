@@ -26,9 +26,9 @@ import java.util.*;
 
 /**
  * Реализация ДАО для работы со строками НФ
- * 
+ *
  * @author sgoryachkin
- * 
+ *
  */
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
@@ -40,8 +40,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                                                     "Изменения будут отменены. Переоткройте форму заново.";
 
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
-
-    private static int ROW_MAX = 10000;
 
 	@Override
 	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowRange range) {
@@ -418,7 +416,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	/**
 	 * Метод получает значение ORD для строки по индексу. Метод работает со временным срезом формы
-	 * 
+	 *
 	 * @param formDataId
 	 * @param dataRowIndex
 	 * @param manual
@@ -440,7 +438,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	/**
 	 * Метод получает пару: ORD и INDEX. Метод работает со временным срезом формы
-	 * 
+	 *
 	 * @param formDataId
 	 * @param dataRowId
 	 * @return
@@ -473,7 +471,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	/**
 	 * Метод получает пару: TYPE и ORD. Метод работает со временным срезом формы
-	 * 
+	 *
 	 */
 	private Map<Long, Pair<Integer, Long>> getTypeAndOrdById(long formDataId, List<Long> dataRowIds) {
         String sql = "SELECT type, ord, id FROM data_row WHERE TYPE IN (:types) AND form_data_id = :formDataId AND ";
@@ -529,7 +527,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	/**
 	 * Метод сохраняет параметры Cell
-	 * 
+	 *
 	 * @param dataRows
 	 */
 	private void batchInsertCells(List<DataRow<Cell>> dataRows) {
@@ -735,7 +733,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
     }
 
     @Override
-    public void saveSortRows(final List<DataRow<Cell>> dataRows) {
+    public void saveSortRows(final List<DataRow<Cell>> dataRows, FormData formData) {
         if (dataRows == null || dataRows.isEmpty()) {
             return;
         }
@@ -746,19 +744,14 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             dataRowIds.add(row.getId());
         }
 
-        final List<Long> ords = new ArrayList<Long>();
-        for (int i = 0; i < dataRowIds.size(); i += ROW_MAX) {
-            List<Long> subList = dataRowIds.subList(i, Math.min(i + ROW_MAX, dataRowIds.size()));
-            String sqlSelectOrds = "SELECT ord FROM data_row WHERE " + SqlUtils.transformToSqlInStatement("id", subList) + "";
-            ords.addAll(getJdbcTemplate().queryForList(sqlSelectOrds, Long.class));
-        }
-        Collections.sort(ords);
+        String sqlSelectOrds = "SELECT ord FROM data_row WHERE form_data_id = " + formData.getId() + " AND type IN (0, 1) AND manual = "+ (formData.isManual() ? 1 : 0) + " ORDER BY ord";
+        final List<Long> ords = getJdbcTemplate().queryForList(sqlSelectOrds, Long.class);
 
-        getJdbcTemplate().batchUpdate("INSERT INTO data_row_temp (id, ord) VALUES (?, ?)", new BatchPreparedStatementSetter() {
+        getJdbcTemplate().batchUpdate("UPDATE data_row SET ord = ? WHERE id = ?", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, dataRows.get(i).getId());
-                ps.setLong(2, ords.get(i));
+                ps.setLong(1, ords.get(i));
+                ps.setLong(2, dataRows.get(i).getId());
             }
 
             @Override
@@ -766,9 +759,5 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
                 return dataRows.size();
             }
         });
-
-        StringBuilder sql = new StringBuilder("MERGE INTO data_row dr USING data_row_temp ords ON (dr.id = ords.id) " +
-				"WHEN MATCHED THEN UPDATE SET dr.ord = ords.ord");
-        getJdbcTemplate().update(sql.toString());
     }
 }
