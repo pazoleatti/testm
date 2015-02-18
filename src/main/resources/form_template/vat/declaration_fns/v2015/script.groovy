@@ -276,30 +276,30 @@ void generateXML() {
     /** НалИсчПрод. Код строки 170 Графа 3. */
     def nalIschProd = empty
     if (rows724_1) {
-        // TODO перепроверить алиасы после http://jira.aplana.com/browse/SBRFACCTAX-10404
-        def row = getDataRow(rows724_1, 'total_1')
-        def tmp = (row?.baseSum ?: empty)
-        nalBaza010 = round(tmp)
-        tmp = (row?.ndsSum ?: empty)
-        sumNal010 = round(tmp)
+        def totalRow1 = getDataRow(rows724_1, 'total_1')
+        def totalRow2 = getDataRow(rows724_1, 'total_2')
+        def totalRow3 = getDataRow(rows724_1, 'total_3')
+        def totalRow4 = getDataRow(rows724_1, 'total_4')
+        def totalRow5 = getDataRow(rows724_1, 'total_5')
+        def totalRow6 = getDataRow(rows724_1, 'total_6')
+        def totalRow7 = getDataRow(rows724_1, 'total_7')
 
-        row = getDataRow(rows724_1, 'total_2')
-        nalBaza020 = round(row?.baseSum ?: empty)
-        sumNal020 = round(row?.ndsSum ?: empty)
+        nalBaza010 = round(totalRow1?.baseSum ?: empty) + round(totalRow7?.baseSum ?: empty)
+        sumNal010 = round(totalRow1?.ndsSum ?: empty) + round(totalRow7?.ndsSum ?: empty)
 
-        row = getDataRow(rows724_1, 'total_3')
-        nalBaza030 = round(row?.baseSum ?: empty)
-        sumNal030 = round(row?.ndsSum ?: empty)
+        nalBaza020 = round(totalRow2?.baseSum ?: empty)
+        sumNal020 = round(totalRow2?.ndsSum ?: empty)
 
-        row = getDataRow(rows724_1, 'total_4')
-        nalBaza040 = round(row?.baseSum ?: empty)
-        sumNal040 = round(row?.ndsSum ?: empty)
+        nalBaza030 = round(totalRow3?.baseSum ?: empty)+ round(totalRow6?.baseSum ?: empty)
+        sumNal030 = round(totalRow3?.ndsSum ?: empty)  + round(totalRow6?.ndsSum ?: empty)
 
-        row = getDataRow(rows724_1, 'total_5')
-        nalBaza070 = round(row?.baseSum ?: empty)
-        sumNal070 = round(row?.ndsSum ?: empty)
+        nalBaza040 = round(totalRow4?.baseSum ?: empty)
+        sumNal040 = round(totalRow4?.ndsSum ?: empty)
 
-        nalIschProd = round(getDataRow(rows724_1, 'total_7')?.nds)
+        nalBaza070 = round(totalRow5?.baseSum ?: empty)
+        sumNal070 = round(totalRow5?.ndsSum ?: empty)
+
+        nalIschProd = round(totalRow7?.ndsDealSum)
     }
 
     /** НалПредНППриоб . Код строки 120 Графа 3. */

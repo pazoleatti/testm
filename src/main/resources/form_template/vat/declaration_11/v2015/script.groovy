@@ -145,32 +145,36 @@ void generateXML() {
                 ПризнСвед11: code001
         ) {
             ЖУчПолучСчФ() {
+                def isFirstSection = true
                 for (def row : sourceDataRows) {
                     if (row.getAlias() != null) {
+                        isFirstSection = (row.getAlias() == "part_1")
                         continue
                     }
-                    // TODO http://jira.aplana.com/browse/SBRFACCTAX-10400
-                    def code005 = row.todo
-                    def code010 = row.todo
-                    def code020 = row.todo
-                    def code030 = row.todo
-                    def code040 = row.todo
-                    def code050 = row.todo
-                    def code060 = row.todo
-                    def code070 = row.todo
-                    def code080 = row.todo
-                    def code090 = row.todo
-                    def code100 = row.todo
-                    def code110 = row.todo
-                    def code120 = row.todo
-                    def code130 = row.todo
-                    def code140 = row.todo
-                    def code150 = row.todo
-                    def code160 = row.todo
-                    def code170 = row.todo
-                    def code180 = row.todo
-                    def code190 = row.todo
-                    def code200 = row.todo
+                    if (isFirstSection) {
+                        continue
+                    }
+                    def code005 = row.rowNumber
+                    def code010 = row.date
+                    def code020 = row.opTypeCode
+                    def code030 = getNumber(row.invoiceNumDate)
+                    def code040 = getDate(row.invoiceNumDate)
+                    def code050 = getNumber(row.invoiceCorrNumDate)
+                    def code060 = getDate(row.invoiceCorrNumDate)
+                    def code070 = getNumber(row.corrInvoiceNumDate)
+                    def code080 = getDate(row.corrInvoiceNumDate)
+                    def code090 = getNumber(row.corrInvCorrNumDate)
+                    def code100 = getDate(row.corrInvCorrNumDate)
+                    def code110 = row.buyerInnKpp
+                    def code120 = row.mediatorInnKpp
+                    def code130 = getNumber(row.mediatorNumDate)
+                    def code140 = getLastTextPart(row.currNameCode, "(\\w.{0,254}) ")
+                    def code150 = row.cost
+                    def code160 = row.vatSum
+                    def code170 = row.diffDec
+                    def code180 = row.diffInc
+                    def code190 = row.diffVatDec
+                    def code200 = row.diffVatInc
 
                     // различаем юр. и физ. лица в строках 110 и 120
                     def code110inn, code110kpp, code120inn, code120kpp
@@ -250,4 +254,23 @@ def checkDeclarationFNS() {
         def String event = (formDataEvent == FormDataEvent.MOVE_CREATED_TO_ACCEPTED) ? "Принять данную декларацию" : "Отменить принятие данной декларации"
         throw new ServiceException('%s невозможно, так как в текущем периоде и подразделении принята "Декларация по НДС (раздел 1-7)', event)
     }
+}
+
+def getNumber(def String str) {
+    if (str != null && str.length > 10) {
+        return str.substring(0, str.length - 10)
+    }
+    return null
+}
+
+def getDate(def String str) {
+    if (str != null && str.length > 10) {
+        return str.substring(str.length - 9)
+    }
+    return null
+}
+
+def getLastTextPart(String value, def pattern) {
+    def parts = value?.split(pattern)
+    return parts?.length == 2 ? parts[1] : null
 }
