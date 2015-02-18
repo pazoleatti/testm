@@ -6,8 +6,10 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
- * (724.4) Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
- * или возврата соответствующих сумм авансовых платежей (v.2015).
+ * (724.4) Налоговые вычеты за прошедший налоговый период, связанные с изменением условий или расторжением договора,
+ * в случае возврата ранее реализованных товаров (отказа от услуг) или возврата соответствующих сумм авансовых платежей
+ * (Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
+ * или возврата соответствующих сумм авансовых платежей) (v.2015).
  *
  * formTemplateId=1603
  */
@@ -219,8 +221,13 @@ void logicCheck() {
                             (row.number2 in ['60309.04', '60309.05'] && row.nds == '18/118'))
             def logicCheck6 = (!isSection1 && row.number2 in ['60309.02', '60309.03'] && row.nds == '18/118')
             if (isSection1 ? !logicCheck5 : !logicCheck6) {
-                def columns = "«${getColumnName(row, 'number2')}», «${getColumnName(row, 'nds')}»"
-                rowError(logger, row, errorMsg + 'Графы ' + columns + ' заполнены неверно!')
+                def number2Name = getColumnName(row, 'number2')
+                def ndsName = getColumnName(row, 'nds')
+                def columns = "«$number2Name», «$ndsName»"
+                def endMessage = isSection1 ?
+                        " Ожидаемое значение (раздел 1): («$number2Name» = «60309.01» и «$ndsName» = «10»/ «18»/ «10/110»/ «18/118») или («$number2Name» = «60309.04»/ «60309.05»  и «$ndsName» = «18/118»)." :
+                        " Ожидаемое значение (раздел 2): «$number2Name» = «60309.02»/ «60309.03» и «$ndsName» = «18/118»."
+                rowError(logger, row, errorMsg + 'Графы ' + columns + ' заполнены неверно!' + endMessage)
             }
         }
     }
@@ -328,8 +335,8 @@ void importData() {
             (xml.row[1].cell[2]): 'Налоговая база',
             (xml.row[1].cell[5]): 'НДС',
 
-            (xml.row[2].cell[2]): 'наименование балансового счёта',
-            (xml.row[2].cell[3]): 'номер балансового счёта',
+            (xml.row[2].cell[2]): 'наименование балансового счёта расхода',
+            (xml.row[2].cell[3]): 'номер балансового счёта расхода',
             (xml.row[2].cell[4]): 'сумма',
             (xml.row[2].cell[5]): 'номер балансового счёта',
             (xml.row[2].cell[6]): 'сумма',
