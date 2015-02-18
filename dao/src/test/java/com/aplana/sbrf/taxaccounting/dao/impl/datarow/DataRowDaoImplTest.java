@@ -742,7 +742,7 @@ public class DataRowDaoImplTest extends Assert {
         });
 
         // сохранить сортировку
-        dataRowDao.saveSortRows(dataRows1);
+        dataRowDao.saveSortRows(dataRows1, fd);
 
         // получить строки из временного среза
         List<DataRow<Cell>> dataRows2 = dataRowDao.getRows(fd, null);

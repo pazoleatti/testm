@@ -98,30 +98,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
             params.put("from", range.getOffset());
             params.put("to", range.getOffset() + range.getLimit() - 1);
         }
+        sql.append("  order by ord \n");
         sql.append("  ) d \n");
         sql.append(" LEFT JOIN data_cell c ON d.id = c.row_id ) sub \n");
         sql.append("GROUP BY sub.id \n");
-        sql.append("order by idx");
-        /*
-		StringBuilder sql = new StringBuilder();
-		sql.append(select);
-		// Генерация нумерации строк
-		sql.insert(0, "SELECT * FROM (\n");
-		sql.append(") table1\nLEFT JOIN \n(");
-		sql.append("SELECT ROW_NUMBER() OVER (ORDER BY sub.ord) AS idx2, sub.id AS id2\n");
-		sql.append(" FROM (SELECT d.id, d.alias, d.ord FROM data_row d\n");
-		sql.append(" WHERE d.form_data_id = :formDataId AND d.manual = :manual AND d.type IN (:types)");
-        sql.append(" AND (d.alias IS NULL OR d.alias LIKE '%" + ALIASED_WITH_AUTO_NUMERATION_AFFIX + "%')) sub\n");
-        sql.append(" GROUP BY sub.id, sub.ord, sub.alias ORDER BY sub.ord");
-		sql.append(") table2\nON table1.id = table2.id2");
-
-		if (range != null) {
-			sql.insert(0, "SELECT * FROM ( ");
-			sql.append(") WHERE idx BETWEEN :from AND :to");
-			params.put("from", range.getOffset());
-			params.put("to", range.getOffset() + range.getLimit() - 1);
-		}*/
-
         return new Pair<String, Map<String, Object>>(sql.toString(), params);
 	}
 
