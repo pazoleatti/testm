@@ -423,7 +423,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             // 16 если форма не была создана
             if (!formWasCreated) {
-                log(userInfo, LogData.L18, localLogger, formType.getName(), formDepartment.getName(), reportPeriodName);
+                log(userInfo, LogData.L18, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
             } else {
                 // 13А.2 НФ корректно заполнена значениями из ТФ.
                 log(userInfo, LogData.L19, localLogger, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
