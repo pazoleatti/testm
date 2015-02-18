@@ -452,7 +452,7 @@ def getNewRow() {
 def getTotalRow() {
     def total = formData.createDataRow()
     total.setAlias('total')
-    total.fix = 'Итого'
+    total.fix = 'Всего'
     total.getCell('fix').colSpan = 16
     (allColumns + 'fix').each {
         total.getCell(it).setStyleAlias('Контрольные суммы')
