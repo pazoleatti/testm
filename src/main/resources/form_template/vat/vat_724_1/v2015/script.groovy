@@ -79,15 +79,15 @@ def allColumns = ['rowNum', 'baseAccName', 'baseAccNum', 'baseSum', 'ndsNum', 'n
 
 // Редактируемые атрибуты (графа 3..6, 8)
 @Field
-def editableColumns = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsBookSum', 'ndsDealSum']
+def editableColumns = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsBookSum']
 
 // Проверяемые на пустые значения атрибуты для разделов 1, 2, 3, 4 (1-4, 6-8)
 @Field
-def nonEmptyColumns1 = ['baseAccNum', 'baseSum', 'ndsSum', 'ndsRate', 'ndsBookSum', 'ndsDealSum']
+def nonEmptyColumns1 = ['baseAccNum', 'baseSum', 'ndsSum', 'ndsRate', 'ndsBookSum']
 
 // Проверяемые на пустые значения атрибуты для разделов 1*, 5, 6 (1-8)
 @Field
-def nonEmptyColumns2 = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum', 'ndsDealSum']
+def nonEmptyColumns2 = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 'ndsBookSum']
 
 // Проверяемые на пустые значения атрибуты для разделов 7 (1-4, 6, 8)
 @Field
@@ -99,7 +99,7 @@ def sortColumns = ['baseAccNum', 'ndsNum']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6, 8)
 @Field
-def totalColumns = ['baseSum', 'ndsSum', 'ndsBookSum', 'ndsDealSum']
+def totalColumns = ['baseSum', 'ndsSum', 'ndsBookSum']
 
 // список алиасов подразделов
 @Field
@@ -145,6 +145,8 @@ def addRow() {
         index = currentDataRow.getIndex()
         if (alias == null || alias.startsWith('head_')) {
             index++
+        } else if (alias == 'total') {// строка "Всего" возвращает в шестой раздел
+            index--
         }
     } else {
         def lastRow = getDataRow(dataRows, 'total_7')
@@ -159,7 +161,7 @@ def addRow() {
 // Получить новую строку с заданными стилями
 def getNewRow(def isSection7) {
     def row = formData.createDataRow()
-    def columns = (isSection7 ? editableColumns + 'ndsRate' : editableColumns)
+    def columns = (isSection7 ? editableColumns + ['ndsRate', 'ndsDealSum'] : editableColumns)
     columns.each {
         row.getCell(it).editable = true
         row.getCell(it).setStyleAlias('Редактируемая')
@@ -174,7 +176,13 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    def superTotalRow = getDataRow(dataRows, 'total')
+    totalColumns.each{
+        superTotalRow[it] = BigDecimal.ZERO
+    }
+
     for (def section : sections) {
+        def isSection7 = section == '7'
         def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
         def lastRow = getDataRow(dataRows, getLastRowAlias(section))
         def from = firstRow.getIndex()
@@ -193,7 +201,13 @@ void calc() {
 
         // посчитать итоги по разделам
         def rows = (from <= to ? dataRows[from..to] : [])
-        calcTotalSum(rows, lastRow, totalColumns)
+
+        calcTotalSum(rows, lastRow, isSection7 ? (totalColumns + 'ndsDealSum') : totalColumns)
+        if (!isSection7) {
+            totalColumns.each{
+                superTotalRow[it] = superTotalRow[it] + (lastRow[it]?:0)
+            }
+        }
     }
     updateIndexes(dataRows)
 
@@ -206,12 +220,12 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    def isSection1or2 = false
+    def isSection1or2or3 = false
     def isSection5or6 = false
     def isSection7 = false
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            isSection1or2 = (row.getAlias() == 'head_1' || row.getAlias() == 'head_2')
+            isSection1or2or3 = (row.getAlias() in ['head_1', 'head_2', 'head_3'])
             isSection5or6 = (row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
             isSection7 = row.getAlias() == 'head_7'
             continue
@@ -224,14 +238,22 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, columns, logger, true)
 
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
-        if (row.ndsSum != row.ndsBookSum &&
-                (isSection1or2 && row.ndsNum == '60309.01' || isSection5or6)) {
-            rowWarning(logger, row, errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!')
+        if (row.ndsSum != row.ndsBookSum && (isSection1or2or3 && row.ndsNum == '60309.01' || isSection5or6)) {
+            rowWarning(logger, row, errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!' +
+                    (isSection1or2or3 ?
+                            "Ожидаемое значение (разделы 1-3): «Графа 6» = «Графа 8» в строках, в которых «Графа 5» = «60309.01»." :
+                            "Ожидаемое значение (раздел 5 и 6): «Графа 6» = «Графа 8»."))
         }
     }
 
     def hasError = false
+    Map<String, BigDecimal> superSums = [:]
+    totalColumns.each{
+        superSums[it] = BigDecimal.ZERO
+    }
+
     for (def section : sections) {
+        isSection7 = section == '7'
         def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
         def lastRow = getDataRow(dataRows, getLastRowAlias(section))
         def from = firstRow.getIndex()
@@ -240,12 +262,12 @@ void logicCheck() {
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
         // 3. Проверка итоговых значений по разделам 1-7
-        def tmpTotal = getTotalRow(sectionsRows, lastRow.getIndex())
+        def tmpTotal = getTotalRow(sectionsRows, isSection7)
 
         if (!hasError) {
-            totalColumns.each { alias ->
+            (isSection7 ? (totalColumns + 'ndsDealSum') : totalColumns).each { alias ->
                 if (lastRow[alias] != tmpTotal[alias]) {
-                    logger.error(WRONG_TOTAL, getColumnName(lastRow, alias))
+                    logger.error('Строка ' + lastRow.getIndex() + ': ' + WRONG_TOTAL, getColumnName(lastRow, alias))
                     hasError = true
                 }
             }
@@ -253,16 +275,37 @@ void logicCheck() {
 
         // 4..6. Проверка номера балансового счета (графа 5) по разделам
         // 8. Проверка номера балансового счета (графа 5) по разделу между фиксированной строкой 2 и 4
-        if (section == '7') {
+        if (isSection7) {
             continue
         }
+        totalColumns.each{
+            superSums[it] = (superSums[it]?:0) + (lastRow[it]?:0)
+        }
         def values5 = calc5(section)
+        def endString = ''
+        switch (section) {
+            case '1':
+            case '2':
+            case '3':
+            case '4': endString = "(разделы 1-4): пустое значение или «60309.01»."
+                break
+            case '5': endString = "(раздел 5): «60309.04»."
+                break
+            case '6': endString = "(раздел 6): «60309.05»."
+        }
         for (def row : sectionsRows) {
             if (!(row.ndsNum in values5)) {
-                rowError(logger, row, 'Строка ' + row.getIndex() + ': Графа «' + getColumnName(row, 'ndsNum') + '» заполнена неверно!')
+                rowError(logger, row, 'Строка ' + row.getIndex() + ': Графа «' + getColumnName(row, 'ndsNum') + '» заполнена неверно! Ожидаемое значение ' + endString)
             }
         }
     }
+    def superTotalRow = getDataRow(dataRows, 'total')
+    totalColumns.each { alias ->
+        if (superTotalRow[alias] != superSums[alias]) {
+            logger.error('Строка ' + superTotalRow.getIndex() + ': ' + WRONG_TOTAL, getColumnName(superTotalRow, alias))
+        }
+    }
+
 }
 
 void consolidation() {
@@ -433,7 +476,8 @@ void addData(def xml, int headRowCount) {
             'total_5': [getDataRow(dataRows, 'total_5')],
             '6. Суммы, полученные в виде штрафов, пени, неустоек по расчётной ставке исчисления налога от общей суммы полученного дохода 18/118': [getDataRow(dataRows, 'head_6')],
             'total_6': [getDataRow(dataRows, 'total_6')],
-            '7. Суммы, отражённые в бухгалтерском учёте и книге продаж, не вошедшие в разделы с 1 по 6': [rowHead7],
+            'total': [getDataRow(dataRows, 'total')],
+            '7. Сумма налога, подлежащая вычету у продавца, по которой отгрузка соответствующих товаров осуществлена в текущем отчетном периоде': [rowHead7],
             'total_7': [getDataRow(dataRows, 'total_7')]
     ]
 
@@ -505,13 +549,14 @@ void addData(def xml, int headRowCount) {
     dataRowHelper.save(rows)
 }
 
-def getTotalRow(sectionsRows, def index) {
+def getTotalRow(sectionsRows, def isSection7) {
     def newRow = formData.createDataRow()
-    totalColumns.each { alias ->
+    def columns = (isSection7 ? (totalColumns + 'ndsDealSum') : totalColumns)
+    columns.each { alias ->
         newRow.getCell(alias).setValue(BigDecimal.ZERO, null)
     }
     for (def row : sectionsRows) {
-        totalColumns.each { alias ->
+        columns.each { alias ->
             def value1 = newRow.getCell(alias).value
             def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
             newRow[alias] = value1 + value2
