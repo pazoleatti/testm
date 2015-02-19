@@ -49,6 +49,17 @@ def empty = 0
 @Field
 def departmentParam = null
 
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+def getEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
+}
+
 // Получение провайдера с использованием кеширования
 def getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
@@ -107,14 +118,16 @@ List<String> getErrorVersion(record) {
 void generateXML() {
     // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
+    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
     def inn = departmentParam?.INN?.value
+    def kpp = departmentParam?.KPP?.value
     def formatVersion = departmentParam?.FORMAT_VERSION?.value
 
     // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".9" + "_" +
-            declarationData.taxOrganCode + "_" +
-            declarationData.taxOrganCode + "_" +
-            inn + "" + declarationData.kpp + "_" +
+            taxOrganCode + "_" +
+            taxOrganCode + "_" +
+            inn + "" + kpp + "_" +
             (new SimpleDateFormat("yyyyMMdd")).format(Calendar.getInstance().getTime()) + "_" +
             UUID.randomUUID().toString().toUpperCase()
     def index = "0000090"
@@ -129,15 +142,15 @@ void generateXML() {
         if (formData.id == 608) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+            def totalRow = getDataRow(sourceDataRows, 'total')
+            code230 = totalRow?.saleCostB18 ?: empty
+            code240 = totalRow?.saleCostB10 ?: empty
+            code250 = totalRow?.saleCostB0 ?: empty
+            code260 = totalRow?.vatSum18 ?: empty
+            code270 = totalRow?.vatSum10 ?: empty
+            code280 = totalRow?.bonifSalesSum ?: empty
         }
     }
-    def totalRow = getDataRow(sourceDataRows, 'total')
-    code230 = totalRow?.saleCostB18 ?: empty
-    code240 = totalRow?.saleCostB10 ?: empty
-    code250 = totalRow?.saleCostB0 ?: empty
-    code260 = totalRow?.vatSum18 ?: empty
-    code270 = totalRow?.vatSum10 ?: empty
-    code280 = totalRow?.bonifSalesSum ?: empty
     if (corrNumber > 0) {
         code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
     }
@@ -192,14 +205,14 @@ void generateXML() {
                     def code100inn, code100kpp, code110inn, code110kpp
                     def boolean isUL100 = false
                     def slashIndex = code100?.indexOf("/")
-                    if (slashIndex != 0) {
+                    if (slashIndex > 0) {
                         isUL100 = true
                         code100inn = code100.substring(0, slashIndex)
                         code100kpp = code100.substring(slashIndex + 1)
                     }
                     def boolean isUL110 = false
                     slashIndex = code110?.indexOf("/")
-                    if (slashIndex != 0) {
+                    if (slashIndex > 0) {
                         isUL110 = true
                         code110inn = code110.substring(0, slashIndex)
                         code110kpp = code110.substring(slashIndex + 1)
@@ -226,7 +239,7 @@ void generateXML() {
                             СумНДССФ10: code210,
                             СтоимПродОсв: code220
                     ) {
-                        КодВидОпер { code010 }
+                        КодВидОпер(code010)
                         ДокПдтвОпл(
                                 НомДокПдтвОпл: code120,
                                 ДатаДокПдтвОпл: code130
@@ -273,15 +286,15 @@ def checkDeclarationFNS() {
 }
 
 def getNumber(def String str) {
-    if (str != null && str.length > 10) {
-        return str.substring(0, str.length - 10)
+    if (str != null && str.length() > 11) {
+        return str.substring(0, str.length() - 11)
     }
     return null
 }
 
 def getDate(def String str) {
-    if (str != null && str.length > 10) {
-        return str.substring(str.length - 9)
+    if (str != null && str.length() > 10) {
+        return str.substring(str.length() - 10)
     }
     return null
 }

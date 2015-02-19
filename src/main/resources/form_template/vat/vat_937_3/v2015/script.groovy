@@ -228,7 +228,7 @@ void logicCheck() {
         }
 
         // 5. Проверка значения «Графы 12» (часть 2)
-        if (!isFirstSection && row.mediatorNumDate != null && !checkFormat(row.mediatorNumDate.trim(), "^\\[1234]\$")) {
+        if (!isFirstSection && row.mediatorNumDate != null && !checkFormat(row.mediatorNumDate.trim(), "^[1234]\$")) {
             def name = getColumnName(row,'mediatorNumDate')
             loggerError(row, String.format(COLUMN_12_ERROR_MSG, index, name, name))
         }
