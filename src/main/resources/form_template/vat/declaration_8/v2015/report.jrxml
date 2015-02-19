@@ -133,7 +133,7 @@
 		<initialValueExpression><![CDATA["-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"]]></initialValueExpression>
 	</variable>
 	<variable name="ИдФайл_О" class="java.lang.String">
-		<variableExpression><![CDATA[$F{ИдФайл}.split("_")[4]]]></variableExpression>
+		<variableExpression><![CDATA[$F{ИдФайл}==null || $F{ИдФайл}.length()==0 ? $V{STR_FILLER} : $F{ИдФайл}.split("_")[4]]]></variableExpression>
 	</variable>
 	<variable name="ИННЮЛ" class="java.lang.String">
 		<variableExpression><![CDATA[$V{ИдФайл_О}.length()<10 ? ($V{ИдФайл_О} + $V{STR_FILLER}).substring(0, 12) :$V{ИдФайл_О}.substring(0, 10) + "--"]]></variableExpression>
@@ -152,8 +152,8 @@
 		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="ПризнСвед8" class="java.lang.String">
-		<variableExpression><![CDATA[$V{PAGE_NUMBER} == 1 ? $F{ПризнСвед8} : "-"]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{ПризнСвед8}]]></initialValueExpression>
+		<variableExpression><![CDATA[$V{PAGE_NUMBER} == 1 ? ($F{ПризнСвед8} == null ? "-": $F{ПризнСвед8}) : "-"]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="НомерПор" class="java.lang.String">
 		<variableExpression><![CDATA[$F{НомерПор} == null ? "------------" :
@@ -210,8 +210,8 @@
 		<initialValueExpression><![CDATA[($F{ДатаУчТов} == null ? $V{STR_FILLER}: $F{ДатаУчТов} + $V{STR_FILLER}).substring(0,10)]]></initialValueExpression>
 	</variable>
 	<variable name="КодВидОпер" class="java.lang.String">
-		<variableExpression><![CDATA[($V{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></variableExpression>
-		<initialValueExpression><![CDATA[($V{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></initialValueExpression>
+		<variableExpression><![CDATA[($F{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[($F{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></initialValueExpression>
 	</variable>
 	<variable name="---------------" class="java.lang.String"/>
 	<variable name="currentPage" class="java.lang.Integer" resetType="Page">

@@ -46,11 +46,12 @@
 			<pen lineWidth="0.5" lineColor="#FFFFFF"/>
 		</box>
 	</style>
-	<parameter name="INN" class="java.lang.String"/>
-	<parameter name="KPP" class="java.lang.String"/>
 	<queryString language="xPath">
 		<![CDATA[/Файл/Документ/КнигаПрод/КнПродСтр]]>
 	</queryString>
+	<field name="ИдФайл" class="java.lang.String">
+		<fieldDescription><![CDATA[../../../@ИдФайл]]></fieldDescription>
+	</field>
 	<field name="ПризнСвед9" class="java.lang.String">
 		<fieldDescription><![CDATA[../../@ПризнСвед9]]></fieldDescription>
 	</field>
@@ -178,13 +179,16 @@
 		<variableExpression><![CDATA["-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"]]></variableExpression>
 		<initialValueExpression><![CDATA["-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"]]></initialValueExpression>
 	</variable>
+	<variable name="ИдФайл_О" class="java.lang.String">
+		<variableExpression><![CDATA[($F{ИдФайл} == null || $F{ИдФайл}.length()==0) ? $V{STR_FILLER} : $F{ИдФайл}.split("_")[4]]]></variableExpression>
+	</variable>
 	<variable name="ИННЮЛ" class="java.lang.String">
-		<variableExpression><![CDATA[($P{INN} == null ? $V{STR_FILLER} : ($P{INN}+$V{STR_FILLER})).substring(0,12)]]></variableExpression>
-		<initialValueExpression><![CDATA[($P{INN} == null ? $V{STR_FILLER} : ($P{INN}+$V{STR_FILLER})).substring(0,12)]]></initialValueExpression>
+		<variableExpression><![CDATA[$V{ИдФайл_О}.length()<10 ? ($V{ИдФайл_О} + $V{STR_FILLER}).substring(0, 12) :$V{ИдФайл_О}.substring(0, 10) + "--"]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="КПП" class="java.lang.String">
-		<variableExpression><![CDATA[($P{KPP}==null ? $V{STR_FILLER}: $P{KPP} + $V{STR_FILLER}).substring(0,9)]]></variableExpression>
-		<initialValueExpression><![CDATA[($P{KPP}==null ? $V{STR_FILLER}: $P{KPP} + $V{STR_FILLER}).substring(0,9)]]></initialValueExpression>
+		<variableExpression><![CDATA[($V{ИдФайл_О} + $V{STR_FILLER}).substring(10, 19)]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="BarcodeImage_Section1" class="java.lang.String">
 		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAIkAAABBCAMAAADSQXciAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAADBQTFRFAAAA////mZmZIiIiiIiId3d3ERERMzMzzMzM7u7uqqqqu7u73d3dZmZmVVVVRERE8UHvnwAAAAFiS0dEAf8CLd4AAAAJcEhZcwAACxMAAAsTAQCanBgAAAGNSURBVGje7ZTrbsMgDIXNPSQQ3v9th2kBk2FV2vZnki1Fwvjk9KsxAQCl8MEAoBlJ4R076dhdJa/16vkwmV7vkpAIiZAIiZAIiZAIiZAIiZAIiZAIiZAIiZAIiZAIiZAIiZAIyf8g+VH82kBIhERI/o5EGzB2KtbUeXC72kJSReEgPxLNXPavyTQ4OZIrpPqcXbumLsfo3KZGSeydVMoTJYXZrKvQPqQc65MYEocWZx5NWFIT6T8kNUpi0DoNXpevSWIdJblbmwolIdXQYAuTtgbztZfnLGLkvtOw7KKM6Oe/vUvXnknri9mxNeKfYOtf7joZume6WkWnt8q+BiZVOYTE1XrPq/9R9iTe4nSMKbT1PE61VX4kwaZotvY+Ag/lBMZfkUlzOLG3ZZSm9TYwaTPyfG3ExZ0+zf3C9VS21s27s6a+XQu/l/YoKHL3/nSwdhi6z07sFaI65iysKfqnMbIPaY9URfG+tv74MZpzUlykN+DZPe3Bay6tI+AtJyXbgYJQf0vvDtrB8oX5Av57HTavxe0/AAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE1LTAyLTE3VDEzOjQ1OjQwKzAwOjAwzWSmTAAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxNS0wMi0xN1QxMzo0NTo0MCswMDowMLw5HvAAAAA/dEVYdFNvZnR3YXJlAEJhcmNvZGUgV3JpdGVyIGluIFB1cmUgUG9zdFNjcmlwdCAtIFZlcnNpb24gMjAxNS0wMS0xMcQCIAwAAAA8dEVYdFNvdXJjZQBodHRwOi8vd3d3LnRlcnJ5YnVydG9uLmNvLnVrL2JhcmNvZGV3cml0ZXIvZ2VuZXJhdG9yL39acHEAAAAASUVORK5CYII="]]></variableExpression>
@@ -276,8 +280,8 @@
 		<initialValueExpression><![CDATA[($F{ДатаУчТов} == null ? $V{STR_FILLER}: $F{ДатаУчТов} + $V{STR_FILLER}).substring(0,10)]]></initialValueExpression>
 	</variable>
 	<variable name="КодВидОпер" class="java.lang.String">
-		<variableExpression><![CDATA[($V{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></variableExpression>
-		<initialValueExpression><![CDATA[($V{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></initialValueExpression>
+		<variableExpression><![CDATA[($F{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[($F{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></initialValueExpression>
 	</variable>
 	<variable name="---------------" class="java.lang.String"/>
 	<variable name="currentPage" class="java.lang.Integer" resetType="Page">

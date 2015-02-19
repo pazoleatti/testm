@@ -46,11 +46,12 @@
 			<pen lineWidth="0.5" lineColor="#FFFFFF"/>
 		</box>
 	</style>
-	<parameter name="INN" class="java.lang.String"/>
-	<parameter name="KPP" class="java.lang.String"/>
 	<queryString language="xPath">
 		<![CDATA[/Файл/Документ/КнигаПродДЛ/КнПродДЛСтр]]>
 	</queryString>
+	<field name="ИдФайл" class="java.lang.String">
+		<fieldDescription><![CDATA[../../../@ИдФайл]]></fieldDescription>
+	</field>
 	<field name="ПризнСвед9" class="java.lang.String">
 		<fieldDescription><![CDATA[../../@ПризнСвед91]]></fieldDescription>
 	</field>
@@ -197,13 +198,16 @@
 		<variableExpression><![CDATA["-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"]]></variableExpression>
 		<initialValueExpression><![CDATA["-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"]]></initialValueExpression>
 	</variable>
+	<variable name="ИдФайл_О" class="java.lang.String">
+		<variableExpression><![CDATA[$F{ИдФайл}==null || $F{ИдФайл}.length()==0 ? $V{STR_FILLER} : $F{ИдФайл}.split("_")[4]]]></variableExpression>
+	</variable>
 	<variable name="ИННЮЛ" class="java.lang.String">
-		<variableExpression><![CDATA[($P{INN} == null ? $V{STR_FILLER} : ($P{INN}+$V{STR_FILLER})).substring(0,12)]]></variableExpression>
-		<initialValueExpression><![CDATA[($P{INN} == null ? $V{STR_FILLER} : ($P{INN}+$V{STR_FILLER})).substring(0,12)]]></initialValueExpression>
+		<variableExpression><![CDATA[$V{ИдФайл_О}.length()<10 ? ($V{ИдФайл_О} + $V{STR_FILLER}).substring(0, 12) :$V{ИдФайл_О}.substring(0, 10) + "--"]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="КПП" class="java.lang.String">
-		<variableExpression><![CDATA[($P{KPP}==null ? $V{STR_FILLER}: $P{KPP} + $V{STR_FILLER}).substring(0,9)]]></variableExpression>
-		<initialValueExpression><![CDATA[($P{KPP}==null ? $V{STR_FILLER}: $P{KPP} + $V{STR_FILLER}).substring(0,9)]]></initialValueExpression>
+		<variableExpression><![CDATA[($V{ИдФайл_О} + $V{STR_FILLER}).substring(10, 19)]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="BarcodeImage_Title" class="java.lang.String">
 		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAIkAAABBCAMAAADSQXciAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAADBQTFRFAAAA////mZmZIiIiiIiId3d3ERERMzMzzMzM7u7uqqqqu7u73d3dZmZmVVVVRERE8UHvnwAAAAFiS0dEAf8CLd4AAAAJcEhZcwAACxMAAAsTAQCanBgAAAF9SURBVGje7ZTRcoQgDEVBBURB//9vm+gioZJdp+1DH25mnCHkcjlC1BhjLT8cxshMpOYVPek120rOcespF7+WlGnVHiQgAQlIQAISkIAEJCABCUhAAhKQgAQkIAEJSEACEpCA5P+R/Ch+bQASkIDk70iG0YxTVbSp88b1ag0JicIsNolju2SRdkV5J1lDoucSt6nLMTrXqUmSaUs25YqSQj2slCM9yd6VdxLHhSVf1E06RvmGoiZJRt4oXbwur5VkO85ot3fli0QcZTjQdyVlH6PXTs9a5Mhl5qhFdvB9pZXKMvZKSjbZqTWxWzJd/4EWRzc8UJaxUVKbQ0hardwA7Tbviv9EN7A8Un4i4UMZ1NoZ9EXsS9/fccdu0wPl2ZTU7kp6oHi9dsXqu/7HrPyqVSUdP59d/Xba1B/N7vvSEjuL3Nb1N82rvFPyTyLaufZCm/KqdLXsN2mJRKK4rV3/3UXR8++UFIM3ftBSulg/aVIxHaS99CcD8Ze+Kb8Aldcdvv3LULAAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTUtMDItMTdUMTY6NDA6MTMrMDA6MDBPasriAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE1LTAyLTE3VDE2OjQwOjEzKzAwOjAwPjdyXgAAAD90RVh0U29mdHdhcmUAQmFyY29kZSBXcml0ZXIgaW4gUHVyZSBQb3N0U2NyaXB0IC0gVmVyc2lvbiAyMDE1LTAxLTExxAIgDAAAADx0RVh0U291cmNlAGh0dHA6Ly93d3cudGVycnlidXJ0b24uY28udWsvYmFyY29kZXdyaXRlci9nZW5lcmF0b3Ivf1pwcQAAAABJRU5ErkJggg=="]]></variableExpression>
@@ -299,8 +303,8 @@
 		<initialValueExpression><![CDATA[($F{ДатаУчТов} == null ? $V{STR_FILLER}: $F{ДатаУчТов} + $V{STR_FILLER}).substring(0,10)]]></initialValueExpression>
 	</variable>
 	<variable name="КодВидОпер" class="java.lang.String">
-		<variableExpression><![CDATA[($V{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></variableExpression>
-		<initialValueExpression><![CDATA[($V{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></initialValueExpression>
+		<variableExpression><![CDATA[($F{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[($F{КодВидОпер} == null ? $V{STR_FILLER} : $F{КодВидОпер} + $V{STR_FILLER}).substring(0,20)]]></initialValueExpression>
 	</variable>
 	<variable name="---------------" class="java.lang.String"/>
 	<variable name="currentPage" class="java.lang.Integer" resetType="Page">
@@ -677,7 +681,7 @@
 	</variable>
 	<title>
 		<band height="827">
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="b5021adb-bf63-41fe-9cf7-536ba60bb784" x="175" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -691,7 +695,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{КПП}.charAt(0)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="cf776079-0dbe-44b2-ad33-8ccbd165deaf" x="280" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -705,7 +709,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{КПП}.charAt(7)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="ceddec4d-43db-4736-aa6c-fe2c99a1ce4e" x="295" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -719,7 +723,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{КПП}.charAt(8)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="e37ec3e1-9b4b-4220-b95b-1cd5de33482d" x="235" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -733,7 +737,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{КПП}.charAt(4)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="3acddffa-9954-4b96-bc93-ea4fe6b922c2" x="250" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -754,7 +758,7 @@
 				</textElement>
 				<text><![CDATA[КПП]]></text>
 			</staticText>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="5b3485fa-690c-4261-a6fa-7dc6c9c79ae5" x="265" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -768,7 +772,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(6)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="15c6e9ba-481a-4474-839a-036dd36a8236" x="310" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -782,7 +786,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(9)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="a0591130-d2c2-4860-b517-081bdedce75b" x="250" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -796,7 +800,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(5)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="8bc140e8-1aef-49c9-ab52-c4673d983d46" x="235" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -810,7 +814,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(4)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="69acc033-a885-4ddf-9cf1-1fbd99f9bf8f" x="265" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -824,7 +828,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{КПП}.charAt(6)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="e10ff387-c67e-4e46-9661-dd8c52dd3b18" x="205" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -838,7 +842,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(2)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="e8193e3a-9439-4fe4-835b-fa5af58494e7" x="190" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -859,7 +863,7 @@
 				</textElement>
 				<text><![CDATA[ИНН]]></text>
 			</staticText>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="f96d6121-6adb-40c9-8c09-c60262872619" x="220" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -873,7 +877,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{КПП}.charAt(3)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="220" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -894,7 +898,7 @@
 				</textElement>
 				<text><![CDATA[Стр.]]></text>
 			</staticText>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="22e5045e-a249-48ef-8961-2593eeac7502" x="190" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -908,7 +912,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(1)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="e9b1c140-e991-4b34-b15f-25e8373afd96" x="205" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -922,7 +926,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{КПП}.charAt(2)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="a1503a24-be07-4430-b169-b70dd315fd48" x="325" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -936,7 +940,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(10)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="b3977964-039b-4e77-8491-3ddf99f85478" x="280" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -950,7 +954,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(7)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="8dadcbb0-7a5a-41ad-b0e6-e2476191a088" x="295" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -964,7 +968,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(8)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="5a7bfc9a-f96b-491e-a780-f7bbcfc9f84c" x="175" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -978,7 +982,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(0)]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField evaluationTime="Report" isBlankWhenNull="true">
 				<reportElement uuid="ee4f0cd0-d90e-4593-892e-4b7b787cddda" x="340" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
 					<pen lineColor="#666666"/>
@@ -1094,7 +1098,7 @@
 			</rectangle>
 			<staticText>
 				<reportElement uuid="2f8790eb-c8a6-42e9-bead-b06f60596d2c" x="300" y="45" width="300" height="15">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил. 1 к разд.10"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="Arial" size="8" isBold="true"/>
@@ -1236,7 +1240,7 @@
 			</staticText>
 			<staticText>
 				<reportElement uuid="5102f616-d15c-4733-b6af-dd02d405fd6b" x="300" y="60" width="300" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил. 1 к разд.10"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="Arial" size="9"/>
@@ -1245,7 +1249,7 @@
 			</staticText>
 			<staticText>
 				<reportElement uuid="9b803d66-42f0-4510-bcaf-2f6f7ca301c8" x="0" y="82" width="600" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил. 1 к разд.10"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
 				</reportElement>
 				<textElement textAlignment="Center">
 					<font fontName="Arial" size="9" isBold="true"/>
@@ -3343,7 +3347,7 @@
 			</rectangle>
 			<staticText>
 				<reportElement uuid="2f8790eb-c8a6-42e9-bead-b06f60596d2c" x="300" y="60" width="300" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил. 1 к разд.10"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="Arial" size="9"/>
@@ -10311,7 +10315,7 @@
 			</rectangle>
 			<staticText>
 				<reportElement uuid="2f8790eb-c8a6-42e9-bead-b06f60596d2c" x="300" y="60" width="300" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил. 1 к разд.10"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="Arial" size="9"/>
@@ -15060,7 +15064,7 @@
 			</rectangle>
 			<staticText>
 				<reportElement uuid="2f8790eb-c8a6-42e9-bead-b06f60596d2c" x="300" y="60" width="300" height="20">
-					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Прил. 1 к разд.10"/>
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="Arial" size="9"/>
