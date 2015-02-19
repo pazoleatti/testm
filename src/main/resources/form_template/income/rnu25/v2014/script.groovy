@@ -719,6 +719,7 @@ void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 13, 1)
     addTransportData(xml)
 
+    // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     checkTotalSum(dataRows, totalSumColumns, logger, false)
 }

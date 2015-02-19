@@ -942,7 +942,8 @@ void importTransportData() {
     }
     dataRows = null
     dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
+    checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 // Добавляет строку в текущий буфер строк

@@ -480,9 +480,6 @@ void addData(def xml, int headRowCount) {
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 20, 0)
     addTransportData(xml)
-
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalSumColumns, logger, false)
 }
 
 void addTransportData(def xml) {
@@ -496,6 +493,11 @@ void addTransportData(def xml) {
 
     def rows = [headRow]
     def int rowIndex = 1
+
+    def totalTmp = formData.createDataRow()
+    totalSumColumns.each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
 
     for (def row : xml.row) {
         rnuIndexRow++
@@ -584,6 +586,12 @@ void addTransportData(def xml) {
         xmlIndexCol++
         newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
+        totalSumColumns.each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
+        }
+
         rows.add(newRow)
     }
 
@@ -626,6 +634,19 @@ void addTransportData(def xml) {
         xmlIndexCol++
         total.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
+        def colIndexMap = ['saleCostB18' : 15, 'saleCostB10' : 16, 'saleCostB0' : 17, 'vatSum18' : 18, 'vatSum10' : 19, 'bonifSalesSum' : 20]
+
+        for (def alias : totalSumColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+            }
+        }
+
         rows.add(total)
     }
     dataRowHelper.save(rows)
@@ -646,7 +667,7 @@ def getNewRow() {
 def getTotalRow() {
     def total = formData.createDataRow()
     total.setAlias('total')
-    total.fix = 'Итого'
+    total.fix = 'Всего'
     total.getCell('fix').colSpan = 15
     (allColumns + 'fix').each {
         total.getCell(it).setStyleAlias('Контрольные суммы')

@@ -584,7 +584,7 @@ void addTransportData(def xml) {
             if ((v1 == null && v2 != null) || v1 != null && v1 != v2) {
                 // определить колонку в тф: 14 - это номер графы с которой начинаются подсчеты сумм
                 def col = 14 + totalSumColumns.indexOf(it) + colOffset
-                logger.error(TRANSPORT_FILE_SUM_ERROR, col, rnuIndexRow)
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, col, rnuIndexRow)
             }
         }
     }

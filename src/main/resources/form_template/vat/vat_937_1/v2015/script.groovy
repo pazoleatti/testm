@@ -335,9 +335,6 @@ void addData(def xml, int headRowCount) {
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 16, 1)
     addTransportData(xml)
-
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalSumColumns, logger, false)
 }
 
 void addTransportData(def xml) {
@@ -347,6 +344,11 @@ void addTransportData(def xml) {
 
     def rows = []
     def int rowIndex = 1
+
+    def totalTmp = formData.createDataRow()
+    totalSumColumns.each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
 
     for (def row : xml.row) {
         rnuIndexRow++
@@ -419,6 +421,12 @@ void addTransportData(def xml) {
         xmlIndexCol++
         newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
+        totalSumColumns.each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
+        }
+
         rows.add(newRow)
     }
 
@@ -431,6 +439,19 @@ void addTransportData(def xml) {
 
         // Графа 16
         total.nds = parseNumber(row.cell[16].text(), rnuIndexRow, 16 + colOffset, logger, true)
+
+        def colIndexMap = ['nds' : 16]
+
+        for (def alias : totalSumColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+            }
+        }
 
         rows.add(total)
     }
@@ -475,4 +496,12 @@ def loggerError(def row, def msg) {
     } else {
         rowError(logger, row, msg)
     }
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), true)
+    dataRowHelper.saveSort()
 }
