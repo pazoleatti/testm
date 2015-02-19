@@ -7036,8 +7036,8 @@
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество листов данного раздела.
-<sup>2</sup>  Указывается на первой странице, на остальных ставится прочерк.
-<sup>3</sup>  Заполняется необходимое количество листов с указанными показателями.]]></text>
+<sup>2</sup>  Указывается на первой странице, на остальных - ставится прочерк.
+<sup>3</sup>  Заполняется необходимое количество листов с указанным показателем.]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="270" y="183" width="15" height="19" isPrintWhenDetailOverflows="true"/>
@@ -8056,7 +8056,7 @@
 				<textElement>
 					<font fontName="Arial" size="8"/>
 				</textElement>
-				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество страниц с указанным показателем.]]></text>
+				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество листов с указанным показателем.]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="bb70bada-7135-419e-aeec-5d3f99d9bca0" x="225" y="270" width="45" height="20"/>

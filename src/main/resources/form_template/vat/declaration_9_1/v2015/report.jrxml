@@ -1151,7 +1151,7 @@
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество листов данного приложения.
-<sup>2</sup>  Указывается на первой странице, на остальных ставится прочерк.]]></text>
+<sup>2</sup>  Указывается на первой странице, на остальных - ставится прочерк.]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="c8d9fbe5-46e6-42cb-856c-3b6ce1f34d28" x="225" y="378" width="45" height="20"/>
@@ -9371,7 +9371,7 @@
 				<textElement verticalAlignment="Bottom">
 					<font fontName="Arial" size="8"/>
 				</textElement>
-				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество листов со строками 80 - 300
+				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество листов со строками 080 - 300.
 <sup>2</sup>  Заполняется необходимое количество листов с указанным показателем.
 ]]></text>
 			</staticText>
@@ -10391,7 +10391,7 @@
 				<textElement>
 					<font fontName="Arial" size="8"/>
 				</textElement>
-				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество страниц с указанным показателем.]]></text>
+				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество листов с указанным показателем.]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="bb70bada-7135-419e-aeec-5d3f99d9bca0" x="225" y="270" width="45" height="20"/>
