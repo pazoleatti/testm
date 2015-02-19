@@ -54,7 +54,6 @@
             position: absolute !important;
             bottom: 0;
             left: 0;
-            right: 50.5%;
             top: 0;
         }
 
@@ -62,7 +61,6 @@
             position: absolute !important;
             bottom: 0;
             right: 0;
-            left: 50.5%;
             top: 0;
         }
 
@@ -157,9 +155,9 @@
                 <g:SplitLayoutPanel addStyleNames="{style.table}">
                     <g:center>
                         <g:ResizeLayoutPanel addStyleNames="{style.upWrapper}">
-                            <g:HTMLPanel width="100%" height="100%">
+                            <g:HTMLPanel ui:field="panel" width="100%" height="100%">
                                 <!--Левая-->
-                                <g:HTMLPanel addStyleNames="{style.leftPanel}">
+                                <g:HTMLPanel ui:field="leftPanel" addStyleNames="{style.leftPanel}">
                                     <style:LabelSeparator ui:field="leftLabel" text="Приёмник" addStyleNames="{style.bold}" />
                                     <g:HorizontalPanel width="100%" height="30px" verticalAlignment="middle">
                                         <g:Label text="Подразделение:" width="120px" addStyleNames="{style.searchLabel}"/>
@@ -174,7 +172,7 @@
                                 </g:HTMLPanel>
 
                                 <!--Правая-->
-                                <g:HTMLPanel addStyleNames="{style.rightPanel}">
+                                <g:HTMLPanel ui:field="rightPanel" addStyleNames="{style.rightPanel}">
                                     <g:HorizontalPanel width="100%" verticalAlignment="middle">
                                         <g:cell width="100%">
                                             <style:LabelSeparator ui:field="rightLabel" text="Источники" addStyleNames="{style.bold}"/>

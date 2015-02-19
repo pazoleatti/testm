@@ -20,9 +20,7 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -32,6 +30,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
@@ -84,6 +83,8 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public static final String TITLE_FORM_DEAL = "Формы";
     public static final String TITLE_DEC_DEAL = "Уведомления";
 
+    private static final int CHECK_BOX_COLUMN_WIDTH = 40;
+
     @UiField(provided = true)
     ValueListBox<AppointmentType> appointmentTypePicker;
 
@@ -125,6 +126,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             downLabel,
             leftLabel,
             rightLabel;
+
+    @UiField
+    HTMLPanel panel, leftPanel, rightPanel;
 
     private GenericDataGrid.DataGridResizableHeader
             leftFormKindHeader,
@@ -238,8 +242,22 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 return getUiHandlers();
             }
         };
+
+        Window.addResizeHandler(new ResizeHandler() {
+            @Override
+            public void onResize(ResizeEvent event) {
+                setPanelWidth();
+            }
+        });
+        setPanelWidth();
     }
 
+    @Override
+    public void setPanelWidth() {
+        int width = panel.getOffsetWidth();
+        leftPanel.getElement().getStyle().setRight(width / 2 + 7 + CHECK_BOX_COLUMN_WIDTH / 2, Style.Unit.PX);
+        rightPanel.getElement().getStyle().setLeft(width / 2 + 7 - CHECK_BOX_COLUMN_WIDTH / 2, Style.Unit.PX);
+    }
     /**
      * Настройка левой таблицы
      */
@@ -670,7 +688,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
         leftTable.addColumn(leftNameTypeColumn, leftNameTypeHeader, 100, Style.Unit.PCT);
 
-        rightTable.addColumn(rightCheckBoxColumn, rightCheckBoxHeader, 3, Style.Unit.EM);
+        rightTable.addColumn(rightCheckBoxColumn, rightCheckBoxHeader, CHECK_BOX_COLUMN_WIDTH, Style.Unit.PX);
         if (isNotFourState) {
             rightTable.addColumn(rightFormKindColumn, rightFormKindHeader, 110, Style.Unit.PX);
         }

@@ -141,6 +141,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         void loadLeftData(DepartmentAssign leftSelectedRecord);
 
         void loadRightData();
+
+        void setPanelWidth();
     }
 
 	private final DispatchAsync dispatcher;
@@ -459,5 +461,11 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
             }
         }
         return true;
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().setPanelWidth();
     }
 }
