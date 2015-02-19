@@ -1,4 +1,4 @@
-package form_template.vat.vat_937_3
+package form_template.vat.vat_937_3.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
