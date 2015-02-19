@@ -49,6 +49,17 @@ def empty = 0
 @Field
 def departmentParam = null
 
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+def getEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
+}
+
 // Получение провайдера с использованием кеширования
 def getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
@@ -107,14 +118,16 @@ List<String> getErrorVersion(record) {
 void generateXML() {
     // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
+    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
     def inn = departmentParam?.INN?.value
+    def kpp = departmentParam?.KPP?.value
     def formatVersion = departmentParam?.FORMAT_VERSION?.value
 
     // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".11" + "_" +
-            declarationData.taxOrganCode + "_" +
-            declarationData.taxOrganCode + "_" +
-            inn + "" + declarationData.kpp + "_" +
+            taxOrganCode + "_" +
+            taxOrganCode + "_" +
+            inn + "" + kpp + "_" +
             (new SimpleDateFormat("yyyyMMdd")).format(Calendar.getInstance().getTime()) + "_" +
             UUID.randomUUID().toString().toUpperCase()
     def index = "0000110"
@@ -155,7 +168,7 @@ void generateXML() {
                         continue
                     }
                     def code005 = row.rowNumber
-                    def code010 = row.date
+                    def code010 = row.date?.format('dd.MM.yyyy')
                     def code020 = row.opTypeCode
                     def code030 = getNumber(row.invoiceNumDate)
                     def code040 = getDate(row.invoiceNumDate)
@@ -180,14 +193,14 @@ void generateXML() {
                     def code110inn, code110kpp, code120inn, code120kpp
                     def boolean isUL110 = false
                     def slashIndex = code110?.indexOf("/")
-                    if (slashIndex != 0) {
+                    if (slashIndex > 0) {
                         isUL110 = true
                         code110inn = code110.substring(0, slashIndex)
                         code110kpp = code110.substring(slashIndex + 1)
                     }
                     def boolean isUL120 = false
                     slashIndex = code120?.indexOf("/")
-                    if (slashIndex != 0) {
+                    if (slashIndex > 0) {
                         isUL120 = true
                         code120inn = code120.substring(0, slashIndex)
                         code120kpp = code120.substring(slashIndex + 1)
@@ -213,7 +226,7 @@ void generateXML() {
                             РазНДСКСчФУм: code190,
                             РазНДСКСчФУв: code200
                     ) {
-                        КодВидОпер { code020 }
+                        КодВидОпер (code020)
                         СвПрод() {
                             if (isUL110) {
                                 СведЮЛ(
@@ -257,15 +270,15 @@ def checkDeclarationFNS() {
 }
 
 def getNumber(def String str) {
-    if (str != null && str.length > 10) {
-        return str.substring(0, str.length - 10)
+    if (str != null && str.length() > 11) {
+        return str.substring(0, str.length() - 11)
     }
     return null
 }
 
 def getDate(def String str) {
-    if (str != null && str.length > 10) {
-        return str.substring(str.length - 9)
+    if (str != null && str.length() > 10) {
+        return str.substring(str.length() - 10)
     }
     return null
 }

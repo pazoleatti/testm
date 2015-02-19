@@ -49,6 +49,17 @@ def empty = 0
 @Field
 def departmentParam = null
 
+// Дата окончания отчетного периода
+@Field
+def reportPeriodEndDate = null
+
+def getEndDate() {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
+}
+
 // Получение провайдера с использованием кеширования
 def getProvider(def long providerId) {
     if (!providerCache.containsKey(providerId)) {
@@ -107,14 +118,16 @@ List<String> getErrorVersion(record) {
 void generateXML() {
     // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
+    def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
     def inn = departmentParam?.INN?.value
+    def kpp = departmentParam?.KPP?.value
     def formatVersion = departmentParam?.FORMAT_VERSION?.value
 
     // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".81" + "_" +
-            declarationData.taxOrganCode + "_" +
-            declarationData.taxOrganCode + "_" +
-            inn + "" + declarationData.kpp + "_" +
+            taxOrganCode + "_" +
+            taxOrganCode + "_" +
+            inn + "" + kpp + "_" +
             (new SimpleDateFormat("yyyyMMdd")).format(Calendar.getInstance().getTime()) + "_" +
             UUID.randomUUID().toString().toUpperCase()
     def index = "0000081"
@@ -130,12 +143,10 @@ void generateXML() {
         if (formData.id == 616) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
+            code005 = getDataRow(sourceDataRows, 'head')?.nds ?: empty  // "Итого"
+            code190 = getDataRow(sourceDataRows, 'total')?.nds ?: empty // "Всего"
         }
     }
-    def headRow = getDataRow(dataRows, 'head') // "Итого"
-    def totalRow = getDataRow(dataRows, 'total') // "Всего"
-    code005 = headRow?.nds ?: empty
-    code190 = totalRow?.nds ?: empty
     if (corrNumber > 0) {
         code001 = (corrNumber == sourceCorrNumber) ? 0 : 1
     }
@@ -170,7 +181,7 @@ void generateXML() {
                     def code090 = getDate(row.invoiceCorrectingCorrection)
                     def code100 = getDate(row.documentPay)
                     def code110 = getDate(row.documentPay)
-                    def code120 = row.dateRegistration
+                    def code120 = row.dateRegistration?.format('dd.MM.yyyy')
                     def code130 = row.salesmanInnKpp
                     def code140 = row.agentInnKpp
                     def code150 = row.declarationNum
@@ -182,14 +193,14 @@ void generateXML() {
                     def code130inn, code130kpp, code140inn, code140kpp
                     def boolean isUL130 = false
                     def slashIndex = code130?.indexOf("/")
-                    if (slashIndex != 0) {
+                    if (slashIndex > 0) {
                         isUL130 = true
                         code130inn = code130.substring(0, slashIndex)
                         code130kpp = code130.substring(slashIndex + 1)
                     }
                     def boolean isUL140 = false
                     slashIndex = code140?.indexOf("/")
-                    if (slashIndex != 0) {
+                    if (slashIndex > 0) {
                         isUL140 = true
                         code140inn = code140.substring(0, slashIndex)
                         code140kpp = code140.substring(slashIndex + 1)
@@ -210,12 +221,12 @@ void generateXML() {
                             СтоимПокупВ: code170,
                             СумНДС: code180
                     ) {
-                        КодВидОпер { code010 }
+                        КодВидОпер(code010)
                         ДокПдтвУпл(
                                 НомДокПдтвУпл: code100,
                                 ДатаДокПдтвУпл: code110
                         )
-                        ДатаУчТов { code120 }
+                        ДатаУчТов(code120)
                         СвПрод() {
                             if (isUL130) {
                                 СведЮЛ(
@@ -258,15 +269,15 @@ def checkDeclarationFNS() {
 }
 
 def getNumber(def String str) {
-    if (str != null && str.length > 10) {
-        return str.substring(0, str.length - 10)
+    if (str != null && str.length() > 11) {
+        return str.substring(0, str.length() - 11)
     }
     return null
 }
 
 def getDate(def String str) {
-    if (str != null && str.length > 10) {
-        return str.substring(str.length - 9)
+    if (str != null && str.length() > 10) {
+        return str.substring(str.length() - 10)
     }
     return null
 }
