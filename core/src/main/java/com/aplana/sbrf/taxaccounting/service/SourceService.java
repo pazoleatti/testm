@@ -480,4 +480,17 @@ public interface SourceService {
      * @return список назначенных деклараций для выбранного налога и подразделений
      */
     int getAssignedDeclarationsCount(List<Long> departmentsIds, char taxType);
+
+    /**
+     * Удалить записи о консолидации для текущего экземпляра
+     * @param targetDeclarationDataId идентификатор декларации
+     */
+    void deleteDeclarationConsolidateInfo(long targetDeclarationDataId);
+
+    /**
+     * Проверяет консолидирован ли источник с идентификатором sourceFormDataId для декларации с declarationId
+     * @param sourceFormDataId
+     * @return
+     */
+    boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId);
 }

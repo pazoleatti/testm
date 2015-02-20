@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,12 +14,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration({ "SourceDaoTest.xml" })
-//@Transactional
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration({ "SourceDaoTest.xml" })
+@Transactional
 public class SourceDaoTest {
+
+    @Autowired
+    SourceDao sourceDao;
+
+    @Test
+    public void deleteConsolidateInfo() {
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(2, 11));
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(2, 12));
+        sourceDao.deleteDeclarationConsolidateInfo(2);
+        assertFalse(sourceDao.isDeclarationSourceConsolidated(2, 11));
+        assertFalse(sourceDao.isDeclarationSourceConsolidated(2, 12));
+    }
     /*@Test
     public void testSaveFormSources() {
         List<DepartmentFormType> sources = departmentFormTypeDao.getFormSources(2, 2, FormDataKind.fromId(3));

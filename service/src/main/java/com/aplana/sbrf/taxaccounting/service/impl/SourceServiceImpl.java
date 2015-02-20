@@ -975,6 +975,16 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public void deleteDeclarationConsolidateInfo(long targetDeclarationDataId) {
+        sourceDao.deleteDeclarationConsolidateInfo(targetDeclarationDataId);
+    }
+
+    @Override
+    public boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId) {
+        return sourceDao.isDeclarationSourceConsolidated(declarationId, sourceFormDataId);
+    }
+
+    @Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind, Date periodStart, Date periodEnd) {
         return departmentFormTypeDao.getFormDestinations(sourceDepartmentId, sourceFormTypeId, sourceKind, periodStart, periodEnd);
     }

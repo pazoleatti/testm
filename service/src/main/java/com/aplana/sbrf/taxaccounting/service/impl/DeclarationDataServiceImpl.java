@@ -98,6 +98,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private ValidateXMLService validateXMLService;
 
+    @Autowired
+    private SourceService sourceService;
+
     private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
 
     public static final String TAG_FILE = "Файл";
@@ -254,6 +257,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 DeclarationData declarationData = declarationDataDao.get(id);
 
                 declarationDataDao.delete(id);
+                // удаляем записи о консолидации для текущего экземпляра
+                sourceService.deleteDeclarationConsolidateInfo(id);
 
                     auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
                             declarationData.getReportPeriodId(),

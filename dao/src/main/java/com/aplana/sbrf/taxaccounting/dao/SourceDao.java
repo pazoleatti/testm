@@ -131,4 +131,17 @@ public interface SourceDao {
      * @return id подразделения
      */
     Integer getDepartmentIdByDepartmentDeclarationType(long departmentDeclarationTypeId);
+
+    /**
+     * Удалить записи о консолидации для текущего экземпляра
+     * @param targetDeclarationDataId идентификатор декларации
+     */
+    void deleteDeclarationConsolidateInfo(long targetDeclarationDataId);
+
+    /**
+     * Проверяет консолидирован ли источник с идентификатором sourceFormDataId для декларации с declarationId
+     * @param sourceFormDataId
+     * @return
+     */
+    boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId);
 }
