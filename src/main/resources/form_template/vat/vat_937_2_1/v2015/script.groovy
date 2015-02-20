@@ -248,15 +248,11 @@ void logicCheck() {
     def headRow = getDataRow(dataRows, 'head')
     def bookTotalRow = getBookTotalRow()
     if (bookTotalRow) {
-        def errorColumns = []
         totalSumColumns.each { column ->
             // Графы 14-19 фиксированной строки «Итого» заполнены согласно алгоритму
             if (bookTotalRow[column] != headRow[column]) {
-                errorColumns += getColumnName(bookTotalRow, column)
+                loggerLog(bookTotalRow, "Строка ${headRow.getIndex()}: Итоговые значения рассчитаны неверно в графе «${getColumnName(bookTotalRow, column)}»!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
             }
-        }
-        if (!errorColumns.isEmpty()) {
-            loggerLog(bookTotalRow, "Строка ${headRow.getIndex()}: Итоговые значения рассчитаны неверно в графе «${getColumnName(bookTotalRow, column)}»!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
         }
     }
 
@@ -281,7 +277,7 @@ def getBookTotalRow(boolean skip = false) {
         }
     } else {
         for (DepartmentFormType formDataSource in bookFormSources) {
-            def bookFormData = formDataService.getLast(bookFormType, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def bookFormData = formDataService.getLast(bookFormType, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
             // 2. ищем форму в статусе принята
             if (bookFormData != null && bookFormData.state == WorkflowState.ACCEPTED) {
                 def bookDataRows = formDataService.getDataRowHelper(bookFormData)?.allCached

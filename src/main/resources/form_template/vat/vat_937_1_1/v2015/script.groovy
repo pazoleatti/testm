@@ -242,7 +242,7 @@ def getBookTotalRow(boolean skip = false) {
         }
     } else {
         for (DepartmentFormType formDataSource in bookFormSources) {
-            def bookFormData = formDataService.getLast(bookFormType, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def bookFormData = formDataService.getLast(bookFormType, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
             // 2. ищем форму в статусе принята
             if (bookFormData != null && bookFormData.state == WorkflowState.ACCEPTED) {
                 def bookDataRows = formDataService.getDataRowHelper(bookFormData)?.allCached
