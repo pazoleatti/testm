@@ -50,6 +50,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentService"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.SourceService"/>
+    </bean>
 
     <bean id="declarationDataService" class="com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl" />
 
