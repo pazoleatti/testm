@@ -92,8 +92,8 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
         // 2. Проверка суммы НДС
         if (row.sum != null && row.sum2 != null &&
-                !(row.sum2 > row.sum * 0.15 && row.sum2 < row.sum * 0.21)) {
-            rowWarning(logger, row, "Строка $index: Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!")
+                !(row.sum * 0.18 + row.sum * 0.03 > row.sum2 && row.sum2 > row.sum * 0.18 - row.sum * 0.03)) {
+            rowWarning(logger, row, "Строка $index: Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе! Проверка: «Графа 5» * 18% + («Графа 5» * 3) / 100 > «Графа 7» > «Графа 5» * 18% - («Графа 5» * 3) / 100.")
         }
     }
     // 3. Проверка итоговых значений
@@ -104,9 +104,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def totalRow = getDataRow(dataRows, 'total')
-    deleteAllAliased(dataRows)
     calcTotalSum(dataRows, totalRow, totalColumns)
-    dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 
     // Сортировка групп и строк
