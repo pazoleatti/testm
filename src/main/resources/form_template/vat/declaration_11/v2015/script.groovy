@@ -135,10 +135,10 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.3 (строка 001 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = null
+    def code001 = empty
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
-        if (formData.id == 619) {
+        if (formData.formType.id == 619) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
         }

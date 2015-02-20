@@ -135,12 +135,11 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.1.1 (строки 001, 005 и 190 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = null
-    def code005 = null
-    def code190 = null
+    def code001 = empty
+    def (code005, code190) = [empty, empty]
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
-        if (formData.id == 616) {
+        if (formData.formType.id == 616) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
             code005 = getDataRow(sourceDataRows, 'head')?.nds ?: empty  // "Итого"
@@ -165,10 +164,12 @@ void generateXML() {
                     СумНДСИтКПк: code005,
                     СумНДСИтП1Р8: code190
             ) {
+                hasPage = false
                 for (def row : sourceDataRows) {
                     if (row.getAlias() != null) {
                         continue
                     }
+                    hasPage = true
                     def code008 = row.rowNum
                     def code010 = row.typeCode
                     def code020 = getNumber(row.invoice)
@@ -252,6 +253,9 @@ void generateXML() {
                             }
                         }
                     }
+                }
+                if (!hasPage) {
+                    КнПокДЛСтр() {}
                 }
             }
         }

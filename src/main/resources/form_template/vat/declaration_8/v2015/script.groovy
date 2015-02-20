@@ -135,8 +135,7 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.1 (строки 001 и 190 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = empty
-    def code190 = empty
+    def (code001, code190) = [empty, empty]
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 606) {
@@ -162,10 +161,12 @@ void generateXML() {
             КнигаПокуп(
                     СумНДСВсКПк: code190
             ) {
+                hasPage = false
                 for (def row : sourceDataRows) {
                     if (row.getAlias() != null) {
                         continue
                     }
+                    hasPage = true
                     def code005 = row.rowNum
                     def code010 = row.typeCode
                     def code020 = getNumber(row.invoice)
@@ -176,7 +177,7 @@ void generateXML() {
                     def code070 = getDate(row.invoiceCorrection)
                     def code080 = getNumber(row.invoiceCorrectingCorrection)
                     def code090 = getDate(row.invoiceCorrectingCorrection)
-                    def code100 = getDate(row.documentPay)
+                    def code100 = getNumber(row.documentPay)
                     def code110 = getDate(row.documentPay)
                     def code120 = row.dateRegistration?.format('dd.MM.yyyy')
                     def code130 = row.salesmanInnKpp
@@ -249,6 +250,9 @@ void generateXML() {
                             }
                         }
                     }
+                }
+                if (!hasPage) {
+                    КнПокСтр() {}
                 }
             }
         }

@@ -135,15 +135,16 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.2.1 (строки 001, 020-070 и 310-360 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = null
-    def code020, code030, code040, code050, code060, code070, code310, code320, code330, code340, code350, code360
+    def code001 = empty
+    def (code020, code030, code040, code050, code060, code070, code310, code320, code330, code340, code350, code360) =
+    [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty]
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
-        if (formData.id == 617) {
+        if (formData.formType.id == 617) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-            def headRow = getDataRow(dataRows, 'head') // "Итого"
-            def totalRow = getDataRow(dataRows, 'total') // "Всего"
+            def headRow = getDataRow(sourceDataRows, 'head') // "Итого"
+            def totalRow = getDataRow(sourceDataRows, 'total') // "Всего"
             code020 = headRow?.saleCostB18 ?: empty
             code030 = headRow?.saleCostB10 ?: empty
             code040 = headRow?.saleCostB0 ?: empty
@@ -186,10 +187,12 @@ void generateXML() {
                     СумНДСВсП1Р9_10: code350,
                     СтПродОсвП1Р9Вс: code360,
             ) {
+                hasPage = false
                 for (def row : sourceDataRows) {
                     if (row.getAlias() != null) {
                         continue
                     }
+                    hasPage = true
                     def code080 = row.rowNumber
                     def code090 = row.opTypeCode
                     def code180 = row.buyerInnKpp
@@ -281,6 +284,9 @@ void generateXML() {
                             }
                         }
                     }
+                }
+                if (!hasPage) {
+                    КнПродДЛСтр() {}
                 }
             }
         }

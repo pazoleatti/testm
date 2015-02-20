@@ -135,11 +135,11 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.2 (строки 001 и 230-280 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = null
-    def code230, code240, code250, code260, code270, code280
+    def code001 = empty
+    def (code230, code240, code250, code260, code270, code280) = [empty, empty, empty, empty, empty, empty]
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
-        if (formData.id == 608) {
+        if (formData.formType.id == 608) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
             def totalRow = getDataRow(sourceDataRows, 'total')
@@ -173,10 +173,12 @@ void generateXML() {
                     СумНДСВсКПр10: code270,
                     СтПродОсвВсКПр: code280
             ) {
+                hasPage = false
                 for (def row : sourceDataRows) {
                     if (row.getAlias() != null) {
                         continue
                     }
+                    hasPage = true
                     def code005 = row.rowNumber
                     def code010 = row.opTypeCode
                     def code020 = getNumber(row.invoiceNumDate)
@@ -228,7 +230,6 @@ void generateXML() {
                             ДатаКСчФПрод: code070,
                             НомИспрКСчФ: code080,
                             ДатаИспрКСчФ: code090,
-                            НомТД: code150,
                             ОКВ: code140,
                             СтоимПродСФВ: code150,
                             СтоимПродСФ: code160,
@@ -269,6 +270,9 @@ void generateXML() {
                             }
                         }
                     }
+                }
+                if (!hasPage) {
+                    КнПродСтр() {}
                 }
             }
         }
