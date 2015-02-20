@@ -158,6 +158,7 @@ void generateXML() {
                 ПризнСвед11: code001
         ) {
             ЖУчПолучСчФ() {
+                hasPage = false
                 def isFirstSection = true
                 for (def row : sourceDataRows) {
                     if (row.getAlias() != null) {
@@ -167,6 +168,7 @@ void generateXML() {
                     if (isFirstSection) {
                         continue
                     }
+                    hasPage = true
                     def code005 = row.rowNumber
                     def code010 = row.date?.format('dd.MM.yyyy')
                     def code020 = row.opTypeCode
@@ -180,7 +182,7 @@ void generateXML() {
                     def code100 = getDate(row.corrInvCorrNumDate)
                     def code110 = row.buyerInnKpp
                     def code120 = row.mediatorInnKpp
-                    def code130 = getNumber(row.mediatorNumDate)
+                    def code130 = row.mediatorNumDate
                     def code140 = getLastTextPart(row.currNameCode, "(\\w.{0,254}) ")
                     def code150 = row.cost
                     def code160 = row.vatSum
@@ -253,6 +255,9 @@ void generateXML() {
                         }
 
                     }
+                }
+                if (!hasPage) {
+                    ЖУчПолучСчФСтр() {}
                 }
             }
         }

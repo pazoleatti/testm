@@ -158,6 +158,7 @@ void generateXML() {
                 ПризнСвед10: code001
         ) {
             ЖУчВыстСчФ() {
+                hasPage = false
                 def isFirstSection = true
                 for (def row : sourceDataRows) {
                     if (row.getAlias() != null) {
@@ -167,6 +168,7 @@ void generateXML() {
                     if (!isFirstSection) {
                         break
                     }
+                    hasPage = true
                     def code005 = row.rowNumber
                     def code010 = row.date?.format('dd.MM.yyyy')
                     def code020 = row.opTypeCode
@@ -258,6 +260,9 @@ void generateXML() {
                         }
 
                     }
+                }
+                if (!hasPage) {
+                    ЖУчВыстСчФСтр() {}
                 }
             }
         }
