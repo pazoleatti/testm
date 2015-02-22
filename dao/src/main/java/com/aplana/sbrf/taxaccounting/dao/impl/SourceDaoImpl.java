@@ -2,18 +2,22 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.source.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import com.aplana.sbrf.taxaccounting.model.source.AcceptedFormData;
+import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
+import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 
 @Repository
 public class SourceDaoImpl extends AbstractDao implements SourceDao {
@@ -25,8 +29,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         int counter = 0;
         int sum = 0;
         int size = sourcePairs.size();
-        for (Iterator<SourcePair> it = sourcePairs.iterator(); it.hasNext();) {
-            SourcePair pair = it.next();
+        for (SourcePair pair : sourcePairs) {
             if (counter == 0) {
                 in.append(pairNames).append(" in (");
             }
@@ -87,7 +90,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                                                                 Date excludedPeriodStart, Date excludedPeriodEnd, final boolean declaration) {
         final Map<SourcePair, List<SourceObject>> result = new HashMap<SourcePair, List<SourceObject>>();
         //формируем in-часть вида ((1, 2), (1, 3))
-        String sql = null;
+        String sql;
         if (declaration) {
             sql = buildPairsInQuery(GET_DECLARATION_INTERSECTIONS, "(src_department_form_type_id, department_declaration_type_id)", sourcePairs);
         } else {
@@ -405,5 +408,61 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         }
 
         return true;
+    }
+
+    private static final String ADD_CONSOLIDATION =
+            "insert into FORM_DATA_CONSOLIDATION (TARGET_FORM_DATA_ID, SOURCE_FORM_DATA_ID) values (?,?)";
+    @Override
+    public void addFormDataConsolidationInfo(final Long tgtFormDataId, Collection<Long> srcFormDataIds) {
+        final Object[] srcArray = srcFormDataIds.toArray();
+        try{
+            getJdbcTemplate().batchUpdate(ADD_CONSOLIDATION, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setLong(1, tgtFormDataId);
+                    ps.setLong(2, (Long)srcArray[i]);
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return srcArray.length;
+                }
+            });
+        } catch (DataAccessException e){
+            throw new DaoException("", e);
+        }
+    }
+
+    private static final String DELETE_CONSOLIDATION =
+            "delete from FORM_DATA_CONSOLIDATION where TARGET_FORM_DATA_ID = ?";
+
+    @Override
+    public void deleteFormDataConsolidationInfo(final Collection<Long> tgtFormDataIds) {
+        try{
+            getJdbcTemplate().batchUpdate(DELETE_CONSOLIDATION, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setLong(1, (Long)tgtFormDataIds.toArray()[i]);
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return tgtFormDataIds.size();
+                }
+            });
+        } catch (DataAccessException e){
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId) {
+        try {
+            return getJdbcTemplate().queryForInt(
+                    "select 1 from FORM_DATA_CONSOLIDATION where TARGET_FORM_DATA_ID = ? and source_form_data_id = ?",
+                    formDataId, sourceFormDataId) > 0;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 }

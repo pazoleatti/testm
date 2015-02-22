@@ -65,4 +65,6 @@ public interface FormDataUiHandlers extends UiHandlers{
     void onOpenSourcesDialog();
 
     void onCorrectionSwitch();
+
+    void onConsolidate();
 }

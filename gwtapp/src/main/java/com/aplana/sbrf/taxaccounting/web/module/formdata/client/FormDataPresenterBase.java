@@ -120,6 +120,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void stopTimerReport(ReportType reportType);
 
         void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
+
+        void showConsolidation(boolean isShown);
     }
 
 	public static final String NAME_TOKEN = "!formData";
@@ -304,10 +306,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
                 .with(FormDataPresenterBase.READ_ONLY, String.valueOf(readOnly))
                 .with(FormDataPresenterBase.FORM_DATA_ID, String.valueOf(formData.getId()));
         if (isManual) {
-            builder.with(FormDataPresenterBase.MANUAL, String.valueOf(isManual));
+            builder.with(FormDataPresenterBase.MANUAL, String.valueOf(true));
         }
         if (correctionDiff) {
-            builder.with(FormDataPresenterBase.CORRECTION, String.valueOf(correctionDiff));
+            builder.with(FormDataPresenterBase.CORRECTION, String.valueOf(true));
         }
         if (uuid != null) {
             builder.with(UUID, uuid);

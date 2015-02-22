@@ -541,6 +541,19 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
+    public void onConsolidate() {
+        ConsolidateAction action = new ConsolidateAction();
+        action.setManual(formData.isManual());
+        action.setFormDataId(formData.getId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<ConsolidateResult>() {
+            @Override
+            public void onSuccess(ConsolidateResult result) {
+                LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+            }
+        }, this));
+    }
+
+    @Override
 	public void onWorkflowMove(final WorkflowMove wfMove) {
         if (!formData.isManual() && wfMove.getFromState().equals(WorkflowState.ACCEPTED)) {
             if (existManual) {
@@ -710,6 +723,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 innerLogUuid = result.getUuid();
 
                                 getView().updatePageSize(result.getFormData().getFormType().getTaxType());
+                                getView().showConsolidation(
+                                        WorkflowState.ACCEPTED != formData.getState()
+                                                &&
+                                        (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind()));
 
                                 onTimerReport(ReportType.EXCEL, false);
                                 onTimerReport(ReportType.CSV, false);

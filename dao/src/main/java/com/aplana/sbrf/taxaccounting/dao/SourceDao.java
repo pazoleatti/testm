@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.source.*;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -144,4 +145,15 @@ public interface SourceDao {
      * @return
      */
     boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId);
+
+    /**
+     * Обновляет информацию о консолидации(т.е. была ли она сделана).
+     * @param tgtFormDataId идентификатор НФ
+     * @param srcFormDataIds форма-источник с которой делалась консолидация для НФ
+     */
+    void addFormDataConsolidationInfo(Long tgtFormDataId, Collection<Long> srcFormDataIds);
+
+    void deleteFormDataConsolidationInfo(Collection<Long> tgtFormDataIds);
+
+    boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId);
 }

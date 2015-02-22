@@ -493,4 +493,22 @@ public interface SourceService {
      * @return
      */
     boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId);
+
+    /**
+     * Добавляет информацию о консолидации(т.е. была ли она сделана).
+     * Соответствие либо один-к-одному, либо один-ко-многим(т.е. одно в одном списке и сногов другом)
+     * @param tgtFormDataId идентификатор НФ
+     * @param srcFormDataIds форма-источник с которой делалась консолидация для НФ
+     */
+    void addFormDataConsolidationInfo(Long tgtFormDataId, Collection<Long> srcFormDataIds);
+
+    void deleteFDConsolidationInfo(Collection<Long> tgtFormDataIds);
+
+    /**
+     * Проверяет осуществлялась ли консолидация для НФ
+     * @param formDataId
+     * @param sourceFormDataId
+     * @return
+     */
+    boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId);
 }

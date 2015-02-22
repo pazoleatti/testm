@@ -246,6 +246,7 @@
                         <g:HorizontalPanel ui:field="workflowButtons"/>
                         <g:Button ui:field="deleteFormButton" text="Удалить" addStyleNames="{style.btnMarginRight}"/>
                         <g:Button ui:field="originalVersionButton" text="Исходная версия"/>
+                        <g:Button ui:field="consolidationButton" text="Консолидировать" visible="false"/>
 
                         <g:Label addStyleNames="{style.verSep}"/>
                     </g:HorizontalPanel>

@@ -9,6 +9,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -28,6 +30,20 @@ public class SourceDaoTest {
         sourceDao.deleteDeclarationConsolidateInfo(2);
         assertFalse(sourceDao.isDeclarationSourceConsolidated(2, 11));
         assertFalse(sourceDao.isDeclarationSourceConsolidated(2, 12));
+    }
+
+    @Test
+    public void addConsolidateInfo() {
+        sourceDao.addFormDataConsolidationInfo(1l, Arrays.asList(1l));
+        assertTrue(sourceDao.isFDSourceConsolidated(1, 1));
+    }
+
+    @Test
+    public void deleteFDConsolidateInfo() {
+        sourceDao.addFormDataConsolidationInfo(1l, Arrays.asList(1l));
+        assertTrue(sourceDao.isDeclarationSourceConsolidated(1, 1));
+        sourceDao.deleteFormDataConsolidationInfo(Arrays.asList(1l));
+        assertFalse(sourceDao.isFDSourceConsolidated(1, 1));
     }
     /*@Test
     public void testSaveFormSources() {

@@ -328,4 +328,13 @@ public interface FormDataService {
     void deleteReport(long formDataId, Boolean manual);
 
     void findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate, Logger logger);
+
+    /**
+     * Консолидация НФ
+     * @param workflowMove
+     * @param formData
+     * @param userInfo
+     * @param logger
+     */
+    void compose(final FormData formData, TAUserInfo userInfo, Logger logger);
 }

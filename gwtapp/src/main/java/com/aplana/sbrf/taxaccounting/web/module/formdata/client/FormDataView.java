@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -24,7 +23,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.RequestException;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -98,6 +96,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     LinkButton addRowButton, removeRowButton, correctionButton;
 	@UiField
 	Button originalVersionButton, fillPreviousButton;
+    @UiField
+    Button consolidationButton;
 	@UiField
 	Button recalculateButton;
 	@UiField
@@ -292,6 +292,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 printToCSV.setText("Сформировать CSV");
             }
         }
+    }
+
+    @Override
+    public void showConsolidation(boolean isCons) {
+        consolidationButton.setVisible(isCons);
     }
 
     @Override
@@ -564,6 +569,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			getUiHandlers().onShowCheckedColumns();
 		}
 	}
+
+    @UiHandler("consolidationButton")
+    void onConsolidationButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onConsolidate();
+        }
+    }
 
 	@Override
 	public void setAdditionalFormInfo(
