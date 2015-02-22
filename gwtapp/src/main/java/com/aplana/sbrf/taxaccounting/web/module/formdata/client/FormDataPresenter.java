@@ -35,15 +35,16 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers, SetFocus.SetFocusHandler {
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
+    private Date lastSendingTime;
+
+    private static final int EXTEND_LOCKTIME_LIMIT_IN_MINUTES = 5;
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -138,7 +139,31 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onCellModified(DataRow<Cell> dataRow) {
         modifiedRows.add(dataRow);
+
+        if (lastSendingTime == null) {
+            lastSendingTime = new Date();
+        }
+        Date currentDate = new Date();
+        long diffMinutes = (currentDate.getTime() - lastSendingTime.getTime()) / (60 * 1000);
+        if (diffMinutes >= EXTEND_LOCKTIME_LIMIT_IN_MINUTES) {
+            lastSendingTime = currentDate;
+            extendFormLock();
+        }
+
 	}
+
+    private void extendFormLock() {
+        ExtendFormLockAction action = new ExtendFormLockAction();
+        action.setFormDataId(formData.getId());
+        dispatcher.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<ExtendFormLockResult>() {
+                            @Override
+                            public void onSuccess(ExtendFormLockResult result) {
+                                //nothing
+                            }
+                        }, FormDataPresenter.this)
+        );
+    }
 
     @Override
     public void onStartLoad() {
