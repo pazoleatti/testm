@@ -196,9 +196,10 @@ void calc() {
     }
 
     // Принятый отчет за предыдущий месяц
-    def dataPrev = null
+    def prevRowMap = [:]
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-        dataPrev = getDataRowHelperPrev()
+        def prevDataRows = getPrevDataRows()
+        prevRowMap = getInvNumberObjectMap(prevDataRows)
     }
 
     for (def row in dataRows) {
@@ -210,7 +211,7 @@ void calc() {
         def map = row.amortGroup == null ? null : getRefBookValue(71, row.amortGroup)
 
         // Строка из предыдущей формы с тем же инвентарным номером
-        def prevRow = getPrevRow(dataPrev, row)
+        def prevRow = prevRowMap[row.invNumber]
 
         // Графа 8
         row.usefulLifeWithUsed = calc8(row)
@@ -237,8 +238,23 @@ void calc() {
         row.amortNorm = calc13(row)
     }
     dataRowHelper.update(dataRows);
+}
 
-    sortFormDataRows()
+// Получить строки за предыдущий отчетный период./
+def getPrevDataRows() {
+    def prevFormData = formDataService.getFormDataPrev(formData)
+    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
+}
+
+// Группирует данные по графе invNumber с сохранением одной из ссылок на соответствующую строку
+// Результат: Map[invNumber:row]
+def getInvNumberObjectMap(def rows) {
+    def result = [:]
+    rows.each {
+        def inum = it.invNumber
+        if (result[inum] == null) result[inum] = it
+    }
+    return result
 }
 
 // Ресчет графы 8
@@ -364,14 +380,23 @@ void logicCheck() {
 
     // Инвентарные номера
     def Set<String> invSet = new HashSet<String>()
-    def inventoryNumbersOld = []
-    def dataRowHelperOld = null
+    def prevRowMap = [:]
     if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
-        dataRowHelperOld = getDataRowHelperPrev()
-        if (dataRowHelperOld) {
-            dataRowHelperOld.allCached.each { row ->
-                inventoryNumbersOld.add(row.invNumber)
-            }
+        def prevDataRows = getPrevDataRows()
+        prevRowMap = getInvNumberObjectMap(prevDataRows)
+    }
+    def inventoryNumbersOld = prevRowMap.keySet()
+
+    // Строки в предыдущих формах(по месяцам)
+    def monthsRowMap = [:]
+    for (def month = formData.periodOrder - 1; month >= 1; month--) {
+        def prevFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
+                formData.reportPeriodId, month)
+        if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
+            def prevDataRows = formDataService.getDataRowHelper(prevFormData).allCached
+            monthsRowMap[month] = getInvNumberObjectMap(prevDataRows)
+        } else {
+            monthsRowMap[month] = [:]
         }
     }
 
@@ -406,8 +431,8 @@ void logicCheck() {
 
         if (formData.kind == FormDataKind.PRIMARY) {
 
-            def prevRow = getPrevRow(dataRowHelperOld, row)
-            def prevSum = getYearSum(['cost10perMonth', 'amortMonth'], row)
+            def prevRow = prevRowMap[row.invNumber]
+            def prevSum = getYearSum(['cost10perMonth', 'amortMonth'], row, monthsRowMap)
 
             // 6. Проверка суммы расходов в виде капитальных вложений с начала года
             if (prevRow == null ||
@@ -473,20 +498,8 @@ def BigDecimal round(BigDecimal value, def int precision = 2) {
     return value?.setScale(precision, RoundingMode.HALF_UP)
 }
 
-// Поиск строки из предыдущей формы с тем же инвентарным номером
-def getPrevRow(def dataPrev, def row) {
-    if (dataPrev != null) {
-        for (def rowPrev : dataPrev.getAll()) {
-            if (rowPrev.invNumber == row.invNumber) {
-                return rowPrev
-            }
-        }
-    }
-    return null
-}
-
 // Получение суммы по графе всех предыдущих принятых форм и по графе текущей формы
-def getYearSum(def aliases, def rowCurrent) {
+def getYearSum(def aliases, def rowCurrent, def monthsRowMap) {
     def retVal = [:]
 
     for (def alias : aliases) {
@@ -500,15 +513,11 @@ def getYearSum(def aliases, def rowCurrent) {
     }
     // Сумма в предыдущих формах
     for (def month = formData.periodOrder - 1; month >= 1; month--) {
-        def prevFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
-                formData.reportPeriodId, month)
-        if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
-            def row = getPrevRow(formDataService.getDataRowHelper(prevFormData), rowCurrent)
-            if (row) {
-                for (def alias : aliases) {
-                    def val = row.get(alias)
-                    retVal[alias] += val == null ? 0 : val
-                }
+        def row = monthsRowMap[month][rowCurrent.invNumber]
+        if (row) {
+            for (def alias : aliases) {
+                def val = row.get(alias)
+                retVal[alias] += val == null ? 0 : val
             }
         }
     }
