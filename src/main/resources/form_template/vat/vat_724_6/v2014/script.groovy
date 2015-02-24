@@ -80,22 +80,38 @@ def nonEmptyColumns = ['operDate', 'contragent', 'type', 'sum', 'number', 'sum2'
 @Field
 def totalColumns = ['sum', 'sum2']
 
+// Признак периода ввода остатков
+@Field
+def isBalancePeriod
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
+
+    def FORMAT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s»"
+
     for (def row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         def index = row.getIndex()
+
         // 1. Проверка заполнения граф
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
         // 2. Проверка суммы НДС
         if (row.sum != null && row.sum2 != null &&
                 !(row.sum * 0.18 + row.sum * 0.03 > row.sum2 && row.sum2 > row.sum * 0.18 - row.sum * 0.03)) {
             rowWarning(logger, row, "Строка $index: Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе! Проверка: «Графа 5» * 18% + («Графа 5» * 3) / 100 > «Графа 7» > «Графа 5» * 18% - («Графа 5» * 3) / 100.")
         }
+
+        // 4. Проверка формата заполнения
+        // графа 9
+        if (row.number2 && !row.number2.matches("^\\S{2}\\-\\S{4}\\-\\S{6}\$")) {
+            loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'number2'), "ХХ-ХХХХ-ХХХХХХ"))
+        }
     }
+
     // 3. Проверка итоговых значений
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
@@ -323,4 +339,21 @@ void sortFormDataRows() {
 // Получение итоговых строк
 def getTotalRow(def dataRows) {
     return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
+}
+
+def loggerError(def row, def msg) {
+    if (isBalancePeriod()) {
+        rowWarning(logger, row, msg)
+    } else {
+        rowError(logger, row, msg)
+    }
+}
+
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
+    }
+    return isBalancePeriod
 }
