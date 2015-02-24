@@ -256,14 +256,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
                 DeclarationData declarationData = declarationDataDao.get(id);
 
-                declarationDataDao.delete(id);
                 // удаляем записи о консолидации для текущего экземпляра
                 sourceService.deleteDeclarationConsolidateInfo(id);
 
-                    auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
-                            declarationData.getReportPeriodId(),
-                            declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                            null, null, "Декларация удалена", null, null);
+                declarationDataDao.delete(id);
+
+                auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
+                        declarationData.getReportPeriodId(),
+                        declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+                        null, null, "Декларация удалена", null, null);
             } finally {
                 unlock(id, userInfo);
             }
