@@ -587,6 +587,7 @@ public class FormDataServiceImpl implements FormDataService {
             formDataDao.delete(formDataId);
             deleteReport(formDataId, null);
         }
+        sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
 	}
 
     /**
@@ -737,13 +738,12 @@ public class FormDataServiceImpl implements FormDataService {
     private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
-        if (workflowMove != null && (
-                WorkflowMove.CREATED_TO_ACCEPTED.equals(workflowMove) ||
-                        WorkflowMove.CREATED_TO_APPROVED.equals(workflowMove) ||
-                        WorkflowMove.CREATED_TO_PREPARED.equals(workflowMove) ||
-                        WorkflowMove.PREPARED_TO_APPROVED.equals(workflowMove) ||
-                        WorkflowMove.PREPARED_TO_ACCEPTED.equals(workflowMove) ||
-                        WorkflowMove.APPROVED_TO_ACCEPTED.equals(workflowMove))) {
+        if (WorkflowMove.CREATED_TO_ACCEPTED.equals(workflowMove) ||
+                WorkflowMove.CREATED_TO_APPROVED.equals(workflowMove) ||
+                WorkflowMove.CREATED_TO_PREPARED.equals(workflowMove) ||
+                WorkflowMove.PREPARED_TO_APPROVED.equals(workflowMove) ||
+                WorkflowMove.PREPARED_TO_ACCEPTED.equals(workflowMove) ||
+                WorkflowMove.APPROVED_TO_ACCEPTED.equals(workflowMove)) {
             checkPerformer(logger, formData);
         }
 
