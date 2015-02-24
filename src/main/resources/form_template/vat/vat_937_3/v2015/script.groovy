@@ -139,7 +139,8 @@ void logicCheck() {
     def WRONG2_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s»."
 
     def isFirstSection = true
-    def codeValues = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28']
+    // 01, 02, …, 13, 16, 17, …, 28
+    def codeValues = ((1..13) + (16..28))
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -184,51 +185,51 @@ void logicCheck() {
 
         // 3. Проверка формата заполнения
         // 3.1 графа 4
-        if (row.invoiceNumDate != null && !checkFormat(row.invoiceNumDate.trim(), "^\\S.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceNumDate != null && !row.invoiceNumDate.matches("^\\S.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'invoiceNumDate'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // 3.1 графа 12
-        if (isFirstSection && row.mediatorNumDate != null && !checkFormat(row.mediatorNumDate.trim(), "^\\S.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (isFirstSection && row.mediatorNumDate != null && !row.mediatorNumDate.matches("^\\S.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'mediatorNumDate'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
 
         // 3.2 графа 5
-        if (row.invoiceCorrNumDate != null && !checkFormat(row.invoiceCorrNumDate.trim(), "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrNumDate != null && !row.invoiceCorrNumDate.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'invoiceCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // 3.2 графа 7
-        if (row.corrInvCorrNumDate != null && !checkFormat(row.corrInvCorrNumDate.trim(), "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvCorrNumDate != null && !row.corrInvCorrNumDate.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
 
         // 3.3 графа 6
-        if (row.corrInvoiceNumDate != null && !checkFormat(row.corrInvoiceNumDate.trim(), "^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvoiceNumDate != null && !row.corrInvoiceNumDate.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'corrInvoiceNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
 
         // 3.4 графа 13
-        if (row.currNameCode != null && !checkFormat(row.currNameCode.trim(), "^\\S.{0,254} \\S{3}\$")) {
+        if (row.currNameCode != null && !row.currNameCode.matches("^\\S.{0,254} \\S{3}\$")) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'currNameCode'), "<Наименование: тип поля «Строка/255/»> <Код: тип поля «Строка/3/», формат «ХХХ»>"))
         }
 
         // 3.5 графа 9
-        if (row.buyerInnKpp != null && !checkFormat(row.buyerInnKpp, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
+        if (row.buyerInnKpp != null && !row.buyerInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
             loggerError(row, String.format(WRONG2_ERROR_MSG, index, getColumnName(row,'buyerInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // 3.6 графа 11
-        if (row.mediatorInnKpp != null && !checkFormat(row.mediatorInnKpp, "^(\\d{12}|\\d{10}/\\d{9})\$")) {
+        if (row.mediatorInnKpp != null && !row.mediatorInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
             loggerError(row, String.format(WRONG2_ERROR_MSG, index, getColumnName(row,'mediatorInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
 
 
         // 4. Проверка значения графы «Код вида операции»
-        if (!(row.opTypeCode in codeValues)) {
+        if (row.opTypeCode && (!row.opTypeCode.matches("^[0-9]{2}\$") || !(Integer.valueOf(row.opTypeCode) in codeValues))) {
             def name = getColumnName(row, 'opTypeCode')
             loggerError(row, "Строка $index: Графа «$name» заполнена неверно! Графа $name должна принимать значение из следующего диапазона: 01, 02, …, 13, 16, 17, …, 28.")
         }
 
         // 5. Проверка значения «Графы 12» (часть 2)
-        if (!isFirstSection && row.mediatorNumDate != null && !checkFormat(row.mediatorNumDate.trim(), "^[1234]\$")) {
+        if (!isFirstSection && row.mediatorNumDate != null && !row.mediatorNumDate.matches("^[1234]\$")) {
             def name = getColumnName(row,'mediatorNumDate')
             loggerError(row, String.format(COLUMN_12_ERROR_MSG, index, name, name))
         }
