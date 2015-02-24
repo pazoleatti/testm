@@ -175,7 +175,11 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiField
     Button findButton;
 
+    // Выбранное подразделение
     private Integer currentDepartmentId;
+
+    // Выбранный период
+    private Integer currentReportPeriodId;
 
     private Boolean isUnp;
 
@@ -229,10 +233,37 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         };
 
+        periodPickerPopup.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<List<Integer>> event) {
+                Integer selPeriodId = null;
+                if (event.getValue() != null && event.getValue().size() == 1) {
+                    selPeriodId = event.getValue().get(0);
+                }
+                // Проверка совпадения выбранного периода с текущим
+                if (DepartmentConfigPropertyView.this.currentReportPeriodId != null
+                        && DepartmentConfigPropertyView.this.currentReportPeriodId.equals(selPeriodId)) {
+                    return;
+                }
+                DepartmentConfigPropertyView.this.currentReportPeriodId = selPeriodId;
+                editButton.setEnabled(false);
+            }
+        });
+
         departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Integer>> event) {
-                getUiHandlers().onDepartmentChanged();
+                Integer selDepartmentId = null;
+                if (event != null && !event.getValue().isEmpty()) {
+                    selDepartmentId = event.getValue().iterator().next();
+                }
+                // Проверка совпадения выбранного подразделения с текущим
+                if (DepartmentConfigPropertyView.this.currentDepartmentId != null
+                        && DepartmentConfigPropertyView.this.currentDepartmentId.equals(selDepartmentId)) {
+                    return;
+                }
+                DepartmentConfigPropertyView.this.currentDepartmentId = selDepartmentId;
+                editButton.setEnabled(false);
             }
         });
 
@@ -673,6 +704,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         periodPickerPopup.setPeriods(reportPeriods);
         ReportPeriod maxPeriod = getMaxPeriod(reportPeriods);
         periodPickerPopup.setValue(maxPeriod == null ? null : Arrays.asList(maxPeriod.getId()));
+        this.currentReportPeriodId = maxPeriod == null ? null : maxPeriod.getId();
+
     }
 
     private ReportPeriod getMaxPeriod(List<ReportPeriod> reportPeriods) {
@@ -695,6 +728,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @Override
     public Integer getReportPeriodId() {
+        if (periodPickerPopup.getValue().isEmpty())
+            return null;
         return periodPickerPopup.getValue().get(0);
     }
 
@@ -734,6 +769,11 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void setIsUnp(boolean isUnp) {
         this.isUnp = isUnp;
+    }
+
+    @Override
+    public void updateVisibleEditButton() {
+        editButton.setEnabled(!isEditMode);
     }
 
     /**

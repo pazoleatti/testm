@@ -118,6 +118,11 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         void addResizeHandler();
 
         void setIsUnp(boolean isUnp);
+
+        /**
+         * Обновление видимости дял кнопки "Редактировать"
+         */
+        void updateVisibleEditButton();
     }
 
     @Inject
@@ -134,9 +139,22 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         String value = request.getParameter("nType", "");
-        TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
+        final TaxType nType = (value != null && !"".equals(value) ? TaxType.valueOf(value) : null);
         getView().setTaxType(nType);
-        reloadDepartments(nType, null);
+        dispatcher.execute(new GetUserDepartmentAction(),
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetUserDepartmentResult>() {
+                            @Override
+                            public void onSuccess(GetUserDepartmentResult result) {
+                                if (result == null) {
+                                    getProxy().manualRevealFailed();
+                                    return;
+                                }
+                                // Текущее подразделение пользователя
+                                userDepartment = result.getDepartment();
+                                reloadDepartments(nType, null);
+                            }
+                        }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
         getView().setEditMode(false);
         getView().addResizeHandler();
     }
@@ -267,6 +285,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private void getData() {
         LogCleanEvent.fire(DepartmentConfigPropertyPresenter.this);
+        if (getView().getReportPeriodId() == null || getView().getDepartmentId() == null)
+            return;
         GetRefBookValuesAction action = new GetRefBookValuesAction();
         action.setRefBookId(getCurrentRefBookId());
         action.setSlaveRefBookId(getCurrentTableRefBookId());
@@ -277,6 +297,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                 .defaultCallback(new AbstractCallback<GetRefBookValuesResult>() {
                     @Override
                     public void onSuccess(GetRefBookValuesResult result) {
+                        onDepartmentChanged();
+                        getView().updateVisibleEditButton();
                         if (result.getNotTableValues() == null || result.getNotTableValues().isEmpty()) {
                             getView().clearNonTableData();
                             getView().clearTableData();
@@ -446,7 +468,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                 // Список отчетных периодов
                                 getView().setReportPeriods(result.getReportPeriods() == null
                                         ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods());
-//
                                 createTableColumns();
                                 getData();
 
@@ -454,8 +475,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
     }
 
-    @Override
-    public void onDepartmentChanged() {
+    private void onDepartmentChanged() {
         if (getView().getTaxType() == TaxType.INCOME) {
             GetDepartmentAction action = new GetDepartmentAction();
             action.setDepartmentId(getView().getDepartmentId());
