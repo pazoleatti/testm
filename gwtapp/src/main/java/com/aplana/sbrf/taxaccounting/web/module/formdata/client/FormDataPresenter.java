@@ -654,6 +654,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 					public void onSuccess(GoMoveResult result) {
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         revealFormData(true, formData.isManual(), !absoluteView, result.getUuid());
+                        getView().showConsolidation(!WorkflowState.ACCEPTED.equals(formData.getState())
+                                &&
+                                (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind()));
                     }
                 }, this));
 	}

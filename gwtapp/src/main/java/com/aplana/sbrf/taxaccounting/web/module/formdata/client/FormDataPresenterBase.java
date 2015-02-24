@@ -230,6 +230,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         getView().showModeAnchor(existManual, formData.isManual());
         getView().showManualAnchor(false);
         getView().showDeleteManualAnchor(false);
+        getView().showConsolidation(false);
 	}
 
 	protected void setReadUnlockedMode() {
@@ -252,6 +253,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         getView().showModeAnchor(existManual, formData.isManual());
         getView().showManualAnchor(canCreatedManual && !existManual);
         getView().showDeleteManualAnchor(false);
+        getView().showConsolidation(true);
         placeManager.setOnLeaveConfirmation(null);
 	}
 
@@ -284,6 +286,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         getView().showModeAnchor(false, false);
         getView().showManualAnchor(false);
         getView().showDeleteManualAnchor(formData.isManual());
+        getView().showConsolidation(false);
 
 		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
