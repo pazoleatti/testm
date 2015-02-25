@@ -23,5 +23,9 @@ create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 drop table data_row_temp;
 
 ---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-10446: Индекс в таблицу DATA_ROW
+create index i_data_row_fdata_manual_type on data_row(form_data_id, manual, type);
+---------------------------------------------------------------------------------------------
+
 commit;
 end;

@@ -271,6 +271,7 @@ alter table log_system_report add constraint log_system_report_chk_type check (t
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
+create index i_data_row_fdata_manual_type on data_row(form_data_id, manual, type);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);
 create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_kind on form_data(kind);
