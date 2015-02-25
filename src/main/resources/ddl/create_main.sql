@@ -867,17 +867,7 @@ comment on column configuration_email.id is 'Идентификатор запи
 comment on column configuration_email.name is 'Код параметра';
 comment on column configuration_email.value is 'Значение параметра';
 comment on column configuration_email.description is 'Описание параметра';
---------------------------------------------------------------------------------------------------------
-create global temporary table data_row_temp
-(
-  ID  NUMBER(18) not null primary key,
-  ORD NUMBER(18) not null
-)
-on commit delete rows;
 
-comment on table data_row_temp is 'Временная таблица для сортировки строк';
-comment on column data_row_temp.id is 'Идентификатор записи';
-comment on column data_row_temp.ord is 'Число, соотвествующее номеру строки по порядку';
 --------------------------------------------------------------------------------------------------------
 create table configuration_lock
 (
@@ -910,4 +900,16 @@ comment on table declaration_data_consolidation is 'Сведения о конс
 comment on column declaration_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
 comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор декларации приемника';
 
+--------------------------------------------------------------------------------------------------------
+create table log_system_report
+(
+blob_data_id varchar(32) not null,
+type number(1) not null,
+sec_user_id number(9)
+);
+
+comment on table log_system_report is 'Выгрузки журнала аудита';
+comment on column log_system_report.blob_data_id is 'Идентификатор таблицы BLOB_DATA, в которой хранятся файлы';
+comment on column log_system_report.type is 'Тип выгрузки (0 - архивация журнала аудита, 1 - генерация zip-файла для журнала аудита)';
+comment on column log_system_report.sec_user_id is 'Идентификатор пользователя, инициировавшего выгрузку типа 1';
 
