@@ -4,14 +4,14 @@
     <name>Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации</name>
     <fullName>Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации
     </fullName>
-    <code>787/1/1</code>
+    <header>787/1/1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>27</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -99,14 +99,14 @@
         <nameAttributeId>111</nameAttributeId>
         <refBookAttributeId>110</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>baseTaxOf</alias>
         <checking>false</checking>
         <name>Доля налоговой базы (%)</name>
         <order>11</order>
-        <width>7</width>
-        <maxLength>11</maxLength>
-        <precision>8</precision>
+        <width>11</width>
+        <maxLength>19</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>baseTaxOfRub</alias>
@@ -158,7 +158,7 @@
         <checking>false</checking>
         <name>Сумма налога к уменьшению</name>
         <order>17</order>
-        <width>6</width>
+        <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>

@@ -125,7 +125,7 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 
 // Атрибуты для итогов
 @Field
-def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit', 'baseTaxOf',
+def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit',
         'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
         'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
         'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
@@ -140,6 +140,9 @@ def helperCache = [:]
 @Field
 def summaryMap = [301 : "Доходы, учитываемые в простых РНУ", 302 : "Сводная форма начисленных доходов",
         303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
+
+@Field
+def baseTaxOfPattern = "[0-9]{1,3}(\\.[0-9]{0,15})?"
 
 @Field
 def startDate = null
@@ -281,6 +284,10 @@ void calc() {
     totalRow.getCell('fix').colSpan = 2
     setTotalStyle(totalRow)
     calcTotalSum(dataRows, totalRow, totalColumns)
+    totalRow.baseTaxOf = dataRows.sum{ row ->
+        String value = row.baseTaxOf
+        (row.getAlias() == null && value?.isBigDecimal()) ? new BigDecimal(value) : BigDecimal.ZERO
+    }.toString()
     dataRows.add(totalRow)
 
     // найти строку ЦА
@@ -328,15 +335,16 @@ def calc2(def row) {
 }
 
 def calc10(def row, def propertyPriceSumm, def workersCountSumm) {
+    BigDecimal temp = 0
     if (row.propertyPrice != null && row.workersCount != null && propertyPriceSumm > 0 && workersCountSumm > 0) {
-        return roundValue((row.propertyPrice / propertyPriceSumm * 100 + row.workersCount / workersCountSumm * 100) / 2, 8)
+        temp = (row.propertyPrice / propertyPriceSumm * 100 + row.workersCount / workersCountSumm * 100) / 2
     }
-    return 0
+    return roundValue(temp, 15).toString()
 }
 
 def calc11(def row, def taxBase) {
-    if (row.baseTaxOf != null && taxBase != null) {
-        return roundValue(taxBase * row.baseTaxOf / 100, 0)
+    if (row.baseTaxOf != null && (row.baseTaxOf ==~ baseTaxOfPattern) && taxBase != null) {
+        return roundValue(taxBase * new BigDecimal(row.baseTaxOf) / 100, 0)
     }
     return 0
 }
@@ -487,6 +495,11 @@ void logicalCheckAfterCalc() {
 
         // 1. Обязательность заполнения поля графы 1..21
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
+        // 2. Проверка значения в графе «Доля налоговой базы (№)»
+        if (row.baseTaxOf != null && !(row.baseTaxOf ==~ baseTaxOfPattern)) {
+            logger.error("Строка $index: Графа «%s» заполнена неверно! Ожидаемый тип поля: Число/18.15/ (3 знака до запятой, 15 после запятой).", getColumnName(row,'baseTaxOf'))
+        }
     }
 }
 
@@ -891,10 +904,10 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
     def tmp
 
     // графа 14
-    if (sumNal == null || row.baseTaxOf == null) {
+    if (sumNal == null || row.baseTaxOf == null || !(row.baseTaxOf ==~ baseTaxOfPattern)) {
         row.taxSumOutside = 0
     } else {
-        row.taxSumOutside = roundValue(sumNal * 0.9 * row.baseTaxOf / 100, 0)
+        row.taxSumOutside = roundValue(sumNal * 0.9 * new BigDecimal(row.baseTaxOf) / 100, 0)
     }
 
     // графа 15
