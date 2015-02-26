@@ -59,8 +59,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
-        calc()
+        // calc() // в этой форме расчет только для нумерации, вынес его в consolidation()
         logicCheck()
+        sortFormDataRows()
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -123,6 +124,13 @@ def getReportPeriodEndDate() {
 }
 
 void calc() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    calc1(dataRows)
+
+    dataRowHelper.save(dataRows)
+
     sortFormDataRows()
 }
 
@@ -325,8 +333,12 @@ void addData(def xml, int headRowCount) {
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
 
+        // Графа 1
+        def xmlIndexCol = 0
+        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+
         // Графа 2
-        def xmlIndexCol = 2
+        xmlIndexCol = 2
         newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         // Графа 3
@@ -448,8 +460,12 @@ void addTransportData(def xml) {
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(rnuIndexRow)
 
+        // Графа 1
+        def xmlIndexCol = 1
+        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+
         // Графа 2
-        def xmlIndexCol = 2
+        xmlIndexCol = 2
         newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
         // Графа 3
@@ -681,6 +697,7 @@ void consolidation() {
             }
         }
     }
+    calc1(dataRows)
     dataRowHelper.save(dataRows)
 }
 
@@ -731,5 +748,20 @@ def roundValue(def value, int precision) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
     } else {
         return null
+    }
+}
+
+/** Рассчитать нумерацию строк. Для каждой части нф нумерация начинается с 1. */
+void calc1(def dataRows) {
+    def index = 0
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            index = 0
+            continue
+        }
+        index++
+
+        // графа 1
+        row.rowNumber = index
     }
 }

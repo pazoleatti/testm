@@ -5,14 +5,15 @@
     <fullName>Итоговые данные из журнала полученных и выставленных счетов-фактур по посреднической деятельности
     </fullName>
     <header>937.3</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
-        <columnType>AUTO</columnType>
+        <columnType>NUMBER</columnType>
         <name>№ п/п</name>
         <order>1</order>
         <width>5</width>
-        <numerationType>SERIAL</numerationType>
+        <maxLength>12</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
