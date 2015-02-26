@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.
 import com.aplana.sbrf.taxaccounting.web.widget.ui.HasHighlighting;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.TextUtils;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
@@ -58,7 +59,21 @@ public class LazyTreeItem extends TreeItem implements HasHighlighting {
 
         if (multiSelection != null){
             checkBox = new CheckBox(name);
-            radioButton = new RadioButton(RADIO_BUTTON_GROUP, name);
+            radioButton = new RadioButton(RADIO_BUTTON_GROUP, name) {
+                // http://jira.aplana.com/browse/SBRFACCTAX-10159
+                // в IE8 происходит клиентская ошибка, не может установить фокус на невидимый элемент
+                // поэтому пренудительно изменяем фокус только у Label
+                @Override
+                public void setFocus(boolean focused) {
+                    Element el = super.getElement().getElementsByTagName("label").getItem(0);
+                    if (focused) {
+                        el.focus();
+                    } else {
+                        el.blur();
+                    }
+                }
+            };
+
             radioButton.getElement().getFirstChildElement().getStyle().setDisplay(Style.Display.NONE);
             DOM.getChild(checkBox.getElement(), 0).getStyle().setCursor(Style.Cursor.POINTER);
             DOM.getChild(checkBox.getElement(), 1).getStyle().setCursor(Style.Cursor.POINTER);
