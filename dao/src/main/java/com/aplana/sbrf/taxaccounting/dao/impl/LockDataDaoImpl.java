@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
+import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import org.apache.commons.logging.Log;
@@ -14,10 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Реализация дао блокировок
@@ -171,6 +171,40 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Cacheable(value = "PermanentData", key = "'LockTimeout_'+#lockObject.name()")
     public int getLockTimeout(LockData.LockObjects lockObject) {
         return getJdbcTemplate().queryForInt("select timeout from configuration_lock where key = ? ", lockObject.name());
+    }
+
+    @Override
+    public PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords, LockSearchOrdering searchOrdering, boolean ascSorting) {
+        try {
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("start", startIndex + 1);
+            params.put("count", startIndex + countOfRecords);
+            params.put("filter", "%" + filter.toLowerCase() + "%");
+            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, u.login, rownum as rn FROM lock_data ld "
+                    + "join sec_user u on u.id = ld.user_id "
+                    + (filter != null && !filter.isEmpty() ? "where lower(key) like :filter or lower(login) like :filter " : "")
+                    + "order by " + searchOrdering + (ascSorting ? " asc" : " desc")+ ") ";
+
+            String fullSql = "select * from" + sql + "where rn between :start and :count order by rn";
+            String countSql = "select count(*) from" + sql;
+            List<LockData> records = getNamedParameterJdbcTemplate().query(fullSql, params, new LockDataMapper());
+            int count = getNamedParameterJdbcTemplate().queryForInt(countSql, params);
+            return new PagingResult<LockData>(records, count);
+        } catch (EmptyResultDataAccessException e) {
+            return new PagingResult<LockData>(new ArrayList<LockData>(), 0);
+        }
+    }
+
+    @Override
+    public void unlockAll(List<String> keys) {
+        getJdbcTemplate().update("delete from lock_data ld where " + SqlUtils.transformToSqlInStatementForString("key", keys));
+    }
+
+    @Override
+    public void extendAll(List<String> keys, int hours) {
+        getJdbcTemplate().update("update lock_data set date_before = date_before + interval '"+ hours +
+                "' hour where " + SqlUtils.transformToSqlInStatementForString("key", keys));
+
     }
 
     private static final class LockDataMapper implements RowMapper<LockData> {

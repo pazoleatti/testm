@@ -3,9 +3,7 @@ package com.aplana.sbrf.taxaccounting.core.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -242,6 +240,22 @@ public class LockDataServiceImpl implements LockDataService {
         } catch (Exception e) {
             throw new ServiceException(String.format("Не удалось получить таймаут для блокировки объекта с ключом = %s",lockObject.name()), e);
         }
+    }
+
+    @Override
+    public PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords,
+                                           LockSearchOrdering searchOrdering, boolean ascSorting) {
+        return dao.getLocks(filter, startIndex, countOfRecords, searchOrdering, ascSorting);
+    }
+
+    @Override
+    public void unlockAll(List<String> keys) {
+        dao.unlockAll(keys);
+    }
+
+    @Override
+    public void extendAll(List<String> keys, int hours) {
+        dao.extendAll(keys, hours);
     }
 
     /**

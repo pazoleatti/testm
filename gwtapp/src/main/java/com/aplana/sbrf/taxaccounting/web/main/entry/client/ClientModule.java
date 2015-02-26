@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.client.T
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeModule;
 import com.aplana.sbrf.taxaccounting.web.module.home.client.HomeNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.IfrsModule;
+import com.aplana.sbrf.taxaccounting.web.module.lock.client.LockModule;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersModule;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationModule;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsModule;
@@ -102,5 +103,6 @@ public class ClientModule extends AbstractPresenterModule {
         install(new ScriptExecutionModule());
         install(new UploadTransportDataModule());
         install(new IfrsModule());
+        install(new LockModule());
 	}
 }

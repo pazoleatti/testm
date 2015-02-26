@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.ifrs.client.IfrsTokens;
+import com.aplana.sbrf.taxaccounting.web.module.lock.client.LockTokens;
 import com.aplana.sbrf.taxaccounting.web.module.members.client.MembersTokens;
 import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens;
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
@@ -235,6 +236,8 @@ public class GetMainMenuActionHandler extends
                         + MigrationTokens.migration));
                 adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
                         + SchedulerTokens.taskList));
+                adminMenuItem.getSubMenu().add(new MenuItem("Блокировки", NUMBER_SIGN
+                        + LockTokens.lockList));
             }
 
             if (currentUser.hasRole(TARole.ROLE_CONF)) {
