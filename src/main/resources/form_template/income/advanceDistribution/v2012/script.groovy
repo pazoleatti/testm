@@ -577,7 +577,6 @@ void logicalCheckAfterCalc() {
 
         // 2. Проверка значения в графе «Доля налоговой базы (№)»
         if (row.baseTaxOf != null && !checkFormat(row.baseTaxOf, baseTaxOfPattern)) {
-            logger.info("row.baseTaxOf = ${row.baseTaxOf}")
             logger.error("Строка $index: Графа «%s» заполнена неверно! Ожидаемый тип поля: Число/18.15/ (3 знака до запятой, 15 после запятой).", getColumnName(row,'baseTaxOf'))
         }
     }
