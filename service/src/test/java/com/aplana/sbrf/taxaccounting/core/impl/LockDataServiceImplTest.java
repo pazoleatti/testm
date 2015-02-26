@@ -35,9 +35,9 @@ public class LockDataServiceImplTest {
 	public static void init() {
 		service = new LockDataServiceImpl();
 		LockDataDao dao = mock(LockDataDao.class);
-		when(dao.get("a")).thenReturn(new LockData("a", 0, FUTURE));
-		when(dao.get("b")).thenReturn(new LockData("b", 0, PAST));
-		when(dao.get("c")).thenReturn(new LockData("c", 1, FUTURE));
+		when(dao.get("a",false)).thenReturn(new LockData("a", 0, FUTURE));
+		when(dao.get("b",false)).thenReturn(new LockData("b", 0, PAST));
+		when(dao.get("c",false)).thenReturn(new LockData("c", 1, FUTURE));
 		ReflectionTestUtils.setField(service, "dao", dao);
 
         TransactionHelper tx = new TransactionHelper() {

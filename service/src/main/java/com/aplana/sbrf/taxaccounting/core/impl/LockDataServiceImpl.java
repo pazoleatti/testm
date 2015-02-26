@@ -45,7 +45,7 @@ public class LockDataServiceImpl implements LockDataService {
             public LockData executeWithReturn() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
-                        LockData lock = validateLock(dao.get(key));
+                        LockData lock = validateLock(dao.get(key, false));
                         if (lock != null) {
                             return lock;
                         }
@@ -65,7 +65,7 @@ public class LockDataServiceImpl implements LockDataService {
     @Override
     public LockData getLock(String key) {
         synchronized(LockDataServiceImpl.class) {
-            return validateLock(dao.get(key));
+            return validateLock(dao.get(key, false));
         }
     }
 
@@ -105,7 +105,7 @@ public class LockDataServiceImpl implements LockDataService {
             public void execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
-                        LockData lock = validateLock(dao.get(key));
+                        LockData lock = validateLock(dao.get(key, false));
                         if (lock != null) {
                             if (!force && lock.getUserId() != userId) {
                                 TAUser blocker = userDao.getUser(lock.getUserId());
@@ -138,7 +138,7 @@ public class LockDataServiceImpl implements LockDataService {
             public void execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
-                        LockData lock = validateLock(dao.get(key));
+                        LockData lock = validateLock(dao.get(key, false));
                         if (lock != null) {
                             if (lock.getUserId() != userId) {
                                 TAUser blocker = userDao.getUser(lock.getUserId());
@@ -181,9 +181,9 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public boolean isLockExists(final String key) {
+    public boolean isLockExists(final String key, boolean like) {
         synchronized(LockDataServiceImpl.class) {
-            return validateLock(dao.get(key)) != null;
+            return validateLock(dao.get(key, like)) != null;
         }
     }
 
@@ -201,7 +201,7 @@ public class LockDataServiceImpl implements LockDataService {
             public void execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
-                        LockData lock = validateLock(dao.get(key));
+                        LockData lock = validateLock(dao.get(key, false));
                         if (lock != null) {
                             dao.addUserWaitingForLock(key, userId);
                         } else {

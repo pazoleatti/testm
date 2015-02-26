@@ -152,7 +152,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
         loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT);
-        if (lockService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual)) {
+        if (lockService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual, false)) {
             lockService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual, userInfo.getUser().getId());
         } else {
             //Если блокировка уже не существует, значит загружаемые данные не актуальны - откатываем их

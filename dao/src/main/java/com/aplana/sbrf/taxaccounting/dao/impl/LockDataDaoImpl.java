@@ -31,11 +31,11 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	private static final Log LOG = LogFactory.getLog(LockDataDaoImpl.class);
 
 	@Override
-	public LockData get(String key) {
+	public LockData get(String key, boolean like) {
 		try {
             return getJdbcTemplate().queryForObject(
-					"SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ?",
-					new Object[] {key},
+					"SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key " + (like ? "like ?" : "= ?"),
+					new Object[] {like ? "%" + key + "%" : key},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
 			);

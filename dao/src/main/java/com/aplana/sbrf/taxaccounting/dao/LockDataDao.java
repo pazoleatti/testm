@@ -14,12 +14,13 @@ import java.util.List;
 
 public interface LockDataDao {
 
-	/**
-	 * Возвращает информацию о блокировке
-	 * @param key код блокировки
-	 * @return возвращает null, если блокировка по данному коду не найдена
-	 */
-	LockData get(String key);
+    /**
+     * Возвращает информацию о блокировке
+     * @param key код блокировки
+     * @param like проверяем неполное совпадение ключа?
+     * @return возвращает null, если блокировка по данному коду не найдена
+     */
+    LockData get(String key, boolean like);
 
     /**
      * Возвращает информацию о блокировке
@@ -90,7 +91,6 @@ public interface LockDataDao {
     /**
      * Получает список всех блокировок
      * @return все блокировки
-     * @param filter ограничение по имени пользователя или ключу
      * @param startIndex с
      * @param countOfRecords по
      * @param searchOrdering поле по которому выполняется сортировка

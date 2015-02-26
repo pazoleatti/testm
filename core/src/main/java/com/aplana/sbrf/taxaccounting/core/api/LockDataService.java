@@ -121,9 +121,10 @@ public interface LockDataService {
     /**
      * Проверяет, установлена ли блокировка на указанном объекте
      * @param key код блокировки
+     * @param like проверяем неполное совпадение ключа?
      * @return блокировка установлена?
      */
-    boolean isLockExists(String key);
+    boolean isLockExists(String key, boolean like);
 
     /**
      * Проверяет, установлена ли блокировка на указанном объекте с определенной датой окончания действия блокировки
