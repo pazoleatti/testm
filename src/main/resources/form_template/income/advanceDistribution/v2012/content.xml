@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации</name>
-    <fullName>Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации
+    <name>Расчет распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации</name>
+    <fullName>Расчет распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации
     </fullName>
     <header>787/1/1</header>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <columnType>AUTO</columnType>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -123,15 +122,15 @@
         <refBookAttributeId>110</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>baseTaxOf</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <columnType>STRING</columnType>
         <name>Доля налоговой базы (%)</name>
         <order>12</order>
-        <width>7</width>
-        <maxLength>11</maxLength>
-        <precision>8</precision>
+        <width>11</width>
+        <maxLength>19</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>baseTaxOfRub</alias>
