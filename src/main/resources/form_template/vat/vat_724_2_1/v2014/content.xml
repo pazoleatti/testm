@@ -15,6 +15,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
@@ -24,6 +25,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>code</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Код операции</name>
         <order>2</order>
         <width>5</width>
@@ -33,6 +35,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>name</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Наименование операции</name>
         <order>3</order>
         <width>60</width>
@@ -42,6 +45,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>realizeCost</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Стоимость реализованных (переданных) товаров (работ, услуг) без НДС</name>
         <order>4</order>
         <width>16</width>
@@ -51,6 +55,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>obtainCost</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Стоимость приобретенных товаров (работа, услуг), не облагаемых НДС</name>
         <order>5</order>
         <width>16</width>
@@ -58,16 +63,23 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Корректировка-изменено</alias>
+        <alias>Автозаполняемая</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
-        <fontColor>RED</fontColor>
+        <fontColor>DARK_GREEN</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Корректировка-без изменений</alias>
-        <backColor>GREY</backColor>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
@@ -86,24 +98,17 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Редактируемая</alias>
-        <backColor>LIGHT_BLUE</backColor>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Автозаполняемая</alias>
+        <alias>Корректировка-изменено</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>
-        <fontColor>DARK_GREEN</fontColor>
+        <fontColor>RED</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
