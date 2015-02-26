@@ -264,9 +264,14 @@ alter table declaration_data_consolidation add constraint decl_data_consolidatio
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id);
 
+alter table log_system_report add constraint log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id);
+alter table log_system_report add constraint log_system_report_fk_sec_user foreign key (sec_user_id) references sec_user (id) on delete cascade;
+alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
+
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);
+create index i_data_row_fdata_manual_type on data_row(form_data_id, manual, type);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);
 create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_kind on form_data(kind);
@@ -284,3 +289,4 @@ create index i_ref_book_script_id on ref_book(script_id);
 create index i_declaration_template_xsd on declaration_template(xsd);
 create index i_declaration_template_jrxml on declaration_template(jrxml);
 create index i_notification_blob_data_id on notification(blob_data_id);
+create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
