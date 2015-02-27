@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="head">
-        <cell alias="fix" colSpan="16" rowSpan="1" stringValue="Итого" styleAlias="Контрольные суммы"/>
+        <cell alias="fix" colSpan="16" rowSpan="1" stringValue="Итого"/>
         <cell alias="rowNum" colSpan="1" rowSpan="1"/>
         <cell alias="typeCode" colSpan="1" rowSpan="1"/>
         <cell alias="invoice" colSpan="1" rowSpan="1"/>
@@ -17,7 +17,7 @@
         <cell alias="declarationNum" colSpan="1" rowSpan="1"/>
         <cell alias="currency" colSpan="1" rowSpan="1"/>
         <cell alias="cost" colSpan="1" rowSpan="1"/>
-        <cell alias="nds" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="nds" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
     <row alias="total">
         <cell alias="fix" colSpan="16" rowSpan="1" stringValue="Всего" styleAlias="Контрольные суммы"/>

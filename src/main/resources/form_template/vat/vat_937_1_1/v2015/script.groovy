@@ -137,15 +137,6 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def totalRow = getDataRow(dataRows, 'total')
-    def headRow = getDataRow(dataRows, 'head')
-
-    def bookTotalRow = getBookTotalRow(true)
-    if (bookTotalRow) {
-        totalSumColumns.each { column ->
-            // Графы 14-19 фиксированной строки «Итого» заполнены согласно алгоритму
-            headRow[column] = bookTotalRow[column]
-        }
-    }
 
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
@@ -216,48 +207,9 @@ void logicCheck() {
     }
 
     def headRow = getDataRow(dataRows, 'head')
-    def bookTotalRow = getBookTotalRow()
-    if (bookTotalRow) {
-        totalSumColumns.each { column ->
-            if (bookTotalRow[column] != headRow[column]) {
-                loggerLog(bookTotalRow, "Строка ${headRow.getIndex()}: Итоговые значения рассчитаны неверно в графе «${getColumnName(bookTotalRow, column)}»!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
-            }
-        }
-    }
+    checkNonEmptyColumns(headRow, headRow.getIndex(), totalSumColumns, logger, !isBalancePeriod())
 
     checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod())
-}
-
-// Получить строку итогов из Итоговой книги покупок
-def getBookTotalRow(boolean skip = false) {
-    int bookFormType = 606
-    String bookFormTypeName = formTypeService.get(bookFormType).name
-    List<DepartmentFormType> bookFormSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate()).findAll { it.formTypeId == bookFormType }
-    // 1. ищем назначение
-    if (bookFormSources == null || bookFormSources.isEmpty()) {
-        if (!skip) {
-            loggerLog(null, "Не назначена источником налоговая форма «$bookFormTypeName» в текущем периоде. " +
-                    "Расчеты строки «Итого» не могут быть выполнены!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
-        }
-    } else {
-        for (DepartmentFormType formDataSource in bookFormSources) {
-            def bookFormData = formDataService.getLast(bookFormType, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
-            // 2. ищем форму в статусе принята
-            if (bookFormData != null && bookFormData.state == WorkflowState.ACCEPTED) {
-                def bookDataRows = formDataService.getDataRowHelper(bookFormData)?.allCached
-                if (bookDataRows) {
-                    return getDataRow(bookDataRows, 'total')
-                }
-            } else {
-                if (!skip) {
-                    loggerLog(null, "Не найден экземпляр налоговой формы-источника «$bookFormTypeName» текущего периода " +
-                            "в статусе «Принята». Расчеты строки «Итого» не могут быть выполнены!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
-                }
-            }
-        }
-    }
-    return null
 }
 
 void importData() {
@@ -309,6 +261,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowIndex = 1
     def rows = [headRow]
+    boolean isHead = true
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -323,8 +276,12 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк
+        // Итоговые строки
         if (row.cell[0].text() == null || row.cell[0].text() == "") {
+            if (isHead) {
+                headRow.nds = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
+                isHead = false
+            }
             continue
         }
 
@@ -358,7 +315,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 8
         xmlIndexCol++
-        newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 9
         xmlIndexCol++
@@ -386,11 +343,11 @@ void addData(def xml, int headRowCount) {
 
         // Графа 15
         xmlIndexCol++
-        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 16
         xmlIndexCol++
-        newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }
@@ -458,7 +415,7 @@ void addTransportData(def xml) {
 
         // Графа 8
         xmlIndexCol++
-        newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 9
         xmlIndexCol++
@@ -486,11 +443,11 @@ void addTransportData(def xml) {
 
         // Графа 15
         xmlIndexCol++
-        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 16
         xmlIndexCol++
-        newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         totalSumColumns.each { alias ->
             def value1 = totalTmp.getCell(alias).value
@@ -509,7 +466,7 @@ void addTransportData(def xml) {
         def total = getTotalRow()
 
         // Графа 16
-        total.nds = parseNumber(row.cell[16].text(), rnuIndexRow, 16 + colOffset, logger, true)
+        total.nds = parseNumber(row.cell[16].text(), rnuIndexRow, 16 + colOffset, logger, false)
 
         def colIndexMap = ['nds' : 16]
 

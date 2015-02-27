@@ -146,15 +146,6 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def totalRow = getDataRow(dataRows, 'total')
-    def headRow = getDataRow(dataRows, 'head')
-
-    def bookTotalRow = getBookTotalRow(true)
-    if (bookTotalRow) {
-        totalSumColumns.each { column ->
-            // Графы 14-19 фиксированной строки «Итого» заполнены согласно алгоритму
-            headRow[column] = bookTotalRow[column]
-        }
-    }
 
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
@@ -246,53 +237,9 @@ void logicCheck() {
     }
 
     def headRow = getDataRow(dataRows, 'head')
-    def bookTotalRow = getBookTotalRow()
-    if (bookTotalRow) {
-        totalSumColumns.each { column ->
-            // Графы 14-19 фиксированной строки «Итого» заполнены согласно алгоритму
-            if (bookTotalRow[column] != headRow[column]) {
-                loggerLog(bookTotalRow, "Строка ${headRow.getIndex()}: Итоговые значения рассчитаны неверно в графе «${getColumnName(bookTotalRow, column)}»!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
-            }
-        }
-    }
+    checkNonEmptyColumns(headRow, headRow.getIndex(), totalSumColumns, logger, !isBalancePeriod())
 
     checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod())
-}
-
-/**
- * Получить строку итогов из Итоговой книги продаж
- * @param logLevel
- * @return
- */
-def getBookTotalRow(boolean skip = false) {
-    int bookFormType = 608
-    String bookFormTypeName = formTypeService.get(bookFormType).name
-    List<DepartmentFormType> bookFormSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate()).findAll { it.formTypeId == bookFormType }
-    // 1. ищем назначение
-    if (bookFormSources == null || bookFormSources.isEmpty()) {
-        if (!skip) {
-            loggerLog(null, "Не назначена источником налоговая форма «$bookFormTypeName» в текущем периоде. " +
-                    "Расчеты строки «Итого» не могут быть выполнены!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
-        }
-    } else {
-        for (DepartmentFormType formDataSource in bookFormSources) {
-            def bookFormData = formDataService.getLast(bookFormType, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
-            // 2. ищем форму в статусе принята
-            if (bookFormData != null && bookFormData.state == WorkflowState.ACCEPTED) {
-                def bookDataRows = formDataService.getDataRowHelper(bookFormData)?.allCached
-                if (bookDataRows) {
-                    return getDataRow(bookDataRows, 'total')
-                }
-            } else {
-                if (!skip) {
-                    loggerLog(null, "Не найден экземпляр налоговой формы-источника «$bookFormTypeName» текущего периода " +
-                            "в статусе «Принята». Расчеты строки «Итого» не могут быть выполнены!", formDataEvent == FormDataEvent.CALCULATE ? LogLevel.WARNING : LogLevel.ERROR)
-                }
-            }
-        }
-    }
-    return null
 }
 
 // получить кусок текста
@@ -367,6 +314,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowIndex = 1
     def rows = [headRow]
+    boolean isHead = true
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -381,8 +329,34 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        // Пропуск итоговых строк
+        // Итоговые строки
         if (row.cell[0].text() == null || row.cell[0].text() == "") {
+            if (isHead) {
+                // Графа 14(15)
+                def xmlIndexCol = 14
+                headRow.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+                // Графа 15(16)
+                xmlIndexCol++
+                headRow.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+                // Графа 16(17)
+                xmlIndexCol++
+                headRow.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+                // Графа 17(18)
+                xmlIndexCol++
+                headRow.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+                // Графа 18(19)
+                xmlIndexCol++
+                headRow.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+                // Графа 19(20-я)
+                xmlIndexCol++
+                headRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+                isHead = false
+            }
             continue
         }
 
@@ -436,35 +410,35 @@ void addData(def xml, int headRowCount) {
 
         // Графа 13а
         xmlIndexCol++
-        newRow.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 13б(14)
         xmlIndexCol++
-        newRow.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 14(15)
         xmlIndexCol++
-        newRow.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 15(16)
         xmlIndexCol++
-        newRow.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 16(17)
         xmlIndexCol++
-        newRow.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 17(18)
         xmlIndexCol++
-        newRow.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 18(19)
         xmlIndexCol++
-        newRow.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 19(20-я)
         xmlIndexCol++
-        newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         rows.add(newRow)
     }
@@ -552,35 +526,35 @@ void addTransportData(def xml) {
 
         // Графа 13
         xmlIndexCol++
-        newRow.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 14
         xmlIndexCol++
-        newRow.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 15
         xmlIndexCol++
-        newRow.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 16
         xmlIndexCol++
-        newRow.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 17
         xmlIndexCol++
-        newRow.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 18
         xmlIndexCol++
-        newRow.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 19
         xmlIndexCol++
-        newRow.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 20
         xmlIndexCol++
-        newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         totalSumColumns.each { alias ->
             def value1 = totalTmp.getCell(alias).value
@@ -600,35 +574,35 @@ void addTransportData(def xml) {
 
         // Графа 13
         def xmlIndexCol = 13
-        total.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        total.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 14
         xmlIndexCol++
-        total.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        total.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 15
         xmlIndexCol++
-        total.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        total.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 16
         xmlIndexCol++
-        total.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        total.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 17
         xmlIndexCol++
-        total.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        total.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 18
         xmlIndexCol++
-        total.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        total.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 19
         xmlIndexCol++
-        total.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        total.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         // Графа 20
         xmlIndexCol++
-        total.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        total.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, false)
 
         def colIndexMap = ['saleCostB18' : 15, 'saleCostB10' : 16, 'saleCostB0' : 17, 'vatSum18' : 18, 'vatSum10' : 19, 'bonifSalesSum' : 20]
 

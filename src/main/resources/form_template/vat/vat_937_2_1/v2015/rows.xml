@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><rows>
   <row alias="head">
-    <cell alias="fix" colSpan="15" rowSpan="1" stringValue="Итого" styleAlias="Контрольные суммы"/>
+    <cell alias="fix" colSpan="15" rowSpan="1" stringValue="Итого"/>
     <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
     <cell alias="opTypeCode" colSpan="1" rowSpan="1" stringValue=""/>
     <cell alias="invoiceNumDate" colSpan="1" rowSpan="1"/>
@@ -15,12 +15,12 @@
     <cell alias="currNameCode" colSpan="1" rowSpan="1"/>
     <cell alias="saleCostACurr" colSpan="1" rowSpan="1"/>
     <cell alias="saleCostARub" colSpan="1" rowSpan="1"/>
-    <cell alias="saleCostB18" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-    <cell alias="saleCostB10" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-    <cell alias="saleCostB0" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-    <cell alias="vatSum18" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-    <cell alias="vatSum10" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-    <cell alias="bonifSalesSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    <cell alias="saleCostB18" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="saleCostB10" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="saleCostB0" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="vatSum18" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="vatSum10" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="bonifSalesSum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
   </row>
   <row alias="total">
     <cell alias="fix" colSpan="15" rowSpan="1" stringValue="Всего" styleAlias="Контрольные суммы"/>
