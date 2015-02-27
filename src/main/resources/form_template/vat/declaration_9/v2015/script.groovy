@@ -135,7 +135,7 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.2 (строки 001 и 230-280 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = empty
+    def code001 = null
     def (code230, code240, code250, code260, code270, code280) = [empty, empty, empty, empty, empty, empty]
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
@@ -161,9 +161,9 @@ void generateXML() {
             ВерсПрог: applicationVersion,
             ВерсФорм: formatVersion) {
         Документ(
-                Индекс: index,
-                НомКорр: corrNumber,
-                ПризнСвед9: code001
+                [Индекс: index] +
+                        [НомКорр: corrNumber] +
+                        (code001 != null ? [ПризнСвед9: code001] : [:])
         ) {
             КнигаПрод(
                     СтПродБезНДС18: code230,

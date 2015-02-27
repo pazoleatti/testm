@@ -135,7 +135,7 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.3 (строка 001 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = empty
+    def code001 = null
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 619) {
@@ -153,9 +153,9 @@ void generateXML() {
             ВерсПрог: applicationVersion,
             ВерсФорм: formatVersion) {
         Документ(
-                Индекс: index,
-                НомКорр: corrNumber,
-                ПризнСвед10: code001
+                [Индекс: index] +
+                        [НомКорр: corrNumber] +
+                        (code001 != null ? [ПризнСвед10: code001] : [:])
         ) {
             ЖУчВыстСчФ() {
                 hasPage = false

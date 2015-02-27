@@ -135,7 +135,7 @@ void generateXML() {
 
     // атрибуты, заполняемые по форме 937.2.1 (строки 001, 020-070 и 310-360 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
-    def code001 = empty
+    def code001 = null
     def (code020, code030, code040, code050, code060, code070, code310, code320, code330, code340, code350, code360) =
     [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty]
     def sourceCorrNumber
@@ -169,9 +169,9 @@ void generateXML() {
             ВерсПрог: applicationVersion,
             ВерсФорм: formatVersion) {
         Документ(
-                Индекс: index,
-                НомКорр: corrNumber,
-                ПризнСвед91: code001
+                [Индекс: index] +
+                        [НомКорр: corrNumber] +
+                        (code001 != null ? [ПризнСвед91: code001] : [:])
         ) {
             КнигаПродДЛ(
                     ИтСтПродКПр18: code020,
