@@ -90,19 +90,19 @@ def resetColumns = ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTax
         'logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference']
 
 @Field
-def rowsNotCalc = ['R1', 'R53', 'R54', 'R156']
+def rowsNotCalc = ['R1', 'R53', 'R54', 'R157']
 
 @Field
 def totalColumns = ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']
 
 @Field
-def rows567 = ([2, 3] + (5..11) + (17..20) + [22, 24] + (28..30) + [48, 49, 51, 52] + (65..70) + [139] + (142..151) + (153..155))
+def rows567 = ([2, 3] + (5..11) + (17..20) + [22, 24] + (28..30) + [48, 49, 51, 52] + (65..70) + [139] + (143..152) + (154..156))
 
 @Field
-def rows8 = ((2..52) + (55..155))
+def rows8 = ((2..52) + (55..156))
 
 @Field
-def chRows = ['R118', 'R119', 'R140', 'R141']
+def chRows = ['R118', 'R119', 'R140', 'R141', 'R142']
 
 @Field
 def formatY = new SimpleDateFormat('yyyy')
@@ -172,17 +172,17 @@ void calc() {
     def dataRows = dataRowHelper.getAllCached()
 
     def row40001 = getDataRow(dataRows, 'R53')
-    def row40002 = getDataRow(dataRows, 'R156')
+    def row40002 = getDataRow(dataRows, 'R157')
     totalColumns.each { alias ->
         row40001[alias] = getSum(dataRows, alias, 'R2', 'R52')
-        row40002[alias] = getSum(dataRows, alias, 'R55', 'R155')
+        row40002[alias] = getSum(dataRows, alias, 'R55', 'R156')
     }
 
     // Лог. проверка
     dataRows.each { row ->
         if (['R2', 'R3', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R17', 'R18', 'R19', 'R20', 'R22', 'R24', 'R28',
-                'R29', 'R30', 'R48', 'R49', 'R51', 'R52', 'R65', 'R66', 'R67', 'R68', 'R69', 'R70', 'R139', 'R142',
-                'R143', 'R144', 'R145', 'R146', 'R147', 'R148', 'R149', 'R150', 'R151', 'R153', 'R154', 'R155'
+                'R29', 'R30', 'R48', 'R49', 'R51', 'R52', 'R65', 'R66', 'R67', 'R68', 'R69', 'R70', 'R139',
+                'R143', 'R144', 'R145', 'R146', 'R147', 'R148', 'R149', 'R150', 'R151', 'R153', 'R154', 'R155', 'R156'
         ].contains(row.getAlias())) {
             def BigDecimal summ = ((BigDecimal) ((row.rnu6Field10Sum ?: 0) - (row.rnu6Field12Accepted ?: 0)
                     + (row.rnu6Field12PrevTaxPeriod ?: 0))).setScale(2, BigDecimal.ROUND_HALF_UP)
@@ -242,10 +242,11 @@ void calc() {
             row.difference = (row.opuSumTotal ?: 0) - (row.rnu4Field5Accepted ?: 0)
         }
 
-        if (row.getAlias() in ['R140', 'R141']) {
+        if (row.getAlias() in ['R140', 'R141', 'R142']) {
             row.difference = (row.opuSumTotal ?: 0) -
                     ((getDataRow(dataRows, 'R140').rnu4Field5Accepted ?: 0) +
-                            (getDataRow(dataRows, 'R141').rnu4Field5Accepted ?: 0))
+                            (getDataRow(dataRows, 'R141').rnu4Field5Accepted ?: 0) +
+                            (getDataRow(dataRows, 'R142').rnu4Field5Accepted ?: 0))
         }
     }
 
@@ -303,12 +304,12 @@ void logicCheck() {
     }
 
     def row40001 = getDataRow(dataRows, 'R53')
-    def row40002 = getDataRow(dataRows, 'R156')
+    def row40002 = getDataRow(dataRows, 'R157')
     def need40001 = [:]
     def need40002 = [:]
     totalColumns.each { alias ->
         need40001[alias] = getSum(dataRows, alias, 'R2', 'R52')
-        need40002[alias] = getSum(dataRows, alias, 'R55', 'R155')
+        need40002[alias] = getSum(dataRows, alias, 'R55', 'R156')
     }
     checkTotalSum(row40001, need40001)
     checkTotalSum(row40002, need40002)
@@ -326,7 +327,7 @@ def consolidationBank(def dataRows) {
     // очистить форму
     dataRows.each { row ->
         ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
-            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in ['R53', 'R156']) {
+            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in ['R53', 'R157']) {
                 row[alias] = 0
             }
         }
@@ -362,7 +363,7 @@ def consolidationSummary(def dataRows) {
     // Очистить форму
     dataRows.each { row ->
         ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
-            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in ['R53', 'R156']) {
+            if (row.getCell(alias)?.style?.alias == editableStyle || row.getAlias() in ['R53', 'R157']) {
                 row[alias] = 0
             }
         }
@@ -396,7 +397,7 @@ def consolidationSummary(def dataRows) {
     }
 
     // Прошел по строкам и получил список кну
-    def knuList = ((2..52) + (55..155)).collect {
+    def knuList = ((2..52) + (55..156)).collect {
         def row = getDataRow(dataRows, 'R' + it)
         return row.incomeTypeId
     }
@@ -555,7 +556,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-    def int maxRow = 156
+    def int maxRow = 157
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
