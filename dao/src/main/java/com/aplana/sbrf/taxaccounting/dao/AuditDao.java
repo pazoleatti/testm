@@ -61,7 +61,25 @@ public interface AuditDao {
      */
     PagingResult<LogSearchResultItem> getLogsBusinessForControl(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds);
 
+    /**
+     * Получает количество записей в таблице для админа
+     * @param filter до какой даты
+     * @return число записей в таблице до этой даты
+     */
+    long getCountForControl(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds);
+
     PagingResult<LogSearchResultItem> getLogsBusinessForOper(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds);
 
+    long getCountForOper(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds);
+
     PagingResult<LogSearchResultItem> getLogsBusinessForControlUnp(LogSystemFilter filter);
+
+    long getCountForControlUnp(LogSystemFilter filter);
+
+    /**
+     * Получает количество записей в таблице для админа
+     * @param filter до какой даты
+     * @return число записей в таблице до этой даты
+     */
+    long getCount(LogSystemFilter filter);
 }

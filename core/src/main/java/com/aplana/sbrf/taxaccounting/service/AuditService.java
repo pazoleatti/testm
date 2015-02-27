@@ -9,6 +9,10 @@ import java.util.List;
  * Сервис для работы с журналом аудита
  */
 public interface AuditService {
+    public enum AsyncNames{
+        LOG_FILTER,
+        LOG_COUNT
+    }
 
 	/**
 	 * Получить информацию из журнала аудита по фильтру
@@ -59,15 +63,5 @@ public interface AuditService {
      */
     PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo);
 
-    /**
-     * Блокировка операции "Архивирование журнала событий"
-     * @param userInfo
-     */
-    LockData lock(TAUserInfo userInfo);
-
-    /**
-     * Снимает блокировку операции "Архивирование журнала событий"
-     * @param userInfo
-     */
-    void unlock(TAUserInfo userInfo);
+    long getCountRecords(LogSystemFilter filter,  TAUserInfo userInfo);
 }

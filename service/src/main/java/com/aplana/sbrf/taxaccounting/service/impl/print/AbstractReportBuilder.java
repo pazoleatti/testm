@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +43,16 @@ public abstract class AbstractReportBuilder {
         fillFooter();
         setPrintSetup();
         return flushBlobData();
+    }
+
+    public final File createBlobDataFile() throws IOException  {
+        fillHeader();
+        createTableHeaders();
+        createDataForTable();
+        cellAlignment();
+        fillFooter();
+        setPrintSetup();
+        return flushBlobDataFile();
     }
 
     protected void cellAlignment() {
@@ -83,6 +94,10 @@ public abstract class AbstractReportBuilder {
         workBook.write(data);
 
         return data.toByteArray();
+    }
+
+    protected File flushBlobDataFile() throws IOException {
+        return null;
     }
 
     /**

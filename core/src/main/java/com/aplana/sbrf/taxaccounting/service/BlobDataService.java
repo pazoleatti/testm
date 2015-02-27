@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
@@ -17,6 +18,14 @@ public interface BlobDataService {
      * @return uuid идентификатор
      */
     String create(InputStream is, String name);
+
+    /**
+     * Создание записи
+     * @param file файл
+     * @param name имя для базы
+     * @return uuid идентификатор
+     */
+    String create(File file, String name);
 
     /**
      * Удаление записи.

@@ -1,9 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -30,8 +29,6 @@ public class AuditServiceImpl implements AuditService {
 	private DepartmentService departmentService;
     @Autowired
     private TransactionHelper tx;
-    @Autowired
-    private LockDataService lockDataService;
     @Autowired
     private PeriodService periodService;
 
@@ -99,7 +96,6 @@ public class AuditServiceImpl implements AuditService {
     @Override
     @Transactional(readOnly = false)
     public void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo) {
-        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         Date startDate = null;
         Date endDate = null;
         if (!items.isEmpty()){
@@ -115,8 +111,6 @@ public class AuditServiceImpl implements AuditService {
             }
             auditDao.removeRecords(listIds);
         }
-        StringBuilder message = new StringBuilder("Архивация событий ЖА за период: ").append(format.format(startDate)).append(" - ").append(format.format(endDate));
-        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, message.toString(), null, null);
     }
 
     @Override
@@ -125,8 +119,13 @@ public class AuditServiceImpl implements AuditService {
         Date startDate = firstRecord.getLogDate();
         Date endDate = lastRecord.getLogDate();
         auditDao.removeRecords(filter);
-        StringBuilder message = new StringBuilder("Архивация событий ЖА за период: ").append(format.format(startDate)).append(" - ").append(format.format(endDate));
-        add(FormDataEvent.LOG_SYSTEM_BACKUP, userInfo, userInfo.getUser().getDepartmentId(), null, null, null, null, message.toString(), null, null);
+        add(
+                FormDataEvent.LOG_SYSTEM_BACKUP,
+                userInfo,
+                userInfo.getUser().getDepartmentId(),
+                null, null, null, null,
+                "Архивация событий ЖА за период: " + format.format(startDate) + " - " + format.format(endDate),
+                null, null);
     }
 
     @Override
@@ -170,13 +169,27 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public LockData lock(TAUserInfo userInfo) {
-        return lockDataService.lock(LockData.LockObjects.LOG_SYSTEM_BACKUP.name(), userInfo.getUser().getId(),
-                lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_BACKUP));
-    }
+    public long getCountRecords(LogSystemFilter filter,  TAUserInfo userInfo) {
+        TAUser user = userInfo.getUser();
+        if (user.hasRole(TARole.ROLE_ADMIN)) {
+            return auditDao.getCount(filter);
+        } else if (user.hasRole(TARole.ROLE_CONTROL_NS) || user.hasRole(TARole.ROLE_CONTROL)) {
+            HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
+                    new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
+            sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
+            sampleVal.put(SAMPLE_NUMBER.S_45, departmentService.getSourcesDepartmentIds(userInfo.getUser(), null, null));
+            sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
 
-    @Override
-    public void unlock(TAUserInfo userInfo) {
-        lockDataService.unlock(LockData.LockObjects.LOG_SYSTEM_BACKUP.name(), userInfo.getUser().getId());
+            return auditDao.getCountForControl(filter, sampleVal);
+        } else if (user.hasRole(TARole.ROLE_OPER)) {
+            HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
+                    new HashMap<SAMPLE_NUMBER, Collection<Integer>>(2);
+            sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
+            sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
+            return auditDao.getCountForOper(filter, sampleVal);
+        } else if (user.hasRole(TARole.ROLE_CONTROL_UNP)){
+            return auditDao.getCountForControlUnp(filter);
+        }
+        return auditDao.getCount(filter);
     }
 }

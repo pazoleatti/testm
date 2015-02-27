@@ -1,16 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +28,16 @@ public class BlobDataServiceImpl implements BlobDataService {
     public String create(InputStream is, String name) {
         BlobData blobData = initBlob("", is, name);
         return blobDataDao.create(blobData);
+    }
+
+    @Override
+    public String create(File file, String name) {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            return create(fileInputStream, name);
+        } catch (FileNotFoundException e) {
+            throw new ServiceException("", e);
+        }
     }
 
     @Override

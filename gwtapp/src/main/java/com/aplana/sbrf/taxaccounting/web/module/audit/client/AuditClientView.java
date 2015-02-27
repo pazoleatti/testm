@@ -3,13 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 import com.aplana.sbrf.taxaccounting.model.AuditFormType;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,7 +21,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -62,17 +61,25 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     Panel filterContentPanel;
     @UiField
     FlexiblePager pager;
+    //Формирует отчет
     @UiField
     LinkAnchor printButton;
+    //Загружает отчет
+    @UiField
+    LinkAnchor downloadCsvButton;
     @UiField
     LinkAnchor archive;
     @UiField
     Label archiveDateLbl;
     @UiField
+    LinkAnchor downloadArchive;
+    @UiField
     Label archiveLbl;
     private HistoryBusinessSearchOrdering sortByColumn;
     private AsyncDataProviderWithSortableTable dataProvider;
 
+
+    private Timer timerArchive, timerCSV;
     @Inject
     @UiConstructor
     public AuditClientView(final Binder uiBinder) {
@@ -87,6 +94,26 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
             }
         };
         dataProvider.setAscSorting(false);
+
+        timerArchive = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerReport(ReportType.ARCHIVE_AUDIT, true);
+                } catch (Exception e) {
+                }
+            }
+        };
+
+        timerCSV = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerReport(ReportType.CSV_AUDIT, true);
+                } catch (Exception e) {
+                }
+            }
+        };
     }
 
     @Override
@@ -105,11 +132,6 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     public void setAuditTableData(int startIndex, long count, List<LogSearchResultItem> itemList) {
         table.setRowCount((int) count);
         table.setRowData(startIndex, itemList);
-    }
-
-    @Override
-    public void getBlobFromServer(String uuid) {
-        DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadBlobController/processLogDownload/" + uuid);
     }
 
     @Override
@@ -148,6 +170,36 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     }
 
     @Override
+    public void updatePrintReportButtonName(ReportType reportType, boolean isVisibleLoad) {
+        if (reportType == ReportType.ARCHIVE_AUDIT){
+            downloadArchive.setVisible(isVisibleLoad);
+        } else {
+            printButton.setVisible(!isVisibleLoad);
+            downloadCsvButton.setVisible(isVisibleLoad);
+        }
+    }
+
+    @Override
+    public void startTimerReport(ReportType reportType) {
+        if (ReportType.ARCHIVE_AUDIT.equals(reportType)) {
+            timerArchive.scheduleRepeating(3000);
+            timerArchive.run();
+        } else {
+            timerCSV.scheduleRepeating(3000);
+            timerCSV.run();
+        }
+    }
+
+    @Override
+    public void stopTimerReport(ReportType reportType) {
+        if (ReportType.ARCHIVE_AUDIT.equals(reportType)) {
+            timerArchive.cancel();
+        } else {
+            timerCSV.cancel();
+        }
+    }
+
+    @Override
     public void setSortByColumn(String sortByColumn) {
         this.sortByColumn = HistoryBusinessSearchOrdering.valueOf(sortByColumn);
     }
@@ -159,8 +211,22 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
 
     @UiHandler("printButton")
     void onPrintButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
+        if (getUiHandlers()!= null){
             getUiHandlers().onPrintButtonClicked();
+        }
+    }
+
+    @UiHandler("downloadCsvButton")
+    void onDownloadButtonClicked(ClickEvent event) {
+        if (getUiHandlers()!= null){
+            getUiHandlers().onTimerReport(ReportType.CSV_AUDIT, false);
+        }
+    }
+
+    @UiHandler("downloadArchive")
+    void onDownloadArchiveClicked(ClickEvent event) {
+        if (getUiHandlers()!= null){
+            getUiHandlers().onTimerReport(ReportType.ARCHIVE_AUDIT, false);
         }
     }
 

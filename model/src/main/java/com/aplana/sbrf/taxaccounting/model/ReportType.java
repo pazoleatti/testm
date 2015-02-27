@@ -14,6 +14,8 @@ public enum ReportType {
     XML_DEC(1, "XML", 6L, 116L),
     PDF_DEC(2, "PDF", 7L, 107L),
     JASPER_DEC(3, "JASPER", 8L, 108L),
+    ARCHIVE_AUDIT(0, "ARCHIVE_AUDIT", 10L, 110L),
+    CSV_AUDIT(1, "CSV_AUDIT", 11l, 111L),
 
     ZIP_IFRS(0, "Zip", 9L, 109L);
 

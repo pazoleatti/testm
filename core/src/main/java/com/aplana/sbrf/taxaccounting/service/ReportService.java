@@ -29,6 +29,14 @@ public interface ReportService {
     void createDec(long declarationDataId, String blobDataId, ReportType type);
 
     /**
+     * Создание записи об отчете журнала аудита
+     * @param userId ссылка на пользователя
+     * @param blobDataId ссылка на отчет
+     * @param type тип
+     */
+    void createAudit(int userId, String blobDataId, ReportType type);
+
+    /**
      * Получение записи об отчете НФ
      * @param formDataId
      * @param type
@@ -49,6 +57,14 @@ public interface ReportService {
     String getDec(TAUserInfo userInfo, long declarationDataId, ReportType type);
 
     /**
+     * Получение записи об отчете журнала аудита
+     * @param userInfo
+     * @param type
+     * @return uuid
+     */
+    String getAudit(TAUserInfo userInfo, ReportType type);
+
+    /**
      * Удаление всех отчетов по id НФ
      * @param formDataId
      * @param manual
@@ -60,4 +76,15 @@ public interface ReportService {
      * @param declarationDataId
      */
     void deleteDec(long declarationDataId);
+
+    /**
+     * @param declarationDataId
+     */
+    void deleteAudit(TAUserInfo userInfo, ReportType reportType);
+
+    /**
+     * Удаление всех отчетов по id blobdata
+     * @param declarationDataId
+     */
+    void deleteAudit(String blobDataId);
 }
