@@ -395,7 +395,7 @@ void addTransportData(def xml) {
 
         String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[3].text() + "')"
         def records = refBookFactory.getDataProvider(27).getRecords(getReportPeriodEndDate(), null, filter, null)
-        if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), getReportPeriodEndDate(), rnuIndexRow, 2, logger, true)) {
+        if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), getReportPeriodEndDate(), rnuIndexRow, 2, logger, false)) {
             // графа 2
             newRow.number = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         }
