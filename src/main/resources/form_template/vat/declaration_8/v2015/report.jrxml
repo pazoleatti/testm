@@ -136,11 +136,11 @@
 		<variableExpression><![CDATA[$F{ИдФайл}==null || $F{ИдФайл}.length()==0 ? $V{STR_FILLER} : $F{ИдФайл}.split("_")[4]]]></variableExpression>
 	</variable>
 	<variable name="ИННЮЛ" class="java.lang.String">
-		<variableExpression><![CDATA[$V{ИдФайл_О}.length()<10 ? ($V{ИдФайл_О} + $V{STR_FILLER}).substring(0, 12) :$V{ИдФайл_О}.substring(0, 10) + "--"]]></variableExpression>
+		<variableExpression><![CDATA[$V{ИдФайл_О}.startsWith("null") ? $V{STR_FILLER}.substring(0, 12) : ($V{ИдФайл_О}.endsWith("null") ? ($V{ИдФайл_О}.substring(0, $V{ИдФайл_О}.indexOf("null")) + $V{STR_FILLER}).substring(0, 12) : ($V{ИдФайл_О}.length()<10 ? ($V{ИдФайл_О} + $V{STR_FILLER}).substring(0, 12) :$V{ИдФайл_О}.substring(0, 10) + "--"))]]></variableExpression>
 		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="КПП" class="java.lang.String">
-		<variableExpression><![CDATA[($V{ИдФайл_О} + $V{STR_FILLER}).substring(10, 19)]]></variableExpression>
+		<variableExpression><![CDATA[$V{ИдФайл_О}.endsWith("null") ? $V{STR_FILLER}.substring(0,9) : ($V{ИдФайл_О}.startsWith("null") ? ($V{ИдФайл_О}.substring(4, $V{ИдФайл_О}.length()) + $V{STR_FILLER}).substring(0,9) : ($V{ИдФайл_О} + $V{STR_FILLER}).substring(10, 19))]]></variableExpression>
 		<initialValueExpression><![CDATA[]]></initialValueExpression>
 	</variable>
 	<variable name="BarcodeImage_Section1" class="java.lang.String">
