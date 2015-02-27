@@ -975,6 +975,11 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public void addDeclarationConsolidationInfo(Long tgtDeclarationId, Collection<Long> srcFormDataIds) {
+        sourceDao.addDeclarationConsolidationInfo(tgtDeclarationId, srcFormDataIds);
+    }
+
+    @Override
     public void deleteDeclarationConsolidateInfo(long targetDeclarationDataId) {
         sourceDao.deleteDeclarationConsolidateInfo(targetDeclarationDataId);
     }

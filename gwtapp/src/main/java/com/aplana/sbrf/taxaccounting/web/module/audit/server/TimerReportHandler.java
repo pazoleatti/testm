@@ -36,7 +36,7 @@ public class TimerReportHandler extends AbstractActionHandler<TimerReportAction,
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         if (action.getReportType() == ReportType.ARCHIVE_AUDIT){
-            if (lockDataService.isLockExists(LockData.LockObjects.LOG_SYSTEM_BACKUP.name())){
+            if (lockDataService.isLockExists(LockData.LockObjects.LOG_SYSTEM_BACKUP.name(), false)){
                 result.setLocked(true);
                 return result;
             }

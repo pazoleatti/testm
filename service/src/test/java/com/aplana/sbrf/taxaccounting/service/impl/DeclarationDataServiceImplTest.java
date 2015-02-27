@@ -39,6 +39,10 @@ public class DeclarationDataServiceImplTest {
     PeriodService periodService;
     @Autowired
     DepartmentService departmentService;
+    @Autowired
+    SourceService sourceService;
+    @Autowired
+    FormDataService formDataService;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
