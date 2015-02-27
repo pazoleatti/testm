@@ -80,7 +80,7 @@ public class UploadDataRowsHandler extends
                 throw new ServiceLoggerException("Не удалось выполнить операцию импорта данных в налоговую форму", logEntryService.save(logger.getEntries()));
             } finally {
                 try {
-                    if (lockDataService.isLockExists(key)) {
+                    if (lockDataService.isLockExists(key, false)) {
                         lockDataService.unlock(key, userInfo.getUser().getId());
                     }
                 } catch (Exception e2) {}

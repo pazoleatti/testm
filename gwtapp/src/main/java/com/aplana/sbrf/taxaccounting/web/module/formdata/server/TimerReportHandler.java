@@ -38,7 +38,7 @@ public class TimerReportHandler extends AbstractActionHandler<TimerReportAction,
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         String key = LockData.LockObjects.FORM_DATA.name() + "_" + action.getFormDataId() + "_" + action.getType().getName() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual() + "_saved_" + action.isSaved();
-        if (!lockDataService.isLockExists(key)) {
+        if (!lockDataService.isLockExists(key, false)) {
             String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), action.isSaved());
             if (uuid == null) {
                 result.setExistReport(TimerReportResult.StatusReport.NOT_EXIST);

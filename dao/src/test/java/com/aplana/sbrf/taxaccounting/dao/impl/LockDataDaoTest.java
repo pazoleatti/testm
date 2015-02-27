@@ -31,7 +31,7 @@ public class LockDataDaoTest {
 
 	@Test
 	public void getTest() {
-		LockData data = dao.get("a");
+		LockData data = dao.get("a", false);
 		Assert.assertEquals(0, data.getUserId());
 		Calendar cal = Calendar.getInstance();
 		cal.clear();
@@ -43,11 +43,16 @@ public class LockDataDaoTest {
         cal.set(Calendar.YEAR, 2014);
         data = dao.get("a", cal.getTime());
         Assert.assertNull(data);
+
+        data = dao.get("FORM_DATA", true);
+        Assert.assertNotNull(data);
+        data = dao.get("FORM_DATA_2", true);
+        Assert.assertNull(data);
 	}
 
 	@Test
 	public void getTest2() {
-		Assert.assertNull(dao.get("c"));
+		Assert.assertNull(dao.get("c", false));
 	}
 
 	@Test (expected = LockException.class)
@@ -67,7 +72,7 @@ public class LockDataDaoTest {
 		cal.set(2013, 0, 1, 0, 5, 0);
 		Date dateBefore = cal.getTime();
 		dao.createLock("c", 0, dateBefore);
-		LockData data = dao.get("c");
+		LockData data = dao.get("c", false);
 		Assert.assertEquals("c", data.getKey());
 		Assert.assertEquals(0, data.getUserId());
 		Assert.assertEquals(dateBefore, data.getDateBefore());
@@ -87,7 +92,7 @@ public class LockDataDaoTest {
 		Date dateBefore = cal.getTime();
 
 		dao.updateLock("b", dateBefore);
-		LockData data = dao.get("b");
+		LockData data = dao.get("b", false);
 		Assert.assertEquals("b", data.getKey());
 		Assert.assertEquals(1, data.getUserId());
 		Assert.assertEquals(dateBefore, data.getDateBefore());
@@ -106,7 +111,7 @@ public class LockDataDaoTest {
 	@Test
 	public void deleteLockTest2() {
 		dao.deleteLock("a");
-		Assert.assertNull(dao.get("a"));
+		Assert.assertNull(dao.get("a", false));
 	}
 
     @Test

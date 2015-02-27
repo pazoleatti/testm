@@ -2,7 +2,7 @@
 
 create table log_system_report
 (
-blob_data_id varchar(32) not null,
+blob_data_id varchar2(36) not null,
 type number(1) not null,
 sec_user_id number(9)
 );

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.Date;
@@ -119,9 +121,10 @@ public interface LockDataService {
     /**
      * Проверяет, установлена ли блокировка на указанном объекте
      * @param key код блокировки
+     * @param like проверяем неполное совпадение ключа?
      * @return блокировка установлена?
      */
-    boolean isLockExists(String key);
+    boolean isLockExists(String key, boolean like);
 
     /**
      * Проверяет, установлена ли блокировка на указанном объекте с определенной датой окончания действия блокировки
@@ -151,4 +154,28 @@ public interface LockDataService {
      * @return время в милисекундах
      */
     int getLockTimeout(LockData.LockObjects lockObject);
+
+    /**
+     * Получает список всех блокировок
+     * @return все блокировки
+     * @param filter ограничение по имени пользователя или ключу
+     * @param startIndex с
+     * @param countOfRecords по
+     * @param searchOrdering поле по которому выполняется сортировка
+     * @param ascSorting порядок сортировки
+     */
+    PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords, LockSearchOrdering searchOrdering, boolean ascSorting);
+
+    /**
+     * Удаляет все указанные блокировки
+     * @param keys список ключей блокировок
+     */
+    void unlockAll(List<String> keys);
+
+    /**
+     * Продляет все указанные блокировки
+     * @param keys список ключей блокировок
+     * @param hours количество часов, на которое будут продлены блокировки
+     */
+    void extendAll(List<String> keys, int hours);
 }
