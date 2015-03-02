@@ -184,7 +184,7 @@ void generateXML() {
                     def code120 = row.mediatorInnKpp
                     def code130 = getNumber(row.mediatorNumDate)
                     def code140 = getDate(row.mediatorNumDate)
-                    def code150 = getLastTextPart(row.currNameCode, "(\\w.{0,254}) ")
+                    def code150 = getCurrencyCode(row.currNameCode)
                     def code160 = row.cost
                     def code170 = row.vatSum
                     def code180 = row.diffDec
@@ -280,20 +280,35 @@ def checkDeclarationFNS() {
 }
 
 def getNumber(def String str) {
-    if (str != null && str.length() > 11) {
-        return str.substring(0, str.length() - 11)
+    if (str == null) {
+        return null
     }
-    return null
+    if (str.length() >= 10) {
+        if (str.substring(str.length() - 10).matches("(0[1-9]{1}|[1-2]{1}[0-9]{1}|3[0-1]{1})\\.(0[1-9]{1}|1[0-2]{1})\\.(1[0-9]{3}|20[0-9]{2})")) {
+            if (str.length() > 10 && str.codePointAt(str.length() - 11).equals(32)) {
+                return str.substring(0, str.length() - 11)
+            } else {
+                return str.substring(0, str.length() - 10)
+            }
+        }
+    }
+    return str
 }
 
 def getDate(def String str) {
-    if (str != null && str.length() > 10) {
-        return str.substring(str.length() - 10)
+    if (str != null && str.length() >= 10) {
+        if (str.substring(str.length() - 10).matches("(0[1-9]{1}|[1-2]{1}[0-9]{1}|3[0-1]{1})\\.(0[1-9]{1}|1[0-2]{1})\\.(1[0-9]{3}|20[0-9]{2})")) {
+            return str.substring(str.length() - 10)
+        }
     }
     return null
 }
 
-def getLastTextPart(String value, def pattern) {
-    def parts = value?.split(pattern)
-    return parts?.length == 2 ? parts[1] : null
+def getCurrencyCode(String str) {
+    if (str != null) {
+        if ((str.length() > 3 && str.codePointAt(str.length() - 4).equals(32)) || str.length() == 3) {
+            return str.substring(str.length() - 3)
+        }
+    }
+    return null
 }
