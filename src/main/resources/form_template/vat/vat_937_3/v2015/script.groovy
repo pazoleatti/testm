@@ -2,6 +2,7 @@ package form_template.vat.vat_937_3.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import java.text.SimpleDateFormat
 import groovy.transform.Field
 
 /**
@@ -109,6 +110,20 @@ def startDate = null
 @Field
 def endDate = null
 
+// данные предыдущего преиода
+@Field
+def prevDataRows = null
+
+// признак корректирующего периода
+@Field
+def isCorrectionPeriodMap = [:]
+
+@Field
+def reportPeriod = null
+
+@Field
+def formTypeName = null
+
 def getReportPeriodStartDate() {
     if (startDate == null) {
         startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
@@ -149,6 +164,9 @@ void logicCheck() {
     def isFirstSection = true
     // 01, 02, …, 13, 16, 17, …, 28
     def codeValues = ((1..13) + (16..28))
+
+    def index1 = getPrevLastIndex(true)
+    def index2 = getPrevLastIndex(false)
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -240,6 +258,17 @@ void logicCheck() {
         if (!isFirstSection && row.mediatorNumDate != null && !row.mediatorNumDate.matches("^[1234]\$")) {
             def name = getColumnName(row,'mediatorNumDate')
             loggerError(row, String.format(COLUMN_12_ERROR_MSG, index, name, name))
+        }
+
+        // 6. Проверка значения «Графы 1»
+        if (row.rowNumber != (isFirstSection ? ++index1 : ++index2)) {
+            def name = getColumnName(row, 'rowNumber')
+            def formTypeName = getFormTypeName()
+            def periodName = getReportPeriod().name
+            def year = getReportPeriod().taxPeriod.year
+            logger.error("Строка $index: Графа «$name» заполнена неверно (в первичной налоговой форме «$formTypeName» " +
+                    "текущего подразделения за $periodName $year изменено количество строк). " +
+                    "Для обновления значения графы необходимо нажать на «Рассчитать».")
         }
     }
 }
@@ -542,7 +571,7 @@ void addTransportData(def xml) {
 
         // подсчет итоговых значений
         totalSumColumns.each {
-            tmpSums[it] += roundValue((newRow[it] ?: BigDecimal.ZERO), 2)
+            tmpSums[it] += roundValue(newRow[it] ?: BigDecimal.ZERO)
         }
 
         if (mapRows[sectionIndex] == null) {
@@ -743,7 +772,7 @@ void updateIndexes(def dataRows) {
     }
 }
 
-def roundValue(def value, int precision) {
+def roundValue(def value, int precision = 2) {
     if (value != null) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
     } else {
@@ -753,15 +782,86 @@ def roundValue(def value, int precision) {
 
 /** Рассчитать нумерацию строк. Для каждой части нф нумерация начинается с 1. */
 void calc1(def dataRows) {
-    def index = 0
+    def index1 = getPrevLastIndex(true)
+    def index2 = getPrevLastIndex(false)
+    def isFirstSection = null
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            index = 0
+            isFirstSection = (row.getAlias() == sections[0])
             continue
         }
-        index++
 
         // графа 1
-        row.rowNumber = index
+        row.rowNumber = (isFirstSection ? ++index1 : ++index2)
     }
+}
+
+/**
+ * Получить последний номер строки из формы предыдушего периода из указаной части.
+ *
+ * @param isFirstPart
+ * @return
+ */
+def getPrevLastIndex(def isFirstPart) {
+    def prevDataRows = getPrevDataRows()
+    // если предыдущих данных нет или в предыдущей форме только фиксированные строки, то 0
+    if (!prevDataRows || prevDataRows.size() == sections.size()) {
+        return 0
+    }
+    def lastRow
+    if (isFirstPart) {
+        // для части 1 - находим заголовок части 2 и по ней получаем последнюю строку части 1
+        def tmpRow = getDataRow(prevDataRows, sections[1])
+        lastRow = prevDataRows.get(tmpRow.getIndex() - 2)
+    } else {
+        // для части 2 - берем последнюю строку
+        lastRow = prevDataRows.get(prevDataRows.size() - 1)
+    }
+    return roundValue(lastRow.getAlias() == null ? lastRow.rowNumber : 0)
+}
+
+/** Получить строки предыдущего периода не в статусе "создана". */
+def getPrevDataRows() {
+    if (getReportPeriod()?.order == 1 || isCorrectionPeriod(formData.departmentReportPeriodId)) {
+        return null
+    }
+    if (prevDataRows == null) {
+        // получить предыдущие периоды текущего года
+        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
+        def start = format.parse("01.01." + getReportPeriodStartDate().format('yyyy'))
+        def end = getReportPeriodStartDate() - 1
+        def reportPeriods = reportPeriodService.getReportPeriodsByDate(formData.formType.taxType, start, end)?.reverse()
+
+        // поиск формы предыдущего периода в статусе отличной от "создана"
+        for (def report : reportPeriods) {
+            def formDataTmp = formDataService.getLast(formData.formType.id, formData.kind,  formDataDepartment.id, report.id, null)
+            if (!isCorrectionPeriod(formDataTmp.departmentReportPeriodId) && formDataTmp.state != WorkflowState.CREATED) {
+                prevDataRows = formDataService.getDataRowHelper(formDataTmp)?.getAllSaved()
+                break
+            }
+        }
+    }
+    return prevDataRows
+}
+
+def isCorrectionPeriod(def departmentReportPeriodId) {
+    if (isCorrectionPeriodMap[departmentReportPeriodId] == null) {
+        def correctionDate = departmentReportPeriodService.get(departmentReportPeriodId).correctionDate
+        isCorrectionPeriodMap[departmentReportPeriodId] = (correctionDate ? true : false)
+    }
+    return isCorrectionPeriodMap[departmentReportPeriodId]
+}
+
+def getReportPeriod() {
+    if (reportPeriod == null) {
+        reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    }
+    return reportPeriod
+}
+
+def getFormTypeName() {
+    if (formTypeName == null) {
+        formTypeName = formTypeService.get(formData.formType.id).name
+    }
+    return formTypeName
 }
