@@ -835,7 +835,9 @@ def getPrevDataRows() {
         // поиск формы предыдущего периода в статусе отличной от "создана"
         for (def report : reportPeriods) {
             def formDataTmp = formDataService.getLast(formData.formType.id, formData.kind,  formDataDepartment.id, report.id, null)
-            if (!isCorrectionPeriod(formDataTmp.departmentReportPeriodId) && formDataTmp.state != WorkflowState.CREATED) {
+            // форма подходил если: она существует, она не в состоянии "создана" и не в корректирующем периоде
+            if (formDataTmp != null && !isCorrectionPeriod(formDataTmp.departmentReportPeriodId)
+                    && formDataTmp.state != WorkflowState.CREATED) {
                 prevDataRows = formDataService.getDataRowHelper(formDataTmp)?.getAllSaved()
                 break
             }
