@@ -1073,7 +1073,7 @@ void generateXML() {
                                                 (row.phone ? [Тлф : row.phone] : [:])) {
                                     МНПолуч(
                                             (row.zipCode ? [Индекс : row.zipCode] : [:]) +
-                                                    [КодРегион : getRefBookValue(4, row.subdivisionRF)?.CODE?.value] +
+                                                    [КодРегион : ((getRefBookValue(4, row.subdivisionRF)?.CODE?.value)?:'00')] +
                                                     (row.area? [Район : row.area] : [:]) +
                                                     (row.city ? [Город : row.city] : [:]) +
                                                     (row.region ? [НаселПункт : row.region] : [:]) +
