@@ -27,5 +27,9 @@ drop table data_row_temp;
 create index i_data_row_fdata_manual_type on data_row(form_data_id, manual, type);
 ---------------------------------------------------------------------------------------------
 
+--http://jira.aplana.com/browse/SBRFACCTAX-10547: Удаление констрейнта на DATA_ROW, деактивированного в 0.5
+drop index data_row_uniq_form_data_order;
+alter table data_row drop constraint data_row_uniq_form_data_order;
+
 commit;
 end;
