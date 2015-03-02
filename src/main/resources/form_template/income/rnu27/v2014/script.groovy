@@ -942,8 +942,7 @@ void importTransportData() {
     }
     dataRows = null
     dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    checkTotalSum(dataRows, totalColumns, logger, false)
+    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 // Добавляет строку в текущий буфер строк
@@ -1059,7 +1058,7 @@ boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowI
 }
 
 static String pure(String cell) {
-    return StringUtils.cleanString(cell).intern()
+    return StringUtils.cleanString(cell).intern()          
 }
 
 // Сортировка групп и строк

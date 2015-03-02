@@ -3,7 +3,7 @@
     <fixedRows>true</fixedRows>
     <name>Доходы, учитываемые в простых РНУ (доходы простые)</name>
     <fullName>Доходы, учитываемые в простых РНУ (доходы простые) Сбербанка</fullName>
-    <code>787/Д/1</code>
+    <header>787/Д/1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>incomeTypeId</alias>
         <checking>false</checking>
