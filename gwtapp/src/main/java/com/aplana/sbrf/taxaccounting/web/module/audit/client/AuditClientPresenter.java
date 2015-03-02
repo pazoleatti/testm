@@ -1,9 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -43,8 +44,6 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     interface MyView extends ViewWithSortableTable, HasUiHandlers<AuditClientUIHandler> {
         void setAuditTableData(int startIndex, long count, List<LogSearchResultItem> itemList);
 
-        void getBlobFromServer(String uuid);
-
         void updateData();
 
         void updateData(int pageNumber);
@@ -54,6 +53,12 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         HistoryBusinessSearchOrdering getSearchOrdering();
 
         void setVisibleArchiveButton(boolean isVisible);
+
+        void updatePrintReportButtonName(ReportType reportType, boolean isVisible);
+
+        void startTimerReport(ReportType reportType);
+
+        void stopTimerReport(ReportType reportType);
 
     }
 
@@ -113,10 +118,11 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
             dataAction.setLogSystemFilter(new LogSystemAuditFilter(auditFilterPresenter.getLogSystemFilter()));
             dataAction.getLogSystemFilter().setStartIndex(0);
             dataAction.getLogSystemFilter().setCountOfRecords(0);
-            dispatcher.execute(dataAction, CallbackUtils.defaultCallback(new AbstractCallback<PrintAuditDataResult>() {
+            dispatcher.execute(dataAction, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<PrintAuditDataResult>() {
                 @Override
                 public void onSuccess(PrintAuditDataResult result) {
-                    getView().getBlobFromServer(result.getUuid());
+                    LogAddEvent.fire(AuditClientPresenter.this, result.getLogUuid());
+                    getView().startTimerReport(ReportType.CSV_AUDIT);
                 }
 
                 @Override
@@ -146,6 +152,54 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         LogAddEvent.fire(AuditClientPresenter.this, uuid);
     }
 
+    @Override
+    public void onTimerReport(final ReportType reportType,  final boolean isTimer) {
+        TimerReportAction action = new TimerReportAction();
+        action.setReportType(reportType);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallbackNoLock(new AbstractCallback<TimerReportResult>() {
+                    @Override
+                    public void onSuccess(TimerReportResult result) {
+                        if (reportType==ReportType.ARCHIVE_AUDIT){
+                            if (isTimer){
+                                GetLastArchiveDateAction action = new GetLastArchiveDateAction();
+                                dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<GetLastArchiveDateResult>() {
+                                    @Override
+                                    public void onSuccess(GetLastArchiveDateResult result) {
+                                        getView().updateArchiveDateLbl(result.getLastArchiveDate());
+                                    }
+                                }, AuditClientPresenter.this));
+                                getView().updatePrintReportButtonName(reportType, !result.isLocked() && result.isExist());
+                            } else{
+                                DownloadUtils.
+                                        openInIframe("download/downloadBlobController/processArchiveDownload/" + result.getUuid());
+                                getView().stopTimerReport(ReportType.ARCHIVE_AUDIT);
+                            }
+
+                        } else if (reportType == ReportType.CSV_AUDIT){
+                            if (!isTimer){
+                                DownloadUtils.
+                                        openInIframe("download/downloadBlobController/processLogDownload/" + result.getUuid());
+                                getView().updatePrintReportButtonName(ReportType.CSV_AUDIT, false);
+                                getView().stopTimerReport(ReportType.CSV_AUDIT);
+                            } else{
+                                getView().updatePrintReportButtonName(reportType, !result.isLocked() && result.isExist());
+                            }
+                        }
+                    }
+                }, this));
+    }
+
+    @Override
+    public void downloadArchive() {
+
+    }
+
+    @Override
+    public void downloadCsv() {
+
+    }
+
     @ProxyEvent
     @Override
     public void onAuditArchiveClickEvent(AuditArchiveDialogEvent event) {
@@ -154,14 +208,15 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         logSystemFilter.setFromSearchDate(new Date(0));
         AuditArchiveAction action = new AuditArchiveAction();
         action.setLogSystemFilter(logSystemFilter);
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<AuditArchiveResult>() {
+        dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<AuditArchiveResult>() {
             @Override
             public void onSuccess(AuditArchiveResult result) {
                 LogCleanEvent.fire(AuditClientPresenter.this);
                 LogAddEvent.fire(AuditClientPresenter.this, result.getUuid());
-                if (!result.isException()) {
-                    MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно. Архивировано " + result.getCountOfRemoveRecords() + " записей");
-                    getView().getBlobFromServer(result.getFileUuid());
+                getView().startTimerReport(ReportType.ARCHIVE_AUDIT);
+                /*if (!result.isException()) {
+                    //MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно. Архивировано " + result.getCountOfRemoveRecords() + " записей");
+//                    getView().getBlobFromServer(result.getFileUuid());
                     GetLastArchiveDateAction action = new GetLastArchiveDateAction();
                     dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<GetLastArchiveDateResult>() {
                         @Override
@@ -173,7 +228,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                     auditFilterPresenter.onSearchButtonClicked();
                 } else {
                     Dialog.errorMessage("Архивация не выполнена");
-                }
+                }*/
             }
         }, this));
         getProxy().manualReveal(AuditClientPresenter.this);
@@ -212,11 +267,15 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     protected void onHide() {
         super.onHide();
         clearSlot(TYPE_AUDIT_FILTER_PRESENTER);
+        getView().stopTimerReport(ReportType.CSV_AUDIT);
+        getView().stopTimerReport(ReportType.ARCHIVE_AUDIT);
     }
 
     @Override
     protected void onReveal() {
         super.onReveal();
         setInSlot(TYPE_AUDIT_FILTER_PRESENTER, auditFilterPresenter);
+        getView().startTimerReport(ReportType.CSV_AUDIT);
+        getView().startTimerReport(ReportType.ARCHIVE_AUDIT);
     }
 }

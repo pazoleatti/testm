@@ -55,14 +55,14 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
     }
 
     @Override
-    protected byte[] flushBlobData() throws IOException {
+    protected File flushBlobDataFile() throws IOException {
         String fileName = String.format(PATTER_LOG_FILE_NAME,
                 SDF_LOG_NAME.format(items.get(items.size() - 1).getLogDate()),
                 SDF_LOG_NAME.format(items.get(0).getLogDate()));
         String tmpDir = System.getProperty("java.io.tmpdir");
         File file = new File(tmpDir + File.separator + fileName + ".csv");
         FileWriter fileWriter = new FileWriter(file);
-        FileReader fileReader = new FileReader(file);
+        File zipFile = new File(tmpDir + File.separator + fileName + POSTFIX);
         try {
             CSVWriter csvWriter = new CSVWriter(fileWriter, ';');
 
@@ -72,21 +72,22 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
             }
             csvWriter.close();
 
-            File zipFile = new File(tmpDir + File.separator + fileName + POSTFIX);
             ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
             ZipEntry zipEntry = new ZipEntry(file.getName());
             zout.putNextEntry(zipEntry);
             zout.write(IOUtils.toByteArray(new FileReader(file), ENCODING));
             zout.close();
 
-            return IOUtils.toByteArray(fileReader);
+            return zipFile;
         } catch (IOException e) {
             throw new IOException(e);
         } finally {
             IOUtils.closeQuietly(fileWriter);
-            IOUtils.closeQuietly(fileReader);
+            //IOUtils.closeQuietly(fileReader);
             if (!file.delete())
                 logger.warn(String.format("Временнный файл %s не был удален.", file.getName()));
+            /*if (!zipFile.delete())
+                logger.warn(String.format("Временнный файл %s не был удален.", zipFile.getName()));*/
         }
     }
 

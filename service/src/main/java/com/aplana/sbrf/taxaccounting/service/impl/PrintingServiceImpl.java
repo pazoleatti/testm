@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -183,12 +184,18 @@ public class PrintingServiceImpl implements PrintingService {
 
     @Override
     public String generateAuditCsv(List<LogSearchResultItem> resultItems) {
+        File zipCsv = null;
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
-            return blobDataService.create(new ByteArrayInputStream(logSystemCsvBuilder.createBlobData()), "");
+            zipCsv = logSystemCsvBuilder.createBlobDataFile();
+            return blobDataService.create(zipCsv, "Отчет.zip");
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemXlsxReportBuilder.class);
+        } finally {
+            if (zipCsv != null && !zipCsv.delete()) {
+                logger.warn(String.format("Временный файл %s не удален.", zipCsv.getAbsolutePath()));
+            }
         }
     }
 }

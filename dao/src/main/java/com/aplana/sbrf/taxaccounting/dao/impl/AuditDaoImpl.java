@@ -140,6 +140,57 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     }
 
     @Override
+    public long getCountForControl(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds) {
+        cutOffLogSystemFilter(filter);
+
+        ArrayList<Integer> s_45_s_55_join = new ArrayList<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_55).size() +
+                availableDepIds.get(SAMPLE_NUMBER.S_45).size());
+        s_45_s_55_join.addAll(availableDepIds.get(SAMPLE_NUMBER.S_55));
+        s_45_s_55_join.addAll(availableDepIds.get(SAMPLE_NUMBER.S_45));
+        //2б,4б
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("with ");
+        //Судя по постановке, выборка SAMPLE_NUMBER.S_10 пустой быть не
+        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
+                SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45_s_55_join)));
+        //3б
+        ps.appendQuery(",\n");
+        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_PERFORMER,
+                SqlUtils.transformToSqlInStatement("src.PERFORMER_DEP_ID", availableDepIds.get(SAMPLE_NUMBER.S_10))));
+        ps.appendQuery(LOG_SYSTEM_DATA_BY_FILTER_COUNT);
+        ps.appendQuery("WHERE (");
+        //Фильтрация 2а,4а
+        ps.appendQuery(String.format(DEPARTMENT_SOURCES_CLAUSE,
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
+        ps.appendQuery(" OR ");
+        //Фильтрация 3а
+        ps.appendQuery(String.format(DEPARTMENT_PERFORMER_CLAUSE,
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
+        ps.appendQuery(" OR ");
+        //1.Отображение всех событий с кодами 1, 2, 3, 6, 10*, 40*, 7, 90*
+        ps.appendQuery(String.format("( %s AND %s )",
+                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%"))));
+        ps.appendQuery(" OR ");
+        //5.Отображение всех событий с кодами 90*
+        ps.appendQuery(String.format("( %s AND %s )",
+                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_s_55_join),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
+        ps.appendQuery(" )");
+        appendSelectWhereClause(ps, filter, " AND ");
+        try{
+            return getJdbcTemplate().queryForLong(ps.getQuery().toString(), ps.getParams().toArray());
+        } catch (EmptyResultDataAccessException e){
+            return 0;
+        }
+    }
+
+    @Override
     public PagingResult<LogSearchResultItem> getLogsBusinessForOper(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds) {
         //2б
         PreparedStatementData ps = new PreparedStatementData();
@@ -194,6 +245,48 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     }
 
     @Override
+    public long getCountForOper(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds) {
+        //2б
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery("with ");
+        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
+                SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                !availableDepIds.get(SAMPLE_NUMBER.S_55).isEmpty() ?
+                        SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)) :
+                        "1=1"));
+        ps.appendQuery(LOG_SYSTEM_DATA_BY_FILTER_COUNT);
+        ps.appendQuery("WHERE (");
+        //Фильтрация 2а
+        ps.appendQuery(String.format(DEPARTMENT_SOURCES_CLAUSE,
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
+        ps.appendQuery(" OR ");
+        //1.Отображение всех событий с кодами 1, 2, 3, 6, 10*, 40*, 7, 90*
+        ps.appendQuery(String.format("( %s AND %s )",
+                !availableDepIds.get(SAMPLE_NUMBER.S_10).isEmpty() ?
+                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)) :
+                        "1=1",
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%"))));
+        ps.appendQuery(" OR ");
+        //3.Отображение всех событий с кодами 90*
+        ps.appendQuery(String.format("( %s AND %s )",
+                !availableDepIds.get(SAMPLE_NUMBER.S_55).isEmpty() ?
+                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)) :
+                        "1=1",
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
+        ps.appendQuery(" )");
+
+        appendSelectWhereClause(ps, filter, " AND ");
+        try{
+            return getJdbcTemplate().queryForLong(ps.getQuery().toString(), ps.getParams().toArray());
+        } catch (EmptyResultDataAccessException e){
+            return 0;
+        }
+    }
+
+    @Override
     public PagingResult<LogSearchResultItem> getLogsBusinessForControlUnp(LogSystemFilter filter) {
         cutOffLogSystemFilter(filter);
 
@@ -225,6 +318,47 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
     }
 
+    @Override
+    public long getCountForControlUnp(LogSystemFilter filter) {
+        cutOffLogSystemFilter(filter);
+
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery(LOG_SYSTEM_DATA_BY_FILTER_COUNT);
+
+        ps.appendQuery("WHERE (");
+        ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                eventDao.getEventCodes(TARole.ROLE_CONTROL, Arrays.asList(501, 502, 601, 701))));
+        ps.appendQuery(" )");
+
+        appendSelectWhereClause(ps, filter, " AND ");
+        try{
+            return getJdbcTemplate().queryForLong(ps.getQuery().toString(), ps.getParams().toArray());
+        } catch (EmptyResultDataAccessException e){
+            return 0;
+        }
+    }
+
+
+    private static final String LOG_SYSTEM_DATA_BY_FILTER_COUNT = "select count(*) " +
+            "from log_system ls " +
+            "left join event ev on ls.event_id=ev.\"ID\" " +
+            "left join form_kind fk on ls.form_kind_id=fk.\"ID\" ";
+
+    @Override
+    public long getCount(final LogSystemFilter filter) {
+        cutOffLogSystemFilter(filter);
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery(LOG_SYSTEM_DATA_BY_FILTER_COUNT);
+        ps.appendQuery("WHERE ");
+        appendSelectWhereClause(ps, filter, "");
+        try{
+            return getJdbcTemplate().queryForLong(
+                    ps.getQuery().toString(),
+                    ps.getParams().toArray());
+        } catch (EmptyResultDataAccessException e){
+            return 0;
+        }
+    }
 
     @Override
 	public void add(LogSystem logSystem) {

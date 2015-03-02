@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
 
 /**
@@ -10,4 +11,7 @@ public interface AuditClientUIHandler extends AplanaUiHandlers {
     void onArchiveButtonClicked();
     void onSortingChanged();
     void onEventClick(String uuid);
+    void onTimerReport(ReportType reportType, boolean isTimer);
+    void downloadArchive();
+    void downloadCsv();
 }

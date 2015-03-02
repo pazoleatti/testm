@@ -6,13 +6,13 @@ import com.gwtplatform.dispatch.shared.Result;
  * User: avanteev
  */
 public class PrintAuditDataResult implements Result {
-    private String uuid;
+    private String logUuid;
 
-    public String getUuid() {
-        return uuid;
+    public String getLogUuid() {
+        return logUuid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setLogUuid(String logUuid) {
+        this.logUuid = logUuid;
     }
 }

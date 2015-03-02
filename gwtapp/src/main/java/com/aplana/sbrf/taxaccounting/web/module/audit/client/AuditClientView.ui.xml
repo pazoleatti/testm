@@ -58,11 +58,16 @@
                         <style:LeftBar marginRight="10" childValign="middle" height="100%">
                             <g:Label text="Дата последней архивации: " ui:field="archiveLbl"/>
                             <g:Label ui:field="archiveDateLbl" styleName="{style.lableStyle}" />
+                            <style:LinkAnchor text="Выгрузить" ui:field="downloadArchive"
+                                              title="Выгрузить" visible="false"/>
                             <style:LinkAnchor text="Архивировать" ui:field="archive" img="resources/img/starfish-16.png"
                                               title="Архивировать"/>
-                            <style:LinkAnchor text="Выгрузить в xlsx" ui:field="printButton"
+                            <style:LinkAnchor text="Сформировать ZIP" ui:field="printButton"
                                               img="resources/img/download-xls-16.png"
-                                              title="Выгрузить в xlsx"/>
+                                              title="Сформировать ZIP"/>
+                            <style:LinkAnchor text="Выгрузить ZIP" ui:field="downloadCsvButton" visible="false"
+                                              img="resources/img/download-xls-16.png"
+                                              title="Выгрузить ZIP"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

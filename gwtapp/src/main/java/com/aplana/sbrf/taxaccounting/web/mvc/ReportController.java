@@ -41,16 +41,30 @@ public class ReportController {
     private static final String ENCODING = "UTF-8";
 
     /**
-     * Обработка запроса для формирования отчета по журналу аудита
+     * Получает архив ЖА
+     * @param uuid
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping(value = "/processArchiveDownload/{uuid}", method = RequestMethod.GET)
+    public void processDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        BlobData blobData = blobDataService.get(uuid);
+        createResponse(request, response, blobData);
+    }
+
+    /**
+     * Получает отчет по ЖА
      * @param uuid
      * @param request
      * @param response
      * @throws IOException
      */
     @RequestMapping(value = "/processLogDownload/{uuid}", method = RequestMethod.GET)
-    public void processDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void processLogDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
         BlobData blobData = blobDataService.get(uuid);
         createResponse(request, response, blobData);
+        reportService.deleteAudit(uuid);
         blobDataService.delete(uuid);
     }
 

@@ -1,8 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.model.LogSystem;
-import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
+import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +11,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -50,6 +50,40 @@ public class AuditDaoTest {
 
         auditDao.add(logSystem);
     }
+
+    @Test
+    public void testCount() {
+        LogSystemFilter filter = new LogSystemFilter();
+        filter.setCountOfRecords(10);
+        filter.setStartIndex(0);
+        filter.setFromSearchDate(new Date(1304247365000l));
+        filter.setToSearchDate(new Date(1369911365000l));
+        filter.setFilter("controlBank");
+        filter.setAuditFieldList(Arrays.asList(AuditFieldList.ALL.getId()));
+
+        long count = auditDao.getCount(filter);
+        assertEquals(4, count);
+    }
+
+    /*@Test
+    public void testCountForControl() {
+        LogSystemFilter filter = new LogSystemFilter();
+        filter.setCountOfRecords(10);
+        filter.setStartIndex(0);
+        filter.setFromSearchDate(new Date(1304247365000l));
+        filter.setToSearchDate(new Date(1369911365000l));
+        filter.setFilter("controlBank");
+        filter.setAuditFieldList(Arrays.asList(AuditFieldList.ALL.getId()));
+
+        long count = auditDao.getCountForControl(filter,
+                new HashMap<AuditDao.SAMPLE_NUMBER, Collection<Integer>>()
+                {{
+                    put(AuditDao.SAMPLE_NUMBER.S_55, Arrays.asList(10));
+                    put(AuditDao.SAMPLE_NUMBER.S_45, Arrays.asList(10));
+                    put(AuditDao.SAMPLE_NUMBER.S_10, Arrays.asList(10));
+                }});
+        assertEquals(4, count);
+    }*/
 
     /*@Test
     public void testGet() {

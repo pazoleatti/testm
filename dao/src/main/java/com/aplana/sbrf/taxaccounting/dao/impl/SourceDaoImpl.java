@@ -393,6 +393,30 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         return getJdbcTemplate().queryForInt("select d.id from department d join department_declaration_type ddt on ddt.department_id = d.id where ddt.id = ?", departmentDeclarationTypeId);
     }
 
+    private static final String ADD_DECLARATION_CONSOLIDATION =
+            "insert into DECLARATION_DATA_CONSOLIDATION (TARGET_DECLARATION_DATA_ID, SOURCE_FORM_DATA_ID) values (?,?)";
+
+    @Override
+    public void addDeclarationConsolidationInfo(final Long tgtDeclarationId, Collection<Long> srcFormDataIds) {
+        final Object[] srcArray = srcFormDataIds.toArray();
+        try{
+            getJdbcTemplate().batchUpdate(ADD_DECLARATION_CONSOLIDATION, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setLong(1, tgtDeclarationId);
+                    ps.setLong(2, (Long)srcArray[i]);
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return srcArray.length;
+                }
+            });
+        } catch (DataAccessException e){
+            throw new DaoException("", e);
+        }
+    }
+
     @Override
     public void deleteDeclarationConsolidateInfo(long targetDeclarationDataId) {
         getJdbcTemplate().update("delete from DECLARATION_DATA_CONSOLIDATION where TARGET_DECLARATION_DATA_ID = ?",

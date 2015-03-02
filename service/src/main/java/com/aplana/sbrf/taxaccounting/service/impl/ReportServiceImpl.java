@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -17,6 +18,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private ReportDao reportDao;
+
+    @Autowired
+    private BlobDataService blobDataService;
 
     @Autowired
     private FormDataAccessService formDataAccessService;
@@ -46,13 +50,34 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public void createAudit(int userId, String blobDataId, ReportType type) {
+        reportDao.createAudit(userId, blobDataId, type);
+    }
+
+    @Override
     public String getDec(TAUserInfo userInfo, long declarationDataId, ReportType type) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL1);
         return reportDao.getDec(declarationDataId, type);
     }
 
     @Override
+    public String getAudit(TAUserInfo userInfo, ReportType type) {
+        return reportDao.getAudit(userInfo.getUser().getId(), type);
+    }
+
+    @Override
     public void deleteDec(long formDataId) {
         reportDao.deleteDec(formDataId);
+    }
+
+    @Override
+    public void deleteAudit(TAUserInfo userInfo, ReportType reportType) {
+        reportDao.deleteAudit(userInfo.getUser().getId(), reportType);
+    }
+
+    @Override
+    public void deleteAudit(String blobDataId) {
+        reportDao.deleteAudit(blobDataId);
+        blobDataService.delete(blobDataId);
     }
 }

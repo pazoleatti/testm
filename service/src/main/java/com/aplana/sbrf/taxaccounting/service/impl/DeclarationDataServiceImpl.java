@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -101,6 +102,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private SourceService sourceService;
 
+    @Autowired
+    private DepartmentFormTypeDao departmentFormTypeDao;
+
+    @Autowired
+    private FormDataService formDataService;
+
     private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
 
     public static final String TAG_FILE = "Файл";
@@ -111,6 +118,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
     public static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"";
+    private static final String CONSOLIDATION_WARN =
+            "Не выполнена консолидация данных из формы %s %s %s %s %s в статусе %s";
 
     private static final Date MAX_DATE;
     private static final Calendar CALENDAR = Calendar.getInstance();
@@ -205,7 +214,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
 
+        //2. проверяет состояние XML отчета экземпляра декларации
         setDeclarationBlobs(logger, declarationData, docDate, userInfo);
+
+        //3. обновляет записи о консолидации
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
+        DeclarationTemplate template = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
+                (int) id,
+                template.getType().getId(),
+                reportPeriod.getCalendarStartDate(),
+                reportPeriod.getEndDate());
+        ArrayList<Long> formDataIds = new ArrayList<Long>();
+        for (DepartmentFormType dftSource : dftSources){
+            DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
+            FormData formData =
+                    formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), null);
+            formDataIds.add(formData.getId());
+        }
+        //Обновление информации о консолидации.
+        //TODO: Может имеет смысл оптимизировать и не добавлять в инфо по консолидации, которая уже была
+        sourceService.deleteDeclarationConsolidateInfo(id);
+        sourceService.addDeclarationConsolidationInfo(id, formDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
         auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData.getDepartmentId(),

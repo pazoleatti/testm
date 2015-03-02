@@ -134,6 +134,13 @@ public interface SourceDao {
     Integer getDepartmentIdByDepartmentDeclarationType(long departmentDeclarationTypeId);
 
     /**
+     * Обновляет информацию о консолидации(т.е. была ли она сделана).
+     * @param tgtFormDataId идентификатор НФ
+     * @param srcFormDataIds форма-источник с которой делалась консолидация для НФ
+     */
+    void addDeclarationConsolidationInfo(Long tgtDeclarationId, Collection<Long> srcFormDataIds);
+
+    /**
      * Удалить записи о консолидации для текущего экземпляра
      * @param targetDeclarationDataId идентификатор декларации
      */

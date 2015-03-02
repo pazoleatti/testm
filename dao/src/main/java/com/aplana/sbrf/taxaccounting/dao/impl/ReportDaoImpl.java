@@ -67,6 +67,13 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
+    public void createAudit(int userId, String blobDataId, ReportType type) {
+        getJdbcTemplate().update(
+                "INSERT INTO LOG_SYSTEM_REPORT (SEC_USER_ID, BLOB_DATA_ID, TYPE) VALUES (?,?,?)",
+                userId, blobDataId, type.getId());
+    }
+
+    @Override
     public String get(final long formDataId, final ReportType type, final boolean checking, final boolean manual, final boolean absolute) {
         try{
             PreparedStatementData ps = new PreparedStatementData();
@@ -102,6 +109,20 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
+    public String getAudit(int userId, ReportType type) {
+        try{
+            return getJdbcTemplate().queryForObject(
+                    "select blob_data_id from log_system_report where type=? and sec_user_id=?",
+                    new Object[]{type.getId(), userId},
+                    String.class);
+        } catch (EmptyResultDataAccessException e){
+            return null;
+        } catch (DataAccessException e){
+            throw new DaoException("Не удалось получить отчет ЖА", e);
+        }
+    }
+
+    @Override
     public void delete(long formDataId, Boolean manual) {
         try {
             Map<String, Object> params = new HashMap<String, Object>();
@@ -123,6 +144,25 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                     new int[]{Types.INTEGER});
         } catch (DataAccessException e){
             throw new DaoException(String.format("Не удалось удалить записи с declaration_data_id = %d", declarationDataId), e);
+        }
+    }
+
+    @Override
+    public void deleteAudit(int userId, ReportType reportType) {
+        try{
+            getJdbcTemplate().update("delete from log_system_report where type=? and sec_user_id=?",
+                    userId, reportType.getId());
+        } catch (DataAccessException e){
+            throw new DaoException(String.format("Не удалось удалить записи ЖА пользователя с идентификатором %d ", userId), e);
+        }
+    }
+
+    @Override
+    public void deleteAudit(String blobDataId) {
+        try{
+            getJdbcTemplate().update("delete from log_system_report where blob_data_id=?", blobDataId);
+        } catch (DataAccessException e){
+            throw new DaoException("Не удалось удалить записи ЖА", e);
         }
     }
 }
