@@ -136,14 +136,14 @@ void generateXML() {
     // атрибуты, заполняемые по форме 937.1.1 (строки 001, 005 и 190 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
     def code001 = null
-    def (code005, code190) = [empty, empty]
+    def (code005, code190) = [null, null]
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 616) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-            code005 = getDataRow(sourceDataRows, 'head')?.nds ?: empty  // "Итого"
-            code190 = getDataRow(sourceDataRows, 'total')?.nds ?: empty // "Всего"
+            code005 = getDataRow(sourceDataRows, 'head')?.nds // "Итого"
+            code190 = getDataRow(sourceDataRows, 'total')?.nds // "Всего"
         }
     }
     if (corrNumber > 0) {
@@ -161,8 +161,8 @@ void generateXML() {
                         (code001 != null ? [ПризнСвед81: code001] : [:])
         ) {
             КнигаПокупДЛ(
-                    СумНДСИтКПк: code005,
-                    СумНДСИтП1Р8: code190
+                    (code005 != null ? [СумНДСИтКПк: code005] : [:]) +
+                            (code190 != null ? [СумНДСИтП1Р8: code190] : [:])
             ) {
                 hasPage = false
                 for (def row : sourceDataRows) {

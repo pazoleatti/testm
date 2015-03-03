@@ -136,13 +136,13 @@ void generateXML() {
     // атрибуты, заполняемые по форме 937.1 (строки 001 и 190 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
     def code001 = null
-    def code190 = empty
+    def code190 = null
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 606) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-            code190 = getDataRow(sourceDataRows, 'total')?.nds ?: empty
+            code190 = getDataRow(sourceDataRows, 'total')?.nds
         }
     }
     if (corrNumber > 0) {
@@ -160,7 +160,7 @@ void generateXML() {
                         (code001 != null ? [ПризнСвед8: code001] : [:])
         ) {
             КнигаПокуп(
-                    СумНДСВсКПк: code190
+                    (code190 != null ? [СумНДСВсКПк: code190] : [:])
             ) {
                 hasPage = false
                 for (def row : sourceDataRows) {
@@ -297,9 +297,9 @@ def getDate(def String str) {
 
 def getCurrencyCode(String str) {
     if (str != null) {
-            if ((str.length() > 3 && str.codePointAt(str.length() - 4).equals(32)) || str.length() == 3) {
-                return str.substring(str.length() - 3)
-            }
+        if ((str.length() > 3 && str.codePointAt(str.length() - 4).equals(32)) || str.length() == 3) {
+            return str.substring(str.length() - 3)
         }
+    }
     return null
 }

@@ -136,19 +136,19 @@ void generateXML() {
     // атрибуты, заполняемые по форме 937.2 (строки 001 и 230-280 отдельно, остальное в массиве sourceDataRows)
     def sourceDataRows = []
     def code001 = null
-    def (code230, code240, code250, code260, code270, code280) = [empty, empty, empty, empty, empty, empty]
+    def (code230, code240, code250, code260, code270, code280) = [null, null, null, null, null, null]
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 608) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
             def totalRow = getDataRow(sourceDataRows, 'total')
-            code230 = totalRow?.saleCostB18 ?: empty
-            code240 = totalRow?.saleCostB10 ?: empty
-            code250 = totalRow?.saleCostB0 ?: empty
-            code260 = totalRow?.vatSum18 ?: empty
-            code270 = totalRow?.vatSum10 ?: empty
-            code280 = totalRow?.bonifSalesSum ?: empty
+            code230 = totalRow?.saleCostB18
+            code240 = totalRow?.saleCostB10
+            code250 = totalRow?.saleCostB0
+            code260 = totalRow?.vatSum18
+            code270 = totalRow?.vatSum10
+            code280 = totalRow?.bonifSalesSum
         }
     }
     if (corrNumber > 0) {
@@ -166,12 +166,12 @@ void generateXML() {
                         (code001 != null ? [ПризнСвед9: code001] : [:])
         ) {
             КнигаПрод(
-                    СтПродБезНДС18: code230,
-                    СтПродБезНДС10: code240,
-                    СтПродБезНДС0: code250,
-                    СумНДСВсКПр18: code260,
-                    СумНДСВсКПр10: code270,
-                    СтПродОсвВсКПр: code280
+                    (code230 != null ? [СтПродБезНДС18: code230] : [:]) +
+                            (code240 != null ? [СтПродБезНДС10: code240] : [:]) +
+                            (code250 != null ? [СтПродБезНДС0: code250] : [:]) +
+                            (code260 != null ? [СумНДСВсКПр18: code260] : [:]) +
+                            (code270 != null ? [СумНДСВсКПр10: code270] : [:]) +
+                            (code280 != null ? [СтПродОсвВсКПр: code280] : [:])
             ) {
                 hasPage = false
                 for (def row : sourceDataRows) {

@@ -137,7 +137,7 @@ void generateXML() {
     def sourceDataRows = []
     def code001 = null
     def (code020, code030, code040, code050, code060, code070, code310, code320, code330, code340, code350, code360) =
-    [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty]
+    [null, null, null, null, null, null, null, null, null, null, null, null]
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 617) {
@@ -145,18 +145,18 @@ void generateXML() {
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
             def headRow = getDataRow(sourceDataRows, 'head') // "Итого"
             def totalRow = getDataRow(sourceDataRows, 'total') // "Всего"
-            code020 = headRow?.saleCostB18 ?: empty
-            code030 = headRow?.saleCostB10 ?: empty
-            code040 = headRow?.saleCostB0 ?: empty
-            code050 = headRow?.vatSum18 ?: empty
-            code060 = headRow?.vatSum10 ?: empty
-            code070 = headRow?.bonifSalesSum ?: empty
-            code310 = totalRow?.saleCostB18 ?: empty
-            code320 = totalRow?.saleCostB10 ?: empty
-            code330 = totalRow?.saleCostB0 ?: empty
-            code340 = totalRow?.vatSum18 ?: empty
-            code350 = totalRow?.vatSum10 ?: empty
-            code360 = totalRow?.bonifSalesSum ?: empty
+            code020 = headRow?.saleCostB18
+            code030 = headRow?.saleCostB10
+            code040 = headRow?.saleCostB0
+            code050 = headRow?.vatSum18
+            code060 = headRow?.vatSum10
+            code070 = headRow?.bonifSalesSum
+            code310 = totalRow?.saleCostB18
+            code320 = totalRow?.saleCostB10
+            code330 = totalRow?.saleCostB0
+            code340 = totalRow?.vatSum18
+            code350 = totalRow?.vatSum10
+            code360 = totalRow?.bonifSalesSum
         }
     }
     if (corrNumber > 0) {
@@ -174,18 +174,19 @@ void generateXML() {
                         (code001 != null ? [ПризнСвед91: code001] : [:])
         ) {
             КнигаПродДЛ(
-                    ИтСтПродКПр18: code020,
-                    ИтСтПродКПр10: code030,
-                    ИтСтПродКПр0: code040,
-                    СумНДСИтКПр18: code050,
-                    СумНДСИтКПр10: code060,
-                    ИтСтПродОсвКПр: code070,
-                    СтПродВсП1Р9_18: code310,
-                    СтПродВсП1Р9_10: code320,
-                    СтПродВсП1Р9_0: code330,
-                    СумНДСВсП1Р9_18: code340,
-                    СумНДСВсП1Р9_10: code350,
-                    СтПродОсвП1Р9Вс: code360,
+                    (code020 != null ? [ИтСтПродКПр18: code020] : [:]) +
+                            (code030 != null ? [ИтСтПродКПр10: code030] : [:]) +
+                            (code040 != null ? [ИтСтПродКПр0: code040] : [:]) +
+                            (code050 != null ? [СумНДСИтКПр18: code050] : [:]) +
+                            (code060 != null ? [СумНДСИтКПр10: code060] : [:]) +
+                            (code070 != null ? [ИтСтПродОсвКПр: code070] : [:]) +
+                            (code310 != null ? [СтПродВсП1Р9_18: code310] : [:]) +
+                            (code320 != null ? [СтПродВсП1Р9_10: code320] : [:]) +
+                            (code330 != null ? [СтПродВсП1Р9_0: code330] : [:]) +
+                            (code340 != null ? [СумНДСВсП1Р9_18: code340] : [:]) +
+                            (code350 != null ? [СумНДСВсП1Р9_10: code350] : [:]) +
+                            (code360 != null ? [СтПродОсвП1Р9Вс: code360] : [:])
+
             ) {
                 hasPage = false
                 for (def row : sourceDataRows) {
