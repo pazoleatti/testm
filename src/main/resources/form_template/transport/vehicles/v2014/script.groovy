@@ -981,7 +981,7 @@ void addData(def xml, int headRowCount) {
             def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
             def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
             def columnName = getColumnName(newRow, 'taxBenefitCode')
-            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, xlsIndexRow, xmlIndexCol + colOffset)
+            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, xlsIndexRow, xmlIndexCol + colOffset, false)
         }
         xmlIndexCol++
 
@@ -1138,8 +1138,8 @@ void addTransportData(def xml) {
         if (row.cell[xmlIndexCol].text()) {
             def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
             if(recordId != null) {
-                def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
-                def columnName = getColumnName(newRow, 'taxBenefitCode')
+                String filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
+                String columnName = getColumnName(newRow, 'taxBenefitCode')
                 newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, rnuIndexRow, xmlIndexCol + colOffset, false)
             }
         }
