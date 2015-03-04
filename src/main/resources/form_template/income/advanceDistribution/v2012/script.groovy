@@ -400,8 +400,8 @@ def calc17_18 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     // графа 17 и 18 расчитывается в конце потому что требует значения графы 19, 20, 21
     // графа 17
     // (Сумма всех нефиксированных строк по «графе 13» - Сумма всех нефиксированных строк по «графе 13» из предыдущего периода) * («графа 13» / Сумма всех нефиксированных строк по «графе 13»)
-    def currentSum = dataRows.sum { (it.getAlias() == null) ? it.taxSum : 0 }
-    def previousSum = prevDataRows.sum { (it.getAlias() == null) ? it.taxSum : 0 }
+    def currentSum = dataRows?.sum { (it.getAlias() == null) ? it.taxSum : 0 } ?: 0
+    def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? it.taxSum : 0 } ?: 0
     switch (reportPeriod.order) {
         case 1: //«графа 17» = «графа 13»
             tmp = row.taxSum
