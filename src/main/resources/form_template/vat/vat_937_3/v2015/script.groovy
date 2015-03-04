@@ -80,9 +80,9 @@ switch (formDataEvent) {
 @Field
 def allColumns = ['fix', 'rowNumber', 'date', 'opTypeCode', 'invoiceNumDate', 'invoiceCorrNumDate', 'corrInvoiceNumDate', 'corrInvCorrNumDate', 'buyerName', 'buyerInnKpp', 'mediatorName', 'mediatorInnKpp', 'mediatorNumDate', 'currNameCode', 'cost', 'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'diffVatInc']
 
-// Проверяемые на пустые значения атрибуты раздела 1 (графа 2..4, 6!, 10..12, 14, 15!, 16!, 17!, 18!, 19!)
+// Проверяемые на пустые значения атрибуты раздела 1 (графа 2..4, 6!, 10, 12, 15!, 16!, 17!, 18!, 19!)
 @Field
-def nonEmptyColumns1 = ['date', 'opTypeCode', 'invoiceNumDate', /*'corrInvoiceNumDate',*/ 'mediatorName', 'mediatorInnKpp', 'mediatorNumDate', 'cost', /*'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'diffVatInc'*/]
+def nonEmptyColumns1 = ['date', 'opTypeCode', 'invoiceNumDate', /*'corrInvoiceNumDate',*/ 'mediatorName', 'mediatorNumDate', /*'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'diffVatInc'*/]
 
 // Проверяемые на пустые значения атрибуты раздела 2 (графа 2..4, 6!, 12, 14, 15!, 16!, 17!, 18!, 19!)
 @Field
@@ -155,6 +155,7 @@ void logicCheck() {
     def FILLED_FILLED_ERROR_MSG = "Строка %s: В случае если графа «%s» заполнена, должна быть заполнена графа «%s»!"
     def SOME_CONDITION_FILLED_ERROR_MSG = "Строка %s: В случае если графы «%s» и «%s» не заполнены, или заполнена графа «%s», должна быть заполнена графа «%s»!"
     def NOT_FILLED_2_FILLED_ERROR_MSG = "Строка %s: В случае если графы «%s» и «%s» не заполнены, должна быть заполнена графа «%s»!"
+    def NOT_FILLED_FILLED_ERROR_MSG = "Строка %s: В случае если графа «%s» не заполнена, должна быть заполнена графа «%s»!"
 
     def COLUMN_12_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 1-4."
 
@@ -193,21 +194,29 @@ void logicCheck() {
         if (row.diffInc != null && row.diffVatInc == null) {
             loggerError(row, String.format(FILLED_FILLED_ERROR_MSG, index, getColumnName(row, 'diffInc'), getColumnName(row, 'diffVatInc')))
         }
-        // 2.4 Если не заполнены «Графа 6» и «Графа 7», то заполнена «Графа 15»
-        if (row.corrInvoiceNumDate == null && row.corrInvCorrNumDate == null && row.vatSum == null) {
-            loggerError(row, String.format(NOT_FILLED_2_FILLED_ERROR_MSG, index, getColumnName(row, 'corrInvoiceNumDate'),
-                    getColumnName(row, 'corrInvCorrNumDate'), getColumnName(row, 'vatSum')))
-        }
-        // 2.5 Если не заполнены «Графа 6» и «Графа 7» или заполнена «Графа 17», то заполнена «Графа 16»
+        // 2.4 Если не заполнены «Графа 6» и «Графа 7» или заполнена «Графа 17», то заполнена «Графа 16»
         if (((row.corrInvoiceNumDate == null && row.corrInvCorrNumDate == null) || row.diffInc != null) && row.diffDec == null) {
             loggerError(row, String.format(SOME_CONDITION_FILLED_ERROR_MSG, index, getColumnName(row, 'corrInvoiceNumDate'),
                     getColumnName(row, 'corrInvCorrNumDate'), getColumnName(row, 'diffInc'), getColumnName(row, 'diffDec')))
         }
-        // 2.6 Если не заполнены «Графа 6» и «Графа 7» или заполнена «Графа 16», то заполнена «Графа 17»
+        // 2.5 Если не заполнены «Графа 6» и «Графа 7» или заполнена «Графа 16», то заполнена «Графа 17»
         if (((row.corrInvoiceNumDate == null && row.corrInvCorrNumDate == null) || row.diffDec != null) && row.diffInc == null) {
             loggerError(row, String.format(SOME_CONDITION_FILLED_ERROR_MSG, index, getColumnName(row, 'corrInvoiceNumDate'),
                     getColumnName(row, 'corrInvCorrNumDate'), getColumnName(row, 'diffDec'), getColumnName(row, 'diffInc')))
         }
+        // 2.6 Часть 1: Если не заполнена «Графа 6», то заполнена «Графа 14»
+        if (isFirstSection && row.corrInvoiceNumDate == null && row.cost == null) {
+            loggerError(row, String.format(NOT_FILLED_FILLED_ERROR_MSG, index, getColumnName(row, 'corrInvoiceNumDate'), getColumnName(row, 'cost')))
+        }
+        // 2.7 Часть 1: Если не заполнена «Графа 6», то заполнена «Графа 15»
+        if (isFirstSection && row.corrInvoiceNumDate == null && row.vatSum == null) {
+            loggerError(row, String.format(NOT_FILLED_FILLED_ERROR_MSG, index, getColumnName(row, 'corrInvoiceNumDate'), getColumnName(row, 'vatSum')))
+        }
+        // 2.8 Часть 2: Если не заполнены «Графа 6» и «Графа 7», то заполнена «Графа 15»
+        if (!isFirstSection && row.corrInvoiceNumDate == null && row.corrInvCorrNumDate == null && row.vatSum == null) {
+            loggerError(row, String.format(NOT_FILLED_2_FILLED_ERROR_MSG, index, getColumnName(row, 'corrInvoiceNumDate'), getColumnName(row, 'corrInvCorrNumDate'), getColumnName(row, 'vatSum')))
+        }
+
 
         // 3. Проверка формата заполнения
         // 3.1 графа 4
