@@ -167,6 +167,16 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 ignoreFileSet.add(fileName);
                 FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
 
+                // Блокировка файла
+                LockData fileLock = lockService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
+                        userInfo.getUser().getId(),
+                        lockService.getLockTimeout(LockData.LockObjects.FILE));
+                if (fileLock != null) {
+                    log(userInfo, LogData.L41, logger, fileName, path);
+                    fail++;
+                    continue;
+                }
+
                 // ЭЦП
                 List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
                 if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
@@ -179,6 +189,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     if (!check) {
                         log(userInfo, LogData.L16, logger, fileName);
                         fail++;
+                        // Разблокировка файла
+                        lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                         if (move) {
                             moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile, null, logger);
                         }
@@ -297,11 +309,14 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                 }
                             } finally {
                                 //Снимаем блокировки
+                                lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                                 for (String lock : lockedObjects) {
                                     lockService.unlock(lock, userId);
                                 }
                             }
                         } else {
+                            // Разблокировка файла
+                            lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                             throw new ServiceException(String.format(LOCK_MESSAGE, refBook.getName()));
                         }
                     } catch (Exception e) {
@@ -313,6 +328,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         log(userInfo, LogData.L21, logger, e.getMessage());
                         // Перемещение в каталог ошибок
                         logger.getEntries().addAll(getEntries(localLoggerList));
+                        // Разблокировка файла
+                        lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                         if (move) {
                             moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger), currentFile,
                                     getEntries(localLoggerList), logger);

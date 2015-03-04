@@ -21,7 +21,9 @@ public final class LockData {
         DECLARATION_TEMPLATE,
         FORM_TEMPLATE,
         LOG_SYSTEM_BACKUP,
-        IFRS
+        LOG_SYSTEM_CSV,
+        IFRS,
+        FILE
     }
 
 	/* Идентификатор блокировки */

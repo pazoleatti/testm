@@ -79,6 +79,7 @@ public abstract class AbstractLoadTransportDataService {
         L42_1("Нет доступа к <каталогу архива «%s»> ТБ «%s»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
         L42_2("Нет доступа к <каталогу ошибок «%s»> ТБ «%s»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
         L42_3("Нет доступа к <каталогу архива «%s» и к каталогу ошибок «%s»> ТБ «%s»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L41("Файл %s пропущен, т.к. он уже обрабатывается системой.", LogLevel.ERROR, true, false),
         // Сообщения которых нет в постановке
         L_1("Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
         L_2("Не указан каталог архива в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false);
@@ -225,12 +226,14 @@ public abstract class AbstractLoadTransportDataService {
             } catch (Exception e) {
                 success = false;
                 log(userInfo, deleteErrorLogData, logger, file.getPath(), e.getMessage());
+                e.printStackTrace();
             }
 
             log(userInfo, successLogData, logger, fileDst.getName());
         } catch (Exception e) {
             success = false;
             log(userInfo, moveErrorLogData, logger, e.getMessage());
+            e.printStackTrace();
         }
         return success;
     }

@@ -173,6 +173,16 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             ignoreFileSet.add(fileName);
             FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
 
+            // Блокировка файла
+            LockData fileLock = lockDataService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
+                    userInfo.getUser().getId(),
+                    lockDataService.getLockTimeout(LockData.LockObjects.FILE));
+            if (fileLock != null) {
+                log(userInfo, LogData.L41, logger, fileName, path);
+                fail++;
+                continue;
+            }
+
             // Обработка файла
             TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
             String formCode = transportDataParam.getFormCode();
@@ -187,6 +197,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Не задан код подразделения или код формы
             if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
                 log(userInfo, LogData.L4, logger, fileName, path);
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), fileName, path))), logger);
                 fail++;
@@ -204,6 +216,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 }
                 if (!check) {
                     log(userInfo, LogData.L16, logger, fileName);
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                             Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L16.getText())), logger);
                     fail++;
@@ -227,6 +241,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Указан несуществующий код подразделения
             if (formDepartment == null) {
                 log(userInfo, LogData.L5, logger, fileName);
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), fileName))), logger);
                 fail++;
@@ -237,6 +253,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             FormType formType = formTypeService.getByCode(formCode);
             if (formType == null) {
                 log(userInfo, LogData.L6, logger, fileName);
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), fileName))), logger);
                 fail++;
@@ -253,6 +271,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // если нет назначения на первичную и выходную, то ошибка
             if (!existedPrimaryAssigning && !existedAdditionalAssigning) {
                 log(userInfo, LogData.L14, logger, formType.getName(), formDepartment.getName());
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
                                 formType.getName(), formDepartment.getName()))), logger);
@@ -267,6 +287,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
             if (reportPeriod == null) {
                 log(userInfo, LogData.L7, logger, fileName);
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), fileName))), logger);
                 fail++;
@@ -281,6 +303,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
                 String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
                 log(userInfo, LogData.L9, logger, formType.getName(), reportPeriodName);
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L9.getText(),
                                 formType.getName(), reportPeriodName))), logger);
@@ -306,6 +330,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             } catch (Exception e) {
                 // Если шаблона нет, то не загружаем ТФ
                 log(userInfo, LogData.L21, logger, e.getMessage());
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), e.getMessage()))), logger);
                 fail++;
@@ -315,6 +341,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             FormTemplate formTemplate = formTemplateService.get(formTemplateId);
             if (monthly != formTemplate.isMonthly()) {
                 log(userInfo, LogData.L4, logger, fileName, path);
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), fileName, path))), logger);
                 fail++;
@@ -330,6 +358,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 Logger localLogger = new Logger();
                 localLogger.error(LogData.L17.getText());
                 log(userInfo, LogData.L17, logger, formType.getName(), formDepartment.getName());
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         localLogger.getEntries(), logger);
                 fail++;
@@ -351,6 +381,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Загрузка
                 result = importFormData(userInfo, departmentId, currentFile, formData, formType, formTemplate,
                         departmentReportPeriod, formDataKind, transportDataParam, formWasCreated, localLogger);
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
 
                 // Вывод скрипта в область уведомлений
                 logger.getEntries().addAll(localLogger.getEntries());
@@ -359,6 +391,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 logger.getEntries().addAll(localLogger.getEntries());
                 // Вывод в область уведомленеий и ЖА
                 log(userInfo, LogData.L21, logger, e.getMessage());
+                // Разблокировка файла
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 // Перемещение в каталог ошибок
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
                         localLogger.getEntries(), logger);
