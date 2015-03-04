@@ -142,7 +142,7 @@
         </name>
         <order>14</order>
         <width>6</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -154,7 +154,7 @@
         </name>
         <order>15</order>
         <width>6</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -166,7 +166,7 @@
         </name>
         <order>16</order>
         <width>6</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -178,7 +178,7 @@
         </name>
         <order>17</order>
         <width>6</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -190,7 +190,7 @@
         </name>
         <order>18</order>
         <width>6</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -202,7 +202,7 @@
         </name>
         <order>19</order>
         <width>6</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -214,7 +214,7 @@
         </name>
         <order>20</order>
         <width>6</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -226,7 +226,7 @@
         </name>
         <order>21</order>
         <width>10</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <styles>

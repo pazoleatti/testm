@@ -161,7 +161,7 @@
         </name>
         <order>16</order>
         <width>7</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -173,7 +173,7 @@
         </name>
         <order>17</order>
         <width>7</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <styles>
