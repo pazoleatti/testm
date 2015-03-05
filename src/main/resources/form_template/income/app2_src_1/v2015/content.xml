@@ -1,46 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Сведения о доходах физ-го лица, выплаченных ему налоговым агентом</name>
+    <name>Сведения о доходах физ-го лица, выплаченных ему налоговым агентом (ЦФО НДФЛ)</name>
     <fullName>Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами,
         операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам
-        российских эмитентов
+        российских эмитентов (ЦФО НДФЛ)
     </fullName>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>refNum</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>Справка №</name>
-        <order>1</order>
-        <width>5</width>
-        <maxLength>7</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
-        <alias>date</alias>
-        <checking>false</checking>
-        <columnType>DATE</columnType>
-        <name>Дата составления</name>
-        <order>2</order>
-        <width>7</width>
-        <formatId>0</formatId>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>type</alias>
-        <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>Тип</name>
-        <order>3</order>
-        <width>5</width>
-        <maxLength>2</maxLength>
-        <precision>0</precision>
-    </columns>
+    <header>app2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>innRF</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>ИНН в РФ</name>
-        <order>4</order>
+        <order>1</order>
         <width>5</width>
         <maxLength>12</maxLength>
         <prevLength>0</prevLength>
@@ -50,7 +22,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>ИНН в стране гражданства</name>
-        <order>5</order>
+        <order>2</order>
         <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
@@ -60,7 +32,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Фамилия</name>
-        <order>6</order>
+        <order>3</order>
         <width>8</width>
         <maxLength>60</maxLength>
         <prevLength>0</prevLength>
@@ -70,7 +42,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Имя</name>
-        <order>7</order>
+        <order>4</order>
         <width>8</width>
         <maxLength>60</maxLength>
         <prevLength>0</prevLength>
@@ -80,7 +52,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Отчество</name>
-        <order>8</order>
+        <order>5</order>
         <width>8</width>
         <maxLength>60</maxLength>
         <prevLength>0</prevLength>
@@ -90,7 +62,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Статус налогоплательщика</name>
-        <order>9</order>
+        <order>6</order>
         <width>9</width>
         <maxLength>1</maxLength>
         <prevLength>0</prevLength>
@@ -100,7 +72,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата рождения</name>
-        <order>10</order>
+        <order>7</order>
         <width>5</width>
         <formatId>0</formatId>
     </columns>
@@ -109,7 +81,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Гражданство (код страны)</name>
-        <order>11</order>
+        <order>8</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
@@ -121,7 +93,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код вида документа, удостоверяющего личность</name>
-        <order>12</order>
+        <order>9</order>
         <width>8</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3602</nameAttributeId>
@@ -133,7 +105,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Серия и номер документа</name>
-        <order>13</order>
+        <order>10</order>
         <width>5</width>
         <maxLength>25</maxLength>
         <prevLength>0</prevLength>
@@ -143,7 +115,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Почтовый индекс</name>
-        <order>14</order>
+        <order>11</order>
         <width>5</width>
         <maxLength>6</maxLength>
         <prevLength>0</prevLength>
@@ -153,7 +125,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Регион (код)</name>
-        <order>15</order>
+        <order>12</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>10</nameAttributeId>
@@ -165,7 +137,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Район</name>
-        <order>16</order>
+        <order>13</order>
         <width>5</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
@@ -175,7 +147,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Город</name>
-        <order>17</order>
+        <order>14</order>
         <width>5</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
@@ -185,7 +157,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Населенный пункт (село, поселок)</name>
-        <order>18</order>
+        <order>15</order>
         <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
@@ -195,7 +167,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Улица (проспект, переулок)</name>
-        <order>19</order>
+        <order>16</order>
         <width>5</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
@@ -205,7 +177,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер дома (владения)</name>
-        <order>20</order>
+        <order>17</order>
         <width>5</width>
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
@@ -215,7 +187,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер корпуса (строения)</name>
-        <order>21</order>
+        <order>18</order>
         <width>5</width>
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
@@ -225,7 +197,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер квартиры</name>
-        <order>22</order>
+        <order>19</order>
         <width>5</width>
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
@@ -235,7 +207,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код страны</name>
-        <order>23</order>
+        <order>20</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
@@ -247,7 +219,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Адрес места жительства за пределами Российской Федерации</name>
-        <order>24</order>
+        <order>21</order>
         <width>6</width>
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
@@ -257,7 +229,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Налоговая ставка</name>
-        <order>25</order>
+        <order>22</order>
         <width>5</width>
         <maxLength>2</maxLength>
         <precision>0</precision>
@@ -267,7 +239,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Общая сумма дохода</name>
-        <order>26</order>
+        <order>23</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -277,7 +249,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Общая сумма вычетов</name>
-        <order>27</order>
+        <order>24</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -287,7 +259,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Налоговая база</name>
-        <order>28</order>
+        <order>25</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -297,7 +269,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога исчисленная</name>
-        <order>29</order>
+        <order>26</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -307,7 +279,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога удержанная</name>
-        <order>30</order>
+        <order>27</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -317,7 +289,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога перечисленная</name>
-        <order>31</order>
+        <order>28</order>
         <width>7</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -327,7 +299,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога, излишне удержанная налоговым агентом</name>
-        <order>32</order>
+        <order>29</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -337,27 +309,17 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога, не удержанная налоговым агентом</name>
-        <order>33</order>
+        <order>30</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>decoding</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>Расшифровка справки о доходах физического лица №</name>
-        <order>34</order>
-        <width>6</width>
-        <maxLength>7</maxLength>
-        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>col_040_1</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>040 (Код дохода)</name>
-        <order>35</order>
+        <order>31</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3702</nameAttributeId>
@@ -369,7 +331,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>041 (Сумма дохода)</name>
-        <order>36</order>
+        <order>32</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -379,7 +341,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>37</order>
+        <order>33</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -391,7 +353,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>38</order>
+        <order>34</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -401,7 +363,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>39</order>
+        <order>35</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -413,7 +375,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>40</order>
+        <order>36</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -423,7 +385,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>41</order>
+        <order>37</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -435,7 +397,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>42</order>
+        <order>38</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -445,7 +407,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>43</order>
+        <order>39</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -457,7 +419,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>44</order>
+        <order>40</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -467,7 +429,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>45</order>
+        <order>41</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -479,7 +441,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>46</order>
+        <order>42</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -489,7 +451,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>040 (код дохода)</name>
-        <order>47</order>
+        <order>43</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3702</nameAttributeId>
@@ -501,7 +463,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>041 (Сумма дохода)</name>
-        <order>48</order>
+        <order>44</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -511,7 +473,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>49</order>
+        <order>45</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -523,7 +485,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>50</order>
+        <order>46</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -533,7 +495,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>51</order>
+        <order>47</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -545,7 +507,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>52</order>
+        <order>48</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -555,7 +517,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>53</order>
+        <order>49</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -567,7 +529,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>54</order>
+        <order>50</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -577,7 +539,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>55</order>
+        <order>51</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -589,7 +551,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>56</order>
+        <order>52</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -599,7 +561,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>57</order>
+        <order>53</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -611,7 +573,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>58</order>
+        <order>54</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -621,7 +583,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>040 (код дохода)</name>
-        <order>59</order>
+        <order>55</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3702</nameAttributeId>
@@ -633,7 +595,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>041 (Сумма дохода)</name>
-        <order>60</order>
+        <order>56</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -643,7 +605,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>61</order>
+        <order>57</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -655,7 +617,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>62</order>
+        <order>58</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -665,7 +627,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>63</order>
+        <order>59</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -677,7 +639,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>64</order>
+        <order>60</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -687,7 +649,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>65</order>
+        <order>61</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -699,7 +661,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>66</order>
+        <order>62</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -709,7 +671,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>67</order>
+        <order>63</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -721,7 +683,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>68</order>
+        <order>64</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -731,7 +693,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>042 (Код вычета)</name>
-        <order>69</order>
+        <order>65</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -743,7 +705,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>70</order>
+        <order>66</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -753,7 +715,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>051 (Код вычета)</name>
-        <order>71</order>
+        <order>67</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -765,7 +727,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>052 (Сумма вычета)</name>
-        <order>72</order>
+        <order>68</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -775,7 +737,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>051 (Код вычета)</name>
-        <order>73</order>
+        <order>69</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>3502</nameAttributeId>
@@ -787,7 +749,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>052 (Сумма вычета)</name>
-        <order>74</order>
+        <order>70</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
