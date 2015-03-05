@@ -58,7 +58,6 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
-        logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -392,14 +391,14 @@ void addData(def xml, int headRowCount) {
         newRow.setImportIndex(xlsIndexRow)
 
         // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
-        record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
         newRow.number = record?.record_id?.value
 
         // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
         if (record != null) {
             def value1 = record?.ACCOUNT_NAME?.value?.toString()
             def value2 = row.cell[2].text()
-            formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
+            formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, false)
         }
 
         // графа 4
