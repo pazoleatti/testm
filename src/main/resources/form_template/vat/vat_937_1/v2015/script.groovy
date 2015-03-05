@@ -109,7 +109,7 @@ void calc() {
 
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
-    dataRowHelper.save(dataRows)
+    save(dataRows)
 }
 
 void logicCheck() {
@@ -329,7 +329,7 @@ void addData(def xml, int headRowCount) {
         rows.add(newRow)
     }
     rows.add(getTotalRow())
-    dataRowHelper.save(rows)
+    save(rows)
 }
 
 void importTransportData() {
@@ -455,7 +455,7 @@ void addTransportData(def xml) {
 
         rows.add(total)
     }
-    dataRowHelper.save(rows)
+    save(rows)
 }
 
 /** Получить новую строку с заданными стилями. */
@@ -504,4 +504,22 @@ void sortFormDataRows() {
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), true)
     dataRowHelper.saveSort()
+}
+
+void save(def dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    // запись
+    dataRowHelper.clear()
+    def rows = []
+    dataRows.each { row ->
+        rows.add(row)
+        if (rows.size() > 1000) {
+            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+            rows.clear()
+        }
+    }
+    if (rows.size() > 0) {
+        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+        rows.clear()
+    }
 }
