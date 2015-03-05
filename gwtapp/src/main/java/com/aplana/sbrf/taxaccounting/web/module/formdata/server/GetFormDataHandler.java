@@ -288,7 +288,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		if (lockInformation != null) {
 			// Если данная форма уже заблокирована другим пользотелем
 			result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
-			result.setLockDate(getFormedDate(lockInformation.getDateBefore()));
+			result.setLockDate(getFormedDate(lockInformation.getDateLock()));
 			if (lockInformation.getUserId() == userInfo.getUser().getId()) {
 				if (action.isReadOnly()) {
 					formMode = FormMode.READ_UNLOCKED;
