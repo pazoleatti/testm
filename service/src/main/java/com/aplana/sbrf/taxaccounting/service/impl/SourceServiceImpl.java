@@ -661,8 +661,10 @@ public class SourceServiceImpl implements SourceService {
                 if (srcDepartmentId != null && destDepartmentId != null) {
                     Integer srcTB = departmentDao.getParentTBId(srcDepartmentId);
                     Integer destTB = departmentDao.getParentTBId(destDepartmentId);
-                    if (srcTB != null && destTB != null && !destTB.equals(srcTB)) {
-                        throw new ServiceLoggerException("Ограничение регионального налога: приёмник должен принадлежать тому же территориальному банку, к которому относится форма-источник!",
+                    if ((srcTB == null && destTB != null) ||
+                            (srcTB != null && destTB == null) ||
+                            (destTB != null && !destTB.equals(srcTB))) {
+                        throw new ServiceLoggerException("Ограничение регионального налога: приёмник и источник должны относится к одному и тому же территориальному банку!",
                                 logEntryService.save(logger.getEntries()));
                     }
                 }
