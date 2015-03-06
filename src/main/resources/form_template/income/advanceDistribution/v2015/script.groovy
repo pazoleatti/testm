@@ -258,6 +258,11 @@ void calc() {
         calcColumnFrom14To21(prevDataRows, row, sumNal, reportPeriod)
     }
 
+    // нужен отдельный расчет
+    for (row in dataRows) {
+        calc18_19(prevDataRows, dataRows, row, reportPeriod)
+    }
+
     // Сортировка
     // отсортировать можно только после расчета графы regionBank
     dataRows.sort { a, b ->
@@ -451,6 +456,30 @@ def calc14(def row) {
         temp = 0
     }
     return temp
+}
+
+def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
+    def tmp
+    // графа 18 и 19 расчитывается в конце потому что требует значения графы 20, 21, 22
+    // графа 18
+    // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+    def currentSum = dataRows?.sum { (it.getAlias() == null) ? it.taxSum : 0 } ?: 0
+    def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? it.taxSum : 0 } ?: 0
+    switch (reportPeriod.order) {
+        case 1: //«графа 18» = «графа 14»
+            tmp = row.taxSum
+            break
+        default:
+            // остальные
+            if (currentSum) {
+                tmp = (currentSum - previousSum) * (row.taxSum / currentSum)
+            }
+    }
+    row.everyMontherPaymentAfterPeriod = tmp
+
+    // графа 19
+    row.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? row.everyMontherPaymentAfterPeriod : 0)
+
 }
 
 /**
@@ -980,8 +1009,6 @@ def getTaxBase() {
  * @param reportPeriod отчетный период
  */
 void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPeriod) {
-    def tmp
-
     // графа 15
     if (sumNal == null || row.baseTaxOf == null || !checkFormat(row.baseTaxOf, baseTaxOfPattern)) {
         row.taxSumOutside = 0
@@ -1001,8 +1028,8 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
     if (row.taxSum == null || row.subjectTaxCredit == null || row.taxSumOutside == null) {
         row.taxSumToReduction = 0
     } else {
-        row.taxSumToReduction = (row.taxSum < row.subjectTaxCredit + row.taxSumOutside ?
-                (row.subjectTaxCredit + row.taxSumOutside) - row.taxSum : 0)
+        row.taxSumToReduction = ((row.taxSum < (row.subjectTaxCredit + row.taxSumOutside)) ?
+                ((row.subjectTaxCredit + row.taxSumOutside) - row.taxSum) : 0)
     }
 
     // Значения граф этого же подразделения в форме пред. периода
@@ -1042,27 +1069,6 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
         row.everyMonthForFourthKvartalNextPeriod =
                 ((reportPeriod.order == 3) ? (row.taxSum - row.everyMonthForThirdKvartalNextPeriod) : 0)
     }
-
-    // графа 18 и 19 расчитывается в конце потому что требует значения графы 20, 21, 22
-    // графа 18
-    switch (reportPeriod.order) {
-        case 1:
-            tmp = row.everyMonthForSecondKvartalNextPeriod
-            break
-        case 2:
-            tmp = row.everyMonthForThirdKvartalNextPeriod
-            break
-        case 3:
-            tmp = row.everyMonthForFourthKvartalNextPeriod
-            break
-        default:
-            // налоговый период
-            tmp = 0
-    }
-    row.everyMontherPaymentAfterPeriod = tmp
-
-    // графа 19
-    row.everyMonthForKvartalNextPeriod = (reportPeriod.order == 3 ? row.everyMontherPaymentAfterPeriod : 0)
 }
 
 /**
