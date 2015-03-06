@@ -655,8 +655,8 @@ void generateXML() {
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(
-                    ОКВЭД : okvedCode,
-                    Тлф : phone) {
+                    [ОКВЭД : okvedCode] +
+                            (phone ? [Тлф : phone] : [:])) {
 
                 НПЮЛ(
                         НаимОрг : name,
