@@ -55,9 +55,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        logicCheckBeforeCalc()
         calc()
-        logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -277,12 +275,14 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    for (row in dataRows) {
-        // название подразделения
-        row.regionBank = calc2(row)
+    if(formDataEvent != FormDataEvent.IMPORT) {
+        for (row in dataRows) {
+            // название подразделения
+            row.regionBank = calc2(row)
 
-        // наименование подразделения в декларации
-        row.divisionName = calc4(row)
+            // наименование подразделения в декларации
+            row.divisionName = calc4(row)
+        }
     }
     // Сортировка
     dataRows.sort { a, b ->
@@ -427,7 +427,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 3
         def indexCol = 3
-        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset)
+        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[indexCol].text(), xlsIndexRow, indexCol + colOffset, false)
 
         // графа 5
         indexCol = 5
@@ -526,7 +526,7 @@ void addTransportData(def xml) {
         def total = formData.createDataRow()
 
         // графа 5
-        newRow.kpp = getNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        total.kpp = getNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset)
         // графа 6
         total.avepropertyPricerageCost = getNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset)
         // графа 7

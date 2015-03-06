@@ -76,7 +76,6 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
-        logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -203,34 +202,36 @@ void calc() {
     def dataRows = dataRowHelper.allCached
 
     def totalRow = getDataRow(dataRows, 'total')
-    dataRows.each { row ->
-        if (row.getAlias() == null) {
-            def isFirstSection = (row.getIndex() < totalRow.getIndex())
-            if (isFirstSection) {
-                // графа 4
-                row.debt45_90DaysNormAllocation50per = calc4()
-                // графа 5
-                row.debt45_90DaysReserve = calc5(row)
-                // графа 7
-                row.debtOver90DaysNormAllocation100per = calc7()
-                // графа 8
-                row.debtOver90DaysReserve = calc8(row)
-                // графа 11
-                row.totalReserve = calc9(row)
+    if(formDataEvent != FormDataEvent.IMPORT) {
+        dataRows.each { row ->
+            if (row.getAlias() == null) {
+                def isFirstSection = (row.getIndex() < totalRow.getIndex())
+                if (isFirstSection) {
+                    // графа 4
+                    row.debt45_90DaysNormAllocation50per = calc4()
+                    // графа 5
+                    row.debt45_90DaysReserve = calc5(row)
+                    // графа 7
+                    row.debtOver90DaysNormAllocation100per = calc7()
+                    // графа 8
+                    row.debtOver90DaysReserve = calc8(row)
+                    // графа 11
+                    row.totalReserve = calc9(row)
 
-                // TODO (Ramil Timerbaev) расчет графы 10 пока не делать
-                // графа 10
-                // row.reservePrev = null
+                    // TODO (Ramil Timerbaev) расчет графы 10 пока не делать
+                    // графа 10
+                    // row.reservePrev = null
 
-                // графа 11
-                row.reserveCurrent = calc11(row)
-            } else {
-                // TODO (Ramil Timerbaev) расчет графы 10 пока не делать
-                // графа 10
-                // row.reservePrev = null
+                    // графа 11
+                    row.reserveCurrent = calc11(row)
+                } else {
+                    // TODO (Ramil Timerbaev) расчет графы 10 пока не делать
+                    // графа 10
+                    // row.reservePrev = null
 
-                // графа 11
-                row.reserveCurrent = calc11AB(row)
+                    // графа 11
+                    row.reserveCurrent = calc11AB(row)
+                }
             }
         }
     }

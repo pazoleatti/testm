@@ -945,6 +945,10 @@ void addTransportData(def xml) {
         }
     }
 
+    def monthRow = getDataRow(dataRows, 'total')
+    rows.add(monthRow)
+    calcTotalRow(monthRow, totalRow)
+
     dataRowHelper.save(rows)
 }
 
