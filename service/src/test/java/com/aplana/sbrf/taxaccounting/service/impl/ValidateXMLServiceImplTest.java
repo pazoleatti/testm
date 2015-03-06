@@ -92,7 +92,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
         data.setId(3l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null));
     }
 
     @Test
@@ -128,6 +128,6 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true));
+        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null));
     }
 }

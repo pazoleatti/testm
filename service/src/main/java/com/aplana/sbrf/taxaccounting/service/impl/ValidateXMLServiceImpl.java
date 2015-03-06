@@ -66,7 +66,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     }
 
     @Override
-    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal) {
+    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile) {
         String[] params = new String[4];
         assert url != null;
         DeclarationTemplate template = declarationTemplateService.get(data.getDeclarationTemplateId());
@@ -74,7 +74,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         FileOutputStream outputStream;
         InputStream inputStream;
         BufferedReader reader;
-        File xsdFile = null, xmlFile = null, vsax3File = null;
+        File xsdFile = null, xmlFileBD = null, vsax3File = null;
         try {
             vsax3File = File.createTempFile("VSAX3",".exe");
             outputStream = new FileOutputStream(vsax3File);
@@ -85,13 +85,17 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             params[0] = vsax3File.getAbsolutePath();
 
             //Получаем xml
-            xmlFile = File.createTempFile("file_for_validate",".xml");
-            outputStream = new FileOutputStream(xmlFile);
-            inputStream = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC)).getInputStream();
-            log.info("Xml copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-            inputStream.close();
-            outputStream.close();
-            params[1] = xmlFile.getAbsolutePath();
+            if (xmlFile == null) {
+                xmlFileBD = File.createTempFile("file_for_validate", ".xml");
+                outputStream = new FileOutputStream(xmlFileBD);
+                inputStream = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC)).getInputStream();
+                log.info("Xml copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+                inputStream.close();
+                outputStream.close();
+                params[1] = xmlFileBD.getAbsolutePath();
+            } else {
+                params[1] = xmlFile.getAbsolutePath();
+            }
 
             //Получаем xsd файл
             xsdFile = File.createTempFile("validation_file",".xsd");
@@ -103,7 +107,12 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             params[2] = xsdFile.getAbsolutePath();
 
             //Имя файла
-            InputSource inputSource = new InputSource(new FileReader(xmlFile));
+            InputSource inputSource;
+            if (xmlFile != null) {
+                inputSource = new InputSource(new FileReader(xmlFile));
+            } else {
+                inputSource = new InputSource(new FileReader(xmlFileBD));
+            }
             SAXHandler handler = new SAXHandler();
             factory.newSAXParser().parse(inputSource, handler);
             params[3] = handler.fileName;
@@ -153,8 +162,8 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             if (xsdFile != null && !xsdFile.delete()){
                 log.warn(String.format("Файл %s не был удален", xsdFile.getName()));
             }
-            if (xmlFile != null && !xmlFile.delete()){
-                log.warn(String.format("Файл %s не был удален", xmlFile.getName()));
+            if (xmlFile == null && xmlFileBD != null && !xmlFileBD.delete()){
+                log.warn(String.format("Файл %s не был удален", xmlFileBD.getName()));
             }
         }
     }

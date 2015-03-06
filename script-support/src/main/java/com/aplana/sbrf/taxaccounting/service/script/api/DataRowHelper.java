@@ -15,6 +15,9 @@ import java.util.List;
  */
 public interface DataRowHelper {
 
+	/** Устанавливает количество одновременно вставляемых в бд строк */
+	static final int INSERT_LIMIT = 1024;
+
 	/**
 	 * Получение списка сохраненных строк формы
 	 * 

@@ -136,7 +136,21 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	public void save(List<DataRow<Cell>> dataRows) {
         updateIndexes(dataRows);
         FormDataUtils.cleanValueOwners(dataRows);
-		dataRowDao.saveRows(fd, dataRows);
+
+		// сохранение строк порциями
+		List<DataRow<Cell>> buffer = new ArrayList<DataRow<Cell>>();
+		for(int i=0; i<dataRows.size(); i++) {
+			buffer.add(dataRows.get(i));
+			if (buffer.size() == DataRowHelper.INSERT_LIMIT) {
+				insert(buffer, getAllCached().size() + 1);
+				buffer.clear();
+			}
+			// обрабатываем окончание строк
+			if (i == dataRows.size() - 1 && buffer.size() > 0) {
+				insert(buffer, getAllCached().size() + 1);
+			}
+		}
+
         FormDataUtils.setValueOwners(dataRows);
         this.dataRows = dataRows;
     }
