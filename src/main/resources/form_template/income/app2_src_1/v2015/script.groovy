@@ -125,8 +125,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -463,11 +461,11 @@ void addData(def xml, int headRowCount) {
 
         // Графа 8 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
         xmlIndexCol++
-        newRow.citizenship = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.citizenship = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 9 - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
         xmlIndexCol++
-        newRow.code = getRecordIdImport(360L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.code = getRecordIdImport(360L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 10
         xmlIndexCol++
@@ -479,7 +477,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 12 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
         xmlIndexCol++
-        newRow.region = getRecordIdImport(4L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.region = getRecordIdImport(4L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 13
         xmlIndexCol++
@@ -511,7 +509,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 20 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
         xmlIndexCol++
-        newRow.country = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.country = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 21
         xmlIndexCol++
@@ -555,7 +553,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 31 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
         xmlIndexCol++
-        newRow.col_040_1 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_040_1 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 32
         xmlIndexCol++
@@ -563,7 +561,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 33 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_1_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_1_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 34
         xmlIndexCol++
@@ -571,7 +569,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 35 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_1_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_1_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 36
         xmlIndexCol++
@@ -579,7 +577,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 37 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_1_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_1_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 38
         xmlIndexCol++
@@ -587,7 +585,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 39 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_1_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_1_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 40
         xmlIndexCol++
@@ -595,7 +593,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 41 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_1_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_1_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 42
         xmlIndexCol++
@@ -603,7 +601,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 43 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
         xmlIndexCol++
-        newRow.col_040_2 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_040_2 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 44
         xmlIndexCol++
@@ -611,7 +609,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 45 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_2_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_2_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 46
         xmlIndexCol++
@@ -619,7 +617,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 47 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_2_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_2_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 48
         xmlIndexCol++
@@ -627,7 +625,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 49 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_2_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_2_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 50
         xmlIndexCol++
@@ -635,7 +633,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 51 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_2_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_2_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 52
         xmlIndexCol++
@@ -643,7 +641,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 53 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_2_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_2_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 54
         xmlIndexCol++
@@ -651,7 +649,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 55 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
         xmlIndexCol++
-        newRow.col_040_3 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_040_3 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 56
         xmlIndexCol++
@@ -659,7 +657,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 57 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_3_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_3_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 58
         xmlIndexCol++
@@ -667,7 +665,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 59 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_3_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_3_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 60
         xmlIndexCol++
@@ -675,7 +673,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 61 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_3_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_3_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 62
         xmlIndexCol++
@@ -683,7 +681,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 63 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_3_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_3_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 64
         xmlIndexCol++
@@ -691,7 +689,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 65 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_042_3_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_042_3_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 66
         xmlIndexCol++
@@ -699,7 +697,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 67 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_051_3_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_051_3_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 68
         xmlIndexCol++
@@ -707,7 +705,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 69 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
-        newRow.col_051_3_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.col_051_3_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // Графа 70
         xmlIndexCol++
