@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,6 +36,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private TransactionHelper transactionHelper;
     @Autowired
     private LogEntryService logEntryService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     /**
      * Выполнение бизнес логики задачи
@@ -62,15 +65,15 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
     @Override
     public void execute(final Map<String, Object> params) {
-        log.debug("AbstractAsyncTask has been started");
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
+        log.info(String.format("Запущена асинхронная задача с ключом %s и датой окончания %s", lock, sdf.format(lockDateEnd)));
         transactionHelper.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
                 try {
                     if (lockService.isLockExists(lock, lockDateEnd)) {
-                        log.debug("Async task lock exists");
+                        log.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
                         final Logger logger = new Logger();
                         //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                         executeBusinessLogic(params, logger);
@@ -79,21 +82,24 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                             throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                         }
+                        log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
                         sendNotifications(lock, getNotificationMsg(params), logEntryService.save(logger.getEntries()));
                     } else {
                         throw new RuntimeException("Задача \"" + getAsyncTaskName() + "\" больше не актуальна.");
                     }
                 } catch (final Exception e) {
-                    log.error(e, e);
+                    log.error("Произошла ошибка при выполнении асинхронной задачи", e);
                     if (lockService.isLockExists(lock, lockDateEnd)) {
                         transactionHelper.executeInNewTransaction(new TransactionLogic() {
                             @Override
                             public void execute() {
+                                log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
                                 if (e instanceof ServiceLoggerException) {
                                     sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), ((ServiceLoggerException) e).getUuid());
                                 } else {
                                     sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), null);
                                 }
+                                log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
                                 lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                             }
 
@@ -103,6 +109,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             }
                         });
                     }
+                    log.info(String.format("Для задачи с ключом %s выполняется откат транзакции", lock));
                     if (e instanceof ServiceLoggerException) {
                         throw new ServiceLoggerException("Не удалось выполнить асинхронную задачу", ((ServiceLoggerException) e).getUuid());
                     } else {
@@ -116,8 +123,11 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 return null;
             }
         });
+        log.info(String.format("Для задачи с ключом %s выполняется пост-обработка", lock));
         executePostLogic(params);
+        log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки после успешного завершения", lock));
         lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+        log.info(String.format("Для задачи с ключом %s завершено выполнение", lock));
     }
 
     /**
