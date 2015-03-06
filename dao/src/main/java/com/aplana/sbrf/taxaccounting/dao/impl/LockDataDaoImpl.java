@@ -47,18 +47,18 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	}
 
     @Override
-    public LockData get(String key, Date dateBefore) {
+    public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ? and date_before = ?",
-                    new Object[] {key, dateBefore},
+                    "SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ? and date_lock = ?",
+                    new Object[] {key, lockDate},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
             );
         } catch (EmptyResultDataAccessException e) {
             return null;
         } catch (Exception e) {
-            throw new LockException("Ошибка при поиске блокировки с кодом = %s и сроком жизни блокировки = %s", key, dateBefore);
+            throw new LockException("Ошибка при поиске блокировки с кодом = %s и датой начала = %s", key, lockDate);
         }
     }
 

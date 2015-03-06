@@ -188,9 +188,9 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public boolean isLockExists(String key, Date lockDateEnd) {
+    public boolean isLockExists(String key, Date lockDate) {
         synchronized(LockDataServiceImpl.class) {
-            return validateLock(dao.get(key, lockDateEnd)) != null;
+            return validateLock(dao.get(key, lockDate)) != null;
         }
     }
 

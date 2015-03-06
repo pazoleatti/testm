@@ -391,6 +391,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         }
 
+        System.out.println("import finished: " + success);
         return new ImportCounter(success, fail + wrongImportCounter.getFailCounter());
     }
 

@@ -129,10 +129,10 @@ public interface LockDataService {
     /**
      * Проверяет, установлена ли блокировка на указанном объекте с определенной датой окончания действия блокировки
      * @param key код блокировки
-     * @param lockDateEnd дата окончания действия блокировки
+     * @param lockDate дата начала действия блокировки
      * @return блокировка установлена?
      */
-    boolean isLockExists(String key, Date lockDateEnd);
+    boolean isLockExists(String key, Date lockDate);
 
     /**
      * Добавляет пользователя в список ожидающих выполнения операций над объектом блокировки

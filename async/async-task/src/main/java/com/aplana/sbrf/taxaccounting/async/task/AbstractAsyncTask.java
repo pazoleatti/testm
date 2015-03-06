@@ -64,17 +64,17 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     public void execute(final Map<String, Object> params) {
         log.debug("AbstractAsyncTask has been started");
         final String lock = (String) params.get(LOCKED_OBJECT.name());
-        final Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
         transactionHelper.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
                 try {
-                    if (lockService.isLockExists(lock, lockDateEnd)) {
+                    if (lockService.isLockExists(lock, lockDate)) {
                         log.debug("Async task lock exists");
                         final Logger logger = new Logger();
                         //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                         executeBusinessLogic(params, logger);
-                        if (!lockService.isLockExists(lock, lockDateEnd)) {
+                        if (!lockService.isLockExists(lock, lockDate)) {
                             //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                             //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                             throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
@@ -85,7 +85,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     }
                 } catch (final Exception e) {
                     log.error(e, e);
-                    if (lockService.isLockExists(lock, lockDateEnd)) {
+                    if (lockService.isLockExists(lock, lockDate)) {
                         transactionHelper.executeInNewTransaction(new TransactionLogic() {
                             @Override
                             public void execute() {

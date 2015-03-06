@@ -67,7 +67,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA))) == null) {
             try {
-                params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), action.isSaved());
                 if (uuid == null) {
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());

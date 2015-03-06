@@ -69,7 +69,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
         try {
             if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
                     lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_BACKUP))) == null) {
-                params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                 asyncManager.executeAsync(ReportType.CSV_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);
             } else {

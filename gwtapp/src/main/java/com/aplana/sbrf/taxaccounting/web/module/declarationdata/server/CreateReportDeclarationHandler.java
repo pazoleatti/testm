@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
@@ -76,7 +75,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                     try {
                         String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), action.getType());
                         if (uuid == null) {
-                            params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
+                            params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
                             lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                             asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);
                             logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));

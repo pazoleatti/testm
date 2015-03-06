@@ -79,7 +79,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 params.put("docDate", action.getDocDate());
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
                 try {
                     declarationDataService.deleteReport(action.getDeclarationId(), false);
                     // отменяем задания на формирование XLSX и PDF

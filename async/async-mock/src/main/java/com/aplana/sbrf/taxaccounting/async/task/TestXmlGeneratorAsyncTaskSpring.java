@@ -126,7 +126,7 @@ public class TestXmlGeneratorAsyncTaskSpring extends AbstractAsyncTask {
             paramsPdf.put("declarationDataId", declarationDataId);
             paramsPdf.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
             paramsPdf.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-            paramsPdf.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
+            paramsPdf.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
 
             // копирует список ожидающих завершения формирования декларации
             List<Integer> waitingUserIds = lockDataService.getUsersWaitingForLock((String) params.get(LOCKED_OBJECT.name()));

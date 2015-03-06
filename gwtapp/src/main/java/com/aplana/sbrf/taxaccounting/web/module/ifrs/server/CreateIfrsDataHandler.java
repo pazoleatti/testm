@@ -71,7 +71,7 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
                 params.put("reportPeriodId", action.getReportPeriodId());
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE_END.name(), lockDataService.getLock(key).getDateBefore());
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
 
                 if (!ifrsDataService.check(logger, action.getReportPeriodId())) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
