@@ -203,15 +203,15 @@
 	</variable>
 	<variable name="ИННЮЛ" class="java.lang.String">
 		<variableExpression><![CDATA[$V{ИдФайл_О}.startsWith("null") ? $V{STR_FILLER}.substring(0, 12) : ($V{ИдФайл_О}.endsWith("null") ? ($V{ИдФайл_О}.substring(0, $V{ИдФайл_О}.indexOf("null")) + $V{STR_FILLER}).substring(0, 12) : ($V{ИдФайл_О}.length()<10 ? ($V{ИдФайл_О} + $V{STR_FILLER}).substring(0, 12) :$V{ИдФайл_О}.substring(0, 10) + "--"))]]></variableExpression>
-		<initialValueExpression><![CDATA[]]></initialValueExpression>
+		<initialValueExpression><![CDATA[$V{STR_FILLER}]]></initialValueExpression>
 	</variable>
 	<variable name="КПП" class="java.lang.String">
 		<variableExpression><![CDATA[$V{ИдФайл_О}.endsWith("null") ? $V{STR_FILLER}.substring(0,9) : ($V{ИдФайл_О}.startsWith("null") ? ($V{ИдФайл_О}.substring(4, $V{ИдФайл_О}.length()) + $V{STR_FILLER}).substring(0,9) : ($V{ИдФайл_О} + $V{STR_FILLER}).substring(10, 19))]]></variableExpression>
-		<initialValueExpression><![CDATA[]]></initialValueExpression>
+		<initialValueExpression><![CDATA[$V{STR_FILLER}]]></initialValueExpression>
 	</variable>
 	<variable name="BarcodeImage_Title" class="java.lang.String">
 		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAIkAAABBCAMAAADSQXciAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAADBQTFRFAAAA////mZmZIiIiiIiId3d3ERERMzMzzMzM7u7uqqqqu7u73d3dZmZmVVVVRERE8UHvnwAAAAFiS0dEAf8CLd4AAAAJcEhZcwAACxMAAAsTAQCanBgAAAF9SURBVGje7ZTRcoQgDEVBBURB//9vm+gioZJdp+1DH25mnCHkcjlC1BhjLT8cxshMpOYVPek120rOcespF7+WlGnVHiQgAQlIQAISkIAEJCABCUhAAhKQgAQkIAEJSEACEpCA5P+R/Ch+bQASkIDk70iG0YxTVbSp88b1ag0JicIsNolju2SRdkV5J1lDoucSt6nLMTrXqUmSaUs25YqSQj2slCM9yd6VdxLHhSVf1E06RvmGoiZJRt4oXbwur5VkO85ot3fli0QcZTjQdyVlH6PXTs9a5Mhl5qhFdvB9pZXKMvZKSjbZqTWxWzJd/4EWRzc8UJaxUVKbQ0hardwA7Tbviv9EN7A8Un4i4UMZ1NoZ9EXsS9/fccdu0wPl2ZTU7kp6oHi9dsXqu/7HrPyqVSUdP59d/Xba1B/N7vvSEjuL3Nb1N82rvFPyTyLaufZCm/KqdLXsN2mJRKK4rV3/3UXR8++UFIM3ftBSulg/aVIxHaS99CcD8Ze+Kb8Aldcdvv3LULAAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTUtMDItMTdUMTY6NDA6MTMrMDA6MDBPasriAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE1LTAyLTE3VDE2OjQwOjEzKzAwOjAwPjdyXgAAAD90RVh0U29mdHdhcmUAQmFyY29kZSBXcml0ZXIgaW4gUHVyZSBQb3N0U2NyaXB0IC0gVmVyc2lvbiAyMDE1LTAxLTExxAIgDAAAADx0RVh0U291cmNlAGh0dHA6Ly93d3cudGVycnlidXJ0b24uY28udWsvYmFyY29kZXdyaXRlci9nZW5lcmF0b3Ivf1pwcQAAAABJRU5ErkJggg=="]]></variableExpression>
-		<initialValueExpression><![CDATA[]]></initialValueExpression>
+		<initialValueExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAIkAAABBCAMAAADSQXciAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAADBQTFRFAAAA////mZmZIiIiiIiId3d3ERERMzMzzMzM7u7uqqqqu7u73d3dZmZmVVVVRERE8UHvnwAAAAFiS0dEAf8CLd4AAAAJcEhZcwAACxMAAAsTAQCanBgAAAF9SURBVGje7ZTRcoQgDEVBBURB//9vm+gioZJdp+1DH25mnCHkcjlC1BhjLT8cxshMpOYVPek120rOcespF7+WlGnVHiQgAQlIQAISkIAEJCABCUhAAhKQgAQkIAEJSEACEpCA5P+R/Ch+bQASkIDk70iG0YxTVbSp88b1ag0JicIsNolju2SRdkV5J1lDoucSt6nLMTrXqUmSaUs25YqSQj2slCM9yd6VdxLHhSVf1E06RvmGoiZJRt4oXbwur5VkO85ot3fli0QcZTjQdyVlH6PXTs9a5Mhl5qhFdvB9pZXKMvZKSjbZqTWxWzJd/4EWRzc8UJaxUVKbQ0hardwA7Tbviv9EN7A8Un4i4UMZ1NoZ9EXsS9/fccdu0wPl2ZTU7kp6oHi9dsXqu/7HrPyqVSUdP59d/Xba1B/N7vvSEjuL3Nb1N82rvFPyTyLaufZCm/KqdLXsN2mJRKK4rV3/3UXR8++UFIM3ftBSulg/aVIxHaS99CcD8Ze+Kb8Aldcdvv3LULAAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTUtMDItMTdUMTY6NDA6MTMrMDA6MDBPasriAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE1LTAyLTE3VDE2OjQwOjEzKzAwOjAwPjdyXgAAAD90RVh0U29mdHdhcmUAQmFyY29kZSBXcml0ZXIgaW4gUHVyZSBQb3N0U2NyaXB0IC0gVmVyc2lvbiAyMDE1LTAxLTExxAIgDAAAADx0RVh0U291cmNlAGh0dHA6Ly93d3cudGVycnlidXJ0b24uY28udWsvYmFyY29kZXdyaXRlci9nZW5lcmF0b3Ivf1pwcQAAAABJRU5ErkJggg=="]]></initialValueExpression>
 	</variable>
 	<variable name="BarcodeImage_Section1" class="java.lang.String">
 		<variableExpression><![CDATA["iVBORw0KGgoAAAANSUhEUgAAAIkAAABBCAMAAADSQXciAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAADBQTFRFAAAA////mZmZIiIiiIiId3d3ERERMzMzzMzM7u7uu7u73d3dqqqqZmZmVVVVREREwZsZsAAAAAFiS0dEAf8CLd4AAAAJcEhZcwAACxMAAAsTAQCanBgAAAF8SURBVGje7ZPbbsQgDERNCLcQyP//bXE2CXbXbqW2L5VsKVKGmTUH1gEA5/DBAqCKSLhKij6rPPJ6n0HukV3IDkZiJEZiJEZiJEZiJEZiJEZiJEZiJEZiJEZiJEZiJEZiJEZiJP+D5Ef16wZGYiRG8nckiwe/zgSXIUKQPEYyQimTTYp3tAHx1vQ0fyfZUh3Pfme5DK2UEASPkqy9utrmdjXNy+Je9nm4u0ISMLa35wxM+kJPSDxK4itu//CGtk0S7gWEqJ6SkKtM5zEOReJdg+69ek4Tq90r795R5N/S96jIAdKC6l3L2L+C2J97kDubSYkEFOlaSlXzruoDNR8yCffgGFPTg5j8lgQvZfmaBL+PY5dJuAfn1Hg5eQ7lGGhFnihR957aotKfel65h+v6cZ7nt8NlPA8R5ehdB4ZCF/tzr20OP2WFZEvF5TkLXGKP+ozsp+hddYRK38T+3MujQe2LmBy1RIiLJsffHFctSpYTBaH9ubd7iHRg3QcH4h2ouURZ1wAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxNS0wMi0xN1QxNjo0MDozMiswMDowMKs4xisAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTUtMDItMTdUMTY6NDA6MzIrMDA6MDDaZX6XAAAAP3RFWHRTb2Z0d2FyZQBCYXJjb2RlIFdyaXRlciBpbiBQdXJlIFBvc3RTY3JpcHQgLSBWZXJzaW9uIDIwMTUtMDEtMTHEAiAMAAAAPHRFWHRTb3VyY2UAaHR0cDovL3d3dy50ZXJyeWJ1cnRvbi5jby51ay9iYXJjb2Rld3JpdGVyL2dlbmVyYXRvci9/WnBxAAAAAElFTkSuQmCC"]]></variableExpression>
@@ -593,6 +593,7 @@
 	$F{ИтСтПродКПр18}.indexOf(".") < 0 ? "--" :
 	($F{ИтСтПродКПр18}.substring(($F{ИтСтПродКПр18}.indexOf("."))+1, $F{ИтСтПродКПр18}.length())+"--").substring(0,2)
 ))).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{STR_FILLER}]]></initialValueExpression>
 	</variable>
 	<variable name="ИтСтПродКПр10" class="java.lang.String">
 		<variableExpression><![CDATA[((($F{ИтСтПродКПр10} == null)
@@ -610,6 +611,7 @@
 	$F{ИтСтПродКПр10}.indexOf(".") < 0 ? "--" :
 	($F{ИтСтПродКПр10}.substring(($F{ИтСтПродКПр10}.indexOf("."))+1, $F{ИтСтПродКПр10}.length())+"--").substring(0,2)
 ))).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{STR_FILLER}]]></initialValueExpression>
 	</variable>
 	<variable name="ИтСтПродКПр0" class="java.lang.String">
 		<variableExpression><![CDATA[((($F{ИтСтПродКПр0} == null)
@@ -627,6 +629,7 @@
 	$F{ИтСтПродКПр0}.indexOf(".") < 0 ? "--" :
 	($F{ИтСтПродКПр0}.substring(($F{ИтСтПродКПр0}.indexOf("."))+1, $F{ИтСтПродКПр0}.length())+"--").substring(0,2)
 ))).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{STR_FILLER}]]></initialValueExpression>
 	</variable>
 	<variable name="СумНДСИтКПр18" class="java.lang.String">
 		<variableExpression><![CDATA[((($F{СумНДСИтКПр18} == null)
@@ -644,6 +647,7 @@
 	$F{СумНДСИтКПр18}.indexOf(".") < 0 ? "--" :
 	($F{СумНДСИтКПр18}.substring(($F{СумНДСИтКПр18}.indexOf("."))+1, $F{СумНДСИтКПр18}.length())+"--").substring(0,2)
 ))).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{STR_FILLER}]]></initialValueExpression>
 	</variable>
 	<variable name="СумНДСИтКПр10" class="java.lang.String">
 		<variableExpression><![CDATA[((($F{СумНДСИтКПр10} == null)
@@ -661,6 +665,7 @@
 	$F{СумНДСИтКПр10}.indexOf(".") < 0 ? "--" :
 	($F{СумНДСИтКПр10}.substring(($F{СумНДСИтКПр10}.indexOf("."))+1, $F{СумНДСИтКПр10}.length())+"--").substring(0,2)
 ))).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{STR_FILLER}]]></initialValueExpression>
 	</variable>
 	<variable name="ИтСтПродОсвКПр" class="java.lang.String">
 		<variableExpression><![CDATA[((($F{ИтСтПродОсвКПр} == null)
@@ -678,6 +683,7 @@
 	$F{ИтСтПродОсвКПр}.indexOf(".") < 0 ? "--" :
 	($F{ИтСтПродОсвКПр}.substring(($F{ИтСтПродОсвКПр}.indexOf("."))+1, $F{ИтСтПродОсвКПр}.length())+"--").substring(0,2)
 ))).substring(0,20)]]></variableExpression>
+		<initialValueExpression><![CDATA[$V{STR_FILLER}]]></initialValueExpression>
 	</variable>
 	<title>
 		<band height="827">
@@ -16851,4 +16857,2256 @@
 			</rectangle>
 		</band>
 	</summary>
+	<noData>
+		<band height="827">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b5021adb-bf63-41fe-9cf7-536ba60bb784" x="175" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="cf776079-0dbe-44b2-ad33-8ccbd165deaf" x="280" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(7)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ceddec4d-43db-4736-aa6c-fe2c99a1ce4e" x="295" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(8)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e37ec3e1-9b4b-4220-b95b-1cd5de33482d" x="235" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="3acddffa-9954-4b96-bc93-ea4fe6b922c2" x="250" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(5)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="875ee423-ab35-449c-bbff-3f34ad74758e" x="140" y="24" width="35" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[КПП]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="5b3485fa-690c-4261-a6fa-7dc6c9c79ae5" x="265" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(6)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="15c6e9ba-481a-4474-839a-036dd36a8236" x="310" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(9)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a0591130-d2c2-4860-b517-081bdedce75b" x="250" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(5)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="8bc140e8-1aef-49c9-ab52-c4673d983d46" x="235" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="69acc033-a885-4ddf-9cf1-1fbd99f9bf8f" x="265" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(6)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e10ff387-c67e-4e46-9661-dd8c52dd3b18" x="205" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e8193e3a-9439-4fe4-835b-fa5af58494e7" x="190" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(1)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="9931ad44-6f65-4ab5-8b15-f53b65558da2" x="140" y="0" width="35" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="10" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[ИНН]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f96d6121-6adb-40c9-8c09-c60262872619" x="220" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(3)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="220" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(3)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="8caf1a6a-bba3-46d8-9fb2-c24cd25e388b" x="310" y="24" width="30" height="20" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="9" pdfFontName="Arial.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Стр.]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="22e5045e-a249-48ef-8961-2593eeac7502" x="190" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e9b1c140-e991-4b34-b15f-25e8373afd96" x="205" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{КПП}.charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a1503a24-be07-4430-b169-b70dd315fd48" x="325" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(10)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b3977964-039b-4e77-8491-3ddf99f85478" x="280" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(7)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="8dadcbb0-7a5a-41ad-b0e6-e2476191a088" x="295" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(8)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="5a7bfc9a-f96b-491e-a780-f7bbcfc9f84c" x="175" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ee4f0cd0-d90e-4593-892e-4b7b787cddda" x="340" y="0" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИННЮЛ}.charAt(11)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="55c10650-1434-44c9-9707-de38518511b2" x="355" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="370" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="385" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
+					<property name="ireport.layer" value="1"/>
+				</reportElement>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(3)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="400" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
+					<property name="ireport.layer" value="1"/>
+				</reportElement>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ec000c8e-c0c4-433a-9a13-5c29945c7408" x="415" y="24" width="15" height="19" isPrintWhenDetailOverflows="true">
+					<property name="ireport.layer" value="1"/>
+				</reportElement>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(5)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="699720b2-4abb-4373-8ec9-923abc586ef6" x="340" y="24" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[("00000"+$V{PAGE_NUMBER}).substring(("00000"+$V{PAGE_NUMBER}).length()-6).charAt(0)]]></textFieldExpression>
+			</textField>
+			<image hAlign="Center">
+				<reportElement uuid="9d321a0f-9699-4e9c-bc60-dd6103a3b1bc" x="21" y="0" width="96" height="42" isPrintWhenDetailOverflows="true"/>
+				<imageExpression><![CDATA[new java.io.StringBufferInputStream( new org.w3c.tools.codec.Base64Decoder($V{BarcodeImage_Title}).processString())]]></imageExpression>
+			</image>
+			<rectangle>
+				<reportElement uuid="ce433043-db7c-4096-82d8-543e86ffa62d" x="1" y="1" width="14" height="14" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="5350cb7e-1708-47ae-842a-a07aba344595" x="125" y="1" width="14" height="14" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="2f8790eb-c8a6-42e9-bead-b06f60596d2c" x="300" y="45" width="300" height="15">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Индекс 0000091]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b2c2c778-6cf3-4082-b8ba-df714ac86a7a" x="0" y="105" width="213" height="25"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Показатели
+1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="02a26851-e538-427c-bb9e-689edf4d9121" x="213" y="105" width="67" height="25"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Код строки
+2]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="68fcbcc0-947b-4ea9-bb14-a26453777eaa" x="280" y="105" width="320" height="25"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Значения показателей
+3]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d3e25b5b-4353-455b-b912-fec99fc34d1d" x="1" y="340" width="225" height="25"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Итоговая сумма налога по книге продаж в рублях
+и копейках<sup>2</sup>, по ставке: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3258cb3e-839f-4911-a139-e485cfcd4030" x="0" y="452" width="225" height="40"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Итоговая стоимость продаж, освобождаемых от
+налога, по книге продаж в рублях и копейках<sup>2</sup>]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="01728907-0388-442f-a787-d95aafff0b85" x="10" y="770" width="590" height="40"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[<sup>1</sup>  Заполняется необходимое количество листов данного приложения.
+<sup>2</sup>  Указывается на первой странице, на остальных - ставится прочерк.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c8d9fbe5-46e6-42cb-856c-3b6ce1f34d28" x="225" y="378" width="45" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[050]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2562e61f-1517-4e9b-8bab-f32ece529ffd" x="225" y="416" width="45" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[060]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="574d4729-5406-4617-bcd2-7aa907c47bd8" x="225" y="452" width="45" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[070]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="11d19d7e-92b1-4378-a879-bfb5b521d6f0" x="0" y="176" width="225" height="40"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Итоговая стоимость продаж по книге продаж (без
+налога) в рублях и копейках<sup>2</sup>, по ставке:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c8e0bf3a-4a8f-4dfc-b344-31fbf6ec3422" x="20" y="230" width="205" height="20"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[18 %]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="29736972-2b0e-47f8-86ec-a1905b59f24d" x="20" y="266" width="205" height="20"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[10 %]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4b2dee70-0ec3-4c72-9eea-d8de26b9574d" x="20" y="300" width="205" height="20"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[0 %]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8af91cd0-6e50-41cc-8d4e-887ae2da5f86" x="20" y="416" width="205" height="20"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[10 %]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8d59734f-fda5-406e-a852-fd148a455acb" x="20" y="378" width="205" height="20"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[18 %]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4113fcbd-9461-4a9e-a836-0bcd431d8cfc" x="225" y="266" width="45" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[030]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="544eb176-cb16-429b-90c9-f394f1fc4e28" x="225" y="230" width="45" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[020]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9687a863-bbc7-4752-b071-e7b3efc6c68f" x="225" y="300" width="45" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[040]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5102f616-d15c-4733-b6af-dd02d405fd6b" x="300" y="60" width="300" height="20">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[Приложение 1 к разделу 9 декларации]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9b803d66-42f0-4510-bcaf-2f6f7ca301c8" x="0" y="82" width="600" height="20">
+					<property name="net.sf.jasperreports.export.xls.sheet.name" value="Раздел 9.1"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Сведения из дополнительных листов продаж<sup>1</sup>]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f16eeedc-71b4-4816-b8f2-622bc11febcf" x="0" y="140" width="225" height="25"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Признак актуальности ранее предоставленных
+сведений<sup>2</sup>]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7b6e54e0-47b6-4f11-94e7-6ac0e7b08007" x="225" y="140" width="45" height="25"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="9"/>
+				</textElement>
+				<text><![CDATA[001]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="fd2eafc8-78fb-4d18-b28c-c037fdc2ee98" x="270" y="142" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" isBold="false" pdfFontName="courbd.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["1"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="270" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="285" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="300" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="315" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(3)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="330" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="345" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(5)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="360" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(6)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="375" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(7)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="390" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(8)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="405" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(9)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="420" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(10)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="435" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(11)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="450" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(12)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="465" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(13)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="480" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(14)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="495" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(15)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="510" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(16)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="540" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(18)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="555" y="230" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр18}.charAt(19)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="270" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="285" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="300" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="315" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(3)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="330" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="345" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(5)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="360" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(6)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="375" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(7)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="390" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(8)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="405" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(9)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="420" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(10)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="435" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(11)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="450" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(12)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="465" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(13)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="480" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(14)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="495" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(15)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="510" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(16)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="540" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(18)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="555" y="266" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр10}.charAt(19)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="270" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="285" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="300" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="315" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(3)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="330" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="345" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(5)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="360" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(6)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="375" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(7)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="390" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(8)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="405" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(9)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="420" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(10)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="435" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(11)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="450" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(12)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="465" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(13)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="480" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(14)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="495" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(15)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="510" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(16)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="540" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(18)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="555" y="300" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродКПр0}.charAt(19)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="ae449314-a25d-4598-a789-33b9c42c36c0" x="525" y="230" width="15" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="16"/>
+				</textElement>
+				<text><![CDATA[.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="cd7a4181-691b-429f-a6de-2c993430a7a9" x="525" y="266" width="15" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="16"/>
+				</textElement>
+				<text><![CDATA[.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c443d5de-3d91-48d9-b8c3-db0603b99dbd" x="525" y="300" width="15" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="16"/>
+				</textElement>
+				<text><![CDATA[.]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="270" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="285" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="300" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="315" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(3)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="330" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="345" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(5)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="360" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(6)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="375" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(7)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="390" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(8)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="405" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(9)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="420" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(10)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="435" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(11)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="450" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(12)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="465" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(13)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="480" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(14)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="495" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(15)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="510" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(16)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="540" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(18)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="555" y="378" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр18}.charAt(19)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="270" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="285" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="300" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="315" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(3)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="330" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="345" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(5)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="360" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(6)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="375" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(7)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="390" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(8)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="405" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(9)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="420" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(10)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="435" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(11)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="450" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(12)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="465" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(13)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="480" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(14)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="495" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(15)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="510" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(16)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="540" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(18)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="555" y="416" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{СумНДСИтКПр10}.charAt(19)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="270" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(0)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="285" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(1)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="300" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(2)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="315" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(3)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="330" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(4)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="345" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(5)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="360" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(6)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="375" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(7)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="390" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(8)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="405" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(9)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="420" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(10)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="435" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(11)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="450" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(12)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="465" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(13)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="480" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(14)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="495" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(15)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="510" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(16)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="540" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(18)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="981b6e2e-88a0-4463-b6a3-00b9eef4f80b" x="555" y="452" width="15" height="19" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<pen lineColor="#666666"/>
+					<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<leftPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+					<rightPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{ИтСтПродОсвКПр}.charAt(19)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="ae449314-a25d-4598-a789-33b9c42c36c0" x="525" y="378" width="15" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="16"/>
+				</textElement>
+				<text><![CDATA[.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="cd7a4181-691b-429f-a6de-2c993430a7a9" x="525" y="416" width="15" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="16"/>
+				</textElement>
+				<text><![CDATA[.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c443d5de-3d91-48d9-b8c3-db0603b99dbd" x="525" y="452" width="15" height="20"/>
+				<textElement textAlignment="Center">
+					<font fontName="Arial" size="16"/>
+				</textElement>
+				<text><![CDATA[.]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="86abf2cb-ba9c-43b1-9777-6b9ef9809c96" x="0" y="813" width="14" height="14" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="090c40e4-d084-4c6f-a1f2-e6ff88e20ed3" x="585" y="813" width="14" height="14" isPrintWhenDetailOverflows="true" backcolor="#000000"/>
+			</rectangle>
+		</band>
+	</noData>
 </jasperReport>
