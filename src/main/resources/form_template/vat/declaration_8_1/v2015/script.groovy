@@ -160,104 +160,106 @@ void generateXML() {
                         [НомКорр: corrNumber] +
                         (code001 != null ? [ПризнСвед81: code001] : [:])
         ) {
-            КнигаПокупДЛ(
-                    (code005 != null ? [СумНДСИтКПк: code005] : [:]) +
-                            (code190 != null ? [СумНДСИтП1Р8: code190] : [:])
-            ) {
-                hasPage = false
-                for (def row : sourceDataRows) {
-                    if (row.getAlias() != null) {
-                        continue
-                    }
-                    hasPage = true
-                    def code008 = row.rowNum
-                    def code010 = row.typeCode
-                    def code020 = getNumber(row.invoice)
-                    def code030 = getDate(row.invoice)
-                    def code040 = getNumber(row.invoiceCorrecting)
-                    def code050 = getDate(row.invoiceCorrecting)
-                    def code060 = getNumber(row.invoiceCorrection)
-                    def code070 = getDate(row.invoiceCorrection)
-                    def code080 = getNumber(row.invoiceCorrectingCorrection)
-                    def code090 = getDate(row.invoiceCorrectingCorrection)
-                    def code100 = getDate(row.documentPay)
-                    def code110 = getDate(row.documentPay)
-                    def code120 = row.dateRegistration?.format('dd.MM.yyyy')
-                    def code130 = row.salesmanInnKpp
-                    def code140 = row.agentInnKpp
-                    def code150 = row.declarationNum
-                    def code160 = getCurrencyCode(row.currency)
-                    def code170 = row.cost
-                    def code180 = row.nds
-
-                    // различаем юр. и физ. лица в строках 130 и 140
-                    def code130inn, code130kpp, code140inn, code140kpp
-                    def boolean isUL130 = false
-                    def slashIndex = code130?.indexOf("/")
-                    if (slashIndex > 0) {
-                        isUL130 = true
-                        code130inn = code130.substring(0, slashIndex)
-                        code130kpp = code130.substring(slashIndex + 1)
-                    }
-                    def boolean isUL140 = false
-                    slashIndex = code140?.indexOf("/")
-                    if (slashIndex > 0) {
-                        isUL140 = true
-                        code140inn = code140.substring(0, slashIndex)
-                        code140kpp = code140.substring(slashIndex + 1)
-                    }
-
-                    КнПокДЛСтр(
-                            [НомерПор: code008] +
-                                    [НомСчФПрод: code020] +
-                                    (code030 != null ? [ДатаСчФПрод: code030] : [:]) +
-                                    (code040 != null ? [НомИспрСчФ: code040] : [:]) +
-                                    (code050 != null ? [ДатаИспрСчФ: code050] : [:]) +
-                                    (code060 != null ? [НомКСчФПрод: code060] : [:]) +
-                                    (code070 != null ? [ДатаКСчФПрод: code070] : [:]) +
-                                    (code080 != null ? [НомИспрКСчФ: code080] : [:]) +
-                                    (code090 != null ? [ДатаИспрКСчФ: code090] : [:]) +
-                                    (code150 != null ? [НомТД: code150] : [:]) +
-                                    (code160 != null ? [ОКВ: code160] : [:]) +
-                                    [СтоимПокупВ: code170] +
-                                    [СумНДС: code180]
-                    ) {
-                        КодВидОпер(code010)
-                        ДокПдтвУпл(
-                                (code100 != null ? [НомДокПдтвУпл: code100] : [:]) +
-                                        (code110 != null ? [ДатаДокПдтвУпл: code110] : [:])
-                        )
-                        if(code120 != null) {
-                            ДатаУчТов(code120)
+            if(code001 != 1) {
+                КнигаПокупДЛ(
+                        (code005 != null ? [СумНДСИтКПк: code005] : [:]) +
+                                (code190 != null ? [СумНДСИтП1Р8: code190] : [:])
+                ) {
+                    hasPage = false
+                    for (def row : sourceDataRows) {
+                        if (row.getAlias() != null) {
+                            continue
                         }
-                        СвПрод() {
-                            if (isUL130) {
-                                СведЮЛ(
-                                        ИННЮЛ: code130inn,
-                                        КПП: code130kpp
-                                )
-                            } else {
-                                СведИП(
-                                        ИННФЛ: code130
-                                )
+                        hasPage = true
+                        def code008 = row.rowNum
+                        def code010 = row.typeCode
+                        def code020 = getNumber(row.invoice)
+                        def code030 = getDate(row.invoice)
+                        def code040 = getNumber(row.invoiceCorrecting)
+                        def code050 = getDate(row.invoiceCorrecting)
+                        def code060 = getNumber(row.invoiceCorrection)
+                        def code070 = getDate(row.invoiceCorrection)
+                        def code080 = getNumber(row.invoiceCorrectingCorrection)
+                        def code090 = getDate(row.invoiceCorrectingCorrection)
+                        def code100 = getDate(row.documentPay)
+                        def code110 = getDate(row.documentPay)
+                        def code120 = row.dateRegistration?.format('dd.MM.yyyy')
+                        def code130 = row.salesmanInnKpp
+                        def code140 = row.agentInnKpp
+                        def code150 = row.declarationNum
+                        def code160 = getCurrencyCode(row.currency)
+                        def code170 = row.cost
+                        def code180 = row.nds
+
+                        // различаем юр. и физ. лица в строках 130 и 140
+                        def code130inn, code130kpp, code140inn, code140kpp
+                        def boolean isUL130 = false
+                        def slashIndex = code130?.indexOf("/")
+                        if (slashIndex > 0) {
+                            isUL130 = true
+                            code130inn = code130.substring(0, slashIndex)
+                            code130kpp = code130.substring(slashIndex + 1)
+                        }
+                        def boolean isUL140 = false
+                        slashIndex = code140?.indexOf("/")
+                        if (slashIndex > 0) {
+                            isUL140 = true
+                            code140inn = code140.substring(0, slashIndex)
+                            code140kpp = code140.substring(slashIndex + 1)
+                        }
+
+                        КнПокДЛСтр(
+                                [НомерПор: code008] +
+                                        [НомСчФПрод: code020] +
+                                        (code030 != null ? [ДатаСчФПрод: code030] : [:]) +
+                                        (code040 != null ? [НомИспрСчФ: code040] : [:]) +
+                                        (code050 != null ? [ДатаИспрСчФ: code050] : [:]) +
+                                        (code060 != null ? [НомКСчФПрод: code060] : [:]) +
+                                        (code070 != null ? [ДатаКСчФПрод: code070] : [:]) +
+                                        (code080 != null ? [НомИспрКСчФ: code080] : [:]) +
+                                        (code090 != null ? [ДатаИспрКСчФ: code090] : [:]) +
+                                        (code150 != null ? [НомТД: code150] : [:]) +
+                                        (code160 != null ? [ОКВ: code160] : [:]) +
+                                        [СтоимПокупВ: code170] +
+                                        [СумНДС: code180]
+                        ) {
+                            КодВидОпер(code010)
+                            ДокПдтвУпл(
+                                    (code100 != null ? [НомДокПдтвУпл: code100] : [:]) +
+                                            (code110 != null ? [ДатаДокПдтвУпл: code110] : [:])
+                            )
+                            if (code120 != null) {
+                                ДатаУчТов(code120)
+                            }
+                            СвПрод() {
+                                if (isUL130) {
+                                    СведЮЛ(
+                                            ИННЮЛ: code130inn,
+                                            КПП: code130kpp
+                                    )
+                                } else {
+                                    СведИП(
+                                            ИННФЛ: code130
+                                    )
+                                }
+                            }
+                            СвПос() {
+                                if (isUL140) {
+                                    СведЮЛ(
+                                            ИННЮЛ: code140inn,
+                                            КПП: code140kpp
+                                    )
+                                } else {
+                                    СведИП(
+                                            ИННФЛ: code140
+                                    )
+                                }
                             }
                         }
-                        СвПос() {
-                            if (isUL140) {
-                                СведЮЛ(
-                                        ИННЮЛ: code140inn,
-                                        КПП: code140kpp
-                                )
-                            } else {
-                                СведИП(
-                                        ИННФЛ: code140
-                                )
-                            }
-                        }
                     }
-                }
-                if (!hasPage) {
-                    КнПокДЛСтр() {}
+                    if (!hasPage) {
+                        КнПокДЛСтр() {}
+                    }
                 }
             }
         }

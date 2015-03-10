@@ -165,114 +165,116 @@ void generateXML() {
                         [НомКорр: corrNumber] +
                         (code001 != null ? [ПризнСвед9: code001] : [:])
         ) {
-            КнигаПрод(
-                    (code230 != null ? [СтПродБезНДС18: code230] : [:]) +
-                            (code240 != null ? [СтПродБезНДС10: code240] : [:]) +
-                            (code250 != null ? [СтПродБезНДС0: code250] : [:]) +
-                            (code260 != null ? [СумНДСВсКПр18: code260] : [:]) +
-                            (code270 != null ? [СумНДСВсКПр10: code270] : [:]) +
-                            (code280 != null ? [СтПродОсвВсКПр: code280] : [:])
-            ) {
-                hasPage = false
-                for (def row : sourceDataRows) {
-                    if (row.getAlias() != null) {
-                        continue
-                    }
-                    hasPage = true
-                    def code005 = row.rowNumber
-                    def code010 = row.opTypeCode
-                    def code020 = getNumber(row.invoiceNumDate)
-                    def code030 = getDate(row.invoiceNumDate)
-                    def code040 = getNumber(row.invoiceCorrNumDate)
-                    def code050 = getDate(row.invoiceCorrNumDate)
-                    def code060 = getNumber(row.corrInvoiceNumDate)
-                    def code070 = getDate(row.corrInvoiceNumDate)
-                    def code080 = getNumber(row.corrInvCorrNumDate)
-                    def code090 = getDate(row.corrInvCorrNumDate)
-                    def code100 = row.buyerInnKpp
-                    def code110 = row.mediatorInnKpp
-                    def code120 = getNumber(row.paymentDocNumDate)
-                    def code130 = getDate(row.paymentDocNumDate)
-                    def code140 = getCurrencyCode(row.currNameCode)
-                    def code150 = row.saleCostACurr
-                    def code160 = row.saleCostARub
-                    def code170 = row.saleCostB18
-                    def code180 = row.saleCostB10
-                    def code190 = row.saleCostB0
-                    def code200 = row.vatSum18
-                    def code210 = row.vatSum10
-                    def code220 = row.saleCostARub
+            if(code001 != 1) {
+                КнигаПрод(
+                        (code230 != null ? [СтПродБезНДС18: code230] : [:]) +
+                                (code240 != null ? [СтПродБезНДС10: code240] : [:]) +
+                                (code250 != null ? [СтПродБезНДС0: code250] : [:]) +
+                                (code260 != null ? [СумНДСВсКПр18: code260] : [:]) +
+                                (code270 != null ? [СумНДСВсКПр10: code270] : [:]) +
+                                (code280 != null ? [СтПродОсвВсКПр: code280] : [:])
+                ) {
+                    hasPage = false
+                    for (def row : sourceDataRows) {
+                        if (row.getAlias() != null) {
+                            continue
+                        }
+                        hasPage = true
+                        def code005 = row.rowNumber
+                        def code010 = row.opTypeCode
+                        def code020 = getNumber(row.invoiceNumDate)
+                        def code030 = getDate(row.invoiceNumDate)
+                        def code040 = getNumber(row.invoiceCorrNumDate)
+                        def code050 = getDate(row.invoiceCorrNumDate)
+                        def code060 = getNumber(row.corrInvoiceNumDate)
+                        def code070 = getDate(row.corrInvoiceNumDate)
+                        def code080 = getNumber(row.corrInvCorrNumDate)
+                        def code090 = getDate(row.corrInvCorrNumDate)
+                        def code100 = row.buyerInnKpp
+                        def code110 = row.mediatorInnKpp
+                        def code120 = getNumber(row.paymentDocNumDate)
+                        def code130 = getDate(row.paymentDocNumDate)
+                        def code140 = getCurrencyCode(row.currNameCode)
+                        def code150 = row.saleCostACurr
+                        def code160 = row.saleCostARub
+                        def code170 = row.saleCostB18
+                        def code180 = row.saleCostB10
+                        def code190 = row.saleCostB0
+                        def code200 = row.vatSum18
+                        def code210 = row.vatSum10
+                        def code220 = row.saleCostARub
 
-                    // различаем юр. и физ. лица в строках 100 и 110
-                    def code100inn, code100kpp, code110inn, code110kpp
-                    def boolean isUL100 = false
-                    def slashIndex = code100?.indexOf("/")
-                    if (slashIndex > 0) {
-                        isUL100 = true
-                        code100inn = code100.substring(0, slashIndex)
-                        code100kpp = code100.substring(slashIndex + 1)
-                    }
-                    def boolean isUL110 = false
-                    slashIndex = code110?.indexOf("/")
-                    if (slashIndex > 0) {
-                        isUL110 = true
-                        code110inn = code110.substring(0, slashIndex)
-                        code110kpp = code110.substring(slashIndex + 1)
-                    }
+                        // различаем юр. и физ. лица в строках 100 и 110
+                        def code100inn, code100kpp, code110inn, code110kpp
+                        def boolean isUL100 = false
+                        def slashIndex = code100?.indexOf("/")
+                        if (slashIndex > 0) {
+                            isUL100 = true
+                            code100inn = code100.substring(0, slashIndex)
+                            code100kpp = code100.substring(slashIndex + 1)
+                        }
+                        def boolean isUL110 = false
+                        slashIndex = code110?.indexOf("/")
+                        if (slashIndex > 0) {
+                            isUL110 = true
+                            code110inn = code110.substring(0, slashIndex)
+                            code110kpp = code110.substring(slashIndex + 1)
+                        }
 
-                    КнПродСтр(
-                            [НомерПор: code005] +
-                                    [НомСчФПрод: code020] +
-                                    [ДатаСчФПрод: code030] +
-                                    (code040 != null ? [НомИспрСчФ: code040] : [:]) +
-                                    (code050 != null ? [ДатаИспрСчФ: code050] : [:]) +
-                                    (code060 != null ? [НомКСчФПрод: code060] : [:]) +
-                                    (code070 != null ? [ДатаКСчФПрод: code070] : [:]) +
-                                    (code080 != null ? [НомИспрКСчФ: code080] : [:]) +
-                                    (code090 != null ? [ДатаИспрКСчФ: code090] : [:]) +
-                                    (code140 != null ? [ОКВ: code140] : [:]) +
-                                    [СтоимПродСФВ: code150] +
-                                    [СтоимПродСФ: code160] +
-                                    [СтоимПродСФ18: code170] +
-                                    [СтоимПродСФ10: code180] +
-                                    [СтоимПродСФ0: code190] +
-                                    [СумНДССФ18: code200] +
-                                    [СумНДССФ10: code210] +
-                                    [СтоимПродОсв: code220]
-                    ) {
-                        КодВидОпер(code010)
-                        ДокПдтвОпл(
-                                (code120 != null ? [НомДокПдтвОпл: code120] : [:]) +
-                                        (code130 != null ? [ДатаДокПдтвОпл: code130] : [:])
-                        )
-                        СвПокуп() {
-                            if (isUL100) {
-                                СведЮЛ(
-                                        ИННЮЛ: code100inn,
-                                        КПП: code100kpp
-                                )
-                            } else {
-                                СведИП(
-                                        ИННФЛ: code100
-                                )
+                        КнПродСтр(
+                                [НомерПор: code005] +
+                                        [НомСчФПрод: code020] +
+                                        [ДатаСчФПрод: code030] +
+                                        (code040 != null ? [НомИспрСчФ: code040] : [:]) +
+                                        (code050 != null ? [ДатаИспрСчФ: code050] : [:]) +
+                                        (code060 != null ? [НомКСчФПрод: code060] : [:]) +
+                                        (code070 != null ? [ДатаКСчФПрод: code070] : [:]) +
+                                        (code080 != null ? [НомИспрКСчФ: code080] : [:]) +
+                                        (code090 != null ? [ДатаИспрКСчФ: code090] : [:]) +
+                                        (code140 != null ? [ОКВ: code140] : [:]) +
+                                        [СтоимПродСФВ: code150] +
+                                        [СтоимПродСФ: code160] +
+                                        [СтоимПродСФ18: code170] +
+                                        [СтоимПродСФ10: code180] +
+                                        [СтоимПродСФ0: code190] +
+                                        [СумНДССФ18: code200] +
+                                        [СумНДССФ10: code210] +
+                                        [СтоимПродОсв: code220]
+                        ) {
+                            КодВидОпер(code010)
+                            ДокПдтвОпл(
+                                    (code120 != null ? [НомДокПдтвОпл: code120] : [:]) +
+                                            (code130 != null ? [ДатаДокПдтвОпл: code130] : [:])
+                            )
+                            СвПокуп() {
+                                if (isUL100) {
+                                    СведЮЛ(
+                                            ИННЮЛ: code100inn,
+                                            КПП: code100kpp
+                                    )
+                                } else {
+                                    СведИП(
+                                            ИННФЛ: code100
+                                    )
+                                }
+                            }
+                            СвПос() {
+                                if (isUL110) {
+                                    СведЮЛ(
+                                            ИННЮЛ: code110inn,
+                                            КПП: code110kpp
+                                    )
+                                } else {
+                                    СведИП(
+                                            ИННФЛ: code110
+                                    )
+                                }
                             }
                         }
-                        СвПос() {
-                            if (isUL110) {
-                                СведЮЛ(
-                                        ИННЮЛ: code110inn,
-                                        КПП: code110kpp
-                                )
-                            } else {
-                                СведИП(
-                                        ИННФЛ: code110
-                                )
-                            }
-                        }
                     }
-                }
-                if (!hasPage) {
-                    КнПродСтр() {}
+                    if (!hasPage) {
+                        КнПродСтр() {}
+                    }
                 }
             }
         }
