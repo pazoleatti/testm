@@ -281,7 +281,9 @@ void addData(def xml, int headRowCount) {
                 headRow.nds = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
                 isHead = false
             }
-            continue
+            if (row.cell[1].text() == null || row.cell[1].text() == "") {
+                continue
+            }
         }
 
         def newRow = getNewRow()

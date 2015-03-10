@@ -356,7 +356,9 @@ void addData(def xml, int headRowCount) {
                 headRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
                 isHead = false
             }
-            continue
+            if (row.cell[1].text() == null || row.cell[1].text() == "") {
+                continue
+            }
         }
 
         def newRow = getNewRow()
