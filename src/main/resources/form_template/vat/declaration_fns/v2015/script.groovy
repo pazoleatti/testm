@@ -396,18 +396,18 @@ void generateXML() {
                 )
 
                 // РАЗДЕЛ 2
-                if (!shortDeclaration) {
-                    for (def row : getSection2Rows(dataRowsMap)) {
-                        СумУплНА(
-                                КППИно: null,
-                                КБК: '18210301000011000110',
-                                ОКТМО: okato,
-                                СумИсчисл: row.sumIschisl,
-                                КодОпер: row.codeOper,
-                                СумИсчислОтгр: null,
-                                СумИсчислОпл: null,
-                                СумИсчислНА: null
-                        ) {
+                for (def row : getSection2Rows(dataRowsMap)) {
+                    СумУплНА(
+                            КППИно: null,
+                            КБК: '18210301000011000110',
+                            ОКТМО: okato,
+                            СумИсчисл: row.sumIschisl,
+                            КодОпер: row.codeOper,
+                            СумИсчислОтгр: null,
+                            СумИсчислОпл: null,
+                            СумИсчислНА: null
+                    ) {
+                        if (!shortDeclaration) {
                             СведПродЮЛ(
                                     НаимПрод: row.naimProd,
                                     ИННЮЛПрод: row.innULProd
@@ -514,9 +514,9 @@ void generateXML() {
                                     НалВосст: empty
                             )
                             СумОпер1010448(
-                                    КодОпер: '1010448',
+                                    КодОпер: '1010448'/*,
                                     КорНалБазаУв: empty,
-                                    КорНалБазаУм: empty
+                                    КорНалБазаУм: empty*/
                             )
                         }
                     }
