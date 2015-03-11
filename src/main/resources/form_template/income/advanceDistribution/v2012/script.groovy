@@ -115,7 +115,7 @@ def nonEmptyColumns = ['number', 'regionBank', 'regionBankDivision',
         'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
         'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
         'taxSum', 'taxSumOutside', 'taxSumToPay',
-        'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+        'taxSumToReduction', 'everyMonthForKvartalNextPeriod',
         'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
         'everyMonthForFourthKvartalNextPeriod']
 
