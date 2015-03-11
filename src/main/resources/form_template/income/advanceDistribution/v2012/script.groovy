@@ -120,7 +120,7 @@ def nonEmptyColumns = ['regionBank', 'regionBankDivision',
                        'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
                        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
                        'taxSum', 'taxSumOutside', 'taxSumToPay',
-                       'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                       'taxSumToReduction', 'everyMonthForKvartalNextPeriod',
                        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
                        'everyMonthForFourthKvartalNextPeriod']
 
@@ -468,6 +468,9 @@ def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     switch (reportPeriod.order) {
         case 1: //«графа 18» = «графа 14»
             tmp = row.taxSum
+            break
+        case 4:
+            tmp = null
             break
         default:
             // остальные
