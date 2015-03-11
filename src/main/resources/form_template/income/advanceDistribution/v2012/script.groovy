@@ -406,6 +406,9 @@ def calc17_18 (def prevDataRows, def dataRows, def row, def reportPeriod) {
         case 1: //«графа 17» = «графа 13»
             tmp = row.taxSum
             break
+        case 4:
+            tmp = null
+            break
         default:
             // остальные
             if (currentSum) {
