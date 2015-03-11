@@ -160,7 +160,7 @@ void generateXML() {
                         [НомКорр: corrNumber] +
                         (code001 != null ? [ПризнСвед81: code001] : [:])
         ) {
-            if(code001 != 1) {
+            if (code001 != 1) {
                 КнигаПокупДЛ(
                         (code005 != null ? [СумНДСИтКПк: code005] : [:]) +
                                 (code190 != null ? [СумНДСИтП1Р8: code190] : [:])
@@ -224,35 +224,41 @@ void generateXML() {
                                         [СумНДС: code180]
                         ) {
                             КодВидОпер(code010)
-                            ДокПдтвУпл(
-                                    (code100 != null ? [НомДокПдтвУпл: code100] : [:]) +
-                                            (code110 != null ? [ДатаДокПдтвУпл: code110] : [:])
-                            )
+                            if (code100 != null && code110 != null) {
+                                ДокПдтвУпл(
+                                        НомДокПдтвУпл: code100,
+                                        ДатаДокПдтвУпл: code110
+                                )
+                            }
                             if (code120 != null) {
                                 ДатаУчТов(code120)
                             }
-                            СвПрод() {
-                                if (isUL130) {
-                                    СведЮЛ(
-                                            ИННЮЛ: code130inn,
-                                            КПП: code130kpp
-                                    )
-                                } else {
-                                    СведИП(
-                                            ИННФЛ: code130
-                                    )
+                            if (code130 != null) {
+                                СвПрод() {
+                                    if (isUL130) {
+                                        СведЮЛ(
+                                                ИННЮЛ: code130inn,
+                                                КПП: code130kpp
+                                        )
+                                    } else {
+                                        СведИП(
+                                                ИННФЛ: code130
+                                        )
+                                    }
                                 }
                             }
-                            СвПос() {
-                                if (isUL140) {
-                                    СведЮЛ(
-                                            ИННЮЛ: code140inn,
-                                            КПП: code140kpp
-                                    )
-                                } else {
-                                    СведИП(
-                                            ИННФЛ: code140
-                                    )
+                            if (code140 != null) {
+                                СвПос() {
+                                    if (isUL140) {
+                                        СведЮЛ(
+                                                ИННЮЛ: code140inn,
+                                                КПП: code140kpp
+                                        )
+                                    } else {
+                                        СведИП(
+                                                ИННФЛ: code140
+                                        )
+                                    }
                                 }
                             }
                         }

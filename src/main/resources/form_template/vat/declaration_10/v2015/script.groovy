@@ -157,7 +157,7 @@ void generateXML() {
                         [НомКорр: corrNumber] +
                         (code001 != null ? [ПризнСвед10: code001] : [:])
         ) {
-            if(code001 != 1) {
+            if (code001 != 1) {
                 ЖУчВыстСчФ() {
                     hasPage = false
                     def isFirstSection = true
@@ -223,16 +223,18 @@ void generateXML() {
                                         (code100 != null ? [ДатаИспрКСчФ: code100] : [:])
                         ) {
                             КодВидОпер(code020)
-                            СвПокуп() {
-                                if (isUL110) {
-                                    СведЮЛ(
-                                            ИННЮЛ: code110inn,
-                                            КПП: code110kpp
-                                    )
-                                } else {
-                                    СведИП(
-                                            ИННФЛ: code110
-                                    )
+                            if (code110 != null) {
+                                СвПокуп() {
+                                    if (isUL110) {
+                                        СведЮЛ(
+                                                ИННЮЛ: code110inn,
+                                                КПП: code110kpp
+                                        )
+                                    } else {
+                                        СведИП(
+                                                ИННФЛ: code110
+                                        )
+                                    }
                                 }
                             }
                             СвПосрДеят(
@@ -246,16 +248,18 @@ void generateXML() {
                                             [РазНДСКСчФУм: code200] +
                                             [РазНДСКСчФУв: code210]
                             ) {
-                                СвПрод() {
-                                    if (isUL120) {
-                                        СведЮЛ(
-                                                ИННЮЛ: code120inn,
-                                                КПП: code120kpp
-                                        )
-                                    } else {
-                                        СведИП(
-                                                ИННФЛ: code120
-                                        )
+                                if (code120 != null) {
+                                    СвПрод() {
+                                        if (isUL120) {
+                                            СведЮЛ(
+                                                    ИННЮЛ: code120inn,
+                                                    КПП: code120kpp
+                                            )
+                                        } else {
+                                            СведИП(
+                                                    ИННФЛ: code120
+                                            )
+                                        }
                                     }
                                 }
                             }
