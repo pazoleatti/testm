@@ -516,7 +516,7 @@ public interface SourceService {
      * Проверяет осуществлялась ли консолидация для НФ
      * @param formDataId
      * @param sourceFormDataId
-     * @return
+     * @return true если консолидация сделана
      */
     boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId);
 }

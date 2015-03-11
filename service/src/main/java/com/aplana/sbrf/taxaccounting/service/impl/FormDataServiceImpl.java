@@ -480,18 +480,20 @@ public class FormDataServiceImpl implements FormDataService {
                 for (DepartmentFormType dftTarget : destinationsDFT) {
                     FormData destinationFD =
                             findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
-                    ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
-                    DepartmentReportPeriod drp = departmentReportPeriodService.get(destinationFD.getDepartmentReportPeriodId());
-                    logger.warn(
-                            NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
-                            departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),
-                            destinationFD.getFormType().getName(),
-                            destinationFD.getKind().getName(),
-                            rp.getName() + (destinationFD.getPeriodOrder() != null?" " + Months.fromId(destinationFD.getPeriodOrder()).getTitle():""),
-                            rp.getTaxPeriod().getYear(),
-                            drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                    SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
-                    );
+                    if (!sourceService.isFDSourceConsolidated(destinationFD.getId(), formData.getId())){
+                        ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
+                        DepartmentReportPeriod drp = departmentReportPeriodService.get(destinationFD.getDepartmentReportPeriodId());
+                        logger.warn(
+                                NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
+                                departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),
+                                destinationFD.getFormType().getName(),
+                                destinationFD.getKind().getName(),
+                                rp.getName() + (destinationFD.getPeriodOrder() != null?" " + Months.fromId(destinationFD.getPeriodOrder()).getTitle():""),
+                                rp.getTaxPeriod().getYear(),
+                                drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                        SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
+                        );
+                    }
                 }
             }
             //Система проверяет статус консолидации из форм-источников.
