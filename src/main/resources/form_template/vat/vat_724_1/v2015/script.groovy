@@ -1,4 +1,3 @@
-//TODO: после появления постановки при необходимости внести в скрипт изменения
 package form_template.vat.vat_724_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -92,9 +91,9 @@ def nonEmptyColumns2 = ['baseAccNum', 'baseSum', 'ndsNum', 'ndsSum', 'ndsRate', 
 @Field
 def nonEmptyColumns3 = ['baseAccNum', 'baseSum', 'ndsSum', 'ndsBookSum', 'ndsDealSum']
 
-// Сортируемые атрибуты (графа 3, 5)
+// Сортируемые атрибуты (графа 3, 5, 2, 4, 6, 7, 8, 9)
 @Field
-def sortColumns = ['baseAccNum', 'ndsNum']
+def sortColumns = ['baseAccNum', 'ndsNum', 'baseAccName', 'baseSum', 'ndsSum', 'ndsRate', 'ndsBookSum', 'ndsDealSum']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 6, 8)
 @Field
@@ -188,9 +187,6 @@ void calc() {
         def to = lastRow.getIndex() - 1
 
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
-
-        // отсортировать/группировать
-        sortRows(sectionsRows, sortColumns)
 
         // расчитать
         if(formDataEvent != FormDataEvent.IMPORT) {
@@ -735,7 +731,7 @@ void sortFormDataRows() {
         def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
-        sortRowsSimple(sectionsRows)
+        sortRows(sectionsRows, sortColumns)
     }
 
     dataRowHelper.saveSort()

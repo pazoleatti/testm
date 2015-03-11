@@ -80,7 +80,7 @@ def editableColumns = allColumns - 'rowNum'
 
 // Проверяемые на пустые значения атрибуты (графа )
 @Field
-def nonEmptyColumns = ['typeCode', 'invoice']
+def nonEmptyColumns = ['typeCode', 'invoice', 'cost', 'nds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа )
 @Field
@@ -257,7 +257,8 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == "") {
+        if ((row.cell[0].text() == null || row.cell[0].text() == "") &&
+                (row.cell[1].text() == null || row.cell[1].text() == "")) {
             continue
         }
 

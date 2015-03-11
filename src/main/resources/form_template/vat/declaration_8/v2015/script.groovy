@@ -186,8 +186,8 @@ void generateXML() {
                         def code140 = row.agentInnKpp
                         def code150 = row.declarationNum
                         def code160 = getCurrencyCode(row.currency)
-                        def code170 = row.cost
-                        def code180 = row.nds
+                        def code170 = row.cost ?: empty
+                        def code180 = row.nds ?: empty
 
                         // различаем юр. и физ. лица в строках 130 и 140
                         def code130inn, code130kpp, code140inn, code140kpp

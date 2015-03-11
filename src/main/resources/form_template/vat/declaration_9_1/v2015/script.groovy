@@ -210,14 +210,14 @@ void generateXML() {
                         def code200 = getNumber(row.paymentDocNumDate)
                         def code210 = getDate(row.paymentDocNumDate)
                         def code220 = getCurrencyCode(row.currNameCode)
-                        def code230 = row.saleCostACurr
-                        def code240 = row.saleCostARub
-                        def code250 = row.saleCostB18
-                        def code260 = row.saleCostB10
-                        def code270 = row.saleCostB0
-                        def code280 = row.vatSum18
-                        def code290 = row.vatSum10
-                        def code300 = row.bonifSalesSum
+                        def code230 = row.saleCostACurr ?: empty
+                        def code240 = row.saleCostARub ?: empty
+                        def code250 = row.saleCostB18 ?: empty
+                        def code260 = row.saleCostB10 ?: empty
+                        def code270 = row.saleCostB0 ?: empty
+                        def code280 = row.vatSum18 ?: empty
+                        def code290 = row.vatSum10 ?: empty
+                        def code300 = row.bonifSalesSum ?: empty
 
                         // различаем юр. и физ. лица в строках 180 и 190
                         def code180inn, code180kpp, code190inn, code190kpp

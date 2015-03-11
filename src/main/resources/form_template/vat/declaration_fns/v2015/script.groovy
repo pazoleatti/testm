@@ -318,7 +318,7 @@ void generateXML() {
     /** НалВычОбщ. Код строки 190 Графа 5. */
     def nalVichObsh = nalPredNPPriob + nalIschProd
     /** НалПУ164. Код строки 200 и код строки 210.*/
-    def nalPU164 = nalVosstObsh - nalVichObsh
+    def nalPU164 = (nalVosstObsh - nalVichObsh).abs().intValue()
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
@@ -396,18 +396,17 @@ void generateXML() {
                 )
 
                 // РАЗДЕЛ 2
-                if (!shortDeclaration) {
-                    for (def row : getSection2Rows(dataRowsMap)) {
-                        СумУплНА(
-                                КППИно: null,
-                                КБК: '18210301000011000110',
-                                ОКТМО: okato,
-                                СумИсчисл: row.sumIschisl,
-                                КодОпер: row.codeOper,
-                                СумИсчислОтгр: null,
-                                СумИсчислОпл: null,
-                                СумИсчислНА: null
-                        ) {
+                for (def row : getSection2Rows(dataRowsMap)) {
+                    СумУплНА(
+                            КБК: '18210301000011000110',
+                            ОКТМО: okato,
+                            СумИсчисл: row.sumIschisl,
+                            КодОпер: row.codeOper,
+                            СумИсчислОтгр: null,
+                            СумИсчислОпл: null,
+                            СумИсчислНА: null
+                    ) {
+                        if (!shortDeclaration) {
                             СведПродЮЛ(
                                     НаимПрод: row.naimProd,
                                     ИННЮЛПрод: row.innULProd
@@ -507,16 +506,6 @@ void generateXML() {
                                     НалВычПод: empty,
                                     НалНеПод: empty,
                                     НалВосст: empty
-                            )
-                            СумОпер1010447(
-                                    КодОпер: '1010447',
-                                    НалБаза: empty,
-                                    НалВосст: empty
-                            )
-                            СумОпер1010448(
-                                    КодОпер: '1010448',
-                                    КорНалБазаУв: empty,
-                                    КорНалБазаУм: empty
                             )
                         }
                     }

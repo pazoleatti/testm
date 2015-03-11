@@ -546,7 +546,7 @@ void generateXML() {
     if (!sourceCheck(false, LogLevel.WARNING)) {
         nalVipl311 = 0
     } else {
-        nalVipl311 = getAliasFromForm(dataRowsSum, 'taxSum', 'R1')
+        nalVipl311 = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
     }
     /** НалВыпл311ФБ. Код строки декларации 250. */
     def nalVipl311FB = getLong(nalVipl311 * 2 / 20)
@@ -1175,7 +1175,7 @@ void generateXML() {
                             nalBaza04 = getSimpleIncomeSumRows8(dataRowsSimpleIncome, [14010])
                             stavNal = 9
                             nalDivNeRFPred = nalDivNeRFPredOld + nalDivNeRFOld
-                            nalDivNeRF = (getAliasFromForm(dataRowsSum, 'taxSum', 'R2') ?: 0)
+                            nalDivNeRF = (getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_DIVIDENDS') ?: 0)
                             break
                         case 5:
                             nalBaza04 = getSimpleIncomeSumRows8(dataRowsSimpleIncome, [14015])

@@ -1,4 +1,4 @@
-package form_template.income.declaration_bank.v2012
+package form_template.income.declaration_bank_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -7,17 +7,13 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 /**
- * Декларация по налогу на прибыль (Банк)
+ * Декларация по налогу на прибыль (Банк) (год 2014)
  * Формирование XML для декларации налога на прибыль.
  *
- * declarationTemplateId=2020
+ * declarationTemplateId=21607
  *
- * @author rtimerbaev
+ * @author Bulat.Kinzyabulatov
  */
-
-// Признак новой декларации (http://jira.aplana.com/browse/SBRFACCTAX-8910)
-@Field
-def boolean newDeclaration = false;
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
@@ -80,6 +76,8 @@ def departmentParamTable = null
 
 // Дата окончания отчетного периода
 @Field
+def getEndDate = null
+@Field
 def reportPeriodEndDate = null
 
 def getEndDate() {
@@ -95,7 +93,6 @@ def getRefBookValue(def long refBookId, def recordId) {
 }
 
 void checkDepartmentParams(LogLevel logLevel) {
-
     // Параметры подразделения
     def departmentParam = getDepartmentParam()
     def departmentParamIncomeRow = getDepartmentParamTable(departmentParam.record_id.value)
@@ -135,7 +132,7 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
     return success
 }
 
-/** Логические проверки. */
+// Логические проверки.
 void logicCheck() {
     // получение данных из xml'ки
     def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false, false)
@@ -147,8 +144,7 @@ void logicCheck() {
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
     def nalVipl311 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалВыпл311.text())
     def nalIschisl = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчисл.text())
-    if (nalVipl311 != null && nalIschisl != null &&
-            nalVipl311 > nalIschisl) {
+    if (nalVipl311 != null && nalIschisl != null && nalVipl311 > nalIschisl) {
         logger.error('Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)!')
     }
 
@@ -245,15 +241,11 @@ void logicCheck() {
     }
 }
 
-/** Запуск генерации XML. */
+// Запуск генерации XML.
 void generateXML() {
-    /*
-     * Константы.
-     */
 
     def empty = 0
-    /** Костыльные пустые значения для отсутсвтующих блоков (=null или 0). */
-    def emptyNull = 0
+
     def knd = '1151006'
     def kbk = '18210101011011000110'
     def kbk2 = '18210101012021000110'
@@ -285,9 +277,8 @@ void generateXML() {
     def signatoryLastName = incomeParamsTable?.SIGNATORY_LASTNAME?.value
     def approveDocName = incomeParamsTable?.APPROVE_DOC_NAME?.value
     def approveOrgName = incomeParamsTable?.APPROVE_ORG_NAME?.value
-    // справочник "Параметры подразделения по налогу на прибыль" - конец
 
-    /** Отчётный период. */
+    // Отчётный период.
     def reportPeriod = reportPeriodService.get(reportPeriodId)
 
     /** Предыдущий отчётный период. */
@@ -296,7 +287,7 @@ void generateXML() {
     /** XML декларации за предыдущий отчетный период. */
     def xmlDataOld = getXmlData(prevReportPeriod?.id, departmentId, false, true)
 
-    /** Налоговый период. */
+    // Налоговый период.
     def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
 
     /** Признак налоговый ли это период. */
@@ -332,9 +323,7 @@ void generateXML() {
         }
     }
 
-    /*
-     * Данные налоговых форм.
-     */
+    // Данные налоговых форм.
 
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
@@ -354,15 +343,15 @@ void generateXML() {
     def dataRowsAdvance = getDataRows(formDataCollection, 500, FormDataKind.SUMMARY)
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, newDeclaration ? 411 : 306, FormDataKind.ADDITIONAL)
+    def dataRowsDividend = getDataRows(formDataCollection, 411, FormDataKind.ADDITIONAL)
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, newDeclaration ? 413 : 307, FormDataKind.ADDITIONAL)
+    def dataRowsTaxAgent = getDataRows(formDataCollection, 413, FormDataKind.ADDITIONAL)
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
-    def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308, FormDataKind.ADDITIONAL)
+    def dataRowsTaxSum = getDataRows(formDataCollection, 412, FormDataKind.ADDITIONAL)
 
     /** форма «Остатки по начисленным авансовым платежам». */
     def dataRowsRemains = getDataRows(formDataCollection, 309, FormDataKind.PRIMARY)
@@ -370,9 +359,8 @@ void generateXML() {
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
     def dataRowsSum = getDataRows(formDataCollection, 417, FormDataKind.ADDITIONAL)
 
-    /*
-     * Получение значении декларации за предыдущий период.
-     */
+    // Выходная Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
+    def dataRowsApp2 = getDataRows(formDataCollection, 415, FormDataKind.ADDITIONAL)
 
     /** НалВыпл311ФБ за предыдущий отчетный период. Код строки декларации 250. */
     def nalVipl311FBOld = 0
@@ -398,11 +386,9 @@ void generateXML() {
         avPlatMesFBOld = new BigDecimal(xmlDataOld.Документ.Прибыль.РасчНал.@АвПлатМесФБ.text() ?: 0)
     }
 
-    /*
-     * Расчет значений для текущей декларации.
-     */
+    // Расчет значений для текущей декларации.
 
-    /** Период. */
+    // Период
     def period = 0
     if (reorgFormCode != null) {
         period = 50
@@ -410,6 +396,7 @@ void generateXML() {
         def values = [21, 31, 33, 34]
         period = values[reportPeriod.order - 1]
     }
+
 
     /** ВыручРеалТов. Код строки декларации 180. */
     def viruchRealTov = empty
@@ -439,10 +426,10 @@ void generateXML() {
     def pribRealAI = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10845]))
     /** УбытРеалАИ. Код строки декларации 060. Код вида расхода = 21780. */
     def ubitRealAI = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21780]))
-    /** ЦенаРеалПравЗУ. Код строки декларации 240. Код вида дохода = 10890. */
-    def cenaRealPravZU = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10890]))
-    /** УбытРеалЗУ. Код строки декларации 260. Код вида расхода = 21390. */
-    def ubitRealZU = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21390]))
+    /** ЦенРеалПрЗУ. Код строки декларации 240. Код вида дохода = 10890. */
+    def cenRealPrZU = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10890]))
+    /** УбытРеалПрЗУ. Код строки декларации 260. Код вида расхода = 21390. */
+    def ubitRealPrZU = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21390]))
     /** ВыручРеалПТДоСр. Код строки декларации 100. Код вида дохода = 10860. */
     def viruchRealPTDoSr = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10860]))
     /** ВыручРеалПТПосСр. Код строки декларации 110. Код вида дохода = 10870. */
@@ -472,7 +459,17 @@ void generateXML() {
     /** ВырРеалПред. Код строки декларации 023. */
     def virRealPred = empty
     /** ВыручОп302Ит. Код строки декларации 340. Строка 030 + строка 100 + строка 110 + строка 180 + (строка 210 – строка 211) + строка 240. */
-    def viruchOp302It = viruchRealAI + viruchRealPTDoSr + viruchRealPTPosSr + viruchRealTov + dohDolgovDUI - dohDolgovDUI_VnR + cenaRealPravZU
+    def viruchOp302It = viruchRealAI + viruchRealPTDoSr + viruchRealPTPosSr + viruchRealTov + dohDolgovDUI - dohDolgovDUI_VnR + cenRealPrZU
+
+    /** СерЛицНедр. Лицензия: серия */
+    def serLicNedr = empty
+    /** НомЛицНедр. Лицензия: номер */
+    def nomLicNedr = empty
+    /** ВидЛицНедр. Лицензия: вид морского месторождения */
+    def vidLicNedr = empty
+    /** НомМорМест. Лицензия: номер морского месторождения */
+    def nomMorMest = empty
+
     /** ДохРеал, ВырРеалИтог. */
     def dohReal = virRealVs + virRealCBVs + virRealPred + viruchOp302It
     /** ДохВнереал. Код строки декларации 100. */
@@ -498,7 +495,11 @@ void generateXML() {
     /** ПриобРеалЦБ. Код строки декларации 070. Код вида расхода = 21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680. */
     def priobrRealCB = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680]))
     /** СумОтклЦен. Код строки декларации 071. Код вида расходов = 21685, 21690, 21695. */
-    def sumOtklCen = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21685, 21690, 21695]))
+    def sumOtklCen = empty
+    /** ПриобРеалЦБОрг. Код строки декларации 072. Расходы, связанные с приобритением и реализацией (выбытием, в том числе погашением) ценных бумаг, обращающихся на организованном рынке ценных бумаг */
+    def priobRealCBOrg = empty
+    /** СумОтклЦенОрг. Код строки декларации 073. Суммы отклонения от максимальной (расчетной) цены */
+    def sumOtklCenOrg = empty
 
     /** УбытПрошОбсл. Код строки декларации 090. */
     def ubitProshObsl = empty
@@ -512,10 +513,10 @@ void generateXML() {
     def rashDolgovDUI = empty
     /** РасхДоговДУИ_ВнР. Код строки декларации 221. */
     def rashDolgovDUI_VnR = empty
-    /** СумНевозмЗатрЗУ. Код строки декларации 250. Код вида расхода = 21385. */
-    def sumNevozmZatrZU = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21385]))
+    /** НеВозЗатрПрЗУ. Код строки декларации 250. Код вида расхода = 21385. */
+    def neVozZatrPrZU = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21385]))
     /** РасхОпер32, РасхОп302Ит. Код строки декларации = 080 или 350. */
-    def rashOper32 = ostStRealAI + stoimRealPTDoSr + stoimRealPTPosSr + rashRealTov + (rashDolgovDUI - rashDolgovDUI_VnR) + sumNevozmZatrZU
+    def rashOper32 = ostStRealAI + stoimRealPTDoSr + stoimRealPTPosSr + rashRealTov + (rashDolgovDUI - rashDolgovDUI_VnR) + neVozZatrPrZU
     /** УбытРеалАмИм. Код строки декларации 100. Код вида расхода = 21520, 21530. */
     def ubitRealAmIm = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21520, 21530]))
     /** УбытРеалЗемУч. Код строки декларации 110. */
@@ -527,12 +528,13 @@ void generateXML() {
             priobrRealImush + activRealPred + priobrRealCB + rashOper32 + ubitProshObsl +
             ubitRealAmIm + ubitRealZemUch + nadbPokPred
     /** Убытки, УбытОп302. Код строки декларации 360. Cтрока 060 + строка 150 + строка 160 + строка 201+ строка 230 + строка 260. */
-    def ubitki = ubitRealAI + ubit1Prev269 + ubit2RealPT + ubitObObslNeobl + ubitDogovDUI + ubitRealZU
+    def ubitki = ubitRealAI + ubit1Prev269 + ubit2RealPT + ubitObObslNeobl + ubitDogovDUI + ubitRealPrZU
     /** ПрибУб. */
     def pribUb = dohReal + dohVnereal - rashUmReal - rashVnereal + ubitki
     /** ДохИсклПриб. */
     def dohIsklPrib = getDohIsklPrib(dataRowsComplexIncome, dataRowsSimpleIncome)
-    def nalBaza = pribUb - dohIsklPrib - 0 - 0 + 0
+    // НалБаза строка 60 - строка 70 - строка 80 - строка 90 - строка 400 (Приложение №2 к Листу 02)
+    def nalBaza = pribUb - dohIsklPrib - 0 - 0 - 0
     /** НалБазаИсч, НалБазаОрг. */
     def nalBazaIsch = getNalBazaIsch(nalBaza, 0)
     /** НалИсчислФБ. Код строки декларации 190. */
@@ -541,7 +543,7 @@ void generateXML() {
     def nalIschislSub = getTotalFromForm(dataRowsAdvance, 'taxSum')
     /** НалИсчисл. Код строки декларации 180. */
     def nalIschisl = nalIschislFB + nalIschislSub
-    /** НалВыпл311. Код строки декларации 240. */
+    // НалВыпл311. Код строки декларации 240.
     def nalVipl311
     if (!sourceCheck(false, LogLevel.WARNING)) {
         nalVipl311 = 0
@@ -554,7 +556,7 @@ void generateXML() {
     def nalVipl311Sub = getLong(nalVipl311 - nalVipl311FB)
 
     /** АвПлатМесФБ. Код строки декларации 300. */
-    def avPlatMesFB = nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0)
+    def avPlatMesFB = isTaxPeriod ? empty : (nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0))
     /** АвНачислФБ. Код строки декларации 220. */
     def avNachislFB
     if(isFirstPeriod){
@@ -567,9 +569,9 @@ void generateXML() {
         avNachislFB = nalIschislFBOld - nalVipl311FBOld + avPlatMesFBOld
     }
     /** АвПлатМесСуб. Код строки декларации 310. */
-    def avPlatMesSub = nalIschislSub - (isFirstPeriod ? 0 : nalIschislSubOld)
+    def avPlatMesSub = isTaxPeriod ? empty : (nalIschislSub - (isFirstPeriod ? 0 : nalIschislSubOld))
     /** АвПлатМес. */
-    def avPlatMes = avPlatMesFB + avPlatMesSub
+    def avPlatMes = isTaxPeriod ? empty : (avPlatMesFB + avPlatMesSub)
     /** АвПлатУпл1КвФБ. */
     def avPlatUpl1CvFB = (reportPeriod != null && reportPeriod.order == 3 ? avPlatMesFB : empty)
     /** АвПлатУпл1КвСуб. Код строки декларации 340. */
@@ -597,10 +599,10 @@ void generateXML() {
     def nalUmenFB = getNalUmen(avNachislFB, nalVipl311FB, nalIschislFB)
     /** НалУменСуб. Код строки декларации 281. */
     def nalUmenSub = getTotalFromForm(dataRowsAdvance, 'taxSumToReduction')
-    /** ОтклВырЦБМин. Код строки декларации 021. Код вида дохода = 11270, 11280, 11290. */
-    def otklVirCBMin = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [11270, 11280, 11290]))
-    /** ОтклВырЦБРасч. Код строки декларации 022. Код вида дохода = 11300, 11310. */
-    def otklVirCBRasch = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [11300, 11310]))
+    /** ОтклВырЦБОбр. Код строки декларации 021. Код вида дохода = 11270, 11280, 11290. */
+    def otklVirCBOrb = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [11270, 11280, 11290]))
+    /** ОтклВырЦБНеОбр. Код строки декларации 022. Код вида дохода = 11300, 11310. */
+    def otklVirCBNeObr = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [11300, 11310]))
     /** ВнеРеалДохВс. Код строки декларации 100. */
     def vneRealDohVs = dohVnereal
     /** ВнеРеалДохСт. Код строки декларации 102. Код вида дохода = 13250. */
@@ -679,15 +681,13 @@ void generateXML() {
         return
     }
 
-    /*
-     * Формирование XML'ки.
-     */
+    // Формирование XML'ки.
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 9 : 2, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
-            ВерсФорм : formatVersion) {
+            ВерсФорм : formatVersion){
 
         // Титульный лист
         Документ(
@@ -700,8 +700,7 @@ void generateXML() {
                 ПоМесту : taxPlaceTypeCode) {
 
             СвНП(
-                    ОКВЭД : okvedCode,
-                    Тлф : phone) {
+                    [ОКВЭД : okvedCode] + (phone ? [Тлф : phone] : [:])) {
 
                 НПЮЛ(
                         НаимОрг : name,
@@ -719,9 +718,8 @@ void generateXML() {
 
             Подписант(ПрПодп : prPodp) {
                 ФИО(
-                        Фамилия : signatorySurname,
-                        Имя : signatoryFirstName,
-                        Отчество : signatoryLastName)
+                        [Фамилия : signatorySurname, Имя : signatoryFirstName] +
+                                (signatoryLastName != null ? [Отчество : signatoryLastName] : [:]))
                 if (prPodp != 1) {
                     СвПред(
                             [НаимДок : approveDocName] +
@@ -735,15 +733,12 @@ void generateXML() {
                 НалПУ() {
                     // Раздел 1. Подраздел 1.1
                     // 0..n // всегда один
-                    НалПУАв(
-                            ТипНП : typeNP,
-                            ОКТМО : oktmo) {
-
+                    НалПУАв(ОКТМО: oktmo) {
                         def nalPu = (nalDoplFB != 0 ? nalDoplFB : -nalUmenFB)
                         // 0..1
                         ФедБдж(
-                                КБК : kbk,
-                                НалПУ : nalPu)
+                                КБК: kbk,
+                                НалПУ: nalPu)
 
                         nalPu = 0
                         if (dataRowsAdvance != null) {
@@ -759,8 +754,8 @@ void generateXML() {
 
                         // 0..1
                         СубБдж(
-                                КБК : kbk2,
-                                НалПУ : nalPu)
+                                КБК: kbk2,
+                                НалПУ: nalPu)
                     }
                     // Раздел 1. Подраздел 1.1 - конец
 
@@ -768,7 +763,7 @@ void generateXML() {
                     def cvartalIchs
                     switch (reportPeriod != null ? reportPeriod.order : empty) {
                         case 3 :
-                            cvartalIchs = [21, 24]
+                            cvartalIchs = [0, 0]
                             break
                         default:
                             cvartalIchs = [0]
@@ -776,10 +771,8 @@ void generateXML() {
                     cvartalIchs.each { cvartalIch ->
                         if (!isTaxPeriod) {
                             // 0..n
-                            НалПУМес(
-                                    [ТипНП : typeNP] +
-                                            (cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
-                                            [ОКТМО : oktmo]) {
+                            НалПУМес((cvartalIch != 0 ? [КварталИсч : cvartalIch] : [:]) +
+                                    [ОКТМО : oktmo]) {
                                 def list02Row300 = avPlatMesFB
                                 def avPlat1 = (long) list02Row300 / 3
                                 def avPlat2 = avPlat1
@@ -836,9 +829,13 @@ void generateXML() {
                 }
 
                 // Лист 02
-                // 0..3 - всегда один
+                // 0..4
                 РасчНал(
                         ТипНП : typeNP,
+//                        СерЛицНедр : serLicNedr,
+//                        НомЛицНедр : nomLicNedr,
+//                        ВидЛицНедр : vidLicNedr,
+//                        НомМорМест : nomMorMest,
                         ДохРеал : dohReal,
                         ДохВнереал : dohVnereal,
                         РасхУмРеал : rashUmReal,
@@ -895,8 +892,12 @@ void generateXML() {
                             // 0..1
                             ВырРеалЦБ(
                                     ВырРеалЦБВс : virRealCBVs,
-                                    ОтклВырЦБМин : otklVirCBMin,
-                                    ОтклВырЦБРасч : otklVirCBRasch)
+                                    ОтклВырЦБОбр : otklVirCBOrb,
+                                    ОтклВырЦБНеОбр : otklVirCBNeObr)
+                            // 0..1
+                            ВырРеалЦБОбр(
+                                    ВырРеалЦБВс : empty,
+                                    ОтклВырЦБМин : empty)
                         }
                         // 0..1
                         ДохВнеРеал(
@@ -913,7 +914,13 @@ void generateXML() {
 
                     // Приложение № 2 к Листу 02
                     // 0..1
-                    РасхРеалВнеРеал(ТипНП : typeNP) {
+                    РасхРеалВнеРеал(
+                            ТипНП : typeNP
+//                            СерЛицНедр: empty,
+//                            НомЛицНедр: empty,
+//                            ВидЛицНедр : empty,
+//                            НомМорМест : empty
+                    ) {
                         // 0..1
                         РасхРеал(
                                 ПрямРасхРеал : pramRashReal,
@@ -922,6 +929,7 @@ void generateXML() {
                                 АктивРеалПред : activRealPred,
                                 ПриобРеалЦБ : priobrRealCB,
                                 СумОтклЦен : sumOtklCen,
+                                ПриобРеалЦБОрг : priobRealCBOrg,
                                 РасхОпер32 : rashOper32,
                                 УбытПрошОбсл : ubitProshObsl,
                                 УбытРеалАмИм : ubitRealAmIm,
@@ -961,7 +969,7 @@ void generateXML() {
                                 РасхВнеРеалВс : rashVnerealVs,
                                 РасхВнереалПрДО : rashVnerealPrDO,
                                 РасхВнереалРзрв : empty,
-                                УбытРеалПравТр : ubitRealPravTr,
+                                // УбытРеалПравТр : ubitRealPravTr, не заполняется с 2015 года
                                 РасхЛиквОС : rashLikvOS,
                                 РасхШтраф : rashShtraf,
                                 РасхРынЦБДД : rashRinCBDD)
@@ -970,6 +978,9 @@ void generateXML() {
                                 УбытПриравнВс : ubitPriravnVs,
                                 УбытПрошПер : ubitProshPer,
                                 СумБезнадДолг : sumBeznalDolg)
+                        КорНБЛиш(КорНБЛишВс : empty) {
+                            // КорНБЛишГод(Год: year, КорНБЛишВс: korNBlishVs)
+                        }
                     }
                     // Приложение № 2 к Листу 02 - конец
 
@@ -977,6 +988,10 @@ void generateXML() {
                     // 0..1
                     РасчРасхОпер(
                             ТипНП : typeNP,
+//                            СерЛицНедр : empty,
+//                            НомЛицНедр : empty,
+//                            ВидЛицНедр : empty,
+//                            НомМорМест : empty,
                             КолОбРеалАИ :colObRealAI,
                             КолОбРеалАИУб : colObRealAIUb,
                             ВыручРеалАИ : viruchRealAI,
@@ -992,26 +1007,31 @@ void generateXML() {
                             РасхДоговДУИ : rashDolgovDUI,
                             РасхДоговДУИ_ВнР : rashDolgovDUI_VnR,
                             УбытДоговДУИ : empty,
-                            ЦенаРеалПравЗУ : cenaRealPravZU,
-                            СумНевозмЗатрЗУ : sumNevozmZatrZU,
-                            УбытРеалЗУ : ubitRealZU,
+                            ЦенРеалПрЗУ : cenRealPrZU,
+                            НеВозЗатрПрЗУ : neVozZatrPrZU,
+                            УбытРеалПрЗУ : ubitRealPrZU,
                             ВыручОп302Ит : viruchOp302It,
                             РасхОп302Ит : rashOper32,
                             УбытОп302 : ubitki) {
                         // 0..1
                         ВыручРеалПТ(
                                 ВыручРеалПТДоСр : viruchRealPTDoSr,
-                                ВыручРеалПТПосСр : viruchRealPTPosSr)
+                                // ВыручРеалПТПосСр : viruchRealPTPosSr не заполняется с 2015 года
+                        )
                         // 0..1
                         СтоимРеалПТ(
                                 СтоимРеалПТДоСр : stoimRealPTDoSr,
-                                СтоимРеалПТПосСр : stoimRealPTPosSr)
+                                // СтоимРеалПТПосСр : stoimRealPTPosSr не заполняется с 2015 года
+                        )
                         // 0..1
-                        УбытРеалПТ(
+                        УбытРеалПТ1(
                                 Убыт1Соот269 : ubit1Soot269,
-                                Убыт1Прев269 : ubit1Prev269,
-                                Убыт2РеалПТ : ubit2RealPT,
-                                Убыт2ВнРасх : ubit2VnRash)
+                                Убыт1Прев269 : ubit1Prev269
+                        )
+                        //УбытРеалПТ2(
+                                // Убыт2РеалПТ : ubit2RealPT, не заполняется с 2015 года
+                                // Убыт2ВнРасх : ubit2VnRash не заполняется с 2015 года
+                        //)
                     }
                     // Приложение № 3 к Листу 02 - конец
 
@@ -1019,19 +1039,19 @@ void generateXML() {
                     if (dataRowsAdvance != null && !dataRowsAdvance.isEmpty()) {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
-                                def naimOP
+                                def naimOP = null
                                 def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
                                 if (record33 != null) {
                                     naimOP = record33?.ADDITIONAL_NAME?.value
                                 }
                                 // 0..n
                                 РаспрНалСубРФ(
-                                        ТипНП: typeNP,
+                                        ТипНП: empty,
                                         ОбРасч: getRefBookValue(26, row.calcFlag)?.CODE?.value,
                                         НаимОП: naimOP,
                                         КППОП: row.kpp,
                                         ОбязУплНалОП: getRefBookValue(25, row.obligationPayTax)?.CODE?.value,
-                                        НалБазаОрг: nalBazaIsch,
+                                        НалБазаОрг: empty,
                                         НалБазаБезЛиквОП: empty,
                                         ДоляНалБаз: row.baseTaxOf,
                                         НалБазаДоля: row.baseTaxOfRub,
@@ -1040,7 +1060,7 @@ void generateXML() {
                                         НалНачислСубРФ: row.subjectTaxCredit,
                                         НалВыплВнеРФ: row.taxSumOutside,
                                         СумНалП: (row.taxSumToPay != 0) ? row.taxSumToPay : (-row.taxSumToReduction),
-                                        МесАвПлат: row.everyMontherPaymentAfterPeriod,
+                                        МесАвПлат: (isTaxPeriod ? empty : (row.everyMontherPaymentAfterPeriod)),
                                         МесАвПлат1КвСлед: row.everyMonthForKvartalNextPeriod)
                             }
                         }
@@ -1052,36 +1072,43 @@ void generateXML() {
                 НалУдНА() {
                     if (dataRowsDividend != null) {
                         dataRowsDividend.each { row ->
-                            def divAll = ((newDeclaration) ? row.dividendSumNalogAgent : row.dividendSumRaspredPeriod)
                             // Лист 03 А
                             // 0..n
                             НалДохДив(
+                                    КатегорНА : row.taCategory,
+                                    ИННЮЛ_ЭмЦБ : row.inn,
                                     ВидДив : row.dividendType,
                                     НалПер : row.taxPeriod,
                                     ОтчетГод : row.financialYear.format('yyyy'),
-                                    ДивВсего : getLong(divAll),
+                                    ДивРаспрПол : getLong(row.totalDividend),
+                                    ДивВсего : getLong(row.dividendSumRaspredPeriod),
+                                    ДивФЛРез : getLong(row.dividendRussianPersonal),
+                                    ДивИнОрг : getLong(row.dividendForgeinOrgAll),
+                                    ДивСтатНеУст : getLong(row.dividendTaxUnknown),
+                                    ДивНеДоход : getLong(row.dividendNonIncome),
+                                    ДивРаспрУм : getLong(row.dividendD1D2),
                                     НалИсчисл : getLong(row.taxSum),
                                     НалДивПред : getLong(row.taxSumFromPeriod),
-                                    НалДивПосл : getLong(row.taxSumFromPeriodAll)) {
+                                    НалДивПосл : getLong(row.taxSumLast)) {
+
+                                ДивРосОрг(
+                                        ДивРосОргВс : getLong(row.dividendRussianTotal),
+                                        ДивРосСтав0 : getLong(row.dividendRussianStavka0),
+                                        ДивРосСтав9 : getLong(row.dividendRussianStavka9),
+                                        //ДивРосСтавИн :
+                                        ДивРосНеНП : getLong(row. dividendRussianTaxFree),
+                                )
                                 // 0..1
-                                ДивИОФЛНеРез(
-                                        ДивИнОрг : getLong(row.dividendForgeinOrgAll),
-                                        ДивФЛНеРез : getLong(row.dividendForgeinPersonalAll),
-                                        ДивИсч0 : getLong(row.dividendStavka0),
-                                        ДивИсч5 : getLong(row.dividendStavkaLess5),
-                                        ДивИсч10 : getLong(row.dividendStavkaMore5),
-                                        ДивИсчСв10 : getLong(row.dividendStavkaMore10))
-                                // 0..1
-                                ДивРА(
-                                        ДивРАВс : getLong(row.dividendRussianMembersAll),
-                                        ДивРО9 : getLong(row.dividendRussianOrgStavka9),
-                                        ДивРО0 : getLong(row.dividendRussianOrgStavka0),
-                                        ДивФЛРез : getLong(row.dividendPersonRussia),
-                                        ДивНеНП : getLong(row.dividendMembersNotRussianTax))
+                                ДивФЛНеРез(
+                                        ДивФЛНеРезВс : getLong(row.dividendForgeinPersonalAll),
+                                        ДивФЛСтав0 : getLong(row.dividendStavka0),
+                                        ДивФЛСтав5 : getLong(row.dividendStavkaLess5),
+                                        ДивФЛСтав10 : getLong(row.dividendStavkaMore5),
+                                        ДивФЛСтавСв10 : getLong(row.dividendStavkaMore10))
                                 // 0..1
                                 ДивНА(
                                         ДивНАдоРас : getLong(row.dividendAgentAll),
-                                        ДивНАдоРас0 : getLong(row.dividendAgentWithStavka0))
+                                        ДивНАБезУч0 : getLong(row.dividendAgentWithStavka0))
                                 // 0..1
                                 ДивНал(
                                         ДивНалВс : getLong(row.dividendSumForTaxAll),
@@ -1109,16 +1136,18 @@ void generateXML() {
                         dataRowsTaxAgent.each { row ->
                             // 0..n
                             РеестрСумДив(
+                                    ПрПринадл : 'А',
+                                    Тип : row.recType,
                                     ДатаПерДив : (row.dividendDate != null ? row.dividendDate.format('dd.MM.yyyy') : empty),
                                     СумДив : getLong(row.sumDividend),
-                                    СумНал : getLong(row.sumTax)) {
+                                    СумНал : getLong(row.sumTax),) {
 
                                 СвПолуч(
-                                        [НаимПолуч : row.title] +
+                                        [ИННПолуч : row.inn, КПППолуч : row.kpp, НаимПолуч : row.recName] +
                                                 (row.phone ? [Тлф : row.phone] : [:])) {
                                     МНПолуч(
                                             (row.zipCode ? [Индекс : row.zipCode] : [:]) +
-                                                    [КодРегион : getRefBookValue(4, row.subdivisionRF)?.CODE?.value] +
+                                                    [КодРегион : (getRefBookValue(4, row.subdivisionRF)?.CODE?.value ?: '00')] +
                                                     (row.area? [Район : row.area] : [:]) +
                                                     (row.city ? [Город : row.city] : [:]) +
                                                     (row.region ? [НаселПункт : row.region] : [:]) +
@@ -1128,8 +1157,8 @@ void generateXML() {
                                                     (row.apartment ? [Кварт : row.apartment] : [:]))
                                     // 0..1
                                     ФИОРук(
-                                            [Фамилия : row.surname] +
-                                                    [Имя : row.name] +
+                                            [Фамилия : (row.surname ?: 'нет данных')] +
+                                                    (row.name ? [Имя : row.name] : [:]) +
                                                     (row.patronymic ? [Отчество : row.patronymic] : [:]))
                                 }
                             }
@@ -1208,23 +1237,7 @@ void generateXML() {
                 }
                 // Лист 04 - конец
 
-                // Лист 05
-                // 0..n
-                НалБазОпОсоб(
-                        ВидОпер : 5,
-                        ДохВыбытПогаш : empty,
-                        СумОтклМинЦ : empty,
-                        РасхПриобРеал : empty,
-                        СумОтклМаксЦ : empty,
-                        Прибыль : empty,
-                        КорПриб : empty,
-                        НалБазаБезУбПред : empty,
-                        СумУбытПред : empty,
-                        СумУбытУменНБ : empty,
-                        СумНеучУбытПер : empty,
-                        СумУбытЗСДо2010 : empty,
-                        НалБаза : empty)
-                // Лист 05 - конец
+                // Лист 05 неактуален с 1 января 2015 года
 
                 // Приложение к налоговой декларации
                 if (svCelSred.size() > 0) {
@@ -1244,12 +1257,159 @@ void generateXML() {
                     }
                 }
                 // Приложение к налоговой декларации - конец
+
+                // Приложение №2
+                for (def row : dataRowsApp2) {
+                    //НомерСправ  Справка №
+                    def nomerSprav = row.column1
+                    //ДатаСправ   Дата составления
+                    def dataSprav = row.column2
+                    //Тип         Тип
+                    def type = row.column3
+                    //ИННФЛ       ИНН
+                    def innFL = row.column4
+                    //ИННИно       ИНН
+                    def innIno = row.column5
+                    //Фамилия     Фамилия
+                    def surname = row.column6
+                    //Имя         Имя
+                    def givenName = row.column7
+                    //Отчество    Отчество
+                    def parentName = row.column8
+                    //СтатусНП    Статус налогоплательщика
+                    def statusNP = row.column9
+                    //ДатаРожд    Дата рождения
+                    def dataRozhd = row.column10
+                    //Гражд       Гражданство (код страны)
+                    def grazhd = row.column11
+                    //КодВидДок   Код вида документа, удостоверяющего личность
+                    def kodVidDok = row.column12
+                    //СерНомДок   Серия и номер документа
+                    def serNomDok = row.column13
+                    //Индекс      Почтовый индекс
+                    def zipCode = row.column14
+                    //КодРегион   Регион (код)
+                    def subdivisionRF = getRefBookValue(4, row.column15)?.CODE?.value
+                    //Район       Район
+                    def area = row.column16
+                    //Город       Город
+                    def city = row.column17
+                    //НаселПункт  Населенный пункт (село, поселок)
+                    def region = row.column18
+                    //Улица       Улица (проспект, переулок)
+                    def street = row.column19
+                    //Дом         Номер дома (владения)
+                    def homeNumber = row.column20
+                    //Корпус      Номер корпуса (строения)
+                    def corpNumber = row.column21
+                    //Кварт       Номер квартиры
+                    def apartment = row.column22
+                    //ОКСМ        Код страны
+                    def oksm = row.column23
+                    //АдрТекст    Адрес места жительства за пределами Российской Федерации
+                    def adrText = row.column24
+                    //Ставка      Налоговая ставка
+                    def stavka = row.column25
+                    //СумДохОбщ   Общая сумма дохода
+                    def sumDohObsh = row.column26
+                    //СумВычОбщ   Общая сумма вычетов
+                    def sumVichObsh = row.column27
+                    //НалБаза     Налоговая база
+                    def nalBazaApp2 = row.column28
+                    //НалИсчисл   Сумма налога исчисленная
+                    def nalIschislApp2 = row.column29
+                    //НалУдерж    Сумма налога удержанная
+                    def nalUderzh = row.column30
+                    //НалПеречисл Сумма налога перечисленная
+                    def nalPerechisl = row.column31
+                    //НалУдержЛиш Сумма налога, излишне удержанная налоговым агентом
+                    def nalUderzhLish = row.column32
+                    //НалНеУдерж  Сумма налога, не удержанная налоговым агентом
+                    def nalNeUderzh = row.column33
+
+                    // 0..n
+                    СведДохФЛ(
+                            НомерСправ : nomerSprav,
+                            ДатаСправ : dataSprav.format('dd.MM.yyyy'),
+                            Тип : type) {
+                        //1..1
+                        ФЛПолучДох(
+                                ИННФЛ : innFL,
+                                ИННИно : innIno,
+                                СтатусНП : statusNP,
+                                ДатаРожд : dataRozhd,
+                                Гражд : grazhd,
+                                КодВидДок : kodVidDok,
+                                СерНомДок : serNomDok
+                        ) {
+                            // 1..1
+                            ФИО([Фамилия : surname, Имя : givenName] + (parentName != null ? [Отчество : parentName] : []))
+                            //0..1
+                            АдрМЖРФ(
+                                    (zipCode ? [Индекс : zipCode] : [:]) +
+                                            [КодРегион : subdivisionRF] +
+                                            (area? [Район : area] : [:]) +
+                                            (city ? [Город : city] : [:]) +
+                                            (region ? [НаселПункт : region] : [:]) +
+                                            (street ? [Улица : street] : [:]) +
+                                            (homeNumber ? [Дом : homeNumber] : [:]) +
+                                            (corpNumber ? [Корпус : corpNumber] : [:]) +
+                                            (apartment ? [Кварт : apartment] : [:]))
+                            //0..1
+                            АдрМЖИно(ОКСМ : oksm, АдрТекст : adrText)
+                        }
+                        //1..1
+                        ДохНалПер(
+                                [Ставка : stavka, СумДоходОбщ : sumDohObsh] +
+                                        (sumVichObsh != null ? [СумВычОбщ : sumVichObsh] : []) +
+                                        [НалБаза : nalBazaApp2, НалИсчисл : nalIschislApp2] +
+                                        (nalUderzh != null ? [СумВычОбщ : nalUderzh] : []) +
+                                        (nalPerechisl != null ? [НалПеречисл : nalPerechisl] : []) +
+                                        (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
+                                        (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
+                        )
+                        int num = 34
+                        //0..1
+                        СпрДохФЛ() {
+                            3.times{
+                                //КодДоход    040 (Код дохода)
+                                def kodDohod040 = row["column${++num}"]
+                                //СумДоход    041 (Сумма дохода)
+                                def sumDohod041 = row["column${++num}"]
+
+                                СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
+                                    5.times{
+                                        //КодВычет    042 (Код вычета)
+                                        def kodVichet042 = row["column${++num}"]
+                                        //СумВычет    043 (Сумма вычета)
+                                        def sumVichet043 = row["column${++num}"]
+
+                                        //1..n
+                                        СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
+                                    }
+                                }
+                            }
+                        }
+
+                        //0..1
+                        НалВычСтанд() {
+                            2.times{
+                                //КодВычет    051 (Код вычета)
+                                def kodVichet051 = row["column${++num}"]
+                                //СумВычет    052 (Сумма вычета)
+                                def sumVichet052 = row["column${++num}"]
+                                //1..n
+                                СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-/** Получить округленное, целочисленное значение. */
+// Получить округленное, целочисленное значение.
 def getLong(def value) {
     if (value == null) {
         return 0
@@ -1689,23 +1849,6 @@ def getTotalFromForm(def dataRows, def columnName) {
 }
 
 /**
- * Получить значение ячейки фиксированной строки из налоговой формы.
- *
- * @param dataRows строки нф
- * @param columnName название столбца
- * @param alias алиас строки
- * @return значение столбца
- *
- */
-def getAliasFromForm(def dataRows, def columnName, def alias) {
-    if (dataRows != null && !dataRows.isEmpty()) {
-        def aliasRow = getDataRow(dataRows, alias)
-        return getLong(aliasRow.getCell(columnName).value)
-    }
-    return 0
-}
-
-/**
  * Получить из xml за предыдущий период значения
  * @param data xml
  * @param kind вид дохода (1..6)
@@ -1732,13 +1875,13 @@ def getOldValue(def data, def kind, def valueName) {
 def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
     if (reportPeriodId != null) {
         // вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка
-        def declarationTypeId = ((newDeclaration) ? 9 : 2)
+        def declarationTypeId = 9
         def xml = getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         if (xml != null) {
             return xml
         }
         // для новой декларации можно поискать в прошлом периоде другую декларацию (обычную Банка)
-        if (newDeclaration && anyPrevDeclaration) {
+        if (anyPrevDeclaration) {
             declarationTypeId = 2
             return getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         }
@@ -1881,6 +2024,23 @@ def getReportPeriod9month(def reportPeriod) {
         return reportPeriod;
     }
     return null;
+}
+
+/**
+ * Получить значение ячейки фиксированной строки из налоговой формы.
+ *
+ * @param dataRows строки нф
+ * @param columnName название столбца
+ * @param alias алиас строки
+ * @return значение столбца
+ *
+ */
+def getAliasFromForm(def dataRows, def columnName, def alias) {
+    if (dataRows != null && !dataRows.isEmpty()) {
+        def aliasRow = getDataRow(dataRows, alias)
+        return getLong(aliasRow.getCell(columnName).value)
+    }
+    return 0
 }
 
 // Получить параметры подразделения (из справочника 33)

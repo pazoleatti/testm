@@ -120,7 +120,7 @@ def nonEmptyColumns = ['regionBank', 'regionBankDivision',
                        'subjectTaxCredit', 'calcFlag', 'obligationPayTax',
                        'baseTaxOf', 'baseTaxOfRub', 'subjectTaxStavka',
                        'taxSum', 'taxSumOutside', 'taxSumToPay',
-                       'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+                       'taxSumToReduction', 'everyMonthForKvartalNextPeriod',
                        'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
                        'everyMonthForFourthKvartalNextPeriod']
 
@@ -215,7 +215,7 @@ void calc() {
     def sumNal = 0
     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
     if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
-        sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'R1')
+        sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
     }
 
     def prevDataRows = getPrevDataRows()
@@ -468,6 +468,9 @@ def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     switch (reportPeriod.order) {
         case 1: //«графа 18» = «графа 14»
             tmp = row.taxSum
+            break
+        case 4:
+            tmp = null
             break
         default:
             // остальные
