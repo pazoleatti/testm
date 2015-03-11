@@ -185,12 +185,12 @@ void generateXML() {
                         def code120 = row.mediatorInnKpp
                         def code130 = row.mediatorNumDate
                         def code140 = getCurrencyCode(row.currNameCode)
-                        def code150 = row.cost
-                        def code160 = row.vatSum
-                        def code170 = row.diffDec
-                        def code180 = row.diffInc
-                        def code190 = row.diffVatDec
-                        def code200 = row.diffVatInc
+                        def code150 = row.cost ?: empty
+                        def code160 = row.vatSum ?: empty
+                        def code170 = row.diffDec ?: empty
+                        def code180 = row.diffInc ?: empty
+                        def code190 = row.diffVatDec ?: empty
+                        def code200 = row.diffVatInc ?: empty
 
                         // различаем юр. и физ. лица в строках 110 и 120
                         def code110inn, code110kpp, code120inn, code120kpp
