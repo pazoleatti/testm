@@ -509,7 +509,7 @@ void generateXML() {
     def nalVipl311Sub = getLong(nalVipl311 - nalVipl311FB)
 
     /** АвПлатМесФБ. Код строки декларации 300. */
-    def avPlatMesFB = nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0)
+    def avPlatMesFB = isTaxPeriod ? empty : (nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0))
     /** АвНачислФБ. Код строки декларации 220. */
     def avNachislFB
     if(isFirstPeriod){
@@ -522,9 +522,9 @@ void generateXML() {
         avNachislFB = nalIschislFBOld - nalVipl311FBOld + avPlatMesFBOld
     }
     /** АвПлатМесСуб. Код строки декларации 310. */
-    def avPlatMesSub = nalIschislSub - (isFirstPeriod ? 0 : nalIschislSubOld)
+    def avPlatMesSub = isTaxPeriod ? empty : (nalIschislSub - (isFirstPeriod ? 0 : nalIschislSubOld))
     /** АвПлатМес. */
-    def avPlatMes = avPlatMesFB + avPlatMesSub
+    def avPlatMes = isTaxPeriod ? empty : (avPlatMesFB + avPlatMesSub)
     /** АвПлатУпл1КвФБ. */
     def avPlatUpl1CvFB = (reportPeriod != null && reportPeriod.order == 3 ? avPlatMesFB : empty)
     /** АвПлатУпл1КвСуб. Код строки декларации 340. */
@@ -995,7 +995,7 @@ void generateXML() {
                                         НалНачислСубРФ: row.subjectTaxCredit,
                                         НалВыплВнеРФ: row.taxSumOutside,
                                         СумНалП: (row.taxSumToPay != 0) ? row.taxSumToPay : (-row.taxSumToReduction),
-                                        МесАвПлат: row.everyMontherPaymentAfterPeriod,
+                                        МесАвПлат: (isTaxPeriod ? empty : (row.everyMontherPaymentAfterPeriod)),
                                         МесАвПлат1КвСлед: row.everyMonthForKvartalNextPeriod)
                             }
                         }
