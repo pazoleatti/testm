@@ -3,8 +3,9 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.api.*;
+import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -71,13 +72,19 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String ERROR = "Операция не выполнена";
     //Выводит информацию о НФ в определенном формате
     private static final String FORM_DATA_INFO_MSG = "%s %s %s %s %s";
+    private static final String NOT_CONSOLIDATE_DESTINATION_FORM_WARNING =
+            "Не выполнена консолидация данных в форму %s %s %s %s %d %s";
+    private static final String NOT_CONSOLIDATE_SOURCE_FORM_WARNING =
+            "Не выполнена консолидация данных из формы %s %s %s %s %d %s в статусе %s";
+    private static final String NOT_EXIST_SOURCE_FORM_WARNING =
+            "Не выполнена консолидация данных из формы %s %s %s %s %d %s - экземпляр формы не создан";
 
     @Autowired
 	private FormDataDao formDataDao;
-	@Autowired
-	private FormTemplateDao formTemplateDao;
     @Autowired
     private FormTemplateService formTemplateService;
+    @Autowired
+    private FormTypeService formTypeService;
 	@Autowired
 	private FormDataAccessService formDataAccessService;
 	@Autowired
@@ -371,7 +378,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
 
-		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
 		if (formTemplate.isFixedRows()) {
 			throw new ServiceException("Нельзя добавить строку в НФ с фиксированным количеством строк");
@@ -395,7 +402,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
 
-		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
 		if (formTemplate.isFixedRows()) {
 			throw new ServiceException("Нельзя удалить строку в НФ с фиксированным количеством строк");
@@ -457,15 +464,88 @@ public class FormDataServiceImpl implements FormDataService {
 
         checkPerformer(logger, formData);
 
-		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
-		} else {
-			// Ошибка для отката транзакции
-			logger.info("Проверка завершена, фатальных ошибок не обнаружено");
-			throw new ServiceLoggerException("Ошибок не обнаружено", logEntryService.save(logger.getEntries()));
-		}
-	}
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
+        } else {
+            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+            if (formData.getState() == WorkflowState.ACCEPTED) {
+                // Система проверяет, существует ли экземпляр формы-приёмника, консолидация в который не была выполнена.
+                List<DepartmentFormType> destinationsDFT = departmentFormTypeDao.getFormDestinations(
+                        formData.getDepartmentId(),
+                        formData.getFormType().getId(),
+                        formData.getKind(),
+                        reportPeriod.getStartDate(),
+                        reportPeriod.getEndDate());
+                for (DepartmentFormType dftTarget : destinationsDFT) {
+                    FormData destinationFD =
+                            findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                    ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
+                    DepartmentReportPeriod drp = departmentReportPeriodService.get(destinationFD.getDepartmentReportPeriodId());
+                    logger.warn(
+                            NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
+                            departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),
+                            destinationFD.getFormType().getName(),
+                            destinationFD.getKind().getName(),
+                            rp.getName() + (destinationFD.getPeriodOrder() != null?" " + Months.fromId(destinationFD.getPeriodOrder()).getTitle():""),
+                            rp.getTaxPeriod().getYear(),
+                            drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                    SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
+                    );
+                }
+            }
+            //Система проверяет статус консолидации из форм-источников.
+            List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
+                    formData.getId().intValue(),
+                    formData.getFormType().getId(),
+                    formData.getKind(),
+                    reportPeriod.getCalendarStartDate(),
+                    reportPeriod.getEndDate());
+            ArrayList<FormData> formDataIds = new ArrayList<FormData>();
+            for (DepartmentFormType dftSource : dftSources){
+                FormData sourceFormData =
+                        findFormData(dftSource.getFormTypeId(), dftSource.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                if (sourceFormData == null){
+                    ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+                    DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+                    logger.warn(
+                            NOT_EXIST_SOURCE_FORM_WARNING,
+                            departmentService.getDepartment(dftSource.getDepartmentId()).getName(),
+                            formTypeService.get(dftSource.getFormTypeId()).getName(),
+                            dftSource.getKind().getName(),
+                            rp.getName(),
+                            rp.getTaxPeriod().getYear(),
+                            drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                    SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
+                    );
+                } else if (!sourceService.isFDSourceConsolidated(formData.getId(), sourceFormData.getId())){
+                    formDataIds.add(sourceFormData);
+                }
+            }
+            if (!formDataIds.isEmpty()){
+                for (FormData sourceFD : formDataIds){
+                    ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+                    DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+                    logger.warn(
+                            NOT_CONSOLIDATE_SOURCE_FORM_WARNING,
+                            departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
+                            sourceFD.getFormType().getName(),
+                            sourceFD.getKind().getName(),
+                            rp.getName() + (sourceFD.getPeriodOrder() != null?" " + Months.fromId(sourceFD.getPeriodOrder()).getTitle():""),
+                            rp.getTaxPeriod().getYear(),
+                            drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                    SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
+                            sourceFD.getState().getName()
+                    );
+                }
+            } else if (!dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
+                logger.info("Консолидация выполнена из всех форм-источников");
+            }
+            // Ошибка для отката транзакции
+            logger.info("Проверка завершена, фатальных ошибок не обнаружено");
+            throw new ServiceLoggerException("Ошибок не обнаружено", logEntryService.save(logger.getEntries()));
+        }
+    }
 
     private void checkPerformer(Logger logger, FormData formData) {
         if (TaxType.INCOME.equals(formData.getFormType().getTaxType()) &&

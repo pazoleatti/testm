@@ -497,8 +497,8 @@ public interface SourceService {
 
     /**
      * Проверяет консолидирован ли источник с идентификатором sourceFormDataId для декларации с declarationId
-     * @param sourceFormDataId
-     * @return
+     * @param sourceFormDataId НФ источник
+     * @return true если есть запись о консолидации
      */
     boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId);
 

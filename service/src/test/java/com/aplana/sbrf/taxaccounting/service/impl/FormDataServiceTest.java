@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -28,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -56,6 +58,8 @@ public class FormDataServiceTest {
     private FormTemplateService formTemplateService;
     @Autowired
     SourceService sourceService;
+    @Autowired
+    FormTypeService formTypeService;
 
     private static final int FORM_TEMPLATE_ID = 1;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
@@ -263,11 +267,11 @@ public class FormDataServiceTest {
         when(departmentService.getDepartment(1)).thenReturn(department);
 
         Assert.assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
-        Assert.assertEquals(
+        assertEquals(
                 "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\"",
                 logger.getEntries().get(0).getMessage()
         );
-        Assert.assertEquals(
+        assertEquals(
                 "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\"",
                 logger.getEntries().get(1).getMessage()
         );
@@ -628,11 +632,11 @@ public class FormDataServiceTest {
         // 1
         FormData prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod1);
         Assert.assertNotNull(prevFormData);
-        Assert.assertEquals(2, prevFormData.getId().intValue());
+        assertEquals(2, prevFormData.getId().intValue());
         // 2
         prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod2);
         Assert.assertNotNull(prevFormData);
-        Assert.assertEquals(3, prevFormData.getId().intValue());
+        assertEquals(3, prevFormData.getId().intValue());
         // 3
         prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod3);
         Assert.assertNull(prevFormData);
@@ -673,7 +677,7 @@ public class FormDataServiceTest {
         when(formDataDao.find(111, kind, 0, null)).thenReturn(formData1);
 
         FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, null);
-        Assert.assertEquals(formDataOld.getId(), formData1.getId());
+        assertEquals(formDataOld.getId(), formData1.getId());
     }
 
     @Test
@@ -725,8 +729,8 @@ public class FormDataServiceTest {
         FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder);
         FormData formDataOld2 = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder2);
 
-        Assert.assertEquals(formDataOld.getId(), formData1.getId());
-        Assert.assertEquals(formDataOld2.getId(), formData2.getId());
+        assertEquals(formDataOld.getId(), formData1.getId());
+        assertEquals(formDataOld2.getId(), formData2.getId());
     }
 
     private FormData getFormData() {
@@ -810,18 +814,122 @@ public class FormDataServiceTest {
 		try {
 			formDataService.checkLockedMe(lockData, user);
 		} catch (ServiceException e) {
-			Assert.assertEquals("Объект заблокирован другим пользователем (\"MockUser\", срок \"00:00 30.10.1983\")", e.getMessage());
+			assertEquals("Объект заблокирован другим пользователем (\"MockUser\", срок \"00:00 30.10.1983\")", e.getMessage());
 			exceptionCount++;
 		}
 		try {
 			formDataService.checkLockedMe(null, user);
 		} catch (ServiceException e) {
-			Assert.assertEquals("Блокировка не найдена. Объект должен быть заблокирован текущим пользователем", e.getMessage());
+			assertEquals("Блокировка не найдена. Объект должен быть заблокирован текущим пользователем", e.getMessage());
 			exceptionCount++;
 		}
 		user.setId(666);
 		formDataService.checkLockedMe(lockData, user);
 
-		Assert.assertEquals(2, exceptionCount);
+		assertEquals(2, exceptionCount);
 	}
+
+    @Test
+    public void doCheckTest() {
+        FormData formData = new FormData();
+        formData.setId(1l);
+        formData.setReportPeriodId(2);
+        formData.setDepartmentId(1);
+        FormType formType = new FormType();
+        formType.setId(1);
+        formData.setFormType(formType);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setManual(false);
+        formData.setState(WorkflowState.ACCEPTED);
+        formData.setDepartmentReportPeriodId(1);
+        formData.setPeriodOrder(null);
+
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+        Logger logger = new Logger();
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        TaxPeriod tp = new TaxPeriod();
+        tp.setYear(2015);
+        reportPeriod.setTaxPeriod(tp);
+        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setName("1 квартал");
+        reportPeriod.setId(2);
+        reportPeriod.setStartDate(new Date());
+        reportPeriod.setEndDate(new Date());
+        when(periodService.getReportPeriod(2)).thenReturn(reportPeriod);
+
+        ArrayList<DepartmentFormType> dftTargets = new ArrayList<DepartmentFormType>(1);
+        FormData formDataDest = new FormData();
+        formDataDest.setId(3l);
+        formDataDest.setReportPeriodId(2);
+        formDataDest.setDepartmentId(1);
+        FormType formType1 = new FormType();
+        formType1.setId(2);
+        formType1.setName("РНУ");
+        formDataDest.setFormType(formType);
+        formDataDest.setKind(FormDataKind.PRIMARY);
+        formDataDest.setManual(false);
+        formDataDest.setState(WorkflowState.ACCEPTED);
+        formDataDest.setDepartmentReportPeriodId(3);
+        formDataDest.setFormType(formType1);
+        when(formDataDao.get(3l, null)).thenReturn(formDataDest);
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        when(departmentReportPeriodService.get(formDataDest.getDepartmentReportPeriodId())).thenReturn(drp);
+        Department department = new Department();
+        department.setName("Тестовое подразделение");
+        when(departmentService.getDepartment(formDataDest.getDepartmentId())).thenReturn(department);
+
+        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>(1);
+        DepartmentFormType dft1 = new DepartmentFormType();
+        dft1.setDepartmentId(1);
+        dft1.setFormTypeId(1);
+        dft1.setKind(FormDataKind.ADDITIONAL);
+        DepartmentFormType dft2 = new DepartmentFormType();
+        dft2.setDepartmentId(2);
+        dft2.setFormTypeId(2);
+        dft2.setKind(FormDataKind.CONSOLIDATED);
+        dftSources.add(dft1);
+        dftSources.add(dft2);
+        dftTargets.add(dft2);
+        when(departmentFormTypeDao.getFormSources(
+                formData.getDepartmentId(),
+                formData.getFormType().getId(),
+                formData.getKind(),
+                reportPeriod.getStartDate(),
+                reportPeriod.getEndDate())).thenReturn(dftSources);
+        when(departmentFormTypeDao.getFormDestinations(
+                formData.getDepartmentId(),
+                formData.getFormType().getId(),
+                formData.getKind(),
+                reportPeriod.getStartDate(),
+                reportPeriod.getEndDate())).thenReturn(dftTargets);
+        when(formDataDao.find(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
+
+        when(formTypeService.get(dft1.getFormTypeId())).thenReturn(formType1);
+
+        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setCorrectionDate(new Date(0));
+        when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp1);
+
+        try{
+            formDataService.doCheck(logger, userInfo, formData);
+        }catch (ServiceLoggerException e){
+            assertEquals(
+                    "Не выполнена консолидация данных в форму Тестовое подразделение РНУ Первичная 1 квартал 2015 ",
+                    logger.getEntries().get(0).getMessage()
+            );
+            assertEquals(
+                    "Не выполнена консолидация данных из формы Тестовое подразделение РНУ Выходная 1 квартал 2015 с датой сдачи корректировки 01.01.1970 - экземпляр формы не создан",
+                    logger.getEntries().get(1).getMessage()
+            );
+            assertEquals(
+                    "Не выполнена консолидация данных из формы Тестовое подразделение РНУ Первичная 1 квартал 2015 с датой сдачи корректировки 01.01.1970 в статусе Принята",
+                    logger.getEntries().get(2).getMessage()
+            );
+        }
+    }
 }
