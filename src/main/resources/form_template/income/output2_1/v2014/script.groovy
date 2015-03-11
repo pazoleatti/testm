@@ -2,6 +2,8 @@ package form_template.income.output2_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
@@ -62,6 +64,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        break
     case FormDataEvent.IMPORT:
         importData()
         calc()
@@ -85,17 +90,54 @@ def editableColumns = ['emitent', 'decreeNumber', 'title', 'zipCode', 'subdivisi
 @Field
 def nonEmptyColumns = ['rowNumber', 'emitent', 'decreeNumber', 'title', 'sumDividend', 'dividendDate', 'dividendSum', 'sumTax']
 
-// Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def sourceFormType = 419
 
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
                       def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Получение Id записи с использованием кэширования
+def getRecordId(def ref_id, String alias, String value, Date date) {
+    String filter = "LOWER($alias) = LOWER('$value')"
+    if (value == '') filter = "$alias is null"
+    if (recordCache[ref_id] != null) {
+        if (recordCache[ref_id][filter] != null) {
+            return recordCache[ref_id][filter]
+        }
+    } else {
+        recordCache[ref_id] = [:]
+    }
+    def records = refBookFactory.getDataProvider(ref_id).getRecords(date, null, filter, null)
+    if (records.size() == 1) {
+        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return recordCache[ref_id][filter]
+    }
+    return null
 }
 
 void checkCreation() {
@@ -125,6 +167,86 @@ void logicCheck() {
         def rowNum = row.getIndex()
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
     }
+}
+
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = []
+
+    // получить формы-источники в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+        if(it.formTypeId == sourceFormType) {
+            def sourceFormData = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
+                def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
+                sourceHelper.getAll().each { sourceRow ->
+                    def newRow = formNewRow(sourceRow)
+                    dataRows.add(newRow)
+                }
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
+}
+
+def formNewRow(def row) {
+    def newRow = formData.createDataRow()
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    // TODO заготовка
+    //«Графа 2» = «Графа 2» первичной формы
+    newRow.emitent = row.emitentName
+    //«Графа 3» = «Графа 7» первичной формы
+    newRow.decreeNumber = row.decisionNumber
+    //«Графа 4» = «Графа 13» первичной формы
+    newRow.decreeNumber = row.addresseeName
+    //«Графа 5» = «Графа 30» первичной формы
+    newRow.zipCode = row.postcode
+    //«Графа 6» = «Графа 31» первичной формы
+    newRow.subdivisionRF = getRecordId(4, 'CODE', row.region, getReportPeriodEndDate())
+    //«Графа 7» = «Графа 32» первичной формы
+    newRow.area = row.district
+    //«Графа 8» = «Графа 33» первичной формы
+    newRow.city = row.city
+    //«Графа 9» = «Графа 34» первичной формы
+    newRow.region = row.locality
+    //«Графа 10» = «Графа 35» первичной формы
+    newRow.street = row.street
+    //«Графа 11» = «Графа 36» первичной формы
+    newRow.homeNumber = row.house
+    //«Графа 12» = «Графа 37» первичной формы
+    newRow.corpNumber = row.housing
+    //«Графа 13» = «Графа 38» первичной формы
+    newRow.apartment = row.apartment
+    //«Графа 14» = «Графа 39» первичной формы
+    newRow.surname = row.surname
+    //«Графа 15» = «Графа 40» первичной формы
+    newRow.name = row.name
+    //«Графа 16» = «Графа 41» первичной формы
+    newRow.patronymic = row.patronymic
+    //«Графа 17» = «Графа 42» первичной формы
+    newRow.phone = row.phone
+    //«Графа 18» = «Графа 12» первичной формы
+    newRow.sumDividend = row.allSum
+    //«Графа 19» = «Графа 25» первичной формы
+    newRow.dividendDate = row.date
+    //«Графа 20» = «Графа 26» первичной формы
+    newRow.dividendNum = row.number
+    //«Графа 21» = «Графа 24» первичной формы
+    newRow.dividendSum = row.sum
+    //«Графа 22» = «Графа 28» первичной формы
+    newRow.taxDate = row.withheldDate
+    //«Графа 23» = «Графа 29» первичной формы
+    newRow.taxNum = row.withheldNumber
+    //«Графа 24» = «Графа 27» первичной формы
+    newRow.sumTax = row.withheldSum
+    //«Графа 25» = «Графа 9» первичной формы
+    newRow.reportYear = row.year
+
+    return newRow
 }
 
 void importData() {
@@ -174,7 +296,6 @@ void importData() {
 }
 
 void addData(def xml, headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
