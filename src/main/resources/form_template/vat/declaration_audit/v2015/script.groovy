@@ -398,7 +398,6 @@ void generateXML() {
                 // РАЗДЕЛ 2
                 for (def row : getSection2Rows(dataRowsMap)) {
                     СумУплНА(
-                            КППИно: null,
                             КБК: '18210301000011000110',
                             ОКТМО: okato,
                             СумИсчисл: row.sumIschisl,
