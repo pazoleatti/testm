@@ -215,7 +215,7 @@ void calc() {
     def sumNal = 0
     def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
     if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
-        sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'R1')
+        sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
     }
 
     def prevDataRows = getPrevDataRows()
