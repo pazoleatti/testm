@@ -1,8 +1,6 @@
 package form_template.vat.vat_937_1_1.v2015
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -88,6 +86,12 @@ def nonEmptyColumns = ['typeCode', 'invoice']
 @Field
 def totalSumColumns = ['nds']
 
+// Сортируемые атрибуты (графа 8, 3, 2, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16)
+@Field
+def sortColumns = ['dateRegistration', 'invoice', 'typeCode', 'invoiceCorrecting', 'invoiceCorrection',
+        'invoiceCorrectingCorrection', 'documentPay', 'salesman', 'salesmanInnKpp', 'agentName',
+        'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -140,6 +144,9 @@ void calc() {
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
     dataRowHelper.save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void logicCheck() {
@@ -523,7 +530,17 @@ def isBalancePeriod() {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), true)
+
+    def headRow = getDataRow(dataRows, 'head')
+    def totalRow = getDataRow(dataRows, 'total')
+    dataRows.remove(headRow)
+    dataRows.remove(totalRow)
+
+    sortRows(dataRows, sortColumns)
+
+    dataRows.add(0, headRow)
+    dataRows.add(totalRow)
+
     dataRowHelper.saveSort()
 }
 

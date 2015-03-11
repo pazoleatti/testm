@@ -86,6 +86,12 @@ def nonEmptyColumns = ['typeCode', 'invoice', 'cost', 'nds']
 @Field
 def totalSumColumns = ['nds']
 
+// Сортируемые атрибуты (графа 8, 3, 2, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16)
+@Field
+def sortColumns = ['dateRegistration', 'invoice', 'typeCode', 'invoiceCorrecting', 'invoiceCorrection',
+        'invoiceCorrectingCorrection', 'documentPay', 'salesman', 'salesmanInnKpp', 'agentName',
+        'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -109,6 +115,9 @@ void calc() {
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
     save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void logicCheck() {
@@ -502,7 +511,12 @@ def loggerError(def row, def msg) {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), true)
+
+    def totalRow = getDataRow(dataRows, 'total')
+    dataRows.remove(totalRow)
+    sortRows(dataRows, sortColumns)
+    dataRows.add(totalRow)
+
     dataRowHelper.saveSort()
 }
 

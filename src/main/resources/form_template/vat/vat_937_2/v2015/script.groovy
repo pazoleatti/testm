@@ -3,8 +3,6 @@ package form_template.vat.vat_937_2.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
-import java.util.regex.Pattern
-
 /**
  * Итоговые данные книги продаж
  * formTemplateId=1608
@@ -104,6 +102,12 @@ def autoFillColumns = allColumns - editableColumns
 @Field
 def totalSumColumns = ['saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
 
+// Сортируемые атрибуты (графа 3, 2, 4..19)
+@Field
+def sortColumns = ['invoiceNumDate', 'opTypeCode', 'invoiceCorrNumDate', 'corrInvoiceNumDate', 'corrInvCorrNumDate',
+        'buyerName', 'buyerInnKpp', 'mediatorName', 'mediatorInnKpp', 'paymentDocNumDate', 'currNameCode',
+        'saleCostACurr', 'saleCostARub', 'saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
+
 // Признак периода ввода остатков
 @Field
 def isBalancePeriod
@@ -146,6 +150,9 @@ void calc() {
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
     save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void logicCheck() {
@@ -619,7 +626,12 @@ def isBalancePeriod() {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), true)
+
+    def totalRow = getDataRow(dataRows, 'total')
+    dataRows.remove(totalRow)
+    sortRows(dataRows, sortColumns)
+    dataRows.add(totalRow)
+
     dataRowHelper.saveSort()
 }
 
