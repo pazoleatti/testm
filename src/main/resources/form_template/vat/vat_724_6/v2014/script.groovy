@@ -79,6 +79,10 @@ def nonEmptyColumns = ['operDate', 'contragent', 'type', 'sum', 'number', 'sum2'
 @Field
 def totalColumns = ['sum', 'sum2']
 
+// Группируемые атрибуты (графа 4, 2, 3, 5, 6, 7, 8, 9)
+@Field
+def sortColumns = ['type', 'operDate', 'contragent', 'sum', 'number', 'sum2', 'date', 'number2']
+
 // Признак периода ввода остатков
 @Field
 def isBalancePeriod
@@ -331,7 +335,12 @@ def getNewRow() {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, getTotalRow(dataRows), null)
+
+    def totalRow = getTotalRow(dataRows)
+    dataRows.remove(totalRow)
+    sortRows(dataRows, sortColumns)
+    dataRows.add(totalRow)
+
     dataRowHelper.saveSort()
 }
 

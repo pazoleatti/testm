@@ -1,4 +1,3 @@
-//TODO: при необходимости исправить скрипт после получения новой постановки
 package form_template.vat.vat_724_4.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -95,9 +94,9 @@ def nonEmptyColumns = ['number', 'sum', 'number2', 'sum2', 'nds']
 @Field
 def totalColumns = ['sum', 'sum2']
 
-// Группируемые атрибуты (графа 3, 5)
+// Группируемые атрибуты (графа 3, 5, 2, 4, 6, 7)
 @Field
-def sortColumns = ['number', 'number2']
+def sortColumns = ['number', 'number2', 'name', 'sum', 'sum2', 'nds']
 
 // список алиасов подразделов
 @Field
@@ -182,9 +181,6 @@ void calc() {
         def to = lastRow.getIndex() - 1
 
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
-
-        // отсортировать/группировать
-        sortRows(sectionsRows, sortColumns)
 
         // посчитать итоги по разделам
         def rows = (from <= to ? dataRows[from..to] : [])
@@ -599,7 +595,7 @@ void sortFormDataRows() {
         def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
-        sortRowsSimple(sectionsRows)
+        sortRows(sectionsRows, sortColumns)
     }
 
     dataRowHelper.saveSort()
