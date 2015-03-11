@@ -318,7 +318,7 @@ void generateXML() {
     /** НалВычОбщ. Код строки 190 Графа 5. */
     def nalVichObsh = nalPredNPPriob + nalIschProd
     /** НалПУ164. Код строки 200 и код строки 210.*/
-    def nalPU164 = nalVosstObsh - nalVichObsh
+    def nalPU164 = (nalVosstObsh - nalVichObsh).abs().intValue()
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
