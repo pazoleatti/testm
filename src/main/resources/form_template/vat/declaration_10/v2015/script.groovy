@@ -186,8 +186,8 @@ void generateXML() {
                         def code130 = getNumber(row.mediatorNumDate)
                         def code140 = getDate(row.mediatorNumDate)
                         def code150 = getCurrencyCode(row.currNameCode)
-                        def code160 = row.cost ?: empty
-                        def code170 = row.vatSum ?: empty
+                        def code160 = row.cost
+                        def code170 = row.vatSum
                         def code180 = row.diffDec ?: empty
                         def code190 = row.diffInc ?: empty
                         def code200 = row.diffVatDec ?: empty
