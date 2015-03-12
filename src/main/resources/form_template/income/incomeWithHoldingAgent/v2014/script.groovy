@@ -272,7 +272,7 @@ void addData(def xml, headRowCount) {
 
         // графа 3
         xmlIndexCol++
-        newRow.emitentInn = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
+        newRow.emitentInn = row.cell[xmlIndexCol].text()
 
         // графа 4
         xmlIndexCol++
@@ -296,7 +296,7 @@ void addData(def xml, headRowCount) {
 
         // графа 9
         xmlIndexCol++
-        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
+        newRow.year = getDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, required)
 
         // графа 10
         xmlIndexCol++
@@ -484,7 +484,7 @@ void addTransportData(def xml) {
 
         // графа 3
         xmlIndexCol++
-        newRow.emitentInn = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, required)
+        newRow.emitentInn = row.cell[xmlIndexCol].text()
 
         // графа 4
         xmlIndexCol++
@@ -683,4 +683,26 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     return newRow
+}
+
+/**
+ * Получение даты в случае когда в эксель дата отображается yyyy, но значение содержит dd.MM.yyyy.
+ * // TODO (Ramil Timerbaev) это метод нужен в версии 0.3.9.1, в версии 0.5 этот метод не нужен.
+ */
+def getDate(def value, def format, def indexRow, def indexColumn, required) {
+    def tmp = value.trim()
+    // формат строки и шаблона не совпадают (excel может подставить в ячейку "yyyy" значение "01.01.yyyy")
+    if (!tmp.contains(".") && format.contains(".")) {
+        BigDecimal tmpNum = parseNumber(tmp, indexRow, indexColumn, logger, required);
+        if (tmpNum != null && !tmpNum.equals(0)) {
+            return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
+        }
+    }
+    if (tmp.contains(".") && !format.contains(".")) {
+        BigDecimal tmpNum = parseNumber(tmp.substring(tmp.lastIndexOf('.') + 1), indexRow, indexColumn, logger, required);
+        if (tmpNum != null && !tmpNum.equals(0)) {
+            return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
+        }
+    }
+    return parseDate(value, format, indexRow, indexCol, logger, required)
 }

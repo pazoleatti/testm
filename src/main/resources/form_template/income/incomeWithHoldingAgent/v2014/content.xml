@@ -23,14 +23,14 @@
         <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>emitentInn</alias>
         <checking>false</checking>
         <name>Эмитент. ИНН</name>
         <order>3</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>10</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>all</alias>
