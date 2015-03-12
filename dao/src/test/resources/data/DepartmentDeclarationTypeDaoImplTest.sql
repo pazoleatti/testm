@@ -21,6 +21,13 @@ insert into department (id, name, parent_id, type, code) values (11, 'testName11
 insert into department (id, name, parent_id, type, code) values (12, 'testName12', 1, 2, 12);
 insert into department (id, name, parent_id, type, code) values (13, 'testName13', 1, 2, 13);
 
+--TAX_TYPE
+INSERT INTO tax_type (id, name) VALUES ('T', 'Транспортный');
+INSERT INTO tax_type (id, name) VALUES ('I', 'Прибыль');
+INSERT INTO tax_type (id, name) VALUES ('P', 'Имущество');
+INSERT INTO tax_type (id, name) VALUES ('V', 'НДС');
+INSERT INTO tax_type (id, name) VALUES ('D', 'ТЦО');
+
 -- DECLARATION_TYPE
 insert into declaration_type (id, tax_type, name) values (1, 'T', 'testName1');
 insert into declaration_type (id, tax_type, name) values (2, 'I', 'testName2');

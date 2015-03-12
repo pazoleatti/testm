@@ -1,3 +1,4 @@
+insert into tax_type (id, name) values ('T', 'Транспортный');
 insert into form_type (id, name, tax_type, fixed_rows) values (1, 'FormType - Transport', 'T', 1);
 insert into form_template (id, type_id, data_rows, version, is_active) values (1, 1, null, '0.1', 1);
 

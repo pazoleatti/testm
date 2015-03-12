@@ -1,3 +1,5 @@
+INSERT INTO tax_type (id, name) VALUES ('T', 'Транспортный');
+
 -- tax period
 insert into tax_period (id, tax_type, year) values (1, 'T', 2002);
 insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');

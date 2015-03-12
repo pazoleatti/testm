@@ -4,9 +4,14 @@ INSERT INTO form_kind (id, name) VALUES (3, 'Сводная');
 INSERT INTO form_kind (id, name) VALUES (4, 'Форма УНП');
 INSERT INTO form_kind (id, name) VALUES (5, 'Выходная');
 
-INSERT INTO declaration_type (id, name, tax_type) VALUES (1, 'Вид декларации (тест)', 'T');
+--TAX_TYPE
+INSERT INTO tax_type (id, name) VALUES ('T', 'Транспортный');
+INSERT INTO tax_type (id, name) VALUES ('I', 'Прибыль');
+INSERT INTO tax_type (id, name) VALUES ('P', 'Имущество');
+INSERT INTO tax_type (id, name) VALUES ('V', 'НДС');
+INSERT INTO tax_type (id, name) VALUES ('D', 'ТЦО');
 
--- TODO: сейчас с источниками бардак формы являются источниками друг друга без учёта вида налога
+INSERT INTO declaration_type (id, name, tax_type) VALUES (1, 'Вид декларации (тест)', 'T');
 
 INSERT INTO form_type (id, name, tax_type) VALUES (1, 'FormType - Transport', 'T');
 INSERT INTO form_type (id, name, tax_type) VALUES (2, 'FormType - Income', 'I');
