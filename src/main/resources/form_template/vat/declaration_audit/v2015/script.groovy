@@ -408,8 +408,8 @@ void generateXML() {
                     ) {
                         if (!shortDeclaration) {
                             СведПродЮЛ(
-                                    НаимПрод: row.naimProd,
-                                    ИННЮЛПрод: row.innULProd
+                                    [НаимПрод: row.naimProd ?: empty] +
+                                            (row.innULProd != null ? [ИННЮЛПрод: row.innULProd] : [:])
                             )
                         }
                     }
