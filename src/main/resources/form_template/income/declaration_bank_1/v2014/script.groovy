@@ -1688,6 +1688,7 @@ def getExistedXmlData(def declarationTypeId, def departmentId, def reportPeriodI
     def declarationData = declarationService.find(declarationTypeId, departmentId, reportPeriodId)
     if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
         def xmlString = declarationService.getXmlData(declarationData.id)
+        if (xmlString == null) return null
         xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
         return new XmlSlurper().parseText(xmlString)
     }
