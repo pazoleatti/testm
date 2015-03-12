@@ -641,8 +641,9 @@ void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 18, 1)
     addTransportData(xml)
 
+    // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 void addTransportData(def xml) {
@@ -683,7 +684,7 @@ void addTransportData(def xml) {
         newRow.sellingPrice = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
         // графа 6
         xlsIndexCol = 6
-        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset)
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, false)
         // графа 7
         xlsIndexCol = 7
         newRow.rateBRBillDate = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)

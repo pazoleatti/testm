@@ -1000,18 +1000,18 @@ void addTransportData(def xml) {
 
         // графа 2
         indexCell = 2
-        newRow.operationType = getRecordIdImport(87, 'OPERATION_TYPE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+        newRow.operationType = getRecordIdImport(87, 'OPERATION_TYPE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, false)
 
         // графа 3
         indexCell = 3
-        newRow.signContractor = getRecordIdImport(88, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+        newRow.signContractor = getRecordIdImport(88, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, false)
 
         // графа 4
         indexCell = 4
         newRow.contractorName = row.cell[indexCell].text()
 
         // графа 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
-        def record100 = getRecordImport(100, 'NAME', row.cell[5].text(), rnuIndexRow, 5 + colOffset)
+        def record100 = getRecordImport(100, 'NAME', row.cell[5].text(), rnuIndexRow, 5 + colOffset, false)
         if (record100 != null) {
             // поиск записи по эмитенту и серии (графам 5 и 6)
             String filter = "ISSUER = " + record100?.record_id?.value?.toString() + " and LOWER(SHORTNAME) = LOWER('" + (row.cell[6].text() ?: '') + "')"
@@ -1021,7 +1021,7 @@ void addTransportData(def xml) {
                 record84 = records[0]
                 newRow.securityName = record84.get(RefBook.RECORD_ID_ALIAS).numberValue
             } else {
-                logger.error("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
+                logger.warn("Проверка файла: Строка ${rnuIndexRow} содержит значение, отсутствующее в справочнике " +
                         "«" + refBookFactory.get(84).getName() + "»!")
             }
 
@@ -1030,33 +1030,33 @@ void addTransportData(def xml) {
                 indexCell = 6
                 def value1 = row.cell[indexCell].text()
                 def value2 = record84?.SHORTNAME?.value
-                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, false)
 
                 // графа 7 - зависит от графы 5 - атрибут 815 - TYPE - «Тип (вид) ценной бумаги», справочник 84 «Ценные бумаги»
                 indexCell = 7
-                def record89 = getRecordImport(89, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+                def record89 = getRecordImport(89, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, false)
                 if (record89 != null) {
                     value1 = record89?.record_id?.value?.toString()
                     value2 = record84?.TYPE?.value?.toString()
-                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, false)
                 }
 
                 // графа 8 - зависит от графы 5 - атрибут 869 - SIGN - «Признак ценной бумаги», справочник 84 «Ценные бумаги»
                 indexCell = 8
-                def record62 = getRecordImport(62, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+                def record62 = getRecordImport(62, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, false)
                 if (record62 != null) {
                     value1 = record62?.record_id?.value?.toString()
                     value2 = record84?.SIGN?.value?.toString()
-                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, false)
                 }
 
                 // графа 9 - зависит от графы 5 - атрибут 810 - CODE - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
                 indexCell = 9
-                def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+                def record15 = getRecordImport(15, 'CODE', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, false)
                 if (record15 != null) {
                     value1 = record15?.record_id?.value?.toString()
                     value2 = record84?.CODE_CUR?.value?.toString()
-                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, false)
                 }
 
                 // графа 10 - зависит от графы 5 - атрибут 810 - NAME - «Наименование валюты», справочник 84 «Ценные бумаги»
@@ -1064,11 +1064,11 @@ void addTransportData(def xml) {
                 if (record15 != null) {
                     value1 = row.cell[indexCell].text()
                     value2 = record15?.NAME?.value
-                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, true)
+                    formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, indexCell + colOffset, logger, false)
                 }
             }
         } else {
-            logger.error("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
+            logger.warn("Проверка файла: Строка ${xlsIndexRow} содержит значение, отсутствующее в справочнике " +
                     "«" + refBookFactory.get(100).getName() + "»!")
         }
 
@@ -1090,7 +1090,7 @@ void addTransportData(def xml) {
 
         // графа 15 - атрибут 65 CODE_2 - «Код валюты. Буквенный», справочник 15 «Единый справочник валют»
         indexCell = 15
-        record15 = getRecordImport(15, 'CODE_2', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset)
+        record15 = getRecordImport(15, 'CODE_2', row.cell[indexCell].text(), rnuIndexRow, indexCell + colOffset, false)
         newRow.currencyCodeTrade = record15?.record_id?.value
 
         // графа 16 - зависит от графы 15 - атрибут 66 NAME - «Наименование валюты», справочник 15 «Единый справочник валют»
@@ -1308,8 +1308,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }

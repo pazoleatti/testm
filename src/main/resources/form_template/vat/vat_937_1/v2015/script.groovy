@@ -7,6 +7,7 @@ import groovy.transform.Field
  * (937.1 v2015) Итоговые данные книги покупок
  * formTemplate = 1606
  *
+ * fix
  * 1  rowNum                      № п/п
  * 2  typeCode 		              Код вида операции
  * 3  invoice                     Номер и дата счета-фактуры продавца
@@ -29,15 +30,20 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.AFTER_CREATE:
-        calcAfterCreate()
-        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
+        break
+    case FormDataEvent.ADD_ROW:
+        formDataService.addRow(formData, currentDataRow, editableColumns, null)
+        break
+    case FormDataEvent.DELETE_ROW:
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
@@ -48,17 +54,19 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        consolidation()
+        formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
         importData()
         calc()
-        logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
         break
 }
 
@@ -66,33 +74,23 @@ switch (formDataEvent) {
 def allColumns = ['rowNum', 'typeCode', 'invoice', 'invoiceCorrecting', 'invoiceCorrection', 'invoiceCorrectingCorrection', 'documentPay', 'dateRegistration',
                   'salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
 
-// TODO: Заполнить после того, как будут известны поля
-@Field
-def calcColumns = []
-@Field
-def totalANonEmptyColumns = ['rowNum', 'typeCode', 'invoice', 'invoiceCorrection', 'cost', 'nds']
-
-// TODO (Ramil Timerbaev) пока редактируемыми сделал все поля кроме нумерации
 // Редактируемые атрибуты (графа )
 @Field
 def editableColumns = allColumns - 'rowNum'
 
-// Автозаполняемые атрибуты
-@Field
-def autoFillColumns = allColumns - editableColumns
-
 // Проверяемые на пустые значения атрибуты (графа )
 @Field
-def nonEmptyColumns = []
+def nonEmptyColumns = ['typeCode', 'invoice', 'cost', 'nds']
 
-// TODO (Ramil Timerbaev)
 // Атрибуты итоговых строк для которых вычисляются суммы (графа )
 @Field
 def totalSumColumns = ['nds']
 
-//TODO: Уточнить данное значение
+// Сортируемые атрибуты (графа 8, 3, 2, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16)
 @Field
-def sizeDiff = 15
+def sortColumns = ['dateRegistration', 'invoice', 'typeCode', 'invoiceCorrecting', 'invoiceCorrection',
+        'invoiceCorrectingCorrection', 'documentPay', 'salesman', 'salesmanInnKpp', 'agentName',
+        'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
 
 // Дата начала отчетного периода
 @Field
@@ -109,32 +107,83 @@ def endDate = null
 @Field
 def isBalancePeriod
 
-@Field
-def dateFormat = 'dd.MM.yyyy'
-
-// Получение числа из строки при импорте
-def getNumber(def value, def indexRow, def indexCol) {
-    return parseNumber(value, indexRow, indexCol, logger, true)
-}
-
-void calcAfterCreate() {
-    // TODO: Реализовать метод после того, как будет известна логика
-}
-
 void calc() {
-    // TODO: Реализовать метод после того, как будет известна логика
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def totalRow = getDataRow(dataRows, 'total')
+
+    calcTotalSum(dataRows, totalRow, totalSumColumns)
+
+    save(dataRows)
+
+    // Сортировка групп и строк
+    sortFormDataRows()
 }
 
 void logicCheck() {
-    // TODO: Реализовать метод после того, как будет известна логика
-}
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
 
-void consolidation() {
-    // TODO: Реализовать метод после того, как будет известна логика
-}
+    def FILLED_FILLED_ERROR_MSG = "Строка %s: В случае если графа «%s» заполнена, должна быть заполнена графа «%s»!"
+    def ONE_FMT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s». Оба поля обязательны для заполнения."
+    def TWO_FMT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s»."
 
-void addRowsToRows(def dataRows, def addRows) {
-    // TODO: Реализовать метод при необходимости после того, как будет известна логика
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def index = row.getIndex()
+        // Проверка заполнения граф
+        checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
+
+        //	Если заполнена «Графа 6», то заполнена «Графа 5»
+        if (row.invoiceCorrectingCorrection != null && row.invoiceCorrection == null){
+            loggerError(row, String.format(FILLED_FILLED_ERROR_MSG, index, getColumnName(row,'invoiceCorrectingCorrection'), getColumnName(row,'invoiceCorrection')))
+        }
+        //	Если «Графа 2» принимает хотя бы одно из значений диапазона: 01-05 | 07-13, то заполнена «Графа 10»
+        if (row.typeCode && row.typeCode.matches("^[0-9]{2}\$") && Integer.valueOf(row.typeCode) in ((01..05) + (07..13)) && row.salesmanInnKpp == null){
+            loggerError(row, String.format("Строка %s: В случае если графа «%s» принимает значение из диапазона: 01-05 | 07-13, должна быть заполнена графа «%s»!", index, getColumnName(row,'typeCode'), getColumnName(row,'salesmanInnKpp')))
+        }
+        // Проверки форматов
+        // графа 3
+        if (row.invoice && !row.invoice.matches("^\\S.{0,999}( ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4}))?\$")) {
+            loggerError(row, String.format("Строка %s: Графа «%s» заполнена неверно! Ожидаемое значение: «%s». Только номер обязателен для заполнения.", index, getColumnName(row,'invoice'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
+        }
+        // графа 4
+        if (row.invoiceCorrecting && !row.invoiceCorrecting.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+            loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrecting'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
+        }
+        // графа 5
+        if (row.invoiceCorrection && !row.invoiceCorrection.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+            loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrection'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
+        }
+        // графа 6
+        if (row.invoiceCorrectingCorrection && !row.invoiceCorrectingCorrection.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+            loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrectingCorrection'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
+        }
+        // графа 7
+        if (row.documentPay && !row.documentPay.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+            loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'documentPay'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата» формат, «ДД.ММ.ГГГГ»>"))
+        }
+        // графа 10
+        if (row.salesmanInnKpp && !row.salesmanInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
+            loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'salesmanInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
+        }
+        // графа 12
+        if (row.agentInnKpp && !row.agentInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
+            loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'agentInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
+        }
+        // графа 14
+        if (row.currency && !row.currency.matches("^\\S.{0,254} \\S{3}\$")) {
+            loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'currency'), "<Наименование: тип поля «Строка/255/»> <Код: тип поля «Строка/3/», формат «ХХХ»>"))
+        }
+        // графа 2
+        if (row.typeCode && (!row.typeCode.matches("^[0-9]{2}\$") || !(Integer.valueOf(row.typeCode) in ((1..13) + (16..28))))) {
+            loggerError(row, String.format("Строка <Номер строки>: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 01, 02, …,13, 16, 17, …, 28.", index, getColumnName(row,'typeCode'), getColumnName(row,'typeCode')))
+        }
+    }
+
+    checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod())
 }
 
 def getReportPeriodStartDate() {
@@ -158,7 +207,6 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// TODO: При необходимости исправить данный метод после получения постановки
 void importData() {
     def tmpRow = formData.createDataRow()
     def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null)
@@ -218,7 +266,8 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == "") {
+        if ((row.cell[0].text() == null || row.cell[0].text() == "") &&
+                (row.cell[1].text() == null || row.cell[1].text() == "")) {
             continue
         }
 
@@ -288,19 +337,15 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
-    dataRowHelper.save(rows)
+    rows.add(getTotalRow())
+    save(rows)
 }
 
-// TODO: После получения постановки при необходимости удалить данный метод
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 16, 0)
+    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 16, 1)
     addTransportData(xml)
-
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalSumColumns, logger, false)
 }
 
-// TODO: После получения постановки при необходимости исправить или удалить данный метод
 void addTransportData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
@@ -308,6 +353,11 @@ void addTransportData(def xml) {
 
     def rows = []
     def int rowIndex = 1
+
+    def totalTmp = formData.createDataRow()
+    totalSumColumns.each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+    }
 
     for (def row : xml.row) {
         rnuIndexRow++
@@ -380,6 +430,12 @@ void addTransportData(def xml) {
         xmlIndexCol++
         newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
+        totalSumColumns.each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
+        }
+
         rows.add(newRow)
     }
 
@@ -393,9 +449,22 @@ void addTransportData(def xml) {
         // Графа 16
         total.nds = parseNumber(row.cell[16].text(), rnuIndexRow, 16 + colOffset, logger, true)
 
+        def colIndexMap = ['nds' : 16]
+
+        for (def alias : totalSumColumns) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+            }
+        }
+
         rows.add(total)
     }
-    dataRowHelper.save(rows)
+    save(rows)
 }
 
 /** Получить новую строку с заданными стилями. */
@@ -413,10 +482,9 @@ def getNewRow() {
 def getTotalRow() {
     def total = formData.createDataRow()
     total.setAlias('total')
-    // TODO (Ramil Timerbaev) возможно надо будет добавить скрытый столбец fix
-    // total.КАКАЯ_ТО_СТРОКА = 'Итого'
-    // total.getCell('КАКАЯ_ТО_СТРОКА').colSpan = 2
-    allColumns.each {
+    total.fix = 'Всего'
+    total.getCell('fix').colSpan = 16
+    (allColumns + 'fix').each {
         total.getCell(it).setStyleAlias('Контрольные суммы')
     }
     return total
@@ -429,4 +497,43 @@ def isBalancePeriod() {
         isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
+}
+
+def loggerError(def row, def msg) {
+    if (isBalancePeriod()) {
+        rowWarning(logger, row, msg)
+    } else {
+        rowError(logger, row, msg)
+    }
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def totalRow = getDataRow(dataRows, 'total')
+    dataRows.remove(totalRow)
+    sortRows(dataRows, sortColumns)
+    dataRows.add(totalRow)
+
+    dataRowHelper.saveSort()
+}
+
+void save(def dataRows) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    // запись
+    dataRowHelper.clear()
+    def rows = []
+    dataRows.each { row ->
+        rows.add(row)
+        if (rows.size() > 1000) {
+            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+            rows.clear()
+        }
+    }
+    if (rows.size() > 0) {
+        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+        rows.clear()
+    }
 }

@@ -376,7 +376,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 4
         if (map != null) {
-            formDataService.checkReferenceValue(28, row.cell[3].text(), map.NUMBER?.stringValue, rnuIndexRow, 3 + colOffset, logger, true)
+            formDataService.checkReferenceValue(28, row.cell[3].text(), map.NUMBER?.stringValue, xlsIndexRow, 3 + colOffset, logger, true)
         }
 
         // графа 5
@@ -418,17 +418,17 @@ void addTransportData(def xml) {
         }
 
         // графа 3 - поиск записи идет по графе 2
-        newRow.balance = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset)
+        newRow.balance = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset, false)
         def map = getRefBookValue(28, newRow.code)
 
         // графа 3 проверка
         if (map != null) {
-            formDataService.checkReferenceValue(28, row.cell[3].text(), map.NUMBER?.stringValue, rnuIndexRow, 3 + colOffset, logger, true)
+            formDataService.checkReferenceValue(28, row.cell[3].text(), map.NUMBER?.stringValue, rnuIndexRow, 3 + colOffset, logger, false)
         }
 
         // графа 4 проверка
         if (map != null) {
-            formDataService.checkReferenceValue(28, row.cell[4].text(), map.TYPE_INCOME?.stringValue, rnuIndexRow, 4 + colOffset, logger, true)
+            formDataService.checkReferenceValue(28, row.cell[4].text(), map.TYPE_INCOME?.stringValue, rnuIndexRow, 4 + colOffset, logger, false)
         }
 
         // графа 5
@@ -463,8 +463,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }

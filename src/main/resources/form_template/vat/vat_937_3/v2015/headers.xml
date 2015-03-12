@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ п/п"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="date" colSpan="1" rowSpan="2" value="Дата выставления/ получения"/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="2" value="Код вида операции"/>
+        <cell alias="invoiceNumDate" colSpan="1" rowSpan="2" value="Номер и дата счета-фактуры"/>
+        <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="2" value="Номер и дата исправления счета-фактуры"/>
+        <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="2" value="Номер и дата корректировочного счета-фактуры"/>
+        <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="2"
+              value="Номер и дата исправления корректировочного счета-фактуры"/>
+        <cell alias="buyerName" colSpan="1" rowSpan="2" value="Наименование покупателя/ продавца"/>
+        <cell alias="buyerInnKpp" colSpan="1" rowSpan="2" value="ИНН/КПП покупателя/ продавца"/>
+        <cell alias="mediatorName" colSpan="3" rowSpan="1"
+              value="Сведения о посреднической деятельности, указываемые комиссионером (агентом), застройщиком или техническим заказчиком"/>
+        <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1"
+              value="Сведения о посреднической деятельности, указываемые комиссионером (агентом), застройщиком или техническим заказчиком"/>
+        <cell alias="mediatorNumDate" colSpan="1" rowSpan="1"
+              value="Сведения о посреднической деятельности, указываемые комиссионером (агентом), застройщиком или техническим заказчиком"/>
+        <cell alias="currNameCode" colSpan="1" rowSpan="2" value="Наименование и код валюты"/>
+        <cell alias="cost" colSpan="1" rowSpan="2"
+              value="Стоимость товаров (работ, услуг), имущественных прав по счету-фактуре - всего"/>
+        <cell alias="vatSum" colSpan="1" rowSpan="2" value="В том числе сумма НДС по счету-фактуре"/>
+        <cell alias="diffDec" colSpan="2" rowSpan="1"
+              value="Разница стоимости с учетом НДС по корректировочному счету-фактуре"/>
+        <cell alias="diffInc" colSpan="1" rowSpan="1"
+              value="Разница стоимости с учетом НДС по корректировочному счету-фактуре"/>
+        <cell alias="diffVatDec" colSpan="2" rowSpan="1" value="Разница НДС по корректировочному счету-фактуре"/>
+        <cell alias="diffVatInc" colSpan="1" rowSpan="1" value="Разница НДС по корректировочному счету-фактуре"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="date" colSpan="1" rowSpan="1" value="Дата выставления/ получения"/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="1" value="Код вида операции"/>
+        <cell alias="invoiceNumDate" colSpan="1" rowSpan="1" value="Номер и дата счета-фактуры"/>
+        <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1" value="Номер и дата исправления счета-фактуры"/>
+        <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1" value="Номер и дата корректировочного счета-фактуры"/>
+        <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="1"
+              value="Номер и дата исправления корректировочного счета-фактуры"/>
+        <cell alias="buyerName" colSpan="1" rowSpan="1" value="Наименование покупателя/ продавца"/>
+        <cell alias="buyerInnKpp" colSpan="1" rowSpan="1" value="ИНН/КПП покупателя/ продавца"/>
+        <cell alias="mediatorName" colSpan="1" rowSpan="1"
+              value="наименование продавца (из графы 8 части 2)/ субкомиссионера (субагента)"/>
+        <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1"
+              value="ИНН/КПП продавца (из графы 9 части 2)/ субкомиссионера (субагента)"/>
+        <cell alias="mediatorNumDate" colSpan="1" rowSpan="1"
+              value="номер и дата счета-фактуры, полученного от продавца (из графы 4 части 2)/ код вида сделки"/>
+        <cell alias="currNameCode" colSpan="1" rowSpan="1" value="Наименование и код валюты"/>
+        <cell alias="cost" colSpan="1" rowSpan="1"
+              value="Стоимость товаров (работ, услуг), имущественных прав по счету-фактуре - всего"/>
+        <cell alias="vatSum" colSpan="1" rowSpan="1" value="В том числе сумма НДС по счету-фактуре"/>
+        <cell alias="diffDec" colSpan="1" rowSpan="1" value="уменьшение"/>
+        <cell alias="diffInc" colSpan="1" rowSpan="1" value="увеличение"/>
+        <cell alias="diffVatDec" colSpan="1" rowSpan="1" value="уменьшение"/>
+        <cell alias="diffVatInc" colSpan="1" rowSpan="1" value="увеличение"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="date" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="invoiceNumDate" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="corrInvCorrNumDate" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="buyerName" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="buyerInnKpp" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="mediatorName" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="mediatorInnKpp" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="mediatorNumDate" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="currNameCode" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="cost" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="vatSum" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="diffDec" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="diffInc" colSpan="1" rowSpan="1" value="17"/>
+        <cell alias="diffVatDec" colSpan="1" rowSpan="1" value="18"/>
+        <cell alias="diffVatInc" colSpan="1" rowSpan="1" value="19"/>
+    </row>
+</rows>

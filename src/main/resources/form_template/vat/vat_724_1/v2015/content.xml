@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Отчёт о суммах начисленного НДС по операциям Банка</name>
-    <fullName>Отчёт о суммах начисленного НДС по операциям Банка</fullName>
+    <name>Отчет о суммах начисленного НДС по операциям Банка</name>
+    <fullName>Отчет о суммах начисленного НДС по операциям Банка</fullName>
     <header>724.1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
@@ -11,7 +11,7 @@
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <numerationType>SERIAL</numerationType>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -52,7 +52,7 @@
         <name>Данные бухгалтерского учета. Налоговая база. Сумма</name>
         <order>5</order>
         <width>11</width>
-        <maxLength>17</maxLength>
+        <maxLength>16</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -62,7 +62,7 @@
         <name>Данные бухгалтерского учета. НДС. Номер балансового счета</name>
         <order>6</order>
         <width>10</width>
-        <maxLength>22</maxLength>
+        <maxLength>8</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -72,7 +72,7 @@
         <name>Данные бухгалтерского учета. НДС. Сумма</name>
         <order>7</order>
         <width>11</width>
-        <maxLength>17</maxLength>
+        <maxLength>16</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -82,7 +82,7 @@
         <name>Ставка НДС</name>
         <order>8</order>
         <width>10</width>
-        <maxLength>255</maxLength>
+        <maxLength>6</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -92,7 +92,7 @@
         <name>Сумма НДС по книге продаж</name>
         <order>9</order>
         <width>11</width>
-        <maxLength>17</maxLength>
+        <maxLength>16</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -102,7 +102,7 @@
         <name>Сумма НДС по книге покупок</name>
         <order>10</order>
         <width>11</width>
-        <maxLength>17</maxLength>
+        <maxLength>16</maxLength>
         <precision>2</precision>
     </columns>
     <styles>

@@ -6,87 +6,86 @@
         операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам
         российских эмитентов
     </fullName>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column1</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>refNum</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>AUTO</columnType>
         <name>Справка №</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>7</maxLength>
-        <prevLength>0</prevLength>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
-        <alias>column2</alias>
+        <alias>date</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата составления</name>
         <order>2</order>
-        <width>5</width>
+        <width>7</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column3</alias>
+        <alias>innRF</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Тип</name>
+        <name>ИНН в РФ</name>
         <order>3</order>
-        <width>5</width>
-        <maxLength>2</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column4</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>ИНН</name>
-        <order>4</order>
         <width>5</width>
         <maxLength>12</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column5</alias>
+        <alias>inn</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>ИНН в стране гражданства</name>
+        <order>4</order>
+        <width>6</width>
+        <maxLength>50</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>surname</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Фамилия</name>
         <order>5</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>60</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column6</alias>
+        <alias>name</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Имя</name>
         <order>6</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>60</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column7</alias>
+        <alias>patronymic</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Отчество</name>
         <order>7</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>60</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column8</alias>
+        <alias>status</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Статус налогоплательщика</name>
         <order>8</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>1</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
-        <alias>column9</alias>
+        <alias>birthday</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата рождения</name>
@@ -95,29 +94,31 @@
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
-        <alias>column10</alias>
+        <alias>citizenship</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Гражданство (код страны)</name>
         <order>10</order>
-        <width>5</width>
+        <width>6</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
         <refBookAttributeId>50</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column11</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>code</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>REFBOOK</columnType>
         <name>Код вида документа, удостоверяющего личность</name>
         <order>11</order>
-        <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <width>8</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3602</nameAttributeId>
+        <refBookAttributeId>3601</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column12</alias>
+        <alias>series</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Серия и номер документа</name>
@@ -127,7 +128,7 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column13</alias>
+        <alias>postcode</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Почтовый индекс</name>
@@ -137,7 +138,7 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
-        <alias>column14</alias>
+        <alias>region</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Регион (код)</name>
@@ -149,7 +150,7 @@
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column15</alias>
+        <alias>district</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Район</name>
@@ -159,7 +160,7 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column16</alias>
+        <alias>city</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Город</name>
@@ -169,17 +170,17 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column17</alias>
+        <alias>locality</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Населенный пункт (село, поселок)</name>
         <order>17</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column18</alias>
+        <alias>street</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Улица (проспект, переулок)</name>
@@ -189,7 +190,7 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column19</alias>
+        <alias>house</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер дома (владения)</name>
@@ -199,7 +200,7 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column20</alias>
+        <alias>housing</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер корпуса (строения)</name>
@@ -209,7 +210,7 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column21</alias>
+        <alias>apartment</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер квартиры</name>
@@ -219,7 +220,7 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
-        <alias>column22</alias>
+        <alias>country</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Код страны</name>
@@ -231,17 +232,17 @@
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column23</alias>
+        <alias>address</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Адрес места жительства за пределами Российской Федерации</name>
         <order>23</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column24</alias>
+        <alias>taxRate</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Налоговая ставка</name>
@@ -251,7 +252,7 @@
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column25</alias>
+        <alias>income</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Общая сумма дохода</name>
@@ -261,7 +262,7 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column26</alias>
+        <alias>deduction</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Общая сумма вычетов</name>
@@ -271,7 +272,7 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column27</alias>
+        <alias>taxBase</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Налоговая база</name>
@@ -281,461 +282,491 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column28</alias>
+        <alias>calculated</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога исчисленная</name>
         <order>28</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column29</alias>
+        <alias>withheld</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога удержанная</name>
         <order>29</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column30</alias>
+        <alias>listed</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога перечисленная</name>
         <order>30</order>
-        <width>5</width>
+        <width>7</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column31</alias>
+        <alias>withheldAgent</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога, излишне удержанная налоговым агентом</name>
         <order>31</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column32</alias>
+        <alias>nonWithheldAgent</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма налога, не удержанная налоговым агентом</name>
         <order>32</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column33</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_040_1</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>Расшифровка справки о доходах физического лица №</name>
+        <columnType>REFBOOK</columnType>
+        <name>040 (Код дохода)</name>
         <order>33</order>
         <width>5</width>
-        <maxLength>7</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3702</nameAttributeId>
+        <refBookAttributeId>3701</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column34</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_041_1</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>040 (Код дохода)</name>
+        <columnType>NUMBER</columnType>
+        <name>041 (Сумма дохода)</name>
         <order>34</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column35</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_1_1</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>041 (Сумма дохода)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>35</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column36</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_1_1</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>36</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column37</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_1_2</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>37</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column38</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_1_2</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>38</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column39</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_1_3</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>39</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column40</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_1_3</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>40</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column41</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_1_4</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>41</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column42</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_1_4</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>42</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column43</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_1_5</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>43</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column44</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_1_5</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>44</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column45</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_040_2</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>040 (код дохода)</name>
         <order>45</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3702</nameAttributeId>
+        <refBookAttributeId>3701</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column46</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_041_2</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>040 (код дохода)</name>
+        <columnType>NUMBER</columnType>
+        <name>041 (Сумма дохода)</name>
         <order>46</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column47</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_2_1</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>041 (Сумма дохода)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>47</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column48</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_2_1</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>48</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column49</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_2_2</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>49</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column50</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_2_2</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>50</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column51</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_2_3</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>51</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column52</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_2_3</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>52</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column53</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_2_4</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>53</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column54</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_2_4</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>54</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column55</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_2_5</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>55</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column56</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
-        <order>56</order>
-        <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column57</alias>
+        <alias>col_043_2_5</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
-        <order>57</order>
+        <order>56</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column58</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_040_3</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>REFBOOK</columnType>
         <name>040 (код дохода)</name>
-        <order>58</order>
+        <order>57</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3702</nameAttributeId>
+        <refBookAttributeId>3701</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column59</alias>
+        <alias>col_041_3</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>041 (Сумма дохода)</name>
+        <order>58</order>
+        <width>5</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_3_1</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>59</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column60</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_3_1</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>60</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column61</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_3_2</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>61</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column62</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_3_2</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>62</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column63</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_3_3</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>63</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column64</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_3_3</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>64</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column65</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_3_4</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>65</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column66</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_043_3_4</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>043 (Сумма вычета)</name>
         <order>66</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column67</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_042_3_5</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>043 (Сумма вычета)</name>
+        <columnType>REFBOOK</columnType>
+        <name>042 (Код вычета)</name>
         <order>67</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column68</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>042 (Код вычета)</name>
-        <order>68</order>
-        <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column69</alias>
+        <alias>col_043_3_5</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>043 (Сумма вычета)</name>
+        <order>68</order>
+        <width>5</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_051_3_1</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>051 (Код вычета)</name>
         <order>69</order>
         <width>5</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column70</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>col_052_3_1</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>051 (Код вычета)</name>
+        <columnType>NUMBER</columnType>
+        <name>052 (Сумма вычета)</name>
         <order>70</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column71</alias>
-        <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>052 (Сумма вычета)</name>
-        <order>71</order>
-        <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>column72</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>col_051_3_2</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>REFBOOK</columnType>
         <name>051 (Код вычета)</name>
-        <order>72</order>
+        <order>71</order>
         <width>5</width>
-        <maxLength>2000</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3502</nameAttributeId>
+        <refBookAttributeId>3501</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>column73</alias>
+        <alias>col_052_3_2</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>052 (Сумма вычета)</name>
-        <order>73</order>
+        <order>72</order>
         <width>5</width>
         <maxLength>17</maxLength>
         <precision>2</precision>

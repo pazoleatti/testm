@@ -625,7 +625,7 @@ void addTransportData(def xml) {
         if (isFirstSection(section)) {
             // графа 3
             xmlIndexCol = 3
-            newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+            newRow.provision = getRecordIdImport(86, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
 
             // графа 5
             xmlIndexCol = 5
@@ -739,8 +739,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }

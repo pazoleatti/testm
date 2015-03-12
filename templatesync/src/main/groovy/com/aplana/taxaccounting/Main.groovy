@@ -207,11 +207,18 @@ class Main {
                     'rnu75': 366,
                     'rnu8': 320,
                     'remainsPrepayments': 309,
-                    'reserve': 614
+                    'reserve': 614,
+                    'reserve_debts' : 618
             ],
             'vat': [
                     'declaration_audit': -1,
                     'declaration_fns': -1,
+                    'declaration_8': -1,
+                    'declaration_8_1': -1,
+                    'declaration_9': -1,
+                    'declaration_9_1': -1,
+                    'declaration_10': -1,
+                    'declaration_11': -1,
                     'vat_724_1': 600,
                     'vat_724_2_1': 601,
                     'vat_724_2_2': 602,
@@ -223,7 +230,8 @@ class Main {
                     'vat_937_1_13': 607,
                     'vat_937_2': 608,
                     'vat_937_2_1': 617,
-                    'vat_937_2_13': 609
+                    'vat_937_2_13': 609,
+                    'vat_937_3': 619
             ],
             'transport': [
                     'benefit_vehicles': 202,
