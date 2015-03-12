@@ -650,7 +650,6 @@ public class FormDataServiceTest {
         formTemplate.setType(formType);
 
         FormDataKind kind = FormDataKind.PRIMARY;
-        Integer periodOrder = null;
 
         DepartmentReportPeriod departmentReportPeriodPrev = new DepartmentReportPeriod();
         ReportPeriod reportPeriodPrev = new ReportPeriod();
@@ -883,7 +882,7 @@ public class FormDataServiceTest {
         department.setName("Тестовое подразделение");
         when(departmentService.getDepartment(formDataDest.getDepartmentId())).thenReturn(department);
 
-        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>(1);
+        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>();
         DepartmentFormType dft1 = new DepartmentFormType();
         dft1.setDepartmentId(1);
         dft1.setFormTypeId(1);
