@@ -114,7 +114,7 @@ void calc() {
 
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
-    save(dataRows)
+    dataRowHelper.update(totalRow)
 
     // Сортировка групп и строк
     sortFormDataRows()
