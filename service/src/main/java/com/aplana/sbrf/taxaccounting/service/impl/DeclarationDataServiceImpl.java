@@ -108,6 +108,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private FormDataService formDataService;
 
+    @Autowired
+    FormTypeService formTypeService;
+
     private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
 
     public static final String TAG_FILE = "Файл";
@@ -118,8 +121,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
     public static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"";
-    private static final String CONSOLIDATION_WARN =
-            "Не выполнена консолидация данных из формы %s %s %s %s %s в статусе %s";
+    private static final String NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING =
+            "Не выполнена консолидация данных из формы %s %s %s %s %d %s в статусе %s";
+    private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
+            "Не выполнена консолидация данных из формы %s %s %s %s %d %s - экземпляр формы не создан";
 
     private static final Date MAX_DATE;
     private static final Calendar CALENDAR = Calendar.getInstance();
@@ -248,13 +253,47 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void check(Logger logger, long id, TAUserInfo userInfo) {
         declarationDataScriptingService.executeScript(userInfo,
                 declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-        validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.CHECK, null);
+        DeclarationData dd = declarationDataDao.get(id);
+        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, null);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
                     "Найдены ошибки при выполнении проверки декларации",
                     logEntryService.save(logger.getEntries()));
         } else {
+            ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
+            List<DepartmentFormType> sourceDDs = departmentFormTypeDao.getDeclarationSources(
+                    dd.getDepartmentId(),
+                    declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getId(),
+                    rp.getStartDate(),
+                    rp.getEndDate());
+            for (DepartmentFormType sourceDFT : sourceDDs){
+                FormData sourceFD =
+                        formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), dd.getDepartmentReportPeriodId(), null);
+                if (sourceFD==null){
+                    DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
+                    logger.warn(
+                            NOT_EXIST_SOURCE_DECLARATION_WARNING,
+                            departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
+                            formTypeService.get(sourceDFT.getFormTypeId()).getName(),
+                            sourceDFT.getKind().getName(),
+                            rp.getName(),
+                            rp.getTaxPeriod().getYear(),
+                            drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                    formatter.format(drp.getCorrectionDate())) : "");
+                } else if (!sourceService.isDeclarationSourceConsolidated(id, sourceFD.getId())){
+                    DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
+                    logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
+                            departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
+                            sourceFD.getFormType().getName(),
+                            sourceFD.getKind().getName(),
+                            rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
+                            rp.getTaxPeriod().getYear(),
+                            sourceDRP.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                    formatter.format(sourceDRP.getCorrectionDate())) : "",
+                            sourceFD.getState().getName());
+                }
+            }
             logger.info("Проверка завершена, ошибок не обнаружено");
         }
     }
