@@ -304,19 +304,19 @@ void generateXML() {
         nalBaza070 = round(totalRow5?.baseSum ?: empty)
         sumNal070 = round(totalRow5?.ndsSum ?: empty)
 
-        nalIschProd = round(totalRow7?.ndsDealSum)
+        nalIschProd = round(totalRow7?.ndsDealSum ?: empty)
     }
 
     /** НалПредНППриоб . Код строки 120 Графа 3. */
     def nalPredNPPriob = empty
     if (rows724_4) {
-        nalPredNPPriob = getDataRow(rows724_4, 'total1')?.sum2
+        nalPredNPPriob = round(getDataRow(rows724_4, 'total1')?.sum2 ?: empty)
     }
 
     /** НалВосстОбщ. Код строки 110 Графа 5. */
     def nalVosstObsh = sumNal010 + sumNal020 + sumNal030 + sumNal040 + sumNal070 + sumNal105 + sumNal106 + sumNal107 + sumNal108
     /** НалВычОбщ. Код строки 190 Графа 5. */
-    def nalVichObsh = nalPredNPPriob + nalIschProd
+    def nalVichObsh = round(nalPredNPPriob + nalIschProd)
     /** НалПУ164. Код строки 200 и код строки 210.*/
     def nalPU164 = (nalVosstObsh - nalVichObsh).abs().intValue()
 
@@ -400,11 +400,11 @@ void generateXML() {
                     СумУплНА(
                             КБК: '18210301000011000110',
                             ОКТМО: okato,
-                            СумИсчисл: row.sumIschisl,
+                            СумИсчисл: round(row.sumIschisl ?: empty),
                             КодОпер: row.codeOper,
-                            СумИсчислОтгр: null,
-                            СумИсчислОпл: null,
-                            СумИсчислНА: null
+                            СумИсчислОтгр: empty,
+                            СумИсчислОпл: empty,
+                            СумИсчислНА: empty
                     ) {
                         if (!shortDeclaration) {
                             СведПродЮЛ(
@@ -502,7 +502,7 @@ void generateXML() {
                             }
                             СумОпер4(
                                     КодОпер: row.code,
-                                    НалБаза: round(row.base),
+                                    НалБаза: round(row.base ?: empty),
                                     НалВычПод: empty,
                                     НалНеПод: empty,
                                     НалВосст: empty
@@ -523,7 +523,7 @@ void generateXML() {
                             }
                             СумОпер7(
                                     КодОпер: row.code,
-                                    СтРеалТов: round(row.realizeCost),
+                                    СтРеалТов: round(row.realizeCost ?: empty),
                                     СтПриобТов: round(row.obtainCost ?: empty),
                                     НалНеВыч: round(getNalNeVich(row))
                             )
@@ -615,7 +615,7 @@ def Map<Long, Expando> getParts() {
                 def String xmlString = declarationService.getXmlData(declarationData.id)
                 xmlString = xmlString?.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
                 if (xmlString) {
-                    result.fileName = new XmlSlurper().parseText(xmlString).Файл.@ИдФайл
+                    result.fileName = new XmlSlurper().parseText(xmlString).@ИдФайл
                 }
             }
             declarationParts[id] = result
@@ -633,12 +633,13 @@ def BigDecimal isDeclarationExist(def declarationId) {
 }
 
 def BigDecimal hasOneOrMoreDeclaration() {
+    def BigDecimal hasDeclaration = 0
     declarations().each { declaration ->
         if (isDeclarationExist(declaration.value[0]) == 1) {
-            return 1
+            hasDeclaration = 1
         }
     }
-    return 0
+    return hasDeclaration
 }
 
 /**

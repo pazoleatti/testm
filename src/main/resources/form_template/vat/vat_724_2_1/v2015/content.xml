@@ -47,7 +47,7 @@
         <name>Стоимость реализованных (переданных) товаров (работ, услуг) без НДС</name>
         <order>4</order>
         <width>16</width>
-        <maxLength>17</maxLength>
+        <maxLength>16</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -57,7 +57,7 @@
         <name>Стоимость приобретенных товаров (работа, услуг), не облагаемых НДС</name>
         <order>5</order>
         <width>16</width>
-        <maxLength>17</maxLength>
+        <maxLength>16</maxLength>
         <precision>2</precision>
     </columns>
     <styles>

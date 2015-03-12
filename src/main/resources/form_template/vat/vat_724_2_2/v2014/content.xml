@@ -45,7 +45,7 @@
         <name>Налоговая база</name>
         <order>4</order>
         <width>12</width>
-        <maxLength>17</maxLength>
+        <maxLength>16</maxLength>
         <precision>2</precision>
     </columns>
     <styles>

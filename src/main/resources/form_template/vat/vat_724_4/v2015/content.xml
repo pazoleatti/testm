@@ -78,7 +78,7 @@
         <name>Данные бухгалтерского учёта. НДС. Сумма</name>
         <order>7</order>
         <width>11</width>
-        <maxLength>17</maxLength>
+        <maxLength>16</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
