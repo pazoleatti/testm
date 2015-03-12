@@ -1,6 +1,7 @@
 package form_template.vat.vat_937_2_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -59,6 +60,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
+        consolidation()
         calc()
         logicCheck()
         break
@@ -686,4 +688,44 @@ def loggerLog(def row, def msg, LogLevel logLevel = LogLevel.ERROR) {
     } else {
         rowError(logger, row, msg)
     }
+}
+
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    def headRow = getDataRow(dataRows, 'head')
+    def totalRow = getDataRow(dataRows, 'total')
+    dataRows = []
+    // графы для суммирования в заголовке (графа 14..19)
+    def headSumColumns = ['saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
+    headSumColumns.each { column ->
+        headRow[column] = BigDecimal.ZERO
+    }
+
+    // собрать из источников строки
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+        if (it.formTypeId == formData.formType.id) {
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                // получить все строки источника
+                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+                // получить только нефиксированные строки
+                def notFixedRows = sourceDataRows.findAll { row -> row.getAlias() == null || row.getAlias() == '' }
+                // получить заголовок
+                def sourceHeadRow = getDataRow(sourceDataRows, 'head')
+                // просуммировать значения заголовков
+                headSumColumns.each { column ->
+                    headRow[column] = headRow[column] + (sourceHeadRow[column] ?: BigDecimal.ZERO)
+                }
+
+                dataRows.addAll(notFixedRows)
+            }
+        }
+    }
+    dataRows.add(0, headRow)
+    dataRows.add(totalRow)
+
+    dataRowHelper.save(dataRows)
 }
