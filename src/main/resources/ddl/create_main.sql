@@ -913,3 +913,15 @@ comment on column log_system_report.blob_data_id is 'Идентификатор 
 comment on column log_system_report.type is 'Тип выгрузки (0 - архивация журнала аудита, 1 - генерация zip-файла для журнала аудита)';
 comment on column log_system_report.sec_user_id is 'Идентификатор пользователя, инициировавшего выгрузку типа 1';
 
+--------------------------------------------------------------------------------------------------------
+create table tax_type
+(
+id char(1) not null,
+name varchar2(256) not null
+);
+
+comment on table tax_type is 'Справочник типов налогов';
+comment on column tax_type.id is 'Символьный идентификатор типа налога';
+comment on column tax_type.name is 'Тип налога';
+
+--------------------------------------------------------------------------------------------------------
