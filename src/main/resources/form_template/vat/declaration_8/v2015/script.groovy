@@ -276,7 +276,7 @@ def checkDeclarationFNS() {
     def declarationData = declarationService.getLast(declarationFnsId, declarationData.departmentId, reportPeriod.id)
     if (declarationData != null && declarationData.accepted) {
         def String event = (formDataEvent == FormDataEvent.MOVE_CREATED_TO_ACCEPTED) ? "Принять данную декларацию" : "Отменить принятие данной декларации"
-        throw new ServiceException('%s невозможно, так как в текущем периоде и подразделении принята "Декларация по НДС (раздел 1-7)', event)
+        throw new ServiceException('%s невозможно, так как в текущем периоде и подразделении принята "Декларация по НДС (раздел 1-7)"', event)
     }
 }
 
