@@ -580,7 +580,7 @@ void addTransportData(def xml) {
 
         def row = xml.rowTotal[0]
 
-        def total = getTotalRow()
+        def total = getFixedRow('Всего', 'total', true)
 
         // Графа 13
         def xmlIndexCol = 13
@@ -643,18 +643,6 @@ def getNewRow() {
     return newRow
 }
 
-/** Получить пустую итоговую строку со стилями. */
-def getTotalRow() {
-    def total = formData.createDataRow()
-    total.setAlias('total')
-    total.fix = 'Всего'
-    total.getCell('fix').colSpan = 15
-    (allColumns + 'fix').each {
-        total.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    return total
-}
-
 // Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
@@ -669,17 +657,20 @@ void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def headRow = getDataRow(dataRows, 'head')
-    def totalRow = getDataRow(dataRows, 'total')
-    dataRows.remove(headRow)
-    dataRows.remove(totalRow)
+    // не производим сортировку в консолидированных формах
+    if (dataRows[0].getAlias() == null) {
+        def headRow = getDataRow(dataRows, 'head')
+        def totalRow = getDataRow(dataRows, 'total')
+        dataRows.remove(headRow)
+        dataRows.remove(totalRow)
 
-    sortRows(dataRows, sortColumns)
+        sortRows(dataRows, sortColumns)
 
-    dataRows.add(0, headRow)
-    dataRows.add(totalRow)
+        dataRows.add(0, headRow)
+        dataRows.add(totalRow)
 
-    dataRowHelper.saveSort()
+        dataRowHelper.saveSort()
+    }
 }
 
 def loggerLog(def row, def msg, LogLevel logLevel = LogLevel.ERROR) {
@@ -696,36 +687,63 @@ void consolidation() {
 
     def headRow = getDataRow(dataRows, 'head')
     def totalRow = getDataRow(dataRows, 'total')
-    dataRows = []
-    // графы для суммирования в заголовке (графа 14..19)
-    def headSumColumns = ['saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
-    headSumColumns.each { column ->
+    dataRows = [headRow]
+    totalSumColumns.each { column ->
         headRow[column] = BigDecimal.ZERO
     }
 
     // собрать из источников строки
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
-            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+    def formSources = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate())
+    // сортируем по наименованию подразделения
+    formSources.sort { departmentService.get(it.departmentId).name }
+    formSources.each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
+            def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null)
+            if (child != null && child.state == WorkflowState.ACCEPTED) {
                 // получить все строки источника
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
-                // получить только нефиксированные строки
-                def notFixedRows = sourceDataRows.findAll { row -> row.getAlias() == null || row.getAlias() == '' }
+                def final childDataRows = formDataService.getDataRowHelper(child).allCached
+                def final department = departmentService.get(child.departmentId)
+                def depHeadRow = getFixedRow(department.name, "head_${department.id}", true)
+                dataRows.add(depHeadRow)
+                def subHeadRow = getFixedRow("Итого по ${department.name}", "sub_head_${department.id}", false)
                 // получить заголовок
-                def sourceHeadRow = getDataRow(sourceDataRows, 'head')
+                def sourceHeadRow = getDataRow(childDataRows, 'head')
+                totalSumColumns.each { column ->
+                    subHeadRow[column] = (sourceHeadRow[column] ?: BigDecimal.ZERO)
+                }
+                dataRows.add(subHeadRow)
                 // просуммировать значения заголовков
-                headSumColumns.each { column ->
+                totalSumColumns.each { column ->
                     headRow[column] = headRow[column] + (sourceHeadRow[column] ?: BigDecimal.ZERO)
                 }
-
-                dataRows.addAll(notFixedRows)
+                dataRows.addAll(childDataRows.findAll { row -> row.getAlias() == null || row.getAlias() == '' })
+                def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}", true)
+                calcTotalSum(childDataRows, subTotalRow, totalSumColumns)
+                dataRows.add(subTotalRow)
             }
         }
     }
-    dataRows.add(0, headRow)
     dataRows.add(totalRow)
 
     dataRowHelper.save(dataRows)
+}
+
+/** Получить произвольную фиксированную строку со стилями. */
+def getFixedRow(String title, String alias, boolean isTotal) {
+    def total = formData.createDataRow()
+    total.setAlias(alias)
+    total.fix = title
+    total.getCell('fix').colSpan = 15
+    if (isTotal) {
+        (allColumns + 'fix').each {
+            total.getCell(it).setStyleAlias('Контрольные суммы')
+        }
+    } else {
+        totalSumColumns.each { column ->
+            total.getCell(column).setStyleAlias('Редактируемая')
+            total.getCell(column).editable = true
+        }
+    }
+    return total
 }
