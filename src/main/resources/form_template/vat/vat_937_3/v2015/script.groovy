@@ -60,9 +60,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
-        // calc() // в этой форме расчет только для нумерации, вынес его в consolidation()
+        calc()
         logicCheck()
-        sortFormDataRows()
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -95,9 +94,9 @@ def editableColumns = allColumns - ['fix', 'rowNumber']
 @Field
 def totalSumColumns = ['cost', 'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'diffVatInc']
 
-// Алиасы заголовков разделов 1 и 2.
+// список алиасов подразделов
 @Field
-def sections = ['part_1', 'part_2']
+def sections = ['1', '2']
 
 // Признак периода ввода остатков
 @Field
@@ -142,6 +141,7 @@ void calc() {
     def dataRows = dataRowHelper.allCached
 
     calc1(dataRows)
+    calcTotal(dataRows)
 
     dataRowHelper.save(dataRows)
 
@@ -171,7 +171,7 @@ void logicCheck() {
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            isFirstSection = row.getAlias() == sections[0]
+            isFirstSection = row.getAlias() == 'part_1'
             continue
         }
         def index = row.getIndex()
@@ -332,8 +332,8 @@ void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def firstRow = getDataRow(dataRows, sections[0])
-    def lastRow = getDataRow(dataRows, sections[1])
+    def firstRow = getDataRow(dataRows, 'part_1')
+    def lastRow = getDataRow(dataRows, 'part_2')
 
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
@@ -364,6 +364,8 @@ void addData(def xml, int headRowCount) {
             def isFirstSection = (firstValue == firstRow.fix)
             sectionIndex = (isFirstSection ? firstRow : lastRow).getAlias()
             mapRows.put(sectionIndex, [])
+            continue
+        } else if (firstValue == 'Всего') {
             continue
         }
 
@@ -454,9 +456,10 @@ void addData(def xml, int headRowCount) {
 
     // копирование данных по разделам
     sections.each { section ->
-        def copyRows = mapRows[section]
+        def alias = 'part_' + section
+        def copyRows = mapRows[alias]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(dataRows, section).getIndex()
+            def insertIndex = getDataRow(dataRows, alias).getIndex()
             dataRows.addAll(insertIndex, copyRows)
             // поправить индексы, потому что они после вставки не пересчитываются
             updateIndexes(dataRows)
@@ -590,12 +593,20 @@ void addTransportData(def xml) {
     }
 
     deleteNotFixedRows(dataRows)
+    dataRows.each { row ->
+        if (row.getAlias()?.contains('total')) {
+            totalSumColumns.each {
+                row[it] = null
+            }
+        }
+    }
 
     // копирование данных по разделам
     sections.each { section ->
-        def copyRows = mapRows[section]
+        def alias = 'part_' + section
+        def copyRows = mapRows[alias]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(dataRows, section).getIndex()
+            def insertIndex = getDataRow(dataRows, alias).getIndex()
             dataRows.addAll(insertIndex, copyRows)
             // поправить индексы, потому что они после вставки не пересчитываются
             updateIndexes(dataRows)
@@ -671,26 +682,19 @@ void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def firstRow = getDataRow(dataRows, sections[0])
-    def lastRow = getDataRow(dataRows, sections[1])
-    def columnNameList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'part_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
 
-    // раздел 1
-    def from = firstRow.getIndex()
-    def to = lastRow.getIndex() - 1
-    def section1Rows = (from < to ? dataRows[from..(to - 1)] : [])
-    // Массовое разыменовывание граф НФ
-    refBookService.dataRowsDereference(logger, section1Rows, columnNameList)
-    sortRowsSimple(section1Rows)
+        // Массовое разыменовывание граф НФ
+        def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        refBookService.dataRowsDereference(logger, sectionRows, columnNameList)
 
-    // раздел 2
-    from = lastRow.getIndex()
-    to = dataRows.size()
-    def section2Rows = (from < to ? dataRows[from..(to - 1)] : [])
-    // Массовое разыменовывание граф НФ
-    refBookService.dataRowsDereference(logger, section2Rows, columnNameList)
-    sortRowsSimple(section2Rows)
-
+        sortRowsSimple(sectionRows)
+    }
     dataRowHelper.saveSort()
 }
 
@@ -707,9 +711,17 @@ def addRow() {
     def dataRows = dataRowHelper.allCached
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
-        index = getDataRow(dataRows, sections[1]).getIndex()
-    } else {
+        index = getDataRow(dataRows, 'total_2').getIndex()
+    } else if (currentDataRow.getAlias() == null) {
         index = currentDataRow.getIndex() + 1
+    } else {
+        def alias = currentDataRow.getAlias()
+        if (alias.contains('total')) {
+            index = getDataRow(dataRows, alias).getIndex()
+        } else {
+            def tmp = 'total_' + alias[alias.size() - 1]
+            index = getDataRow(dataRows, tmp).getIndex()
+        }
     }
     dataRowHelper.insert(getNewRow(), index)
 }
@@ -730,12 +742,12 @@ void consolidation() {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
 
                 // копирование данных по разделам
-                copyRows(sourceDataRows, dataRows, sections[0], sections[1])
-                copyRows(sourceDataRows, dataRows, sections[1], null)
+                sections.each { section ->
+                    copyRows(sourceDataRows, dataRows, 'part_' + section, 'total_' + section)
+                }
             }
         }
     }
-    calc1(dataRows)
     dataRowHelper.save(dataRows)
 }
 
@@ -758,18 +770,18 @@ void deleteNotFixedRows(def dataRows) {
  *
  * @param sourceDataRows строки источника
  * @param destinationDataRows строки приемника
- * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно),
+ * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно)
+ * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
  *      в приемник строки вставляются перед строкой с этим псевдонимом
- * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно)
  */
 void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
     def from = getDataRow(sourceDataRows, fromAlias).getIndex()
-    def to = (toAlias ? getDataRow(sourceDataRows, toAlias).getIndex() - 1 : sourceDataRows.size())
+    def to = getDataRow(sourceDataRows, toAlias).getIndex() - 1
     if (from >= to) {
         return
     }
     def copyRows = sourceDataRows.subList(from, to)
-    destinationDataRows.addAll(getDataRow(destinationDataRows, fromAlias).getIndex(), copyRows)
+    destinationDataRows.addAll(getDataRow(destinationDataRows, toAlias).getIndex() - 1, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
     updateIndexes(destinationDataRows)
 }
@@ -789,6 +801,28 @@ def roundValue(def value, int precision = 2) {
     }
 }
 
+void calcTotal(def dataRows) {
+    // посчитать итоги по разделам
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'part_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        totalSumColumns.each { alias ->
+            def sum = roundValue(getSum(dataRows, alias, firstRow, lastRow))
+            lastRow.getCell(alias).setValue(sum, null)
+        }
+    }
+}
+
+// Получить сумму столбца.
+def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
+    def from = rowStart.getIndex()
+    def to = rowEnd.getIndex() - 2
+    if (from > to) {
+        return 0
+    }
+    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
+}
+
 /** Рассчитать нумерацию строк. Для каждой части нф нумерация начинается с 1. */
 void calc1(def dataRows) {
     def index1 = getPrevLastIndex(true)
@@ -796,7 +830,7 @@ void calc1(def dataRows) {
     def isFirstSection = null
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            isFirstSection = (row.getAlias() == sections[0])
+            isFirstSection = (row.getAlias() == 'part_1')
             continue
         }
 
@@ -805,26 +839,19 @@ void calc1(def dataRows) {
     }
 }
 
-/**
- * Получить последний номер строки из формы предыдушего периода из указаной части.
- *
- * @param isFirstPart
- * @return
- */
+/** Получить последний номер строки из формы предыдушего периода из указаной части. */
 def getPrevLastIndex(def isFirstPart) {
     def prevDataRows = getPrevDataRows()
     // если предыдущих данных нет или в предыдущей форме только фиксированные строки, то 0
-    if (!prevDataRows || prevDataRows.size() == sections.size()) {
+    if (!prevDataRows || prevDataRows.size() == sections.size() * 2) {
         return 0
     }
     def lastRow
+    def totalAlias = (isFirstPart ? 'total_1' : 'total_2')
     if (isFirstPart) {
-        // для части 1 - находим заголовок части 2 и по ней получаем последнюю строку части 1
-        def tmpRow = getDataRow(prevDataRows, sections[1])
+        // находим строку итоги и по ней получаем последнюю строку части
+        def tmpRow = getDataRow(prevDataRows, totalAlias)
         lastRow = prevDataRows.get(tmpRow.getIndex() - 2)
-    } else {
-        // для части 2 - берем последнюю строку
-        lastRow = prevDataRows.get(prevDataRows.size() - 1)
     }
     return roundValue(lastRow.getAlias() == null ? lastRow.rowNumber : 0)
 }
