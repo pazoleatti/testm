@@ -275,9 +275,24 @@ void logicCheck() {
             def formTypeName = getFormTypeName()
             def periodName = getReportPeriod().name
             def year = getReportPeriod().taxPeriod.year
-            logger.error("Строка $index: Графа «$name» заполнена неверно (в первичной налоговой форме «$formTypeName» " +
+            loggerError(row, "Строка $index: Графа «$name» заполнена неверно (в первичной налоговой форме «$formTypeName» " +
                     "текущего подразделения за $periodName $year изменено количество строк). " +
                     "Для обновления значения графы необходимо нажать на «Рассчитать».")
+        }
+    }
+
+    // 7. Проверка итоговых значений (графа 14..19)
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'part_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        for (def alias : totalSumColumns) {
+            def value = roundValue(lastRow.getCell(alias).value ?: 0)
+            def sum = roundValue(getSum(dataRows, alias, firstRow, lastRow))
+            if (sum != value) {
+                def index = lastRow.getIndex()
+                def name = getColumnName(lastRow, alias)
+                loggerError(lastRow, "Строка $index: Итоговые значения рассчитаны неверно в графе «$name»!")
+            }
         }
     }
 }
@@ -848,11 +863,10 @@ def getPrevLastIndex(def isFirstPart) {
     }
     def lastRow
     def totalAlias = (isFirstPart ? 'total_1' : 'total_2')
-    if (isFirstPart) {
-        // находим строку итоги и по ней получаем последнюю строку части
-        def tmpRow = getDataRow(prevDataRows, totalAlias)
-        lastRow = prevDataRows.get(tmpRow.getIndex() - 2)
-    }
+    // находим строку итоги и по ней получаем последнюю строку части
+    def tmpRow = getDataRow(prevDataRows, totalAlias)
+    lastRow = prevDataRows.get(tmpRow.getIndex() - 2)
+
     return roundValue(lastRow.getAlias() == null ? lastRow.rowNumber : 0)
 }
 
