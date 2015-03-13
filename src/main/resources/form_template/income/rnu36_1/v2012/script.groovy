@@ -93,6 +93,16 @@ def providerCache = [:]
 @Field
 def recordCache = [:]
 
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
 @Field
 def startDate = null
 
@@ -456,8 +466,8 @@ def filForm(def newRow, def row, int i, int colOffset) {
     newRow.nominal = parseNumber(row.cell[2].text(), i, colOffset, logger, true)
     // графа 4
     newRow.shortPositionDate = parseDate(row.cell[3].text(), "dd.MM.yyyy", i, colOffset, logger, true)
-    //  графа 5
-    newRow.balance2 = formDataService.getRefBookRecordIdImport(28L, recordCache, providerCache, 'NUMBER', row.cell[4].text(), getReportPeriodEndDate(), newRow.getIndex(), 5, logger, true)
+    // графа 5
+    newRow.balance2 =getRecordIdImport(28L, 'NUMBER', row.cell[4].text(), i, 5, false)
     // графа 6
     newRow.averageWeightedPrice = parseNumber(row.cell[5].text(), i, colOffset, logger, true)
     // графа 7
@@ -540,7 +550,7 @@ void addTransportData(def xml) {
 
         //  графа 5
         rnuIndexCol = 5
-        newRow.balance2 = formDataService.getRefBookRecordIdImport(28L, recordCache, providerCache, 'NUMBER', row.cell[rnuIndexCol].text(), getReportPeriodEndDate(), rnuIndexRow, rnuIndexCol, logger, true)
+        newRow.balance2 = getRecordIdImport(28L, 'NUMBER', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, false)
 
         // графа 6
         rnuIndexCol = 6
@@ -606,8 +616,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
 

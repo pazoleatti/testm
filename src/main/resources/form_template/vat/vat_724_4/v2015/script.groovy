@@ -1,4 +1,3 @@
-//TODO: при необходимости исправить скрипт после получения новой постановки
 package form_template.vat.vat_724_4.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -6,8 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
- * (724.4) Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
- * или возврата соответствующих сумм авансовых платежей (v.2015).
+ * (724.4) Налоговые вычеты за прошедший налоговый период, связанные с изменением условий или расторжением договора,
+ * в случае возврата ранее реализованных товаров (отказа от услуг) или возврата соответствующих сумм авансовых платежей
+ * (Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
+ * или возврата соответствующих сумм авансовых платежей) (v.2015).
  *
  * formTemplateId=1603
  */
@@ -56,7 +57,6 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
-        logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -94,9 +94,9 @@ def nonEmptyColumns = ['number', 'sum', 'number2', 'sum2', 'nds']
 @Field
 def totalColumns = ['sum', 'sum2']
 
-// Группируемые атрибуты (графа 3, 5)
+// Группируемые атрибуты (графа 3, 5, 2, 4, 6, 7)
 @Field
-def sortColumns = ['number', 'number2']
+def sortColumns = ['number', 'number2', 'name', 'sum', 'sum2', 'nds']
 
 // список алиасов подразделов
 @Field
@@ -182,9 +182,6 @@ void calc() {
 
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
-        // отсортировать/группировать
-        sortRows(sectionsRows, sortColumns)
-
         // посчитать итоги по разделам
         def rows = (from <= to ? dataRows[from..to] : [])
         calcTotalSum(rows, lastRow, totalColumns)
@@ -219,8 +216,13 @@ void logicCheck() {
                             (row.number2 in ['60309.04', '60309.05'] && row.nds == '18/118'))
             def logicCheck6 = (!isSection1 && row.number2 in ['60309.02', '60309.03'] && row.nds == '18/118')
             if (isSection1 ? !logicCheck5 : !logicCheck6) {
-                def columns = "«${getColumnName(row, 'number2')}», «${getColumnName(row, 'nds')}»"
-                rowError(logger, row, errorMsg + 'Графы ' + columns + ' заполнены неверно!')
+                def number2Name = getColumnName(row, 'number2')
+                def ndsName = getColumnName(row, 'nds')
+                def columns = "«$number2Name», «$ndsName»"
+                def endMessage = isSection1 ?
+                        " Ожидаемое значение (раздел 1): («$number2Name» = «60309.01» и «$ndsName» = «10»/ «18»/ «10/110»/ «18/118») или («$number2Name» = «60309.04»/ «60309.05»  и «$ndsName» = «18/118»)." :
+                        " Ожидаемое значение (раздел 2): «$number2Name» = «60309.02»/ «60309.03» и «$ndsName» = «18/118»."
+                rowError(logger, row, errorMsg + 'Графы ' + columns + ' заполнены неверно!' + endMessage)
             }
         }
     }
@@ -328,8 +330,8 @@ void importData() {
             (xml.row[1].cell[2]): 'Налоговая база',
             (xml.row[1].cell[5]): 'НДС',
 
-            (xml.row[2].cell[2]): 'наименование балансового счёта',
-            (xml.row[2].cell[3]): 'номер балансового счёта',
+            (xml.row[2].cell[2]): 'наименование балансового счёта расхода',
+            (xml.row[2].cell[3]): 'номер балансового счёта расхода',
             (xml.row[2].cell[4]): 'сумма',
             (xml.row[2].cell[5]): 'номер балансового счёта',
             (xml.row[2].cell[6]): 'сумма',
@@ -385,14 +387,14 @@ void addData(def xml, int headRowCount) {
         newRow.setImportIndex(xlsIndexRow)
 
         // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
-        record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset)
+        record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
         newRow.number = record?.record_id?.value
 
         // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
         if (record != null) {
             def value1 = record?.ACCOUNT_NAME?.value?.toString()
             def value2 = row.cell[2].text()
-            formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, true)
+            formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, false)
         }
 
         // графа 4
@@ -478,7 +480,7 @@ void addTransportData(def xml) {
 
         // графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
         rnuIndexCol = 3
-        record = getRecordImport(101, 'ACCOUNT', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        record = getRecordImport(101, 'ACCOUNT', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, false)
         newRow.number = record?.record_id?.value
 
         // графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
@@ -486,7 +488,7 @@ void addTransportData(def xml) {
             rnuIndexCol = 2
             def value1 = record?.ACCOUNT_NAME?.value?.toString()
             def value2 = row.cell[rnuIndexCol].text()
-            formDataService.checkReferenceValue(101, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(101, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, false)
         }
 
         // графа 4
@@ -556,8 +558,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }
@@ -594,7 +595,7 @@ void sortFormDataRows() {
         def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
-        sortRowsSimple(sectionsRows)
+        sortRows(sectionsRows, sortColumns)
     }
 
     dataRowHelper.saveSort()

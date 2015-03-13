@@ -722,8 +722,9 @@ void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 19, 1)
     addTransportData(xml)
 
+    // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 void addTransportData(def xml) {
@@ -771,9 +772,9 @@ void addTransportData(def xml) {
         newRow.financialResult1 = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
         // графа 11
         if (row.cell[11].text() == "Российский рубль") { // TODO http://jira.aplana.com/browse/SBRFACCTAX-6288
-            newRow.currencyDebtObligation = getRecordIdImport(15, 'CODE', "810", rnuIndexRow, 11 + colOffset)
+            newRow.currencyDebtObligation = getRecordIdImport(15, 'CODE', "810", rnuIndexRow, 11 + colOffset, false)
         } else {
-            newRow.currencyDebtObligation = getRecordIdImport(15, 'NAME', row.cell[11].text(), rnuIndexRow, 11 + colOffset)
+            newRow.currencyDebtObligation = getRecordIdImport(15, 'NAME', row.cell[11].text(), rnuIndexRow, 11 + colOffset, false)
         }
         // графа 12
         newRow.rateBR = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)

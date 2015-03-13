@@ -54,7 +54,6 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
-        logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -80,22 +79,42 @@ def nonEmptyColumns = ['operDate', 'contragent', 'type', 'sum', 'number', 'sum2'
 @Field
 def totalColumns = ['sum', 'sum2']
 
+// Группируемые атрибуты (графа 4, 2, 3, 5, 6, 7, 8, 9)
+@Field
+def sortColumns = ['type', 'operDate', 'contragent', 'sum', 'number', 'sum2', 'date', 'number2']
+
+// Признак периода ввода остатков
+@Field
+def isBalancePeriod
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
+
+    def FORMAT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s»"
+
     for (def row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         def index = row.getIndex()
+
         // 1. Проверка заполнения граф
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
         // 2. Проверка суммы НДС
         if (row.sum != null && row.sum2 != null &&
-                !(row.sum2 > row.sum * 0.15 && row.sum2 < row.sum * 0.21)) {
-            rowWarning(logger, row, "Строка $index: Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе!")
+                !(row.sum * 0.18 + row.sum * 0.03 > row.sum2 && row.sum2 > row.sum * 0.18 - row.sum * 0.03)) {
+            rowWarning(logger, row, "Строка $index: Сумма НДС по данным бухгалтерского учета не соответствует налоговой базе! Проверка: «Графа 5» * 18% + («Графа 5» * 3) / 100 > «Графа 7» > «Графа 5» * 18% - («Графа 5» * 3) / 100.")
+        }
+
+        // 4. Проверка формата заполнения
+        // графа 9
+        if (row.number2 && !row.number2.matches("^\\S{2}\\-\\S{4}\\-\\S{6}\$")) {
+            loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'number2'), "ХХ-ХХХХ-ХХХХХХ"))
         }
     }
+
     // 3. Проверка итоговых значений
     checkTotalSum(dataRows, totalColumns, logger, true)
 }
@@ -104,9 +123,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def totalRow = getDataRow(dataRows, 'total')
-    deleteAllAliased(dataRows)
     calcTotalSum(dataRows, totalRow, totalColumns)
-    dataRows.add(totalRow)
     dataRowHelper.save(dataRows)
 
     // Сортировка групп и строк
@@ -289,8 +306,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }
@@ -319,11 +335,33 @@ def getNewRow() {
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, getTotalRow(dataRows), null)
+
+    def totalRow = getTotalRow(dataRows)
+    dataRows.remove(totalRow)
+    sortRows(dataRows, sortColumns)
+    dataRows.add(totalRow)
+
     dataRowHelper.saveSort()
 }
 
 // Получение итоговых строк
 def getTotalRow(def dataRows) {
     return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
+}
+
+def loggerError(def row, def msg) {
+    if (isBalancePeriod()) {
+        rowWarning(logger, row, msg)
+    } else {
+        rowError(logger, row, msg)
+    }
+}
+
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
+    }
+    return isBalancePeriod
 }

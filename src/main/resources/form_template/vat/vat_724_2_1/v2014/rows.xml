@@ -5,7 +5,7 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010201"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Предоставление арендодателем в аренду на территории Российской Федерации помещений иностранным гражданам или организациям, аккредитованным в Российской Федерации (п. 1 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="R2">
@@ -21,7 +21,7 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010239"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Реализация услуг по предоставлению в пользование жилых помещений в жилищном фонде всех форм собственности (п/п. 10 п. 2 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="R4">
@@ -29,7 +29,7 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010242"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Реализация монет из драгоценных металлов (за исключением коллекционных монет), являющихся валютой Российской Федерации или валютой иностранных государств (п/п. 11 п. 2 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="R5">
@@ -37,7 +37,7 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010243"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Реализация долей в уставном (складочном) капитале организаций, паев в паевых фондах кооперативов и паевых инвестиционных фондах, ценных бумаг и инструментов срочных сделок (включая форвардные, фьючерсные контракты, опционы) (п/п. 12 п. 2 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="R6">
@@ -60,23 +60,23 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010276"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Осуществление банками банковских операций (за исключением инкассации) (п/п. 3 п. 3 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="obtainCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
     <row alias="R9">
         <cell alias="rowNum" colSpan="1" numericValue="9" rowSpan="1"/>
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010277"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Операции по оказанию услуг, связанных с обслуживанием банковских карт (п/п. 3.1 п. 3 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="obtainCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
     <row alias="R10">
         <cell alias="rowNum" colSpan="1" numericValue="10" rowSpan="1"/>
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010284"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Проведение лотерей, проводимых по решению уполномоченного органа исполнительной власти, включая оказание услуг по реализации лотерейных билетов"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R11">
@@ -84,7 +84,7 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010285"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Реализация руды, концентратов и других промышленных продуктов, содержащих драгоценные металлы, лома и отходов драгоценных металлов для производства драгоценных металлов и аффинажа: реализация драгоценных металлов и драгоценных камней налогоплательщиками (за исключением указанных в п/п. 6 п. 1 ст. 164 НК РФ) Государственному фонду драгоценных металлов и драгоценных камней Российской Федерации, фондам драгоценных металлов и драгоценных камней субъектов Российской Федерации, Центральному банку Российской Федерации и банкам; реализация драгоценных камней в сырье (за исключением необработанных алмазов) для обработки предприятиям независимо от форм собственности для последующей продажи на экспорт; реализация драгоценных камней в сырье и ограненных специализированным внешнеэкономическим организациям, Государственному фонду драгоценных металлов и драгоценных камней Российской Федерации, фондам драгоценных металлов и драгоценных камней субъектов Российской Федерации, Центральному банку Российской Федерации и банкам; реализация драгоценных металлов из Государственного фонда драгоценных металлов и драгоценных камней Российской Федерации, из фондов драгоценных металлов и драгоценных камней субъектов Российской Федерации специализированным внешнеэкономическим организациям, Центральному банку Российской Федерации и банкам, а также драгоценных металлов в слитках Центральным банком Российской Федерации и банками при условии, что эти слитки остаются в одном из сертифицированных хранилищ (Государственном хранилище ценностей, хранилище Центрального банка Российской Федерации или хранилищах банков) - п/п. 9 п. 3 ст. 149 НК РФ"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="R12">
@@ -100,14 +100,14 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010290"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Реализация услуг, оказываемых на рынке ценных бумаг, товарных и валютных рынках, а именно: услуг, оказываемых регистраторами, депозитариями, дилерами, брокерами, управляющими ценными бумагами (п/п. 12.2 п. 2 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1"/>
-        <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="obtainCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
     <row alias="R14">
         <cell alias="rowNum" colSpan="1" numericValue="14" rowSpan="1"/>
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010298"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Реализация жилых домов (п/п. 22 п. 3 ст. 149 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="R15">
@@ -139,7 +139,7 @@
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="1010806"/>
         <cell alias="name" colSpan="1" rowSpan="1"
               stringValue="Реализация земельных участков (долей в них) (п/п. 6 п. 2 ст. 146 НК РФ)"/>
-        <cell alias="realizeCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="realizeCost" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="obtainCost" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
     </row>
     <row alias="itog">

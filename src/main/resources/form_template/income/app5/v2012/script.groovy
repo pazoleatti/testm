@@ -494,9 +494,9 @@ void addTransportData(def xml) {
         newRow.setIndex(rowIndex++)
 
         // графа 2
-        newRow.regionBank = getRecordIdImport(30, 'NAME', row.cell[2].text(), rnuIndexRow, 2 + colOffset)
+        newRow.regionBank = getRecordIdImport(30, 'NAME', row.cell[2].text(), rnuIndexRow, 2 + colOffset, false)
         // графа 3
-        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), rnuIndexRow, 3 + colOffset)
+        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), rnuIndexRow, 3 + colOffset, false)
         // графа 4
         newRow.divisionName = row.cell[4].text()
         // графа 5
@@ -545,8 +545,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }

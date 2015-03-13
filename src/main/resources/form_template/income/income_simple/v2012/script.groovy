@@ -63,8 +63,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
         break
 }
 
@@ -102,7 +100,7 @@ def rows567 = ([2, 3] + (5..11) + (17..20) + [22, 24] + (28..30) + [48, 49, 51, 
 def rows8 = ((2..52) + (55..155))
 
 @Field
-def chRows = ['R118', 'R119', 'R140', 'R141']
+def chRows = ['R118', 'R119', 'R140', 'R141', 'R141_1']
 
 @Field
 def formatY = new SimpleDateFormat('yyyy')
@@ -242,10 +240,11 @@ void calc() {
             row.difference = (row.opuSumTotal ?: 0) - (row.rnu4Field5Accepted ?: 0)
         }
 
-        if (row.getAlias() in ['R140', 'R141']) {
+        if (row.getAlias() in ['R140', 'R141', 'R141_1']) {
             row.difference = (row.opuSumTotal ?: 0) -
                     ((getDataRow(dataRows, 'R140').rnu4Field5Accepted ?: 0) +
-                            (getDataRow(dataRows, 'R141').rnu4Field5Accepted ?: 0))
+                            (getDataRow(dataRows, 'R141').rnu4Field5Accepted ?: 0) +
+                            ((dataRows.find { 'R141_1'.equals(it.getAlias()) }?.rnu4Field5Accepted) ?: 0))
         }
     }
 
@@ -345,10 +344,12 @@ def consolidationBank(def dataRows) {
                 if (row.getAlias() == null || row.getAlias().contains('total')) {
                     continue
                 }
-                def rowResult = getDataRow(dataRows, row.getAlias())
-                for (alias in ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']) {
-                    if (row.getCell(alias).getValue() != null) {
-                        rowResult.getCell(alias).setValue(summ(rowResult.getCell(alias), row.getCell(alias)), null)
+                def rowResult = dataRows.find{ row.getAlias() == it.getAlias() }
+                if (rowResult != null) {
+                    for (alias in ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']) {
+                        if (row.getCell(alias).getValue() != null) {
+                            rowResult.getCell(alias).setValue(summ(rowResult.getCell(alias), row.getCell(alias)), null)
+                        }
                     }
                 }
             }
@@ -393,10 +394,15 @@ def consolidationSummary(def dataRows) {
             //«графа 8» +=«графа 8» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
             row.rnu4Field5Accepted = getDataRow(dataRowsOld, "R$rowNum").rnu4Field5Accepted
         }
+        def row = dataRows.find { 'R141_1'.equals(it.getAlias()) }
+        def rowPrev = dataRowsOld.find { 'R141_1'.equals(it.getAlias()) }
+        if (row != null) {
+            row.rnu4Field5Accepted = rowPrev?.rnu4Field5Accepted ?: 0
+        }
     }
 
     // Прошел по строкам и получил список кну
-    def knuList = ((2..52) + (55..155)).collect {
+    def knuList = ((2..52) + (55..155)).collect {// 141_1 пропускаем для совместимости с предыдущими формами
         def row = getDataRow(dataRows, 'R' + it)
         return row.incomeTypeId
     }
@@ -461,6 +467,20 @@ def consolidationSummary(def dataRows) {
 
                         def recordId = getRecordId(28, 'CODE', row.incomeTypeId, getReportPeriodEndDate())
 
+                        def sum8 = 0
+                        dataChild.getAll().each { rowRNU4 ->
+                            if (rowRNU4.getAlias() == null) {
+                                if (row.incomeTypeId != null && row.accountNo != null && recordId == rowRNU4.balance && isEqualNum(row.accountNo, rowRNU4.balance)) {
+                                    //«графа 8» =  сумма значений по «графе 5» (столбец «Сумма дохода за отчётный квартал») всех форм источников вида «(РНУ-4)
+                                    sum8 += rowRNU4.sum
+                                }
+                            }
+                        }
+                        row.rnu4Field5Accepted += sum8
+                    }
+                    def row = dataRows.find { 'R141_1'.equals(it.getAlias()) }
+                    if (row != null) {
+                        def recordId = getRecordId(28, 'CODE', row.incomeTypeId, getReportPeriodEndDate())
                         def sum8 = 0
                         dataChild.getAll().each { rowRNU4 ->
                             if (rowRNU4.getAlias() == null) {
@@ -555,7 +575,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-    def int maxRow = 156
+    def int maxRow = 157
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1
@@ -579,7 +599,18 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        def curRow = getDataRow(rows, "R" + rowIndex)
+        def alias
+        if (rowIndex < 142){
+            alias = "R" + rowIndex
+        } else if (rowIndex == 142) {
+            alias = "R141_1"
+        } else {
+            alias = "R" + (rowIndex - 1)
+        }
+        def curRow = rows.find{ it.getAlias() == alias}
+        if (curRow == null) {
+            continue
+        }
         curRow.setImportIndex(xlsIndexRow)
 
         //очищаем столбцы

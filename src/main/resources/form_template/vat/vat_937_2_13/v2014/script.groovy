@@ -397,7 +397,7 @@ void addTransportData(def xml) {
         def v1 = totalSum
         def v2 = sum
         if ((v1 == null && v2 != null) || v1 != null && v1 != v2) {
-            logger.error(TRANSPORT_FILE_SUM_ERROR, 3 + colOffset, rnuIndexRow)
+            logger.warn(TRANSPORT_FILE_SUM_ERROR, 3 + colOffset, rnuIndexRow)
         }
     }
 
