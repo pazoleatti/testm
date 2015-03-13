@@ -66,6 +66,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        calc()
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -181,8 +182,11 @@ void consolidation() {
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
                 sourceHelper.getAll().each { sourceRow ->
-                    def newRow = formNewRow(sourceRow)
-                    dataRows.add(newRow)
+                    // «Графа 17» = «RUS» и «Графа 16» = 1 и «Графа 22» = «0» или «9»
+                    if ('RUS'.equals(sourceRow.status) && sourceRow.type == 1 && (sourceRow.rate == 0 || sourceRow.rate == 9)) {
+                        def newRow = formNewRow(sourceRow)
+                        dataRows.add(newRow)
+                    }
                 }
             }
         }
@@ -196,7 +200,6 @@ def formNewRow(def row) {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    // TODO заготовка
     //«Графа 2» = «Графа 2» первичной формы
     newRow.emitent = row.emitentName
     //«Графа 3» = «Графа 7» первичной формы
@@ -230,21 +233,11 @@ def formNewRow(def row) {
     //«Графа 17» = «Графа 42» первичной формы
     newRow.phone = row.phone
     //«Графа 18» = «Графа 12» первичной формы
-    newRow.sumDividend = row.allSum
+    newRow.sumDividend = row.dividends
     //«Графа 19» = «Графа 25» первичной формы
     newRow.dividendDate = row.date
-    //«Графа 20» = «Графа 26» первичной формы
-    newRow.dividendNum = row.number
-    //«Графа 21» = «Графа 24» первичной формы
-    newRow.dividendSum = row.sum
-    //«Графа 22» = «Графа 28» первичной формы
-    newRow.taxDate = row.withheldDate
-    //«Графа 23» = «Графа 29» первичной формы
-    newRow.taxNum = row.withheldNumber
     //«Графа 24» = «Графа 27» первичной формы
     newRow.sumTax = row.withheldSum
-    //«Графа 25» = «Графа 9» первичной формы
-    newRow.reportYear = row.year
 
     return newRow
 }
