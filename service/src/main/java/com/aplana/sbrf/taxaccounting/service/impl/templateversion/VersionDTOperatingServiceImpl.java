@@ -48,6 +48,8 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     private SourceService sourceService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private FormTypeService formTypeService;
 
     private Calendar calendar = Calendar.getInstance();
 
@@ -167,7 +169,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
             logger.error(
                     String.format(MSG_HAVE_SOURCE,
                             first.getKind().getName(),
-                            declarationTypeService.get(first.getFormTypeId()).getName(),
+                            formTypeService.get(first.getFormTypeId()).getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
                             sdf.format(pair.getSecond())
                     )
