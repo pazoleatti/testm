@@ -279,18 +279,18 @@ def formNewRow(def row, def rowMap, def periodStartDate, def periodEndDate, def 
     newRow.dividendRussianOrgStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
     // «Графа 17» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «2»
     newRow.dividendPersonRussia = rowList.sum{ (it.status == 'RUS' && it.type == 2 && it.dividends != null) ? it.dividends : 0 }
-    // TODO «Графа 18» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = ???
-    newRow.dividendMembersNotRussianTax = 0
+    // «Графа 18» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 4
+    newRow.dividendMembersNotRussianTax = rowList.sum{ (it.status == '4' && it.dividends != null) ? it.dividends : 0 }
     // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 19» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
     newRow.dividendAgentAll = (row.emitentName == sbString && row.emitentInn == graph3String && row.all != null) ? row.all : 0
     // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 20» = («Графа 4» первичной формы – «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 20» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
     newRow.dividendAgentWithStavka0 = (row.emitentName == sbString && row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : (row.distributionSum ?: 0)
     // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 21» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 21» = («Графа 12» первичной формы - «Графа 6» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
     newRow.dividendSumForTaxAll = (row.emitentName == sbString && row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : ((row.allSum ?: 0) - (row.distributionSum ?: 0))
-    // Если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9», то «Графа 22» = («Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 21»)
-    newRow.dividendSumForTaxStavka9 = (row.status == 'RUS' && row.type == 1 && row.rate == 9 && row.allSum) ? ((row.dividends ?: 0) / row.allSum * (row.series ?: 0)) : 0
-    // Если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 23» = («Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 21»)
-    newRow.dividendSumForTaxStavka0 = (row.status == 'RUS' && row.type == 1 && row.rate == 0 && row.allSum) ? ((row.dividends ?: 0) / row.allSum * (row.series ?: 0)) : 0
+    // Если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9», то «Графа 22» = («Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6»)
+    newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 9 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
+    // Если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 23» = («Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6»)
+    newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
     // «Графа 24» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
     newRow.taxSum = rowList.sum{ it.withheldSum ?: 0 }
     // «Графа 25» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28 » первичной формы принадлежит текущему отчетному периоду
