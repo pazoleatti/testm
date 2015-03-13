@@ -339,7 +339,7 @@ def getSources() {
             sourceFormDataList.add(formData)
         }
     }
-    sourceFormDataList.sort { FormData formData -> formData.departmentId }
+    sourceFormDataList.sort { FormData formData -> getRefBookValue(30, formData.departmentId)?.NAME?.value }
     return sourceFormDataList
 }
 
