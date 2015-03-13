@@ -18,80 +18,79 @@ import groovy.transform.Field
  */
 
 // графа 1  - refNum
-// графа 2  - date
-// графа 3  - innRF
-// графа 4  - inn
-// графа 5  - surname
-// графа 6  - name
-// графа 7  - patronymic
-// графа 8  - status
-// графа 9  - birthday
-// графа 10 - citizenship       - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
-// графа 11 - code              - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
-// графа 12 - series
-// графа 13 - postcode
-// графа 14 - region            - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
-// графа 15 - district
-// графа 16 - city
-// графа 17 - locality
-// графа 18 - street
-// графа 19 - house
-// графа 20 - housing
-// графа 21 - apartment
-// графа 22 - country           - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
-// графа 23 - address
-// графа 24 - taxRate
-// графа 25 - income
-// графа 26 - deduction
-// графа 27 - taxBase
-// графа 28 - calculated
-// графа 29 - withheld
-// графа 30 - listed
-// графа 31 - withheldAgent
-// графа 32 - nonWithheldAgent
+// графа 2  - innRF
+// графа 3  - inn
+// графа 4  - surname
+// графа 5  - name
+// графа 6  - patronymic
+// графа 7  - status
+// графа 8  - birthday
+// графа 9  - citizenship       - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
+// графа 10 - code              - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
+// графа 11 - series
+// графа 12 - postcode
+// графа 13 - region            - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
+// графа 14 - district
+// графа 15 - city
+// графа 16 - locality
+// графа 17 - street
+// графа 18 - house
+// графа 19 - housing
+// графа 20 - apartment
+// графа 21 - country           - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
+// графа 22 - address
+// графа 23 - taxRate
+// графа 24 - income
+// графа 25 - deduction
+// графа 26 - taxBase
+// графа 27 - calculated
+// графа 28 - withheld
+// графа 29 - listed
+// графа 30 - withheldAgent
+// графа 31 - nonWithheldAgent
 
-// графа 33 - col_040_1         - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
-// графа 34 - col_041_1
-// графа 35 - col_042_1_1       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 36 - col_043_1_1
-// графа 37 - col_042_1_2       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 38 - col_043_1_2
-// графа 39 - col_042_1_3       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 40 - col_043_1_3
-// графа 41 - col_042_1_4       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 42 - col_043_1_4
-// графа 43 - col_042_1_5       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 44 - col_043_1_5
+// графа 32 - col_040_1         - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
+// графа 33 - col_041_1
+// графа 34 - col_042_1_1       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 35 - col_043_1_1
+// графа 36 - col_042_1_2       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 37 - col_043_1_2
+// графа 38 - col_042_1_3       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 39 - col_043_1_3
+// графа 40 - col_042_1_4       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 41 - col_043_1_4
+// графа 42 - col_042_1_5       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 43 - col_043_1_5
 
-// графа 45 - col_040_2         - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
-// графа 46 - col_041_2
-// графа 47 - col_042_2_1       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 48 - col_043_2_1
-// графа 49 - col_042_2_2       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 50 - col_043_2_2
-// графа 51 - col_042_2_3       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 52 - col_043_2_3
-// графа 53 - col_042_2_4       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 54 - col_043_2_4
-// графа 55 - col_042_2_5       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 56 - col_043_2_5
+// графа 44 - col_040_2         - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
+// графа 45 - col_041_2
+// графа 46 - col_042_2_1       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 47 - col_043_2_1
+// графа 48 - col_042_2_2       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 49 - col_043_2_2
+// графа 50 - col_042_2_3       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 51 - col_043_2_3
+// графа 52 - col_042_2_4       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 53 - col_043_2_4
+// графа 54 - col_042_2_5       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 55 - col_043_2_5
 
-// графа 57 - col_040_3         - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
-// графа 58 - col_041_3
-// графа 59 - col_042_3_1       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 60 - col_043_3_1
-// графа 61 - col_042_3_2       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 62 - col_043_3_2
-// графа 63 - col_042_3_3       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 64 - col_043_3_3
-// графа 65 - col_042_3_4       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 66 - col_043_3_4
-// графа 67 - col_042_3_5       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 68 - col_043_3_5
-// графа 69 - col_051_3_1       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 70 - col_052_3_1
-// графа 71 - col_051_3_2       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
-// графа 72 - col_052_3_2
+// графа 56 - col_040_3         - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
+// графа 57 - col_041_3
+// графа 58 - col_042_3_1       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 59 - col_043_3_1
+// графа 60 - col_042_3_2       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 61 - col_043_3_2
+// графа 62 - col_042_3_3       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 63 - col_043_3_3
+// графа 64 - col_042_3_4       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 65 - col_043_3_4
+// графа 66 - col_042_3_5       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 67 - col_043_3_5
+// графа 68 - col_051_3_1       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 69 - col_052_3_1
+// графа 70 - col_051_3_2       - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+// графа 71 - col_052_3_2
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -143,19 +142,19 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['refNum', 'date', 'innRF', 'inn', 'surname', 'name', 'patronymic', 'status', 'birthday', 'citizenship', 'code', 'series', 'postcode', 'region', 'district', 'city', 'locality', 'street', 'house', 'housing', 'apartment','country', 'address', 'taxRate', 'income', 'deduction', 'taxBase', 'calculated', 'withheld', 'listed', 'withheldAgent', 'nonWithheldAgent', 'col_040_1', 'col_041_1', 'col_042_1_1', 'col_043_1_1', 'col_042_1_2','col_043_1_2', 'col_042_1_3', 'col_043_1_3', 'col_042_1_4', 'col_043_1_4', 'col_042_1_5', 'col_043_1_5', 'col_040_2', 'col_041_2', 'col_042_2_1', 'col_043_2_1', 'col_042_2_2', 'col_043_2_2', 'col_042_2_3','col_043_2_3', 'col_042_2_4', 'col_043_2_4', 'col_042_2_5', 'col_043_2_5', 'col_040_3', 'col_041_3', 'col_042_3_1', 'col_043_3_1', 'col_042_3_2', 'col_043_3_2', 'col_042_3_3', 'col_043_3_3', 'col_042_3_4','col_043_3_4', 'col_042_3_5', 'col_043_3_5', 'col_051_3_1', 'col_052_3_1', 'col_051_3_2', 'col_052_3_2']
+def allColumns = ['refNum', 'innRF', 'inn', 'surname', 'name', 'patronymic', 'status', 'birthday', 'citizenship', 'code', 'series', 'postcode', 'region', 'district', 'city', 'locality', 'street', 'house', 'housing', 'apartment','country', 'address', 'taxRate', 'income', 'deduction', 'taxBase', 'calculated', 'withheld', 'listed', 'withheldAgent', 'nonWithheldAgent', 'col_040_1', 'col_041_1', 'col_042_1_1', 'col_043_1_1', 'col_042_1_2','col_043_1_2', 'col_042_1_3', 'col_043_1_3', 'col_042_1_4', 'col_043_1_4', 'col_042_1_5', 'col_043_1_5', 'col_040_2', 'col_041_2', 'col_042_2_1', 'col_043_2_1', 'col_042_2_2', 'col_043_2_2', 'col_042_2_3','col_043_2_3', 'col_042_2_4', 'col_043_2_4', 'col_042_2_5', 'col_043_2_5', 'col_040_3', 'col_041_3', 'col_042_3_1', 'col_043_3_1', 'col_042_3_2', 'col_043_3_2', 'col_042_3_3', 'col_043_3_3', 'col_042_3_4','col_043_3_4', 'col_042_3_5', 'col_043_3_5', 'col_051_3_1', 'col_052_3_1', 'col_051_3_2', 'col_052_3_2']
 
-// Автозаполняемые атрибуты (графа 1, 25..27)
+// Автозаполняемые атрибуты (графа 1, 24..26)
 @Field
 def autoFillColumns = ['refNum', 'income', 'deduction', 'taxBase']
 
-// Редактируемые атрибуты (графа 1..24, 28..72)
+// Редактируемые атрибуты (графа 1..23, 27..71)
 @Field
 def editableColumns = allColumns - autoFillColumns
 
-// Проверяемые на пустые значения атрибуты (графа 1, 2, 5, 6, 8, 24, 25, 27, 28)
+// Проверяемые на пустые значения атрибуты (графа 1, 4, 5, 7, 23, 24, 26, 27)
 @Field
-def nonEmptyColumns = [/*'refNum',*/ 'date', 'surname', 'name', 'status', 'taxRate', 'income', 'taxBase', 'calculated']
+def nonEmptyColumns = [/*'refNum',*/ 'surname', 'name', 'status', 'taxRate', 'income', 'taxBase', 'calculated']
 
 @Field
 def startDate = null
@@ -203,7 +202,7 @@ void logicCheck() {
         return
     }
 
-    // адрес (графа 13, 15..21)
+    // адрес (графа 12, 14..20)
     def address = ['postcode', 'district', 'city', 'locality', 'street', 'house', 'housing', 'apartment']
 
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
@@ -236,7 +235,7 @@ void logicCheck() {
             logger.error(errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
 
-        // 14-21. Проверка заполнения полей 13, 15, 16, 17, 18, 19, 20, 21
+        // 14-21. Проверка заполнения полей 12, 14..20
         if (row.region != null) {
             checkNonEmptyColumns(row, row.getIndex(), address, logger, true)
         }
@@ -275,10 +274,10 @@ void logicCheck() {
             logger.error(String.format(errorMsg1, value))
         }
 
-        // 27. Арифметические проверки расчета граф 25, 26, 27
-        needValue['income'] = calc25(row)
-        needValue['deduction'] = calc26(row)
-        needValue['taxBase'] = calc27(row)
+        // 27. Арифметические проверки расчета граф 24, 25, 26
+        needValue['income'] = calc24(row)
+        needValue['deduction'] = calc25(row)
+        needValue['taxBase'] = calc26(row)
         def arithmeticCheckAlias = needValue.keySet().asList()
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
     }
@@ -292,26 +291,26 @@ void calc() {
         return
     }
 
-    def forColumn26 = getSumString([36, 38, 40, 42, 44, 48, 50, 52, 54, 56, 60, 62, 64, 66, 68, 70, 72])
+    def forColumn25 = getSumString([35, 37, 39, 41, 43, 47, 49, 51, 53, 55, 59, 61, 63, 65, 67, 69, 71])
 
     for (DataRow<Cell> row in dataRows) {
         // проверки, выполняемые до расчёта
         def int index = row.getIndex()
 
+        // графа 24
+        def BigDecimal value24 = calc24(row)
+        checkOverflow(value24, row, 'income', index, 15, '«Графа 33» + «Графа 45» + «Графа 57»')
+        row.income = value24
+
         // графа 25
         def BigDecimal value25 = calc25(row)
-        checkOverflow(value25, row, 'income', index, 15, '«Графа 34» + «Графа 46» + «Графа 58»')
-        row.income = value25
+        checkOverflow(value25, row, 'deduction', index, 15, forColumn25)
+        row.deduction = value25
 
         // графа 26
         def BigDecimal value26 = calc26(row)
-        checkOverflow(value26, row, 'deduction', index, 15, forColumn26)
-        row.deduction = value26
-
-        // графа 27
-        def BigDecimal value27 = calc27(row)
-        checkOverflow(value27, row, 'taxBase', index, 15, '«Графа 25» - «Графа 26»')
-        row.taxBase = value27
+        checkOverflow(value26, row, 'taxBase', index, 15, '«Графа 24» - «Графа 25»')
+        row.taxBase = value26
     }
 
     dataRowHelper.update(dataRows)
@@ -333,29 +332,29 @@ def getSumString(def list) {
     return tmp.join(' + ')
 }
 
-def BigDecimal calc25(def row) {
+def BigDecimal calc24(def row) {
     return getSum(row, ['col_041_1', 'col_041_2', 'col_041_3'])
 }
 
-def BigDecimal calc26(def row) {
+def BigDecimal calc25(def row) {
     return getSum1(row) + getSum2(row) + getSum3(row)
 }
 
-def BigDecimal calc27(def row) {
-    return roundValue((row.income ?: 0) + (row.deduction ?: 0))
+def BigDecimal calc26(def row) {
+    return roundValue((row.income ?: 0) - (row.deduction ?: 0))
 }
 
-/** Получить сумму «Графа 36» + «Графа 38» + «Графа 40» + «Графа 42» + «Графа 44». */
+/** Получить сумму «Графа 35» + «Графа 37» + «Графа 39» + «Графа 41» + «Графа 43». */
 def BigDecimal getSum1(def row) {
     return getSum(row, ['col_043_1_1', 'col_043_1_2', 'col_043_1_3', 'col_043_1_4', 'col_043_1_5'])
 }
 
-/** Получить сумму «Графа 48» + «Графа 50» + « Графа 52» + «Графа 54» + «Графа 56». */
+/** Получить сумму «Графа 47» + «Графа 49» + « Графа 51» + «Графа 53» + «Графа 55». */
 def BigDecimal getSum2(def row) {
     return getSum(row, ['col_043_2_1', 'col_043_2_2', 'col_043_2_3', 'col_043_2_4', 'col_043_2_5'])
 }
 
-/** Получить сумму «Графа 60» + «Графа 62» + «Графа 64» + «Графа 66» + «Графа 68» + «Графа 70» + «Графа 72». */
+/** Получить сумму «Графа 59» + «Графа 61» + «Графа 63» + «Графа 65» + «Графа 67» + «Графа 69» + «Графа 71». */
 def BigDecimal getSum3(def row) {
     return getSum(row, ['col_043_3_1', 'col_043_3_2', 'col_043_3_3', 'col_043_3_4', 'col_043_3_5', 'col_052_3_1', 'col_052_3_2'])
 }
@@ -376,7 +375,7 @@ void importData() {
     def tmpRow = formData.createDataRow()
     def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'refNum'), null)
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 72, 1)
+    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 71, 1)
 
     def headerMapping = [:]
     def index = 0
@@ -427,285 +426,281 @@ void addData(def xml, int headRowCount) {
 
         // Графа 2
         xmlIndexCol++
-        newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
+        newRow.innRF = row.cell[xmlIndexCol].text()
 
         // Графа 3
         xmlIndexCol++
-        newRow.innRF = row.cell[xmlIndexCol].text()
+        newRow.inn = row.cell[xmlIndexCol].text()
 
         // Графа 4
         xmlIndexCol++
-        newRow.inn = row.cell[xmlIndexCol].text()
+        newRow.surname = row.cell[xmlIndexCol].text()
 
         // Графа 5
         xmlIndexCol++
-        newRow.surname = row.cell[xmlIndexCol].text()
+        newRow.name = row.cell[xmlIndexCol].text()
 
         // Графа 6
         xmlIndexCol++
-        newRow.name = row.cell[xmlIndexCol].text()
+        newRow.patronymic = row.cell[xmlIndexCol].text()
 
         // Графа 7
         xmlIndexCol++
-        newRow.patronymic = row.cell[xmlIndexCol].text()
+        newRow.status = row.cell[xmlIndexCol].text()
 
         // Графа 8
         xmlIndexCol++
-        newRow.status = row.cell[xmlIndexCol].text()
-
-        // Графа 9
-        xmlIndexCol++
         newRow.birthday = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 10 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
+        // Графа 9 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
         xmlIndexCol++
         newRow.citizenship = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 11 - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
+        // Графа 10 - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
         xmlIndexCol++
         newRow.code = getRecordIdImport(360L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 12
+        // Графа 11
         xmlIndexCol++
         newRow.series = row.cell[xmlIndexCol].text()
 
-        // Графа 13
+        // Графа 12
         xmlIndexCol++
         newRow.postcode = row.cell[xmlIndexCol].text()
 
-        // Графа 14 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
+        // Графа 13 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
         xmlIndexCol++
         newRow.region = getRecordIdImport(4L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 15
+        // Графа 14
         xmlIndexCol++
         newRow.district = row.cell[xmlIndexCol].text()
 
-        // Графа 16
+        // Графа 15
         xmlIndexCol++
         newRow.city = row.cell[xmlIndexCol].text()
 
-        // Графа 17
+        // Графа 16
         xmlIndexCol++
         newRow.locality = row.cell[xmlIndexCol].text()
 
-        // Графа 18
+        // Графа 17
         xmlIndexCol++
         newRow.street = row.cell[xmlIndexCol].text()
 
-        // Графа 19
+        // Графа 18
         xmlIndexCol++
         newRow.house = row.cell[xmlIndexCol].text()
 
-        // Графа 20
+        // Графа 19
         xmlIndexCol++
         newRow.housing = row.cell[xmlIndexCol].text()
 
-        // Графа 21
+        // Графа 20
         xmlIndexCol++
         newRow.apartment = row.cell[xmlIndexCol].text()
 
-        // Графа 22 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
+        // Графа 21 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
         xmlIndexCol++
         newRow.country = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 23
+        // Графа 22
         xmlIndexCol++
         newRow.address = row.cell[xmlIndexCol].text()
 
-        // Графа 24
+        // Графа 23
         xmlIndexCol++
         newRow.taxRate = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 25
+        // Графа 24
         xmlIndexCol++
         // newRow.income = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 26
+        // Графа 25
         xmlIndexCol++
         // newRow.deduction = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 27
+        // Графа 26
         xmlIndexCol++
         // newRow.taxBase = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 28
+        // Графа 27
         xmlIndexCol++
         newRow.calculated = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 29
+        // Графа 28
         xmlIndexCol++
         newRow.withheld = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 30
+        // Графа 29
         xmlIndexCol++
         newRow.listed = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 31
+        // Графа 30
         xmlIndexCol++
         newRow.withheldAgent = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 32
+        // Графа 31
         xmlIndexCol++
         newRow.nonWithheldAgent = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 33 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
+        // Графа 32 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
         xmlIndexCol++
         newRow.col_040_1 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 34
+        // Графа 33
         xmlIndexCol++
         newRow.col_041_1 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 35 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 34 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_1_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 36
+        // Графа 35
         xmlIndexCol++
         newRow.col_043_1_1 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 37 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 36 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_1_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 38
+        // Графа 37
         xmlIndexCol++
         newRow.col_043_1_2 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 39 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 38 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_1_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 40
+        // Графа 39
         xmlIndexCol++
         newRow.col_043_1_3 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 41 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 40 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_1_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 42
+        // Графа 41
         xmlIndexCol++
         newRow.col_043_1_4 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 43 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 42 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_1_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 44
+        // Графа 43
         xmlIndexCol++
         newRow.col_043_1_5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 45 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
+        // Графа 44 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
         xmlIndexCol++
         newRow.col_040_2 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 46
+        // Графа 45
         xmlIndexCol++
         newRow.col_041_2 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 47 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 46 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_2_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 48
+        // Графа 47
         xmlIndexCol++
         newRow.col_043_2_1 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 49 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 48 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_2_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 50
+        // Графа 49
         xmlIndexCol++
         newRow.col_043_2_2 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 51 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 50 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_2_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 52
+        // Графа 51
         xmlIndexCol++
         newRow.col_043_2_3 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 53 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 52 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_2_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 54
+        // Графа 53
         xmlIndexCol++
         newRow.col_043_2_4 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 55 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 54 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_2_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 56
+        // Графа 55
         xmlIndexCol++
         newRow.col_043_2_5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 57 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
+        // Графа 56 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
         xmlIndexCol++
         newRow.col_040_3 = getRecordIdImport(370, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 58
+        // Графа 57
         xmlIndexCol++
         newRow.col_041_3 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 59 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 58 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_3_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 60
+        // Графа 59
         xmlIndexCol++
         newRow.col_043_3_1 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 61 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 60 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_3_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 62
+        // Графа 61
         xmlIndexCol++
         newRow.col_043_3_2 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 63 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 62 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_3_3 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 64
+        // Графа 63
         xmlIndexCol++
         newRow.col_043_3_3 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 65 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 64 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_3_4 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 66
+        // Графа 65
         xmlIndexCol++
         newRow.col_043_3_4 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 67 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 66 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_042_3_5 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 68
+        // Графа 67
         xmlIndexCol++
         newRow.col_043_3_5 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 69 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 68 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_051_3_1 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 71
+        // Графа 69
         xmlIndexCol++
         newRow.col_052_3_1 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // Графа 71 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
+        // Графа 70 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
         xmlIndexCol++
         newRow.col_051_3_2 = getRecordIdImport(350, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // Графа 72
+        // Графа 71
         xmlIndexCol++
         newRow.col_052_3_2 = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
@@ -751,9 +746,8 @@ void consolidation() {
     def source1FormTypeId = 418
     def source2FormTypeId = 419
 
-    // 2..32, 33..72
-    def consilidationColumns = allColumns - ['refNum', 'date']
-    def currentDate = new Date()
+    // 2..31, 32..71
+    def consilidationColumns = allColumns - 'refNum'
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
@@ -765,7 +759,6 @@ void consolidation() {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allCached
                 sourceDataRows.each { row ->
                     def newRow = getNewRow()
-                    newRow.date = currentDate
                     consilidationColumns.each { column ->
                         newRow[column] = row[column]
                     }
