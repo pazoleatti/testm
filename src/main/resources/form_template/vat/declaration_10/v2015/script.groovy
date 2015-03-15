@@ -160,14 +160,12 @@ void generateXML() {
             if (code001 != 1) {
                 ЖУчВыстСчФ() {
                     hasPage = false
-                    def isFirstSection = true
                     for (def row : sourceDataRows) {
                         if (row.getAlias() != null) {
-                            isFirstSection = (row.getAlias() == "part_1")
+                            if (row.getAlias() == "part_2") {
+                                break
+                            }
                             continue
-                        }
-                        if (!isFirstSection) {
-                            break
                         }
                         hasPage = true
                         def code005 = row.rowNumber
