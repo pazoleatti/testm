@@ -41,7 +41,7 @@ import groovy.transform.Field
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -139,13 +139,6 @@ def getRecordId(def ref_id, String alias, String value, Date date) {
         return recordCache[ref_id][filter]
     }
     return null
-}
-
-void checkCreation() {
-    if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error("Нельзя создавать форму с типом «${formData.kind?.name}»!")
-    }
-    formDataService.checkUnique(formData, logger)
 }
 
 void calc() {
