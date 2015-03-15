@@ -85,11 +85,11 @@ def recordCache = [:]
 @Field
 def editableColumns = ['emitent', 'decreeNumber', 'title', 'zipCode', 'subdivisionRF', 'area', 'city', 'region',
                        'street', 'homeNumber', 'corpNumber', 'apartment', 'surname', 'name', 'patronymic', 'phone',
-                       'sumDividend', 'dividendDate', 'dividendNum', 'dividendSum', 'taxDate', 'taxNum', 'sumTax', 'reportYear']
+                       'sumDividend', 'dividendDate', 'dividendNum', 'taxDate', 'taxNum', 'sumTax', 'reportYear']
 
-// Проверяемые на пустые значения атрибуты 1-16, 18-25
+// Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['rowNumber', 'emitent', 'decreeNumber', 'title', 'sumDividend', 'dividendDate', 'dividendSum', 'sumTax']
+def nonEmptyColumns = ['rowNumber', 'emitent', 'decreeNumber', 'title', 'subdivisionRF', 'surname', 'name', 'sumDividend', 'dividendDate', 'sumTax']
 
 @Field
 def sourceFormType = 419
@@ -148,6 +148,7 @@ void calc() {
         def number = 0
         for (def row in dataRows) {
             row.rowNumber = ++number
+            row.dividendSum = (row.sumDividend ?: 0) - (row.sumTax ?: 0)
         }
     }
     dataRowHelper.save(dataRows)
@@ -198,7 +199,7 @@ def formNewRow(def row) {
     //«Графа 3» = «Графа 7» первичной формы
     newRow.decreeNumber = row.decisionNumber
     //«Графа 4» = «Графа 13» первичной формы
-    newRow.decreeNumber = row.addresseeName
+    newRow.title = row.addresseeName
     //«Графа 5» = «Графа 30» первичной формы
     newRow.zipCode = row.postcode
     //«Графа 6» = «Графа 31» первичной формы
