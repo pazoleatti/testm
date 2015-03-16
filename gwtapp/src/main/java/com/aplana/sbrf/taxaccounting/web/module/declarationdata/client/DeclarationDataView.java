@@ -83,6 +83,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiField
     DateMaskBoxPicker dateBox;
+    @UiField
+    LinkButton sources;
 
     private Timer timerExcel, timerXML, timerPDF;
 
@@ -144,6 +146,11 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         pdfViewer.setVisible(false);
         noPdfPanel.setVisible(true);
         noPdfLabel.setText(text);
+    }
+
+    @Override
+    public void setSourceTitle(String title) {
+        sources.setText(title);
     }
 
     @Override
@@ -294,6 +301,10 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 			getUiHandlers().onInfoClicked();
 		}
 	}
+    @UiHandler("sources")
+    public void onSourcesClicked(ClickEvent event){
+        getUiHandlers().onOpenSourcesDialog();
+    }
 
     @Override
     public void updatePrintReportButtonName(ReportType reportType, boolean isLoad) {

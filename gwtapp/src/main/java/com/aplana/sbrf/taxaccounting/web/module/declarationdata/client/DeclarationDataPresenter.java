@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.TitleUpdateEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.client.DeclarationListNameTokens;
@@ -100,6 +101,8 @@ public class DeclarationDataPresenter
         void showState(boolean accepted);
 
         void showNoPdf(String text);
+
+        void setSourceTitle(String title);
     }
 
 	private final DispatchAsync dispatcher;
@@ -109,17 +112,20 @@ public class DeclarationDataPresenter
 	private long declarationId;
 	private String taxName;
     private TaxType taxType;
+    private final SourcesPresenter sourcesPresenter;
 
 	@Inject
 	public DeclarationDataPresenter(final EventBus eventBus, final MyView view,
 									final MyProxy proxy, DispatchAsync dispatcher,
 									PlaceManager placeManager, DialogPresenter dialogPresenter,
-									HistoryPresenter historyPresenter) {
+									HistoryPresenter historyPresenter,
+                                    SourcesPresenter sourcesPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.dispatcher = dispatcher;
 		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager) placeManager;
 		this.dialogPresenter = dialogPresenter;
+        this.sourcesPresenter = sourcesPresenter;
 		getView().setUiHandlers(this);
 	}
 
@@ -148,10 +154,13 @@ public class DeclarationDataPresenter
 								declarationId = id;
 								taxName = result.getTaxType().name();
                                 taxType = result.getTaxType();
+                                sourcesPresenter.setTaxType(taxType);
 								if (!taxType.equals(TaxType.DEAL)) {
                                     getView().setType("Декларация");
+                                    getView().setSourceTitle("Источники декларации");
                                 } else {
                                     getView().setType("Уведомление");
+                                    getView().setSourceTitle("Источники уведомления");
                                 }
                                 String periodStr = result.getReportPeriodYear() + ", " + result.getReportPeriod();
                                 if (result.getCorrectionDate() != null) {
@@ -240,7 +249,13 @@ public class DeclarationDataPresenter
                 }, this));
     }
 
-	@Override
+    @Override
+    public void onOpenSourcesDialog() {
+        sourcesPresenter.setDeclarationId(declarationId);
+        addToPopupSlot(sourcesPresenter);
+    }
+
+    @Override
 	public boolean useManualReveal() {
 		return true;
 	}
