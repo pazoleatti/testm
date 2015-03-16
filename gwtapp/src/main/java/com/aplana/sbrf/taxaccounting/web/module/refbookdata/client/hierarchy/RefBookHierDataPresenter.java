@@ -27,6 +27,7 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
@@ -59,6 +60,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
     EditFormPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
+    private PlaceManager placeManager;
 
     private final DispatchAsync dispatcher;
 
@@ -102,12 +104,13 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     }
 
     @Inject
-    public RefBookHierDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter,
+    public RefBookHierDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, PlaceManager placeManager,
                                     RefBookVersionPresenter versionPresenter, final MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
         this.editFormPresenter = editFormPresenter;
         this.versionPresenter = versionPresenter;
+        this.placeManager = placeManager;
         this.mode = FormMode.VIEW;
         getView().setUiHandlers(this);
     }
@@ -276,80 +279,92 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
-
         refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-        CheckRefBookAction checkAction = new CheckRefBookAction();
-        checkAction.setRefBookId(refBookDataId);
-        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
-                new AbstractCallback<CheckRefBookResult>() {
-                    @Override
-                    public void onSuccess(CheckRefBookResult result) {
-                        if (result.isAvailable()) {
-                            editFormPresenter.setVersionMode(false);
-                            editFormPresenter.setCurrentUniqueRecordId(null);
-                            editFormPresenter.setRecordId(null);
+
+        CheckHierAction checkHierAction = new CheckHierAction();
+        checkHierAction.setRefBookId(refBookDataId);
+        dispatcher.execute(checkHierAction, CallbackUtils.defaultCallback(new AbstractCallback<CheckHierResult>() {
+            @Override
+            public void onSuccess(CheckHierResult result) {
+                CheckRefBookAction checkAction = new CheckRefBookAction();
+                checkAction.setRefBookId(refBookDataId);
+                dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
+                        new AbstractCallback<CheckRefBookResult>() {
+                            @Override
+                            public void onSuccess(CheckRefBookResult result) {
+                                if (result.isAvailable()) {
+                                    editFormPresenter.setVersionMode(false);
+                                    editFormPresenter.setCurrentUniqueRecordId(null);
+                                    editFormPresenter.setRecordId(null);
 
 
-                            GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookDataId);
-                            dispatcher.execute(action, CallbackUtils.defaultCallback(
-                                    new AbstractCallback<GetRefBookAttributesResult>() {
-                                        @Override
-                                        public void onSuccess(GetRefBookAttributesResult result) {
-                                            Long attrId = null;
-                                            for (RefBookColumn refBookColumn : result.getColumns()) {
-                                                if(refBookColumn.getAlias().toLowerCase().equals("name")){
-                                                    attrId = refBookColumn.getId();
+                                    GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookDataId);
+                                    dispatcher.execute(action, CallbackUtils.defaultCallback(
+                                            new AbstractCallback<GetRefBookAttributesResult>() {
+                                                @Override
+                                                public void onSuccess(GetRefBookAttributesResult result) {
+                                                    Long attrId = null;
+                                                    for (RefBookColumn refBookColumn : result.getColumns()) {
+                                                        if (refBookColumn.getAlias().toLowerCase().equals("name")) {
+                                                            attrId = refBookColumn.getId();
+                                                        }
+                                                    }
+                                                    getView().setAttributeId(attrId);
+                                                    editFormPresenter.init(refBookDataId, result.getColumns());
+
+                                                    /** Очищаем поле поиска если перешли со страницы списка справочников */
+                                                    if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
+                                                        recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
+                                                        if (result.isReadOnly()) {
+                                                            mode = FormMode.READ;
+                                                            //updateMode();
+                                                        } else if (mode == null) {
+                                                            mode = FormMode.VIEW;
+                                                        }
+                                                        setMode(mode);
+                                                        checkRecord();
+                                                    } else {
+                                                        recordId = null;
+                                                        getView().clearFilterInputBox();
+                                                        if (result.isReadOnly()) {
+                                                            mode = FormMode.READ;
+                                                        } else {
+                                                            mode = FormMode.VIEW;
+                                                        }
+                                                        setMode(mode);
+                                                        getView().clearSelected();
+                                                        //getView().load();
+                                                        getView().loadAndSelect();
+                                                    }
+                                                    getProxy().manualReveal(RefBookHierDataPresenter.this);
+                                                    updateMode();
                                                 }
-                                            }
-                                            getView().setAttributeId(attrId);
-                                            editFormPresenter.init(refBookDataId, result.getColumns());
+                                            }, RefBookHierDataPresenter.this));
 
-                                            /** Очищаем поле поиска если перешли со страницы списка справочников */
-                                            if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
-                                                recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
-                                                if (result.isReadOnly()){
-                                                    mode = FormMode.READ;
-                                                    //updateMode();
-                                                } else if (mode == null) {
-                                                    mode = FormMode.VIEW;
+                                    dispatcher.execute(new GetNameAction(refBookDataId), CallbackUtils.defaultCallback(
+                                            new AbstractCallback<GetNameResult>() {
+                                                @Override
+                                                public void onSuccess(GetNameResult result) {
+                                                    getView().setRefBookNameDesc(result.getName());
                                                 }
-                                                setMode(mode);
-                                                checkRecord();
-                                            } else {
-                                                recordId = null;
-                                                getView().clearFilterInputBox();
-                                                if (result.isReadOnly()){
-                                                    mode = FormMode.READ;
-                                                } else {
-                                                    mode = FormMode.VIEW;
-                                                }
-                                                setMode(mode);
-                                                getView().clearSelected();
-                                                //getView().load();
-                                                getView().loadAndSelect();
-                                            }
-                                            getProxy().manualReveal(RefBookHierDataPresenter.this);
-                                            updateMode();
-                                        }
-                                    }, RefBookHierDataPresenter.this));
+                                            }, RefBookHierDataPresenter.this));
+                                    canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
+                                    getView().setVersionedFields(canVersion);
+                                    editFormPresenter.setCanVersion(canVersion);
+                                    versionPresenter.setHierarchy(true);
+                                } else {
+                                    getProxy().manualReveal(RefBookHierDataPresenter.this);
+                                    Dialog.errorMessage("Доступ к справочнику запрещен!");
+                                }
+                            }
+                        }, RefBookHierDataPresenter.this));
+            }
 
-                            dispatcher.execute(new GetNameAction(refBookDataId), CallbackUtils.defaultCallback(
-                                    new AbstractCallback<GetNameResult>() {
-                                        @Override
-                                        public void onSuccess(GetNameResult result) {
-                                            getView().setRefBookNameDesc(result.getName());
-                                        }
-                                    }, RefBookHierDataPresenter.this));
-                            canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
-                            getView().setVersionedFields(canVersion);
-                            editFormPresenter.setCanVersion(canVersion);
-                            versionPresenter.setHierarchy(true);
-                        } else {
-                            getProxy().manualReveal(RefBookHierDataPresenter.this);
-                            Dialog.errorMessage("Доступ к справочнику запрещен!");
-                        }
-                    }
-                }, this));
+            @Override
+            public void onFailure(Throwable caught) {
+                placeManager.unlock();
+            }
+        }, RefBookHierDataPresenter.this));
     }
 
     private void checkRecord() {

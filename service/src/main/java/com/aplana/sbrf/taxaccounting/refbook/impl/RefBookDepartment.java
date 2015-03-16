@@ -51,7 +51,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_TYPE_ATTRIBUTE = "TYPE";
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
-    private static final String DEPARTMENT_ACTIVE_NAME = "IS_ACTIVE";
 
     @Autowired
     RefBookDao refBookDao;
@@ -622,6 +621,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
                         String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null, depId);
                 refBookDepartmentDao.remove(depId);
+                logger.info("Подразделение удалено!");
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);
