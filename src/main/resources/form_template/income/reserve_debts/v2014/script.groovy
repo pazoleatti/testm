@@ -236,26 +236,16 @@ void calc() {
         }
     }
 
-    calcSubTotal(dataRows)
+    calcTotal(dataRows)
 
-    def totalARow = getDataRow(dataRows, 'totalA')
-    def totalBRow = getDataRow(dataRows, 'totalB')
-    def totalAllRow = getDataRow(dataRows, 'totalAll')
-
-    totalColumnsAll.each { alias ->
-        def tmp = (totalRow.getCell(alias).value ?: 0) +
-                (totalARow.getCell(alias).value ?: 0) +
-                (totalBRow.getCell(alias).value ?: 0)
-        totalAllRow.getCell(alias).setValue(tmp, null)
-    }
     dataRowHelper.save(dataRows)
 
     // Сортировка групп и строк
     sortFormDataRows()
 }
 
-/** Рассчитать итоги основного (первого) раздела и итоги разделов А и Б. */
-void calcSubTotal(def dataRows) {
+/** Рассчитать итоги основного (первого) раздела, итоги разделов А и Б и строки "всего". */
+void calcTotal(def dataRows) {
     def totalRow = getDataRow(dataRows, 'total')
     def totalARow = getDataRow(dataRows, 'totalA')
     def totalBRow = getDataRow(dataRows, 'totalB')
@@ -278,6 +268,16 @@ void calcSubTotal(def dataRows) {
     totalColumnsAB.each { alias ->
         totalARow.getCell(alias).setValue(getSum(dataRows, alias, aRow, totalARow), null)
         totalBRow.getCell(alias).setValue(getSum(dataRows, alias, bRow, totalBRow), null)
+    }
+
+    // расчет строки ВСЕГО
+    def totalAllRow = getDataRow(dataRows, 'totalAll')
+
+    totalColumnsAll.each { alias ->
+        def tmp = (totalRow.getCell(alias).value ?: 0) +
+                (totalARow.getCell(alias).value ?: 0) +
+                (totalBRow.getCell(alias).value ?: 0)
+        totalAllRow.getCell(alias).setValue(tmp, null)
     }
 }
 
@@ -830,6 +830,7 @@ def calc11(def row) {
     return roundValue(result, 2)
 }
 
+// для раздела А и Б отдельный метод потому что графа 12 и 13 для этих разделов необязательны и не должны влиять на расчеты.
 def calc11AB(def row) {
     if (row.reservePrev == null || row.useReserve == null) {
         return null
