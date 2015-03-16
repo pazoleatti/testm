@@ -785,7 +785,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return (filter == null || filter.trim().length() == 0) ? parentFilter : filter + " AND " + parentFilter;
     }
 
-    static boolean checkHierarchical(RefBook refBook) {
+    public static boolean checkHierarchical(RefBook refBook) {
         try {
             RefBookAttribute attr = refBook.getAttribute(RefBook.RECORD_PARENT_ID_ALIAS);
             return attr != null;
