@@ -8,28 +8,33 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Dmitriy Levykin
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("UploadTransportDataServiceTest.xml")
 public class UploadTransportDataServiceTest {
-    private static UploadTransportDataService uploadTransportDataService = new UploadTransportDataServiceImpl();
-    private static String FILE_NAME_1 = "Тестовый файл 1.ууу"; // Mock как справочник
+    private static String FILE_NAME_1 = "1290-39.2_______18_0000_00212014_1.rnu"; // Mock как справочник
     private static String FILE_NAME_2 = "Тестовый файл 2.zip"; // Архив
     private static String FILE_NAME_2_EXTRACT_1 = "____852-4______________147212014__.rnu"; // ТФ НФ
     private static String FILE_NAME_2_EXTRACT_2 = "Тестовый файл 2.txt"; // Mock как неподходящий файл
@@ -41,12 +46,28 @@ public class UploadTransportDataServiceTest {
 
     private static TemporaryFolder temporaryFolder;
 
-    @BeforeClass
-    public static void init() throws IOException {
+    @Autowired
+    ConfigurationDao configurationDao;
+    @Autowired
+    DepartmentService departmentService;
+    @Autowired
+    AuditService auditService;
+    @Autowired
+    LoadRefBookDataService loadRefBookDataService;
+    @Autowired
+    FormTypeService formTypeService;
+    @Autowired
+    PeriodService periodService;
+    @Autowired
+    DepartmentFormTypeDao departmentFormTypeDao;
+    @Autowired
+    UploadTransportDataService uploadTransportDataService;
+
+    @Before
+    public void init() throws IOException {
         temporaryFolder = new TemporaryFolder();
         temporaryFolder.create();
         folder = temporaryFolder.getRoot();
-        ConfigurationDao configurationDao = mock(ConfigurationDao.class);
         ConfigurationParamModel model = new ConfigurationParamModel();
         model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, TEST_DEPARTMENT_ID, asList("file://" + folder.getPath() + "/"));
         model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, null);
@@ -56,11 +77,7 @@ public class UploadTransportDataServiceTest {
 
         when(configurationDao.getAll()).thenReturn(model);
         when(configurationDao.getByDepartment(TEST_DEPARTMENT_ID)).thenReturn(model);
-        ReflectionTestUtils.setField(uploadTransportDataService, "configurationDao", configurationDao);
-        AuditService auditService = mock(AuditService.class);
-        ReflectionTestUtils.setField(uploadTransportDataService, "auditService", auditService);
 
-        LoadRefBookDataService loadRefBookDataService = mock(LoadRefBookDataService.class);
         when(loadRefBookDataService.isDiasoftFile(anyString())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -77,13 +94,11 @@ public class UploadTransportDataServiceTest {
                 return false;
             }
         });
-        ReflectionTestUtils.setField(uploadTransportDataService, "loadRefBookDataService", loadRefBookDataService);
 
         final Department formDepartment = new Department();
         formDepartment.setId(TEST_DEPARTMENT_ID);
         formDepartment.setName("TestDepartment");
 
-        DepartmentService departmentService = mock(DepartmentService.class);
         when(departmentService.getDepartment(anyInt())).thenAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -99,26 +114,19 @@ public class UploadTransportDataServiceTest {
                 .thenReturn(Arrays.asList(TEST_DEPARTMENT_ID));
         when(departmentService.getDepartmentBySbrfCode("147")).thenReturn(formDepartment);
         when(departmentService.getParentTB(TEST_DEPARTMENT_ID)).thenReturn(formDepartment);
-        ReflectionTestUtils.setField(uploadTransportDataService, "departmentService", departmentService);
 
         FormType formType852_4 = new FormType();
         formType852_4.setId(1);
         formType852_4.setTaxType(TaxType.INCOME);
         formType852_4.setName("Test form type 852-4");
-        FormTypeService formTypeService = mock(FormTypeService.class);
         when(formTypeService.getByCode("852-4")).thenReturn(formType852_4);
-        ReflectionTestUtils.setField(uploadTransportDataService, "formTypeService", formTypeService);
 
-        PeriodService periodService = mock(PeriodService.class);
         ReportPeriod reportPeriod21 = new ReportPeriod();
         reportPeriod21.setId(1);
         reportPeriod21.setName("Test period");
         when(periodService.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod21);
-        ReflectionTestUtils.setField(uploadTransportDataService, "periodService", periodService);
 
-        DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
         when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, 1, FormDataKind.PRIMARY)).thenReturn(true);
-        ReflectionTestUtils.setField(uploadTransportDataService, "departmentFormTypeDao", departmentFormTypeDao);
     }
 
     @AfterClass
@@ -129,6 +137,8 @@ public class UploadTransportDataServiceTest {
     // Не задан пользователь
     @Test
     public void uploadFile1Test() throws IOException {
+        when(loadRefBookDataService.isDiasoftFile(FILE_NAME_1)).thenReturn(true);
+
         Logger logger = new Logger();
         UploadResult uploadResult = uploadTransportDataService.uploadFile(null, FILE_NAME_1, getFileAsStream(FILE_NAME_1), logger);
         Assert.assertEquals(0, uploadResult.getSuccessCounter());

@@ -15,6 +15,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.util.List;
  * @author Dmitriy Levykin
  */
 @Service
+@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)//Поменял scope бина, из-за переменных formTypeId, formTypeName
 public class UploadTransportDataServiceImpl implements UploadTransportDataService {
 
 	private static final Log LOG = LogFactory.getLog(UploadTransportDataServiceImpl.class);
