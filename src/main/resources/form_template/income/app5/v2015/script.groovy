@@ -374,7 +374,7 @@ void importData() {
             (xml.row[0].cell[4]): getColumnName(tmpRow, 'divisionName'),
             (xml.row[0].cell[5]): getColumnName(tmpRow, 'kpp'),
             (xml.row[0].cell[6]): getColumnName(tmpRow, 'avepropertyPricerageCost'),
-            (xml.row[0].cell[7]): 'Среднесписочная численность работников (чел.)',
+            (xml.row[0].cell[7]): getColumnName(tmpRow, 'workersCount'),
             (xml.row[0].cell[8]): getColumnName(tmpRow, 'subjectTaxCredit'),
             (xml.row[0].cell[9]): 'Льготы по налогу в бюджет субъекта (руб.)',
             (xml.row[1].cell[9]): 'Уменьшение суммы налога (руб.)',
