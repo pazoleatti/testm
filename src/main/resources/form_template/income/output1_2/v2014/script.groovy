@@ -3,7 +3,6 @@ package form_template.income.output1_2.v2014
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -27,8 +26,8 @@ import groovy.transform.Field
  9		dividendSumRaspredPeriod	Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Всего
  10		dividendRussianTotal		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Всего
  11		dividendRussianStavka0		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Налоговая ставка 0%
- 12		dividendRussianStavka6		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Налоговая ставка 6%
- 13		dividendRussianStavka9		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Налоговая ставка 9%
+ 12		dividendRussianStavka6		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Налоговая ставка 9%
+ 13		dividendRussianStavka9		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. По иной ставке
  14		dividendRussianTaxFree		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Распределяемые в пользу акционеров (участников), не являющихся налогоплательщиками
  15		dividendRussianPersonal		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода - физическим лицам, являющимся налоговыми резидентами России
  16		dividendForgeinOrgAll		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – иностранным организациям и физическим лицам, не являющимся резидентами России. Организациям
@@ -52,9 +51,6 @@ import groovy.transform.Field
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        if (formData.kind != FormDataKind.ADDITIONAL) {
-            logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
-        }
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
@@ -100,35 +96,16 @@ def allColumns = ['taCategory', 'financialYear', 'taxPeriod', 'emitent', 'inn', 
                   'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
                   'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']
 
+// обязательные поля (графа 1..4, 6..31)
 @Field
-def nonEmptyColumns = ['taCategory', 'financialYear', 'taxPeriod', 'emitent', 'decreeNumber', 'dividendType',
-                       'totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
-                       'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
-                       'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
-                       'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
-                       'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
-                       'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']
+def nonEmptyColumns = allColumns - 'inn'
 
+// редактируемые поля (графа 1..31)
 @Field
 def editableColumns = allColumns
 
-@Field
-def arithmeticCheckAlias = ['dividendSumRaspredPeriod', 'dividendRussianTotal']
-
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    for (def row in dataRows) {
-        def value10 = calc10(row)
-        checkOverflow(value10, row, 'dividendRussianTotal', row.getIndex(), 15, '«Графа 10» + «Графа 15» + «Графа16» + «Графа 17» + «Графа 22»')
-        row.dividendRussianTotal = value10
-        def value9 = calc9(row)
-        checkOverflow(value9, row, 'dividendSumRaspredPeriod', row.getIndex(), 15, '«Графа 11» + «Графа 12» + «Графа13» + «Графа 14»')
-        row.dividendSumRaspredPeriod = value9
-    }
-
-    dataRowHelper.save(dataRows)
+    // расчетов нет, все поля редактируемые
     sortFormDataRows()
 }
 
@@ -142,24 +119,29 @@ void logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
+
         // 2. Проверка на заполнение «Графы 5»
         if ((row.taCategory == 2) != (row.inn != null && !row.inn.isEmpty())) {
             rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'inn')}» должна быть заполнена в случае если графа «${getColumnName(row, 'taCategory')}» равна «2»!")
         }
+
         // 3. Проверка допустимых значений «Графы 1»
         if (row.taCategory != 1 && row.taCategory != 2) {
-            rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'taCategory')}» заполнена неверно!")
+            errorMessage(row, 'taCategory', errorMsg)
         }
-        // 3. Проверка допустимых значений «Графы 3»
+
+        // 4. Проверка допустимых значений «Графы 3»
         if (!['13', '21', '31', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43',
                                  '44', '45', '46', '50'].contains(row.taxPeriod)) {
             errorMessage(row, 'taxPeriod', errorMsg)
         }
-        // 4. Проверка допустимых значений «Графы 7»
+
+        // 5. Проверка допустимых значений «Графы 7»
         if (!['1', '2'].contains(row.dividendType)) {
             errorMessage(row, 'dividendType', errorMsg)
         }
-        // 5. Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
+
+        // 6. Проверка значения «Графы 1». Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
         if (row.taCategory == 2) {
             ['dividendAgentAll', 'dividendAgentWithStavka0'].each {
                 if (row[it] != 0) {
@@ -167,43 +149,54 @@ void logicCheck() {
                 }
             }
         }
-        // 5. Если «Графа 26» < 0, то «Графа 27», «Графа 28», «Графа 29», «Графа 30», «Графа 31» равны значению «0»
-        if (row.taCategory == 2) {
+        // 7. Проверка значения «Графы 26»
+        if (row.dividendD1D2 < 0) {
+            // графа 27..31
             ['dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast'].each {
                 if (row[it] != 0) {
                     errorMessage(row, it, errorMsg)
                 }
             }
         }
-        def values = [:]
-        allColumns.each {
-            values[it] = row.getCell(it).getValue()
+
+        // 8. Проверка правильности расчета «Графы 9»
+        if (row.dividendSumRaspredPeriod != calc9(row)) {
+            warnMessage9or10(row, 'dividendSumRaspredPeriod', '«Графа 9» = «Графа 10» + «Графа 15» + «Графа 16» + «Графа 17» + «Графа 22»')
         }
-        values.dividendRussianTotal = calc10(row)
-        values.dividendSumRaspredPeriod = calc9(row)
-        checkCalc(row, arithmeticCheckAlias, values, logger, true)
+
+        // 9. Проверка правильности расчета «Графы 10»
+        if (row.dividendRussianTotal != calc10(row)) {
+            warnMessage9or10(row, 'dividendRussianTotal', '«Графа 10» = «Графа 11» + «Графа 12» + «Графа 13» + «Графа 14»')
+        }
     }
-
-
 }
 
 // «Графа 9» = «Графа 10» + «Графа 15» + «Графа16» + «Графа 17» + «Графа 22»
 def calc9( def row) {
-    if (row.dividendRussianTotal != null && row.dividendRussianPersonal != null &&
-            row.dividendForgeinOrgAll != null && row.dividendForgeinPersonalAll != null && row.dividendTaxUnknown != null) {
-        row.dividendRussianTotal + row.dividendRussianPersonal + row.dividendForgeinOrgAll + row.dividendForgeinPersonalAll + row.dividendTaxUnknown
+    def tmp = ['dividendRussianTotal', 'dividendRussianPersonal', 'dividendForgeinOrgAll',
+            'dividendForgeinPersonalAll', 'dividendTaxUnknown'].sum { alias ->
+        return (row[alias] ?: 0)
     }
+    return roundValue(tmp)
 }
 
 // «Графа 10» = «Графа 11» + «Графа 12» + «Графа13» + «Графа 14»
 def calc10( def row) {
-    if (row.dividendRussianStavka0 != null && row.dividendRussianStavka6 != null && row.dividendRussianStavka9 != null && row.dividendRussianTaxFree != null) {
-        row.dividendRussianStavka0 + row.dividendRussianStavka6 + row.dividendRussianStavka9 + row.dividendRussianTaxFree
+    def tmp = ['dividendRussianStavka0', 'dividendRussianStavka6', 'dividendRussianStavka9',
+            'dividendRussianTaxFree'].sum { alias ->
+        return (row[alias] ?: 0)
     }
+    return roundValue(tmp)
 }
 
 void errorMessage(def row, def alias, def errorMsg) {
     rowError(logger, row, errorMsg + "Графа «${getColumnName(row, alias)}» заполнена неверно!")
+}
+
+void warnMessage9or10(def row, def alias, def condition) {
+    def index = row.getIndex()
+    def name = getColumnName(row, alias)
+    logger.warn("Строка $index: Графа «$name» заполнена неверно! Не выполняется условие: $condition")
 }
 
 void importData() {
@@ -239,8 +232,8 @@ void importData() {
 
             (xml.row[2].cell[9]): 'всего',
             (xml.row[2].cell[10]): 'налоговая ставка 0%',
-            (xml.row[2].cell[11]): 'налоговая ставка 6%',
-            (xml.row[2].cell[12]): 'налоговая ставка 9%',
+            (xml.row[2].cell[11]): 'налоговая ставка 9%',
+            (xml.row[2].cell[12]): 'по иной ставке',
             (xml.row[2].cell[13]): 'распределяемые в пользу акционеров (участников), не являющихся налогоплательщиками',
             (xml.row[2].cell[15]): 'организациям',
             (xml.row[2].cell[16]): 'физическим лицам',
@@ -261,7 +254,6 @@ void importData() {
 }
 
 void addData(def xml, def headRowCount) {
-
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
@@ -451,4 +443,12 @@ boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowI
 
 static String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
+}
+
+def roundValue(def value, int precision = 0) {
+    if (value != null) {
+        return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return null
+    }
 }
