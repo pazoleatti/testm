@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.income.app2.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.income.app2.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
