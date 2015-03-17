@@ -168,7 +168,7 @@ void consolidation() {
     formSources.sort { departmentService.get(it.departmentId).name }
     for (departmentFormType in formSources) {
         def final child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
-        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == departmentFormType.formTypeId) {
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             def final childData = formDataService.getDataRowHelper(child)
             def final department = departmentService.get(child.departmentId)
             def headRow = getFixedRow(department.name, "head_${department.id}", false)
