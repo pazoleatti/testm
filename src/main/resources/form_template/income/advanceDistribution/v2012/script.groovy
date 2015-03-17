@@ -502,7 +502,7 @@ void logicalCheckBeforeCalc() {
     def departmentId = formData.getDepartmentId()
 
 // Проверка назначения и назначения в статусе "Принята" формы-источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
-    def sourceFormTypeId = 417
+    def sourceFormTypeId = 421
     def sourceFormType = formTypeService.get(sourceFormTypeId)
 
     def departmentFormTypes = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
@@ -511,6 +511,16 @@ void logicalCheckBeforeCalc() {
         // совпадает подразделение и тип формы
         it.departmentId == departmentId && it.formTypeId == sourceFormTypeId
     }
+    // если нет новой формы, ищем старую
+    if (departmentFormType == null) {
+        sourceFormTypeId = 417
+        sourceFormType = formTypeService.get(sourceFormTypeId)
+        departmentFormType = departmentFormTypes.find {
+            // совпадает подразделение и тип формы
+            it.departmentId == departmentId && it.formTypeId == sourceFormTypeId
+        }
+    }
+
     if (departmentFormType == null) {
         logger.error ("Не назначена источником налоговая форма «${sourceFormType.name}» в текущем периоде! Расчеты не могут быть выполнены.")
     } else {
@@ -1141,7 +1151,7 @@ void sortFormDataRows() {
 
 // Получить строки формы
 def getDataRows(def formId, def kind) {
-    //def formId = 417
+    //def formId = 417|421
     //def formDataKind = FormDataKind.SUMMARY
     def departmentId = formData.departmentId
     def reportPeriodId = formData.reportPeriodId

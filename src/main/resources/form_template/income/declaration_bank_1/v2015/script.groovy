@@ -98,7 +98,7 @@ void checkDepartmentParams(LogLevel logLevel) {
 
 // Проверка налоговой формы источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом» (данная форма-источник создана и находится в статусе «Принята»)
 private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
-    def sourceFormTypeId = 417
+    def sourceFormTypeId = 421
     def sourceFormType = formTypeService.get(sourceFormTypeId)
     def success = true
 
@@ -340,7 +340,7 @@ void generateXML() {
     def dataRowsRemains = getDataRows(formDataCollection, 309, FormDataKind.PRIMARY)
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
-    def dataRowsSum = getDataRows(formDataCollection, 417, FormDataKind.ADDITIONAL)
+    def dataRowsSum = getDataRows(formDataCollection, 421, FormDataKind.ADDITIONAL)
 
     // Выходная Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
     def dataRowsApp2 = getDataRows(formDataCollection, 415, FormDataKind.ADDITIONAL)

@@ -118,7 +118,7 @@ void checkDepartmentParams(LogLevel logLevel) {
 
 // Проверка налоговой формы источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом» (данная форма-источник создана и находится в статусе «Принята»)
 private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
-    def sourceFormTypeId = 417
+    def sourceFormTypeId = 421
     def sourceFormType = formTypeService.get(sourceFormTypeId)
     def success = true
 
@@ -126,6 +126,11 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
     def departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    if (departmentFormType == null) {
+        sourceFormTypeId = 417
+        sourceFormType = formTypeService.get(sourceFormTypeId)
+        departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
+    }
     if (departmentFormType == null) {
         if (loggerNeed) {
             logger.log(logLevel, "Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята» (налоговая форма не назначена источником декларации Банка/назначена источником, но не создана/назначена источником, создана, но не принята). Строка 240 Листа 02 декларации заполнена значением «0»!")
@@ -368,7 +373,10 @@ void generateXML() {
     def dataRowsRemains = getDataRows(formDataCollection, 309, FormDataKind.PRIMARY)
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
-    def dataRowsSum = getDataRows(formDataCollection, 417, FormDataKind.ADDITIONAL)
+    def dataRowsSum = getDataRows(formDataCollection, 421, FormDataKind.ADDITIONAL)
+    if (dataRowsSum == null) {
+        dataRowsSum = getDataRows(formDataCollection, 417, FormDataKind.ADDITIONAL)
+    }
 
     /*
      * Получение значении декларации за предыдущий период.

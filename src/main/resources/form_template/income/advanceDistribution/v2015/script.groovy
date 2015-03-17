@@ -209,7 +209,7 @@ void calc() {
     def departmentParamsDate = getReportPeriodEndDate() - 1
 
     // Получение строк формы "Сведения о суммах налога на прибыль, уплаченного Банком за рубежом"
-    def dataRowsSum = getDataRows(417, FormDataKind.ADDITIONAL)
+    def dataRowsSum = getDataRows(421, FormDataKind.ADDITIONAL)
 
     // Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде.
     def sumNal = 0
@@ -502,7 +502,7 @@ void logicalCheckBeforeCalc() {
     def departmentId = formData.getDepartmentId()
 
 // Проверка назначения и назначения в статусе "Принята" формы-источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
-    def sourceFormTypeId = 417
+    def sourceFormTypeId = 421
     def sourceFormType = formTypeService.get(sourceFormTypeId)
 
     def departmentFormTypes = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
@@ -1141,7 +1141,7 @@ void sortFormDataRows() {
 
 // Получить строки формы
 def getDataRows(def formId, def kind) {
-    //def formId = 417
+    //def formId = 421
     //def formDataKind = FormDataKind.SUMMARY
     def departmentId = formData.departmentId
     def reportPeriodId = formData.reportPeriodId
