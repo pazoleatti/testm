@@ -11,9 +11,6 @@ import groovy.transform.Field
  * formTemplateId=418
  *
  * Первичная форма.
- *
- * TODO:
- *      - не понятно какое должно быть значение "код формы" (пока задал app2)
  */
 
 // графа 1  - innRF

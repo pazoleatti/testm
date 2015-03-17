@@ -23,7 +23,7 @@
         <name>fix</name>
         <order>2</order>
         <width>0</width>
-        <maxLength>6</maxLength>
+        <maxLength>2000</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">

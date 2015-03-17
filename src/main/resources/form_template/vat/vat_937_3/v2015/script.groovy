@@ -2,6 +2,8 @@ package form_template.vat.vat_937_3.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
+
 import java.text.SimpleDateFormat
 import groovy.transform.Field
 
@@ -171,7 +173,12 @@ void logicCheck() {
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            isFirstSection = row.getAlias() == 'part_1'
+            if (row.getAlias() == 'part_1') {
+                isFirstSection = true
+            }
+            if (row.getAlias() == 'part_2') {
+                isFirstSection = false
+            }
             continue
         }
         def index = row.getIndex()
@@ -275,9 +282,24 @@ void logicCheck() {
             def formTypeName = getFormTypeName()
             def periodName = getReportPeriod().name
             def year = getReportPeriod().taxPeriod.year
-            logger.error("Строка $index: Графа «$name» заполнена неверно (в первичной налоговой форме «$formTypeName» " +
+            loggerError(row, "Строка $index: Графа «$name» заполнена неверно (в первичной налоговой форме «$formTypeName» " +
                     "текущего подразделения за $periodName $year изменено количество строк). " +
                     "Для обновления значения графы необходимо нажать на «Рассчитать».")
+        }
+    }
+
+    // 7. Проверка итоговых значений (графа 14..19)
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'part_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        for (def alias : totalSumColumns) {
+            def value = roundValue(lastRow.getCell(alias).value ?: 0)
+            def sum = roundValue(getSum(dataRows, alias, firstRow, lastRow))
+            if (sum != value) {
+                def index = lastRow.getIndex()
+                def name = getColumnName(lastRow, alias)
+                loggerError(lastRow, "Строка $index: Итоговые значения рассчитаны неверно в графе «$name»!")
+            }
         }
     }
 }
@@ -452,7 +474,7 @@ void addData(def xml, int headRowCount) {
         mapRows[sectionIndex].add(newRow)
     }
 
-    deleteNotFixedRows(dataRows)
+    deleteExtraRows(dataRows)
 
     // копирование данных по разделам
     sections.each { section ->
@@ -592,7 +614,7 @@ void addTransportData(def xml) {
         mapRows[sectionIndex].add(newRow)
     }
 
-    deleteNotFixedRows(dataRows)
+    deleteExtraRows(dataRows)
     dataRows.each { row ->
         if (row.getAlias()?.contains('total')) {
             totalSumColumns.each {
@@ -682,20 +704,22 @@ void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    for (def section : sections) {
-        def firstRow = getDataRow(dataRows, 'part_' + section)
-        def lastRow = getDataRow(dataRows, 'total_' + section)
-        def from = firstRow.getIndex()
-        def to = lastRow.getIndex() - 1
-        def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+    if (dataRows[1].getAlias() in [null, 'total_1']) {
+        for (def section : sections) {
+            def firstRow = getDataRow(dataRows, 'part_' + section)
+            def lastRow = getDataRow(dataRows, 'total_' + section)
+            def from = firstRow.getIndex()
+            def to = lastRow.getIndex() - 1
+            def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
 
-        // Массовое разыменовывание граф НФ
-        def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
-        refBookService.dataRowsDereference(logger, sectionRows, columnNameList)
+            // Массовое разыменовывание граф НФ
+            def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+            refBookService.dataRowsDereference(logger, sectionRows, columnNameList)
 
-        sortRowsSimple(sectionRows)
+            sortRowsSimple(sectionRows)
+        }
+        dataRowHelper.saveSort()
     }
-    dataRowHelper.saveSort()
 }
 
 def loggerError(def row, def msg) {
@@ -731,19 +755,22 @@ void consolidation() {
     def dataRows = dataRowHelper.allCached
 
     // удалить нефиксированные строки
-    deleteNotFixedRows(dataRows)
+    deleteExtraRows(dataRows)
 
     // собрать из источников строки и разместить соответствующим разделам
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
-            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+    def formSources = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate())
+    // сортируем по наименованию подразделения
+    formSources.sort { departmentService.get(it.departmentId).name }
+    formSources.each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
-
+            def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null)
+            if (child != null && child.state == WorkflowState.ACCEPTED) {
+                def childDataRows = formDataService.getDataRowHelper(child).allCached
+                def final department = departmentService.get(child.departmentId)
                 // копирование данных по разделам
                 sections.each { section ->
-                    copyRows(sourceDataRows, dataRows, 'part_' + section, 'total_' + section)
+                    copyRows(childDataRows, dataRows, 'part_' + section, 'total_' + section, department)
                 }
             }
         }
@@ -752,10 +779,10 @@ void consolidation() {
 }
 
 // Удалить нефиксированные строки
-void deleteNotFixedRows(def dataRows) {
+void deleteExtraRows(def dataRows) {
     def deleteRows = []
     dataRows.each { row ->
-        if (row.getAlias() == null) {
+        if (!(row.getAlias() in ['part_1', 'total_1', 'part_2', 'total_2'])) {
             deleteRows.add(row)
         }
     }
@@ -763,6 +790,18 @@ void deleteNotFixedRows(def dataRows) {
         dataRows.removeAll(deleteRows)
         updateIndexes(dataRows)
     }
+}
+
+/** Получить произвольную фиксированную строку со стилями. */
+def getFixedRow(String title, String alias) {
+    def total = formData.createDataRow()
+    total.setAlias(alias)
+    total.fix = title
+    total.getCell('fix').colSpan = 13
+    (allColumns + 'fix').each {
+        total.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return total
 }
 
 /**
@@ -773,16 +812,26 @@ void deleteNotFixedRows(def dataRows) {
  * @param fromAlias псевдоним строки с которой копировать строки (НЕ включительно)
  * @param toAlias псевдоним строки до которой копировать строки (НЕ включительно),
  *      в приемник строки вставляются перед строкой с этим псевдонимом
+ * @param department подразделение источника
  */
-void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias) {
+void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def toAlias, def department) {
     def from = getDataRow(sourceDataRows, fromAlias).getIndex()
     def to = getDataRow(sourceDataRows, toAlias).getIndex() - 1
     if (from >= to) {
         return
     }
     def copyRows = sourceDataRows.subList(from, to)
+
+    def headRow = getFixedRow(department.name, "head_${department.id}")
+    destinationDataRows.add(getDataRow(destinationDataRows, toAlias).getIndex() - 1, headRow)
+    updateIndexes(destinationDataRows)
+
     destinationDataRows.addAll(getDataRow(destinationDataRows, toAlias).getIndex() - 1, copyRows)
-    // поправить индексы, потому что они после вставки не пересчитываются
+    updateIndexes(destinationDataRows)
+
+    def subTotalRow = getFixedRow("Всего по ${department.name}", "sub_total_${department.id}")
+    calcTotalSum(copyRows, subTotalRow, totalSumColumns)
+    destinationDataRows.add(getDataRow(destinationDataRows, toAlias).getIndex() - 1, subTotalRow)
     updateIndexes(destinationDataRows)
 }
 
@@ -820,7 +869,7 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
     if (from > to) {
         return 0
     }
-    return summ(formData, dataRows, new ColumnRange(columnAlias, from, to))
+    return dataRows[from..to].findAll { it.getAlias() == null }.sum { it[columnAlias] ?: 0 } ?: 0
 }
 
 /** Рассчитать нумерацию строк. Для каждой части нф нумерация начинается с 1. */
@@ -830,7 +879,12 @@ void calc1(def dataRows) {
     def isFirstSection = null
     for (def row : dataRows) {
         if (row.getAlias() != null) {
-            isFirstSection = (row.getAlias() == 'part_1')
+            if (row.getAlias() == 'part_1') {
+                isFirstSection = true
+            }
+            if (row.getAlias() == 'part_2') {
+                isFirstSection = false
+            }
             continue
         }
 
@@ -848,11 +902,10 @@ def getPrevLastIndex(def isFirstPart) {
     }
     def lastRow
     def totalAlias = (isFirstPart ? 'total_1' : 'total_2')
-    if (isFirstPart) {
-        // находим строку итоги и по ней получаем последнюю строку части
-        def tmpRow = getDataRow(prevDataRows, totalAlias)
-        lastRow = prevDataRows.get(tmpRow.getIndex() - 2)
-    }
+    // находим строку итоги и по ней получаем последнюю строку части
+    def tmpRow = getDataRow(prevDataRows, totalAlias)
+    lastRow = prevDataRows.get(tmpRow.getIndex() - 2)
+
     return roundValue(lastRow.getAlias() == null ? lastRow.rowNumber : 0)
 }
 

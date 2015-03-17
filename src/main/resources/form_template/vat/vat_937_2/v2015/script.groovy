@@ -1,6 +1,7 @@
 package form_template.vat.vat_937_2.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -58,7 +59,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, logger, ['total'])
+        consolidation()
         calc()
         logicCheck()
         break
@@ -248,6 +249,48 @@ String getLastTextPart(String value, def pattern) {
     return parts?.length == 2 ? parts[1] : null
 }
 
+// Консолидация с группировкой по подразделениям
+void consolidation() {
+    def dataRows = []
+
+    // получить данные из источников
+    def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate())
+    // сортируем по наименованию подразделения
+    formSources.sort { departmentService.get(it.departmentId).name }
+    for (departmentFormType in formSources) {
+        def final child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == departmentFormType.formTypeId) {
+            def final childData = formDataService.getDataRowHelper(child)
+            def final department = departmentService.get(child.departmentId)
+            def headRow = getFixedRow(department.name, "head_${department.id}")
+            dataRows.add(headRow)
+            def final childDataRows = childData.all
+            dataRows.addAll(childDataRows.findAll { it.getAlias() == null })
+            def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}")
+            calcTotalSum(childDataRows, subTotalRow, totalSumColumns)
+            dataRows.add(subTotalRow)
+        }
+    }
+
+    def totalRow = getFixedRow('Всего','total')
+    dataRows.add(totalRow)
+    save(dataRows)
+    dataRows = null
+}
+
+/** Получить произвольную фиксированную строку со стилями. */
+def getFixedRow(String title, String alias) {
+    def total = formData.createDataRow()
+    total.setAlias(alias)
+    total.fix = title
+    total.getCell('fix').colSpan = 15
+    (allColumns + 'fix').each {
+        total.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return total
+}
+
 void importData() {
     def tmpRow = formData.createDataRow()
     def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNumber'), null)
@@ -425,7 +468,6 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
 
@@ -538,7 +580,7 @@ void addTransportData(def xml) {
 
         def row = xml.rowTotal[0]
 
-        def total = getTotalRow()
+        def total = getFixedRow('Всего','total')
 
         // Графа 13
         def xmlIndexCol = 13
@@ -601,18 +643,6 @@ def getNewRow() {
     return newRow
 }
 
-/** Получить пустую итоговую строку со стилями. */
-def getTotalRow() {
-    def total = formData.createDataRow()
-    total.setAlias('total')
-    total.fix = 'Всего'
-    total.getCell('fix').colSpan = 15
-    (allColumns + 'fix').each {
-        total.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    return total
-}
-
 // Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
@@ -627,12 +657,15 @@ void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def totalRow = getDataRow(dataRows, 'total')
-    dataRows.remove(totalRow)
-    sortRows(dataRows, sortColumns)
-    dataRows.add(totalRow)
+    // не производим сортировку в консолидированных формах
+    if (dataRows[0].getAlias() == null) {
+        def totalRow = getDataRow(dataRows, 'total')
+        dataRows.remove(totalRow)
+        sortRows(dataRows, sortColumns)
+        dataRows.add(totalRow)
 
-    dataRowHelper.saveSort()
+        dataRowHelper.saveSort()
+    }
 }
 
 def loggerError(def row, def msg) {
