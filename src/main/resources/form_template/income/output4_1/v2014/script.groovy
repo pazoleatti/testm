@@ -36,7 +36,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        logicCheck()
         break
 }
 
