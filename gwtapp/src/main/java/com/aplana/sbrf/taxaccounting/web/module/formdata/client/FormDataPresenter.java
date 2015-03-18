@@ -524,6 +524,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 LogShowEvent.fire(FormDataPresenter.this, false);
                 DeleteFormDataAction action = new DeleteFormDataAction();
                 action.setFormDataId(formData.getId());
+                action.setFormData(formData);
                 action.setManual(true);
                 dispatcher
                         .execute(
@@ -601,6 +602,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 LogShowEvent.fire(FormDataPresenter.this, false);
                 DeleteFormDataAction action = new DeleteFormDataAction();
                 action.setFormDataId(formData.getId());
+                action.setFormData(formData);
                 action.setManual(true);
                 dispatcher.execute(action, CallbackUtils
                         .defaultCallback(new AbstractCallback<DeleteFormDataResult>() {
