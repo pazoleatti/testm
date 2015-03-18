@@ -349,7 +349,7 @@ def BigDecimal calc24(def row) {
 }
 
 def BigDecimal calc25(def row) {
-    return roundValue((row.income ?: 0) + (row.deduction ?: 0))
+    return roundValue((row.income ?: 0) - (row.deduction ?: 0))
 }
 
 /** Получить сумму «Графа 34» + «Графа 36» + «Графа 38» + «Графа 40» + «Графа 42». */
