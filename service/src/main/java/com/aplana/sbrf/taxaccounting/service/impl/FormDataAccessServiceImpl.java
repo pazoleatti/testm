@@ -522,6 +522,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             result.add(WorkflowMove.PREPARED_TO_ACCEPTED);
                         }
                         break;
+                    case APPROVED:
+                        // !!!!!!    Такая ситуация по идее не возможна, но если некорректно манипулировать источникми-приемниками то может произойти  !!!!!
+                        // в этом случае отображаем "шаг назад" без условий чтобы вывести нф из тупика
+                        result.add(WorkflowMove.APPROVED_TO_PREPARED);
+                        break;
                     case ACCEPTED:
                         // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
                         if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
@@ -543,6 +548,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                                 || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
                             result.add(WorkflowMove.CREATED_TO_ACCEPTED);
                         }
+                        break;
+                    case APPROVED:
+                        // !!!!!!    Такая ситуация по идее не возможна, но если некорректно манипулировать источникми-приемниками то может произойти  !!!!!
+                        // в этом случае отображаем "шаг назад" без условий чтобы вывести нф из тупика
+                        result.add(WorkflowMove.APPROVED_TO_CREATED);
                         break;
                     case ACCEPTED:
                         // Понизить статус могут все контролеры, которые имеют доступ для чтения
