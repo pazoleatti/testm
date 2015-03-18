@@ -399,4 +399,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
             getUiHandlers().onApplyFilter();
         }
     }
+
+    @Override
+    public void clearFilter() {
+        kppPicker.setValue("");
+        taxOrganisationPicker.setValue("");
+    }
 }
