@@ -346,7 +346,7 @@ def BigDecimal calc23(def row) {
 
 def BigDecimal calc24(def row) {
     // графа 68, 70
-    def tmp = getSum(row, ['col_052_3_1', 'col_052_3_1'])
+    def tmp = getSum(row, ['col_052_3_1', 'col_052_3_2'])
     return getSum1(row) + getSum2(row) + getSum3(row) + tmp
 }
 
