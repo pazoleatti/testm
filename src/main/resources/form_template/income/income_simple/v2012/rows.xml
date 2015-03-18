@@ -2420,7 +2420,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R142">
+    <row alias="R141_1">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14015"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2437,7 +2437,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R143">
+    <row alias="R142">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14020"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="14" stringValue="Прочие внереализационные доходы"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2454,7 +2454,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R144">
+    <row alias="R143">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14030"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2471,7 +2471,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R145">
+    <row alias="R144">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14040"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2488,7 +2488,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R146">
+    <row alias="R145">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14050"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2505,7 +2505,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R147">
+    <row alias="R146">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14060"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2522,7 +2522,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R148">
+    <row alias="R147">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14070"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2539,7 +2539,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R149">
+    <row alias="R148">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14080"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2556,7 +2556,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R150">
+    <row alias="R149">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14090"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2573,7 +2573,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R151">
+    <row alias="R150">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14100"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2590,7 +2590,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R152">
+    <row alias="R151">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14110"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2607,7 +2607,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R153">
+    <row alias="R152">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14120"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2624,7 +2624,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R154">
+    <row alias="R153">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14130"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2641,7 +2641,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R155">
+    <row alias="R154">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14150"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2658,7 +2658,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R156">
+    <row alias="R155">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14160"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
@@ -2675,7 +2675,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R157">
+    <row alias="R156">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="40002" styleAlias="Контрольные суммы"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Контрольная сумма"
               styleAlias="Контрольные суммы"/>

@@ -108,8 +108,8 @@ def checkDeclarationBank() {
 
     if (bankDeclarationData.id != null) {
         def xmlString = declarationService.getXmlData(bankDeclarationData.id)
-        xmlString = xmlString?.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        if (!xmlString) {
+        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+        if (xmlString == null) {
             logger.error('Данные декларации Банка не заполнены.')
             return
         }
