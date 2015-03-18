@@ -499,28 +499,6 @@ void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def departmentParam
-    def departmentId = formData.getDepartmentId()
-
-// Проверка назначения и назначения в статусе "Принята" формы-источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
-    def sourceFormTypeId = 421
-    def sourceFormType = formTypeService.get(sourceFormTypeId)
-
-    def departmentFormTypes = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate())
-    def departmentFormType = departmentFormTypes.find {
-        // совпадает подразделение и тип формы
-        it.departmentId == departmentId && it.formTypeId == sourceFormTypeId
-    }
-    if (departmentFormType == null) {
-        logger.error ("Не назначена источником налоговая форма «${sourceFormType.name}» в текущем периоде! Расчеты не могут быть выполнены.")
-    } else {
-        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
-        if (departmentFormType.formTypeId == sourceFormTypeId && (child == null || child.state != WorkflowState.ACCEPTED)) {
-            def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-            logger.error("Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята». Расчеты не могут быть выполнены.")
-        }
-    }
-
     def fieldNumber = 0
 
     dataRows.eachWithIndex { row, i ->

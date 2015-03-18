@@ -1,9 +1,6 @@
 package form_template.income.output1_2.v2014
 
-import au.com.bytecode.opencsv.CSVReader
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -16,12 +13,12 @@ import groovy.transform.Field
  * @author Bulat Kinzyabulatov
  *
  1		taCategory		            Категория налогового агента
- 2		financialYear		        Отчетный год
- 3		taxPeriod		            Налоговый (отчетный) период (код)
- 4		emitent		                Эмитент
- 5		inn		                    ИНН организации – эмитента ценных бумаг
- 6		decreeNumber		        Номер решения о распределении доходов от долевого участия
- 7		dividendType		        Вид дивидендов
+ 2		emitent		                Эмитент
+ 3		inn		                    ИНН организации – эмитента ценных бумаг
+ 4		decreeNumber		        Номер решения о распределении доходов от долевого участия
+ 5		dividendType		        Вид дивидендов
+ 6		financialYear		        Отчетный год
+ 7		taxPeriod		            Налоговый (отчетный) период (код)
  8		totalDividend		        Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)
  9		dividendSumRaspredPeriod	Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Всего
  10		dividendRussianTotal		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Всего
@@ -77,10 +74,6 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
-        logicCheck()
-        break
-    case FormDataEvent.IMPORT_TRANSPORT_FILE:
-        importTransportData()
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -96,7 +89,7 @@ def allColumns = ['taCategory', 'financialYear', 'taxPeriod', 'emitent', 'inn', 
                   'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
                   'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']
 
-// обязательные поля (графа 1..4, 6..31)
+// обязательные поля (графа 1..2, 4..31)
 @Field
 def nonEmptyColumns = allColumns - 'inn'
 
@@ -120,7 +113,7 @@ void logicCheck() {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // 2. Проверка на заполнение «Графы 5»
+        // 2. Проверка на заполнение «Графы 3»
         if ((row.taCategory == 2) != (row.inn != null && !row.inn.isEmpty())) {
             rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'inn')}» должна быть заполнена в случае если графа «${getColumnName(row, 'taCategory')}» равна «2»!")
         }
@@ -130,13 +123,13 @@ void logicCheck() {
             errorMessage(row, 'taCategory', errorMsg)
         }
 
-        // 4. Проверка допустимых значений «Графы 3»
+        // 4. Проверка допустимых значений «Графы 7»
         if (!['13', '21', '31', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43',
                                  '44', '45', '46', '50'].contains(row.taxPeriod)) {
             errorMessage(row, 'taxPeriod', errorMsg)
         }
 
-        // 5. Проверка допустимых значений «Графы 7»
+        // 5. Проверка допустимых значений «Графы 5»
         if (!['1', '2'].contains(row.dividendType)) {
             errorMessage(row, 'dividendType', errorMsg)
         }
@@ -204,12 +197,12 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 31, 5)
     def headerMapping = [
             (xml.row[0].cell[0]): 'Категория налогового агента',
-            (xml.row[0].cell[1]): 'Отчетный год',
-            (xml.row[0].cell[2]): 'Налоговый (отчетный) период (код)',
-            (xml.row[0].cell[3]): 'Эмитент',
-            (xml.row[0].cell[4]): 'ИНН организации – эмитента ценных бумаг',
-            (xml.row[0].cell[5]): 'Номер решения о распределении доходов от долевого участия',
-            (xml.row[0].cell[6]): 'Вид дивидендов',
+            (xml.row[0].cell[1]): 'Эмитент',
+            (xml.row[0].cell[2]): 'ИНН организации – эмитента ценных бумаг',
+            (xml.row[0].cell[3]): 'Номер решения о распределении доходов от долевого участия',
+            (xml.row[0].cell[4]): 'Вид дивидендов',
+            (xml.row[0].cell[5]): 'Отчетный год',
+            (xml.row[0].cell[6]): 'Налоговый (отчетный) период (код)',
             (xml.row[0].cell[7]): 'Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)',
             (xml.row[0].cell[8]): 'Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде',
             (xml.row[0].cell[22]): 'Дивиденды, перечисленные лицам, не являющимся получателями дохода',
@@ -290,15 +283,19 @@ void addData(def xml, def headRowCount) {
         newRow.taCategory = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
-        // графа 2
-        newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графs 3-7
-        for (alias in ['taxPeriod', 'emitent', 'inn', 'decreeNumber', 'dividendType']) {
+        // графs 2-5
+        for (alias in ['emitent', 'inn', 'decreeNumber', 'dividendType']) {
             newRow[alias] = row.cell[xmlIndexCol].text()
             xmlIndexCol++
         }
+
+        // графа 6
+        newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 7
+        newRow.taxPeriod = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графы 8-31
         for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
@@ -320,129 +317,6 @@ void sortFormDataRows() {
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, null, null)
     dataRowHelper.saveSort()
-}
-
-void importTransportData() {
-    int COLUMN_COUNT = 31
-    int TOTAL_ROW_COUNT = 0
-    int ROW_MAX = 1000
-    def DEFAULT_CHARSET = "cp866"
-    char SEPARATOR = '|'
-    char QUOTE = '\''
-
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
-
-    if (ImportInputStream == null) {
-        logger.error("Поток данных не должен быть пустым")
-    }
-    if (UploadFileName == null || "".equals(UploadFileName.trim())) {
-        logger.error("Имя файла не может быть пустым")
-    }
-
-    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
-    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
-
-    def dataRows = []
-    String[] rowCells
-    // количество пустых строк
-    int countEmptyRow = 0
-    int fileRowIndex = 0 // номер строки в файле
-    int rowIndex = 0// номер строки в НФ
-    int totalRowCount = 0// счетчик кол-ва итогов
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
-        // если еще не было пустых строк, то это первая строка - заголовок
-        if (rowCells.length == 1 && rowCells[0].length() < 1) { // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-            if (countEmptyRow > 0) {
-                totalRowCount++
-                // итоговая строка
-                addRow(dataRows, reader.readNext(), COLUMN_COUNT, fileRowIndex, ++rowIndex, true)
-                break
-            }
-            countEmptyRow++
-            continue
-        }
-        // обычная строка
-        if (countEmptyRow != 0 && !addRow(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex, false)){
-            break
-        }
-        rowCells = null // очищаем кучу
-        // периодически сбрасываем строки
-        if (dataRows.size() > ROW_MAX) {
-            dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
-            dataRows.clear()
-        }
-    }
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
-    reader.close()
-    if (dataRows.size() != 0) {
-        dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
-        dataRows.clear()
-    }
-}
-
-// Добавляет строку в текущий буфер строк
-boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, boolean isTotal) {
-    if (rowCells == null || isTotal) {
-        return true
-    }
-
-    def DataRow newRow = formData.createDataRow()
-    newRow.setIndex(rowIndex)
-    newRow.setImportIndex(fileRowIndex)
-
-    if (rowCells.length != columnCount + 2) {
-        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
-        return false
-    }
-
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-
-    def int colOffset = 1
-    def int colIndex = 1
-
-    // графа 1
-    newRow.taCategory = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
-    colIndex++
-
-    // графа 2
-    newRow.financialYear = parseDate(pure(rowCells[colIndex]), "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
-    colIndex++
-
-    // графs 3-7
-    for (alias in ['taxPeriod', 'emitent', 'inn', 'decreeNumber', 'dividendType']) {
-        newRow[alias] = pure(rowCells[colIndex])
-        colIndex++
-    }
-
-    // графы 8-31
-    for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
-                   'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
-                   'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
-                   'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
-                   'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
-                   'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']) {
-        newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
-        colIndex++
-    }
-    dataRowsCut.add(newRow)
-    return true
-}
-
-static String pure(String cell) {
-    return StringUtils.cleanString(cell).intern()
 }
 
 def roundValue(def value, int precision = 0) {

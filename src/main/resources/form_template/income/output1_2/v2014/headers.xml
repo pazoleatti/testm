@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?><rows>
   <row alias="">
     <cell alias="taCategory" colSpan="1" rowSpan="4" value="Категория налогового агента"/>
-    <cell alias="financialYear" colSpan="1" rowSpan="4" value="Отчетный год"/>
-    <cell alias="taxPeriod" colSpan="1" rowSpan="4" value="Налоговый (отчетный) период (код)"/>
     <cell alias="emitent" colSpan="1" rowSpan="4" value="Эмитент"/>
     <cell alias="inn" colSpan="1" rowSpan="4" value="ИНН организации – эмитента ценных бумаг"/>
     <cell alias="decreeNumber" colSpan="1" rowSpan="4" value="Номер решения о распределении доходов от долевого участия"/>
     <cell alias="dividendType" colSpan="1" rowSpan="4" value="Вид дивидендов"/>
+    <cell alias="financialYear" colSpan="1" rowSpan="4" value="Отчетный год"/>
+    <cell alias="taxPeriod" colSpan="1" rowSpan="4" value="Налоговый (отчетный) период (код)"/>
     <cell alias="totalDividend" colSpan="1" rowSpan="4" value="Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)"/>
     <cell alias="dividendSumRaspredPeriod" colSpan="14" rowSpan="1" value="Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде"/>
     <cell alias="dividendRussianTotal" colSpan="1" rowSpan="1" value="Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде"/>
@@ -34,12 +34,12 @@
   </row>
   <row alias="">
     <cell alias="taCategory" colSpan="1" rowSpan="1" value="Категория налогового агента"/>
-    <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
-    <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период (код)"/>
     <cell alias="emitent" colSpan="1" rowSpan="1" value="Эмитент"/>
     <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН организации – эмитента ценных бумаг"/>
     <cell alias="decreeNumber" colSpan="1" rowSpan="1" value="Номер решения о распределении доходов от долевого участия"/>
     <cell alias="dividendType" colSpan="1" rowSpan="1" value="Вид дивидендов"/>
+    <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
+    <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период (код)"/>
     <cell alias="totalDividend" colSpan="1" rowSpan="1" value="Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)"/>
     <cell alias="dividendSumRaspredPeriod" colSpan="1" rowSpan="3" value="всего"/>
     <cell alias="dividendRussianTotal" colSpan="5" rowSpan="1" value="Дивиденды, начисленные получателям дохода – российским организациям"/>
@@ -67,12 +67,12 @@
   </row>
   <row alias="">
     <cell alias="taCategory" colSpan="1" rowSpan="1" value="Категория налогового агента"/>
-    <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
-    <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период (код)"/>
     <cell alias="emitent" colSpan="1" rowSpan="1" value="Эмитент"/>
     <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН организации – эмитента ценных бумаг"/>
     <cell alias="decreeNumber" colSpan="1" rowSpan="1" value="Номер решения о распределении доходов от долевого участия"/>
     <cell alias="dividendType" colSpan="1" rowSpan="1" value="Вид дивидендов"/>
+    <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
+    <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период (код)"/>
     <cell alias="totalDividend" colSpan="1" rowSpan="1" value="Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)"/>
     <cell alias="dividendSumRaspredPeriod" colSpan="1" rowSpan="1" value="всего"/>
     <cell alias="dividendRussianTotal" colSpan="1" rowSpan="2" value="всего"/>
@@ -100,12 +100,12 @@
   </row>
   <row alias="">
     <cell alias="taCategory" colSpan="1" rowSpan="1" value="Категория налогового агента"/>
-    <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
-    <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период (код)"/>
     <cell alias="emitent" colSpan="1" rowSpan="1" value="Эмитент"/>
     <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН организации – эмитента ценных бумаг"/>
     <cell alias="decreeNumber" colSpan="1" rowSpan="1" value="Номер решения о распределении доходов от долевого участия"/>
     <cell alias="dividendType" colSpan="1" rowSpan="1" value="Вид дивидендов"/>
+    <cell alias="financialYear" colSpan="1" rowSpan="1" value="Отчетный год"/>
+    <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="Налоговый (отчетный) период (код)"/>
     <cell alias="totalDividend" colSpan="1" rowSpan="1" value="Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)"/>
     <cell alias="dividendSumRaspredPeriod" colSpan="1" rowSpan="1" value="всего"/>
     <cell alias="dividendRussianTotal" colSpan="1" rowSpan="1" value="всего"/>
@@ -133,12 +133,12 @@
   </row>
   <row alias="">
     <cell alias="taCategory" colSpan="1" rowSpan="1" value="1"/>
-    <cell alias="financialYear" colSpan="1" rowSpan="1" value="2"/>
-    <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="3"/>
-    <cell alias="emitent" colSpan="1" rowSpan="1" value="4"/>
-    <cell alias="inn" colSpan="1" rowSpan="1" value="5"/>
-    <cell alias="decreeNumber" colSpan="1" rowSpan="1" value="6"/>
-    <cell alias="dividendType" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="emitent" colSpan="1" rowSpan="1" value="2"/>
+    <cell alias="inn" colSpan="1" rowSpan="1" value="3"/>
+    <cell alias="decreeNumber" colSpan="1" rowSpan="1" value="4"/>
+    <cell alias="dividendType" colSpan="1" rowSpan="1" value="5"/>
+    <cell alias="financialYear" colSpan="1" rowSpan="1" value="6"/>
+    <cell alias="taxPeriod" colSpan="1" rowSpan="1" value="7"/>
     <cell alias="totalDividend" colSpan="1" rowSpan="1" value="8"/>
     <cell alias="dividendSumRaspredPeriod" colSpan="1" rowSpan="1" value="9"/>
     <cell alias="dividendRussianTotal" colSpan="1" rowSpan="1" value="10"/>

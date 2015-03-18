@@ -373,9 +373,9 @@ void generateXML() {
     def dataRowsRemains = getDataRows(formDataCollection, 309, [FormDataKind.PRIMARY])
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
-    def dataRowsSum = getDataRows(formDataCollection, 421, FormDataKind.ADDITIONAL)
+    def dataRowsSum = getDataRows(formDataCollection, 421, [FormDataKind.ADDITIONAL])
     if (dataRowsSum == null) {
-        dataRowsSum = getDataRows(formDataCollection, 417, FormDataKind.ADDITIONAL)
+        dataRowsSum = getDataRows(formDataCollection, 417, [FormDataKind.ADDITIONAL])
     }
 
     /*

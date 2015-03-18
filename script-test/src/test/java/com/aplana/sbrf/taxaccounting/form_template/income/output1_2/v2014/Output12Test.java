@@ -90,15 +90,6 @@ public class Output12Test extends ScriptTestBase {
     }
 
     @Test
-    public void importTransportFileTest() {
-        testHelper.setImportFileInputStream(getImportRnuInputStream());
-        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(1, testHelper.getDataRowHelper().getAll().size());
-        checkLoadData(testHelper.getDataRowHelper().getAll());
-        checkLogger();
-    }
-
-    @Test
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
@@ -111,12 +102,12 @@ public class Output12Test extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         DataRow<Cell> dataRow = dataRows.get(0);
         Assert.assertEquals(1, dataRow.getCell("taCategory").getNumericValue().intValue());
-        Assert.assertEquals("2015", new SimpleDateFormat("yyyy").format(dataRow.getCell("financialYear").getDateValue()));
-        Assert.assertEquals("31", dataRow.getCell("taxPeriod").getStringValue());
         Assert.assertEquals("1", dataRow.getCell("emitent").getStringValue());
         Assert.assertEquals("", dataRow.getCell("inn").getStringValue());
         Assert.assertEquals("1", dataRow.getCell("decreeNumber").getStringValue());
         Assert.assertEquals("1", dataRow.getCell("dividendType").getStringValue());
+        Assert.assertEquals("2015", new SimpleDateFormat("yyyy").format(dataRow.getCell("financialYear").getDateValue()));
+        Assert.assertEquals("31", dataRow.getCell("taxPeriod").getStringValue());
         Assert.assertEquals(1, dataRow.getCell("totalDividend").getNumericValue().intValue());
         Assert.assertEquals(8, dataRow.getCell("dividendSumRaspredPeriod").getNumericValue().intValue());
         Assert.assertEquals(4, dataRow.getCell("dividendRussianTotal").getNumericValue().intValue());
