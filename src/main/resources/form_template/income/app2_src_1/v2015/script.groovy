@@ -150,9 +150,9 @@ def autoFillColumns = ['income', 'deduction', 'taxBase']
 @Field
 def editableColumns = allColumns - autoFillColumns
 
-// Проверяемые на пустые значения атрибуты (графа 3, 4, 5, 6, 22, 23, 25, 26)
+// Проверяемые на пустые значения атрибуты (графа 3, 4, 6, 22, 23, 25, 26)
 @Field
-def nonEmptyColumns = ['surname', 'name', 'patronymic', 'status', 'taxRate', 'income', 'taxBase', 'calculated']
+def nonEmptyColumns = ['surname', 'name', 'status', 'taxRate', 'income', 'taxBase', 'calculated']
 
 @Field
 def endDate = null
@@ -345,7 +345,9 @@ def BigDecimal calc23(def row) {
 }
 
 def BigDecimal calc24(def row) {
-    return getSum1(row) + getSum2(row) + getSum3(row)
+    // графа 68, 70
+    def tmp = getSum(row, ['col_052_3_1', 'col_052_3_1'])
+    return getSum1(row) + getSum2(row) + getSum3(row) + tmp
 }
 
 def BigDecimal calc25(def row) {
