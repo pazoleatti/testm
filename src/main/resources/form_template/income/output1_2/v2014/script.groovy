@@ -1,6 +1,8 @@
 package form_template.income.output1_2.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -71,9 +73,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -96,6 +100,44 @@ def nonEmptyColumns = allColumns - 'inn'
 // редактируемые поля (графа 1..31)
 @Field
 def editableColumns = allColumns
+
+@Field
+def keyColumns = ['year', 'firstMonth', 'lastMonth', 'emitentName', 'decisionNumber', 'decisionDate']
+
+@Field
+def sbString = "ОАО Сбербанк России"
+
+@Field
+def graph3String = "7707083893"
+
+@Field
+def sourceFormType = 419
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def getLastReportPeriod() {
+    ReportPeriod period = reportPeriodService.get(formData.reportPeriodId)
+    List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(period.taxPeriod.id)
+    return periodList.max{ ReportPeriod rp -> rp.order }
+}
 
 void calc() {
     // расчетов нет, все поля редактируемые
@@ -190,6 +232,223 @@ void warnMessage9or10(def row, def alias, def condition) {
     def index = row.getIndex()
     def name = getColumnName(row, alias)
     logger.warn("Строка $index: Графа «$name» заполнена неверно! Не выполняется условие: $condition")
+}
+
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = []
+
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def prevPeriodStartDate = reportPeriodService.getCalendarStartDate(prevReportPeriod.id).time
+    def prevPeriodEndDate = reportPeriodService.getEndDate(prevReportPeriod.id).time
+
+    def lastPeriod = getLastReportPeriod()
+    def lastPeriodStartDate = reportPeriodService.getCalendarStartDate(lastPeriod.id).time
+    def lastPeriodEndDate = reportPeriodService.getEndDate(lastPeriod.id).time
+
+    // получить формы-источники в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+        if(it.formTypeId == sourceFormType) {
+            def sourceFormData = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
+            if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
+                def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
+                def rowMap = getRowMap(sourceHelper.getAll())
+                sourceHelper.getAll().each { sourceRow ->
+                    def newRow = formNewRow(sourceRow, rowMap, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate)
+                    dataRows.add(newRow)
+                }
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
+}
+
+def getRowMap(def rows) {
+    def result = [:]
+    rows.each{ row ->
+        def keyString = keyColumns.collect{ row[it] ?: 0 }.join("#")
+        if(result[keyString] == null) {
+            result[keyString] = []
+        }
+        result[keyString].add(row)
+    }
+    return result
+}
+
+def formNewRow(def row, def rowMap, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
+    def newRow = formData.createDataRow()
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    def keyString = keyColumns.collect{ row[it] ?: 0 }.join("#")
+    def rowList = rowMap[keyString]
+
+    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 1» = «1», иначе «Графа 1» = «2»
+    newRow.taCategory = (row.emitentName == sbString && row.emitentInn == graph3String) ? 1 : 2
+
+    // «Графа 2» = «Графа 2» первичной формы
+    newRow.emitent = row.emitentName
+
+    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 3»  не заполняется, иначе «Графа 3» = «Графа 3» первичной формы
+    newRow.inn = (row.emitentName == sbString && row.emitentInn == graph3String) ? null : row.emitentInn
+
+    // «Графа 4» = «Графа 7» первичной формы
+    newRow.decreeNumber = row.decisionNumber
+
+    // Если «Графа 10» первичной формы = «1» и «Графа 11» = «12», то «Графа 5» = «2», иначе «Графа 5» = «1»
+    newRow.dividendType = (row.firstMonth == 1 && row.lastMonth == 12) ? '2' : '1'
+
+    // «Графа 6» = «Графа 9» первичной формы
+    newRow.financialYear = row.year
+
+    // «Графа 7»
+    newRow.taxPeriod = calcPeriod(row.firstMonth, row.lastMonth)
+
+    // «Графа 8» = «Графа 12» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
+    newRow.totalDividend = rowList.sum{ it.allSum ?: 0 }
+
+    // «Графа 9» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
+    newRow.dividendSumRaspredPeriod = rowList.sum{ it.dividends ?: 0 }
+
+    // «Графа 10» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS»
+    newRow.dividendRussianTotal = rowList.sum{ (it.status == 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
+    newRow.dividendRussianOrgStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 12» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
+    // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
+    newRow.dividendRussianStavka6 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 9 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 13» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы не равна «9» и «0»
+    newRow.dividendRussianStavka9 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate != 9 && it.rate != 0 && it.dividends != null) ? it.dividends : 0 }
+
+    // TODO
+    newRow.dividendRussianStavka9 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate != 9 && it.rate != 0 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «2»
+    newRow.dividendRussianPersonal = rowList.sum{ (it.status == 'RUS' && it.type == 2 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 16» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «1» и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendForgeinOrgAll = rowList.sum{ (it.type == 1 && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 17» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «2» и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendForgeinPersonalAll = rowList.sum{ (it.type == 2 && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 18» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы = «0» и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendStavka0 = rowList.sum{ (it.rate == 0 && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 19» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы <= «5» и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendStavkaLess5 = rowList.sum{ (!(it.rate > 5) && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 20» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы > «5» и <= «10»  и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendStavkaMore5 = rowList.sum{ ((it.rate > 5 && !(it.rate > 10)) && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 21» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы > «10»  и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendStavkaMore10 = rowList.sum{ ((it.rate > 10) && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 22» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «3»
+    newRow.dividendTaxUnknown = rowList.sum{ (it.status == '3' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 23» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «4»
+    newRow.dividendNonIncome = rowList.sum{ (it.status == '4' && it.dividends != null) ? it.dividends : 0 }
+
+    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
+    newRow.dividendAgentAll = (row.emitentName == sbString && row.emitentInn == graph3String && row.all != null) ? row.all : 0
+
+    // «Графа 25» = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
+    newRow.dividendAgentWithStavka0 = (row.emitentName == sbString && row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : (row.distributionSum ?: 0)
+
+    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
+    newRow.dividendD1D2 =  (row.emitentName == sbString && row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
+
+    // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
+    // Если «Графа 17» первичной формы = «RUS»и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9», то «Графа 27» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
+    newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 9 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
+
+    // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
+    // Если «Графа 17» первичной формы = «RUS»и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 28» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
+    newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
+
+    // «Графа 29» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
+    newRow.taxSum = rowList.sum{ it.withheldSum ?: 0 }
+
+    // «Графа 30» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28» первичной формы принадлежит предыдущему отчетному периоду
+    newRow.taxSumFromPeriod = rowList.sum{ if (it.withheldDate != null && it.withheldDate.before(prevPeriodEndDate) && it.withheldDate.after(prevPeriodStartDate)) { it.withheldSum ?: 0 } else { 0 } }
+
+    // «Графа 31» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28» первичной формы принадлежит последнему кварталу отчетного года
+    newRow.taxSumLast = rowList.sum{ if (it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate)) { it.withheldSum ?: 0 } else { 0 }}
+
+    return newRow
+}
+
+def calcPeriod(def firstMonth, def lastMonth) {
+    // «Графа 7» = «21», если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «3».
+    if (firstMonth==1 && lastMonth==3) {
+        return '21'
+    }
+    // «Графа 7» = «31», если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «6».
+    if (firstMonth==1 && lastMonth==6) {
+        return '31'
+    }
+    // «Графа 7» = «33», если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «9».
+    if (firstMonth==1 && lastMonth==9) {
+        return '33'
+    }
+    // «Графа 7» = «34», если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «12».
+    if (firstMonth==1 && lastMonth==12) {
+        return '34'
+    }
+    // «Графа 7» = «35», если «Графа 11» первичной формы - «Графа 10» первичной формы = «0».
+    if ((lastMonth - firstMonth) == 0) {
+        return '35'
+    }
+    // «Графа 7» = «36», если «Графа 11» первичной формы - «Графа 10» первичной формы = «1».
+    if ((lastMonth - firstMonth) == 1) {
+        return '36'
+    }
+    // «Графа 7» = «37», если «Графа 11» первичной формы - «Графа 10» первичной формы = «2».
+    if ((lastMonth - firstMonth) == 2) {
+        return '37'
+    }
+    // «Графа 7» = «38», если «Графа 11» первичной формы - «Графа 10» первичной формы = «3».
+    if ((lastMonth - firstMonth) == 3) {
+        return '38'
+    }
+    // «Графа 7» = «39», если «Графа 11» первичной формы - «Графа 10» первичной формы = «4».
+    if ((lastMonth - firstMonth) == 4) {
+        return '39'
+    }
+    // «Графа 7» = «40», если «Графа 11» первичной формы - «Графа 10» первичной формы = «5».
+    if ((lastMonth - firstMonth) == 5) {
+        return '40'
+    }
+    // «Графа 7» = «41», если «Графа 11» первичной формы - «Графа 10» первичной формы = «6».
+    if ((lastMonth - firstMonth) == 6) {
+        return '41'
+    }
+    // «Графа 7» = «42», если «Графа 11» первичной формы - «Графа 10» первичной формы = «7».
+    if ((lastMonth - firstMonth) == 7) {
+        return '42'
+    }
+    // «Графа 7» = «43», если «Графа 11» первичной формы - «Графа 10» первичной формы = «8».
+    if ((lastMonth - firstMonth) == 8) {
+        return '43'
+    }
+    // «Графа 7» = «44», если «Графа 11» первичной формы - «Графа 10» первичной формы = «9».
+    if ((lastMonth - firstMonth) == 9) {
+        return '44'
+    }
+    // «Графа 7» = «45», если «Графа 11» первичной формы - «Графа 10» первичной формы = «10».
+    if ((lastMonth - firstMonth) == 10) {
+        return '45'
+    }
+    // «Графа 7» = «46», если «Графа 11» первичной формы - «Графа 10» первичной формы = «11».
+    if ((lastMonth - firstMonth) == 11) {
+        return '46'
+    }
 }
 
 void importData() {

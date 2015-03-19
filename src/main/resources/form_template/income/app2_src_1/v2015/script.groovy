@@ -238,7 +238,7 @@ void logicCheck() {
         }
 
         // 10. Проверка заполнения поля «Номер дома (владения)»
-        if (row.house && !row.house?.matches("^[а-яА-ЯёЁa-zA-Z0-9/ ]+\$")) {
+        if (row.house && !row.house?.matches("^[а-яА-ЯёЁa-zA-Z0-9/-]+\$")) {
             def name = getColumnName(row, 'house')
             logger.error(errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
