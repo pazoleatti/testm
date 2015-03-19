@@ -368,7 +368,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onSignersClicked() {
 		signersPresenter.setFormData(formData);
-		signersPresenter.setReadOnlyMode(readOnlyMode);
 		addToPopupSlot(signersPresenter);
 	}
 

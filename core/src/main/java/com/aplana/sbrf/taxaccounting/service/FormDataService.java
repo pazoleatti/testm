@@ -90,7 +90,15 @@ public interface FormDataService {
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав редактировать налоговую форму с такими параметрами
 	 */
 	long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData);
-	
+
+    /**
+     * Сохранить данные исполнителей и подписантов для налоговой формы
+     * @param logger
+     * @param userInfo
+     * @param formData
+     */
+    void savePerformer(Logger logger, TAUserInfo userInfo, FormData formData);
+
 	/**
 	 * Получить данные по налоговой форме
 	 *

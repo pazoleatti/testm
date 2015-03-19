@@ -133,21 +133,27 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     formData.getDepartmentReportPeriodId(), formData.getKind().getId(),
                     formData.getState().getId(), formData.getPeriodOrder(), formData.getPreviousRowNumber());
             formData.setId(formDataId);
+            savePerformerSigner(formData);
         } else {
             formDataId = formData.getId();
         }
 
+        return formDataId;
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void savePerformerSigner(FormData formData) {
         if (formData.getPerformer() != null &&
                 (StringUtils.hasLength(formData.getPerformer().getName())
                         || StringUtils.hasLength(formData.getPerformer().getPhone())
                         || formData.getPerformer().getPrintDepartmentId() != null)
                 ) {
-            formPerformerDao.save(formDataId, formData.isManual(), formData.getPerformer());
+            formPerformerDao.save(formData.getId(), formData.isManual(), formData.getPerformer());
         }
         if (formData.getSigners() != null) {
-            formDataSignerDao.saveSigners(formDataId, formData.getSigners());
+            formDataSignerDao.saveSigners(formData.getId(), formData.getSigners());
         }
-        return formDataId;
     }
 
     @Override

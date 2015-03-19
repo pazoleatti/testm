@@ -550,11 +550,31 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     private void checkPerformer(Logger logger, FormData formData) {
-        if (TaxType.INCOME.equals(formData.getFormType().getTaxType()) &&
-                (FormDataKind.PRIMARY.equals(formData.getKind()) || FormDataKind.CONSOLIDATED.equals(formData.getKind())) &&
-                (formData.getPerformer() == null || formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null || formData.getSigners().size() == 0)) {
-            logger.error("Форма «Исполнитель и подписанты» заполнена не полностью!");
+        boolean check = true;
+        if (formData.getPerformer() == null || formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null || formData.getSigners().size() == 0) {
+            check = false;
         }
+        if (check)
+            for (FormDataSigner signer : formData.getSigners()) {
+                if (signer.getName().trim().isEmpty() || signer.getPosition().trim().isEmpty()) {
+                    check = false;
+                    break;
+                }
+            }
+        if (!check) {
+            logger.error("Параметры печатной формы заполнены не полностью. Ожидается: подразделение, исполнитель, телефон, данные хотя бы об одном подписанте.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void savePerformer(Logger logger, TAUserInfo userInfo, FormData formData) {
+        // Форма должна быть заблокирована текущим пользователем для редактирования
+        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
+        formDataDao.savePerformerSigner(formData);
+
+        deleteReport(formData.getId(), null);
     }
 
     /**
@@ -824,8 +844,7 @@ public class FormDataServiceImpl implements FormDataService {
                 WorkflowMove.CREATED_TO_APPROVED.equals(workflowMove) ||
                 WorkflowMove.CREATED_TO_PREPARED.equals(workflowMove) ||
                 WorkflowMove.PREPARED_TO_APPROVED.equals(workflowMove) ||
-                WorkflowMove.PREPARED_TO_ACCEPTED.equals(workflowMove) ||
-                WorkflowMove.APPROVED_TO_ACCEPTED.equals(workflowMove)) {
+                WorkflowMove.PREPARED_TO_ACCEPTED.equals(workflowMove)) {
             checkPerformer(logger, formData);
         }
 
@@ -1374,8 +1393,8 @@ public class FormDataServiceImpl implements FormDataService {
                     if (manual != null) {
                         lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved), 0, true);
                     } else {
-                        for(boolean all: b) {
-                            lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, all, saved), 0, true);
+                        for(boolean manual1: b) {
+                            lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual1, saved), 0, true);
                         }
                     }
                 }

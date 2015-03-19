@@ -842,6 +842,17 @@ public class FormDataServiceTest {
         formData.setState(WorkflowState.ACCEPTED);
         formData.setDepartmentReportPeriodId(1);
         formData.setPeriodOrder(null);
+        FormDataPerformer performer = new FormDataPerformer();
+        performer.setName("Name");
+        performer.setPhone("8888888");
+        performer.setPrintDepartmentId(8);
+        performer.setReportDepartmentName("8/8");
+        formData.setPerformer(performer);
+        FormDataSigner signer = new FormDataSigner();
+        signer.setName("signer1");
+        signer.setPosition("Position1");
+        signer.setOrd(1);
+        formData.setSigners(Arrays.asList(signer));
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
