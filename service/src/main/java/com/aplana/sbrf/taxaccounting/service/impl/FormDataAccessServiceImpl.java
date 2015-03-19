@@ -453,8 +453,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             }
 
             // Признак контролера вышестоящего уровня
-            boolean isUpControl = (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                    || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))
+            boolean isUpControl = userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
                     && formData.getDepartmentId() != userInfo.getUser().getDepartmentId();
 
             if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL).contains(formData.getKind()) &&
@@ -483,7 +482,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         break;
                     case APPROVED:
                         // Повысить и понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                             result.add(WorkflowMove.APPROVED_TO_PREPARED);
                             result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
                         }
@@ -491,7 +491,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     case ACCEPTED:
                         // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
                         // Форма "Согласование организации" не распринимается
-                        if ((isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP))) {
+                        if ((isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))) {
                             result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
                         }
                         break;
@@ -529,7 +530,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         break;
                     case ACCEPTED:
                         // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                             result.add(WorkflowMove.ACCEPTED_TO_PREPARED);
                         }
                         break;
@@ -587,13 +589,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             result.add(WorkflowMove.APPROVED_TO_CREATED);
                         }
                         // Повысить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                             result.add(WorkflowMove.APPROVED_TO_ACCEPTED);
                         }
                         break;
                     case ACCEPTED:
                         // Понизить статус могут контролеры вышестоящего уровня, которые имеют доступ для чтения
-                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+                        if (isUpControl || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
                             result.add(WorkflowMove.ACCEPTED_TO_APPROVED);
                         }
                         break;
