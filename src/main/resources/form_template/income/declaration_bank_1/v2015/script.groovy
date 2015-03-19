@@ -311,39 +311,39 @@ void generateXML() {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
-    def dataRowsComplexIncome = getDataRows(formDataCollection, 302, FormDataKind.SUMMARY)
+    def dataRowsComplexIncome = getDataRows(formDataCollection, 302, [FormDataKind.SUMMARY])
 
     /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleIncome = getDataRows(formDataCollection, 301, FormDataKind.SUMMARY)
+    def dataRowsSimpleIncome = getDataRows(formDataCollection, 301, [FormDataKind.SUMMARY])
 
     /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
-    def dataRowsComplexConsumption = getDataRows(formDataCollection, 303, FormDataKind.SUMMARY)
+    def dataRowsComplexConsumption = getDataRows(formDataCollection, 303, [FormDataKind.SUMMARY])
 
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleConsumption = getDataRows(formDataCollection, 304, FormDataKind.SUMMARY)
+    def dataRowsSimpleConsumption = getDataRows(formDataCollection, 304, [FormDataKind.SUMMARY])
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-    def dataRowsAdvance = getDataRows(formDataCollection, 500, FormDataKind.SUMMARY)
+    def dataRowsAdvance = getDataRows(formDataCollection, 500, [FormDataKind.SUMMARY])
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, 411, FormDataKind.ADDITIONAL)
+    def dataRowsDividend = getDataRows(formDataCollection, 411, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, 413, FormDataKind.ADDITIONAL)
+    def dataRowsTaxAgent = getDataRows(formDataCollection, 416, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
-    def dataRowsTaxSum = getDataRows(formDataCollection, 412, FormDataKind.ADDITIONAL)
+    def dataRowsTaxSum = getDataRows(formDataCollection, 412, [FormDataKind.ADDITIONAL])
 
     /** форма «Остатки по начисленным авансовым платежам». */
-    def dataRowsRemains = getDataRows(formDataCollection, 309, FormDataKind.PRIMARY)
+    def dataRowsRemains = getDataRows(formDataCollection, 309, [FormDataKind.PRIMARY])
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
-    def dataRowsSum = getDataRows(formDataCollection, 421, FormDataKind.ADDITIONAL)
+    def dataRowsSum = getDataRows(formDataCollection, 421, [FormDataKind.ADDITIONAL])
 
     // Выходная Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
-    def dataRowsApp2 = getDataRows(formDataCollection, 415, FormDataKind.ADDITIONAL)
+    def dataRowsApp2 = getDataRows(formDataCollection, 415, [FormDataKind.ADDITIONAL])
 
     /** НалВыпл311ФБ за предыдущий отчетный период. Код строки декларации 250. */
     def nalVipl311FBOld = 0
@@ -1967,8 +1967,8 @@ def getXmlValue(def value) {
 }
 
 /** Получить строки формы. */
-def getDataRows(def formDataCollection, def formTemplateId, def kind) {
-    def formList = formDataCollection?.findAllByFormTypeAndKind(formTemplateId, kind)
+def getDataRows(def formDataCollection, def formTemplateId, def List<FormDataKind> kinds) {
+    def formList = kinds.sum { formDataCollection?.findAllByFormTypeAndKind(formTemplateId, it) }
     def dataRows = []
     for (def form : formList) {
         dataRows += (formDataService.getDataRowHelper(form)?.getAll()?:[])

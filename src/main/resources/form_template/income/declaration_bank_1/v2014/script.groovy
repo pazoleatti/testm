@@ -364,7 +364,8 @@ void generateXML() {
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, newDeclaration ? 413 : 307, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
+    def output2_id = newDeclaration ? (isTaxPeriod ? 416 : 413) : 307
+    def dataRowsTaxAgent = getDataRows(formDataCollection, output2_id, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
     def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308, [FormDataKind.ADDITIONAL])
