@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
@@ -51,6 +52,10 @@ public class RefBookDepartment implements RefBookDataProvider {
     private static final String DEPARTMENT_TYPE_ATTRIBUTE = "TYPE";
     private static final String DEPARTMENT_NAME_ATTRIBUTE = "NAME";
     private static final String DEPARTMENT_PARENT_ATTRIBUTE = "PARENT_ID";
+    private static final String DFT_RELATION =
+            "В настройке подразделения %s для налога %s в периоде %s %s указана ссылка на версию!";
+
+    private static final SimpleDateFormat SDF_YYYY = new SimpleDateFormat("yyyy");
 
     @Autowired
     RefBookDao refBookDao;
@@ -660,12 +665,11 @@ public class RefBookDepartment implements RefBookDataProvider {
      * @param records значения справочника
      */
     private void checkCorrectness(Logger logger, Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
-        Department rootBank = departmentService.getBankDepartment();
-        Map<String, RefBookValue> values = records.get(0).getValues();
+        /*Map<String, RefBookValue> values = records.get(0).getValues();
         DepartmentType type = values.get(DEPARTMENT_TYPE_ATTRIBUTE) != null ?
                 DepartmentType.fromCode(values.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()) :
                 null;
-        Long parentDepartmentId = values.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue();
+        Long parentDepartmentId = values.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue();*/
 
         // большинство проверок перенесены в скрипт подразделения на событие SAVE
 
@@ -765,7 +769,8 @@ public class RefBookDepartment implements RefBookDataProvider {
         }
 
         //3 точка запроса
-        for (String result : refBookDao.isVersionUsedInRefBooks(REF_BOOK_ID, Arrays.asList((long) department.getId()))){
+        for (String result : refBookDao.isVersionUsedInRefBooks(
+                REF_BOOK_ID, Arrays.asList((long) department.getId()), null, null, false, Arrays.asList(31l, 33l, 37l, 98l, 99l))) {
             logger.error(result);
         }
 
@@ -815,7 +820,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         for (TAUserView taUser : users)
             logger.error(String.format("Подразделению %s назначен пользовател с логином %s!", department.getName(), taUser.getName()));
 
-        //9 точка запроса
+        //9 точка запроса Источники-приёмники
         List<DepartmentFormType> departmentFormTypesDest = sourceService.getFormDestinations(department.getId(), 0, null, null, null);
         List<DepartmentDeclarationType> departmentDeclarationTypesDest = sourceService.getDeclarationDestinations(department.getId(), 0, null, null, null);
         List<DepartmentFormType> depFTSources = sourceService.getDFTSourcesByDFT(department.getId(), 0 , null, null, null);
@@ -842,6 +847,50 @@ public class RefBookDepartment implements RefBookDataProvider {
         ConfigurationParamModel model = configurationService.getByDepartment(department.getId(), logger.getTaUserInfo());
         if (!model.isEmpty())
             logger.warn("Заданы пути к каталогам транспортных файлов для %s!", department.getName());
+
+        //11 точка запроса
+        Map<Integer, Map<String, Object>> records =
+                refBookDepartmentDao.isVersionUsedInRefBooks(
+                        Arrays.asList(
+                                RefBook.DEPARTMENT_CONFIG_INCOME,
+                                RefBook.DEPARTMENT_CONFIG_TRANSPORT,
+                                RefBook.DEPARTMENT_CONFIG_DEAL,
+                                RefBook.DEPARTMENT_CONFIG_VAT,
+                                RefBook.DEPARTMENT_CONFIG_PROPERTY),
+                        Arrays.asList((long) department.getId())
+                );
+        for (Map.Entry<Integer, Map<String, Object>> entry : records.entrySet()){
+            TaxType taxType;
+            switch (((Long)entry.getValue().get(RefBookDepartmentDao.REFBOOK_ID_ALIAS)).intValue()){
+                case 31:
+                    taxType = TaxType.TRANSPORT;
+                    break;
+                case 33:
+                    taxType = TaxType.INCOME;
+                    break;
+                case 37:
+                    taxType = TaxType.DEAL;
+                    break;
+                case 98:
+                    taxType = TaxType.VAT;
+                    break;
+                case 99:
+                    taxType = TaxType.PROPERTY;
+                    break;
+                default:
+                    taxType = TaxType.INCOME;
+                    break;
+            }
+            Date startDate = (Date)entry.getValue().get(RefBookDepartmentDao.VERSION_START_ALIAS);
+            String rpName =
+                    refBookDepartmentDao.getReportPeriodNameByDate(taxType, startDate);
+            logger.error(
+                    DFT_RELATION,
+                    departmentService.getDepartment(department.getId()).getName(),
+                    taxType.getName(),
+                    rpName,
+                    SDF_YYYY.format(startDate));
+        }
     }
 
     private void deleteDRPs(int depId){
