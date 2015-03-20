@@ -12,6 +12,8 @@ import groovy.transform.Field
  * formTemplateId=1415
  *
  * TODO:
+ *      - неясно какой код формы
+ *      - неясно какой верхний колонтитул
  *      - консолидация: в чтз не описано как консолидировать второй источник
  *
  * @author SYasinskiy
@@ -215,51 +217,51 @@ void logicCheck() {
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
 
-        // 1-10. Проверка на заполнение поля «<Наименование поля>»
+        // 1-9. Проверка на заполнение поля «<Наименование поля>»
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-        // 11. Проверка на заполнение поля «<Наименование поля>»
+        // 10. Проверка на заполнение поля «<Наименование поля>»
         if (address.find { row.getCell(it).value != null }) {
             checkNonEmptyColumns(row, index, ['region'], logger, true)
         }
 
-        // 12. Проверка вводимых символов в поле «Серия и номер документа»
+        // 11. Проверка вводимых символов в поле «Серия и номер документа»
         if (row.series != null && !row.series?.matches("^[а-яА-ЯёЁa-zA-Z0-9]+\$")) {
             def name = getColumnName(row, 'series')
             logger.error(errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
 
-        // 13. Проверка заполнения поля «Номер дома (владения)»
-        if (row.house && !row.house?.matches("^[а-яА-ЯёЁa-zA-Z0-9/ ]+\$")) {
+        // 12. Проверка заполнения поля «Номер дома (владения)»
+        if (row.house && !row.house?.matches("^[а-яА-ЯёЁa-zA-Z0-9/-]+\$")) {
             def name = getColumnName(row, 'house')
             logger.error(errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
 
-        // 14-21. Проверка заполнения полей 12, 14..20
+        // 13-20. Проверка заполнения полей 12, 14..20
         if (row.region != null) {
             checkNonEmptyColumns(row, row.getIndex(), address, logger, true)
         }
 
-        // 22. Проверка заполнения графы «Регион (код)»
+        // 21. Проверка заполнения графы «Регион (код)»
         if (row.country == null && row.address == null && row.region == null) {
             def name = getColumnName(row, 'region')
             logger.error(errorMsg + "Графа «$name» не заполнена!")
         }
 
-        // 23. Проверка правильности заполнения графы «ИНН в стране гражданства»
+        // 22. Проверка правильности заполнения графы «ИНН в стране гражданства»
         if (row.inn && row.citizenship && getRefBookValue(10L, row.citizenship)?.CODE?.value == '643') {
             def nameInn = getColumnName(row, 'inn')
             def nameCitizenship = getColumnName(row, 'citizenship')
             logger.error(errorMsg + "Графа «$nameInn» не должно быть заполнено, если графа «$nameCitizenship» равна «643»")
         }
 
-        // 24. Проверка правильности заполнения графы «Статус налогоплательщика»
+        // 23. Проверка правильности заполнения графы «Статус налогоплательщика»
         if (row.status && !row.status?.matches("^[1-3]+\$")) {
             def name = getColumnName(row, 'status')
             logger.error(errorMsg + "Графа «$name» содержит недопустимое значение! Поле может содержать только одно из значений: «1», «2», «3»")
         }
 
-        // 25-27. Проверка соответствия суммы дохода суммам вычета
+        // 24-26. Проверка соответствия суммы дохода суммам вычета
         def String errorMsg1 = errorMsg + "Сумма граф «Сумма вычета» для кода дохода = «%s» превышает значение поля «Сумма дохода» для данного кода."
         if (getSum1(row) > roundValue(row.col_041_1 ?: 0)) {
             def value = getRefBookValue(370L, row.col_040_1)?.CODE?.value
@@ -337,7 +339,9 @@ def BigDecimal calc24(def row) {
 }
 
 def BigDecimal calc25(def row) {
-    return getSum1(row) + getSum2(row) + getSum3(row)
+    // графа 68, 70
+    def tmp = getSum(row, ['col_052_3_1', 'col_052_3_2'])
+    return getSum1(row) + getSum2(row) + getSum3(row) + tmp
 }
 
 def BigDecimal calc26(def row) {
@@ -354,9 +358,9 @@ def BigDecimal getSum2(def row) {
     return getSum(row, ['col_043_2_1', 'col_043_2_2', 'col_043_2_3', 'col_043_2_4', 'col_043_2_5'])
 }
 
-/** Получить сумму «Графа 59» + «Графа 61» + «Графа 63» + «Графа 65» + «Графа 67» + «Графа 69» + «Графа 71». */
+/** Получить сумму «Графа 59» + «Графа 61» + «Графа 63» + «Графа 65» + «Графа 67». */
 def BigDecimal getSum3(def row) {
-    return getSum(row, ['col_043_3_1', 'col_043_3_2', 'col_043_3_3', 'col_043_3_4', 'col_043_3_5', 'col_052_3_1', 'col_052_3_2'])
+    return getSum(row, ['col_043_3_1', 'col_043_3_2', 'col_043_3_3', 'col_043_3_4', 'col_043_3_5'])
 }
 
 /**
@@ -768,7 +772,6 @@ void consolidation() {
         } else if (it.formTypeId == source2FormTypeId) {
             // Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)
             // TODO (Ramil Timerbaev) в чтз не описано как консолидировать второй источник
-            // TODO (Ramil Timerbaev) эта форма в 0.3.9.1, еще не смержили в 0.5.1,
         }
     }
     dataRowHelper.save(dataRows)
