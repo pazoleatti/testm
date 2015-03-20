@@ -156,6 +156,12 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
      * Фильтр для Dao-слоя при выборке НФ. Пользовательская фильтрация и принудительная фильтрация.
      */
     private FormDataDaoFilter createFormDataDaoFilter(TAUserInfo userInfo, FormDataFilter formDataFilter) {
+        if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
+                && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
+                && !userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
+            throw new AccessDeniedException("У пользователя нет прав на поиск по налоговым формам");
+        }
         FormDataDaoFilter formDataDaoFilter = new FormDataDaoFilter();
         // ПОЛЬЗОВАТЕЛЬСКАЯ ФИЛЬТРАЦИЯ
 
