@@ -230,7 +230,7 @@ void calcRows(def dataRows, def prevDataRows) {
     rowBank.reservePrev = calc13(rowBank, prevDataRows)
     // графа 14
     def tmp = tmpRows.sum { it.reserveCurrent ?: 0 }
-    rowBank.reserveCurrent = roundValue(tmp > 0 ? rowBank.reserveCurrent : 0)
+    rowBank.reserveCurrent = roundValue(tmp > 0 ? tmp : 0)
     // графа 17
     tmp = tmpRows.sum { it.usingReserve ?: 0 }
     rowBank.usingReserve = roundValue(tmp)
