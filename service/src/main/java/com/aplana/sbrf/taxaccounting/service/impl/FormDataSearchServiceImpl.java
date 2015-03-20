@@ -170,8 +170,6 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
         if (formDataFilter.getDepartmentIds() == null || formDataFilter.getDepartmentIds().isEmpty()) {
             departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
                     formDataFilter.getTaxType() != null ? asList(formDataFilter.getTaxType()) : asList(TaxType.values()), null, null));
-        } else {
-            departments.addAll(formDataFilter.getDepartmentIds());
             // ПРИНУДИТЕЛЬНАЯ ФИЛЬТРАЦИЯ
             if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
                 // Операторы дополнительно фильтруются по подразделениям и типам форм
@@ -179,17 +177,15 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
                 departments.addAll(departmentService.getTaxFormDepartments(userInfo.getUser(),
                         asList(formDataFilter.getTaxType()), null, null));
             }
+        } else {
+            departments.addAll(formDataFilter.getDepartmentIds());
         }
 
         // Отчетные периоды
         formDataDaoFilter.setReportPeriodIds(formDataFilter.getReportPeriodIds());
         // Типы форм
         Set<FormDataKind> kinds = new HashSet<FormDataKind>(FormDataKind.values().length);
-        if (formDataFilter.getFormDataKind() != null && !formDataFilter.getFormDataKind().isEmpty()) {
-            for (Long id: formDataFilter.getFormDataKind()){
-                kinds.add(FormDataKind.fromId(id.intValue()));
-            }
-        } else {
+        if (formDataFilter.getFormDataKind() == null || formDataFilter.getFormDataKind().isEmpty()) {
             kinds.addAll(formDataAccessService.getAvailableFormDataKind(userInfo, asList(formDataFilter.getTaxType())));
             // ПРИНУДИТЕЛЬНАЯ ФИЛЬТРАЦИЯ
             if (userInfo.getUser().hasRole(TARole.ROLE_OPER)) {
@@ -201,6 +197,10 @@ public class FormDataSearchServiceImpl implements FormDataSearchService {
                     formDataKindList.add(FormDataKind.UNP);
                 }
                 kinds.addAll(formDataKindList);
+            }
+        } else {
+            for (Long id: formDataFilter.getFormDataKind()){
+                kinds.add(FormDataKind.fromId(id.intValue()));
             }
         }
 
