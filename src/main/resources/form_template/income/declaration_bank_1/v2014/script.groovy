@@ -359,7 +359,8 @@ void generateXML() {
     def dataRowsAdvance = getDataRows(formDataCollection, 500, [FormDataKind.SUMMARY])
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, newDeclaration ? 411 : 306, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
+    def output1_id = newDeclaration ? (isTaxPeriod ? 414 : 411) : 306
+    def dataRowsDividend = getDataRows(formDataCollection, output1_id, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */

@@ -326,7 +326,7 @@ void generateXML() {
     def dataRowsAdvance = getDataRows(formDataCollection, 500, [FormDataKind.SUMMARY])
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, 411, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
+    def dataRowsDividend = getDataRows(formDataCollection, 414, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
