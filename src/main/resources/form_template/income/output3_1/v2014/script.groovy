@@ -2,6 +2,8 @@ package form_template.income.output3_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
@@ -11,6 +13,7 @@ import groovy.transform.Field
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
  *
  * @author Stanislav Yasinskiy
+ * @author Bulat Kinzyabulatov
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -40,10 +43,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -69,7 +73,25 @@ def autoFillColumns = ['okatoCode', 'budgetClassificationCode']
 @Field
 def nonEmptyColumns = ['paymentType', 'okatoCode', 'budgetClassificationCode', 'dateOfPayment', 'sumTax']
 
-//// Обертки методов
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
@@ -81,6 +103,25 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
                       def boolean required = true) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
+}
+
+// Получение Id записи с использованием кэширования
+def getRecordId(def ref_id, String alias, String value, Date date) {
+    String filter = "LOWER($alias) = LOWER('$value')"
+    if (value == '') filter = "$alias is null"
+    if (recordCache[ref_id] != null) {
+        if (recordCache[ref_id][filter] != null) {
+            return recordCache[ref_id][filter]
+        }
+    } else {
+        recordCache[ref_id] = [:]
+    }
+    def records = refBookFactory.getDataProvider(ref_id).getRecords(date, null, filter, null)
+    if (records.size() == 1) {
+        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return recordCache[ref_id][filter]
+    }
+    return null
 }
 
 //// Кастомные методы
@@ -118,6 +159,92 @@ def logicCheck() {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
+}
+
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = []
+
+    // «Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)»
+    def sourceFormType03 = 419
+    // «Сведения о уплаченных суммах налога по операциям с ГЦБ»
+    def sourceFormTypeGCB = 420
+    // «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
+    def sourceFormTypeFRN = 421
+
+    // получить формы-источники в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+        def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
+            def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.all
+            def newDataRows = []
+            switch (it.formTypeId) {
+                case sourceFormType03:
+                    newDataRows = formNewRows03(sourceDataRows)
+                    break
+                case sourceFormTypeGCB:
+                    newDataRows = formNewRowsGCB(sourceDataRows)
+                    break
+                case sourceFormTypeFRN:
+                    newDataRows = formNewRowsFRN(sourceDataRows)
+                    break
+            }
+            if(!newDataRows.isEmpty()) {
+                dataRows.addAll(newDataRows)
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
+}
+
+def formNewRows03(def rows) {
+    def newRows = []
+    rows.each { row ->
+        def newRow = formData.createDataRow()
+        newRow.paymentType = getRecordId(24, 'CODE', '1', getReportPeriodEndDate())
+        newRow.okatoCode = '45397000'
+        newRow.budgetClassificationCode = '18210101040011000110'
+        // 28-я графа
+        newRow.dateOfPayment = row.withheldDate
+        // 29-я графа
+        newRow.sumTax = row.withheldNumber
+        newRows.add(newRow)
+    }
+    return newRows
+}
+
+def formNewRowsGCB(def rows) {
+    def newRows = []
+    for (row in rows) {
+        if (!row.getAlias() in ['R3', 'R4', 'R5'])
+            continue
+        def newRow = formData.createDataRow()
+        newRow.paymentType = getRecordId(24, 'CODE', '2', getReportPeriodEndDate())
+        newRow.okatoCode = '45397000'
+        newRow.budgetClassificationCode = '18210101070011000110'
+        // есть графа 3 источника
+        newRow.dateOfPayment = row.date
+        // есть графа 4 источника
+        newRow.sumTax = row.sum
+        newRows.add(newRow)
+    }
+    return newRows
+}
+
+def formNewRowsFRN(def rows) {
+    def newRows = []
+    def row = getDataRow(rows, 'SUM_DIVIDENDS')
+    def newRow = formData.createDataRow()
+    newRow.paymentType = getRecordId(24, 'CODE', '4', getReportPeriodEndDate())
+    newRow.okatoCode = '45397000'
+    newRow.budgetClassificationCode = '18210101060011000110'
+    // есть графа 3 источника
+    newRow.dateOfPayment = row.dealDate
+    // есть графа 4 источника
+    newRow.sumTax = row.taxSum
+    newRows.add(newRow)
+    return newRows
 }
 
 void importData() {
