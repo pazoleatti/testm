@@ -961,6 +961,18 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceLoggerException(ERROR, logEntryService.save(logger.getEntries()));
         }
 
+        //Система проверяет экземпляр на возможность выполнения консолидации в него. Существание хотя бы одной назначенной формы-источника.
+        List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
+                formData.getDepartmentId(),
+                formData.getFormType().getId(),
+                formData.getKind(),
+                reportPeriod.getCalendarStartDate(),
+                reportPeriod.getEndDate());
+        if (departmentFormTypesSources.isEmpty()){
+            logger.error("Для текущей формы не назначено ни одного источника");
+            throw new ServiceLoggerException("Операция не выполнена", logEntryService.save(logger.getEntries()));
+        }
+
         //Блокировка текущей формы
         List<String> lockedForms = new ArrayList<String>();
         String lockCurrentKey = LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId();
@@ -978,13 +990,7 @@ public class FormDataServiceImpl implements FormDataService {
             lockedForms.add(lockCurrentKey);
         }
 
-        //2 Список источников для текущей формы
-        List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources( formData.getDepartmentId(),
-                formData.getFormType().getId(),
-                formData.getKind(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getEndDate());
-
+        //Блокировка всех экземпляров источников
         try {
             String lockKey;
             for (DepartmentFormType sourceDFT : departmentFormTypesSources){
@@ -998,16 +1004,19 @@ public class FormDataServiceImpl implements FormDataService {
                         sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
                 // Проверяем/устанавливаем блокировку для источников
                 lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + sourceDFT.getId();
-                LockData lockData = lockService.lock(lockKey,
+                LockData lockData = lockService.lock(
+                        lockKey,
                         userInfo.getUser().getId(),
                         lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
 
                 if (lockData != null) {
                     logger.error(LOCK_SOURCE,
-                            sourceForm.getFormType().getName(), sourceDFT.getKind().getName(),
+                            sourceForm.getFormType().getName(),
+                            sourceDFT.getKind().getName(),
                             sourceDepartmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " " + sourceDepartmentReportPeriod.getReportPeriod().getName(),
                             departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
-                            userService.getUser(lockData.getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
+                            userService.getUser(lockData.getUserId()).getName(),
+                            SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
                 } else {
                     lockedForms.add(lockKey);
                 }
@@ -1027,6 +1036,9 @@ public class FormDataServiceImpl implements FormDataService {
                 }
                 FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
                         sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+                if (sourceForm==null){
+                    continue;
+                }
                 ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
                 scriptComponentContext.setUserInfo(userInfo);
                 scriptComponentContext.setLogger(logger);
@@ -1049,10 +1061,15 @@ public class FormDataServiceImpl implements FormDataService {
                                 "")
                 ));
             }
+            //Удаление отчета НФ
+            reportService.delete(formData.getId(), null);
+            //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
+            updatePreviousRowNumber(formData, logger);
+            //Обновление записей о консолидации
             sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
             sourceService.addFormDataConsolidationInfo(formData.getId(), srcIds);
 
-            //6, 7 Вывод сообщений в панель уведомлений
+            //Вывод сообщений в панель уведомлений
             logger.info("Выполнена консолидация данных из форм-источников:");
             for (String s : msgPull){
                 logger.info(s);
@@ -1265,7 +1282,7 @@ public class FormDataServiceImpl implements FormDataService {
             for (FormData data : formDataList) {
                 formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data));
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
-                stringBuilder.append(reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear());
+                stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
                 if (--size > 0) {
                     stringBuilder.append(", ");
                 }
