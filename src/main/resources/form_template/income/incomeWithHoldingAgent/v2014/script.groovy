@@ -80,8 +80,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        // TODO (Ramil Timerbaev) в какой то из следующих версий не используется formDataDepartment.id
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
         break
@@ -296,7 +295,7 @@ void addData(def xml, headRowCount) {
 
         // графа 9
         xmlIndexCol++
-        newRow.year = getDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, required)
+        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
         // графа 10
         xmlIndexCol++
@@ -683,26 +682,4 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
     return newRow
-}
-
-/**
- * Получение даты в случае когда в эксель дата отображается yyyy, но значение содержит dd.MM.yyyy.
- * // TODO (Ramil Timerbaev) это метод нужен в версии 0.3.9.1, в версии 0.5 этот метод не нужен.
- */
-def getDate(def value, def format, def indexRow, def indexColumn, required) {
-    def tmp = value.trim()
-    // формат строки и шаблона не совпадают (excel может подставить в ячейку "yyyy" значение "01.01.yyyy")
-    if (!tmp.contains(".") && format.contains(".")) {
-        BigDecimal tmpNum = parseNumber(tmp, indexRow, indexColumn, logger, required);
-        if (tmpNum != null && !tmpNum.equals(0)) {
-            return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
-        }
-    }
-    if (tmp.contains(".") && !format.contains(".")) {
-        BigDecimal tmpNum = parseNumber(tmp.substring(tmp.lastIndexOf('.') + 1), indexRow, indexColumn, logger, required);
-        if (tmpNum != null && !tmpNum.equals(0)) {
-            return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
-        }
-    }
-    return parseDate(value, format, indexRow, indexCol, logger, required)
 }

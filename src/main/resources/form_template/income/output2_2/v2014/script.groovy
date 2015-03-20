@@ -1,7 +1,6 @@
 package form_template.income.output2_2.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
@@ -12,33 +11,33 @@ import groovy.transform.Field
  * formTemplateId=416
  */
 
-// графа 1  -  rowNumber
-// графа 2  -  emitent
-// графа 3  -  decreeNumber
-// графа 4  -  inn
-// графа 5  -  kpp
-// графа 6  -  recType
-// графа 7  -  title
-// графа 8  -  zipCode
-// графа 9  -  subdivisionRF
-// графа 10  -  area
-// графа 11  -  city
-// графа 12  -  region
-// графа 13  -  street
-// графа 14  -  homeNumber
-// графа 15  -  corpNumber
-// графа 16  -  apartment
-// графа 17  -  surname
-// графа 18  -  name
-// графа 19  -  patronymic
-// графа 20  -  phone
-// графа 21  -  dividendDate
-// графа 22  -  sumDividend
-// графа 23  -  sumTax
+// графа 1  - rowNumber
+// графа 2  - emitent
+// графа 3  - decreeNumber
+// графа 4  - inn
+// графа 5  - kpp
+// графа 6  - recType
+// графа 7  - title
+// графа 8  - zipCode
+// графа 9  - subdivisionRF    - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
+// графа 10 - area
+// графа 11 - city
+// графа 12 - region
+// графа 13 - street
+// графа 14 - homeNumber
+// графа 15 - corpNumber
+// графа 16 - apartment
+// графа 17 - surname
+// графа 18 - name
+// графа 19 - patronymic
+// графа 20 - phone
+// графа 21 - dividendDate
+// графа 22 - sumDividend
+// графа 23 - sumTax
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
         calc()
@@ -122,11 +121,14 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
-void checkCreation() {
-    if (formData.kind != FormDataKind.ADDITIONAL) {
-        logger.error("Нельзя создавать форму с типом «${formData.kind?.name}»!")
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                def Date date, boolean required = true) {
+    if (value == null) {
+        return null
     }
-    formDataService.checkUnique(formData, logger)
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
+            cellName, logger, required)
 }
 
 void calc() {
@@ -157,6 +159,7 @@ void logicCheck() {
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = []
+    def index = 1
 
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
@@ -169,6 +172,7 @@ void consolidation() {
                     // «Графа 17» = «RUS» и «Графа 16» = 1 и «Графа 22» = «0» или «9»
                     if ('RUS'.equals(sourceRow.status) && sourceRow.type == 1 && (sourceRow.rate == 0 || sourceRow.rate == 9)) {
                         def newRow = formNewRow(sourceRow)
+                        newRow.setIndex(index++)
                         dataRows.add(newRow)
                     }
                 }
@@ -199,7 +203,7 @@ def formNewRow(def row) {
     //«Графа 8» = «Графа 30» первичной формы
     newRow.zipCode = row.postcode
     //«Графа 9» = «Графа 31» первичной формы
-    newRow.subdivisionRF = row.region
+    newRow.subdivisionRF = getRecordId(4L, 'CODE', row.region, row.getIndex(), getColumnName(row, 'region'), getReportPeriodEndDate(), false)
     //«Графа 10» = «Графа 32» первичной формы
     newRow.area = row.district
     //«Графа 11» = «Графа 33» первичной формы
