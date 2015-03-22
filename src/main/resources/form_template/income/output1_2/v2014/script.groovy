@@ -316,7 +316,7 @@ def formNewRow(def row, def rowMap, def prevPeriodStartDate, def prevPeriodEndDa
     newRow.dividendRussianTotal = rowList.sum{ (it.status == 'RUS' && it.dividends != null) ? it.dividends : 0 }
 
     // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
-    newRow.dividendRussianOrgStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
+    newRow.dividendRussianStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
 
     // «Графа 12» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
     // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
