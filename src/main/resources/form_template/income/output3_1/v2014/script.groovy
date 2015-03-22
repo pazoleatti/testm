@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
- * Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика
+ * Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика (начиная с год 2014)
  * formTemplateId=1412
  *
  * http://conf.aplana.com/pages/viewpage.action?pageId=8784122
@@ -17,9 +17,6 @@ import groovy.transform.Field
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        if (formData.kind != FormDataKind.ADDITIONAL) {
-            logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
-        }
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
