@@ -100,8 +100,8 @@ alter table declaration_data_consolidation add constraint decl_data_consolidatio
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id);
 
 ---------------------------------------------------------------------------------------------
-
-
+--http://jira.aplana.com/browse/SBRFACCTAX-10729: FORM_DATA_PERFORMER:NAME сделать поле необязательным для заполнения
+alter table form_data_performer modify name null;
 
 commit;
 end;

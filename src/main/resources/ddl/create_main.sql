@@ -463,7 +463,7 @@ create sequence seq_form_data_signer start with 10000;
 ---------------------------------------------------------------------------------------------------
 create table form_data_performer (
   form_data_id number(18) not null,
-  name varchar2(200) not null,
+  name varchar2(200),
   phone varchar2(40),
   print_department_id number(9),
   report_department_name varchar2(4000 byte)
