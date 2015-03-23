@@ -136,8 +136,8 @@ void logicCheck() {
 
         // 4. Проверка формата заполнения
         // графа 9
-        if (row.number2 && !row.number2.matches("^\\S{2}\\-\\S{4}\\-\\S{6}\$")) {
-            loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'number2'), "ХХ-ХХХХ-ХХХХХХ"))
+        if (row.number2 && !row.number2.matches("^\\S{9}\\/\\S{2}\\-\\S{4}\$")) {
+            loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'number2'), "ХХХХХХХХХ/ХХ-ХХХХ"))
         }
     }
 

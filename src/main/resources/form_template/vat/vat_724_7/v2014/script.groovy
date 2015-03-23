@@ -140,8 +140,8 @@ void logicCheck() {
             loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'inn'), "ХХХХХХХХХХ"))
         }
         // графа 10
-        if (row.sfNumber && !row.sfNumber.matches("^\\S{2}\\-\\S{4}\\-\\S{6}\$")) {
-            loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'sfNumber'), "ХХ-ХХХХ-ХХХХХХ"))
+        if (row.sfNumber && !row.sfNumber.matches("^\\S{9}\\/\\S{2}\\-\\S{4}\$")) {
+            loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'sfNumber'), "ХХХХХХХХХ/ХХ-ХХХХ"))
         }
     }
 

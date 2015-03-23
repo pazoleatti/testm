@@ -109,8 +109,8 @@
         <columnType>STRING</columnType>
         <name>Счёт-фактура. Номер</name>
         <order>11</order>
-        <width>7</width>
-        <maxLength>14</maxLength>
+        <width>10</width>
+        <maxLength>17</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <styles>
