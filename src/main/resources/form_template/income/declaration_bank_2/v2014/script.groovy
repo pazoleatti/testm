@@ -1,4 +1,4 @@
-package form_template.income.declaration_bank_1.v2015
+package form_template.income.declaration_bank_2.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -9,11 +9,15 @@ import groovy.xml.MarkupBuilder
 /**
  * Декларация по налогу на прибыль (Банк) (год 2014)
  * Формирование XML для декларации налога на прибыль.
+ * версия 2014 года
+ * declarationTemplateId=21447
  *
- * declarationTemplateId=21607
- *
- * @author Bulat.Kinzyabulatov
+ * @author rtimerbaev
  */
+
+// Признак новой декларации (http://jira.aplana.com/browse/SBRFACCTAX-8910)
+@Field
+def boolean newDeclaration = true;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
@@ -106,6 +110,11 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
     def departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    if (departmentFormType == null) {
+        sourceFormTypeId = 417
+        sourceFormType = formTypeService.get(sourceFormTypeId)
+        departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
+    }
     if (departmentFormType == null) {
         if (loggerNeed) {
             logger.log(logLevel, "Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята» (налоговая форма не назначена источником декларации Банка/назначена источником, но не создана/назначена источником, создана, но не принята). Строка 240 Листа 02 декларации заполнена значением «0»!")
@@ -326,21 +335,26 @@ void generateXML() {
     def dataRowsAdvance = getDataRows(formDataCollection, 500, [FormDataKind.SUMMARY])
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, 414, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
+    def output1_id = newDeclaration ? (isTaxPeriod ? 414 : 411) : 306
+    def dataRowsDividend = getDataRows(formDataCollection, output1_id, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, 416, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
+    def output2_id = newDeclaration ? (isTaxPeriod ? 416 : 413) : 307
+    def dataRowsTaxAgent = getDataRows(formDataCollection, output2_id, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
-    def dataRowsTaxSum = getDataRows(formDataCollection, 412, [FormDataKind.ADDITIONAL])
+    def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308, [FormDataKind.ADDITIONAL])
 
     /** форма «Остатки по начисленным авансовым платежам». */
     def dataRowsRemains = getDataRows(formDataCollection, 309, [FormDataKind.PRIMARY])
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
     def dataRowsSum = getDataRows(formDataCollection, 421, [FormDataKind.ADDITIONAL])
+    if (dataRowsSum == null) {
+        dataRowsSum = getDataRows(formDataCollection, 417, [FormDataKind.ADDITIONAL])
+    }
 
     // Выходная Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
     def dataRowsApp2 = getDataRows(formDataCollection, 415, [FormDataKind.ADDITIONAL])
@@ -737,8 +751,8 @@ void generateXML() {
 
                         // 0..1
                         СубБдж(
-                                КБК: kbk2,
-                                НалПУ: nalPu)
+                                КБК : kbk2,
+                                НалПУ : nalPu)
                     }
                     // Раздел 1. Подраздел 1.1 - конец
 
@@ -940,7 +954,7 @@ void generateXML() {
                                 РасхВнеРеалВс : rashVnerealVs,
                                 РасхВнереалПрДО : rashVnerealPrDO,
                                 РасхВнереалРзрв : empty,
-                                // УбытРеалПравТр : ubitRealPravTr, не заполняется с 2015 года
+                                УбытРеалПравТр : ubitRealPravTr,
                                 РасхЛиквОС : rashLikvOS,
                                 РасхШтраф : rashShtraf,
                                 РасхРынЦБДД : rashRinCBDD)
@@ -987,22 +1001,17 @@ void generateXML() {
                         // 0..1
                         ВыручРеалПТ(
                                 ВыручРеалПТДоСр : viruchRealPTDoSr,
-                                // ВыручРеалПТПосСр : viruchRealPTPosSr не заполняется с 2015 года
-                        )
+                                ВыручРеалПТПосСр : viruchRealPTPosSr)
                         // 0..1
                         СтоимРеалПТ(
                                 СтоимРеалПТДоСр : stoimRealPTDoSr,
-                                // СтоимРеалПТПосСр : stoimRealPTPosSr не заполняется с 2015 года
-                        )
+                                СтоимРеалПТПосСр : stoimRealPTPosSr)
                         // 0..1
-                        УбытРеалПТ1(
+                        УбытРеалПТ(
                                 Убыт1Соот269 : ubit1Soot269,
-                                Убыт1Прев269 : ubit1Prev269
-                        )
-                        //УбытРеалПТ2(
-                                // Убыт2РеалПТ : ubit2RealPT, не заполняется с 2015 года
-                                // Убыт2ВнРасх : ubit2VnRash не заполняется с 2015 года
-                        //)
+                                Убыт1Прев269 : ubit1Prev269,
+                                Убыт2РеалПТ : ubit2RealPT,
+                                Убыт2ВнРасх : ubit2VnRash)
                     }
                     // Приложение № 3 к Листу 02 - конец
 
@@ -1210,7 +1219,23 @@ void generateXML() {
                 }
                 // Лист 04 - конец
 
-                // Лист 05 неактуален с 1 января 2015 года
+                // Лист 05
+                // 0..n
+                НалБазОпОсоб(
+                        ВидОпер : 5,
+                        ДохВыбытПогаш : empty,
+                        СумОтклМинЦ : empty,
+                        РасхПриобРеал : empty,
+                        СумОтклМаксЦ : empty,
+                        Прибыль : empty,
+                        КорПриб : empty,
+                        НалБазаБезУбПред : empty,
+                        СумУбытПред : empty,
+                        СумУбытУменНБ : empty,
+                        СумНеучУбытПер : empty,
+                        СумУбытЗСДо2010 : empty,
+                        НалБаза : empty)
+                // Лист 05 - конец
 
                 // Приложение к налоговой декларации
                 if (svCelSred.size() > 0) {
@@ -1847,15 +1872,15 @@ def getOldValue(def data, def kind, def valueName) {
  */
 def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
     if (reportPeriodId != null) {
-        // вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка
-        def declarationTypeId = 9
+        // вид декларации 11 - декларация банка
+        def declarationTypeId = 11
         def xml = getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         if (xml != null) {
             return xml
         }
         // для новой декларации можно поискать в прошлом периоде другую декларацию (обычную Банка)
-        if (anyPrevDeclaration) {
-            declarationTypeId = 2
+        if (newDeclaration && anyPrevDeclaration) {
+            declarationTypeId = 9
             return getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         }
     }
@@ -1978,8 +2003,8 @@ def getDataRows(def formDataCollection, def formTemplateId, def List<FormDataKin
 
 /** Отменить принятие. Проверить наличие декларации ОП. */
 void сancelAccepted() {
-    // вид декларации 5 - декларация ОП
-    def declarationTypeId = 5
+    // вид декларации 19 - декларация ОП
+    def declarationTypeId = 19
 
     if (declarationService.checkExistDeclarationsInPeriod(declarationTypeId, declarationData.reportPeriodId)) {
         throw new Exception('Отменить принятие данной декларации Банка невозможно. Так как в текущем периоде создана декларация ОП по прибыли!')
