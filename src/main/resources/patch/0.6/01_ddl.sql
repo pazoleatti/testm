@@ -68,7 +68,40 @@ comment on column declaration_data.is_show_report is 'Признак возмо�
 
 alter table declaration_data add constraint declaration_data_chk_isshowrep check (is_show_report in (0,1));
 
+---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-10451: Таблицы для консолидации
+
+create table form_data_consolidation
+(
+source_form_data_id number(9) not null,
+target_form_data_id number(9) not null
+);
+
+comment on table form_data_consolidation is 'Сведения о консолидации налоговых форм в налоговые формы';
+comment on column form_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
+comment on column form_data_consolidation.target_form_data_id is 'Идентификатор НФ приемника';
+
+create table declaration_data_consolidation
+(
+source_form_data_id number(9) not null,
+target_declaration_data_id number(9) not null
+);
+
+comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм в декларации';
+comment on column declaration_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
+comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор декларации приемника';
+
+alter table form_data_consolidation add constraint form_data_consolidation_pk primary key (source_form_data_id, target_form_data_id);
+alter table form_data_consolidation add constraint form_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
+alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id);
+
+alter table declaration_data_consolidation add constraint decl_data_consolidation_pk primary key (source_form_data_id, target_declaration_data_id);
+alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
+alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id);
 
 ---------------------------------------------------------------------------------------------
+
+
+
 commit;
 end;
