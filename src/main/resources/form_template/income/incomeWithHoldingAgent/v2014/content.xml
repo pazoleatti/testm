@@ -9,14 +9,16 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
+        <columnType>AUTO</columnType>
         <name>№ п/п</name>
         <order>1</order>
         <width>5</width>
-        <type>0</type>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>emitentName</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Эмитент. Наименование</name>
         <order>2</order>
         <width>6</width>
@@ -26,6 +28,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>emitentInn</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Эмитент. ИНН</name>
         <order>3</order>
         <width>5</width>
@@ -35,6 +38,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>all</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды полученные ОАО &quot;Сбербанк России&quot;. Всего</name>
         <order>4</order>
         <width>5</width>
@@ -44,6 +48,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rateZero</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды полученные ОАО &quot;Сбербанк России&quot;. По ставке 0%</name>
         <order>5</order>
         <width>5</width>
@@ -53,6 +58,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>distributionSum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Сумма дивидендов Эмитента, распределяемая в пользу всех получателей, уменьшенная на сумму дивидендов,
             полученных самим Эмитентом
         </name>
@@ -64,6 +70,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>decisionNumber</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Решение о распределении дивидендов. Номер</name>
         <order>7</order>
         <width>5</width>
@@ -73,6 +80,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>decisionDate</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дивиденды выплаченные. Решение о распределении дивидендов. Дата</name>
         <order>8</order>
         <width>5</width>
@@ -81,6 +89,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>year</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дивиденды выплаченные. Отчетный год. Год</name>
         <order>9</order>
         <width>5</width>
@@ -89,6 +98,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>firstMonth</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды выплаченные. Отчетный год. Период распределения. Первый месяц</name>
         <order>10</order>
         <width>5</width>
@@ -98,6 +108,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>lastMonth</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды выплаченные. Отчетный год. Период распределения. Последний месяц</name>
         <order>11</order>
         <width>5</width>
@@ -107,6 +118,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>allSum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Всего</name>
         <order>12</order>
         <width>5</width>
@@ -116,17 +128,19 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>addresseeName</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             Наименование (ЮЛ) или ФИО (ФЛ)
         </name>
         <order>13</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>inn</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             ИНН
         </name>
@@ -138,6 +152,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>kpp</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             КПП
         </name>
@@ -149,6 +164,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>type</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             Тип
         </name>
@@ -160,6 +176,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>status</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             Статус
         </name>
@@ -171,6 +188,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>birthday</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             Физическое лицо. Дата рождения
         </name>
@@ -178,42 +196,50 @@
         <width>5</width>
         <formatId>0</formatId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>citizenship</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             Физическое лицо. Гражданство
         </name>
         <order>19</order>
-        <width>5</width>
-        <maxLength>3</maxLength>
-        <prevLength>0</prevLength>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
+        <refBookAttributeId>50</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>kind</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             Физическое лицо. Документ. Вид
         </name>
         <order>20</order>
         <width>5</width>
-        <maxLength>2</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>3602</nameAttributeId>
+        <refBookAttributeId>3601</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>series</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Получатель.
             Физическое лицо. Документ. Серия и номер
         </name>
         <order>21</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>25</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rate</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Ставка
         </name>
         <order>22</order>
@@ -224,17 +250,19 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dividends</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Дивиденды
             начисленные
         </name>
         <order>23</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Платёжное
             поручение. Сумма
         </name>
@@ -246,6 +274,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>date</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Платёжное
             поручение. Дата
         </name>
@@ -256,6 +285,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>number</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО &quot;Сбербанк России&quot;. Платёжное
             поручение. Номер
         </name>
@@ -267,6 +297,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>withheldSum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ОАО &quot;Сбербанк России&quot;.
             Платёжное поручение. Сумма
         </name>
@@ -278,6 +309,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>withheldDate</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ОАО &quot;Сбербанк России&quot;.
             Платёжное поручение. Дата
         </name>
@@ -288,6 +320,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>withheldNumber</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ОАО &quot;Сбербанк России&quot;.
             Платёжное поручение. Номер
         </name>
@@ -299,33 +332,39 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>postcode</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Индекс</name>
         <order>30</order>
         <width>5</width>
         <maxLength>6</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>region</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Код региона</name>
         <order>31</order>
         <width>5</width>
-        <maxLength>2</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>10</nameAttributeId>
+        <refBookAttributeId>9</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>district</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Район</name>
         <order>32</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>city</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Город</name>
         <order>33</order>
         <width>5</width>
@@ -335,24 +374,27 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>locality</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Населённый пункт (село, посёлок и т.п.)</name>
         <order>34</order>
-        <width>5</width>
+        <width>8</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>street</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Улица (проспект, переулок и т.д.)</name>
         <order>35</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>house</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Номер дома (владения)</name>
         <order>36</order>
         <width>5</width>
@@ -362,6 +404,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>housing</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Номер корпуса (строения)</name>
         <order>37</order>
         <width>5</width>
@@ -371,6 +414,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>apartment</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Место нахождения (адрес) получателя. Номер офиса (квартиры)</name>
         <order>38</order>
         <width>5</width>
@@ -380,6 +424,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>surname</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Руководитель организации – получателя. Фамилия</name>
         <order>39</order>
         <width>5</width>
@@ -389,6 +434,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>name</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Руководитель организации – получателя. Имя</name>
         <order>40</order>
         <width>5</width>
@@ -398,6 +444,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>patronymic</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Руководитель организации – получателя. Отчество</name>
         <order>41</order>
         <width>5</width>
@@ -407,9 +454,10 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>phone</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Дивиденды выплаченные. Контактный телефон</name>
         <order>42</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
