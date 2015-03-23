@@ -1,7 +1,6 @@
 package form_template.income.output3_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -214,10 +213,11 @@ def formNewRows03(def rows) {
 def formNewRowsGCB(def rows) {
     def newRows = []
     for (row in rows) {
-        if (!row.getAlias() in ['R3', 'R4', 'R5'])
+        if (!(row.getAlias() in ['R3', 'R4', 'R5'])) {
             continue
+        }
         def newRow = formData.createDataRow()
-        newRow.paymentType = getRecordId(24, 'CODE', '2', getReportPeriodEndDate())
+        newRow.paymentType = getRecordId(24, 'CODE', '3', getReportPeriodEndDate())
         newRow.okatoCode = '45397000'
         newRow.budgetClassificationCode = '18210101070011000110'
         // есть графа 3 источника
