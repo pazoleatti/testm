@@ -1,4 +1,4 @@
-package form_template.income.declaration_op_1.v2015
+package form_template.income.declaration_op_2.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -10,7 +10,7 @@ import groovy.xml.MarkupBuilder
  * Декларация по налогу на прибыль (ОП) (год 2014)
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
- * declarationTemplateId=21647
+ * declarationTemplateId=21707
  *
  * @author Bulat.Kinzyabulatov
  */
@@ -92,8 +92,8 @@ def checkDeclarationBank() {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
-    /** вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка */
-    def declarationTypeId = 9
+    /** вид декларации 11 - декларация банка */
+    def declarationTypeId = 11
 
     /** Идентификатор подразделения Банка. */
     def departmentBankId = 1
@@ -350,7 +350,7 @@ void generateXML(def xmlBankData) {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(19, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion){
 
@@ -845,8 +845,8 @@ def getTotalFromForm(def dataRows, def columnName) {
  */
 def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
     if (reportPeriodId != null) {
-        // вид декларации 2 - декларация по налогу на прибыль уровня банка, 9 - новая декларация банка
-        def declarationTypeId = 9
+        // вид декларации 11 - декларация банка
+        def declarationTypeId = 11
         def xml = getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         if (xml != null) {
             return xml
