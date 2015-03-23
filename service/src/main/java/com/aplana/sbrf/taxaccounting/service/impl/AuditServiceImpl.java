@@ -132,19 +132,18 @@ public class AuditServiceImpl implements AuditService {
     public PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo) {
         try {
             TAUser user = userInfo.getUser();
+            HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
+                    new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
             if (user.hasRole(TARole.ROLE_ADMIN)) {
                 return auditDao.getLogsForAdmin(filter);
             } else if (user.hasRole(TARole.ROLE_CONTROL_NS) || user.hasRole(TARole.ROLE_CONTROL)) {
-                HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
-                        new HashMap<SAMPLE_NUMBER, Collection<Integer>>(3);
+
                 sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
                 sampleVal.put(SAMPLE_NUMBER.S_45, departmentService.getSourcesDepartmentIds(userInfo.getUser(), null, null));
                 sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
 
                 return auditDao.getLogsBusinessForControl(filter, sampleVal);
             } else if (user.hasRole(TARole.ROLE_OPER)) {
-                HashMap<SAMPLE_NUMBER, Collection<Integer>> sampleVal =
-                        new HashMap<SAMPLE_NUMBER, Collection<Integer>>(2);
                 sampleVal.put(SAMPLE_NUMBER.S_10, departmentService.getBADepartmentIds(userInfo.getUser()));
                 sampleVal.put(SAMPLE_NUMBER.S_55, departmentService.getAppointmentDepartments(user));
                 return auditDao.getLogsBusinessForOper(filter, sampleVal);
