@@ -740,7 +740,7 @@ void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    if (dataRows[1].getAlias() in [null, 'total_1']) {
+    if (dataRows.find { it.getAlias() != null && it.getAlias().startsWith("sub_head_") } == null) {
         for (def section : sections) {
             def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
             def lastRow = getDataRow(dataRows, getLastRowAlias(section))
