@@ -204,8 +204,8 @@ def formNewRows03(def rows) {
         newRow.budgetClassificationCode = '18210101040011000110'
         // 28-я графа
         newRow.dateOfPayment = row.withheldDate
-        // 29-я графа
-        newRow.sumTax = row.withheldNumber
+        // 27-я графа
+        newRow.sumTax = row.withheldSum
         newRows.add(newRow)
     }
     return newRows
