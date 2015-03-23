@@ -33,21 +33,24 @@ comment on table configuration_lock is 'Параметры блокировок'
 comment on column configuration_lock.key is 'Ключ блокировки';
 comment on column configuration_lock.timeout is 'Таймаут блокировки';
 
-insert into configuration_lock (key, timeout) values ('REF_BOOK', 3600000);
-insert into configuration_lock (key, timeout) values ('DECLARATION_DATA', 86400000);
-insert into configuration_lock (key, timeout) values ('DECLARATION_CREATE', 3600000);
-insert into configuration_lock (key, timeout) values ('FORM_DATA', 86400000);
-insert into configuration_lock (key, timeout) values ('FORM_DATA_IMPORT', 3600000);
-insert into configuration_lock (key, timeout) values ('FORM_DATA_CREATE', 3600000);
-insert into configuration_lock (key, timeout) values ('DECLARATION_TEMPLATE', 3600000);
-insert into configuration_lock (key, timeout) values ('FORM_TEMPLATE', 3600000);
-insert into configuration_lock (key, timeout) values ('LOG_SYSTEM_BACKUP', 3600000);
-insert into configuration_lock (key, timeout) values ('IFRS', 86400000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('REF_BOOK', 3600000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('DECLARATION_DATA', 86400000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('DECLARATION_CREATE', 3600000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('FORM_DATA', 86400000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('FORM_DATA_IMPORT', 3600000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('FORM_DATA_CREATE', 3600000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('DECLARATION_TEMPLATE', 3600000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('FORM_TEMPLATE', 3600000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('LOG_SYSTEM_BACKUP', 3600000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('IFRS', 86400000);
 
 --http://jira.aplana.com/browse/SBRFACCTAX-10294: Добавить поля в LOCK_DATA
 alter table lock_data add date_lock date default current_date not null;
 comment on column lock_data.date_lock is 'Дата установки блокировки';
 ------------------------------------------------------------------------------------------------------
+-- отключить констрейнт на уникальность ORD. Ускорение сортировки, расчетов НФ.
+alter table data_row disable constraint data_row_uniq_form_data_order;
+
 COMMIT;
 EXIT;
 

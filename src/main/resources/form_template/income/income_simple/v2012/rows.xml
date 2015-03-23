@@ -2387,7 +2387,7 @@
     </row>
     <row alias="R140">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14000"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="2"
+        <cell alias="incomeGroup" colSpan="1" rowSpan="3"
               stringValue="Доходы от долевого участия в других организациях"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Дивиденды, полученные за участие в хозяйственной деятельности Российских организаций"/>
@@ -2407,7 +2407,24 @@
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14010"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Дивиденды, полученные за участие в хозяйственной деятельности организаций-нерезидентов"/>
+              stringValue="Дивиденды, полученные за участие в хозяйственной деятельности организаций-нерезидентов (ставка 9%)"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="60347"/>
+        <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
+        <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
+        <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="rnu4Field5Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="60347"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R141_1">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14015"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
+              stringValue="Дивиденды, полученные за участие в хозяйственной деятельности организаций-нерезидентов (ставка 0%)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="60347"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>

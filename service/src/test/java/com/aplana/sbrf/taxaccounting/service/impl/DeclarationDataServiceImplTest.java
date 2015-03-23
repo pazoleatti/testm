@@ -1,12 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -43,6 +45,12 @@ public class DeclarationDataServiceImplTest {
     SourceService sourceService;
     @Autowired
     FormDataService formDataService;
+    @Autowired
+    ReportService reportService;
+    @Autowired
+    DepartmentFormTypeDao departmentFormTypeDao;
+    @Autowired
+    FormTypeService formTypeService;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -183,12 +191,111 @@ public class DeclarationDataServiceImplTest {
         long declarationDataId1 = 1, declarationDataId2 = 2;
         TAUserInfo userInfo = new TAUserInfo();
 
-        ReportService reportService = mock(ReportService.class);
         when(reportService.getDec(userInfo, declarationDataId1, ReportType.XML_DEC)).thenReturn(uuid1);
         when(reportService.getDec(userInfo, declarationDataId2, ReportType.XML_DEC)).thenReturn(uuid2);
         ReflectionTestUtils.setField(declarationDataService, "reportService", reportService);
 
         assertEquals(declarationDataService.getXmlDataDocDate(declarationDataId1, userInfo), new GregorianCalendar(2014, Calendar.NOVEMBER, 12).getTime());
         assertEquals(declarationDataService.getXmlDataFileName(declarationDataId2, userInfo), "NO_PRIB_7750_7750_7707083893777777777_20141112_D63A8CB3-C93D-483C-BED5-81F4EC69B549");
+    }
+
+    @Test
+    public void checkTest() {
+        Logger logger = new Logger();
+
+        DeclarationType declarationType = new DeclarationType();
+        declarationType.setId(1);
+        declarationType.setName("Тестовый тип декларации");
+
+        DeclarationTemplate declarationTemplate = new DeclarationTemplate();
+        declarationTemplate.setType(declarationType);
+        declarationTemplate.setId(1);
+
+        DeclarationData declarationData = new DeclarationData();
+        declarationData.setId(1l);
+        declarationData.setDeclarationTemplateId(1);
+        declarationData.setDepartmentId(1);
+        declarationData.setReportPeriodId(1);
+        declarationData.setId(1l);
+        declarationData.setDepartmentReportPeriodId(1);
+
+        FormData formData = new FormData();
+        formData.setId(1l);
+        formData.setReportPeriodId(2);
+        formData.setDepartmentId(1);
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Тестовый макет");
+        formData.setFormType(formType);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setManual(false);
+        formData.setState(WorkflowState.ACCEPTED);
+        formData.setDepartmentReportPeriodId(1);
+        formData.setPeriodOrder(null);
+
+        Department department = new Department();
+        department.setName("Тестовое подразделение");
+
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        TaxPeriod tp = new TaxPeriod();
+        tp.setYear(2015);
+        reportPeriod.setTaxPeriod(tp);
+        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setName("1 квартал");
+        reportPeriod.setId(2);
+        reportPeriod.setStartDate(new Date());
+        reportPeriod.setEndDate(new Date());
+
+        ArrayList<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>(2);
+        DepartmentFormType dft1 = new DepartmentFormType();
+        dft1.setDepartmentId(1);
+        dft1.setFormTypeId(1);
+        dft1.setKind(FormDataKind.ADDITIONAL);
+        DepartmentFormType dft2 = new DepartmentFormType();
+        dft2.setDepartmentId(2);
+        dft2.setFormTypeId(2);
+        dft2.setKind(FormDataKind.CONSOLIDATED);
+        departmentFormTypes.add(dft1);
+        departmentFormTypes.add(dft2);
+        departmentFormTypes.add(dft2);
+        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setCorrectionDate(new Date(0));
+
+        when(departmentFormTypeDao.getDeclarationSources(
+                declarationData.getDepartmentId(),
+                declarationTemplate.getType().getId(),
+                reportPeriod.getStartDate(),
+                reportPeriod.getEndDate())).thenReturn(departmentFormTypes);
+
+        when(departmentService.getDepartment(declarationData.getDepartmentId())).thenReturn(department);
+        when(departmentService.getDepartment(dft2.getDepartmentId())).thenReturn(department);
+        when(declarationDataDao.get(declarationData.getId())).thenReturn(declarationData);
+        when(reportService.getDec(Matchers.<TAUserInfo>any(), anyLong(), Matchers.<ReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
+        when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
+        when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
+        when(formDataService.findFormData(dft1.getFormTypeId(), dft1.getKind(), declarationData.getDepartmentReportPeriodId(), null)).
+                thenReturn(formData);
+        when(formDataService.findFormData(dft2.getFormTypeId(), dft2.getKind(), declarationData.getDepartmentReportPeriodId(), null)).
+                thenReturn(null);
+        when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType);
+
+        when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
+
+        declarationDataService.check(logger, 1l, userInfo);
+
+        assertEquals(
+                "Не выполнена консолидация данных из формы Тестовое подразделение Тестовый макет Первичная 1 квартал 2015 с датой сдачи корректировки 01.01.1970 в статусе Принята",
+                logger.getEntries().get(0).getMessage()
+        );
+        assertEquals(
+                "Не выполнена консолидация данных из формы Тестовое подразделение Тестовый макет Консолидированная 1 квартал 2015 с датой сдачи корректировки 01.01.1970 - экземпляр формы не создан",
+                logger.getEntries().get(1).getMessage()
+        );
     }
 }

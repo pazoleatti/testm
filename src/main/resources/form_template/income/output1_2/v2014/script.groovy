@@ -409,7 +409,7 @@ boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowI
     newRow.setImportIndex(fileRowIndex)
 
     if (rowCells.length != columnCount + 2) {
-        rowError(logger, newRow, fileRowIndex)
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
         return false
     }
 

@@ -1,24 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>true</fixedRows>
+    <fixedRows>false</fixedRows>
     <name>Итоговые данные книги покупок</name>
     <fullName>Итоговые данные книги покупок</fullName>
     <header>937.1</header>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>fix</name>
+        <order>1</order>
+        <width>0</width>
+        <maxLength>2000</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ п/п</name>
-        <order>1</order>
+        <order>2</order>
         <width>5</width>
-        <numerationType>SERIAL</numerationType>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>typeCode</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Код вида операции</name>
-        <order>2</order>
+        <order>3</order>
         <width>5</width>
         <maxLength>2</maxLength>
         <prevLength>0</prevLength>
@@ -28,7 +38,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер и дата счета-фактуры продавца</name>
-        <order>3</order>
+        <order>4</order>
         <width>6</width>
         <maxLength>1011</maxLength>
         <prevLength>0</prevLength>
@@ -38,7 +48,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер и дата исправления счета-фактуры продавца</name>
-        <order>4</order>
+        <order>5</order>
         <width>6</width>
         <maxLength>14</maxLength>
         <prevLength>0</prevLength>
@@ -48,7 +58,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер и дата корректировочного счета-фактуры продавца</name>
-        <order>5</order>
+        <order>6</order>
         <width>7</width>
         <maxLength>267</maxLength>
         <prevLength>0</prevLength>
@@ -58,7 +68,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер и дата исправления корректировочного счета-фактуры продавца</name>
-        <order>6</order>
+        <order>7</order>
         <width>7</width>
         <maxLength>14</maxLength>
         <prevLength>0</prevLength>
@@ -68,7 +78,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер и дата документа, подтверждающего уплату налога</name>
-        <order>7</order>
+        <order>8</order>
         <width>7</width>
         <maxLength>267</maxLength>
         <prevLength>0</prevLength>
@@ -78,7 +88,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата принятия на учет товаров (работ, услуг), имущественных прав</name>
-        <order>8</order>
+        <order>9</order>
         <width>7</width>
         <formatId>0</formatId>
     </columns>
@@ -87,7 +97,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Наименование продавца</name>
-        <order>9</order>
+        <order>10</order>
         <width>6</width>
         <maxLength>256</maxLength>
         <prevLength>0</prevLength>
@@ -97,7 +107,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>ИНН/КПП продавца</name>
-        <order>10</order>
+        <order>11</order>
         <width>5</width>
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
@@ -107,7 +117,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Сведения о посреднике (комиссионере, агенте). Наименование посредника</name>
-        <order>11</order>
+        <order>12</order>
         <width>6</width>
         <maxLength>256</maxLength>
         <prevLength>0</prevLength>
@@ -117,7 +127,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Сведения о посреднике (комиссионере, агенте). ИНН/КПП посредника</name>
-        <order>12</order>
+        <order>13</order>
         <width>5</width>
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
@@ -127,7 +137,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер таможенной декларации</name>
-        <order>13</order>
+        <order>14</order>
         <width>6</width>
         <maxLength>1000</maxLength>
         <prevLength>0</prevLength>
@@ -137,7 +147,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Наименование и код валюты</name>
-        <order>14</order>
+        <order>15</order>
         <width>6</width>
         <maxLength>259</maxLength>
         <prevLength>0</prevLength>
@@ -149,9 +159,9 @@
         <name>Стоимость покупок по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в
             валюте счета-фактуры
         </name>
-        <order>15</order>
+        <order>16</order>
         <width>7</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -161,9 +171,9 @@
         <name>Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в
             рублях и копейках
         </name>
-        <order>16</order>
+        <order>17</order>
         <width>7</width>
-        <maxLength>17</maxLength>
+        <maxLength>19</maxLength>
         <precision>2</precision>
     </columns>
     <styles>

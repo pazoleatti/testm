@@ -554,7 +554,7 @@ void generateXML() {
     def nalVipl311Sub = getLong(nalVipl311 - nalVipl311FB)
 
     /** АвПлатМесФБ. Код строки декларации 300. */
-    def avPlatMesFB = nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0)
+    def avPlatMesFB = isTaxPeriod ? empty : (nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0))
     /** АвНачислФБ. Код строки декларации 220. */
     def avNachislFB
     if(isFirstPeriod){
@@ -567,9 +567,9 @@ void generateXML() {
         avNachislFB = nalIschislFBOld - nalVipl311FBOld + avPlatMesFBOld
     }
     /** АвПлатМесСуб. Код строки декларации 310. */
-    def avPlatMesSub = nalIschislSub - (isFirstPeriod ? 0 : nalIschislSubOld)
+    def avPlatMesSub = isTaxPeriod ? empty : (nalIschislSub - (isFirstPeriod ? 0 : nalIschislSubOld))
     /** АвПлатМес. */
-    def avPlatMes = avPlatMesFB + avPlatMesSub
+    def avPlatMes = isTaxPeriod ? empty : (avPlatMesFB + avPlatMesSub)
     /** АвПлатУпл1КвФБ. */
     def avPlatUpl1CvFB = (reportPeriod != null && reportPeriod.order == 3 ? avPlatMesFB : empty)
     /** АвПлатУпл1КвСуб. Код строки декларации 340. */
@@ -1040,7 +1040,7 @@ void generateXML() {
                                         НалНачислСубРФ: row.subjectTaxCredit,
                                         НалВыплВнеРФ: row.taxSumOutside,
                                         СумНалП: (row.taxSumToPay != 0) ? row.taxSumToPay : (-row.taxSumToReduction),
-                                        МесАвПлат: row.everyMontherPaymentAfterPeriod,
+                                        МесАвПлат: (isTaxPeriod ? empty : (row.everyMontherPaymentAfterPeriod)),
                                         МесАвПлат1КвСлед: row.everyMonthForKvartalNextPeriod)
                             }
                         }
@@ -1178,7 +1178,7 @@ void generateXML() {
                             nalDivNeRF = (getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_DIVIDENDS') ?: 0)
                             break
                         case 5:
-                            nalBaza04 = 0
+                            nalBaza04 = getSimpleIncomeSumRows8(dataRowsSimpleIncome, [14015])
                             stavNal = 0
                             break
                         case 6:
@@ -1398,7 +1398,7 @@ def getDohVnereal(def dataRows, def dataRowsSimple) {
     // 12410, 12420, 12430, 12830, 12840, 12850, 12860, 12870, 12880, 12890, 12900, 12910, 12920,
     // 12930, 12940, 12950, 12960, 12970, 12980, 12985, 12990, 13000, 13010, 13020, 13030, 13035,
     // 13080, 13130, 13140, 13150, 13160, 13170, 13180, 13190, 13230, 13240, 13290, 13300, 13310, 13320, 13330,
-    // 13340, 13400, 13410, 13725, 13730, 13920, 13925, 13930, 14000, 14010, 14020, 14030, 14040,
+    // 13340, 13400, 13410, 13725, 13730, 13920, 13925, 13930, 14000, 14010, 14015, 14020, 14030, 14040,
     // 14050, 14060, 14070, 14080, 14090, 14100, 14110, 14120, 14130, 14150, 14160
     result += getSimpleIncomeSumRows8(dataRowsSimple, [11380, 11385, 11390, 11395, 11400, 11420,
                                                        11430, 11840, 11850, 11855, 11860, 11870, 11880, 11930, 11970, 12000, 12010, 12030,
@@ -1407,7 +1407,7 @@ def getDohVnereal(def dataRows, def dataRowsSimple) {
                                                        12860, 12870, 12880, 12890, 12900, 12910, 12920, 12930, 12940, 12950, 12960, 12970,
                                                        12980, 12985, 12990, 13000, 13010, 13020, 13030, 13035, 13080, 13130, 13140, 13150, 13160, 13170,
                                                        13180, 13190, 13230, 13240, 13290, 13300, 13310, 13320, 13330, 13340, 13400, 13410,
-                                                       13725, 13730, 13920, 13925, 13930, 14000, 14010, 14020, 14030, 14040, 14050, 14060,
+                                                       13725, 13730, 13920, 13925, 13930, 14000, 14010, 14015, 14020, 14030, 14040, 14050, 14060,
                                                        14070, 14080, 14090, 14100, 14110, 14120, 14130, 14150, 14160])
 
     // Код вида дохода = 11860, 11870, 11880, 11930, 11970, 12000, 13930, 14020, 14030, 14040, 14050,
@@ -1439,7 +1439,7 @@ def getDohIsklPrib(def dataRowsComplex, def dataRowsSimple) {
     }
     if (dataRowsSimple != null) {
         // Код вида дохода = 14000
-        result += getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu4Field5Accepted', [14000, 14010])
+        result += getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu4Field5Accepted', [14000, 14010, 14015])
     }
     return getLong(result)
 }

@@ -381,7 +381,7 @@ public interface SourceService {
 
     /**
      * Метод возвращает модель с информацией о созданных/не созданных
-     * источниках/приемниках
+     * источниках/приемниках для налоговых форм
      *
      * @param departmentId id подразделения
      * @param formTypeId вид налоговой формы
@@ -390,6 +390,14 @@ public interface SourceService {
      * @param periodOrder
      */
     List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
+
+    /**
+     * Метод возвращает модель с информацией о созданных/не созданных
+     * источниках для деклараций/уведомлений
+     *
+     * @param declaration декларация/уведомление
+     */
+    List<FormToFormRelation> getRelations(DeclarationData declaration);
 
     /**
      * Находит назначенные виды налоговые форм, которые являются потребителями налоговой формы{@code typeId}

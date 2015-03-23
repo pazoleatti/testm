@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,6 +61,10 @@ public class FormDataServiceTest {
     SourceService sourceService;
     @Autowired
     FormTypeService formTypeService;
+    @Autowired
+    TAUserService userService;
+    @Autowired
+    ReportService reportService;
 
     private static final int FORM_TEMPLATE_ID = 1;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
@@ -86,7 +91,6 @@ public class FormDataServiceTest {
         FormData formData = mock(FormData.class);
         when(formData.getReportPeriodId()).thenReturn(1);
 
-		TAUserService userService = mock(TAUserService.class);
 		TAUser user = new TAUser();
 		user.setId(666);
 		user.setLogin("MockUser");
@@ -98,8 +102,13 @@ public class FormDataServiceTest {
      */
     @Test
     public void compose() {
+        FormDataCompositionService formDataCompositionService = mock(FormDataCompositionServiceImpl.class);
+        ApplicationContext applicationContext = mock(ApplicationContext.class);
+        when(applicationContext.getBean(FormDataCompositionService.class)).thenReturn(formDataCompositionService);
+        ReflectionTestUtils.setField(formDataService, "applicationContext", applicationContext);
         // текущая форм дата будет вызывать compose на своих приемниках
         final FormData formData = new FormData();
+        formData.setId(1l);
         formData.setReportPeriodId(2);
         formData.setDepartmentId(1);
         FormType formType = new FormType();
@@ -112,6 +121,7 @@ public class FormDataServiceTest {
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
         user.setId(1);
+        user.setName("user");
         userInfo.setUser(user);
         userInfo.setIp("127.0.0.1");
         Logger logger = new Logger();
@@ -169,21 +179,13 @@ public class FormDataServiceTest {
         when(departmentReportPeriodService.get(anyInt())).thenReturn(departmentReportPeriod);
 
         when(formDataDao.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData1);
-
-        FormDataCompositionService formDataCompositionService = mock(FormDataCompositionService.class);
-        ApplicationContext applicationContext = mock(ApplicationContext.class);
-        when(applicationContext.getBean(FormDataCompositionService.class)).thenReturn(formDataCompositionService);
-        ReflectionTestUtils.setField(formDataService, "applicationContext", applicationContext);
+        when(userService.getUser(user.getId())).thenReturn(user);
 
         final Map<String, LockData> map = new HashMap<String, LockData>();
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {
                 Object[] arguments = invocation.getArguments();
-                Object key = invocation.getArguments()[0];
-                if (map.containsKey(key)) {
-                    return map.get(key);
-                }
                 map.put((String) arguments[0], new LockData((String) arguments[0], (Integer) arguments[1], new Date()));
                 return null;
             }
@@ -195,6 +197,43 @@ public class FormDataServiceTest {
                 return null;
             }
         }).when(lockDataService).unlock(anyString(), anyInt());
+
+
+        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>();
+        DepartmentFormType dft1 = new DepartmentFormType();
+        dft1.setDepartmentId(1);
+        dft1.setFormTypeId(1);
+        dft1.setKind(FormDataKind.ADDITIONAL);
+        DepartmentFormType dft2 = new DepartmentFormType();
+        dft2.setDepartmentId(2);
+        dft2.setFormTypeId(2);
+        dft2.setKind(FormDataKind.CONSOLIDATED);
+        dftSources.add(dft1);
+        dftSources.add(dft2);
+        when(departmentService.getDepartment(dft1.getDepartmentId())).thenReturn(department);
+        when(departmentService.getDepartment(dft2.getDepartmentId())).thenReturn(department);
+        when(departmentFormTypeDao.getFormSources(
+                formData.getDepartmentId(),
+                formData.getFormType().getId(),
+                formData.getKind(),
+                reportPeriod.getCalendarStartDate(),
+                reportPeriod.getEndDate())).thenReturn(dftSources);
+
+        FormData formDataDest = new FormData();
+        formDataDest.setId(3l);
+        formDataDest.setReportPeriodId(2);
+        formDataDest.setDepartmentId(1);
+        FormType formType1 = new FormType();
+        formType1.setId(2);
+        formType1.setName("РНУ");
+        formDataDest.setFormType(formType);
+        formDataDest.setKind(FormDataKind.PRIMARY);
+        formDataDest.setManual(false);
+        formDataDest.setState(WorkflowState.ACCEPTED);
+        formDataDest.setDepartmentReportPeriodId(3);
+        formDataDest.setFormType(formType1);
+        when(formDataDao.find(dft1.getFormTypeId(), dft1.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
+        when(formDataDao.find(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
 
         formDataService.compose(formData, userInfo, logger);
         // проверяем что источник удален
@@ -650,7 +689,6 @@ public class FormDataServiceTest {
         formTemplate.setType(formType);
 
         FormDataKind kind = FormDataKind.PRIMARY;
-        Integer periodOrder = null;
 
         DepartmentReportPeriod departmentReportPeriodPrev = new DepartmentReportPeriod();
         ReportPeriod reportPeriodPrev = new ReportPeriod();
@@ -843,6 +881,17 @@ public class FormDataServiceTest {
         formData.setState(WorkflowState.ACCEPTED);
         formData.setDepartmentReportPeriodId(1);
         formData.setPeriodOrder(null);
+        FormDataPerformer performer = new FormDataPerformer();
+        performer.setName("Name");
+        performer.setPhone("8888888");
+        performer.setPrintDepartmentId(8);
+        performer.setReportDepartmentName("8/8");
+        formData.setPerformer(performer);
+        FormDataSigner signer = new FormDataSigner();
+        signer.setName("signer1");
+        signer.setPosition("Position1");
+        signer.setOrd(1);
+        formData.setSigners(Arrays.asList(signer));
 
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
@@ -883,7 +932,7 @@ public class FormDataServiceTest {
         department.setName("Тестовое подразделение");
         when(departmentService.getDepartment(formDataDest.getDepartmentId())).thenReturn(department);
 
-        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>(1);
+        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>();
         DepartmentFormType dft1 = new DepartmentFormType();
         dft1.setDepartmentId(1);
         dft1.setFormTypeId(1);

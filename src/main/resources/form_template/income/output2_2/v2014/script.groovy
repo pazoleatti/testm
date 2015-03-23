@@ -133,7 +133,7 @@ void logicCheck() {
             rowError(logger, row, "Строка ${rowNum}: Графы «Фамилия» и «Имя» должны быть заполнены одновременно (либо обе графы не должны заполняться)!")
         }
         // Проверка допустимых значений «Графы 6» (диапазон 00...99)
-        if (!checkFormat(recType, "[0-9]{2}")) {
+        if (!recType?.matches("[0-9]{2}")) {
             logger.error("Строка ${rowNum}: Графа «Получатель. Тип» заполнена неверно!")
         }
     }
@@ -243,7 +243,7 @@ void addData(def xml, headRowCount) {
 
         // графа 6
         //Проверяется: если загруженное из Excel значение - цифра от 0 до 9, то спереди подставляется 0, чтобы получилось двузначное число.
-        if (checkFormat(row.cell[xmlIndexCol].text(), "[0-9]")) {
+        if (row.cell[xmlIndexCol].text().matches("[0-9]")) {
             newRow.recType = "0" + row.cell[xmlIndexCol].text()
         } else {
             newRow.recType = row.cell[xmlIndexCol].text()
@@ -260,7 +260,7 @@ void addData(def xml, headRowCount) {
 
         // графа 9 - справочник "Коды субъектов Российской Федерации"
         //Проверяется: если загруженное из Excel значение - цифра от 0 до 9, то спереди подставляется 0, чтобы получилось двузначное число.
-        if (checkFormat(row.cell[xmlIndexCol].text(), "[0-9]")) {
+        if (row.cell[xmlIndexCol].text().matches("[0-9]")) {
             newRow.subdivisionRF = getRecordIdImport(4, 'CODE', "0" + row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
         } else {
             newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)

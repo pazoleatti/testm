@@ -766,11 +766,11 @@ void addTransportData(def xml) {
 
         // графа 2 - атрибут 611 - CODE - "Код сделки", справочник 61 "Коды сделок"
         def xmlIndexCol = 2
-        newRow.code = getRecordIdImport(61, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.code = getRecordIdImport(61, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
 
         // графа 3 - атрибут 621 - CODE - "Код признака", справочник 62 "Признаки ценных бумаг"
         xmlIndexCol = 3
-        newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.valuablePaper = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
 
         // графа 4 - атрибут 814 - SHORTNAME - «Выпуск», из справочника 84 «Ценные бумаги» текстовое значение
         xmlIndexCol = 4
@@ -940,11 +940,14 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }
+
+    def monthRow = getDataRow(dataRows, 'total')
+    rows.add(monthRow)
+    calcTotalRow(monthRow, totalRow)
 
     dataRowHelper.save(rows)
 }

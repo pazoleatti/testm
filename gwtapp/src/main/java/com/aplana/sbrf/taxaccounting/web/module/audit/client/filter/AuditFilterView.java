@@ -138,7 +138,7 @@ public class AuditFilterView extends ViewWithUiHandlers<AuditFilterUIHandlers>
                 if (sepFlag) errorStr.append(", ");
                 errorStr.append("\"Искать по полям\"");
             }
-            Dialog.errorMessage("Не заполнены обязательные поля", "Для выполнения поиска должны быть корректно заполнены " + errorStr.toString());
+            Dialog.errorMessage("Не заполнены обязательные поля", "Для выполнения поиска должно быть заполнено поле " + errorStr.toString());
             return;
         }
 

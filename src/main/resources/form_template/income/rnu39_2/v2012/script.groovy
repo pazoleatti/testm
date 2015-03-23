@@ -685,25 +685,25 @@ void addTransportData(def xml) {
         // TODO (Ramil Timerbaev) могут быть проблемы с нахождением записи,
         // если в справочнике 84 есть несколько записей с одинаковыми значениями в поле REG_NUM
         rnuIndexCol = 3
-        def record84 = getRecordImport(84, 'REG_NUM', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, true)
+        def record84 = getRecordImport(84, 'REG_NUM', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, false)
         newRow.regNumber = record84?.record_id?.value
 
         // графа 1 - зависит от графы 3 - атрибут 810 - CODE_CUR - «Цифровой код валюты выпуска», справочник 84 «Ценные бумаги»
         rnuIndexCol = 1
-        def record15 = getRecordImport(15, 'CODE', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        def record15 = getRecordImport(15, 'CODE', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, false)
         if (record84 != null && record15 != null) {
             def value1 = record15?.record_id?.value?.toString()
             def value2 = record84?.CODE_CUR?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, false)
         }
 
         // графа 2 - зависит от графы 3 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
         rnuIndexCol = 2
-        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
+        def record100 = getRecordImport(100, 'FULL_NAME', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, false)
         if (record84 != null && record100 != null) {
             def value1 = record100?.record_id?.value?.toString()
             def value2 = record84?.ISSUER?.value?.toString()
-            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(84, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, false)
         }
 
         // графа 4
@@ -819,8 +819,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
 

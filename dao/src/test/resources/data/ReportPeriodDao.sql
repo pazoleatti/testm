@@ -8,6 +8,13 @@ insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_cod
 insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) values (2, 'ТБ1', 1, 2, null, null, '23', 2);
 insert into DEPARTMENT (id, name, parent_id, type, shortname, tb_index, sbrf_code, code) values (3, 'ТБ2', 1, 2, null, null, null, 3);
 
+--TAX_TYPE
+INSERT INTO tax_type (id, name) VALUES ('T', 'Транспортный');
+INSERT INTO tax_type (id, name) VALUES ('I', 'Прибыль');
+INSERT INTO tax_type (id, name) VALUES ('P', 'Имущество');
+INSERT INTO tax_type (id, name) VALUES ('V', 'НДС');
+INSERT INTO tax_type (id, name) VALUES ('D', 'ТЦО');
+
 insert into tax_period(id, tax_type, year) values (1, 'T', 2013);
 insert into tax_period(id, tax_type, year) values (11, 'T', 2012);
 insert into tax_period(id, tax_type, year) values (21, 'V', 2013);

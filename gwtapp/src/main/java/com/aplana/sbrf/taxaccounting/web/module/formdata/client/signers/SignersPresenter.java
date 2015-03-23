@@ -3,8 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetDepartmentTreeAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetDepartmentTreeResult;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -20,8 +24,10 @@ import java.util.Set;
  */
 
 public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> implements SignersUiHandlers {
-	private boolean readOnlyMode;
-	private FormData formData;
+	private boolean creteLock;
+    private boolean readOnlyMode;
+    private FormData formData;
+    private HandlerRegistration closeFormDataHandlerRegistration;
 
     private final DispatchAsync dispatcher;
 
@@ -44,22 +50,33 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
 	@Override
 	protected void onReveal() {
 		super.onReveal();
-		getView().setReadOnlyMode(readOnlyMode);
-		getView().setPerformer(formData.getPerformer());
-		getView().setSigners(formData.getSigners());
-
-        GetDepartmentTreeAction action = new GetDepartmentTreeAction();
+        GetPerformerAction action = new GetPerformerAction();
         action.setFormData(formData);
         dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetDepartmentTreeResult>() {
+                .defaultCallback(new AbstractCallback<GetPerformerResult>() {
                     @Override
-                    public void onSuccess(GetDepartmentTreeResult result) {
+                    public void onSuccess(GetPerformerResult result) {
+                        FormData formData1 = result.getFormData();
+                        LogAddEvent.fire(SignersPresenter.this, result.getUuid());
+                        readOnlyMode = result.isReadOnlyMode();
+                        creteLock = result.isCreteLock();
+                        getView().setPerformer(formData1.getPerformer());
+                        getView().setSigners(formData1.getSigners());
+                        getView().setReadOnlyMode(SignersPresenter.this.readOnlyMode);
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-                        Integer department = formData.getPerformer() != null && formData.getPerformer().getPrintDepartmentId() != null ?
-                                formData.getPerformer().getPrintDepartmentId() : formData.getDepartmentId();
+                        Integer department = formData1.getPerformer() != null && formData1.getPerformer().getPrintDepartmentId() != null ?
+                                formData1.getPerformer().getPrintDepartmentId() : formData1.getDepartmentId();
                         getView().setDepartment(department);
                         String reportDepartmentName = getReportDepartmentName(result.getDepartments(), department);
                         getView().setReportDepartmentName(reportDepartmentName);
+
+                        closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
+                            @Override
+                            public void onClose(CloseEvent<Window> event) {
+                                closeFormDataHandlerRegistration.removeHandler();
+                                unlockForm();
+                            }
+                        });
                     }
                 }, this));
 	}
@@ -68,15 +85,23 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
 	public void onSave(FormDataPerformer performer, List<FormDataSigner> signers) {
         formData.setPerformer(performer);
 		formData.setSigners(signers);
-		getView().hide();
+        SavePerformerAction action = new SavePerformerAction();
+        action.setFormData(formData);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<SavePerformerResult>() {
+                    @Override
+                    public void onSuccess(SavePerformerResult result) {
+                        if (result.getUuid() == null) {
+                            getView().hide();
+                        } else {
+                            LogAddEvent.fire(SignersPresenter.this, result.getUuid());
+                        }
+                    }
+                }, this));
 	}
 
 	public void setFormData(FormData formData) {
 		this.formData = formData;
-	}
-
-	public void setReadOnlyMode(boolean readOnlyMode) {
-		this.readOnlyMode = readOnlyMode;
 	}
 
     private String getReportDepartmentName(List<Department> departments, Integer department) {
@@ -113,5 +138,20 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
             }
         }
         return null;
+    }
+
+    @Override
+    public void onHide() {
+        super.onHide();
+        closeFormDataHandlerRegistration.removeHandler();
+        unlockForm();
+    }
+
+    private void unlockForm() {
+        if (!readOnlyMode && creteLock) {
+            UnlockFormData action = new UnlockFormData();
+            action.setFormId(formData.getId());
+            dispatcher.execute(action, CallbackUtils.emptyCallback());
+        }
     }
 }

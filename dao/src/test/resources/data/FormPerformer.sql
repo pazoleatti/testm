@@ -7,6 +7,9 @@ INSERT INTO department_type (id, name) VALUES (2, 'Территориальны�
 INSERT INTO department (id, name, parent_id, type, code) VALUES (1, 'А - департамент', NULL, 1, 1);
 INSERT INTO department (id, name, parent_id, type, code) VALUES (2, 'Б - департамент', 1, 2, 2);
 
+INSERT INTO tax_type (id, name) VALUES ('T', 'Транспортный');
+INSERT INTO tax_type (id, name) VALUES ('I', 'Прибыль');
+
 INSERT INTO form_type (id, name, tax_type) VALUES (1, 'А - тип', 'T');
 INSERT INTO form_type (id, name, tax_type) VALUES (2, 'Б - тип', 'I');
 

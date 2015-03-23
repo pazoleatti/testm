@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
@@ -19,6 +20,16 @@ import java.util.Map;
 public interface RefBookDepartmentDao {
 
 	Long REF_BOOK_ID = 30L;
+
+    static final String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
+    static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
+    static final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
+    static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
+    static final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
+    static final String REFBOOK_NAME_ALIAS = "refbookName";
+    static final String REFBOOK_ID_ALIAS = "ref_book_id";
+    static final String VERSION_START_ALIAS = "versionStart";
+    static final String VERSION_END_ALIAS = "versionEnd";
 
     /**
      * Загружает данные справочника
@@ -101,4 +112,20 @@ public interface RefBookDepartmentDao {
      * @return все записи действуют в указанном периоде?
      */
     List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
+
+    /**
+     * Проверка использования записи в справочниках
+     * @param refBookId идентификатор справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @return справочник где 1-й ключ - id из ref_book_record(для уникальности ключа)
+     */
+    Map<Integer, Map<String, Object>> isVersionUsedInRefBooks(List<Long> refBookId, List<Long> uniqueRecordIds);
+
+    /**
+     * Возвращает наменование периода ориентируясь только на дату начала(только на день-месяц, без года)
+     * Должно быть только одно значение, даже не учитывая вид налога{@link com.aplana.sbrf.taxaccounting.model.TaxType}
+     * Справвочник Параметры подразделения по УКС
+     * @param startDate Начало периода
+     */
+    String getReportPeriodNameByDate(TaxType taxType, Date startDate);
 }

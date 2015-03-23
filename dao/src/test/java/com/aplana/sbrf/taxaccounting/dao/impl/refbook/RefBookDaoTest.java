@@ -613,8 +613,7 @@ public class RefBookDaoTest {
 
 	@Test (expected = Exception.class)
 	public void testGetByAttribute4() {
-		Long t = null;
-		refBookDao.getByAttribute(t);
+		refBookDao.getByAttribute(null);
 	}
 
     @Test

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -38,6 +39,7 @@ import java.util.*;
 public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepartmentDao {
 
 	private static final String TABLE_NAME = "DEPARTMENT";
+
 
     @Autowired
     ReportPeriodDao reportPeriodDao;
@@ -269,5 +271,128 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         } catch (EmptyResultDataAccessException ignored) {}
         result.removeAll(existRecords);
         return new ArrayList<Long>(result);
+    }
+
+    private static final String CHECK_USAGES_IN_REFBOOK =
+            "WITH\n" +
+                    "    recordsByVersion AS (SELECT\n" +
+                    "                           r.ID,\n" +
+                    "                           r.RECORD_ID,\n" +
+                    "                           r.REF_BOOK_ID,\n" +
+                    "                           r.VERSION,\n" +
+                    "                           r.STATUS,\n" +
+                    "                           row_number()\n" +
+                    "                           OVER (PARTITION BY r.RECORD_ID\n" +
+                    "                             ORDER BY r.version) rn\n" +
+                    "                         FROM REF_BOOK_RECORD r\n" +
+                    "                         WHERE r.REF_BOOK_ID in (:refBookIds)),\n" +
+                    "    t AS (SELECT\n" +
+                    "            rv.ID,\n" +
+                    "            rv.RECORD_ID                   RECORD_ID,\n" +
+                    "            rv.REF_BOOK_ID,\n" +
+                    "            rv.VERSION                     version,\n" +
+                    "            rv2.version - interval '1' day versionEnd\n" +
+                    "          FROM recordsByVersion rv LEFT OUTER JOIN recordsByVersion rv2\n" +
+                    "              ON rv.RECORD_ID = rv2.RECORD_ID AND rv.rn + 1 = rv2.rn\n" +
+                    "          WHERE rv.status in (0,1))\n" +
+                    "SELECT\n" +
+                    "  t.id,\n" +
+                    "  b.name    AS refbookName,\n" +
+                    "  t.version AS versionStart,\n" +
+                    "  t.versionEnd AS versionEnd,\n" +
+                    "  v.string_value,\n" +
+                    "  v.number_value,\n" +
+                    "  v.date_value,\n" +
+                    "  v.reference_value,\n" +
+                    "  a.is_unique,\n" +
+                    "  b.id as ref_book_id\n" +
+                    "FROM ref_book b\n" +
+                    "  JOIN t ON b.id = t.ref_book_id\n" +
+                    "  JOIN ref_book_value v ON v.record_id = t.id AND (v.reference_value IN (:uniqueRefId))\n" +
+                    "  JOIN ref_book_attribute a\n" +
+                    "    ON (a.ref_book_id = b.id OR a.reference_id = b.id) AND t.ref_book_id = a.ref_book_id AND a.id = v.attribute_id";
+
+    @Override
+    public Map<Integer, Map<String, Object>> isVersionUsedInRefBooks(List<Long> refBookIds, List<Long> uniqueRecordIds) {
+        Map<String, Object> params = new HashMap<String, Object>(2);
+        //Проверка использования в справочниках
+        try {
+            params.put("refBookIds", refBookIds);
+            params.put("uniqueRefId", uniqueRecordIds);
+
+            final Map<Integer, Map<String, Object>> records = new HashMap<Integer, Map<String, Object>>();
+
+            getNamedParameterJdbcTemplate().query(CHECK_USAGES_IN_REFBOOK, params, new RowMapper<Map<Integer, Map<String, Object>>>() {
+                @Override
+                public Map<Integer, Map<String, Object>> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    int id = rs.getInt("id");
+                    int is_unique = rs.getInt("is_unique");
+                    Map<String, Object> recordValues = new HashMap<String, Object>();
+                    recordValues.put(REFBOOK_NAME_ALIAS, rs.getString(REFBOOK_NAME_ALIAS));
+                    recordValues.put(VERSION_START_ALIAS, rs.getDate(VERSION_START_ALIAS));
+                    recordValues.put(REFBOOK_ID_ALIAS, rs.getLong(REFBOOK_ID_ALIAS));
+                    recordValues.put(VERSION_END_ALIAS, rs.getDate(VERSION_END_ALIAS));
+
+                    if (is_unique != 0) {
+                        StringBuilder attr = new StringBuilder();
+                        concatAttrs(rs, attr);
+                        recordValues.put(UNIQUE_ATTRIBUTES_ALIAS, attr.toString());
+                    }
+                    records.put(id, recordValues);
+
+                    return records;
+                }
+
+                public void concatAttrs(ResultSet rs, StringBuilder attr) throws SQLException {
+                    attr.append(rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ? rs.getString(STRING_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getFloat(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null ? rs.getDate(DATE_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getString(REFERENCE_VALUE_COLUMN_ALIAS) != null ? rs.getInt(REFERENCE_VALUE_COLUMN_ALIAS) + ", " : "");
+                }
+            });
+
+            return records;
+        } catch (EmptyResultDataAccessException e) {
+            return new HashMap<Integer, Map<String, Object>>(0);
+        } catch (DataAccessException e) {
+            logger.error("Проверка использования", e);
+            throw new DaoException("Проверка использования", e);
+        }
+    }
+    
+    private static final String GET_REPORT_PERIOD_NAME = 
+            "WITH record_date AS (SELECT\n" +
+                    "                  v.record_id AS record_id\n" +
+                    "                FROM ref_book b\n" +
+                    "                  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
+                    "                  JOIN ref_book_value v ON v.attribute_id = a.id\n" +
+                    "                WHERE b.id = 8 AND to_char(v.DATE_VALUE, 'DDMM') = to_char(:startDate, 'DDMM') AND a.alias = 'CALENDAR_START_DATE'),\n" +
+                    "  record_type AS(SELECT\n" +
+                    "                   v.record_id AS record_id\n" +
+                    "                 FROM ref_book b\n" +
+                    "                   JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
+                    "                   JOIN ref_book_value v ON v.attribute_id = a.id\n" +
+                    "                 WHERE b.id = 8 AND a.alias = :taxCode AND v.NUMBER_VALUE = 1\n" +
+                    ")\n" +
+                    "SELECT\n" +
+                    "  rbv.STRING_VALUE\n" +
+                    "FROM ref_book_attribute a\n" +
+                    "  JOIN record_date rd ON 1 = 1\n" +
+                    "  JOIN record_type rt ON 1 = 1\n" +
+                    "  JOIN ref_book_value rbv ON rbv.attribute_id = a.id AND rbv.RECORD_ID = rd.record_id AND rbv.RECORD_ID = rt.record_id\n" +
+                    "WHERE a.alias = 'NAME'";
+
+    @Override
+    public String getReportPeriodNameByDate(TaxType taxType, Date startDate) {
+        try{
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("taxCode", String.valueOf(taxType.getCode()));
+            params.put("startDate", startDate);
+            return getNamedParameterJdbcTemplate().queryForObject(GET_REPORT_PERIOD_NAME, params, String.class);
+        } catch (EmptyResultDataAccessException e){
+            return "";
+        } catch (DataAccessException e){
+            throw new DaoException("", e);
+        }
     }
 }

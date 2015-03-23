@@ -196,7 +196,7 @@ void logicCheck() {
     def need50001 = [:]
     def need50002 = [:]
     totalColumns.each{ alias ->
-        need50001[alias] = getSum(dataRows, alias, 'R2', 'R107')
+        need50001[alias] = getSum(dataRows, alias, 'R2', 'R107') - (getDataRow(dataRows, 'R36').get(alias)?:0)
         need50002[alias] = getSum(dataRows, alias, 'R110', 'R212')
     }
     checkTotalSum(row50001, need50001)
@@ -209,7 +209,7 @@ void calculationBasicSum(def dataRows) {
 
     // суммы для графы 5..8
     totalColumns.each { alias ->
-        row50001[alias] = getSum(dataRows, alias, 'R2', 'R107')
+        row50001[alias] = getSum(dataRows, alias, 'R2', 'R107') - (getDataRow(dataRows, 'R36').get(alias)?:0)
         row50002[alias] = getSum(dataRows, alias, 'R110', 'R212')
     }
     def formDataRNU14 = getFormDataRNU14()

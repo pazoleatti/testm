@@ -144,7 +144,7 @@ void calc() {
 
 def getDataRowsPrev() {
     if (!isBalancePeriod() && formData.kind == FormDataKind.PRIMARY) {
-        def formDataPrev = formDataService.getFormDataPrev(formData, formData.departmentId)
+        def formDataPrev = formDataService.getFormDataPrev(formData)
         formDataPrev = (formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null)
         if (formDataPrev != null) {
             return formDataService.getDataRowHelper(formDataPrev)?.allCached

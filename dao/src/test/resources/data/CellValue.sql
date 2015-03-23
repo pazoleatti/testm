@@ -1,5 +1,5 @@
+insert into tax_type (id, name) values ('T', 'Транспортный');
 insert into form_kind (id, name) values (3, 'Сводная');
-
 insert into form_type (id, name, tax_type) values (1, 'FormType - Transport', 'T');
 INSERT INTO department_type (id, name) VALUES (1, 'Банк');
 insert into department (id, name, parent_id, type) values (1, 'Банк', null, 1);

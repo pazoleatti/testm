@@ -8,6 +8,9 @@ insert into department (id, name, parent_id, type, code) values (1, 'А - деп
 insert into department (id, name, parent_id, type, code) values (2, 'Б - департамент', 1, 2, 2);
 insert into department (id, name, parent_id, type, code) values (3, 'В - департамент', 1, 2, 3);
 
+insert into tax_type (id, name) values ('T', 'Транспортный');
+insert into tax_type (id, name) values ('I', 'Прибыль');
+
 insert into form_type (id, name, tax_type) values (1, 'А - тип', 'T');
 insert into form_type (id, name, tax_type) values (2, 'Б - тип', 'I');
 insert into form_type (id, name, tax_type) values (3, 'В - тип', 'T');

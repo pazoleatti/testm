@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.SourceDao;
+import com.aplana.sbrf.taxaccounting.dao.*;
 import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -113,6 +110,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Autowired
     private PeriodService reportPeriodService;
+
+    @Autowired
+    private DeclarationTemplateDao declarationTemplateDao;
 
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
@@ -1176,6 +1176,24 @@ public class SourceServiceImpl implements SourceService {
         formToFormRelations.addAll(createFormToFormRelationModel(destinationsForm, departmentReportPeriod,
                 periodOrder, false));
 
+        return formToFormRelations;
+    }
+
+    @Override
+    public List<FormToFormRelation> getRelations(DeclarationData declaration) {
+        List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
+        DeclarationType declarationType = declarationTemplateDao.get(declaration.getDeclarationTemplateId()).getType();
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+
+        //Получаем источники-приемники стандартными методами ядра
+        List<DepartmentFormType> sourcesForm = getDFTSourceByDDT(
+                declaration.getDepartmentId(),
+                declarationType.getId(),
+                departmentReportPeriod.getReportPeriod().getCalendarStartDate(),
+                departmentReportPeriod.getReportPeriod().getEndDate()
+        );
+        formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
+                null, true));
         return formToFormRelations;
     }
 

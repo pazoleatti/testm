@@ -240,21 +240,6 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
             performer = new FormDataPerformer();
         }
 
-        if (name.getText().trim().isEmpty()) {
-            Dialog.warningMessage("Необходимо ввести ФИО исполнителя");
-            return;
-        }
-
-        if (phone.getText().trim().isEmpty()) {
-            Dialog.warningMessage("Необходимо ввести телефон исполнителя");
-            return;
-        }
-
-        if (departmentPicker.getValue() == null || departmentPicker.getValue().isEmpty()) {
-            Dialog.warningMessage("Укажите подразделение-исполнитель.");
-            return;
-        }
-
         performer.setName(name.getText());
         performer.setPhone(phone.getText());
         performer.setPrintDepartmentId(departmentPicker.getValue().get(0));

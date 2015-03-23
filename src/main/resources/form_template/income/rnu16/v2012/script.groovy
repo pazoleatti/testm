@@ -271,7 +271,7 @@ void addTransportData(def xml) {
 
         // проверка графы 3
         if (map != null) {
-            formDataService.checkReferenceValue(28, row.cell[3].text(), map.TYPE_INCOME?.stringValue, rnuIndexRow, 3 + colOffset, logger, true)
+            formDataService.checkReferenceValue(28, row.cell[3].text(), map.TYPE_INCOME?.stringValue, rnuIndexRow, 3 + colOffset, logger, false)
         }
 
         // графа 4
@@ -301,8 +301,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }

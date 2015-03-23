@@ -164,7 +164,7 @@ def columnsForEquals = ['codeOKATO', 'tsTypeCode', 'identNumber', 'taxBase', 'ba
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     if (value == null || value.trim().isEmpty()) {
         return null
     }
@@ -262,8 +262,7 @@ def logicCheck() {
     def dTo = getReportPeriodEndDate()
     def String dFormat = "dd.MM.yyyy"
 
-    // Проверенные строки (5-ая провека)
-    def List<DataRow<Cell>> checkedRows = new ArrayList<DataRow<Cell>>()
+    def rowMap = getRowEqualsMap(dataRows, columnsForEquals)
 
     // регион из подразделения формы для проверки 10
     def regionId = formDataDepartment.regionId
@@ -297,28 +296,6 @@ def logicCheck() {
         if (row.stealDateStart != null && row.stealDateEnd != null && row.stealDateEnd < row.stealDateStart) {
             loggerError(row, errorMsg + 'Дата возврата ТС неверная!')
         }
-
-        // 5. Проверка на наличие в списке ТС строк, для которых графы "Код ОКТМО", "Вид ТС",
-        // "Идентификационный номер ТС", "Налоговая база", "Единица измерения налоговой базы по ОКЕИ" одинаковы
-        if (!checkedRows.contains(row)) {
-            def errorRows = ''
-            for (def rowIn in dataRows) {
-                if (rowIn.getAlias() == null && !checkedRows.contains(rowIn) && row != rowIn && isEquals(row, rowIn, columnsForEquals)) {
-                    checkedRows.add(rowIn)
-                    errorRows = ', ' + rowIn.getIndex()
-                }
-            }
-            if (!''.equals(errorRows)) {
-                loggerError(row, "Обнаружены строки $index$errorRows, у которых " +
-                        "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue ?: '\"\"'}, " +
-                        "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue ?: '\"\"'}, " +
-                        "Идентификационный номер ТС = ${row.identNumber ?: '\"\"'}, " +
-                        "Налоговая база = ${row.taxBase?:'\"\"'}, " +
-                        "Единица измерения налоговой базы по ОКЕИ = ${getRefBookValue(12L, row.baseUnit)?.CODE?.value ?: '\"\"'} " +
-                        "совпадают!")
-            }
-        }
-        checkedRows.add(row)
 
         // 6. Проверка на наличие в списке ТС строк, период владения которых не пересекается с отчётным
         if (row.regDate != null && row.regDate > dTo || row.regDateEnd != null && row.regDateEnd < dFrom) {
@@ -440,6 +417,27 @@ def logicCheck() {
         }
     }
 
+    // 5. Проверка на наличие в списке ТС строк, для которых графы "Код ОКТМО", "Вид ТС",
+    // "Идентификационный номер ТС", "Налоговая база", "Единица измерения налоговой базы по ОКЕИ" одинаковы
+    rowMap.each { key, rowList ->
+        if (rowList.size() > 1) {
+            def errorRows = ''
+            rowList.each { row ->
+                errorRows = errorRows + ', ' + row.getIndex()
+            }
+            if (!''.equals(errorRows)) {
+                def row = rowList[0]
+                loggerError(row, "Обнаружены строки $errorRows, у которых " +
+                        "Код ОКТМО = ${getRefBookValue(96L, row.codeOKATO)?.CODE?.stringValue ?: '\"\"'}, " +
+                        "Код вида ТС = ${getRefBookValue(42L, row.tsTypeCode)?.CODE?.stringValue ?: '\"\"'}, " +
+                        "Идентификационный номер ТС = ${row.identNumber ?: '\"\"'}, " +
+                        "Налоговая база = ${row.taxBase?:'\"\"'}, " +
+                        "Единица измерения налоговой базы по ОКЕИ = ${getRefBookValue(12L, row.baseUnit)?.CODE?.value ?: '\"\"'} " +
+                        "совпадают!")
+            }
+        }
+    }
+
     // 7. Проверка наличия формы предыдущего периода
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     if (prevReportPeriod != null) {
@@ -461,6 +459,34 @@ def logicCheck() {
                     "не создавались формы за следующие периоды: " + str.substring(0, str.size() - 2) + ".")
         }
     }
+}
+
+// Сгруппировать строки в карту по общим колонкам
+def getRowEqualsMap(def dataRows, def columns) {
+    def result = [:]
+    for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        StringBuilder keySb = new StringBuilder()
+        boolean skipRow = false
+        for (column in columns) {
+            if (row[column] != null) {
+                keySb.append(row[column]).append("#")
+            } else {
+                skipRow = true
+            }
+        }
+        if (skipRow) {
+            continue
+        }
+        String keyString = keySb.toString()
+        if (result[keyString] == null) {
+            result[keyString] = []
+        }
+        result[keyString].add(row)
+    }
+    return result
 }
 
 void consolidation() {
@@ -597,6 +623,8 @@ def copyFromOursForm(def dataRows, def dataRowsPrev) {
         sectionRows[it] = []
     }
 
+    def rowOldMap = getRowEqualsMap(rowsOld, columnsForEquals)
+
     for (def row : dataRowsPrev) {
         if (row.getAlias() != null) {
             section = row.getAlias()
@@ -622,14 +650,20 @@ def copyFromOursForm(def dataRows, def dataRowsPrev) {
 
         // исключаем дубли
         def need = true
-        for (def rowOld in rowsOld) {
-            if (rowOld.getAlias() != null) {
-                continue
-            }
-            if (isEquals(row, rowOld, columnsForEquals)) {
-                need = false
+        // формируем ключ карты
+
+        def keySb = new StringBuilder()
+        for (column in columnsForEquals) {
+            // если графа пустая, то считаем что не дубль
+            if (row[column] == null) {
+                keySb = null
                 break
+            } else {
+                keySb.append(row[column]).append("#")
             }
+        }
+        if (keySb != null && rowOldMap[keySb.toString()] != null){
+            need = false
         }
         if (need) {
             row.setIndex(rowsOld.size())
@@ -668,6 +702,9 @@ def copyFromOldForm(def dataRows, dataRows201Old) {
 
     def sectionMap = ['50000' : 'A', '40200' : 'B', '40100' : 'C']
 
+    def dublColumns = ['codeOKATO', 'identNumber', 'baseUnit']
+    def rowOldMap = getRowEqualsMap(rowsOld, dublColumns)
+
     // получение данных из 201
     for (def row : dataRows201Old) {
         if ((row.regDateEnd != null && row.regDateEnd < dFrom) || (row.regDate > dTo)) {
@@ -689,11 +726,19 @@ def copyFromOldForm(def dataRows, dataRows201Old) {
 
         // исключаем дубли
         def need = true
-        for (def rowOld in rowsOld) {
-            if (isEquals(row, rowOld, ['codeOKATO', 'identNumber', 'baseUnit'])) {
-                need = false
+        // формируем ключ карты
+        def keySb = new StringBuilder()
+        for (column in dublColumns) {
+            // если графа пустая, то считаем что не дубль
+            if (row[column] == null) {
+                keySb = null
                 break
+            } else {
+                keySb.append(row[column]).append("#")
             }
+        }
+        if (keySb != null && rowOldMap[keySb.toString()] != null){
+            need = false
         }
         if (need) {
             newRow = copyRow(row, copyColumns201)
@@ -714,23 +759,6 @@ def copyFromOldForm(def dataRows, dataRows201Old) {
     }
 
     return dataRows
-}
-
-
-def isEquals(def row1, def row2, def columns) {
-    for (def column : columns) {
-        if (row1[column] == null) {
-            // Если одна из проверяемых граф пустая - считаем строку уникальной
-            return false
-        }
-    }
-
-    for (def column : columns) {
-        if (!row1[column].equals(row2[column])) {
-            return false
-        }
-    }
-    return true
 }
 
 def getReportPeriodStartDate() {
@@ -854,7 +882,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 3 - зависит от графы 2 - атрибут 841 - NAME - «Наименование», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
         if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
@@ -866,7 +894,7 @@ void addData(def xml, int headRowCount) {
 
         // графа 5 - зависит от графы 4 - атрибут 423 - NAME - «Наименование вида транспортного средства», справочник 42 «Коды видов транспортных средств»
         if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
@@ -953,7 +981,7 @@ void addData(def xml, int headRowCount) {
             def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
             def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
             def columnName = getColumnName(newRow, 'taxBenefitCode')
-            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, xlsIndexRow, xmlIndexCol + colOffset, true)
+            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, xlsIndexRow, xmlIndexCol + colOffset, false)
         }
         xmlIndexCol++
 
@@ -1016,25 +1044,25 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 2 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
-        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        def record = getRecordImport(96, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         newRow.codeOKATO = record?.record_id?.value
         xmlIndexCol++
 
         // графа 3 - зависит от графы 2 - атрибут 841 - NAME - «Наименование», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
         if (record != null) {
-            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(96, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
         // графа 4 - атрибут 422 - CODE - «Код вида ТС», справочник 42 «Коды видов транспортных средств»
         // http://jira.aplana.com/browse/SBRFACCTAX-8572 исправить загрузку Кода Вида ТС (убираю пробелы)
-        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text().replace(' ', ''), rnuIndexRow, xmlIndexCol + colOffset, true)
+        record = getRecordImport(42, 'CODE', row.cell[xmlIndexCol].text().replace(' ', ''), rnuIndexRow, xmlIndexCol + colOffset, false)
         newRow.tsTypeCode = record?.record_id?.value
         xmlIndexCol++
 
         // графа 5 - зависит от графы 4 - атрибут 423 - NAME - «Наименование вида транспортного средства», справочник 42 «Коды видов транспортных средств»
         if (record != null) {
-            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            formDataService.checkReferenceValue(42, row.cell[xmlIndexCol].text(), record?.NAME?.value, rnuIndexRow, xmlIndexCol + colOffset, logger, false)
         }
         xmlIndexCol++
 
@@ -1043,7 +1071,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 7
-        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.ecoClass = getRecordIdImport(40, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         xmlIndexCol++
 
         // графа 8
@@ -1067,7 +1095,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 13 - атрибут 57 - CODE - «Код единицы измерения», справочник 12 «Коды единиц измерения налоговой базы на основании ОКЕИ»
-        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.baseUnit = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         xmlIndexCol++
 
         // графа 14
@@ -1108,10 +1136,12 @@ void addTransportData(def xml) {
 
         // графа 23 - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
         if (row.cell[xmlIndexCol].text()) {
-            def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-            def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
-            def columnName = getColumnName(newRow, 'taxBenefitCode')
-            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, rnuIndexRow, xmlIndexCol + colOffset, true)
+            def recordId = getRecordIdImport(6L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
+            if(recordId != null) {
+                String filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
+                String columnName = getColumnName(newRow, 'taxBenefitCode')
+                newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, rnuIndexRow, xmlIndexCol + colOffset, false)
+            }
         }
         xmlIndexCol++
 
@@ -1120,7 +1150,7 @@ void addTransportData(def xml) {
         xmlIndexCol++
 
         // графа 25 - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
-        newRow.version = getRecordIdImport(208L, 'MODEL', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        newRow.version = getRecordIdImport(208L, 'MODEL', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
         xmlIndexCol++
 
         // Техническое поле(группа)

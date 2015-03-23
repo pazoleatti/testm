@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><rows>
   <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="2" value=""/>
     <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ п/п"/>
     <cell alias="typeCode" colSpan="1" rowSpan="2" value="Код вида операции"/>
     <cell alias="invoice" colSpan="1" rowSpan="2" value="Номер и дата счета-фактуры продавца"/>
@@ -18,6 +19,7 @@
     <cell alias="nds" colSpan="1" rowSpan="2" value="Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в рублях и копейках"/>
   </row>
   <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
     <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
     <cell alias="typeCode" colSpan="1" rowSpan="1" value="Код вида операции"/>
     <cell alias="invoice" colSpan="1" rowSpan="1" value="Номер и дата счета-фактуры продавца"/>
@@ -36,6 +38,7 @@
     <cell alias="nds" colSpan="1" rowSpan="1" value="Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в рублях и копейках"/>
   </row>
   <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
     <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
     <cell alias="typeCode" colSpan="1" rowSpan="1" value="2"/>
     <cell alias="invoice" colSpan="1" rowSpan="1" value="3"/>

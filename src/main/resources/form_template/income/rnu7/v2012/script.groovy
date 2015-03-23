@@ -358,13 +358,13 @@ void logicCheck() {
             }
         }
 
-        // 9. Арифметические проверки расчета неитоговых строк
+        // 8. Арифметические проверки расчета неитоговых строк
         needValue['rateOfTheBankOfRussia'] = calc8(row)
         needValue['taxAccountingRuble'] = calc10(row)
         needValue['ruble'] = calc12(row)
         checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod())
 
-        // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
+        // 9. Арифметические проверки расчета итоговых строк «Итого по КНУ»
         def String code = getKnu(row.code)
         if (sumRowsByCode[code] != null) {
             sumRowsByCode[code] += row.taxAccountingRuble ?: 0
@@ -377,8 +377,8 @@ void logicCheck() {
             sumRowsByCode2[code] = row.ruble ?: 0
         }
 
-        // 12. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
-        // 13. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
+        // 11. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
+        // 12. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         if (row.ruble && row.docDate != null) {
             def Date date = row.docDate
             def Date from = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.' + (Integer.valueOf(new SimpleDateFormat('yyyy').format(date)) - 3))
@@ -407,14 +407,14 @@ void logicCheck() {
                 rowWarning(logger, row, "Операция, указанная в строке " + row.getIndex() + ", в налоговом учете за " +
                         "последние 3 года не проходила!")
             }
-            if (isFind && !(sum > row.ruble)) {
+            if (isFind && row.ruble > sum) {
                 rowWarning(logger, row, errorMsg + "Операция в налоговом учете имеет сумму, меньше чем указано " +
                         "в бухгалтерском учете! См. РНУ-7 в отчетных периодах: ${periods.join(", ")}.")
             }
         }
     }
 
-    // 8 . Проверка на уникальность записи по налоговому учету
+    // 7. Проверка на уникальность записи по налоговому учету
     for (def map : uniq456.keySet()) {
         def rowList = uniq456.get(map)
         if (rowList.size() > 1) {
@@ -424,7 +424,7 @@ void logicCheck() {
         }
     }
 
-    // 10. Арифметические проверки расчета итоговых строк «Итого по КНУ»
+    // 9. Арифметические проверки расчета итоговых строк «Итого по КНУ»
     totalRows.each { key, val ->
         if (val != sumRowsByCode[key]) {
             def msg = formData.createDataRow().getCell('taxAccountingRuble').column.name
@@ -438,7 +438,7 @@ void logicCheck() {
         }
     }
 
-    // 11. Арифметические проверки расчета строки общих итогов
+    // 10. Арифметические проверки расчета строки общих итогов
     checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
 }
 
@@ -634,7 +634,7 @@ void addTransportData(def xml) {
         // графа 4
         String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[4].text() + "')"
         def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
-        if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), reportPeriodEndDate, rnuIndexRow, 2, logger, true)) {
+        if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), reportPeriodEndDate, rnuIndexRow, 2, logger, false)) {
             newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
         }
 
@@ -643,7 +643,7 @@ void addTransportData(def xml) {
         // графа 6
         newRow.docDate = parseDate(row.cell[6].text(), "dd.MM.yyyy", rnuIndexRow, 6 + colOffset, logger, true)
         // графа 7
-        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), rnuIndexRow, 7 + colOffset)
+        newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[7].text(), rnuIndexRow, 7 + colOffset, false)
         // графа 8
         newRow.rateOfTheBankOfRussia =  parseNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset, logger, true)
         // графа 9
@@ -683,8 +683,7 @@ void addTransportData(def xml) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.error(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
     }

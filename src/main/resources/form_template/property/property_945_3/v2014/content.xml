@@ -84,6 +84,7 @@
         <name>Код налоговой льготы</name>
         <order>8</order>
         <width>5</width>
+        <filter>TAX_BENEFIT_ID.CODE = '2012000'</filter>
         <hierarchical>false</hierarchical>
         <nameAttributeId>2033</nameAttributeId>
         <refBookAttributeId>2033</refBookAttributeId>
@@ -127,6 +128,7 @@
         <name>Код налоговой льготы (понижение налоговой ставки)</name>
         <order>12</order>
         <width>5</width>
+        <filter>TAX_BENEFIT_ID.CODE = '2012400'</filter>
         <hierarchical>false</hierarchical>
         <nameAttributeId>2033</nameAttributeId>
         <refBookAttributeId>2033</refBookAttributeId>

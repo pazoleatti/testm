@@ -80,6 +80,9 @@ INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_cod
 INSERT INTO department (id, name, parent_id, type, shortname, tb_index, sbrf_code, code)
   VALUES (3, 'ТБ2', 1, 2, NULL, NULL, NULL, 3);
 
+--TaxType
+INSERT INTO tax_type (id, name) VALUES ('T', 'Транспортный');
+
 -- FormType
 INSERT INTO form_type (id, name, tax_type) VALUES (1, 'FormType - Transport', 'T');
 

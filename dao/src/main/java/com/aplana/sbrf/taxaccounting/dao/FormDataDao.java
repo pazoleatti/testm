@@ -45,6 +45,12 @@ public interface FormDataDao {
 	 */
 	long save(FormData formData);
 
+    /**
+     * Сохранить данные исполнителей и подписантов для налоговой формы
+     * @param formData
+     */
+    void savePerformerSigner(FormData formData);
+
 	/**
 	 * Удалить запись о данных по налоговой форме
 	 *

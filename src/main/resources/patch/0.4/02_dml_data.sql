@@ -131,6 +131,9 @@ UPDATE form_type SET is_ifrs=1, ifrs_name='Расходы сложные' WHERE 
 
 UPDATE declaration_type SET is_ifrs=1, ifrs_name='Декларация' WHERE id=2;
 ----------------------------------------------------------------------------------------------------------------------------
+INSERT INTO tax_type (id, name) VALUES ('I', 'Прибыль');
+INSERT INTO tax_type (id, name) VALUES ('P', 'Имущество');
+----------------------------------------------------------------------------------------------------------------------------
 -- новые виды деклараций
 INSERT INTO declaration_type (id, tax_type, name, status, is_ifrs, ifrs_name) VALUES (8, 'P', 'Расчет по авансовому платежу', 0, 0, NULL);
 INSERT INTO declaration_type (id, tax_type, name, status, is_ifrs, ifrs_name) VALUES (9, 'I', 'Декларация по налогу на прибыль (Банк) (new)', 0, 0, NULL);
