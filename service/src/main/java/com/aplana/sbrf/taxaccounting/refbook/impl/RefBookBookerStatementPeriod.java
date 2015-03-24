@@ -23,14 +23,13 @@ import java.util.Map;
  */
 
 @Service("refBookBookerStatementPeriod")
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookBookerStatementPeriod extends AbstractReadOnlyRefBook {
 
     public static final Long REF_BOOK_ID = RefBookBookerStatementPeriodDao.REF_BOOK_ID;
 
     @Autowired
-    RefBookBookerStatementPeriodDao bookerStatementPeriodDao;
+    private RefBookBookerStatementPeriodDao bookerStatementPeriodDao;
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {

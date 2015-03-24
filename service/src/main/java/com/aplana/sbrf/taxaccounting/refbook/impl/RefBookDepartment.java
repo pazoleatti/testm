@@ -39,7 +39,6 @@ import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
  * User: ekuvshinov
  */
 @Service("refBookDepartment")
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookDepartment implements RefBookDataProvider {
 
