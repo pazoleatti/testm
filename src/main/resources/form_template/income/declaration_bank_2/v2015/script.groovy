@@ -1012,16 +1012,11 @@ void generateXML() {
                         def nalBazaOrg = nalBazaIsch
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
-                                def naimOP = null
-                                def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
-                                if (record33 != null) {
-                                    naimOP = record33?.ADDITIONAL_NAME?.value
-                                }
                                 // 0..n
                                 РаспрНалСубРФ(
                                         ТипНП: typeNP,
                                         ОбРасч: getRefBookValue(26, row.calcFlag)?.CODE?.value,
-                                        НаимОП: naimOP,
+                                        НаимОП: getRefBookValue(30, row.regionBankDivision)?.NAME?.value,
                                         КППОП: row.kpp,
                                         ОбязУплНалОП: getRefBookValue(25, row.obligationPayTax)?.CODE?.value,
                                         НалБазаОрг: nalBazaOrg,
@@ -1041,6 +1036,7 @@ void generateXML() {
                     // Приложение № 5 к Листу 02 - конец
                 }
 
+                boolean isAgentUsed = false
                 // 0..1
                 НалУдНА() {
                     if (dataRowsDividend != null) {
@@ -1251,11 +1247,11 @@ void generateXML() {
                     //СтатусНП    Статус налогоплательщика
                     def statusNP = row.status
                     //ДатаРожд    Дата рождения
-                    def dataRozhd = row.birthday
+                    def dataRozhd = row.birthday?.format('dd.MM.yyyy')
                     //Гражд       Гражданство (код страны)
-                    def grazhd = row.citizenship
+                    def grazhd = getRefBookValue(10, row.citizenship)?.CODE?.value
                     //КодВидДок   Код вида документа, удостоверяющего личность
-                    def kodVidDok = row.code
+                    def kodVidDok = getRefBookValue(360, row.code)?.CODE?.value
                     //СерНомДок   Серия и номер документа
                     def serNomDok = row.series
                     //Индекс      Почтовый индекс
@@ -1277,7 +1273,7 @@ void generateXML() {
                     //Кварт       Номер квартиры
                     def apartment = row.apartment
                     //ОКСМ        Код страны
-                    def oksm = row.country
+                    def oksm = getRefBookValue(10, row.country)?.CODE?.value
                     //АдрТекст    Адрес места жительства за пределами Российской Федерации
                     def adrText = row.address
                     //Ставка      Налоговая ставка
@@ -1292,8 +1288,8 @@ void generateXML() {
                     def nalIschislApp2 = row.calculated
                     //НалУдерж    Сумма налога удержанная
                     def nalUderzh = row.withheld
-                    //НалПеречисл Сумма налога перечисленная
-                    def nalPerechisl = row.listed
+                    //НалУплач Сумма налога перечисленная
+                    def nalUplach = row.listed
                     //НалУдержЛиш Сумма налога, излишне удержанная налоговым агентом
                     def nalUderzhLish = row.withheldAgent
                     //НалНеУдерж  Сумма налога, не удержанная налоговым агентом
@@ -1302,7 +1298,7 @@ void generateXML() {
                     // 0..n
                     СведДохФЛ(
                             НомерСправ : nomerSprav,
-                            ДатаСправ : dataSprav.format('dd.MM.yyyy'),
+                            ДатаСправ : dataSprav,
                             Тип : type) {
                         //1..1
                         ФЛПолучДох(
@@ -1332,11 +1328,11 @@ void generateXML() {
                         }
                         //1..1
                         ДохНалПер(
-                                [Ставка : stavka, СумДоходОбщ : sumDohObsh] +
+                                [Ставка : stavka, СумДохОбщ : sumDohObsh] +
                                         (sumVichObsh != null ? [СумВычОбщ : sumVichObsh] : []) +
                                         [НалБаза : nalBazaApp2, НалИсчисл : nalIschislApp2] +
-                                        (nalUderzh != null ? [СумВычОбщ : nalUderzh] : []) +
-                                        (nalPerechisl != null ? [НалПеречисл : nalPerechisl] : []) +
+                                        (nalUderzh != null ? [НалУдерж : nalUderzh] : []) +
+                                        (nalUplach != null ? [НалУплач : nalUplach] : []) +
                                         (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
                                         (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
                         )
@@ -1344,14 +1340,14 @@ void generateXML() {
                         СпрДохФЛ() {
                             3.times{ index_1 ->
                                 //КодДоход    040 (Код дохода)
-                                def kodDohod040 = row["col_040_${index_1 + 1}"]
+                                def kodDohod040 = getRefBookValue(370, row["col_040_${index_1 + 1}"])?.CODE?.value
                                 //СумДоход    041 (Сумма дохода)
                                 def sumDohod041 = row["col_041_${index_1 + 1}"]
 
                                 СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
                                     5.times{ index_2 ->
                                         //КодВычет    042 (Код вычета)
-                                        def kodVichet042 = row["col_042_${index_1 + 1}_${index_2 + 1}"]
+                                        def kodVichet042 = getRefBookValue(350, row["col_042_${index_1 + 1}_${index_2 + 1}"])?.CODE?.value
                                         //СумВычет    043 (Сумма вычета)
                                         def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
 
@@ -1366,7 +1362,7 @@ void generateXML() {
                         НалВычСтанд() {
                             2.times{ index_1 ->
                                 //КодВычет    051 (Код вычета)
-                                def kodVichet051 = row["col_051_3_${index_1 + 1}"]
+                                def kodVichet051 = getRefBookValue(350, row["col_051_3_${index_1 + 1}"])?.CODE?.value
                                 //СумВычет    052 (Сумма вычета)
                                 def sumVichet052 = row["col_052_3_${index_1 + 1}"]
                                 //1..n
