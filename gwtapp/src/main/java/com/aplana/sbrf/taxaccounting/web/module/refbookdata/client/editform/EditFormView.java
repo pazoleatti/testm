@@ -180,7 +180,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @Override
     public void cleanErrorFields() {
         for (Map.Entry<RefBookColumn, HasValue> widget : widgets.entrySet()){
-            if (widget.getKey().getAttributeType() == RefBookAttributeType.STRING) {
+            if (RefBookAttributeType.STRING.equals(widget.getKey().getAttributeType()) || RefBookAttributeType.NUMBER.equals(widget.getKey().getAttributeType())) {
                 ((Widget) widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
                         .getStyle().setBackgroundColor("");
             }
@@ -276,6 +276,18 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 } else {
                     widget.getElement().getFirstChildElement().getFirstChildElement()
                             .getStyle().setBackgroundColor("");
+                }
+                break;
+            case NUMBER:
+                TextBox hasValue = new TextBox();
+                hasValue.setText(value.toString());
+                try {
+                    checkNumber(col, hasValue, true);
+                    widget.getElement().getFirstChildElement().getFirstChildElement()
+                            .getStyle().setBackgroundColor("");
+                } catch (Exception e) {
+                    widget.getElement().getFirstChildElement().getFirstChildElement()
+                            .getStyle().setBackgroundColor("#ffccd2");
                 }
                 break;
         }
@@ -412,6 +424,46 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         return getFieldsValues(true);
     }
 
+    private BigDecimal checkNumber(RefBookColumn key, HasValue value, boolean checkRequired)  throws BadValueException{
+        BigDecimal number;
+        if (value instanceof CheckBox) {
+            number = value.getValue() == null ?
+                    null :
+                    (Boolean) value.getValue() ?
+                            BigDecimal.ONE : BigDecimal.ZERO;
+        } else {
+            if (value.getValue() != null && !value.getValue().toString().trim().isEmpty()) {
+                String valStr = (String) value.getValue();
+                number = new BigDecimal(valStr);
+                valStr = (number).toPlainString();
+                if (valStr.contains(".")) {
+                    number = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
+                }
+            } else {
+                number = null;
+            }
+        }
+        if (checkRequired) checkRequired(key, number);
+        if (number != null) {
+            int fractionalPart = number.scale();
+            int integerPart = number.precision();
+            integerPart = fractionalPart < integerPart ? (integerPart - fractionalPart) : 0;
+            fractionalPart = fractionalPart < 0 ? 0 : fractionalPart;
+
+            Integer maxLength = key.getMaxLength();
+            Integer precision = key.getPrecision();
+
+            // пердпологается, что (maxLength - precision) <= 17
+            if (fractionalPart > precision || integerPart > (maxLength - precision)) {
+                BadValueException badValueException = new BadValueException();
+                badValueException.setFieldName(key.getName());
+                badValueException.setDescription("значение не соответствует формату. Максимальное количество цифр = " + maxLength + ", максимальная точность = " + precision);
+                throw badValueException;
+            }
+        }
+        return number;
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, RefBookValueSerializable> getFieldsValues(boolean checkRequired) throws BadValueException {
 		Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
@@ -420,44 +472,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 			try {
                 switch (field.getKey().getAttributeType()) {
 					case NUMBER:
-                        BigDecimal number;
-                        if (field.getValue() instanceof CheckBox) {
-                            number = field.getValue().getValue() == null ?
-                                    null :
-                                    (Boolean) field.getValue().getValue() ?
-                                            BigDecimal.ONE : BigDecimal.ZERO;
-                        } else {
-                            if (field.getValue().getValue() != null && !field.getValue().getValue().toString().trim().isEmpty()) {
-                                String valStr = (String) field.getValue().getValue();
-                                number = new BigDecimal(valStr);
-                                valStr = (number).toPlainString();
-                                if (valStr.contains(".")) {
-                                    number = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
-                                }
-                            } else {
-                                number = null;
-                            }
-                        }
-                        if (checkRequired) checkRequired(field.getKey(), number);
-                        if (number != null) {
-                            int fractionalPart = number.scale();
-                            int integerPart = number.precision();
-                            integerPart = fractionalPart < integerPart ? (integerPart - fractionalPart) : 0;
-                            fractionalPart = fractionalPart < 0 ? 0 : fractionalPart;
-
-                            Integer maxLength = field.getKey().getMaxLength();
-                            Integer precision = field.getKey().getPrecision();
-
-                            // пердпологается, что (maxLength - precision) <= 17
-                            if (fractionalPart > precision || integerPart > (maxLength - precision)) {
-								BadValueException badValueException = new BadValueException();
-								badValueException.setFieldName(field.getKey().getName());
-								badValueException.setDescription("значение не соответствует формату. Максимальное количество цифр = " + maxLength + ", максимальная точность = " + precision);
-								throw badValueException;
-							}
-						}
 						value.setAttributeType(RefBookAttributeType.NUMBER);
-						value.setNumberValue(number);
+						value.setNumberValue(checkNumber(field.getKey(), field.getValue(), checkRequired));
 						break;
 					case STRING:
 						String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
