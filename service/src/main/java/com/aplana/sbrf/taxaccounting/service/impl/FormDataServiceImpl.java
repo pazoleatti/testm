@@ -294,7 +294,6 @@ public class FormDataServiceImpl implements FormDataService {
         }
         if (performer == null) {
             performer = new FormDataPerformer();
-            performer.setName(" ");
             performer.setPrintDepartmentId(departmentReportPeriod.getDepartmentId());
             performer.setReportDepartmentName(departmentService.getReportDepartmentName(departmentReportPeriod.getDepartmentId()));
         }
