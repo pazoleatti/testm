@@ -1093,7 +1093,6 @@ void generateXML() {
                                         ДивНАБезУч0 : getLong(row.dividendAgentWithStavka0))
                                 // 0..1
                                 ДивНал(
-                                        ДивНалВс : getLong(row.dividendSumForTaxAll),
                                         ДивНал9 : getLong(row.dividendSumForTaxStavka9),
                                         ДивНал0 : getLong(row.dividendSumForTaxStavka0))
                             }
@@ -1125,7 +1124,7 @@ void generateXML() {
                                     СумНал : getLong(row.sumTax),) {
 
                                 СвПолуч(
-                                        [ИННПолуч : row.inn, КПППолуч : row.kpp, НаимПолуч : row.recName] +
+                                        [ИННПолуч : row.inn, КПППолуч : row.kpp, НаимПолуч : row.title] +
                                                 (row.phone ? [Тлф : row.phone] : [:])) {
                                     МНПолуч(
                                             (row.zipCode ? [Индекс : row.zipCode] : [:]) +
