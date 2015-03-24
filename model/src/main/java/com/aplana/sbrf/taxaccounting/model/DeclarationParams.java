@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Получение в скрипте признака возможности формирования отчетов для декларации
  * @author LHaziev
  */
-public class DeclarationShowReport implements Serializable {
+public class DeclarationParams implements Serializable {
     private static final long serialVersionUID = -215843658318486124L;
 
     /** Признак возможности формирования отчетов для декларации */

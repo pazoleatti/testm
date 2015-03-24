@@ -490,8 +490,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
         StringWriter writer = new StringWriter();
         exchangeParams.put(DeclarationDataScriptParams.XML, writer);
-        DeclarationShowReport showReport = new DeclarationShowReport();
-        exchangeParams.put(DeclarationDataScriptParams.IS_SHOW_REPORT, showReport);
+        DeclarationParams params = new DeclarationParams();
+        exchangeParams.put(DeclarationDataScriptParams.DEC_PARAMS, params);
 
         File xmlFile = null;
         Writer fileWriter = null;
@@ -516,7 +516,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             }
 
-            declarationDataDao.setShowReport(declarationData.getId(), showReport.isShowReport());
+            declarationDataDao.setShowReport(declarationData.getId(), params.isShowReport());
 
             validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, xmlFile);
 
