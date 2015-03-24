@@ -316,21 +316,24 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
                 downloadExcelButton.setText("Сформировать xlsx");
             }
         } else if (ReportType.XML_DEC.equals(reportType)) {
+            downloadExcelButton.setVisible(false);
             if (isLoad) {
                 downloadXmlButton.setVisible(true);
                 downloadXmlButton.setText("Выгрузить в XML");
                 timerXML.cancel();
             } else {
                 downloadXmlButton.setVisible(false);
-                downloadExcelButton.setVisible(false);
             }
         } else if (ReportType.PDF_DEC.equals(reportType)) {
             if (isLoad) {
                 downloadExcelButton.setVisible(true);
+                downloadExcelButton.setEnabled(true);
                 getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, false);
                 timerPDF.cancel();
             } else {
-                downloadExcelButton.setVisible(false);
+                downloadExcelButton.setText("Сформировать xlsx");
+                downloadExcelButton.setVisible(true);
+                downloadExcelButton.setEnabled(false);
             }
         }
     }

@@ -180,7 +180,7 @@
                             <style:LinkAnchor text="Выгрузить в xml" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
                                               title="Скачать декларацию в формате законодателя"/>
                             <style:LinkAnchor text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="resources/img/download-xls-16.png"
-                                              title="Скачать декларацию в формате Excel-документа"/>
+                                              title="Скачать декларацию в формате Excel-документа" visible="false"/>
                         </g:VerticalPanel>
                     </g:cell>
 

@@ -218,12 +218,12 @@ public class DeclarationDataPresenter
                             getView().stopTimerReport(reportType);
                             onTimerReport(ReportType.XML_DEC, false);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
+                            getView().updatePrintReportButtonName(reportType, true);
                             if (ReportType.XML_DEC.equals(reportType)) {
                                 onTimerReport(ReportType.PDF_DEC, false);
                             } else if (ReportType.PDF_DEC.equals(reportType)) {
                                 getView().setPdf(result.getPdf());
                             }
-                            getView().updatePrintReportButtonName(reportType, true);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и нет блокировки(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(reportType);
                             if (ReportType.XML_DEC.equals(reportType)) {
@@ -232,9 +232,7 @@ public class DeclarationDataPresenter
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
                                         " Форма предварительного просмотра и печатная форма не могут быть сформированы в связи с превышением максимально допустимого объема декларации");
                             }
-                            if (!isTimer) {
-                                getView().updatePrintReportButtonName(reportType, false);
-                            }
+                            getView().updatePrintReportButtonName(reportType, false);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.ERROR)) {
                             getView().stopTimerReport(reportType);
                             getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
