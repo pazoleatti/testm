@@ -1045,6 +1045,7 @@ void generateXML() {
                     // Приложение № 5 к Листу 02 - конец
                 }
 
+                boolean isAgentUsed = false
                 // 0..1
                 НалУдНА() {
                     if (dataRowsDividend != null) {
@@ -1090,9 +1091,44 @@ void generateXML() {
                                 ДивНал(
                                         ДивНал9 : getLong(row.dividendSumForTaxStavka9),
                                         ДивНал0 : getLong(row.dividendSumForTaxStavka0))
+                                // Лист 03 В
+                                if (dataRowsTaxAgent != null) {
+                                    isAgentUsed = true
+                                    dataRowsTaxAgent.each { rowAgent ->
+                                        // 0..n
+                                        РеестрСумДив(
+                                                ПрПринадл : 'А',
+                                                Тип : rowAgent.recType,
+                                                ДатаПерДив : (rowAgent.dividendDate != null ? rowAgent.dividendDate.format('dd.MM.yyyy') : empty),
+                                                СумДив : getLong(rowAgent.sumDividend),
+                                                СумНал : getLong(rowAgent.sumTax),) {
+
+                                            СвПолуч(
+                                                    [ИННПолуч : rowAgent.inn, КПППолуч : rowAgent.kpp, НаимПолуч : rowAgent.title] +
+                                                            (rowAgent.phone ? [Тлф : rowAgent.phone] : [:])) {
+                                                МНПолуч(
+                                                        (rowAgent.zipCode ? [Индекс : rowAgent.zipCode] : [:]) +
+                                                                [КодРегион : (getRefBookValue(4, rowAgent.subdivisionRF)?.CODE?.value ?: '00')] +
+                                                                (rowAgent.area? [Район : rowAgent.area] : [:]) +
+                                                                (rowAgent.city ? [Город : rowAgent.city] : [:]) +
+                                                                (rowAgent.region ? [НаселПункт : rowAgent.region] : [:]) +
+                                                                (rowAgent.street ? [Улица : rowAgent.street] : [:]) +
+                                                                (rowAgent.homeNumber ? [Дом : rowAgent.homeNumber] : [:]) +
+                                                                (rowAgent.corpNumber ? [Корпус : rowAgent.corpNumber] : [:]) +
+                                                                (rowAgent.apartment ? [Кварт : rowAgent.apartment] : [:]))
+                                                // 0..1
+                                                ФИОРук(
+                                                        [Фамилия : (rowAgent.surname ?: 'нет данных')] +
+                                                                (rowAgent.name ? [Имя : rowAgent.name] : [:]) +
+                                                                (rowAgent.patronymic ? [Отчество : rowAgent.patronymic] : [:]))
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                            // Лист 03 А - конец
+                            // Лист 03 В - конец
                         }
+                        // Лист 03 А - конец
                         dataRowsDividend.each { row ->
                             // Лист 03 Б
                             // 0..n
@@ -1106,41 +1142,6 @@ void generateXML() {
                             // Лист 03 Б - конец
                         }
                     }
-
-                    // Лист 03 В
-                    if (dataRowsTaxAgent != null) {
-                        dataRowsTaxAgent.each { row ->
-                            // 0..n
-                            РеестрСумДив(
-                                    ПрПринадл : 'А',
-                                    Тип : row.recType,
-                                    ДатаПерДив : (row.dividendDate != null ? row.dividendDate.format('dd.MM.yyyy') : empty),
-                                    СумДив : getLong(row.sumDividend),
-                                    СумНал : getLong(row.sumTax),) {
-
-                                СвПолуч(
-                                        [ИННПолуч : row.inn, КПППолуч : row.kpp, НаимПолуч : row.title] +
-                                                (row.phone ? [Тлф : row.phone] : [:])) {
-                                    МНПолуч(
-                                            (row.zipCode ? [Индекс : row.zipCode] : [:]) +
-                                                    [КодРегион : (getRefBookValue(4, row.subdivisionRF)?.CODE?.value ?: '00')] +
-                                                    (row.area? [Район : row.area] : [:]) +
-                                                    (row.city ? [Город : row.city] : [:]) +
-                                                    (row.region ? [НаселПункт : row.region] : [:]) +
-                                                    (row.street ? [Улица : row.street] : [:]) +
-                                                    (row.homeNumber ? [Дом : row.homeNumber] : [:]) +
-                                                    (row.corpNumber ? [Корпус : row.corpNumber] : [:]) +
-                                                    (row.apartment ? [Кварт : row.apartment] : [:]))
-                                    // 0..1
-                                    ФИОРук(
-                                            [Фамилия : (row.surname ?: 'нет данных')] +
-                                                    (row.name ? [Имя : row.name] : [:]) +
-                                                    (row.patronymic ? [Отчество : row.patronymic] : [:]))
-                                }
-                            }
-                        }
-                    }
-                    // Лист 03 В - конец
                 }
 
                 // Лист 04
