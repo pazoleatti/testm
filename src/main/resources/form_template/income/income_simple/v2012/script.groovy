@@ -39,7 +39,7 @@ import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -496,13 +496,6 @@ def consolidationSummary(def dataRows) {
             }
         }
     }
-}
-
-void checkCreation() {
-    if (formData.kind != FormDataKind.SUMMARY) {
-        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
-    }
-    formDataService.checkUnique(formData, logger)
 }
 
 // Проверка на банк
