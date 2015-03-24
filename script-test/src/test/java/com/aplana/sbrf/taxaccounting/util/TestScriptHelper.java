@@ -162,6 +162,7 @@ public class TestScriptHelper {
             }
             return formTemplate;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new ServiceException("Get form template error for path \"" + path + "\".", e);
         }
     }
