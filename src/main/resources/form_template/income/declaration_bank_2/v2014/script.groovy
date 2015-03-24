@@ -1021,16 +1021,11 @@ void generateXML() {
                         def nalBazaOrg = nalBazaIsch
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
-                                def naimOP = null
-                                def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
-                                if (record33 != null) {
-                                    naimOP = record33?.ADDITIONAL_NAME?.value
-                                }
                                 // 0..n
                                 РаспрНалСубРФ(
                                         ТипНП: typeNP,
                                         ОбРасч: getRefBookValue(26, row.calcFlag)?.CODE?.value,
-                                        НаимОП: naimOP,
+                                        НаимОП: getRefBookValue(30, row.regionBankDivision)?.NAME?.value,
                                         КППОП: row.kpp,
                                         ОбязУплНалОП: getRefBookValue(25, row.obligationPayTax)?.CODE?.value,
                                         НалБазаОрг: nalBazaOrg,
