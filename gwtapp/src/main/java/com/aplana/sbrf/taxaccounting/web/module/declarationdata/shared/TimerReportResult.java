@@ -9,7 +9,8 @@ public class TimerReportResult implements Result {
     public static enum StatusReport {
         EXIST, //существует
         LOCKED, //есть блокировка
-        NOT_EXIST //не существует
+        NOT_EXIST, //не существует
+        ERROR // возникли ошибки во время формирования отчета(только для PDF-отчета)
     }
     private StatusReport existReport;
     private Pdf pdf;

@@ -230,11 +230,16 @@ public class DeclarationDataPresenter
                                 getView().showNoPdf("Область предварительного просмотра");
                             } else if (ReportType.PDF_DEC.equals(reportType)) {
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
-                                        " Печатное представление и форма предварительного просмотра недоступны");
+                                        " Форма предварительного просмотра и печатная форма не могут быть сформированы в связи с превышением максимально допустимого объема декларации");
                             }
                             if (!isTimer) {
                                 getView().updatePrintReportButtonName(reportType, false);
                             }
+                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.ERROR)) {
+                            getView().stopTimerReport(reportType);
+                            getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
+                                    " Форма предварительного просмотра не сформирована");
+                            getView().updatePrintReportButtonName(reportType, false);
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (ReportType.XML_DEC.equals(reportType)) {
                                 getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");

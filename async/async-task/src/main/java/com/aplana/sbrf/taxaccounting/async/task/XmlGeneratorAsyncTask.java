@@ -124,24 +124,28 @@ public class XmlGeneratorAsyncTask extends AbstractAsyncTask {
             // если по каким-либо причинам существует блокировка на формирование PDF отчета, то удаляем такую блокировку
             lockDataService.unlock(key,  0, true);
         }
-        LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
-                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
-        if (lockData == null) {
-            Map<String, Object> paramsPdf = new HashMap<String, Object>();
-            paramsPdf.put("declarationDataId", declarationDataId);
-            paramsPdf.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
-            paramsPdf.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-            paramsPdf.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
 
-            // копирует список ожидающих завершения формирования декларации
-            List<Integer> waitingUserIds = lockDataService.getUsersWaitingForLock((String) params.get(LOCKED_OBJECT.name()));
-            for (int waitingUserId : waitingUserIds)
-                lockDataService.addUserWaitingForLock(key, waitingUserId);
+        DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
+        if (declaration.isShowReport()) {
+            LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                    lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
+            if (lockData == null) {
+                Map<String, Object> paramsPdf = new HashMap<String, Object>();
+                paramsPdf.put("declarationDataId", declarationDataId);
+                paramsPdf.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
+                paramsPdf.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                paramsPdf.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
 
-            try {
-                asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(true), paramsPdf, BalancingVariants.LONG);
-            } catch (AsyncTaskException e) {
-                lockDataService.unlock(key, userInfo.getUser().getId());
+                // копирует список ожидающих завершения формирования декларации
+                List<Integer> waitingUserIds = lockDataService.getUsersWaitingForLock((String) params.get(LOCKED_OBJECT.name()));
+                for (int waitingUserId : waitingUserIds)
+                    lockDataService.addUserWaitingForLock(key, waitingUserId);
+
+                try {
+                    asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(false), paramsPdf, BalancingVariants.LONG);
+                } catch (AsyncTaskException e) {
+                    lockDataService.unlock(key, userInfo.getUser().getId());
+                }
             }
         }
     }

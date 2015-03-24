@@ -14,6 +14,7 @@ public class DeclarationData extends IdentityObject<Long> {
 	private int reportPeriodId;
 	private int departmentId;
     private Integer departmentReportPeriodId;
+    private boolean isShowReport;
 
 	private boolean accepted;
     private String taxOrganCode;
@@ -75,7 +76,15 @@ public class DeclarationData extends IdentityObject<Long> {
         this.departmentReportPeriodId = departmentReportPeriodId;
     }
 
-	/**
+    public boolean isShowReport() {
+        return isShowReport;
+    }
+
+    public void setShowReport(boolean isShowReport) {
+        this.isShowReport = isShowReport;
+    }
+
+    /**
 	 * Возвращает признак того, что декларация принята
 	 * @return true - декларация принята, false - не принята
 	 */
