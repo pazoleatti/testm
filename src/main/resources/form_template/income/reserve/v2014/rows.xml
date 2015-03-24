@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rows>
-    <row alias="R1">
+<?xml version="1.0" encoding="utf-8"?><rows>
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="1" rowSpan="1"/>
         <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="СБЕРБАНК РОССИИ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
@@ -13,16 +12,16 @@
         <cell alias="sumIncome" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="reservePrev" colSpan="1" rowSpan="1"/>
         <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R2">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="1"/>
-        <cell alias="bankName" colSpan="16" rowSpan="1" stringValue="в том числе:"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="в том числе:"/>
+        <cell alias="sum45" colSpan="15" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
         <cell alias="sum90" colSpan="1" rowSpan="1"/>
@@ -38,9 +37,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R3">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Центрально-Чернозёмный банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Центрально-Чернозёмный банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -57,9 +56,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R4">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Уральский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Уральский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -76,9 +75,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R5">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="4" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Байкальский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Байкальский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -95,9 +94,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R6">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="5" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Восточно-Сибирский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Восточно-Сибирский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -114,9 +113,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R7">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="6" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Среднерусский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северо-Восточный банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -133,9 +132,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R8">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="7" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Волго-Вятский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Среднерусский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -152,9 +151,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R9">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="8" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Сибирский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Волго-Вятский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -171,9 +170,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R10">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="9" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Западно-Уральский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Сибирский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -190,9 +189,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R11">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="10" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Юго-Западный банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Западно-Уральский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -209,9 +208,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R12">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="11" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Поволжский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Юго-Западный банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -228,9 +227,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R13">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="12" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северо-Западный банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Поволжский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -247,9 +246,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R14">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="13" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северо-Кавказский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северо-Западный банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -266,9 +265,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R15">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="14" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Западно-Сибирский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северо-Кавказский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -285,9 +284,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R16">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="15" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Дальневосточный банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Западно-Сибирский банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -304,9 +303,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R17">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="16" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северный банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Дальневосточный банк СБ РФ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -323,8 +322,27 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R18">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="17" rowSpan="1"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северный банк СБ РФ"/>
+        <cell alias="sum45" colSpan="1" rowSpan="1"/>
+        <cell alias="norm45" colSpan="1" rowSpan="1"/>
+        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
+        <cell alias="sum90" colSpan="1" rowSpan="1"/>
+        <cell alias="norm90" colSpan="1" rowSpan="1"/>
+        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
+        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
+        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
+        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
+        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
+        <cell alias="reservePrev" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
+        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
+        <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" numericValue="18" rowSpan="1"/>
         <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="ЦЕНТРАЛЬНЫЙ АППАРАТ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
@@ -342,10 +360,10 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R19">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" rowSpan="1"/>
-        <cell alias="bankName" colSpan="16" rowSpan="1" stringValue="в том числе:"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="в том числе:"/>
+        <cell alias="sum45" colSpan="15" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
         <cell alias="sum90" colSpan="1" rowSpan="1"/>
@@ -361,30 +379,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R20">
-        <cell alias="rowNum" colSpan="1" numericValue="18" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Управление поддержки клиентов CIB ПЦП МСЦ «Южный порт»"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" rowSpan="1"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
-    </row>
-    <row alias="R21">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="19" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Отдел обработки документов и отчетности ПЦП МСЦ «Ясная поляна»"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Управление поддержки корпоративных клиентов"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -401,10 +398,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R22">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="20" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Управление учета внутрихозяйствен-ных операций ПЦП МСЦ «Южный порт»"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="ОО ЦСКО &quot;Южный порт&quot;"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -421,10 +417,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R23">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="21" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Отдел обработки документов и отчетности ПЦП МСЦ «Черноземье»"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Управление бухгалтерского учета и отчетности"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -441,29 +436,9 @@
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R24">
-        <cell alias="rowNum" colSpan="1" rowSpan="1"/>
-        <cell alias="bankName" colSpan="16" rowSpan="1"
-              stringValue="Списание безнадежных долгов за счет суммы резерва Центрального аппарата"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" rowSpan="1"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
-    </row>
-    <row alias="R25">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="22" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Уральский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Расчетный центр"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -474,15 +449,15 @@
         <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="reservePrev" colSpan="1" rowSpan="1"/>
         <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="usingReserve" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="R26">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="23" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Среднерусский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Уральский банк СБ РФ- списание безнадежных долгов за счет суммы резерва центрального аппарата"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -494,14 +469,14 @@
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
         <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
-    <row alias="R27">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="24" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Сибирский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Среднерусский банк СБ РФ- списание безнадежных долгов за счет суммы резерва центрального аппарата"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -513,14 +488,14 @@
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
         <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
-    <row alias="R28">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="25" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Дальневосточный банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Сибирский банк СБ РФ- списание безнадежных долгов за счет суммы резерва центрального аппарата"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -532,14 +507,14 @@
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
         <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
-    <row alias="R29">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="26" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северный банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Дальневосточный банк СБ РФ- списание безнадежных долгов за счет суммы резерва центрального аппарата"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -551,14 +526,14 @@
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
         <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
-    <row alias="R30">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="27" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Байкальский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северный банк СБ РФ- списание безнадежных долгов за счет суммы резерва центрального аппарата"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -570,14 +545,14 @@
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
         <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
-    <row alias="R31">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="28" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Центрально-Черноземный банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Центральное ОСБ №8688- списание безнадежных долгов за счет суммы резерва центрального аппарата"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -589,14 +564,14 @@
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
         <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
-    <row alias="R32">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="29" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Восточно-Сибирский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Управление бухгалтерского учета и отчетности- списание безнадежных долгов за счет суммы резерва центрального аппарата"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -608,14 +583,14 @@
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
         <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
-    <row alias="R33">
+    <row alias="">
         <cell alias="rowNum" colSpan="1" numericValue="30" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Волго-Вятский банк"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Управление поддержки корпоративных клиентов- списание безнадежных долгов за счет суммы резерва центрального аппарата"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -627,14 +602,14 @@
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
         <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
+        <cell alias="reserveCurrent" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
         <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     </row>
-    <row alias="R34">
-        <cell alias="rowNum" colSpan="1" numericValue="31" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Западно-Уральский банк"/>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1"/>
+        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Центральный аппарат с учетом списания безнадежных долгов ТБ"/>
         <cell alias="sum45" colSpan="1" rowSpan="1"/>
         <cell alias="norm45" colSpan="1" rowSpan="1"/>
         <cell alias="reserve45" colSpan="1" rowSpan="1"/>
@@ -645,221 +620,7 @@
         <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
         <cell alias="normIncome" colSpan="1" rowSpan="1"/>
         <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R35">
-        <cell alias="rowNum" colSpan="1" numericValue="32" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Юго-Западный банк"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R36">
-        <cell alias="rowNum" colSpan="1" numericValue="33" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Поволжский банк"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R37">
-        <cell alias="rowNum" colSpan="1" numericValue="34" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северо-Западный банк"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R38">
-        <cell alias="rowNum" colSpan="1" numericValue="35" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Северо-Кавказский банк"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R39">
-        <cell alias="rowNum" colSpan="1" numericValue="36" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Западно-Сибирский банк"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R40">
-        <cell alias="rowNum" colSpan="1" numericValue="37" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1" stringValue="Центральное ОСБ №8688"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R41">
-        <cell alias="rowNum" colSpan="1" numericValue="38" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Управление учета внутрихозяйственных операций ПЦП МСЦ «Южный порт»"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R42">
-        <cell alias="rowNum" colSpan="1" numericValue="39" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Управление поддержки клиентов CIB ПЦП МСЦ «Южный порт»"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R43">
-        <cell alias="rowNum" colSpan="1" numericValue="40" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Отдел обработки документов и отчетности ПЦП МСЦ «Ясная поляна»"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R44">
-        <cell alias="rowNum" colSpan="1" numericValue="41" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Отдел обработки документов и отчетности ПЦП МСЦ «Черноземье»"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
-        <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="usingReserve" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-    </row>
-    <row alias="R45">
-        <cell alias="rowNum" colSpan="1" numericValue="42" rowSpan="1"/>
-        <cell alias="bankName" colSpan="1" rowSpan="1"
-              stringValue="Центральный аппарат с учетом списания безнадежных долгов ТБ и подразделений банка"/>
-        <cell alias="sum45" colSpan="1" rowSpan="1"/>
-        <cell alias="norm45" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve45" colSpan="1" rowSpan="1"/>
-        <cell alias="sum90" colSpan="1" rowSpan="1"/>
-        <cell alias="norm90" colSpan="1" rowSpan="1"/>
-        <cell alias="reserve90" colSpan="1" rowSpan="1"/>
-        <cell alias="totalReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="sumIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="normIncome" colSpan="1" rowSpan="1"/>
-        <cell alias="valueReserve" colSpan="1" rowSpan="1"/>
-        <cell alias="reservePrev" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="reservePrev" colSpan="1" rowSpan="1"/>
         <cell alias="reserveCurrent" colSpan="1" rowSpan="1"/>
         <cell alias="addChargeReserve" colSpan="1" rowSpan="1"/>
         <cell alias="restoreReserve" colSpan="1" rowSpan="1"/>

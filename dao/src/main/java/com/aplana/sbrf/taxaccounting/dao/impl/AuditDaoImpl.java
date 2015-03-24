@@ -89,7 +89,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         //Судя по постановке, выборка SAMPLE_NUMBER.S_10 пустой быть не
         ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
                 SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
-                SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45_s_55_join)));
+                !s_45_s_55_join.isEmpty() ?
+                        SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45_s_55_join) :
+                        "1=1"));
         //3б
         ps.appendQuery(",\n");
         ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_PERFORMER,
@@ -121,7 +123,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery(" OR ");
         //5.Отображение всех событий с кодами 90*
         ps.appendQuery(String.format("( %s AND %s )",
-                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_s_55_join),
+                !s_45_s_55_join.isEmpty() ?
+                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_s_55_join) :
+                        "1=1",
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
         ps.appendQuery(" )");

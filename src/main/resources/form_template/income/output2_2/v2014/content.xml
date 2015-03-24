@@ -5,6 +5,7 @@
     <fullName>Сведения о дивидендах (доходах от долевого участия в других организациях, созданных на территории
         Российской Федерации), выплаченных в отчетном квартале
     </fullName>
+    <header>03/B</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
@@ -65,12 +66,12 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>recName</alias>
+        <alias>title</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Получатель. Наименование</name>
         <order>7</order>
-        <width>5</width>
+        <width>12</width>
         <maxLength>1000</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -206,82 +207,34 @@
         <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sumDividend</alias>
-        <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>Сумма начисленных дивидендов</name>
-        <order>21</order>
-        <width>6</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>dividendDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Перечисление дивидендов. Дата</name>
-        <order>22</order>
+        <name>Дата перечисления дивидендов</name>
+        <order>21</order>
         <width>8</width>
         <formatId>0</formatId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>dividendNum</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>Перечисление дивидендов. Номер платёжного поручения</name>
-        <order>23</order>
-        <width>8</width>
-        <maxLength>20</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>dividendSum</alias>
+        <alias>sumDividend</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Перечисление дивидендов. Сумма</name>
-        <order>24</order>
+        <name>Сумма дивидендов в рублях</name>
+        <order>22</order>
         <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
-        <alias>taxDate</alias>
-        <checking>false</checking>
-        <columnType>DATE</columnType>
-        <name>Перечисление налога. Дата</name>
-        <order>25</order>
-        <width>8</width>
-        <formatId>0</formatId>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>taxNum</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>Перечисление налога. Номер платёжного поручения</name>
-        <order>26</order>
-        <width>8</width>
-        <maxLength>20</maxLength>
-        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sumTax</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Перечисление налога. Сумма</name>
-        <order>27</order>
+        <name>Сумма налога в рублях</name>
+        <order>23</order>
         <width>8</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
-        <alias>reportYear</alias>
-        <checking>false</checking>
-        <columnType>DATE</columnType>
-        <name>Отчётный год</name>
-        <order>28</order>
-        <width>5</width>
-        <formatId>4</formatId>
     </columns>
     <styles>
         <alias>Редактируемая</alias>

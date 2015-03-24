@@ -47,7 +47,7 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
     Label declarationTypeTitle;
 
     @UiField(provided = true)
-    ValueListBox<DeclarationType> declarationTypeId;
+    ListBoxWithTooltip<DeclarationType> declarationTypeId;
 
     @UiField
     DepartmentPickerPopupWidget departmentPicker;
@@ -68,6 +68,7 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
                 return object.getName();
             }
         });
+        declarationTypeId.setShowTooltip(true);
 
         initWidget(uiBinder.createAndBindUi(this));
 
