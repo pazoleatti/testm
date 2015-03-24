@@ -1071,8 +1071,8 @@ void generateXML() {
                                 ДивРосОрг(
                                         ДивРосОргВс : getLong(row.dividendRussianTotal),
                                         ДивРосСтав0 : getLong(row.dividendRussianStavka0),
-                                        ДивРосСтав9 : getLong(row.dividendRussianStavka9),
-                                        //ДивРосСтавИн :
+                                        ДивРосСтав9 : getLong(row.dividendRussianStavka6),// для 9% алиас такой
+                                        ДивРосСтавИн : getLong(row.dividendRussianStavka9), // алиас такой
                                         ДивРосНеНП : getLong(row. dividendRussianTaxFree),
                                 )
                                 // 0..1
