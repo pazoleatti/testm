@@ -356,8 +356,8 @@ void generateXML() {
         dataRowsSum = getDataRows(formDataCollection, 417, [FormDataKind.ADDITIONAL])
     }
 
-    // Выходная Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
-    def dataRowsApp2 = getDataRows(formDataCollection, 415, [FormDataKind.ADDITIONAL])
+    // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
+    def dataRowsApp2 = getDataRows(formDataCollection, 415, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
 
     /** НалВыпл311ФБ за предыдущий отчетный период. Код строки декларации 250. */
     def nalVipl311FBOld = 0
@@ -1253,71 +1253,71 @@ void generateXML() {
                 // Приложение №2
                 for (def row : dataRowsApp2) {
                     //НомерСправ  Справка №
-                    def nomerSprav = row.column1
+                    def nomerSprav = row.refNum
                     //ДатаСправ   Дата составления
                     def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
                     //Тип         Тип
                     def type = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
                     //ИННФЛ       ИНН
-                    def innFL = row.column4
+                    def innFL = row.innRF
                     //ИННИно       ИНН
-                    def innIno = row.column5
+                    def innIno = row.inn
                     //Фамилия     Фамилия
-                    def surname = row.column6
+                    def surname = row.surname
                     //Имя         Имя
-                    def givenName = row.column7
+                    def givenName = row.name
                     //Отчество    Отчество
-                    def parentName = row.column8
+                    def parentName = row.patronymic
                     //СтатусНП    Статус налогоплательщика
-                    def statusNP = row.column9
+                    def statusNP = row.status
                     //ДатаРожд    Дата рождения
-                    def dataRozhd = row.column10
+                    def dataRozhd = row.birthday
                     //Гражд       Гражданство (код страны)
-                    def grazhd = row.column11
+                    def grazhd = row.citizenship
                     //КодВидДок   Код вида документа, удостоверяющего личность
-                    def kodVidDok = row.column12
+                    def kodVidDok = row.code
                     //СерНомДок   Серия и номер документа
-                    def serNomDok = row.column13
+                    def serNomDok = row.series
                     //Индекс      Почтовый индекс
-                    def zipCode = row.column14
+                    def zipCode = row.postcode
                     //КодРегион   Регион (код)
-                    def subdivisionRF = getRefBookValue(4, row.column15)?.CODE?.value
+                    def subdivisionRF = getRefBookValue(4, row.region)?.CODE?.value
                     //Район       Район
-                    def area = row.column16
+                    def area = row.district
                     //Город       Город
-                    def city = row.column17
+                    def city = row.city
                     //НаселПункт  Населенный пункт (село, поселок)
-                    def region = row.column18
+                    def region = row.locality
                     //Улица       Улица (проспект, переулок)
-                    def street = row.column19
+                    def street = row.street
                     //Дом         Номер дома (владения)
-                    def homeNumber = row.column20
+                    def homeNumber = row.house
                     //Корпус      Номер корпуса (строения)
-                    def corpNumber = row.column21
+                    def corpNumber = row.housing
                     //Кварт       Номер квартиры
-                    def apartment = row.column22
+                    def apartment = row.apartment
                     //ОКСМ        Код страны
-                    def oksm = row.column23
+                    def oksm = row.country
                     //АдрТекст    Адрес места жительства за пределами Российской Федерации
-                    def adrText = row.column24
+                    def adrText = row.address
                     //Ставка      Налоговая ставка
-                    def stavka = row.column25
+                    def stavka = row.taxRate
                     //СумДохОбщ   Общая сумма дохода
-                    def sumDohObsh = row.column26
+                    def sumDohObsh = row.income
                     //СумВычОбщ   Общая сумма вычетов
-                    def sumVichObsh = row.column27
+                    def sumVichObsh = row.deduction
                     //НалБаза     Налоговая база
-                    def nalBazaApp2 = row.column28
+                    def nalBazaApp2 = row.taxBase
                     //НалИсчисл   Сумма налога исчисленная
-                    def nalIschislApp2 = row.column29
+                    def nalIschislApp2 = row.calculated
                     //НалУдерж    Сумма налога удержанная
-                    def nalUderzh = row.column30
+                    def nalUderzh = row.withheld
                     //НалПеречисл Сумма налога перечисленная
-                    def nalPerechisl = row.column31
+                    def nalPerechisl = row.listed
                     //НалУдержЛиш Сумма налога, излишне удержанная налоговым агентом
-                    def nalUderzhLish = row.column32
+                    def nalUderzhLish = row.withheldAgent
                     //НалНеУдерж  Сумма налога, не удержанная налоговым агентом
-                    def nalNeUderzh = row.column33
+                    def nalNeUderzh = row.nonWithheldAgent
 
                     // 0..n
                     СведДохФЛ(
@@ -1360,21 +1360,20 @@ void generateXML() {
                                         (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
                                         (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
                         )
-                        int num = 34
                         //0..1
                         СпрДохФЛ() {
-                            3.times{
+                            3.times{ index_1 ->
                                 //КодДоход    040 (Код дохода)
-                                def kodDohod040 = row["column${++num}"]
+                                def kodDohod040 = row["col_040_${index_1 + 1}"]
                                 //СумДоход    041 (Сумма дохода)
-                                def sumDohod041 = row["column${++num}"]
+                                def sumDohod041 = row["col_041_${index_1 + 1}"]
 
                                 СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
-                                    5.times{
+                                    5.times{ index_2 ->
                                         //КодВычет    042 (Код вычета)
-                                        def kodVichet042 = row["column${++num}"]
+                                        def kodVichet042 = row["col_042_${index_1 + 1}_${index_2 + 1}"]
                                         //СумВычет    043 (Сумма вычета)
-                                        def sumVichet043 = row["column${++num}"]
+                                        def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
 
                                         //1..n
                                         СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
@@ -1385,11 +1384,11 @@ void generateXML() {
 
                         //0..1
                         НалВычСтанд() {
-                            2.times{
+                            2.times{ index_1 ->
                                 //КодВычет    051 (Код вычета)
-                                def kodVichet051 = row["column${++num}"]
+                                def kodVichet051 = row["col_051_3_${index_1 + 1}"]
                                 //СумВычет    052 (Сумма вычета)
-                                def sumVichet052 = row["column${++num}"]
+                                def sumVichet052 = row["col_052_3_${index_1 + 1}"]
                                 //1..n
                                 СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
                             }
