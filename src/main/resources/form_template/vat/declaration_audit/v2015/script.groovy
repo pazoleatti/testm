@@ -211,6 +211,7 @@ void generateXML() {
     def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1) ? true : false
 
     def sign812 = hasOneOrMoreDeclaration()
+    def has812 = (sign812 == 1)
     def sign8 = (has8 || has8n) ? 1 : 0
     def sign81 = isDeclarationExist(declarations().declaration81[0])
     def sign9 = isDeclarationExist(declarations().declaration9[0])
@@ -326,17 +327,17 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл: declarationService.generateXmlFileId(4, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
-            ВерсПрог: applicationVersion,
-            ВерсФорм: formatVersion,
-            'ПризнНал8-12': sign812,
-            ПризнНал8: sign8,
-            ПризнНал81: sign81,
-            ПризнНал9: sign9,
-            ПризнНал91: sign91,
-            ПризнНал10: sign10,
-            ПризнНал11: sign11,
-            ПризнНал12: sign12) {
+            [ИдФайл: declarationService.generateXmlFileId(4, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp)] +
+                    [ВерсПрог: applicationVersion] +
+                    [ВерсФорм: formatVersion] +
+                    ['ПризнНал8-12': sign812] +
+                    (has812 ? [ПризнНал8: sign8] : [:]) +
+                    (has812 ? [ПризнНал81: sign81] : [:]) +
+                    (has812 ? [ПризнНал9: sign9] : [:]) +
+                    (has812 ? [ПризнНал91: sign91] : [:]) +
+                    (has812 ? [ПризнНал10: sign10] : [:]) +
+                    (has812 ? [ПризнНал11: sign11] : [:]) +
+                    (has812 ? [ПризнНал12: sign12] : [:])) {
         Документ(
                 // ТИТУЛЬНЫЙ ЛИСТ
                 // Номер корректировки
