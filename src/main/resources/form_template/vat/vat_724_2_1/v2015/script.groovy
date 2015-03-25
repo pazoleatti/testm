@@ -1,8 +1,9 @@
-package form_template.vat.vat_724_2_1.v2014
+package form_template.vat.vat_724_2_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -256,8 +257,8 @@ void addData(def xml, int headRowCount) {
 
         // Проверить фиксированные значения (графа 1..3)
         ['rowNum', 'code', 'name'].each { alias ->
-            def value = values[alias]?.toString()
-            def valueExpected = dataRow.getCell(alias).value?.toString()
+            def value = StringUtils.cleanString(values[alias]?.toString())
+            def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
             checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
         }
 
@@ -305,8 +306,8 @@ void addTransportData(def xml) {
 
         // Проверить фиксированные значения (графа 1..3)
         ['rowNum', 'code', 'name'].each { alias ->
-            def value = values[alias]?.toString()
-            def valueExpected = dataRow.getCell(alias).value?.toString()
+            def value = StringUtils.cleanString(values[alias]?.toString())
+            def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
             checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
         }
 
