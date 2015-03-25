@@ -55,82 +55,128 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         return new PagingResult<LogSearchResultItem>(records, !records.isEmpty()?records.get(0).getCnt():0);
     }
 
-    private static final String FILTER_BY_DEPARTMENT_SOURCES =
-            "source_filter as (SELECT DISTINCT src.id id, src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, fds.PERIOD_START start_date, fds.PERIOD_END end_date\n" +
-                    "            from department_form_type src\n" +
-                    "            join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
-                    "            join department_form_type tgt on fds.department_form_type_id = tgt.id\n" +
-                    "               WHERE %s and %s)\n";
+    //Запрос дя получения записей по ЖА для пользователей с ролями CONTROL, CONTROL_NS
+    //Условия связанные с получением источников/приемников вынесены в отдельное представление
+    // (subquery source_filter_2B, source_filter_4B, performer_filter).
+    // Поскольку в постановке условия на записи ЖА сказано, что по выборкам 45, 55 должны совпадать источники/приемники,
+    // то они так же вынесены в представления
 
-    private static final String FILTER_BY_DEPARTMENT_PERFORMER =
-            "performer_filter as (" +
-                    "SELECT src.PERFORMER_DEP_ID performer_dep_id from department_form_type src " +
-                    "where %s)";
+    private static final String SQL_FILTERS_FOR_CONTROL =
+            "WITH source_filter_2K AS (SELECT DISTINCT\n" +
+                    "                         src.id            id,\n" +
+                    "                         src.DEPARTMENT_ID department_id,\n" +
+                    "                         src.FORM_TYPE_ID  form_type_id,\n" +
+                    "                         src.KIND          kind,\n" +
+                    "                         fds.PERIOD_START  start_date,\n" +
+                    "                         fds.PERIOD_END    end_date\n" +
+                    "                       FROM department_form_type src\n" +
+                    "                         JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
+                    "                         JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
+                    "                       WHERE %s and %s) --10\n" +
+                    "  ,\n" +
+                    "    source_filter_4K AS (SELECT DISTINCT\n" +
+                    "                           src.id            id,\n" +
+                    "                           src.DEPARTMENT_ID dep_id,\n" +
+                    "                           src.FORM_TYPE_ID  form_type_id,\n" +
+                    "                           src.KIND          kind,\n" +
+                    "                           fds.PERIOD_START  start_date,\n" +
+                    "                           fds.PERIOD_END    end_date\n" +
+                    "                         FROM department_form_type src\n" +
+                    "                           JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
+                    "                           JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
+                    "                         WHERE %s and %s),--55 и 10\n" +
+                    "    performer_filter_3K AS (SELECT\n" +
+                    "                           src.id            id,\n" +
+                    "                           src.FORM_TYPE_ID  form_type_id,\n" +
+                    "                           src.KIND          kind,\n" +
+                    "                           src.DEPARTMENT_ID dep_id\n" +
+                    "                         FROM department_form_type src\n" +
+                    "                         WHERE %s and %s) --55\n";
 
-    private static final String DEPARTMENT_SOURCES_CLAUSE =
-            "exists ( select 1 from source_filter filter1 where ls.form_kind_id = filter1.kind and ls.FORM_TYPE_ID = filter1.form_type_id\n" +
-                    "    and (ls.LOG_DATE >= filter1.start_date and (filter1.end_date is NULL or ls.LOG_DATE <= filter1.end_date)) \n" +
-                    "    and ls.FORM_DEPARTMENT_ID = filter1.department_id and %s)";
-
-    private static final String DEPARTMENT_PERFORMER_CLAUSE =
-            "exists (select 1 from performer_filter filter2 where filter2.performer_dep_id = ls.FORM_DEPARTMENT_ID and %s)";
+    private static final String SQL_CONTROL =
+            SQL_FILTERS_FOR_CONTROL +
+                    "SELECT\n" +
+                    "  ordDat.*\n" +
+                    "FROM (SELECT\n" +
+                    "        dat.*,\n" +
+                    "        count(*) OVER ()   cnt,\n" +
+                    "        rownum AS rn\n" +
+                    "      FROM (SELECT DISTINCT\n" +
+                    "              ls.id,\n" +
+                    "              ls.log_date,\n" +
+                    "              ls.ip,\n" +
+                    "              ls.event_id,\n" +
+                    "              ev.name       event,\n" +
+                    "              ls.user_login user_login,\n" +
+                    "              ls.roles,\n" +
+                    "              ls.department_name,\n" +
+                    "              ls.report_period_name,\n" +
+                    "              ls.declaration_type_name,\n" +
+                    "              ls.form_type_name,\n" +
+                    "              ls.form_kind_id,\n" +
+                    "              ls.form_type_id,\n" +
+                    "              fk.name       form_kind_name,\n" +
+                    "              ls.note,\n" +
+                    "              ls.user_department_name,\n" +
+                    "              ls.blob_data_id\n" +
+                    "            FROM log_system ls\n" +
+                    "              LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
+                    "              LEFT JOIN form_kind fk ON ls.form_kind_id = fk.\"ID\"\n" +
+                    "              LEFT JOIN source_filter_2K filter1 ON\n" +
+                    "                                                   ls.form_kind_id = filter1.kind AND\n" +
+                    "                                                   ls.FORM_TYPE_ID = filter1.form_type_id\n" +
+                    "                                                   AND ls.LOG_DATE >= filter1.start_date AND\n" +
+                    "                                                   (filter1.end_date IS NULL OR ls.LOG_DATE <= filter1.end_date) AND\n" +
+                    "                                                   %s\n" +
+                    "              LEFT JOIN performer_filter_3K filter2 ON ls.FORM_TYPE_ID = filter2.form_type_id AND\n" +
+                    "                                                    ls.form_kind_id = filter2.kind AND\n" +
+                    "                                                    filter2.dep_id = ls.FORM_DEPARTMENT_ID\n" +
+                    "                                                    AND\n" +
+                    "                                                    %s\n" +
+                    "              LEFT JOIN source_filter_4K filter3 ON ls.FORM_TYPE_ID = filter3.form_type_id AND\n" +
+                    "                                                    ls.form_kind_id = filter3.kind AND\n" +
+                    "                                                    filter3.dep_id = ls.FORM_DEPARTMENT_ID\n" +
+                    "                                                    AND\n" +
+                    "                                                    %s\n" +
+                    "            WHERE (\n" +
+                    "              (%s AND %s)\n" +
+                    "              OR\n" +
+                    "              (%s AND %s))\n";
 
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusinessForControl(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds) {
         cutOffLogSystemFilter(filter);
 
-        ArrayList<Integer> s_45_s_55_join = new ArrayList<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_55).size() +
-                availableDepIds.get(SAMPLE_NUMBER.S_45).size());
-        s_45_s_55_join.addAll(availableDepIds.get(SAMPLE_NUMBER.S_55));
-        s_45_s_55_join.addAll(availableDepIds.get(SAMPLE_NUMBER.S_45));
-        //2б,4б
-        PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("with ");
-        //Судя по постановке, выборка SAMPLE_NUMBER.S_10 пустой быть не
-        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
+        HashSet<Integer> s_45 = new HashSet<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_45));
+        HashSet<Integer> s_55 = new HashSet<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_55));
+        ArrayList<Integer> s_45_55 = new ArrayList<Integer>(s_45.size() + s_55.size());
+        s_45_55.addAll(s_45);
+        s_45_55.addAll(s_55);
+        String sql = String.format(
+                SQL_CONTROL,
+                !s_45.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45) : "1=3",
                 SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
-                !s_45_s_55_join.isEmpty() ?
-                        SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45_s_55_join) :
-                        "1=1"));
-        //3б
-        ps.appendQuery(",\n");
-        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_PERFORMER,
-                SqlUtils.transformToSqlInStatement("src.PERFORMER_DEP_ID", availableDepIds.get(SAMPLE_NUMBER.S_10))));
-        ps.appendQuery(
-                String.format(LOG_SYSTEM_DATA_BY_FILTER,
-                        filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE ?
-                                "case when ls.declaration_type_name is not null then ls.declaration_type_name else ls.form_type_name end as type_name, "
-                                :
-                                ""
-                ));
-
-        ps.appendQuery("WHERE (");
-        //Фильтрация 2а,4а
-        ps.appendQuery(String.format(DEPARTMENT_SOURCES_CLAUSE,
+                !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", s_55) : "1=3",
+                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
+                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
-        ps.appendQuery(" OR ");
-        //Фильтрация 3а
-        ps.appendQuery(String.format(DEPARTMENT_PERFORMER_CLAUSE,
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
-        ps.appendQuery(" OR ");
-        //1.Отображение всех событий с кодами 1, 2, 3, 6, 10*, 40*, 7, 90*
-        ps.appendQuery(String.format("( %s AND %s )",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%"))));
-        ps.appendQuery(" OR ");
-        //5.Отображение всех событий с кодами 90*
-        ps.appendQuery(String.format("( %s AND %s )",
-                !s_45_s_55_join.isEmpty() ?
-                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_s_55_join) :
-                        "1=1",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%")),
+                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_55),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
-        ps.appendQuery(" )");
-        appendSelectWhereClause(ps, filter, " AND ");
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))
+        );
 
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery(sql);
+        appendSelectWhereClause(ps, filter, " AND ");
         appendEndOrderClause(ps, filter);
         try {
             List<LogSearchResultItem> records = getJdbcTemplate().query(ps.getQuery().toString(),
@@ -143,49 +189,65 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
     }
 
+    private static final String LOG_SYSTEM_DATA_FOR_CONTROL_BY_FILTER_COUNT = SQL_FILTERS_FOR_CONTROL +
+            "select count(*) " +
+            "from log_system ls " +
+            "left join event ev on ls.event_id=ev.\"ID\" " +
+            "left join form_kind fk on ls.form_kind_id=fk.\"ID\" " +
+            "              LEFT JOIN source_filter_2K filter1 ON\n" +
+            "                                                   ls.form_kind_id = filter1.kind AND\n" +
+            "                                                   ls.FORM_TYPE_ID = filter1.form_type_id\n" +
+            "                                                   AND ls.LOG_DATE >= filter1.start_date AND\n" +
+            "                                                   (filter1.end_date IS NULL OR ls.LOG_DATE <= filter1.end_date) AND\n" +
+            "                                                   %s\n" +
+            "              LEFT JOIN performer_filter_3K filter2 ON ls.FORM_TYPE_ID = filter2.form_type_id AND\n" +
+            "                                                    ls.form_kind_id = filter2.kind AND\n" +
+            "                                                    filter2.dep_id = ls.FORM_DEPARTMENT_ID\n" +
+            "                                                    AND\n" +
+            "                                                    %s\n" +
+            "              LEFT JOIN source_filter_4K filter3 ON ls.FORM_TYPE_ID = filter3.form_type_id AND\n" +
+            "                                                    ls.form_kind_id = filter3.kind AND\n" +
+            "                                                    filter3.dep_id = ls.FORM_DEPARTMENT_ID\n" +
+            "                                                    AND\n" +
+            "                                                    %s\n" +
+            "            WHERE (\n" +
+            "              (%s AND %s)\n" +
+            "              OR\n" +
+            "              (%s AND %s))\n";
+
     @Override
     public long getCountForControl(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds) {
         cutOffLogSystemFilter(filter);
 
-        ArrayList<Integer> s_45_s_55_join = new ArrayList<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_55).size() +
-                availableDepIds.get(SAMPLE_NUMBER.S_45).size());
-        s_45_s_55_join.addAll(availableDepIds.get(SAMPLE_NUMBER.S_55));
-        s_45_s_55_join.addAll(availableDepIds.get(SAMPLE_NUMBER.S_45));
-        //2б,4б
-        PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("with ");
-        //Судя по постановке, выборка SAMPLE_NUMBER.S_10 пустой быть не
-        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
+        HashSet<Integer> s_45 = new HashSet<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_45));
+        HashSet<Integer> s_55 = new HashSet<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_55));
+        ArrayList<Integer> s_45_55 = new ArrayList<Integer>(s_45.size() + s_55.size());
+        s_45_55.addAll(s_45);
+        s_45_55.addAll(s_55);
+        String sql = String.format(
+                LOG_SYSTEM_DATA_FOR_CONTROL_BY_FILTER_COUNT,
+                !s_45.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45) : "1=3",
                 SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
-                SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45_s_55_join)));
-        //3б
-        ps.appendQuery(",\n");
-        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_PERFORMER,
-                SqlUtils.transformToSqlInStatement("src.PERFORMER_DEP_ID", availableDepIds.get(SAMPLE_NUMBER.S_10))));
-        ps.appendQuery(LOG_SYSTEM_DATA_BY_FILTER_COUNT);
-        ps.appendQuery("WHERE (");
-        //Фильтрация 2а,4а
-        ps.appendQuery(String.format(DEPARTMENT_SOURCES_CLAUSE,
+                !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", s_55) : "1=3",
+                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
+                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
-        ps.appendQuery(" OR ");
-        //Фильтрация 3а
-        ps.appendQuery(String.format(DEPARTMENT_PERFORMER_CLAUSE,
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
-        ps.appendQuery(" OR ");
-        //1.Отображение всех событий с кодами 1, 2, 3, 6, 10*, 40*, 7, 90*
-        ps.appendQuery(String.format("( %s AND %s )",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%"))));
-        ps.appendQuery(" OR ");
-        //5.Отображение всех событий с кодами 90*
-        ps.appendQuery(String.format("( %s AND %s )",
-                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_s_55_join),
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%")),
+                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_45_55),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
-        ps.appendQuery(" )");
+                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))
+        );
+
+        PreparedStatementData ps = new PreparedStatementData();
+        ps.appendQuery(sql);
         appendSelectWhereClause(ps, filter, " AND ");
         try{
             return getJdbcTemplate().queryForLong(ps.getQuery().toString(), ps.getParams().toArray());
@@ -194,46 +256,69 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
     }
 
+    private static final String SQL_FILTERS_FOR_OPER =
+            "WITH source_filter_2O AS (SELECT\n" +
+                    "                            src.id            id,\n" +
+                    "                            src.FORM_TYPE_ID  form_type_id,\n" +
+                    "                            src.KIND          kind,\n" +
+                    "                            src.DEPARTMENT_ID dep_id\n" +
+                    "                          FROM department_form_type src\n" +
+                    "                          WHERE %s and %s)\n";
+
+    private static final String SQL_OPER = SQL_FILTERS_FOR_OPER +
+                    "SELECT\n" +
+                    "  ordDat.*\n" +
+                    "FROM (SELECT\n" +
+                    "        dat.*,\n" +
+                    "        count(*) OVER () cnt,\n" +
+                    "        rownum AS rn\n" +
+                    "      FROM (SELECT DISTINCT\n" +
+                    "              ls.id,\n" +
+                    "              ls.log_date,\n" +
+                    "              ls.ip,\n" +
+                    "              ls.event_id,\n" +
+                    "              ev.name       event,\n" +
+                    "              ls.user_login user_login,\n" +
+                    "              ls.roles,\n" +
+                    "              ls.department_name,\n" +
+                    "              ls.report_period_name,\n" +
+                    "              ls.declaration_type_name,\n" +
+                    "              ls.form_type_name,\n" +
+                    "              ls.form_kind_id,\n" +
+                    "              ls.form_type_id,\n" +
+                    "              fk.name       form_kind_name,\n" +
+                    "              ls.note,\n" +
+                    "              ls.user_department_name,\n" +
+                    "              ls.blob_data_id\n" +
+                    "            FROM log_system ls LEFT JOIN event ev ON ls.event_id = ev.\"ID\"\n" +
+                    "              LEFT JOIN form_kind fk ON ls.form_kind_id = fk.\"ID\"\n" +
+                    "              LEFT JOIN source_filter_2O filter1 ON\n" +
+                    "                                                   ls.form_kind_id = filter1.kind AND\n" +
+                    "                                                   ls.FORM_TYPE_ID = filter1.form_type_id AND                                                   \n" +
+                    "                                                   %s\n" +
+                    "            WHERE (\n" +
+                    "              (%s AND %s)\n" +
+                    "              OR\n" +
+                    "              (%s AND %s) )";
+
     @Override
     public PagingResult<LogSearchResultItem> getLogsBusinessForOper(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds) {
-        //2б
+        HashSet<Integer> s_55 = new HashSet<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_55));
+        String sql = String.format(
+                SQL_OPER,
+                !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
+                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%")),
+                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%", "90%")),
+                !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_55) : "1=3",
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "90%"))
+                );
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("with ");
-        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
-                SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
-                !availableDepIds.get(SAMPLE_NUMBER.S_55).isEmpty() ?
-                        SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)) :
-                        "1=1"));
-        ps.appendQuery(
-                String.format(LOG_SYSTEM_DATA_BY_FILTER,
-                        filter.getSearchOrdering() == HistoryBusinessSearchOrdering.FORM_TYPE ?
-                                "case when ls.declaration_type_name is not null then ls.declaration_type_name else ls.form_type_name end as type_name, "
-                                :
-                                ""
-                ));
-        ps.appendQuery("WHERE (");
-        //Фильтрация 2а
-        ps.appendQuery(String.format(DEPARTMENT_SOURCES_CLAUSE,
-                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
-        ps.appendQuery(" OR ");
-        //1.Отображение всех событий с кодами 1, 2, 3, 6, 10*, 40*, 7, 90*
-        ps.appendQuery(String.format("( %s AND %s )",
-                !availableDepIds.get(SAMPLE_NUMBER.S_10).isEmpty() ?
-                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)) :
-                        "1=1",
-                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%"))));
-        ps.appendQuery(" OR ");
-        //3.Отображение всех событий с кодами 90*
-        ps.appendQuery(String.format("( %s AND %s )",
-                !availableDepIds.get(SAMPLE_NUMBER.S_55).isEmpty() ?
-                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)) :
-                        "1=1",
-                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
-        ps.appendQuery(" )");
-
+        ps.appendQuery(sql);
         appendSelectWhereClause(ps, filter, " AND ");
         appendEndOrderClause(ps, filter);
 
@@ -248,39 +333,39 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
     }
 
+    private static final String LOG_SYSTEM_DATA_FOR_OPER_BY_FILTER_COUNT = SQL_FILTERS_FOR_OPER +
+            "select count(*) " +
+            "from log_system ls " +
+            "left join event ev on ls.event_id=ev.\"ID\" " +
+            "left join form_kind fk on ls.form_kind_id=fk.\"ID\" " +
+            "              LEFT JOIN source_filter_2O filter1 ON\n" +
+            "                                                   ls.form_kind_id = filter1.kind AND\n" +
+            "                                                   ls.FORM_TYPE_ID = filter1.form_type_id AND                                                   \n" +
+            "                                                   %s\n" +
+            "            WHERE (\n" +
+            "              (%s AND %s)\n" +
+            "              OR\n" +
+            "              (%s AND %s))\n";
+
+
     @Override
     public long getCountForOper(LogSystemFilter filter, Map<SAMPLE_NUMBER, Collection<Integer>> availableDepIds) {
-        //2б
+        HashSet<Integer> s_55 = new HashSet<Integer>(availableDepIds.get(SAMPLE_NUMBER.S_55));
+        String sql = String.format(
+                LOG_SYSTEM_DATA_FOR_OPER_BY_FILTER_COUNT,
+                !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
+                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%")),
+                SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%", "90%")),
+                !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", s_55) : "1=3",
+                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
+                        eventDao.getEventCodes(TARole.ROLE_OPER, null, "90%"))
+        );
         PreparedStatementData ps = new PreparedStatementData();
-        ps.appendQuery("with ");
-        ps.appendQuery(String.format(FILTER_BY_DEPARTMENT_SOURCES,
-                SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
-                !availableDepIds.get(SAMPLE_NUMBER.S_55).isEmpty() ?
-                        SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)) :
-                        "1=1"));
-        ps.appendQuery(LOG_SYSTEM_DATA_BY_FILTER_COUNT);
-        ps.appendQuery("WHERE (");
-        //Фильтрация 2а
-        ps.appendQuery(String.format(DEPARTMENT_SOURCES_CLAUSE,
-                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%"))));
-        ps.appendQuery(" OR ");
-        //1.Отображение всех событий с кодами 1, 2, 3, 6, 10*, 40*, 7, 90*
-        ps.appendQuery(String.format("( %s AND %s )",
-                !availableDepIds.get(SAMPLE_NUMBER.S_10).isEmpty() ?
-                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)) :
-                        "1=1",
-                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%", "90%"))));
-        ps.appendQuery(" OR ");
-        //3.Отображение всех событий с кодами 90*
-        ps.appendQuery(String.format("( %s AND %s )",
-                !availableDepIds.get(SAMPLE_NUMBER.S_55).isEmpty() ?
-                        SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_55)) :
-                        "1=1",
-                SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                        eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "90%"))));
-        ps.appendQuery(" )");
+        ps.appendQuery(sql);
 
         appendSelectWhereClause(ps, filter, " AND ");
         try{
@@ -420,7 +505,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     public void removeRecords(final LogSystemFilter filter) {
         getNamedParameterJdbcTemplate().update(
                 DELETE_RECORDS_BY_FILTER,
-                new HashMap<String, Object>(){{put("toDate", filter.getToSearchDate());}});
+                new HashMap<String, Object>() {{
+                    put("toDate", filter.getToSearchDate());
+                }});
     }
 
     @Override
