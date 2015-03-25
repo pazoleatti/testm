@@ -83,6 +83,7 @@ def getProvider(def long providerId) {
 def declarations() {
     [
             declaration8 : [12, 'Декларация по НДС (раздел 8)'],
+            declaration8n: [18, 'Декларация по НДС (раздел 8 без консолид. формы)'],
             declaration81: [13, 'Декларация по НДС (раздел 8.1)'],
             declaration9 : [14, 'Декларация по НДС (раздел 9)'],
             declaration91: [15, 'Декларация по НДС (раздел 9.1)'],
@@ -206,8 +207,11 @@ void generateXML() {
     def reorgFormCode = departmentParam?.REORG_FORM_CODE?.referenceValue
     def prPodp = (signatoryId != null ? signatoryId : 1)
 
+    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1) ? true : false
+    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1) ? true : false
+
     def sign812 = hasOneOrMoreDeclaration()
-    def sign8 = isDeclarationExist(declarations().declaration8[0])
+    def sign8 = (has8 || has8n) ? 1 : 0
     def sign81 = isDeclarationExist(declarations().declaration81[0])
     def sign9 = isDeclarationExist(declarations().declaration9[0])
     def sign91 = isDeclarationExist(declarations().declaration91[0])
@@ -215,7 +219,7 @@ void generateXML() {
     def sign11 = isDeclarationExist(declarations().declaration11[0])
     def sign12 = 0
 
-    def nameDecl8 = getDeclarationFileName(declarations().declaration8[0])
+    def nameDecl8 = has8 ? getDeclarationFileName(declarations().declaration8[0]) : getDeclarationFileName(declarations().declaration8n[0])
     def nameDecl81 = getDeclarationFileName(declarations().declaration81[0])
     def nameDecl9 = getDeclarationFileName(declarations().declaration9[0])
     def nameDecl91 = getDeclarationFileName(declarations().declaration91[0])
@@ -561,11 +565,13 @@ void logicCheck() {
     }
 
     // 2. Атрибуты признаки наличия разделов 8-11 заполнены согласно алгоритмам
+    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1) ? true : false
+    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1) ? true : false
     def checkMap = [
             'Признак наличия разделов с 8 по 12'
             : [getXmlValue(xmlData.@'ПризнНал8-12'.text()) as BigDecimal, hasOneOrMoreDeclaration()],
             'Признак наличия сведений из книги покупок об операциях, отражаемых за истекший налоговый период'
-            : [getXmlValue(xmlData.@ПризнНал8.text()) as BigDecimal, isDeclarationExist(declarations().declaration8[0])],
+            : [getXmlValue(xmlData.@ПризнНал8.text()) as BigDecimal, (has8 || has8n) ? 1 : 0],
             'Признак наличия сведений из дополнительного листа книги покупок'
             : [getXmlValue(xmlData.@ПризнНал81.text()) as BigDecimal, isDeclarationExist(declarations().declaration81[0])],
             'Признак наличия сведений из книги продаж об операциях, отражаемых за истекший налоговый период'
