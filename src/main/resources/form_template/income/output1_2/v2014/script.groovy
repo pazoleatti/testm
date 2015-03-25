@@ -101,8 +101,9 @@ def nonEmptyColumns = allColumns - 'inn'
 @Field
 def editableColumns = allColumns
 
+// 7, 8 графа источника
 @Field
-def keyColumns = ['year', 'firstMonth', 'lastMonth', 'emitentName', 'decisionNumber', 'decisionDate']
+def keyColumns = ['decisionNumber', 'decisionDate']
 
 @Field
 def sbString = "ОАО Сбербанк России"
@@ -254,8 +255,8 @@ void consolidation() {
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
                 def rowMap = getRowMap(sourceHelper.getAll())
-                sourceHelper.getAll().each { sourceRow ->
-                    def newRow = formNewRow(sourceRow, rowMap, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate)
+                rowMap.each { key, sourceRows ->
+                    def newRow = formNewRow(sourceRows, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate)
                     dataRows.add(newRow)
                 }
             }
@@ -276,14 +277,14 @@ def getRowMap(def rows) {
     return result
 }
 
-def formNewRow(def row, def rowMap, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
+def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    def keyString = keyColumns.collect{ row[it] ?: 0 }.join("#")
-    def rowList = rowMap[keyString]
+    // беру первую строку
+    def row = rowList[0]
 
     // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 1» = «1», иначе «Графа 1» = «2»
     newRow.taCategory = (row.emitentName == sbString && row.emitentInn == graph3String) ? 1 : 2
