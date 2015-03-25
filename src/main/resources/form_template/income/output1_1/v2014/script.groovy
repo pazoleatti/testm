@@ -104,8 +104,9 @@ def nonEmptyColumns = ['financialYear', 'taxPeriod', 'dividendType', 'dividendSu
                        'dividendRussianOrgStavka0', 'dividendPersonRussia', 'dividendMembersNotRussianTax',
                        'dividendAgentAll', 'dividendAgentWithStavka0', 'taxSumFromPeriod', 'taxSumFromPeriodAll']
 
+// 7, 8 графа источника
 @Field
-def keyColumns = ['year', 'firstMonth', 'lastMonth', 'emitentName', 'decisionNumber', 'decisionDate']
+def keyColumns = ['decisionNumber', 'decisionDate']
 
 @Field
 def sbString = "ОАО Сбербанк России"
@@ -115,6 +116,9 @@ def graph3String = "7707083893"
 
 @Field
 def sourceFormType = 419
+
+@Field
+def sourceFormType2 = 10070
 
 @Field
 def startDate = null
@@ -209,13 +213,13 @@ void consolidation() {
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        if(it.formTypeId == sourceFormType) {
+        if(it.formTypeId == sourceFormType || it.formTypeId == sourceFormType2) {
             def sourceFormData = formDataService.find(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
                 def rowMap = getRowMap(sourceHelper.getAll())
-                sourceHelper.getAll().each { sourceRow ->
-                    def newRow = formNewRow(sourceRow, rowMap, periodStartDate, periodEndDate, lastPeriodStartDate, lastPeriodEndDate)
+                rowMap.each { key, sourceRows ->
+                    def newRow = formNewRow(sourceRows, periodStartDate, periodEndDate, lastPeriodStartDate, lastPeriodEndDate)
                     dataRows.add(newRow)
                 }
             }
@@ -236,14 +240,14 @@ def getRowMap(def rows) {
     return result
 }
 
-def formNewRow(def row, def rowMap, def periodStartDate, def periodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
+def formNewRow(def rowList, def periodStartDate, def periodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
-    def keyString = keyColumns.collect{ row[it] ?: 0 }.join("#")
-    def rowList = rowMap[keyString]
+    // беру первую строку
+    def row = rowList[0]
 
     // «Графа 1» = Значение «Графы 9» первичной формы
     newRow.financialYear = row.year
