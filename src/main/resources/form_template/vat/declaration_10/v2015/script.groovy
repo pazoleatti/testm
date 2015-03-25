@@ -160,6 +160,7 @@ void generateXML() {
             if (code001 != 1) {
                 ЖУчВыстСчФ() {
                     hasPage = false
+                    def rowNum = 1
                     for (def row : sourceDataRows) {
                         if (row.getAlias() != null) {
                             if (row.getAlias() == "part_2") {
@@ -168,6 +169,7 @@ void generateXML() {
                             continue
                         }
                         hasPage = true
+                        rowNum++
                         def code005 = row.rowNumber
                         def code010 = row.date?.format('dd.MM.yyyy')
                         def code020 = row.opTypeCode
@@ -264,6 +266,8 @@ void generateXML() {
 
                         }
                     }
+                    if (rowNum >= 10000)
+                        decParams.setShowReport(false)
                     if (!hasPage) {
                         ЖУчВыстСчФСтр() {}
                     }

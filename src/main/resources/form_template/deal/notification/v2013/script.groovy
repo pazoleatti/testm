@@ -315,6 +315,8 @@ void generateXML() {
                             )
                         }
                     }
+                    if (rowCounter > 10000)
+                        decParams.setShowReport(false)
                 }
                 if(!hasRows){
                     СвКонтрСд() {}
