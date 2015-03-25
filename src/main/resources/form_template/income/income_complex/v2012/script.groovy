@@ -62,7 +62,7 @@ import java.math.RoundingMode
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE :
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE :
         calc()
@@ -486,13 +486,6 @@ void consolidationSummary(def dataRows) {
                 }
             }
         }
-    }
-}
-
-void checkCreation() {
-    formDataService.checkUnique(formData, logger)
-    if (formData.kind != FormDataKind.SUMMARY) {
-        logger.error("Нельзя создавать форму с типом ${formData.kind.name}")
     }
 }
 

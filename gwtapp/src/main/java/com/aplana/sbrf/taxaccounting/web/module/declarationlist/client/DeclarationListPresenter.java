@@ -194,6 +194,8 @@ public class DeclarationListPresenter extends
         cloneFilter.setReportPeriodIds(filter.getReportPeriodIds());
         cloneFilter.setDepartmentIds(filter.getDepartmentIds());
         cloneFilter.setDeclarationTypeId(filter.getDeclarationTypeId());
+        cloneFilter.setFormState(filter.getFormState());
+        cloneFilter.setCorrectionTag(filter.getCorrectionTag());
         // Если мы захотим чтобы для каждого налога запоминались другие параметры поиска (сортировка...),
         // то вместо создания нового мы должны будем получать фильтр из мапки и обновлять.
 

@@ -133,6 +133,7 @@ alter table declaration_data add constraint declaration_data_pk primary key (id)
 alter table declaration_data add constraint declaration_data_fk_decl_t_id foreign key (declaration_template_id) references declaration_template(id);
 alter table declaration_data add constraint decl_data_fk_dep_rep_per_id foreign key (department_report_period_id) references department_report_period (id);
 alter table declaration_data add constraint declaration_data_chk_is_accptd check (is_accepted in (0,1));
+alter table declaration_data add constraint declaration_data_chk_isshowrep check (is_show_report in (0,1));
 alter table declaration_data add constraint declaration_data_uniq_template unique (department_report_period_id, declaration_template_id, tax_organ_code, kpp);
 
 alter table form_data add constraint form_data_pk primary key (id);

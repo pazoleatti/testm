@@ -209,7 +209,7 @@ void calc() {
     def departmentParamsDate = getReportPeriodEndDate() - 1
 
     // Получение строк формы "Сведения о суммах налога на прибыль, уплаченного Банком за рубежом"
-    def dataRowsSum = getDataRows(417, FormDataKind.ADDITIONAL)
+    def dataRowsSum = getDataRows(421, FormDataKind.ADDITIONAL)
 
     // Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде.
     def sumNal = 0
@@ -499,28 +499,6 @@ void logicalCheckBeforeCalc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def departmentParam
-    def departmentId = formData.getDepartmentId()
-
-// Проверка назначения и назначения в статусе "Принята" формы-источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
-    def sourceFormTypeId = 417
-    def sourceFormType = formTypeService.get(sourceFormTypeId)
-
-    def departmentFormTypes = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate())
-    def departmentFormType = departmentFormTypes.find {
-        // совпадает подразделение и тип формы
-        it.departmentId == departmentId && it.formTypeId == sourceFormTypeId
-    }
-    if (departmentFormType == null) {
-        logger.error ("Не назначена источником налоговая форма «${sourceFormType.name}» в текущем периоде! Расчеты не могут быть выполнены.")
-    } else {
-        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
-        if (departmentFormType.formTypeId == sourceFormTypeId && (child == null || child.state != WorkflowState.ACCEPTED)) {
-            def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
-            logger.error("Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята». Расчеты не могут быть выполнены.")
-        }
-    }
-
     def fieldNumber = 0
 
     dataRows.eachWithIndex { row, i ->
@@ -1141,7 +1119,7 @@ void sortFormDataRows() {
 
 // Получить строки формы
 def getDataRows(def formId, def kind) {
-    //def formId = 417
+    //def formId = 421
     //def formDataKind = FormDataKind.SUMMARY
     def departmentId = formData.departmentId
     def reportPeriodId = formData.reportPeriodId

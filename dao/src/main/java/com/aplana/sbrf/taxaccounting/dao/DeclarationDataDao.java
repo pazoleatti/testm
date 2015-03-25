@@ -35,6 +35,13 @@ public interface DeclarationDataDao {
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если такой декларации не существует
 	 */
 	void setAccepted(long declarationDataId, boolean accepted);
+
+    /**
+     * Установить признак возможности формирования отчета декларации
+     * @param declarationDataId идентификатор декларации
+     * @param showReport признак возможности формирования отчета
+     */
+    void setShowReport(long declarationDataId, boolean showReport);
 	
 	/**
 	 * Удалить декларацию

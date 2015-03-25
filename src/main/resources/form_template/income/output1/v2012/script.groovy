@@ -41,9 +41,6 @@ import groovy.transform.Field
  */
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        if (formData.kind != FormDataKind.ADDITIONAL) {
-            logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
-        }
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:

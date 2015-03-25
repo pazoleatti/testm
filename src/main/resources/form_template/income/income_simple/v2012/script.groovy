@@ -39,7 +39,7 @@ import java.text.SimpleDateFormat
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        checkCreation()
+        formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -498,13 +498,6 @@ def consolidationSummary(def dataRows) {
     }
 }
 
-void checkCreation() {
-    if (formData.kind != FormDataKind.SUMMARY) {
-        logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
-    }
-    formDataService.checkUnique(formData, logger)
-}
-
 // Проверка на банк
 def isBank() {
     boolean isBank = true
@@ -575,7 +568,7 @@ void addData(def xml, int headRowCount) {
     def xmlIndexRow = -1
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-    def int maxRow = 157
+    def int maxRow = 156
 
     def rows = dataRowHelper.allCached
     def int rowIndex = 1

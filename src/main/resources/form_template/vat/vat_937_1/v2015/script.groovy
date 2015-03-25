@@ -1,6 +1,7 @@
 package form_template.vat.vat_937_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -54,7 +55,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, logger, ['total'])
+        consolidation()
         calc()
         logicCheck()
         break
@@ -114,7 +115,7 @@ void calc() {
 
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
-    save(dataRows)
+    dataRowHelper.update(totalRow)
 
     // Сортировка групп и строк
     sortFormDataRows()
@@ -207,6 +208,48 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
+// Консолидация с группировкой по подразделениям
+void consolidation() {
+    def dataRows = []
+
+    // получить данные из источников
+    def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate())
+    // сортируем по наименованию подразделения
+    formSources.sort { departmentService.get(it.departmentId).name }
+    for (departmentFormType in formSources) {
+        def final child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == departmentFormType.formTypeId) {
+            def final childData = formDataService.getDataRowHelper(child)
+            def final department = departmentService.get(child.departmentId)
+            def headRow = getFixedRow(department.name, "head_${department.id}")
+            dataRows.add(headRow)
+            def final childDataRows = childData.all
+            dataRows.addAll(childDataRows.findAll { it.getAlias() == null })
+            def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}")
+            calcTotalSum(childDataRows, subTotalRow, totalSumColumns)
+            dataRows.add(subTotalRow)
+        }
+    }
+
+    def totalRow = getFixedRow('Всего','total')
+    dataRows.add(totalRow)
+    save(dataRows)
+    dataRows = null
+}
+
+/** Получить произвольную фиксированную строку со стилями. */
+def getFixedRow(String title, String alias) {
+    def total = formData.createDataRow()
+    total.setAlias(alias)
+    total.fix = title
+    total.getCell('fix').colSpan = 15
+    (allColumns + 'fix').each {
+        total.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return total
+}
+
 void importData() {
     def tmpRow = formData.createDataRow()
     def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null)
@@ -243,8 +286,6 @@ void importData() {
 }
 
 void addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
@@ -337,7 +378,7 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
-    rows.add(getTotalRow())
+    rows.add(getFixedRow('Всего', 'total'))
     save(rows)
 }
 
@@ -347,7 +388,6 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
 
@@ -444,7 +484,7 @@ void addTransportData(def xml) {
 
         def row = xml.rowTotal[0]
 
-        def total = getTotalRow()
+        def total = getFixedRow('Всего','total')
 
         // Графа 16
         total.nds = parseNumber(row.cell[16].text(), rnuIndexRow, 16 + colOffset, logger, true)
@@ -478,18 +518,6 @@ def getNewRow() {
     return newRow
 }
 
-/** Получить пустую итоговую строку со стилями. */
-def getTotalRow() {
-    def total = formData.createDataRow()
-    total.setAlias('total')
-    total.fix = 'Всего'
-    total.getCell('fix').colSpan = 16
-    (allColumns + 'fix').each {
-        total.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    return total
-}
-
 // Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
@@ -512,12 +540,15 @@ void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def totalRow = getDataRow(dataRows, 'total')
-    dataRows.remove(totalRow)
-    sortRows(dataRows, sortColumns)
-    dataRows.add(totalRow)
+    // не производим сортировку в консолидированных формах
+    if (dataRows[0].getAlias() == null) {
+        def totalRow = getDataRow(dataRows, 'total')
+        dataRows.remove(totalRow)
+        sortRows(dataRows, sortColumns)
+        dataRows.add(totalRow)
 
-    dataRowHelper.saveSort()
+        dataRowHelper.saveSort()
+    }
 }
 
 void save(def dataRows) {

@@ -1,10 +1,8 @@
 package form_template.income.output1_2.v2014
 
-import au.com.bytecode.opencsv.CSVReader
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -17,18 +15,18 @@ import groovy.transform.Field
  * @author Bulat Kinzyabulatov
  *
  1		taCategory		            Категория налогового агента
- 2		financialYear		        Отчетный год
- 3		taxPeriod		            Налоговый (отчетный) период (код)
- 4		emitent		                Эмитент
- 5		inn		                    ИНН организации – эмитента ценных бумаг
- 6		decreeNumber		        Номер решения о распределении доходов от долевого участия
- 7		dividendType		        Вид дивидендов
+ 2		emitent		                Эмитент
+ 3		inn		                    ИНН организации – эмитента ценных бумаг
+ 4		decreeNumber		        Номер решения о распределении доходов от долевого участия
+ 5		dividendType		        Вид дивидендов
+ 6		financialYear		        Отчетный год
+ 7		taxPeriod		            Налоговый (отчетный) период (код)
  8		totalDividend		        Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)
  9		dividendSumRaspredPeriod	Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Всего
  10		dividendRussianTotal		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Всего
  11		dividendRussianStavka0		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Налоговая ставка 0%
- 12		dividendRussianStavka6		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Налоговая ставка 6%
- 13		dividendRussianStavka9		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Налоговая ставка 9%
+ 12		dividendRussianStavka6		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Налоговая ставка 9%
+ 13		dividendRussianStavka9		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. По иной ставке
  14		dividendRussianTaxFree		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – российским организациям. Распределяемые в пользу акционеров (участников), не являющихся налогоплательщиками
  15		dividendRussianPersonal		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода - физическим лицам, являющимся налоговыми резидентами России
  16		dividendForgeinOrgAll		Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде. Дивиденды, начисленные получателям дохода – иностранным организациям и физическим лицам, не являющимся резидентами России. Организациям
@@ -52,9 +50,6 @@ import groovy.transform.Field
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
-        if (formData.kind != FormDataKind.ADDITIONAL) {
-            logger.error("Нельзя создавать форму с типом ${formData.kind?.name}")
-        }
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
@@ -78,13 +73,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
-        break
-    case FormDataEvent.IMPORT_TRANSPORT_FILE:
-        importTransportData()
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -100,35 +93,54 @@ def allColumns = ['taCategory', 'financialYear', 'taxPeriod', 'emitent', 'inn', 
                   'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
                   'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']
 
+// обязательные поля (графа 1..2, 4..31)
 @Field
-def nonEmptyColumns = ['taCategory', 'financialYear', 'taxPeriod', 'emitent', 'decreeNumber', 'dividendType',
-                       'totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
-                       'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
-                       'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
-                       'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
-                       'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
-                       'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']
+def nonEmptyColumns = allColumns - 'inn'
 
+// редактируемые поля (графа 1..31)
 @Field
 def editableColumns = allColumns
 
 @Field
-def arithmeticCheckAlias = ['dividendSumRaspredPeriod', 'dividendRussianTotal']
+def keyColumns = ['year', 'firstMonth', 'lastMonth', 'emitentName', 'decisionNumber', 'decisionDate']
+
+@Field
+def sbString = "ОАО Сбербанк России"
+
+@Field
+def graph3String = "7707083893"
+
+@Field
+def sourceFormType = 419
+
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+def getLastReportPeriod() {
+    ReportPeriod period = reportPeriodService.get(formData.reportPeriodId)
+    List<ReportPeriod> periodList = reportPeriodService.listByTaxPeriod(period.taxPeriod.id)
+    return periodList.max{ ReportPeriod rp -> rp.order }
+}
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
-    for (def row in dataRows) {
-        def value10 = calc10(row)
-        checkOverflow(value10, row, 'dividendRussianTotal', row.getIndex(), 15, '«Графа 10» + «Графа 15» + «Графа16» + «Графа 17» + «Графа 22»')
-        row.dividendRussianTotal = value10
-        def value9 = calc9(row)
-        checkOverflow(value9, row, 'dividendSumRaspredPeriod', row.getIndex(), 15, '«Графа 11» + «Графа 12» + «Графа13» + «Графа 14»')
-        row.dividendSumRaspredPeriod = value9
-    }
-
-    dataRowHelper.save(dataRows)
+    // расчетов нет, все поля редактируемые
     sortFormDataRows()
 }
 
@@ -142,24 +154,29 @@ void logicCheck() {
 
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
-        // 2. Проверка на заполнение «Графы 5»
+
+        // 2. Проверка на заполнение «Графы 3»
         if ((row.taCategory == 2) != (row.inn != null && !row.inn.isEmpty())) {
             rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'inn')}» должна быть заполнена в случае если графа «${getColumnName(row, 'taCategory')}» равна «2»!")
         }
+
         // 3. Проверка допустимых значений «Графы 1»
         if (row.taCategory != 1 && row.taCategory != 2) {
-            rowError(logger, row, errorMsg + "Графа «${getColumnName(row, 'taCategory')}» заполнена неверно!")
+            errorMessage(row, 'taCategory', errorMsg)
         }
-        // 3. Проверка допустимых значений «Графы 3»
+
+        // 4. Проверка допустимых значений «Графы 7»
         if (!['13', '21', '31', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43',
                                  '44', '45', '46', '50'].contains(row.taxPeriod)) {
             errorMessage(row, 'taxPeriod', errorMsg)
         }
-        // 4. Проверка допустимых значений «Графы 7»
+
+        // 5. Проверка допустимых значений «Графы 5»
         if (!['1', '2'].contains(row.dividendType)) {
             errorMessage(row, 'dividendType', errorMsg)
         }
-        // 5. Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
+
+        // 6. Проверка значения «Графы 1». Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
         if (row.taCategory == 2) {
             ['dividendAgentAll', 'dividendAgentWithStavka0'].each {
                 if (row[it] != 0) {
@@ -167,43 +184,271 @@ void logicCheck() {
                 }
             }
         }
-        // 5. Если «Графа 26» < 0, то «Графа 27», «Графа 28», «Графа 29», «Графа 30», «Графа 31» равны значению «0»
-        if (row.taCategory == 2) {
+        // 7. Проверка значения «Графы 26»
+        if (row.dividendD1D2 < 0) {
+            // графа 27..31
             ['dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast'].each {
                 if (row[it] != 0) {
                     errorMessage(row, it, errorMsg)
                 }
             }
         }
-        def values = [:]
-        allColumns.each {
-            values[it] = row.getCell(it).getValue()
+
+        // 8. Проверка правильности расчета «Графы 9»
+        if (row.dividendSumRaspredPeriod != calc9(row)) {
+            warnMessage9or10(row, 'dividendSumRaspredPeriod', '«Графа 9» = «Графа 10» + «Графа 15» + «Графа 16» + «Графа 17» + «Графа 22»')
         }
-        values.dividendRussianTotal = calc10(row)
-        values.dividendSumRaspredPeriod = calc9(row)
-        checkCalc(row, arithmeticCheckAlias, values, logger, true)
+
+        // 9. Проверка правильности расчета «Графы 10»
+        if (row.dividendRussianTotal != calc10(row)) {
+            warnMessage9or10(row, 'dividendRussianTotal', '«Графа 10» = «Графа 11» + «Графа 12» + «Графа 13» + «Графа 14»')
+        }
     }
-
-
 }
 
 // «Графа 9» = «Графа 10» + «Графа 15» + «Графа16» + «Графа 17» + «Графа 22»
 def calc9( def row) {
-    if (row.dividendRussianTotal != null && row.dividendRussianPersonal != null &&
-            row.dividendForgeinOrgAll != null && row.dividendForgeinPersonalAll != null && row.dividendTaxUnknown != null) {
-        row.dividendRussianTotal + row.dividendRussianPersonal + row.dividendForgeinOrgAll + row.dividendForgeinPersonalAll + row.dividendTaxUnknown
+    def tmp = ['dividendRussianTotal', 'dividendRussianPersonal', 'dividendForgeinOrgAll',
+            'dividendForgeinPersonalAll', 'dividendTaxUnknown'].sum { alias ->
+        return (row[alias] ?: 0)
     }
+    return roundValue(tmp)
 }
 
 // «Графа 10» = «Графа 11» + «Графа 12» + «Графа13» + «Графа 14»
 def calc10( def row) {
-    if (row.dividendRussianStavka0 != null && row.dividendRussianStavka6 != null && row.dividendRussianStavka9 != null && row.dividendRussianTaxFree != null) {
-        row.dividendRussianStavka0 + row.dividendRussianStavka6 + row.dividendRussianStavka9 + row.dividendRussianTaxFree
+    def tmp = ['dividendRussianStavka0', 'dividendRussianStavka6', 'dividendRussianStavka9',
+            'dividendRussianTaxFree'].sum { alias ->
+        return (row[alias] ?: 0)
     }
+    return roundValue(tmp)
 }
 
 void errorMessage(def row, def alias, def errorMsg) {
     rowError(logger, row, errorMsg + "Графа «${getColumnName(row, alias)}» заполнена неверно!")
+}
+
+void warnMessage9or10(def row, def alias, def condition) {
+    def index = row.getIndex()
+    def name = getColumnName(row, alias)
+    logger.warn("Строка $index: Графа «$name» заполнена неверно! Не выполняется условие: $condition")
+}
+
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = []
+
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def prevPeriodStartDate = reportPeriodService.getCalendarStartDate(prevReportPeriod.id).time
+    def prevPeriodEndDate = reportPeriodService.getEndDate(prevReportPeriod.id).time
+
+    def lastPeriod = getLastReportPeriod()
+    def lastPeriodStartDate = reportPeriodService.getCalendarStartDate(lastPeriod.id).time
+    def lastPeriodEndDate = reportPeriodService.getEndDate(lastPeriod.id).time
+
+    // получить формы-источники в текущем налоговом периоде
+    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+        if(it.formTypeId == sourceFormType) {
+            def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+            if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
+                def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
+                def rowMap = getRowMap(sourceHelper.getAll())
+                sourceHelper.getAll().each { sourceRow ->
+                    def newRow = formNewRow(sourceRow, rowMap, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate)
+                    dataRows.add(newRow)
+                }
+            }
+        }
+    }
+    dataRowHelper.save(dataRows)
+}
+
+def getRowMap(def rows) {
+    def result = [:]
+    rows.each{ row ->
+        def keyString = keyColumns.collect{ row[it] ?: 0 }.join("#")
+        if(result[keyString] == null) {
+            result[keyString] = []
+        }
+        result[keyString].add(row)
+    }
+    return result
+}
+
+def formNewRow(def row, def rowMap, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
+    def newRow = formData.createDataRow()
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    def keyString = keyColumns.collect{ row[it] ?: 0 }.join("#")
+    def rowList = rowMap[keyString]
+
+    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 1» = «1», иначе «Графа 1» = «2»
+    newRow.taCategory = (row.emitentName == sbString && row.emitentInn == graph3String) ? 1 : 2
+
+    // «Графа 2» = «Графа 2» первичной формы
+    newRow.emitent = row.emitentName
+
+    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 3»  не заполняется, иначе «Графа 3» = «Графа 3» первичной формы
+    newRow.inn = (row.emitentName == sbString && row.emitentInn == graph3String) ? null : row.emitentInn
+
+    // «Графа 4» = «Графа 7» первичной формы
+    newRow.decreeNumber = row.decisionNumber
+
+    // Если «Графа 10» первичной формы = «1» и «Графа 11» = «12», то «Графа 5» = «2», иначе «Графа 5» = «1»
+    newRow.dividendType = (row.firstMonth == 1 && row.lastMonth == 12) ? '2' : '1'
+
+    // «Графа 6» = «Графа 9» первичной формы
+    newRow.financialYear = row.year
+
+    // «Графа 7»
+    newRow.taxPeriod = calcPeriod(row.firstMonth, row.lastMonth)
+
+    // «Графа 8» = «Графа 12» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
+    newRow.totalDividend = rowList.sum{ it.allSum ?: 0 }
+
+    // «Графа 9» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
+    newRow.dividendSumRaspredPeriod = rowList.sum{ it.dividends ?: 0 }
+
+    // «Графа 10» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS»
+    newRow.dividendRussianTotal = rowList.sum{ (it.status == 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
+    newRow.dividendRussianStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 12» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
+    // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
+    newRow.dividendRussianStavka6 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 9 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 13» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы не равна «9» и «0»
+    newRow.dividendRussianStavka9 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate != 9 && it.rate != 0 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 14» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы не заполенена
+    newRow.dividendRussianTaxFree = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == null && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «2»
+    newRow.dividendRussianPersonal = rowList.sum{ (it.status == 'RUS' && it.type == 2 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 16» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «1» и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendForgeinOrgAll = rowList.sum{ (it.type == 1 && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 17» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «2» и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendForgeinPersonalAll = rowList.sum{ (it.type == 2 && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 18» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы = «0» и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendStavka0 = rowList.sum{ (it.rate == 0 && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 19» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы <= «5» и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendStavkaLess5 = rowList.sum{ (!(it.rate > 5) && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 20» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы > «5» и <= «10»  и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendStavkaMore5 = rowList.sum{ ((it.rate > 5 && !(it.rate > 10)) && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 21» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы > «10»  и «Графа 17» первичной формы не равна «RUS»
+    newRow.dividendStavkaMore10 = rowList.sum{ ((it.rate > 10) && it.status != 'RUS' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 22» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «3»
+    newRow.dividendTaxUnknown = rowList.sum{ (it.status == '3' && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 23» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «4»
+    newRow.dividendNonIncome = rowList.sum{ (it.status == '4' && it.dividends != null) ? it.dividends : 0 }
+
+    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
+    newRow.dividendAgentAll = (row.emitentName == sbString && row.emitentInn == graph3String && row.all != null) ? row.all : 0
+
+    // «Графа 25» = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
+    newRow.dividendAgentWithStavka0 = (row.emitentName == sbString && row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : 0
+
+    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
+    newRow.dividendD1D2 =  (row.emitentName == sbString && row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
+
+    // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
+    // Если «Графа 17» первичной формы = «RUS»и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9», то «Графа 27» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
+    newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 9 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
+
+    // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
+    // Если «Графа 17» первичной формы = «RUS»и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 28» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
+    newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
+
+    // «Графа 29» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
+    newRow.taxSum = rowList.sum{ it.withheldSum ?: 0 }
+
+    // «Графа 30» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28» первичной формы принадлежит предыдущему отчетному периоду
+    newRow.taxSumFromPeriod = rowList.sum{ if (it.withheldDate != null && it.withheldDate.before(prevPeriodEndDate) && it.withheldDate.after(prevPeriodStartDate)) { it.withheldSum ?: 0 } else { 0 } }
+
+    // «Графа 31» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28» первичной формы принадлежит последнему кварталу отчетного года
+    newRow.taxSumLast = rowList.sum{ if (it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate)) { it.withheldSum ?: 0 } else { 0 }}
+
+    return newRow
+}
+
+def calcPeriod(def firstMonth, def lastMonth) {
+    // «Графа 7» = «21», если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «3».
+    if (firstMonth==1 && lastMonth==3) {
+        return '21'
+    }
+    // «Графа 7» = «31», если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «6».
+    if (firstMonth==1 && lastMonth==6) {
+        return '31'
+    }
+    // «Графа 7» = «33», если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «9».
+    if (firstMonth==1 && lastMonth==9) {
+        return '33'
+    }
+    // «Графа 7» = «34», если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «12».
+    if (firstMonth==1 && lastMonth==12) {
+        return '34'
+    }
+    // «Графа 7» = «35», если «Графа 11» первичной формы - «Графа 10» первичной формы = «0».
+    if ((lastMonth - firstMonth) == 0) {
+        return '35'
+    }
+    // «Графа 7» = «36», если «Графа 11» первичной формы - «Графа 10» первичной формы = «1».
+    if ((lastMonth - firstMonth) == 1) {
+        return '36'
+    }
+    // «Графа 7» = «37», если «Графа 11» первичной формы - «Графа 10» первичной формы = «2».
+    if ((lastMonth - firstMonth) == 2) {
+        return '37'
+    }
+    // «Графа 7» = «38», если «Графа 11» первичной формы - «Графа 10» первичной формы = «3».
+    if ((lastMonth - firstMonth) == 3) {
+        return '38'
+    }
+    // «Графа 7» = «39», если «Графа 11» первичной формы - «Графа 10» первичной формы = «4».
+    if ((lastMonth - firstMonth) == 4) {
+        return '39'
+    }
+    // «Графа 7» = «40», если «Графа 11» первичной формы - «Графа 10» первичной формы = «5».
+    if ((lastMonth - firstMonth) == 5) {
+        return '40'
+    }
+    // «Графа 7» = «41», если «Графа 11» первичной формы - «Графа 10» первичной формы = «6».
+    if ((lastMonth - firstMonth) == 6) {
+        return '41'
+    }
+    // «Графа 7» = «42», если «Графа 11» первичной формы - «Графа 10» первичной формы = «7».
+    if ((lastMonth - firstMonth) == 7) {
+        return '42'
+    }
+    // «Графа 7» = «43», если «Графа 11» первичной формы - «Графа 10» первичной формы = «8».
+    if ((lastMonth - firstMonth) == 8) {
+        return '43'
+    }
+    // «Графа 7» = «44», если «Графа 11» первичной формы - «Графа 10» первичной формы = «9».
+    if ((lastMonth - firstMonth) == 9) {
+        return '44'
+    }
+    // «Графа 7» = «45», если «Графа 11» первичной формы - «Графа 10» первичной формы = «10».
+    if ((lastMonth - firstMonth) == 10) {
+        return '45'
+    }
+    // «Графа 7» = «46», если «Графа 11» первичной формы - «Графа 10» первичной формы = «11».
+    if ((lastMonth - firstMonth) == 11) {
+        return '46'
+    }
 }
 
 void importData() {
@@ -211,12 +456,12 @@ void importData() {
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 31, 5)
     def headerMapping = [
             (xml.row[0].cell[0]): 'Категория налогового агента',
-            (xml.row[0].cell[1]): 'Отчетный год',
-            (xml.row[0].cell[2]): 'Налоговый (отчетный) период (код)',
-            (xml.row[0].cell[3]): 'Эмитент',
-            (xml.row[0].cell[4]): 'ИНН организации – эмитента ценных бумаг',
-            (xml.row[0].cell[5]): 'Номер решения о распределении доходов от долевого участия',
-            (xml.row[0].cell[6]): 'Вид дивидендов',
+            (xml.row[0].cell[1]): 'Эмитент',
+            (xml.row[0].cell[2]): 'ИНН организации – эмитента ценных бумаг',
+            (xml.row[0].cell[3]): 'Номер решения о распределении доходов от долевого участия',
+            (xml.row[0].cell[4]): 'Вид дивидендов',
+            (xml.row[0].cell[5]): 'Отчетный год',
+            (xml.row[0].cell[6]): 'Налоговый (отчетный) период (код)',
             (xml.row[0].cell[7]): 'Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)',
             (xml.row[0].cell[8]): 'Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде',
             (xml.row[0].cell[22]): 'Дивиденды, перечисленные лицам, не являющимся получателями дохода',
@@ -239,8 +484,8 @@ void importData() {
 
             (xml.row[2].cell[9]): 'всего',
             (xml.row[2].cell[10]): 'налоговая ставка 0%',
-            (xml.row[2].cell[11]): 'налоговая ставка 6%',
-            (xml.row[2].cell[12]): 'налоговая ставка 9%',
+            (xml.row[2].cell[11]): 'налоговая ставка 9%',
+            (xml.row[2].cell[12]): 'по иной ставке',
             (xml.row[2].cell[13]): 'распределяемые в пользу акционеров (участников), не являющихся налогоплательщиками',
             (xml.row[2].cell[15]): 'организациям',
             (xml.row[2].cell[16]): 'физическим лицам',
@@ -261,7 +506,6 @@ void importData() {
 }
 
 void addData(def xml, def headRowCount) {
-
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1
@@ -298,15 +542,19 @@ void addData(def xml, def headRowCount) {
         newRow.taCategory = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
-        // графа 2
-        newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графs 3-7
-        for (alias in ['taxPeriod', 'emitent', 'inn', 'decreeNumber', 'dividendType']) {
+        // графs 2-5
+        for (alias in ['emitent', 'inn', 'decreeNumber', 'dividendType']) {
             newRow[alias] = row.cell[xmlIndexCol].text()
             xmlIndexCol++
         }
+
+        // графа 6
+        newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 7
+        newRow.taxPeriod = row.cell[xmlIndexCol].text()
+        xmlIndexCol++
 
         // графы 8-31
         for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
@@ -330,125 +578,10 @@ void sortFormDataRows() {
     dataRowHelper.saveSort()
 }
 
-void importTransportData() {
-    int COLUMN_COUNT = 31
-    int TOTAL_ROW_COUNT = 0
-    int ROW_MAX = 1000
-    def DEFAULT_CHARSET = "cp866"
-    char SEPARATOR = '|'
-    char QUOTE = '\''
-
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
+def roundValue(def value, int precision = 0) {
+    if (value != null) {
+        return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
+    } else {
+        return null
     }
-
-    if (ImportInputStream == null) {
-        logger.error("Поток данных не должен быть пустым")
-    }
-    if (UploadFileName == null || "".equals(UploadFileName.trim())) {
-        logger.error("Имя файла не может быть пустым")
-    }
-
-    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
-    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
-
-    def dataRows = []
-    String[] rowCells
-    // количество пустых строк
-    int countEmptyRow = 0
-    int fileRowIndex = 0 // номер строки в файле
-    int rowIndex = 0// номер строки в НФ
-    int totalRowCount = 0// счетчик кол-ва итогов
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
-        // если еще не было пустых строк, то это первая строка - заголовок
-        if (rowCells.length == 1 && rowCells[0].length() < 1) { // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-            if (countEmptyRow > 0) {
-                totalRowCount++
-                // итоговая строка
-                addRow(dataRows, reader.readNext(), COLUMN_COUNT, fileRowIndex, ++rowIndex, true)
-                break
-            }
-            countEmptyRow++
-            continue
-        }
-        // обычная строка
-        if (countEmptyRow != 0 && !addRow(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex, false)){
-            break
-        }
-        rowCells = null // очищаем кучу
-        // периодически сбрасываем строки
-        if (dataRows.size() > ROW_MAX) {
-            dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
-            dataRows.clear()
-        }
-    }
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
-    reader.close()
-    if (dataRows.size() != 0) {
-        dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
-        dataRows.clear()
-    }
-}
-
-// Добавляет строку в текущий буфер строк
-boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, boolean isTotal) {
-    if (rowCells == null || isTotal) {
-        return true
-    }
-
-    def DataRow newRow = formData.createDataRow()
-    newRow.setIndex(rowIndex)
-    newRow.setImportIndex(fileRowIndex)
-
-    if (rowCells.length != columnCount + 2) {
-        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
-        return false
-    }
-
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-
-    def int colOffset = 1
-    def int colIndex = 1
-
-    // графа 1
-    newRow.taCategory = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
-    colIndex++
-
-    // графа 2
-    newRow.financialYear = parseDate(pure(rowCells[colIndex]), "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
-    colIndex++
-
-    // графs 3-7
-    for (alias in ['taxPeriod', 'emitent', 'inn', 'decreeNumber', 'dividendType']) {
-        newRow[alias] = pure(rowCells[colIndex])
-        colIndex++
-    }
-
-    // графы 8-31
-    for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
-                   'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
-                   'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
-                   'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
-                   'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
-                   'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']) {
-        newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
-        colIndex++
-    }
-    dataRowsCut.add(newRow)
-    return true
-}
-
-static String pure(String cell) {
-    return StringUtils.cleanString(cell).intern()
 }
