@@ -28,6 +28,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
         checkDeparmentParams(LogLevel.ERROR)
         break
+    case FormDataEvent.PRE_CALCULATION_CHECK:
+        checkDeparmentParams(LogLevel.WARNING)
+        break
     case FormDataEvent.CALCULATE:
         checkDeparmentParams(LogLevel.WARNING)
         generateXML()

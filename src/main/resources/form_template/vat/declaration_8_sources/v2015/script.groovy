@@ -33,6 +33,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
         checkDeclarationFNS()
         break
+    case FormDataEvent.PRE_CALCULATION_CHECK:
+        checkDepartmentParams(LogLevel.WARNING)
+        break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
         generateXML()
