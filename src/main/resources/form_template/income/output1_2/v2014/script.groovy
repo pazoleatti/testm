@@ -95,7 +95,7 @@ def allColumns = ['taCategory', 'financialYear', 'taxPeriod', 'emitent', 'inn', 
 
 // обязательные поля (графа 1..2, 4..31)
 @Field
-def nonEmptyColumns = allColumns - ['inn', 'dividendAgentAll']
+def nonEmptyColumns = allColumns - ['inn', 'dividendAgentAll', 'dividendAgentWithStavka0']
 
 // редактируемые поля (графа 1..31)
 @Field
@@ -183,7 +183,7 @@ void logicCheck() {
         // 6. Проверка значения «Графы 1». Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
         if (row.taCategory == 2) {
             ['dividendAgentAll', 'dividendAgentWithStavka0'].each {
-                if (row[it] != 0) {
+                if (row[it] != null && row[it] != 0) {
                     errorMessage(row, it, errorMsg)
                 }
             }
