@@ -311,7 +311,7 @@ def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def 
     newRow.taxPeriod = calcPeriod(row.firstMonth, row.lastMonth)
 
     // «Графа 8» = «Графа 12» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
-    newRow.totalDividend = it.allSum
+    newRow.totalDividend = row.allSum
 
     // «Графа 9» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
     newRow.dividendSumRaspredPeriod = rowList.sum{ it.dividends ?: 0 }
