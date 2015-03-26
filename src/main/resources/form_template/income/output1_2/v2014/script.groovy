@@ -95,7 +95,7 @@ def allColumns = ['taCategory', 'financialYear', 'taxPeriod', 'emitent', 'inn', 
 
 // обязательные поля (графа 1..2, 4..31)
 @Field
-def nonEmptyColumns = allColumns - 'inn'
+def nonEmptyColumns = allColumns - ['inn', 'dividendAgentAll', 'dividendAgentWithStavka0']
 
 // редактируемые поля (графа 1..31)
 @Field
@@ -107,6 +107,9 @@ def keyColumns = ['decisionNumber', 'decisionDate']
 
 @Field
 def sbString = "ОАО Сбербанк России"
+
+@Field
+def sbString2 = "Открытое акционерное общество \"Сбербанк России\""
 
 @Field
 def graph3String = "7707083893"
@@ -180,7 +183,7 @@ void logicCheck() {
         // 6. Проверка значения «Графы 1». Если «Графа 1» = «2», то «Графа 24» и «Графа 25» равны значению «0»
         if (row.taCategory == 2) {
             ['dividendAgentAll', 'dividendAgentWithStavka0'].each {
-                if (row[it] != 0) {
+                if (row[it] != null && row[it] != 0) {
                     errorMessage(row, it, errorMsg)
                 }
             }
@@ -287,13 +290,13 @@ def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def 
     def row = rowList[0]
 
     // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 1» = «1», иначе «Графа 1» = «2»
-    newRow.taCategory = (row.emitentName == sbString && row.emitentInn == graph3String) ? 1 : 2
+    newRow.taCategory = ((row.emitentName == sbString || row.emitentName == sbString2) && row.emitentInn == graph3String) ? 1 : 2
 
     // «Графа 2» = «Графа 2» первичной формы
     newRow.emitent = row.emitentName
 
     // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 3»  не заполняется, иначе «Графа 3» = «Графа 3» первичной формы
-    newRow.inn = (row.emitentName == sbString && row.emitentInn == graph3String) ? null : row.emitentInn
+    newRow.inn = ((row.emitentName == sbString || row.emitentName == sbString2) && row.emitentInn == graph3String) ? null : row.emitentInn
 
     // «Графа 4» = «Графа 7» первичной формы
     newRow.decreeNumber = row.decisionNumber
@@ -308,7 +311,7 @@ def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def 
     newRow.taxPeriod = calcPeriod(row.firstMonth, row.lastMonth)
 
     // «Графа 8» = «Графа 12» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
-    newRow.totalDividend = rowList.sum{ it.allSum ?: 0 }
+    newRow.totalDividend = it.allSum
 
     // «Графа 9» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
     newRow.dividendSumRaspredPeriod = rowList.sum{ it.dividends ?: 0 }
@@ -357,13 +360,13 @@ def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def 
     newRow.dividendNonIncome = rowList.sum{ (it.status == '4' && it.dividends != null) ? it.dividends : 0 }
 
     // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentAll = (row.emitentName == sbString && row.emitentInn == graph3String && row.all != null) ? row.all : 0
+    newRow.dividendAgentAll = ((row.emitentName == sbString || row.emitentName == sbString2) && row.emitentInn == graph3String && row.all != null) ? row.all : null
 
     // «Графа 25» = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentWithStavka0 = (row.emitentName == sbString && row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : 0
+    newRow.dividendAgentWithStavka0 = ((row.emitentName == sbString || row.emitentName == sbString2) && row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : 0
 
     // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
-    newRow.dividendD1D2 =  (row.emitentName == sbString && row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
+    newRow.dividendD1D2 =  ((row.emitentName == sbString || row.emitentName == sbString2) && row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
 
     // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
     // Если «Графа 17» первичной формы = «RUS»и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9», то «Графа 27» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
