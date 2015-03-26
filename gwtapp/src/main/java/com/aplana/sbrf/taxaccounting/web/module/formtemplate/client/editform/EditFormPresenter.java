@@ -22,6 +22,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
         FormTypeTemplate getTypeData();
         void edit(FormTypeTemplate type);
+        void changeItem(FormTypeTemplate type);
     }
 
     DispatchAsync dispatchAsync;
@@ -34,12 +35,12 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         super(eventBus, view);
         this.dispatchAsync = dispatchAsync;
         getView().setUiHandlers(this);
+        getView().edit(new FormTypeTemplate());
     }
 
     public void setFormTypeTemplate(FormTypeTemplate formTypeTemplate) {
-        this.formTypeTemplate = formTypeTemplate;
         if (formTypeTemplate != null) {
-            getView().edit(formTypeTemplate);
+            getView().changeItem(formTypeTemplate);
         }
     }
 
@@ -57,6 +58,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                     @Override
                     public void onSuccess(EditFormTypeResult result) {
                         formTypeTemplate = getView().getTypeData();
+                        getView().edit(formTypeTemplate);
                         UpdateTableEvent.fire(EditFormPresenter.this);
                     }
                 }, this));
@@ -65,5 +67,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
     @Override
     public void onCancel() {
         getView().edit(formTypeTemplate);
+    }
+
+    @Override
+    public void setModel(FormTypeTemplate model) {
+        this.formTypeTemplate = model;
     }
 }

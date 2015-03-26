@@ -103,6 +103,31 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @Override
     public void edit(FormTypeTemplate type) {
         driver.edit(type);
+    }
+
+    @Override
+    public void changeItem(final FormTypeTemplate type) {
+        if (driver.isDirty()){
+            Dialog.confirmMessage("Редактирование макета", "Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    getUiHandlers().onSave();
+                    doChange(type);
+                }
+
+                @Override
+                public void no() {
+                    getUiHandlers().setModel(type);
+                    getUiHandlers().onCancel();
+                }
+            });
+        } else {
+            doChange(type);
+        }
+    }
+
+    private void doChange(FormTypeTemplate type){
+        driver.edit(type);
         if (TaxType.INCOME.equals(type.getTaxType())) {
             ifrsPanel.setVisible(true);
             if (type.getIsIfrs() != null) ifrsNamePanel.setVisible(type.getIsIfrs());
@@ -110,5 +135,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
             ifrsPanel.setVisible(false);
             ifrsNamePanel.setVisible(false);
         }
+        getUiHandlers().setModel(type);
     }
 }

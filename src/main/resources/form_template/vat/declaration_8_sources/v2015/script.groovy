@@ -278,6 +278,8 @@ void generateXML() {
                             }
                         }
                     }
+                    if (rowNum >= 10000)
+                        decParams.setShowReport(false)
                     if (!hasPage) {
                         КнПокСтр() {}
                     }
