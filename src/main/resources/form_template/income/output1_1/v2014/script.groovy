@@ -265,7 +265,7 @@ def formNewRow(def rowList, def periodStartDate, def periodEndDate, def lastPeri
     // Если «Графа 10» первичной формы = «1» и «Графа 11» первичной формы = «12», то «Графа 5» = «2», иначе «Графа 5» = «1»
     newRow.dividendType = (row.firstMonth == 1 && row.lastMonth == 12) ? '2' : '1'
     // «Графа 6» = «Графа 12» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
-    newRow.dividendSumRaspredPeriod = it.allSum
+    newRow.dividendSumRaspredPeriod = row.allSum
     // «Графа 7» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
     newRow.dividendSumNalogAgent = rowList.sum{ it.dividends ?: 0 }
     // «Графа 8» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «1» и «Графа 17» первичной формы не равна «RUS»
