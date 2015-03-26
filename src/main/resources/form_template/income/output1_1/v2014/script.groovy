@@ -206,8 +206,9 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = []
 
-    def periodStartDate = getReportPeriodStartDate()
-    def periodEndDate = getReportPeriodEndDate()
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def prevPeriodStartDate = reportPeriodService.getCalendarStartDate(prevReportPeriod.id).time
+    def prevPeriodEndDate = reportPeriodService.getEndDate(prevReportPeriod.id).time
 
     def lastPeriod = getLastReportPeriod()
     def lastPeriodStartDate = reportPeriodService.getCalendarStartDate(lastPeriod.id).time
@@ -222,7 +223,7 @@ void consolidation() {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
                 def rowMap = getRowMap(sourceHelper.getAll())
                 rowMap.each { key, sourceRows ->
-                    def newRow = formNewRow(sourceRows, periodStartDate, periodEndDate, lastPeriodStartDate, lastPeriodEndDate)
+                    def newRow = formNewRow(sourceRows, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate)
                     dataRows.add(newRow)
                 }
             }
@@ -243,7 +244,7 @@ def getRowMap(def rows) {
     return result
 }
 
-def formNewRow(def rowList, def periodStartDate, def periodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
+def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -304,12 +305,12 @@ def formNewRow(def rowList, def periodStartDate, def periodEndDate, def lastPeri
     newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 9 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
     // Если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 23» = («Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6»)
     newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
-    // «Графа 24» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
-    newRow.taxSum = rowList.sum{ it.withheldSum ?: 0 }
-    // «Графа 25» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28 » первичной формы принадлежит текущему отчетному периоду
-    newRow.taxSumFromPeriod = rowList.sum{ if (it.withheldDate != null && it.withheldDate.before(periodEndDate) && it.withheldDate.after(periodStartDate)) { it.withheldSum ?: 0 } else { 0 } }
-    // «Графа 26» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28 » первичной формы принадлежит последнему кварталу отчетного года
-    newRow.taxSumFromPeriodAll = rowList.sum{ if (it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate)) { it.withheldSum ?: 0 } else { 0 }}
+    // Графа 24: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8)
+    newRow.taxSum = rowList.sum{ (row.status == 'RUS' && row.type == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
+    // Графа 25: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит ПРЕДЫДУЩЕМУ отчетному периоду
+    newRow.taxSumFromPeriod = rowList.sum{ (row.status == 'RUS' && row.type == 1 && it.withheldDate != null && it.withheldDate.before(prevPeriodEndDate) && it.withheldDate.after(prevPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0 }
+    // Графа 26: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит последнему кварталу отчетного периода
+    newRow.taxSumFromPeriodAll = rowList.sum{ (row.status == 'RUS' && row.type == 1 && it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0 }
 
     return newRow
 }
