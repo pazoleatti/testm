@@ -232,7 +232,8 @@ class Main {
                     'vat_937_2': 608,
                     'vat_937_2_1': 617,
                     'vat_937_2_13': 609,
-                    'vat_937_3': 619
+                    'vat_937_3': 619,
+                    'vat_grant_basis': 622
             ],
             'transport': [
                     'benefit_vehicles': 202,
