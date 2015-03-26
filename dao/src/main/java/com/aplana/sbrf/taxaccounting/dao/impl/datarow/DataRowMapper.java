@@ -60,6 +60,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
             sql.append("\n ");
 		}
         sql.append(", sub.id as id2, max(sub.idx2) as idx2 \n");
+        sql.append(", MAX(sub.ord) ord \n");
         sql.append("FROM (SELECT d.id, d.alias, d.ord, d.idx1, d.idx2");
 
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -98,10 +99,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
             params.put("from", range.getOffset());
             params.put("to", range.getOffset() + range.getLimit() - 1);
         }
-        sql.append("  order by ord \n");
         sql.append("  ) d \n");
         sql.append(" LEFT JOIN data_cell c ON d.id = c.row_id ) sub \n");
         sql.append("GROUP BY sub.id \n");
+        sql.append("ORDER BY ord \n");
         return new Pair<String, Map<String, Object>>(sql.toString(), params);
 	}
 
