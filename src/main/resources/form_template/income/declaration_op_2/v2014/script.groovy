@@ -26,6 +26,10 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
         checkDepartmentParams(LogLevel.ERROR)
         break
+    case FormDataEvent.PRE_CALCULATION_CHECK:
+        checkDepartmentParams(LogLevel.WARNING)
+        checkDeclarationBank()
+        break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
         def xmlBankData = checkDeclarationBank()

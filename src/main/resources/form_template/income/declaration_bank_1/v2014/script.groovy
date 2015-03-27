@@ -51,6 +51,10 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED: // отменить принятие
         сancelAccepted()
         break
+    case FormDataEvent.PRE_CALCULATION_CHECK:
+        checkDepartmentParams(LogLevel.WARNING)
+        sourceCheck(true, LogLevel.WARNING)
+        break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
         sourceCheck(true, LogLevel.WARNING)

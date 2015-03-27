@@ -39,8 +39,9 @@ public class ImportServiceImpl implements ImportService {
      * Используется при обработке файла формата *.rnu (csv),
      * чтобы избежать ошибку при разборе строки файла: в случаях когда есть открывающий (нечетный) двойной апостраф,
      * но нет закрывающего (четного).
+     * Изменил на пустой символ в связи с http://jira.aplana.com/browse/SBRFACCTAX-10422
      */
-    private static final char QUOTE = '\'';
+    private static final char QUOTE = '\0';
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 

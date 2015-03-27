@@ -31,6 +31,9 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // принять из создана
         checkDepartmentParams(LogLevel.ERROR)
         break
+    case FormDataEvent.PRE_CALCULATION_CHECK:
+        checkDepartmentParams(LogLevel.WARNING)
+        break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
         checkAndBuildXml()
