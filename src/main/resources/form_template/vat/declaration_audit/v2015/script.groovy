@@ -33,6 +33,9 @@ switch (formDataEvent) {
         checkDepartmentParams(LogLevel.ERROR)
         logicCheck()
         break
+    case FormDataEvent.PRE_CALCULATION_CHECK:
+        checkDepartmentParams(LogLevel.WARNING)
+        break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
         generateXML()
