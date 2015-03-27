@@ -1044,9 +1044,9 @@ void generateXML() {
                             // Лист 03 А
                             // 0..n
                             НалДохДив(
-                                    КатегорНА : row.taCategory,
-                                    ИННЮЛ_ЭмЦБ : row.inn,
-                                    ВидДив : row.dividendType,
+                                    [КатегорНА : row.taCategory] +
+                                        (row.inn ? [ИННЮЛ_ЭмЦБ : row.inn] : [:]) +
+                                    [ВидДив : row.dividendType,
                                     НалПер : row.taxPeriod,
                                     ОтчетГод : row.financialYear.format('yyyy'),
                                     ДивРаспрПол : getLong(row.totalDividend),
@@ -1058,7 +1058,7 @@ void generateXML() {
                                     ДивРаспрУм : getLong(row.dividendD1D2),
                                     НалИсчисл : getLong(row.taxSum),
                                     НалДивПред : getLong(row.taxSumFromPeriod),
-                                    НалДивПосл : getLong(row.taxSumLast)) {
+                                    НалДивПосл : getLong(row.taxSumLast)]) {
 
                                 ДивРосОрг(
                                         ДивРосОргВс : getLong(row.dividendRussianTotal),
@@ -1097,7 +1097,7 @@ void generateXML() {
                                             СвПолуч(
                                                     [ИННПолуч : rowAgent.inn, КПППолуч : rowAgent.kpp, НаимПолуч : rowAgent.title] +
                                                             (rowAgent.phone ? [Тлф : rowAgent.phone] : [:])) {
-                                                МНПолуч(
+                                                МНПолучРФ(
                                                         (rowAgent.zipCode ? [Индекс : rowAgent.zipCode] : [:]) +
                                                                 [КодРегион : (getRefBookValue(4, rowAgent.subdivisionRF)?.CODE?.value ?: '00')] +
                                                                 (rowAgent.area? [Район : rowAgent.area] : [:]) +
