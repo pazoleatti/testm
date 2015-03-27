@@ -53,6 +53,8 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Repository
 public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd-MM-yyyy");
+
 	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
 
     public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
@@ -1870,7 +1872,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     if (recordValues == null) {
                         recordValues = new HashMap<String, String>();
                         recordValues.put(REFBOOK_NAME_ALIAS, rs.getString(REFBOOK_NAME_ALIAS));
-                        recordValues.put(VERSION_START_ALIAS, rs.getDate(VERSION_START_ALIAS).toString());
+                        recordValues.put(VERSION_START_ALIAS, SDF_DD_MM_YYYY.format(rs.getDate(VERSION_START_ALIAS)));
 
                         if (is_unique != 0) {
                             StringBuilder attr = new StringBuilder();
