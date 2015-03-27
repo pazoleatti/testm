@@ -78,9 +78,6 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         break
-    case FormDataEvent.SORT_ROWS:
-        sortFormDataRows()
-        break
 }
 
 //// Кэши и константы
@@ -174,8 +171,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 // Алгоритмы заполнения полей формы
 void calc() {
     // расчетов нет
-
-    sortFormDataRows()
 }
 
 def logicCheck() {
@@ -195,7 +190,7 @@ def logicCheck() {
     }
 
     // 2. Проверка наличия формы за предыдущий отчётный период
-    if (formDataService.getFormDataPrev(formData) == null) {
+    if (formDataService.getFormDataPrev(formData, formData.departmentId) == null) {
         logger.warn('Форма за предыдущий отчётный период не создавалась!')
     }
 }
@@ -208,8 +203,9 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = []
 
-    def periodStartDate = getReportPeriodStartDate()
-    def periodEndDate = getReportPeriodEndDate()
+    def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    def prevPeriodStartDate = reportPeriodService.getCalendarStartDate(prevReportPeriod.id).time
+    def prevPeriodEndDate = reportPeriodService.getEndDate(prevReportPeriod.id).time
 
     def lastPeriod = getLastReportPeriod()
     def lastPeriodStartDate = reportPeriodService.getCalendarStartDate(lastPeriod.id).time
@@ -224,7 +220,7 @@ void consolidation() {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
                 def rowMap = getRowMap(sourceHelper.getAll())
                 rowMap.each { key, sourceRows ->
-                    def newRow = formNewRow(sourceRows, periodStartDate, periodEndDate, lastPeriodStartDate, lastPeriodEndDate)
+                    def newRow = formNewRow(sourceRows, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate)
                     dataRows.add(newRow)
                 }
             }
@@ -245,7 +241,7 @@ def getRowMap(def rows) {
     return result
 }
 
-def formNewRow(def rowList, def periodStartDate, def periodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
+def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -300,12 +296,12 @@ def formNewRow(def rowList, def periodStartDate, def periodEndDate, def lastPeri
     newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 9 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
     // Если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 23» = («Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6»)
     newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.rate == 0 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends / it.allSum * it.distributionSum) : 0 }
-    // «Графа 24» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
-    newRow.taxSum = rowList.sum{ it.withheldSum ?: 0 }
-    // «Графа 25» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28 » первичной формы принадлежит текущему отчетному периоду
-    newRow.taxSumFromPeriod = rowList.sum{ if (it.withheldDate != null && it.withheldDate.before(periodEndDate) && it.withheldDate.after(periodStartDate)) { it.withheldSum ?: 0 } else { 0 } }
-    // «Графа 26» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если дата по «Графе 28 » первичной формы принадлежит последнему кварталу отчетного года
-    newRow.taxSumFromPeriodAll = rowList.sum{ if (it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate)) { it.withheldSum ?: 0 } else { 0 }}
+    // Графа 24: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8)
+    newRow.taxSum = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
+    // Графа 25: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит ПРЕДЫДУЩЕМУ отчетному периоду
+    newRow.taxSumFromPeriod = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.withheldDate != null && it.withheldDate.before(prevPeriodEndDate) && it.withheldDate.after(prevPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0 }
+    // Графа 26: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит последнему кварталу отчетного периода
+    newRow.taxSumFromPeriodAll = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0 }
 
     return newRow
 }
@@ -462,7 +458,17 @@ void addData(def xml, headRowCount) {
             }
 
             def xmlIndexCol = 0
-            newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+            def yearStr = row.cell[xmlIndexCol].text()
+            if (yearStr != null) {
+                if (yearStr.contains(".")) {
+                    newRow.financialYear = parseDate(yearStr, "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                } else {
+                    def yearNum = parseNumber(yearStr, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+                    if (yearNum != null && yearNum != 0) {
+                        newRow.financialYear = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
+                    }
+                }
+            }
             xmlIndexCol = 1
             newRow.taxPeriod = row.cell[xmlIndexCol].text()
             xmlIndexCol = 2
@@ -518,11 +524,4 @@ void addData(def xml, headRowCount) {
         }
     }
     dataRowHelper.save(rows)
-}
-
-void sortFormDataRows() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, null, null)
-    dataRowHelper.saveSort()
 }
