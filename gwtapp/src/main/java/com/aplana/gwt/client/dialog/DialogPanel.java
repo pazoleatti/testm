@@ -86,6 +86,8 @@ public class DialogPanel extends Composite {
             }
         });
         setWidth("450px");
+        setHeight("0px");
+        getElement().getStyle().setProperty("minHeight", "inherit");
     }
 
     private void closeAfterCkick(){
