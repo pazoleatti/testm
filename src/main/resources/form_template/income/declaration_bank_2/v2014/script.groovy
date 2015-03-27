@@ -1331,7 +1331,7 @@ void generateXML() {
                     СведДохФЛ(
                             НомерСправ : nomerSprav,
                             ДатаСправ : dataSprav,
-                            Тип : type) {
+                            Тип : type.padLeft(2,'0')) {
                         //1..1
                         ФЛПолучДох(
                                 ИННФЛ : innFL,
