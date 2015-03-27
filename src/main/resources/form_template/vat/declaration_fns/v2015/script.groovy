@@ -314,8 +314,11 @@ void generateXML() {
 
     /** НалПредНППриоб . Код строки 120 Графа 3. */
     def nalPredNPPriob = empty
+    /** НалУплПокНА . Код строки 180 Графа 3. */
+    def nalUplPokNA = empty
     if (rows724_4) {
         nalPredNPPriob = round(getDataRow(rows724_4, 'total1')?.sum2 ?: empty)
+        nalUplPokNA = round(getDataRow(rows724_4, 'total2')?.sum2 ?: empty)
     }
 
     /** НалВосстОбщ. Код строки 110 Графа 5. */
@@ -489,7 +492,7 @@ void generateXML() {
                             НалУплТамож: empty,
                             НалУплНОТовТС: empty,
                             НалИсчПрод: nalIschProd,
-                            НалУплПокНА: empty,
+                            НалУплПокНА: nalUplPokNA,
                             НалВычОбщ: nalVichObsh
                     )
                 }
