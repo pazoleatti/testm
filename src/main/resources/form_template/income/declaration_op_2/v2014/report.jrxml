@@ -14330,7 +14330,7 @@
 							<textElement verticalAlignment="Middle">
 								<font fontName="Courier New" size="16" pdfFontName="cour.ttf" pdfEncoding="Cp1251" isPdfEmbedded="true"/>
 							</textElement>
-							<textFieldExpression><![CDATA[$V{ДоляНалБазт}.charAt(1)]]></textFieldExpression>
+							<textFieldExpression><![CDATA[$V{ДоляНалБаз}.charAt(1)]]></textFieldExpression>
 						</textField>
 						<textField isBlankWhenNull="true">
 							<reportElement uuid="b42a1727-aaa5-4189-a287-c9b54378fe5c" style="KL" x="538" y="424" width="15" height="20"/>
