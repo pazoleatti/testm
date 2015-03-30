@@ -159,7 +159,6 @@ def nonEmptyColumns = ['surname', 'name', 'status', 'taxRate', 'income', 'taxBas
 // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
 @Field
 def totalColumnsIndexMap = [
-        'taxRate'          : 22,
         'income'           : 23,
         'deduction'        : 24,
         'taxBase'          : 25,
