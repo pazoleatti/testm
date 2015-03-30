@@ -278,7 +278,7 @@ void consolidation() {
 
     def totalRow = getFixedRow('Всего','total')
     dataRows.add(totalRow)
-    save(dataRows)
+    formDataService.getDataRowHelper(formData).save(dataRows)
     dataRows = null
 }
 
@@ -462,7 +462,8 @@ void addData(def xml, int headRowCount) {
     }
     calcTotalSum(rows, totalRow, totalSumColumns)
     rows.add(totalRow)
-    save(rows)
+    formDataService.getDataRowHelper(formData).save(rows)
+    rows = null
 }
 
 // TODO (Ramil Timerbaev) старая загрузка, потом удалить. Пока оставлено на случай сравнения производительности.
@@ -633,7 +634,8 @@ void addTransportData(def xml) {
 
         rows.add(total)
     }
-    save(rows)
+    formDataService.getDataRowHelper(formData).save(rows)
+    rows = null
 }
 
 /** Получить новую строку с заданными стилями. */
@@ -677,24 +679,6 @@ def loggerError(def row, def msg) {
         rowWarning(logger, row, msg)
     } else {
         rowError(logger, row, msg)
-    }
-}
-
-void save(def dataRows) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    // запись
-    dataRowHelper.clear()
-    def rows = []
-    dataRows.each { row ->
-        rows.add(row)
-        if (rows.size() > 1000) {
-            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-            rows.clear()
-        }
-    }
-    if (rows.size() > 0) {
-        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-        rows.clear()
     }
 }
 
