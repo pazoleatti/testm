@@ -208,8 +208,8 @@ void logicCheck() {
     // строка 150 = Убыт1Прев269	= ubit1Prev269
     def stoimRealPTDoSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТДоСр.text())
     def viruchRealPTDoSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТДоСр.text())
-    def ubit1Prev269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт1Прев269.text())
-    def ubit1Soot269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт1Соот269.text())
+    def ubit1Prev269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ1.@Убыт1Прев269.text())
+    def ubit1Soot269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ1.@Убыт1Соот269.text())
     if (stoimRealPTDoSr != null && viruchRealPTDoSr != null && ubit1Prev269 != null && ubit1Soot269 != null &&
             (stoimRealPTDoSr > viruchRealPTDoSr ?
                     (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
@@ -224,7 +224,7 @@ void logicCheck() {
     // строка 160 = Убыт2РеалПТ		 = ubit2RealPT
     def stoimRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТПосСр.text())
     def viruchRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТПосСр.text())
-    def ubit2RealPT = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт2РеалПТ.text())
+    def ubit2RealPT = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ2.@Убыт2РеалПТ.text())
     if (stoimRealPTPosSr != null && viruchRealPTPosSr != null && ubit2RealPT != null &&
             (stoimRealPTPosSr > viruchRealPTPosSr ?
                     (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)

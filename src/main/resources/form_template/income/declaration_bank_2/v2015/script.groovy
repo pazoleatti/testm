@@ -199,8 +199,8 @@ void logicCheck() {
     // строка 150 = Убыт1Прев269	= ubit1Prev269
     def stoimRealPTDoSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТДоСр.text())
     def viruchRealPTDoSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТДоСр.text())
-    def ubit1Prev269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт1Прев269.text())
-    def ubit1Soot269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт1Соот269.text())
+    def ubit1Prev269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ1.@Убыт1Прев269.text())
+    def ubit1Soot269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ1.@Убыт1Соот269.text())
     if (stoimRealPTDoSr != null && viruchRealPTDoSr != null && ubit1Prev269 != null && ubit1Soot269 != null &&
             (stoimRealPTDoSr > viruchRealPTDoSr ?
                     (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
@@ -210,18 +210,7 @@ void logicCheck() {
 
     // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток), полученной налогоплательщиком
     // при уступке права требования долга после наступления срока платежа в соответствии с п. 2 статьи 279 НК
-    // строка 110 = ВыручРеалПТПосСр = viruchRealPTPosSr
-    // строка 130 = СтоимРеалПТПосСр = stoimRealPTPosSr
-    // строка 160 = Убыт2РеалПТ		 = ubit2RealPT
-    def stoimRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТПосСр.text())
-    def viruchRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТПосСр.text())
-    def ubit2RealPT = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт2РеалПТ.text())
-    if (stoimRealPTPosSr != null && viruchRealPTPosSr != null && ubit2RealPT != null &&
-            (stoimRealPTPosSr > viruchRealPTPosSr ?
-                    (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
-                    : (ubit2RealPT != 0))) {
-        logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма!')
-    }
+    // удалена с 2015 года
 }
 
 // Запуск генерации XML.
@@ -422,9 +411,9 @@ void generateXML() {
     /** Убыт1Прев269. Код строки декларации 150. Код вида расхода = 21500. */
     def ubit1Prev269 = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21500]))
     /** Убыт2РеалПТ. Код строки декларации 160. Код вида расхода = 21510. */
-    def ubit2RealPT = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21510]))
+    def ubit2RealPT = empty
     /** Убыт2ВнРасх. Код строки декларации 170. Код вида расхода = 22700. */
-    def ubit2VnRash = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [22700]))
+    def ubit2VnRash = empty
     // Приложение № 3 к Листу 02 - конец
 
     /** ПрПодп. */
@@ -743,37 +732,39 @@ void generateXML() {
                     // Раздел 1. Подраздел 1.1 - конец
 
                     // Раздел 1. Подраздел 1.2
-                    // 0..n
-                    // КвИсчислАв : '00',
-                    НалПУМес(ОКТМО : oktmo) {
-                        def list02Row300 = avPlatMesFB
-                        def avPlat1 = (long) list02Row300 / 3
-                        def avPlat2 = avPlat1
-                        def avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
-                        // 0..1
-                        ФедБдж(
-                                КБК : kbk,
-                                АвПлат1 : avPlat1,
-                                АвПлат2 : avPlat2,
-                                АвПлат3 : avPlat3)
+                    if (period != 34) {
+                        // 0..n
+                        // КвИсчислАв : '00',
+                        НалПУМес(ОКТМО : oktmo) {
+                            def list02Row300 = avPlatMesFB
+                            def avPlat1 = (long) list02Row300 / 3
+                            def avPlat2 = avPlat1
+                            def avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
+                            // 0..1
+                            ФедБдж(
+                                    КБК : kbk,
+                                    АвПлат1 : avPlat1,
+                                    АвПлат2 : avPlat2,
+                                    АвПлат3 : avPlat3)
 
-                        avPlat1 = empty
-                        avPlat2 = empty
-                        avPlat3 = empty
-                        if (!isTaxPeriod && dataRowsAdvance != null) {
-                            // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
-                            def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
-                            def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                            avPlat1 = (long) appl5List02Row120 / 3
-                            avPlat2 = avPlat1
-                            avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                            avPlat1 = empty
+                            avPlat2 = empty
+                            avPlat3 = empty
+                            if (!isTaxPeriod && dataRowsAdvance != null) {
+                                // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
+                                def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
+                                def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
+                                avPlat1 = (long) appl5List02Row120 / 3
+                                avPlat2 = avPlat1
+                                avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                            }
+                            // 0..1
+                            СубБдж(
+                                    КБК : kbk2,
+                                    АвПлат1 : avPlat1,
+                                    АвПлат2 : avPlat2,
+                                    АвПлат3 : avPlat3)
                         }
-                        // 0..1
-                        СубБдж(
-                                КБК : kbk2,
-                                АвПлат1 : avPlat1,
-                                АвПлат2 : avPlat2,
-                                АвПлат3 : avPlat3)
                     }
                     // Раздел 1. Подраздел 1.2 - конец
 
@@ -1120,18 +1111,7 @@ void generateXML() {
                             // Лист 03 В - конец
                         }
                         // Лист 03 А - конец
-                        dataRowsDividend.each { row ->
-                            // Лист 03 Б
-                            // 0..n
-                            НалДохЦБ(
-                                    ВидДоход : '1',
-                                    НалБаза : empty,
-                                    СтавНал : empty,
-                                    НалИсчисл : empty,
-                                    НалНачислПред : empty,
-                                    НалНачислПосл : empty)
-                            // Лист 03 Б - конец
-                        }
+                        // Лист 03 Б удален
                     }
                 }
 
@@ -1192,16 +1172,18 @@ void generateXML() {
                         nalNachislPosl = nalIschisl04 - nalDivNeRFPred - nalDivNeRF - nalNachislPred
                     }
 
-                    НалДохСтав(
-                            ВидДоход: it,
-                            НалБаза: getLong(nalBaza04),
-                            ДохУмНалБаз: getLong(dohUmNalBaz),
-                            СтавНал: getLong(stavNal),
-                            НалИсчисл: nalIschisl04,
-                            НалДивНеРФПред: getLong(nalDivNeRFPred),
-                            НалДивНеРФ: getLong(nalDivNeRF),
-                            НалНачислПред: getLong(nalNachislPred),
-                            НалНачислПосл: getLong(nalNachislPosl))
+                    if (it in [2, 3, 6] && nalBaza04) {
+                        НалДохСтав(
+                                ВидДоход: it,
+                                НалБаза: getLong(nalBaza04),
+                                ДохУмНалБаз: getLong(dohUmNalBaz),
+                                СтавНал: getLong(stavNal),
+                                НалИсчисл: nalIschisl04,
+                                НалДивНеРФПред: getLong(nalDivNeRFPred),
+                                НалДивНеРФ: getLong(nalDivNeRF),
+                                НалНачислПред: getLong(nalNachislPred),
+                                НалНачислПосл: getLong(nalNachislPosl))
+                    }
                 }
                 // Лист 04 - конец
 
