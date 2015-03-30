@@ -1172,7 +1172,7 @@ void generateXML() {
                         nalNachislPosl = nalIschisl04 - nalDivNeRFPred - nalDivNeRF - nalNachislPred
                     }
 
-                    if (it in [2, 3, 6] && nalBaza04) {
+                    if (!(it in [2, 3, 6] && !nalBaza04)) {
                         НалДохСтав(
                                 ВидДоход: it,
                                 НалБаза: getLong(nalBaza04),
