@@ -1261,7 +1261,9 @@ void generateXML() {
                 // Приложение к налоговой декларации - конец
 
                 // Приложение №2
+                def rowNum = 1
                 for (def row : dataRowsApp2) {
+                    rowNum++
                     //НомерСправ  Справка №
                     def nomerSprav = row.column1
                     //ДатаСправ   Дата составления
@@ -1406,6 +1408,8 @@ void generateXML() {
                         }
                     }
                 }
+                if (rowNum >= 10000)
+                    decParams.setShowReport(false)
             }
         }
     }
