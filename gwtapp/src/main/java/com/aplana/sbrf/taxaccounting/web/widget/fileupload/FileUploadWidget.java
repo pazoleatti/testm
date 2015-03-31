@@ -66,6 +66,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     }
 
     private String value;
+    private boolean isSimpleButton;
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String actionTempUrl = "upload/uploadController/patterntemp/";
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
@@ -88,9 +89,22 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         }
     }
 
+    /**
+     * Используется чтобы установить является кнопка для загрузки файла на сервер и дальнейшего сохранения в бд.
+     * Иначе просто чтобы прокинуть файл на сервер и вернуть его содержимое
+     * (сделано так как работа с файловой системой с клента возможна только с поддержкой html5)
+     * @param simpleButton false - с сохранением в бд
+     */
     public void setSimpleButton(boolean simpleButton){
+        this.isSimpleButton = simpleButton;
+        uploadFormDataXls.setAction(simpleButton ?
+                GWT.getHostPageBaseURL() + actionTempUrl : GWT.getHostPageBaseURL() + actionUrl);
         uploadButton.setVisible(!simpleButton);
         justButton.setVisible(simpleButton);
+    }
+
+    public HandlerRegistration addSubmitCompleteHandler(FormPanel.SubmitCompleteHandler handler) {
+        return uploadFormDataXls.addHandler(handler, FormPanel.SubmitCompleteEvent.getType());
     }
 
     @Override
@@ -118,17 +132,19 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains("uuid")) {
-                    String uuid = event.getResults().replaceAll(jsonPattern, "$2");
-                    JSONValue jsonValue = JSONParser.parseLenient(uuid);
-                    String value = jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim();
-                    EndLoadFileEvent.fire(FileUploadWidget.this, value);
-                    setValue(value, true);
-                } else {
-                    EndLoadFileEvent.fire(FileUploadWidget.this, true);
-                    setValue("");
+                if (!isSimpleButton) {
+                    if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains("uuid")) {
+                        String uuid = event.getResults().replaceAll(jsonPattern, "$2");
+                        JSONValue jsonValue = JSONParser.parseLenient(uuid);
+                        String value = jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim();
+                        EndLoadFileEvent.fire(FileUploadWidget.this, value);
+                        setValue(value, true);
+                    } else {
+                        EndLoadFileEvent.fire(FileUploadWidget.this, true);
+                        setValue("");
+                    }
+                    uploadFormDataXls.reset();
                 }
-                uploadFormDataXls.reset();
             }
         });
         uploader.getElement().setId("uploaderWidget");
@@ -150,18 +166,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     private void uploaderClick(){
         uploader.getElement().<InputElement>cast().click();
-    }
-
-    /**
-     * Метод для совместимости с прошлой версией.
-     * Сейчас используется всегда uploadAsTemporal = false
-     * @param asTemporal true - через создание временной записи, false - сохраненние в постоянное хранилище
-     */
-    public void setUploadAsTemporal(boolean asTemporal){
-        if (asTemporal)
-            uploadFormDataXls.setAction(GWT.getHostPageBaseURL() + actionTempUrl);
-        else
-            uploadFormDataXls.setAction(GWT.getHostPageBaseURL() + actionUrl);
     }
 
     public void setText(String text) {

@@ -163,7 +163,7 @@
                     <g:VerticalPanel addStyleNames="{style.btnPanel2}">
                         <g:HorizontalPanel height="30px">
                             <g:Label width="150px" text="Файл xsd"/>
-                            <fileuplod:FileUploadWidget ui:field="fileUploader" uploadAsTemporal="false" text="Загрузить xsd"/>
+                            <fileuplod:FileUploadWidget ui:field="fileUploader" text="Загрузить xsd"/>
                         </g:HorizontalPanel>
                         <g:HorizontalPanel height="30px">
                             <g:Label width="150px" text="Файл jrxml"/>
