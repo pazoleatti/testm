@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbooklist.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -38,6 +42,9 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
     @Autowired
     private ConfigurationService configurationService;
 
+    @Autowired
+    private LockDataService lockDataService;
+
     public LoadRefBookHandler() {
         super(LoadRefBookAction.class);
     }
@@ -45,7 +52,8 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
 	@Override
 	public LoadRefBookResult execute(LoadRefBookAction arg0,
 			ExecutionContext arg1) throws ActionException {
-		LoadRefBookResult result = new LoadRefBookResult();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        LoadRefBookResult result = new LoadRefBookResult();
 		Logger logger = new Logger();
         // Проверки путей
         ConfigurationParamModel model = configurationService.getByDepartment(0, securityService.currentUserInfo());
@@ -81,12 +89,18 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
             } else {
                 logger.info("Получены: %s.", StringUtils.join(catalogStrList.toArray(), ", ", null));
             }
-            // Импорт справочников из ЦАС НСИ
-            loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
-            // Импорт справочников из Diasoft Custody
-            loadRefBookDataService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
-            // Импорт справочников в справочник "Средняя стоимость транспортных средств"
-            loadRefBookDataService.importRefBookAvgCost(securityService.currentUserInfo(), logger);
+            String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+            lockDataService.lock(key, userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+            try {
+                // Импорт справочников из ЦАС НСИ
+                loadRefBookDataService.importRefBookNsi(userInfo, logger);
+                // Импорт справочников из Diasoft Custody
+                loadRefBookDataService.importRefBookDiasoft(userInfo, logger);
+                // Импорт справочников в справочник "Средняя стоимость транспортных средств"
+                loadRefBookDataService.importRefBookAvgCost(userInfo, logger);
+            } finally {
+                lockDataService.unlock(key, userInfo.getUser().getId());
+            }
         } else {
             logger.warn("Не указан путь ни к одному из каталогов загрузки ТФ, содержащих данные справочников.");
         }

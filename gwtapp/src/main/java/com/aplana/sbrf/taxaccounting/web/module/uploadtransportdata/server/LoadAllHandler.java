@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
@@ -14,6 +16,8 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER','ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -31,6 +35,9 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private LockDataService lockDataService;
+
     public LoadAllHandler() {
         super(LoadAllAction.class);
     }
@@ -41,14 +48,19 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
 
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        // Diasoft
-        loadRefBookDataService.importRefBookDiasoft(userInfo, logger);
+        String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+        lockDataService.lock(key, userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+        try {
+            // Diasoft
+            loadRefBookDataService.importRefBookDiasoft(userInfo, logger);
 
-        loadRefBookDataService.importRefBookAvgCost(userInfo, logger);
+            loadRefBookDataService.importRefBookAvgCost(userInfo, logger);
 
-        // НФ
-        loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger);
-
+            // НФ
+            loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger);
+        } finally {
+            lockDataService.unlock(key, userInfo.getUser().getId());
+        }
         LoadAllResult result = new LoadAllResult();
         result.setUuid(logEntryService.save(logger.getEntries()));
 

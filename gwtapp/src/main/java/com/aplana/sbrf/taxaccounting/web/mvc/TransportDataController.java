@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.UploadResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -28,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class TransportDataController {
@@ -47,6 +50,9 @@ public class TransportDataController {
 
     @Autowired
     private LoadRefBookDataService loadRefBookDataService;
+
+    @Autowired
+    private LockDataService lockDataService;
 
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
     public void upload(HttpServletRequest request, HttpServletResponse response)
@@ -70,26 +76,33 @@ public class TransportDataController {
 
         TAUserInfo userInfo = securityService.currentUserInfo();
 
+
         // Загрузка в каталог
         UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, fileName,
                 items.get(0).getInputStream(), logger);
 
-        // Загрузка из каталога
-        if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
-            // Diasoft
-            loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
-        }
-        if (!uploadResult.getAvgCostFileNameList().isEmpty()) {
-            loadRefBookDataService.importRefBookAvgCost(userInfo, uploadResult.getAvgCostFileNameList(), logger);
-        }
+        String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+        lockDataService.lock(key, userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+        try {
+            // Загрузка из каталога
+            if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
+                // Diasoft
+                loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
+            }
+            if (!uploadResult.getAvgCostFileNameList().isEmpty()) {
+                loadRefBookDataService.importRefBookAvgCost(userInfo, uploadResult.getAvgCostFileNameList(), logger);
+            }
 
-        if (!uploadResult.getFormDataFileNameList().isEmpty()) {
-            // НФ
-            // Пересечение списка доступных приложений и списка загруженных приложений
-            List<Integer> departmentList = new ArrayList(CollectionUtils.intersection(
-                    loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
+            if (!uploadResult.getFormDataFileNameList().isEmpty()) {
+                // НФ
+                // Пересечение списка доступных приложений и списка загруженных приложений
+                List<Integer> departmentList = new ArrayList(CollectionUtils.intersection(
+                        loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
 
-            loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger);
+                loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger);
+            }
+        } finally {
+            lockDataService.unlock(key, userInfo.getUser().getId());
         }
 
         if (!logger.getEntries().isEmpty()) {
