@@ -205,8 +205,8 @@ void logicCheck() {
     // строка 150 = Убыт1Прев269	= ubit1Prev269
     def stoimRealPTDoSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТДоСр.text())
     def viruchRealPTDoSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТДоСр.text())
-    def ubit1Prev269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт1Прев269.text())
-    def ubit1Soot269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт1Соот269.text())
+    def ubit1Prev269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ1.@Убыт1Прев269.text())
+    def ubit1Soot269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ1.@Убыт1Соот269.text())
     if (stoimRealPTDoSr != null && viruchRealPTDoSr != null && ubit1Prev269 != null && ubit1Soot269 != null &&
             (stoimRealPTDoSr > viruchRealPTDoSr ?
                     (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
@@ -219,14 +219,17 @@ void logicCheck() {
     // строка 110 = ВыручРеалПТПосСр = viruchRealPTPosSr
     // строка 130 = СтоимРеалПТПосСр = stoimRealPTPosSr
     // строка 160 = Убыт2РеалПТ		 = ubit2RealPT
-    def stoimRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТПосСр.text())
-    def viruchRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТПосСр.text())
-    def ubit2RealPT = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ.@Убыт2РеалПТ.text())
-    if (stoimRealPTPosSr != null && viruchRealPTPosSr != null && ubit2RealPT != null &&
-            (stoimRealPTPosSr > viruchRealPTPosSr ?
-                    (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
-                    : (ubit2RealPT != 0))) {
-        logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма!')
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    if (reportPeriod.order == 4 && reportPeriod.taxPeriod.year == 2014) {
+        def stoimRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТПосСр.text())
+        def viruchRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТПосСр.text())
+        def ubit2RealPT = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ2.@Убыт2РеалПТ.text())
+        if (stoimRealPTPosSr != null && viruchRealPTPosSr != null && ubit2RealPT != null &&
+                (stoimRealPTPosSr > viruchRealPTPosSr ?
+                        (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
+                        : (ubit2RealPT != 0))) {
+            logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма!')
+        }
     }
 }
 
@@ -412,33 +415,35 @@ void generateXML(def xmlBankData) {
                     // Раздел 1. Подраздел 1.1 - конец
 
                     // Раздел 1. Подраздел 1.2
-                    // 0..n
-                    // КвИсчислАв : '00',
-                    НалПУМес(ОКТМО : oktmo) {
-                        // 0..1
-                        ФедБдж(
-                                КБК : kbk,
-                                АвПлат1 : empty,
-                                АвПлат2 : empty,
-                                АвПлат3 : empty)
+                    if (period != 34 && period != 50) {
+                        // 0..n
+                        // КвИсчислАв : '00',
+                        НалПУМес(ОКТМО : oktmo) {
+                            // 0..1
+                            ФедБдж(
+                                    КБК : kbk,
+                                    АвПлат1 : empty,
+                                    АвПлат2 : empty,
+                                    АвПлат3 : empty)
 
-                        def avPlat1 = empty
-                        def avPlat2 = empty
-                        def avPlat3 = empty
-                        if (!isTaxPeriod && dataRowsAdvance != null) {
-                            // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
-                            def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
-                            def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                            avPlat1 = (long) appl5List02Row120 / 3
-                            avPlat2 = avPlat1
-                            avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                            def avPlat1 = empty
+                            def avPlat2 = empty
+                            def avPlat3 = empty
+                            if (!isTaxPeriod && dataRowsAdvance != null) {
+                                // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
+                                def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
+                                def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
+                                avPlat1 = (long) appl5List02Row120 / 3
+                                avPlat2 = avPlat1
+                                avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                            }
+                            // 0..1
+                            СубБдж(
+                                    КБК : kbk2,
+                                    АвПлат1 : avPlat1,
+                                    АвПлат2 : avPlat2,
+                                    АвПлат3 : avPlat3)
                         }
-                        // 0..1
-                        СубБдж(
-                                КБК : kbk2,
-                                АвПлат1 : avPlat1,
-                                АвПлат2 : avPlat2,
-                                АвПлат3 : avPlat3)
                     }
                     // Раздел 1. Подраздел 1.2 - конец
 

@@ -757,37 +757,39 @@ void generateXML() {
                     // Раздел 1. Подраздел 1.1 - конец
 
                     // Раздел 1. Подраздел 1.2
-                    // 0..n
-                    // КвИсчислАв : '00',
-                    НалПУМес(ОКТМО : oktmo) {
-                        def list02Row300 = avPlatMesFB
-                        def avPlat1 = (long) list02Row300 / 3
-                        def avPlat2 = avPlat1
-                        def avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
-                        // 0..1
-                        ФедБдж(
-                                КБК : kbk,
-                                АвПлат1 : avPlat1,
-                                АвПлат2 : avPlat2,
-                                АвПлат3 : avPlat3)
+                    if (period != 34 && period != 50) {
+                        // 0..n
+                        // КвИсчислАв : '00',
+                        НалПУМес(ОКТМО : oktmo) {
+                            def list02Row300 = avPlatMesFB
+                            def avPlat1 = (long) list02Row300 / 3
+                            def avPlat2 = avPlat1
+                            def avPlat3 = getLong(list02Row300 - avPlat1 - avPlat2)
+                            // 0..1
+                            ФедБдж(
+                                    КБК : kbk,
+                                    АвПлат1 : avPlat1,
+                                    АвПлат2 : avPlat2,
+                                    АвПлат3 : avPlat3)
 
-                        avPlat1 = empty
-                        avPlat2 = empty
-                        avPlat3 = empty
-                        if (!isTaxPeriod && dataRowsAdvance != null) {
-                            // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
-                            def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
-                            def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                            avPlat1 = (long) appl5List02Row120 / 3
-                            avPlat2 = avPlat1
-                            avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                            avPlat1 = empty
+                            avPlat2 = empty
+                            avPlat3 = empty
+                            if (!isTaxPeriod && dataRowsAdvance != null) {
+                                // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
+                                def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
+                                def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
+                                avPlat1 = (long) appl5List02Row120 / 3
+                                avPlat2 = avPlat1
+                                avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                            }
+                            // 0..1
+                            СубБдж(
+                                    КБК : kbk2,
+                                    АвПлат1 : avPlat1,
+                                    АвПлат2 : avPlat2,
+                                    АвПлат3 : avPlat3)
                         }
-                        // 0..1
-                        СубБдж(
-                                КБК : kbk2,
-                                АвПлат1 : avPlat1,
-                                АвПлат2 : avPlat2,
-                                АвПлат3 : avPlat3)
                     }
                     // Раздел 1. Подраздел 1.2 - конец
 
