@@ -682,7 +682,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion){
 
