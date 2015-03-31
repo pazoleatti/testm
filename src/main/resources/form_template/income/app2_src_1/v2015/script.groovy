@@ -7,10 +7,16 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
+import java.text.SimpleDateFormat
+
 /**
  * Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с
  * финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов (ЦФО НДФЛ).
  * formTemplateId=418
+ *
+ * 31.03.2015 - Ramil Timerbaev:
+ *      Добавлена массовая загрузка справочных записей в кеш.
+ *      Не стал добавлять сообещние при нескольких записях с одинаковым кодом.
  *
  * Первичная форма.
  */
@@ -188,6 +194,9 @@ def totalColumnsIndexMap = [
         'col_052_3_1'      : 68,
         'col_052_3_2'      : 70
 ]
+
+@Field
+def tmpMap = [:]
 
 @Field
 def endDate = null
@@ -815,6 +824,7 @@ void importTransportData() {
         totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
     }
 
+    loadRecordIdsInMap()
     while ((rowCells = reader.readNext()) != null) {
         fileRowIndex++
         // если еще не было пустых строк, то это первая строка - заголовок
@@ -939,11 +949,11 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 8 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
     colIndex++
-    newRow.citizenship = getRecordIdImport(10L, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.citizenship = getId(10L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 9 - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
     colIndex++
-    newRow.code = getRecordIdImport(360L, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.code = getId(360L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 10
     colIndex++
@@ -955,7 +965,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 12 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
     colIndex++
-    newRow.region = getRecordIdImport(4L, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.region = getId(4L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 13
     colIndex++
@@ -987,7 +997,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 20 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
     colIndex++
-    newRow.country = getRecordIdImport(10L, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.country = getId(10L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 21
     colIndex++
@@ -1031,7 +1041,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 31 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
     colIndex++
-    newRow.col_040_1 = getRecordIdImport(370, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_040_1 = getId(370L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 32
     colIndex++
@@ -1039,7 +1049,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 33 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_1_1 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_1_1 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 34
     colIndex++
@@ -1047,7 +1057,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 35 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_1_2 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_1_2 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 36
     colIndex++
@@ -1055,7 +1065,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 37 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_1_3 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_1_3 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 38
     colIndex++
@@ -1063,7 +1073,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 39 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_1_4 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_1_4 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 40
     colIndex++
@@ -1071,7 +1081,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 41 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_1_5 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_1_5 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 42
     colIndex++
@@ -1079,7 +1089,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 43 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
     colIndex++
-    newRow.col_040_2 = getRecordIdImport(370, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_040_2 = getId(370L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 44
     colIndex++
@@ -1087,7 +1097,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 45 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_2_1 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_2_1 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 46
     colIndex++
@@ -1095,7 +1105,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 47 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_2_2 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_2_2 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 48
     colIndex++
@@ -1103,7 +1113,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 49 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_2_3 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_2_3 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 50
     colIndex++
@@ -1111,7 +1121,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 51 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_2_4 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_2_4 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 52
     colIndex++
@@ -1119,7 +1129,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 53 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_2_5 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_2_5 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 54
     colIndex++
@@ -1127,7 +1137,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 55 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
     colIndex++
-    newRow.col_040_3 = getRecordIdImport(370, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_040_3 = getId(370L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 56
     colIndex++
@@ -1135,7 +1145,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 57 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_3_1 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_3_1 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 58
     colIndex++
@@ -1143,7 +1153,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 59 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_3_2 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_3_2 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 60
     colIndex++
@@ -1151,7 +1161,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 61 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_3_3 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_3_3 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 62
     colIndex++
@@ -1159,7 +1169,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 63 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_3_4 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_3_4 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 64
     colIndex++
@@ -1167,7 +1177,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 65 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_042_3_5 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_042_3_5 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 66
     colIndex++
@@ -1175,7 +1185,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 67 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_051_3_1 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_051_3_1 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 68
     colIndex++
@@ -1183,7 +1193,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // Графа 69 - атрибут 3501 - CODE - «Код», справочник 350 «Коды вычетов»
     colIndex++
-    newRow.col_051_3_2 = getRecordIdImport(350, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.col_051_3_2 = getId(350L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
     // Графа 70
     colIndex++
@@ -1194,4 +1204,40 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
 static String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
+}
+
+/** Загрузка всех справочников в кеш.*/
+def loadRecordIdsInMap() {
+    [4L, 10L, 350L, 360L, 370L].each { refBookId ->
+        def provider = refBookFactory.getDataProvider(refBookId)
+        def records = provider.getRecords(getReportPeriodEndDate(), null, null, null)
+        if (records) {
+            records.each { record ->
+                def key = getKey(refBookId, record?.CODE?.value)
+                tmpMap[key] = record?.record_id?.value
+            }
+        }
+    }
+}
+
+/** Получить ключ записи по id справочника и коду записи. */
+def getKey(def refBookId, def code) {
+    return refBookId + "_" + code
+}
+
+/** Получить id записи при импорте. */
+def getId(def refBookId, def code, def rowIndex, def colIndex) {
+    if (code == null || code == '') {
+        return null
+    }
+    def key = getKey(refBookId, code)
+    def result = tmpMap[key]
+    if (result == null) {
+        def rb = refBookFactory.get(refBookId)
+        def attribute = rb.getAttribute('CODE').getName()
+        def date = (new SimpleDateFormat("dd.MM.yyyy")).format(getReportPeriodEndDate())
+        def msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, getXLSColumnName(colIndex), rb.getName(), attribute, code, date)
+        logger.warn(msg)
+    }
+    return result
 }
