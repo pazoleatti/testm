@@ -10919,6 +10919,7 @@
 			</line>
 		</band>
 		<band height="842">
+			<printWhenExpression><![CDATA[$V{Период}.substring(0,2).equals("34") == false && $V{Период}.substring(0,2).equals("50") == false]]></printWhenExpression>
 			<textField isBlankWhenNull="true">
 				<reportElement uuid="da499d82-949c-4120-9272-697f35c600db" x="175" y="23" width="15" height="19" isPrintWhenDetailOverflows="true"/>
 				<box>
