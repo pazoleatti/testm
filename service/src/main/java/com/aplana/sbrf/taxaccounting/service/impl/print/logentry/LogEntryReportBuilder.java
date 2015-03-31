@@ -2,21 +2,22 @@ package com.aplana.sbrf.taxaccounting.service.impl.print.logentry;
 
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.util.Date;
 import java.util.List;
 
 public class LogEntryReportBuilder extends AbstractReportBuilder {
 	
 	private static final String FIRST_COLUMN = "№ п/п";
-	private static final String SECOND_COLUMN = "Тип сообщения";
-	private static final String THIRD_COLUMN = "Текст сообщения";
-	
-	private List<LogEntry> list;
+    private static final String SECOND_COLUMN = "Дата-время";
+    private static final String THIRD_COLUMN = "Тип сообщения";
+	private static final String FOURTH_COLUMN = "Текст сообщения";
+
+    private static final String DATE_DATA_FORMAT = "dd.MM.yyyy HH:mm:ss";
+
+    private List<LogEntry> list;
 
 	private int rowNumber = 0;
 	private int cellNumber = 0;
@@ -26,7 +27,8 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
         this.list = list;
 		this.workBook = new XSSFWorkbook();
 		this.sheet = workBook.createSheet("Учет налогов");
-        this.sheet.setColumnWidth(2, cellWidthMin * 256 * 4);
+        this.sheet.setColumnWidth(1, cellWidthMin * 40 * 4);
+        this.sheet.setColumnWidth(3, cellWidthMin * 256 * 4);
 	}
 	
 	@Override
@@ -45,14 +47,18 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
 		Cell cell = row.createCell(cellNumber++);
 		cell.setCellStyle(cs);
 		cell.setCellValue(FIRST_COLUMN);
-		
-		cell = row.createCell(cellNumber++);
-		cell.setCellStyle(cs);
-		cell.setCellValue(SECOND_COLUMN);
-		
+
+        cell = row.createCell(cellNumber++);
+        cell.setCellStyle(cs);
+        cell.setCellValue(SECOND_COLUMN);
+
 		cell = row.createCell(cellNumber++);
 		cell.setCellStyle(cs);
 		cell.setCellValue(THIRD_COLUMN);
+		
+		cell = row.createCell(cellNumber++);
+		cell.setCellStyle(cs);
+		cell.setCellValue(FOURTH_COLUMN);
 		
 		cellNumber = 0;
 		rowNumber = sheet.getLastRowNum();
@@ -85,13 +91,32 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
 		cs.setBorderTop(CellStyle.BORDER_DOUBLE);
 		cs.setBorderRight(CellStyle.BORDER_DOUBLE);
 		cs.setBorderLeft(CellStyle.BORDER_DOUBLE);
-		
-		for (int i = 0; i < list.size(); i++) {
+
+        CellStyle csDate = workBook.createCellStyle();
+        csDate.setAlignment(CellStyle.ALIGN_LEFT);
+        csDate.setWrapText(true);
+        csDate.setBorderBottom(CellStyle.BORDER_DOUBLE);
+        csDate.setBorderTop(CellStyle.BORDER_DOUBLE);
+        csDate.setBorderRight(CellStyle.BORDER_DOUBLE);
+        csDate.setBorderLeft(CellStyle.BORDER_DOUBLE);
+        csDate.setDataFormat(workBook.createDataFormat().getFormat(DATE_DATA_FORMAT));
+
+        Date dateCell;
+        for (int i = 0; i < list.size(); i++) {
 			Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+
 			Cell cell = row.createCell(cellNumber++);
-			
 			cell.setCellStyle(cs);
 			cell.setCellValue(i + 1);
+
+            cell = row.createCell(cellNumber++);
+            cell.setCellStyle(csDate);
+            dateCell = list.get(i).getDate();
+            if (dateCell != null)
+                cell.setCellValue(dateCell);
+            else
+                cell.setCellValue("");
+
 			switch (list.get(i).getLevel()) {
 			case ERROR:
 				cell = row.createCell(cellNumber);

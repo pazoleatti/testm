@@ -1,13 +1,15 @@
 package com.aplana.sbrf.taxaccounting.model.log;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Сообщение в журнале расчёта
  */
 public class LogEntry implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
+    private Date date;
 	private LogLevel level;
 	private String message;
 	
@@ -26,7 +28,17 @@ public class LogEntry implements Serializable {
 	public LogEntry(LogLevel level, String message) {
 		this.level = level;
 		this.message = message;
+        this.date = new Date();
 	}
+
+    /**
+     *
+     * @return дата и время формирования сообщения
+     */
+    public Date getDate() {
+        return date;
+    }
+
 	/**
 	 * @return уровень важности сообщения
 	 */

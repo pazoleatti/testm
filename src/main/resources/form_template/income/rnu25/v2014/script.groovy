@@ -235,19 +235,7 @@ void calc() {
     }
     updateIndexes(dataRows)
     // запись
-    dataRowHelper.clear()
-    def rows = []
-    dataRows.each { row ->
-        rows.add(row)
-        if (rows.size() > 1000) {
-            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-            rows.clear()
-        }
-    }
-    if (rows.size() > 0) {
-        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-        rows.clear()
-    }
+    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
