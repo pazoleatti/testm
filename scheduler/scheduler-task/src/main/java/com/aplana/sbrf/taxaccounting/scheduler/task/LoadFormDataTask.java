@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.scheduler.task;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentType;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
@@ -48,6 +46,9 @@ public class LoadFormDataTask implements UserTask{
     @Autowired
     DepartmentService departmentService;
 
+    @Autowired
+    private LockDataService lockDataService;
+
     private static final String TB_NAME = "ТБ";
     private static final int ALL_DEPARTMENTS_ID = -1;
     private static final String ALL_DEPARTMENTS_LABEL = "Все подразделения";
@@ -82,8 +83,13 @@ public class LoadFormDataTask implements UserTask{
         } else {
             departmentsIds.add(departmentId);
         }
-
-        loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger());
+        String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+        lockDataService.lock(key, userId, lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+        try {
+            loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger());
+        } finally {
+            lockDataService.unlock(key, userId);
+        }
     }
 
     @Override

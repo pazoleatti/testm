@@ -23,7 +23,8 @@ public final class LockData {
         LOG_SYSTEM_BACKUP,
         LOG_SYSTEM_CSV,
         IFRS,
-        FILE
+        FILE,
+        CONFIGURATION_PARAMS
     }
 
 	/* Идентификатор блокировки */
