@@ -271,6 +271,7 @@ alter table log_system_report add constraint log_system_report_fk_blob_data fore
 alter table log_system_report add constraint log_system_report_fk_sec_user foreign key (sec_user_id) references sec_user (id) on delete cascade;
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
 
+alter table async_log add constraint async_log_pk primary key (key, creation_date);
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
 create index i_data_row_form_data_id on data_row(form_data_id);

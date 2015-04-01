@@ -103,5 +103,21 @@ alter table declaration_data_consolidation add constraint decl_data_consolidatio
 --http://jira.aplana.com/browse/SBRFACCTAX-10729: FORM_DATA_PERFORMER:NAME сделать поле необязательным для заполнения
 alter table form_data_performer modify name null;
 
+---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-10834: Хранение логов
+create table async_log
+(
+key varchar2(36) not null,
+creation_date timestamp not null,
+data blob
+);
+
+comment on table async_log is 'Хранение логов';
+comment on column async_log.key is 'Ключ сообщения';
+comment on column async_log.creation_date is 'Дата создания';
+comment on column async_log.data is 'Бинарные данные';
+
+alter table async_log add constraint async_log_pk primary key (key, creation_date);
+
 commit;
 end;
