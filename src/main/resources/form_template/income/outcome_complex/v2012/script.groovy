@@ -81,6 +81,53 @@ def resetColumns = ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod
 def totalColumn = 'consumptionTaxSumS'
 
 @Field
+def formTypeId_RNU12 = 364
+@Field
+def formTypeId_RNU25 = 324
+@Field
+def formTypeId_RNU26 = 325
+@Field
+def formTypeId_RNU27 = 326
+@Field
+def formTypeId_RNU30 = 329
+@Field
+def formTypeId_RNU33 = 332
+@Field
+def formTypeId_RNU45 = 341
+@Field
+def formTypeId_RNU47 = 344
+@Field
+def formTypeId_RNU48_1 = 343
+@Field
+def formTypeId_RNU48_2 = 313
+@Field
+def formTypeId_RNU49 = 312
+@Field
+def formTypeId_RNU50 = 365
+@Field
+def formTypeId_RNU51 = 345
+@Field
+def formTypeId_RNU57 = 353
+@Field
+def formTypeId_RNU64 = 355
+@Field
+def formTypeId_RNU61 = 352
+@Field
+def formTypeId_RNU62 = 354
+@Field
+def formTypeId_RNU70_1 = 504
+@Field
+def formTypeId_RNU70_2 = 357
+@Field
+def formTypeId_RNU71_1 = 356
+@Field
+def formTypeId_RNU71_2 = 503
+@Field
+def formTypeId_RNU72 = 358
+@Field
+def formTypeId_F7_8 = 362
+
+@Field
 def rowsCalc = ['R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17',
                 'R26', 'R27', 'R28', 'R29', 'R30', 'R31', 'R32', 'R70', 'R71']
 
@@ -240,11 +287,29 @@ void calcTotal(def rows) {
 def consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.getAllCached()
-    isBank() ? consolidationBank(dataRows) : consolidationSummary(dataRows)
+    def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(), getReportPeriodStartDate(), getReportPeriodEndDate())
+    def isFromSummary = isFromSummary(formSources)
+    isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
     dataRowHelper.update(dataRows)
 }
 
-void consolidationBank(def dataRows) {
+boolean isFromSummary(def formSources) {
+    def isSummarySource = formSources.find { it.formTypeId == formData.formType.id } != null
+    def isPrimarySource = formSources.find { it.formTypeId in [formTypeId_RNU12, formTypeId_RNU25, formTypeId_RNU26, formTypeId_RNU27, formTypeId_RNU30, formTypeId_RNU33, formTypeId_RNU45, formTypeId_RNU47, formTypeId_RNU48_1, formTypeId_RNU48_2, formTypeId_RNU49, formTypeId_RNU50, formTypeId_RNU51, formTypeId_RNU57, formTypeId_RNU64, formTypeId_RNU61, formTypeId_RNU62, formTypeId_RNU70_1, formTypeId_RNU70_2, formTypeId_RNU71_1, formTypeId_RNU71_2, formTypeId_RNU72, formTypeId_F7_8] } != null
+    if (isSummarySource && isPrimarySource) {
+        logger.warn("Неверно настроены источники формы \"%s\" для подразделения \"%s\"! Одновременно указаны в качестве источников сводные и первичные налоговые формы. Консолидация произведена из сводных налоговых форм.",
+                formData.formType.name, formDataDepartment.name)
+        return true
+    } else if (isSummarySource || isPrimarySource) {
+        return isSummarySource
+    } else {
+        logger.warn("Неверно настроены источники формы \"%s\" для подразделения \"%s\"! Не указаны в качестве источников корректные сводные или первичные налоговые формы.",
+                formData.formType.name, formDataDepartment.name)
+        return true
+    }
+}
+
+void consolidationFromSummary(def dataRows, def formSources) {
     if (dataRows == null || dataRows.isEmpty()) {
         return
     }
@@ -265,8 +330,7 @@ void consolidationBank(def dataRows) {
     }
 
     // получить консолидированные формы из источников
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+    formSources.each {
         def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             for (def row : formDataService.getDataRowHelper(child).getAllCached()) {
@@ -285,7 +349,7 @@ void consolidationBank(def dataRows) {
 }
 
 // Консолидация из первичек
-void consolidationSummary(def dataRows) {
+void consolidationFromPrimary(def dataRows, def formSources) {
     if (dataRows == null || dataRows.isEmpty()) {
         return
     }
@@ -322,9 +386,8 @@ void consolidationSummary(def dataRows) {
         addPrevValue(prevList, dataRows, 'consumptionBuhSumPrevTaxPeriod', dataRowsOld, 'consumptionBuhSumAccepted')
     }
     // получить формы-источники в текущем налоговом периоде
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
-            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        def isMonth = it.formTypeId in [332, 341, 344, 362] //ежемесячная
+    formSources.each {
+        def isMonth = it.formTypeId in [formTypeId_RNU33, formTypeId_RNU45, formTypeId_RNU47, formTypeId_F7_8] //ежемесячная
         def children = []
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
@@ -337,10 +400,11 @@ void consolidationSummary(def dataRows) {
         for (def child in children) {
             if (child != null) {
                 def dataRowsChild = formDataService.getDataRowHelper(child)?.allCached
+
                 switch (child.formType.id) {
-                    case 343: //(РНУ-48.1) Регистр налогового учёта «ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000 руб.»
+                    case formTypeId_RNU48_1: //(РНУ-48.1) Регистр налогового учёта «ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000 руб.»
                         break
-                    case 313: //(РНУ-48.2) Регистр налогового учёта «Сводная ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000 руб.»
+                    case formTypeId_RNU48_2: //(РНУ-48.2) Регистр налогового учёта «Сводная ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000 руб.»
                         // графа 6 = сумма граф 3 фикс строк 1 и 2 форм
                         addChildTotalData(dataRows, 2, 'consumptionBuhSumAccepted', dataRowsChild, "R1", 'summ')
                         addChildTotalData(dataRows, 2, 'consumptionBuhSumAccepted', dataRowsChild, "R2", 'summ')
@@ -348,7 +412,7 @@ void consolidationSummary(def dataRows) {
                         // графа 6 = сумма граф 3 фикс строк 3 форм
                         addChildTotalData(dataRows, 3, 'consumptionBuhSumAccepted', dataRowsChild, "R3", 'summ')
                         break
-                    case 364: //(РНУ-12) Регистр налогового учёта расходов по хозяйственным операциям и оказанным Банку услугам
+                    case formTypeId_RNU12: //(РНУ-12) Регистр налогового учёта расходов по хозяйственным операциям и оказанным Банку услугам
 
                         // графа 6 = сумма граф 12 строк с условием форм
                         def graph6Sum12Map = [
@@ -393,7 +457,7 @@ void consolidationSummary(def dataRows) {
                                 getRnu12AddValue(dataRowsChild, '26412.13', 'outcomeInNalog'))
 
                         break
-                    case 344: //(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам, а также расходов в виде капитальных вложений»
+                    case formTypeId_RNU47: //(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам, а также расходов в виде капитальных вложений»
                         // графа 9 = сумма граф 5 всех строк форм
                         (0..16).each {
                             addChildTotalData(dataRows, 18, 'consumptionTaxSumS', dataRowsChild, "R$it", 'amortTaxPeriod')
@@ -410,11 +474,11 @@ void consolidationSummary(def dataRows) {
                         // графа 9 = сумма граф 5 строки 16 форм
                         addChildTotalData(dataRows, 25, 'consumptionTaxSumS', dataRowsChild, "R15", 'amortTaxPeriod')
                         break
-                    case 341: //(РНУ-45) Регистр налогового учёта «ведомость начисленной амортизации по нематериальным активам»
+                    case formTypeId_RNU45: //(РНУ-45) Регистр налогового учёта «ведомость начисленной амортизации по нематериальным активам»
                         // графа 9 = сумма граф 10 итогов форм
                         addChildTotalData(dataRows, 19, 'consumptionTaxSumS', dataRowsChild, "total", 'amortizationSinceYear')
                         break
-                    case 312: //(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»
+                    case formTypeId_RNU49: //(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»
                         // графа 9 = сумма граф 8 итогов раздела Д форм
                         addChildTotalData(dataRows, 36, 'consumptionTaxSumS', dataRowsChild, "totalD", 'price')
                         // графа 9 = сумма (графа 11 - 8 - 10 + 15) итогов раздела Д форм
@@ -444,7 +508,7 @@ void consolidationSummary(def dataRows) {
                         // графа 9 = сумма граф 17 итогов раздела В форм
                         addChildTotalData(dataRows, 80, 'consumptionTaxSumS', dataRowsChild, "totalV", 'loss')
                         break
-                    case 358: //(РНУ-72) Регистр налогового учёта уступки права требования как реализации финансовых услуг и операций с закладными
+                    case formTypeId_RNU72: //(РНУ-72) Регистр налогового учёта уступки права требования как реализации финансовых услуг и операций с закладными
                         // графа 9 = сумма (графа 6 - 7) итогов форм
                         addRowValue(dataRows, 38, 'consumptionTaxSumS',
                                 getChildTotalValue(dataRowsChild, "total", 'cost279') -
@@ -452,15 +516,15 @@ void consolidationSummary(def dataRows) {
                         // графа 9 = сумма граф 8 итогов форм
                         addChildTotalData(dataRows, 41, 'consumptionTaxSumS', dataRowsChild, "total", 'loss')
                         break
-                    case 504: //(РНУ-70.1) Регистр налогового учёта уступки права требования до наступления, предусмотренного кредитным договором срока погашения основного долга
+                    case formTypeId_RNU70_1: //(РНУ-70.1) Регистр налогового учёта уступки права требования до наступления, предусмотренного кредитным договором срока погашения основного долга
                         // графа 9 = сумма граф 10 итогов форм
                         addChildTotalData(dataRows, 42, 'consumptionTaxSumS', dataRowsChild, "total", 'financialResult1')
                         // графа 9 = сумма граф 11 итогов форм
                         addChildTotalData(dataRows, 43, 'consumptionTaxSumS', dataRowsChild, "total", 'currencyDebtObligation')
                         break
-                    case 357: //(РНУ-70.2) Регистр налогового учёта уступки права требования до наступления, предусмотренного кредитным договором срока погашения основного долга в отношении сделок уступки прав требования в пользу Взаимозависимых лиц и резидентов оффшорных зон
+                    case formTypeId_RNU70_2: //(РНУ-70.2) Регистр налогового учёта уступки права требования до наступления, предусмотренного кредитным договором срока погашения основного долга в отношении сделок уступки прав требования в пользу Взаимозависимых лиц и резидентов оффшорных зон
                         break
-                    case 356: //(РНУ-71.1) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга
+                    case formTypeId_RNU71_1: //(РНУ-71.1) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга
                         // графа 9 = сумма граф 9 и 10 итогов форм
                         addRowValue(dataRows, 44, 'consumptionTaxSumS',
                                 getChildTotalValue(dataRowsChild, "itg", 'result') +
@@ -472,25 +536,25 @@ void consolidationSummary(def dataRows) {
                                 getChildTotalValue(dataRowsChild, "itg", 'dateOfAssignment') +
                                         getChildTotalValue(dataRowsChild, "itg", 'result'))
                         break
-                    case 503: //(РНУ-71.2) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга в отношении сделок уступки прав требования в пользу Взаимозависимых лиц и резидентов оффшорных зон
+                    case formTypeId_RNU71_2: //(РНУ-71.2) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором срока погашения основного долга в отношении сделок уступки прав требования в пользу Взаимозависимых лиц и резидентов оффшорных зон
                         break
-                    case 365: //(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»
+                    case formTypeId_RNU50: //(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»
                         // графа 9 = сумма граф 5 итогов форм
                         addChildTotalData(dataRows, 45, 'consumptionTaxSumS', dataRowsChild, "total", 'lossTaxPeriod')
                         // графа 9 = сумма граф 4 итогов форм
                         addChildTotalData(dataRows, 46, 'consumptionTaxSumS', dataRowsChild, "total", 'lossReportPeriod')
                         break
-                    case 353: //(РНУ-57) Регистр налогового учёта финансового результата от реализации (погашения) векселей сторонних эмитентов
+                    case formTypeId_RNU57: //(РНУ-57) Регистр налогового учёта финансового результата от реализации (погашения) векселей сторонних эмитентов
                         // графа 9 = сумма граф 12 итогов форм
                         addChildTotalData(dataRows, 49, 'consumptionTaxSumS', dataRowsChild, "total", 'allIncome')
                         break
-                    case 332: //(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО
+                    case formTypeId_RNU33: //(РНУ-33) Регистр налогового учёта процентного дохода и финансового результата от реализации (выбытия) ГКО
                         // графа 9 = сумма граф 12 итогов форм
                         addChildTotalData(dataRows, 50, 'consumptionTaxSumS', dataRowsChild, "total", 'taxPrice')
                         // графа 9 = сумма граф 17 итогов форм
                         addChildTotalData(dataRows, 59, 'consumptionTaxSumS', dataRowsChild, "total", 'marketPriceRuble')
                         break
-                    case 345: //(РНУ-51) Регистр налогового учёта финансового результата от реализации (выбытия) ОФЗ
+                    case formTypeId_RNU51: //(РНУ-51) Регистр налогового учёта финансового результата от реализации (выбытия) ОФЗ
                         // графа 9 = сумма граф 20 итогов форм
                         addChildTotalData(dataRows, 51, 'consumptionTaxSumS', dataRowsChild, "itogo", 'expensesTotal')
                         // графа 9 = сумма граф (8 - 12) итогов форм
@@ -498,7 +562,7 @@ void consolidationSummary(def dataRows) {
                                 getChildTotalValue(dataRowsChild, "total", 'acquisitionPrice') -
                                         getChildTotalValue(dataRowsChild, "total", 'acquisitionPriceTax'))
                         break
-                    case 362: //(Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
+                    case formTypeId_F7_8: //(Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
                         // графа 9 = сумма граф 31 фикс строки 14 форм
                         addChildTotalData(dataRows, 52, 'consumptionTaxSumS', dataRowsChild, "R7-total", 'totalLoss')
                         // графа 9 = сумма граф 31 фикс строки 2 форм
@@ -513,35 +577,35 @@ void consolidationSummary(def dataRows) {
                                 getChildTotalValue(dataRowsChild, "R11", 'costWithoutNKD') -
                                         getChildTotalValue(dataRowsChild, "R11", 'costAcquisition'))
                         break
-                    case 355: //(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО
+                    case formTypeId_RNU64: //(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО
                         // графа 9 = сумма граф 6 итогов форм
                         addChildTotalData(dataRows, 58, 'consumptionTaxSumS', dataRowsChild, "total", 'costs')
                         break
-                    case 352: //(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России», учёт которых требует применения метода начисления
+                    case formTypeId_RNU61: //(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России», учёт которых требует применения метода начисления
                         // графа 9 = сумма граф 14 итогов форм
                         addChildTotalData(dataRows, 69, 'consumptionTaxSumS', dataRowsChild, "total", 'percAdjustment')
                         break
-                    case 354: //(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ОАО «Сбербанк России»
+                    case formTypeId_RNU62: //(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ОАО «Сбербанк России»
                         //TODO 22500 (2 строки)
                         break
-                    case 374: //(РНУ-112) Регистр налогового учета сделок РЕПО и сделок займа ценными бумагами
-                        //TODO пропускаю пока не определились с РНУ-100+
-                        break
-                    case 324: //(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения
+                    case formTypeId_RNU25: //(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения
                         // графа 9 = сумма граф 12 итогов форм
                         addChildTotalData(dataRows, 76, 'consumptionTaxSumS', dataRowsChild, "total", 'reserveCreation')
                         break
-                    case 325: //(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения
+                    case formTypeId_RNU26: //(РНУ-26) Регистр налогового учёта расчёта резерва под возможное обесценение акций, РДР, ADR, GDR и опционов эмитента в целях налогообложения
                         // графа 9 = сумма граф 16 итогов форм
                         addChildTotalData(dataRows, 77, 'consumptionTaxSumS', dataRowsChild, "total", 'reserveCreation')
                         break
-                    case 326: //(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
+                    case formTypeId_RNU27: //(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
                         // графа 9 = сумма граф 16 итогов форм
                         addChildTotalData(dataRows, 78, 'consumptionTaxSumS', dataRowsChild, "total", 'reserveCreation')
                         break
-                    case 329: //(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов.
+                    case formTypeId_RNU30: //(РНУ-30) Расчёт резерва по сомнительным долгам на основании результатов инвентаризации сомнительной задолженности и безнадежных долгов.
                         // графа 9 = сумма граф 14 итогов форм
                         addChildTotalData(dataRows, 79, 'consumptionTaxSumS', dataRowsChild, "total", 'calcReserve')
+                        break
+                    case 374: //(РНУ-112) Регистр налогового учета сделок РЕПО и сделок займа ценными бумагами
+                        //TODO пропускаю пока не определились с РНУ-100+
                         break
                     case 370: //(РНУ-117) Регистр налогового учёта доходов и расходов, по операциям со сделками форвард, квалифицированным в качестве операций с ФИСС для целей налогообложения
                         //TODO пропускаю пока не определились с РНУ-100+
