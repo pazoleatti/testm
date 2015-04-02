@@ -1,8 +1,10 @@
 package form_template.vat.vat_724_1.v2015
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -160,6 +162,11 @@ def addRow() {
 // Получить новую строку с заданными стилями
 def getNewRow(def isSection7) {
     def row = formData.createDataRow()
+    setRowStyles(row, isSection7)
+    return row
+}
+
+void setRowStyles(def row, def isSection7) {
     def columns = (isSection7 ? editableColumns + ['ndsRate', 'ndsDealSum'] : editableColumns)
     columns.each {
         row.getCell(it).editable = true
@@ -168,7 +175,6 @@ def getNewRow(def isSection7) {
     (allColumns - columns).each {
         row.getCell(it).setStyleAlias('Автозаполняемая')
     }
-    return row
 }
 
 void calc() {
@@ -590,151 +596,6 @@ def getLastRowAlias(def section) {
     return 'total_' + section
 }
 
-void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 9, 0)
-    addTransportData(xml)
-}
-
-void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-
-    def mapRows = [:]
-
-    def totalTmp = formData.createDataRow()
-    totalColumns.each { alias ->
-        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-    }
-
-    for (def row : xml.row) {
-        rnuIndexRow++
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-        def newRow = getNewRow()
-        newRow.setImportIndex(rnuIndexRow)
-
-        // графа 3 - атрибут 900 - ACCOUNT - «Номер счета», справочник 101 «План счетов бухгалтерского учета»
-        def rnuIndexCol = 3
-        def record101 = getRecordImport(101, 'ACCOUNT', row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, false)
-        newRow.baseAccNum = record101?.record_id?.value
-
-        // графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование счета», справочник 101 «План счетов бухгалтерского учета»
-        if (record101 != null) {
-            rnuIndexCol = 2
-            def value1 = row.cell[rnuIndexCol].text()
-            def value2 = record101?.ACCOUNT_NAME?.value?.toString()
-            formDataService.checkReferenceValue(101, value1, value2, rnuIndexRow, rnuIndexCol + colOffset, logger, false)
-        }
-
-        // графа 4
-        rnuIndexCol = 4
-        newRow.baseSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
-
-        // графа 5
-        rnuIndexCol = 5
-        newRow.ndsNum = row.cell[rnuIndexCol].text()
-
-        // графа 6
-        rnuIndexCol = 6
-        newRow.ndsSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
-
-        // графа 7
-        rnuIndexCol = 7
-        newRow.ndsRate = row.cell[rnuIndexCol].text()
-
-        // графа 8
-        rnuIndexCol = 8
-        newRow.ndsBookSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
-
-        // графа 9
-        rnuIndexCol = 9
-        newRow.ndsDealSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
-
-        totalColumns.each { alias ->
-            def value1 = totalTmp.getCell(alias).value
-            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
-            totalTmp.getCell(alias).setValue(value1 + value2, null)
-        }
-
-        // Техническое поле(группа)
-        rnuIndexCol = 10
-        def sectionIndex = row.cell[rnuIndexCol].text()
-
-        if (mapRows[sectionIndex] == null) {
-            mapRows[sectionIndex] = []
-        }
-        mapRows[sectionIndex].add(newRow)
-    }
-
-    deleteExtraRows(dataRows)
-    // копирование данных по разделам
-    sections.each { section ->
-        def copyRows = mapRows[section]
-        if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(dataRows, getLastRowAlias(section)).getIndex() - 1
-            dataRows.addAll(insertIndex, copyRows)
-            // поправить индексы, потому что они после вставки не пересчитываются
-            updateIndexes(dataRows)
-        }
-    }
-
-    // сравнение итогов
-    if (xml.rowTotal.size() == 1) {
-        rnuIndexRow = rnuIndexRow + 2
-        def row = xml.rowTotal[0]
-        def total = formData.createDataRow()
-
-        // графа 4
-        def rnuIndexCol = 4
-        total.baseSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
-
-        // графа 6
-        rnuIndexCol = 6
-        total.ndsSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
-
-        // графа 8
-        rnuIndexCol = 8
-        total.ndsBookSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
-
-        // графа 9
-        rnuIndexCol = 9
-        total.ndsDealSum = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
-
-        def colIndexMap = ['baseSum' : 4, 'ndsSum' : 6, 'ndsBookSum' : 8, 'ndsDealSum' : 9]
-
-        for (def alias : totalColumns) {
-            def v1 = total.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-                break
-            }
-        }
-    }
-
-    // расчет итогов
-    for (def section : sections) {
-        def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
-        def lastRow = getDataRow(dataRows, getLastRowAlias(section))
-        def from = firstRow.getIndex()
-        def to = lastRow.getIndex() - 1
-
-        // посчитать итоги по разделам
-        def rows = (from <= to ? dataRows[from..to] : [])
-        calcTotalSum(rows, lastRow, totalColumns)
-    }
-    updateIndexes(dataRows)
-
-    dataRowHelper.save(dataRows)
-}
-
 // Сортировка групп и строк
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -756,5 +617,241 @@ void sortFormDataRows() {
         }
 
         dataRowHelper.saveSort()
+    }
+}
+
+void importTransportData() {
+    int COLUMN_COUNT = 9
+    int TOTAL_ROW_COUNT = 1
+    int ROW_MAX = 1000
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\''
+
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    deleteExtraRows(dataRows)
+    dataRowHelper.save(dataRows)
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
+    String[] rowCells
+    int countEmptyRow = 0	// количество пустых строк
+    int fileRowIndex = 0    // номер строки в файле
+    int rowIndex = 0        // номер строки в НФ
+    int totalRowCount = 0   // счетчик кол-ва итогов
+    def total = null		// итоговая строка со значениями из тф для добавления
+    def mapRows = [:]
+
+    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+    def totalColumnsIndexMap = [
+            'baseSum'    : 4,
+            'ndsSum'     : 6,
+            'ndsBookSum' : 8,
+            'ndsDealSum' : 9
+    ]
+
+    while ((rowCells = reader.readNext()) != null) {
+        fileRowIndex++
+
+        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+        if (isEmptyRow) {
+            if (countEmptyRow > 0) {
+                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+                totalRowCount++
+                // итоговая строка тф
+                total = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                break
+            }
+            countEmptyRow++
+            continue
+        }
+
+        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
+        // обычная строка
+        if (countEmptyRow != 0 && !addRow(mapRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
+            break
+        }
+
+        // периодически сбрасываем строки
+        if (getNewRowCount(mapRows) > ROW_MAX) {
+            insertRows(dataRowHelper, mapRows)
+            mapRows.clear()
+        }
+    }
+    reader.close()
+
+    // проверка итоговой строки
+    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
+        logger.error(ROW_FILE_WRONG, fileRowIndex)
+    }
+
+    if (getNewRowCount(mapRows) != 0) {
+        insertRows(dataRowHelper, mapRows)
+    }
+
+    // сравнение итогов
+    if (total) {
+        // итоговая строка для сверки сумм
+        def totalTmp = formData.createDataRow()
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+        }
+
+        // подсчет итогов
+        dataRows.each { row ->
+            totalColumnsIndexMap.keySet().asList().each { alias ->
+                def value1 = totalTmp.getCell(alias).value
+                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+                totalTmp.getCell(alias).setValue(value1 + value2, null)
+            }
+        }
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+    }
+
+    // расчет итогов
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
+        def lastRow = getDataRow(dataRows, getLastRowAlias(section))
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+
+        // посчитать итоги по разделам
+        def rows = (from <= to ? dataRows[from..to] : [])
+        calcTotalSum(rows, lastRow, totalColumns)
+
+        dataRowHelper.update(lastRow)
+    }
+    updateIndexes(dataRows)
+}
+
+/** Добавляет строку в текущий буфер строк. */
+boolean addRow(def mapRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    if (rowCells == null) {
+        return true
+    }
+    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
+    if (newRow == null) {
+        return false
+    }
+
+    // определить раздел и добавить строку в нужный раздел
+    sectionIndex = pure(rowCells[10])
+    if (mapRows[sectionIndex] == null) {
+        mapRows[sectionIndex] = []
+    }
+    mapRows[sectionIndex].add(newRow)
+
+    return true
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
+    }
+
+    def int colOffset = 1
+    def int colIndex
+
+    // графа 3 - атрибут 900 - ACCOUNT - «Номер счета», справочник 101 «План счетов бухгалтерского учета»
+    colIndex = 3
+    def record101 = getRecordImport(101, 'ACCOUNT', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    newRow.baseAccNum = record101?.record_id?.value
+
+    // графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование счета», справочник 101 «План счетов бухгалтерского учета»
+    if (record101 != null) {
+        colIndex = 2
+        def value1 = pure(rowCells[colIndex])
+        def value2 = record101?.ACCOUNT_NAME?.value?.toString()
+        formDataService.checkReferenceValue(101, value1, value2, fileRowIndex, colIndex + colOffset, logger, false)
+    }
+
+    // графа 4
+    colIndex = 4
+    newRow.baseSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 5
+    colIndex = 5
+    newRow.ndsNum = pure(rowCells[colIndex])
+
+    // графа 6
+    colIndex = 6
+    newRow.ndsSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 7
+    colIndex = 7
+    newRow.ndsRate = pure(rowCells[colIndex])
+
+    // графа 8
+    colIndex = 8
+    newRow.ndsBookSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 9
+    colIndex = 9
+    newRow.ndsDealSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+    // Техническое поле(группа)
+    colIndex = 10
+    def sectionIndex = pure(rowCells[colIndex])
+    setRowStyles(newRow, sectionIndex == '7')
+
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell).intern()
+}
+
+/** Получить количество новых строк в мапе во всех разделах. */
+def getNewRowCount(def mapRows) {
+    return mapRows.entrySet().sum { entry -> entry.value.size() }
+}
+
+/** Вставить данные в нф по разделам. */
+def insertRows(def dataRowHelper, def mapRows) {
+    sections.each { section ->
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def dataRows = dataRowHelper.allCached
+            def insertIndex = getDataRow(dataRows, getLastRowAlias(section)).getIndex()
+            dataRowHelper.insert(copyRows, insertIndex)
+
+            // поправить индексы, потому что они после вставки не пересчитываются
+            updateIndexes(dataRows)
+        }
     }
 }
