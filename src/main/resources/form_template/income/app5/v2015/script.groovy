@@ -1,6 +1,8 @@
 package form_template.income.app5.v2015
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -16,11 +18,11 @@ import groovy.transform.Field
 // графа 3  - regionBankDivision        атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 4  - divisionName
 // графа 5  - kpp
-// графа 5  - avepropertyPricerageCost
-// графа 6  - workersCount
-// графа 7  - subjectTaxCredit
-// графа 8  - decreaseTaxSum
-// графа 9  - taxRate
+// графа 6  - avepropertyPricerageCost
+// графа 7  - workersCount
+// графа 8  - subjectTaxCredit
+// графа 9  - decreaseTaxSum
+// графа 10 - taxRate
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -471,87 +473,6 @@ def getNewRow() {
     return newRow
 }
 
-void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 10, 1)
-    addTransportData(xml)
-}
-
-void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        rnuIndexRow++
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-
-        // графа 2
-        newRow.regionBank = getRecordIdImport(30, 'NAME', row.cell[2].text(), rnuIndexRow, 2 + colOffset, false)
-        // графа 3
-        newRow.regionBankDivision = getRecordIdImport(30, 'NAME', row.cell[3].text(), rnuIndexRow, 3 + colOffset, false)
-        // графа 4
-        newRow.divisionName = row.cell[4].text()
-        // графа 5
-        newRow.kpp = row.cell[5].text()
-        // графа 6
-        newRow.avepropertyPricerageCost = getNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset)
-        // графа 7
-        newRow.workersCount = getNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset)
-        // графа 8
-        newRow.subjectTaxCredit = getNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset)
-        // графа 9
-        newRow.decreaseTaxSum = getNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset)
-        // графа 10
-        newRow.taxRate = getNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset)
-
-        rows.add(newRow)
-    }
-
-    def totalRow = getTotalRow(rows)
-    rows.add(totalRow)
-
-    if (xml.rowTotal.size() == 1) {
-        rnuIndexRow += 2
-
-        def row = xml.rowTotal[0]
-
-        def total = formData.createDataRow()
-
-        // графа 5
-        total.kpp = getNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset)
-        // графа 6
-        total.avepropertyPricerageCost = getNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset)
-        // графа 7
-        total.workersCount = getNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset)
-        // графа 8
-        total.subjectTaxCredit = getNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset)
-        // графа 9
-        total.decreaseTaxSum = getNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset)
-
-        def colIndexMap = ['avepropertyPricerageCost' : 6, 'workersCount' : 7, 'subjectTaxCredit' : 8,
-                           'decreaseTaxSum' : 9]
-        for (def alias : totalColumns) {
-            def v1 = total[alias]
-            def v2 = totalRow[alias]
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-            }
-        }
-    }
-    dataRowHelper.save(rows)
-}
-
 /**
  * Получение провайдера с использованием кеширования.
  *
@@ -590,4 +511,162 @@ def getIncomeParamTable(def depParam) {
         return incomeParamTable
     }
     return null
+}
+
+void importTransportData() {
+    int COLUMN_COUNT = 10
+    int TOTAL_ROW_COUNT = 1
+    int ROW_MAX = 1000
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\''
+
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
+    String[] rowCells
+    int countEmptyRow = 0	// количество пустых строк
+    int fileRowIndex = 0    // номер строки в файле
+    int rowIndex = 0        // номер строки в НФ
+    int totalRowCount = 0   // счетчик кол-ва итогов
+    def totalTF = null		// итоговая строка со значениями из тф для добавления
+    def newRows = []
+
+    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+    def totalColumnsIndexMap = [
+            'avepropertyPricerageCost' : 6,
+            'workersCount'             : 7,
+            'subjectTaxCredit'         : 8,
+            'decreaseTaxSum'           : 9
+    ]
+
+    while ((rowCells = reader.readNext()) != null) {
+        fileRowIndex++
+
+        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+        if (isEmptyRow) {
+            if (countEmptyRow > 0) {
+                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+                totalRowCount++
+                // итоговая строка тф
+                totalTF = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                break
+            }
+            countEmptyRow++
+            continue
+        }
+
+        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
+        // обычная строка
+        if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
+            break
+        }
+
+        // периодически сбрасываем строки
+        if (newRows.size() > ROW_MAX) {
+            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+            newRows.clear()
+        }
+    }
+    reader.close()
+
+    // проверка итоговой строки
+    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
+        logger.error(ROW_FILE_WRONG, fileRowIndex)
+    }
+
+    if (newRows.size() != 0) {
+        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+    }
+
+    // сравнение итогов
+    if (totalTF) {
+        // итоговая строка для сверки сумм
+        def totalRow = getTotalRow(dataRowHelper.allCached)
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+
+        // добавить итоговую строку
+        dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
+    }
+}
+
+/** Добавляет строку в текущий буфер строк. */
+boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    if (rowCells == null) {
+        return true
+    }
+    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
+    if (newRow == null) {
+        return false
+    }
+    dataRowsCut.add(newRow)
+    return true
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
+    }
+
+    def int colOffset = 1
+    def int colIndex = 1
+
+    // графа 2, 3
+    ['regionBank', 'regionBankDivision'].each { alias ->
+        colIndex++
+        newRow[alias] = getRecordIdImport(30, 'NAME', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    }
+
+    // графа 4, 5
+    ['divisionName', 'kpp'].each { alias ->
+        colIndex++
+        newRow[alias] = pure(rowCells[colIndex])
+    }
+
+    // графа 6..10
+    ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+    }
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell).intern()
 }
