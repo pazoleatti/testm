@@ -30,7 +30,9 @@ import groovy.transform.Field
 // графа 17 - status            Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО "Сбербанк России". Получатель. Статус
 // графа 18 - birthday          Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО "Сбербанк России". Получатель. Физическое лицо. Дата рождения
 // графа 19 - citizenship       Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО "Сбербанк России". Получатель. Физическое лицо. Гражданство
+//     в 0.5.1 изменился тип со строки на справочник - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
 // графа 20 - kind              Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО "Сбербанк России". Получатель. Физическое лицо. Документ. Вид
+//     в 0.5.1 изменился тип со строки на справочник - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
 // графа 21 - series            Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО "Сбербанк России". Получатель. Физическое лицо. Документ. Серия и номер
 // графа 22 - rate              Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО "Сбербанк России". Ставка
 // графа 23 - dividends         Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ОАО "Сбербанк России". Дивиденды начисленные
@@ -42,6 +44,7 @@ import groovy.transform.Field
 // графа 29 - withheldNumber    Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ОАО "Сбербанк России". Платёжное поручение. Номер
 // графа 30 - postcode          Дивиденды выплаченные. Место нахождения (адрес) получателя. Индекс
 // графа 31 - region            Дивиденды выплаченные. Место нахождения (адрес) получателя. Код региона
+//     в 0.5.1 изменился тип со строки на справочник - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
 // графа 32 - district          Дивиденды выплаченные. Место нахождения (адрес) получателя. Район
 // графа 33 - city              Дивиденды выплаченные. Место нахождения (адрес) получателя. Город
 // графа 34 - locality          Дивиденды выплаченные. Место нахождения (адрес) получателя. Населённый пункт (село, посёлок и т.п.)
@@ -92,6 +95,14 @@ switch (formDataEvent) {
         break
 }
 
+//// Кэши и константы
+@Field
+def providerCache = [:]
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
 // редактируемые (графа 2..42)
 @Field
 def editableColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distributionSum', 'decisionNumber',
@@ -100,19 +111,35 @@ def editableColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distribu
         'withheldSum', 'withheldDate', 'withheldNumber', 'postcode', 'region', 'district', 'city', 'locality',
         'street', 'house', 'housing', 'apartment', 'surname', 'name', 'patronymic', 'phone']
 
-// обязательные (графа 1..17, 22..25, 27)
+// обязательные (графа 1..17, 23..25, 27)
 @Field
 def nonEmptyColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distributionSum', 'decisionNumber',
         'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'inn', 'kpp', 'type',
-        'status', 'rate','dividends', 'sum', 'date', 'withheldSum']
+        'status', 'dividends', 'sum', 'date', 'withheldSum']
 
 // сортировка (графа 7, 8)
 @Field
 def sortColumns = ['decisionNumber', 'decisionDate']
 
-// Текущая дата
 @Field
-def currentDate = new Date()
+def endDate = null
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
 
 // Алгоритмы заполнения полей формы
 void calc() {
@@ -236,7 +263,6 @@ void importData() {
 }
 
 void addData(def xml, headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
     def xmlIndexRow = -1 // Строки xml, от 0
@@ -333,13 +359,13 @@ void addData(def xml, headRowCount) {
         xmlIndexCol++
         newRow.birthday = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // графа 19
+        // графа 19 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
         xmlIndexCol++
-        newRow.citizenship = row.cell[xmlIndexCol].text()
+        newRow.citizenship = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
-        // графа 20
+        // графа 20 - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
         xmlIndexCol++
-        newRow.kind = row.cell[xmlIndexCol].text()
+        newRow.kind = getRecordIdImport(360L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // графа 21
         xmlIndexCol++
@@ -381,9 +407,9 @@ void addData(def xml, headRowCount) {
         xmlIndexCol++
         newRow.postcode = row.cell[xmlIndexCol].text()
 
-        // графа 31
+        // графа 31 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
         xmlIndexCol++
-        newRow.region = row.cell[xmlIndexCol].text()
+        newRow.region = getRecordIdImport(4L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
 
         // графа 32
         xmlIndexCol++
@@ -450,7 +476,6 @@ void addTransportData(def xml) {
 
     // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
     def colIndexMap = [
-            'emitentInn'      : 3,
             'all'             : 4,
             'rateZero'        : 5,
             'distributionSum' : 6,
@@ -545,13 +570,13 @@ void addTransportData(def xml) {
         xmlIndexCol++
         newRow.birthday = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, required)
 
-        // графа 19
+        // графа 19 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
         xmlIndexCol++
-        newRow.citizenship = row.cell[xmlIndexCol].text()
+        newRow.citizenship = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
 
-        // графа 20
+        // графа 20 - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
         xmlIndexCol++
-        newRow.kind = row.cell[xmlIndexCol].text()
+        newRow.kind = getRecordIdImport(360L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
 
         // графа 21
         xmlIndexCol++
@@ -593,9 +618,9 @@ void addTransportData(def xml) {
         xmlIndexCol++
         newRow.postcode = row.cell[xmlIndexCol].text()
 
-        // графа 31
+        // графа 31 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
         xmlIndexCol++
-        newRow.region = row.cell[xmlIndexCol].text()
+        newRow.region = getRecordIdImport(4L, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
 
         // графа 32
         xmlIndexCol++

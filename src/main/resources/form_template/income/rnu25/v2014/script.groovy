@@ -315,18 +315,18 @@ void logicCheck() {
         // 6. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
         if (row.reserveCalcValue != null && row.reserve != null &&
                 sign == '+' && row.reserveCalcValue - row.reserve > 0 && row.reserveRecovery != 0) {
-            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно! Не выполняется условие: если «Графа 11» – «Графа 6» > 0, то «Графа 13» = 0')
         }
         // 7. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 12)
         if (row.reserveCalcValue != null && row.reserve != null &&
                 sign == '+' && row.reserveCalcValue - row.reserve < 0 && row.reserveCreation != 0) {
-            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно! Не выполняется условие: если «Графа 11» – «Графа 6» < 0, то «Графа 12» = 0')
         }
         // 8. Проверка создания (восстановления) резерва по обращающимся акциям (графа 8, 6, 11, 13)
         if (row.reserveCalcValue != null && row.reserve != null &&
                 sign == '+' && row.reserveCalcValue - row.reserve == 0 &&
                 (row.reserveCreation != 0 || row.reserveRecovery != 0)) {
-            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно!')
+            loggerError(row, errorMsg + 'облигации обращающиеся – резерв сформирован (восстановлен) некорректно! Не выполняется условие: если «Графа 11» – «Графа 6» = 0, то «Графа 12» и «Графа 13» = 0')
         }
         // 9. Проверка на положительные значения при наличии созданного резерва
         if (row.reserveCreation > 0 && row.lotSizeCurrent < 0 && row.cost < 0 &&
@@ -337,7 +337,7 @@ void logicCheck() {
         if (row.reserve != null && row.reserveCreation != null &&
                 row.reserveCalcValue != null && row.reserveRecovery != null &&
                 row.reserve + row.reserveCreation != row.reserveCalcValue + row.reserveRecovery) {
-            loggerError(row, errorMsg + 'резерв сформирован некорректно!')
+            loggerError(row, errorMsg + 'резерв сформирован некорректно! Не выполняется условие: «Графа 6» + «Графа 12» - «Графа 11» - «Графа 13» = 0')
         }
         // 11. Проверка корректности заполнения РНУ (графа 3, 3 (за предыдущий период), 4, 5 (за предыдущий период) )
         if (!isBalancePeriod() && !isConsolidated) {

@@ -2,9 +2,12 @@ package form_template.income.declaration_bank.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
+
+import java.text.SimpleDateFormat
 
 /**
  * Декларация по налогу на прибыль (Банк)
@@ -685,7 +688,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 9 : 2, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
+            ИдФайл : generateXmlFileId(taxOrganCode),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
@@ -1019,16 +1022,11 @@ void generateXML() {
                     if (dataRowsAdvance != null && !dataRowsAdvance.isEmpty()) {
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
-                                def naimOP
-                                def record33 = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $row.regionBankDivision", null)?.get(0)
-                                if (record33 != null) {
-                                    naimOP = record33?.ADDITIONAL_NAME?.value
-                                }
                                 // 0..n
                                 РаспрНалСубРФ(
                                         ТипНП: typeNP,
                                         ОбРасч: getRefBookValue(26, row.calcFlag)?.CODE?.value,
-                                        НаимОП: naimOP,
+                                        НаимОП: getRefBookValue(30, row.regionBankDivision)?.NAME?.value,
                                         КППОП: row.kpp,
                                         ОбязУплНалОП: getRefBookValue(25, row.obligationPayTax)?.CODE?.value,
                                         НалБазаОрг: nalBazaIsch,
@@ -1907,4 +1905,20 @@ def getDepartmentParamTable(def departmentParamId) {
         departmentParamTable = departmentParamTableList.get(0)
     }
     return departmentParamTable
+}
+
+def generateXmlFileId(String taxOrganCode) {
+    def departmentParam = getDepartmentParam()
+    if (departmentParam) {
+        def date = (new SimpleDateFormat("yyyyMMdd")).format(Calendar.getInstance().getTime())
+        def fileId = TaxType.INCOME.declarationPrefix + '_' +
+                taxOrganCode + '_' +
+                taxOrganCode + '_' +
+                departmentParam.INN?.value +
+                declarationData.kpp + "_" +
+                date + "_" +
+                UUID.randomUUID().toString().toUpperCase()
+        return fileId
+    }
+    return null
 }

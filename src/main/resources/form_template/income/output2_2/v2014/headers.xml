@@ -70,8 +70,8 @@
     <cell alias="name" colSpan="1" rowSpan="1" value="18"/>
     <cell alias="patronymic" colSpan="1" rowSpan="1" value="19"/>
     <cell alias="phone" colSpan="1" rowSpan="1" value="20"/>
-    <cell alias="dividendDate" colSpan="1" rowSpan="1" value="22"/>
-    <cell alias="sumDividend" colSpan="1" rowSpan="1" value="24"/>
-    <cell alias="sumTax" colSpan="1" rowSpan="1" value="27"/>
+    <cell alias="dividendDate" colSpan="1" rowSpan="1" value="21"/>
+    <cell alias="sumDividend" colSpan="1" rowSpan="1" value="22"/>
+    <cell alias="sumTax" colSpan="1" rowSpan="1" value="23"/>
   </row>
 </rows>

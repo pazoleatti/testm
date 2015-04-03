@@ -688,6 +688,23 @@ void addData(def xml, int headRowCount) {
         // + графа 13 - так как после импорта эта графа 13 не должна пересчитываться
         xmlIndexCol = 13
         newRow.marketQuotationInRub = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        if (getBalancePeriod()) {// в балансовом периоде грузим рассчитываемые графы
+            // графа 8
+            xmlIndexCol = 8
+            newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+            // графа 14
+            xmlIndexCol = 14
+            newRow.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+            // графа 15
+            xmlIndexCol = 15
+            newRow.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+            // графа 16
+            xmlIndexCol = 16
+            newRow.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+            // графа 17
+            xmlIndexCol = 17
+            newRow.reserveRecovery = getNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
+        }
 
         rows.add(newRow)
     }

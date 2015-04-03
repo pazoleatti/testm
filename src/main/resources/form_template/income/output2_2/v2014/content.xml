@@ -66,7 +66,7 @@
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>recName</alias>
+        <alias>title</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Получатель. Наименование</name>

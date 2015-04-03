@@ -121,16 +121,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
-// Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                def Date date, boolean required = true) {
-    if (value == null) {
-        return null
-    }
-    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value, date, rowIndex,
-            cellName, logger, required)
-}
-
 void calc() {
     // расчетов нет
     sortFormDataRows()
@@ -159,7 +149,6 @@ void logicCheck() {
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = []
-    def index = 1
 
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
@@ -172,7 +161,6 @@ void consolidation() {
                     // «Графа 17» = «RUS» и «Графа 16» = 1 и «Графа 22» = «0» или «9»
                     if ('RUS'.equals(sourceRow.status) && sourceRow.type == 1 && (sourceRow.rate == 0 || sourceRow.rate == 9)) {
                         def newRow = formNewRow(sourceRow)
-                        newRow.setIndex(index++)
                         dataRows.add(newRow)
                     }
                 }
@@ -203,7 +191,7 @@ def formNewRow(def row) {
     //«Графа 8» = «Графа 30» первичной формы
     newRow.zipCode = row.postcode
     //«Графа 9» = «Графа 31» первичной формы
-    newRow.subdivisionRF = getRecordId(4L, 'CODE', row.region, row.getIndex(), getColumnName(row, 'region'), getReportPeriodEndDate(), false)
+    newRow.subdivisionRF = row.region
     //«Графа 10» = «Графа 32» первичной формы
     newRow.area = row.district
     //«Графа 11» = «Графа 33» первичной формы
