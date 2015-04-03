@@ -162,39 +162,6 @@ def editableColumns = allColumns - autoFillColumns
 @Field
 def nonEmptyColumns = ['surname', 'name', 'status', 'taxRate', 'income', 'taxBase', 'calculated']
 
-// мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
-@Field
-def totalColumnsIndexMap = [
-        'income'           : 23,
-        'deduction'        : 24,
-        'taxBase'          : 25,
-        'calculated'       : 26,
-        'withheld'         : 27,
-        'listed'           : 28,
-        'withheldAgent'    : 29,
-        'nonWithheldAgent' : 30,
-        'col_041_1'        : 32,
-        'col_043_1_1'      : 34,
-        'col_043_1_2'      : 36,
-        'col_043_1_3'      : 38,
-        'col_043_1_4'      : 40,
-        'col_043_1_5'      : 42,
-        'col_041_2'        : 44,
-        'col_043_2_1'      : 46,
-        'col_043_2_2'      : 48,
-        'col_043_2_3'      : 50,
-        'col_043_2_4'      : 52,
-        'col_043_2_5'      : 54,
-        'col_041_3'        : 56,
-        'col_043_3_1'      : 58,
-        'col_043_3_2'      : 60,
-        'col_043_3_3'      : 62,
-        'col_043_3_4'      : 64,
-        'col_043_3_5'      : 66,
-        'col_052_3_1'      : 68,
-        'col_052_3_2'      : 70
-]
-
 @Field
 def tmpMap = [:]
 
@@ -795,10 +762,7 @@ void importTransportData() {
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
-    char QUOTE = '\''
-
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
+    char QUOTE = '\0'
 
     checkBeforeGetXml(ImportInputStream, UploadFileName)
 
@@ -809,29 +773,26 @@ void importTransportData() {
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-    def dataRows = []
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
+
     String[] rowCells
-    // количество пустых строк
-    int countEmptyRow = 0
+    int countEmptyRow = 0   // количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
     int totalRowCount = 0   // счетчик кол-ва итогов
-    // итоговая строка со значениями из тф для добавления
-    def total = null
-    // итоговая строка для сверки сумм
-    def totalTmp = formData.createDataRow()
-    totalColumnsIndexMap.keySet().asList().each { alias ->
-        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-    }
+    def total = null        // итоговая строка со значениями из тф для добавления
+    def newRows = []
 
     loadRecordIdsInMap()
     while ((rowCells = reader.readNext()) != null) {
         fileRowIndex++
-        // если еще не было пустых строк, то это первая строка - заголовок
-        if (rowCells.length == 1 && rowCells[0].length() < 1) { // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+        if (isEmptyRow) {
             if (countEmptyRow > 0) {
+                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
                 totalRowCount++
-                // итоговая строка
+                // итоговая строка тф
                 total = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
                 break
             }
@@ -839,24 +800,82 @@ void importTransportData() {
             continue
         }
 
+        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
         // обычная строка
-        if (countEmptyRow != 0 && !addRow(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex, totalTmp)) {
+        if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
             break
         }
-        rowCells = null // очищаем кучу
+
         // периодически сбрасываем строки
-        if (dataRows.size() > ROW_MAX) {
-            dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
-            dataRows.clear()
+        if (newRows.size() > ROW_MAX) {
+            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+            newRows.clear()
         }
-    }
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
     }
     reader.close()
 
+    // проверка итоговой строки
+    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
+        logger.error(ROW_FILE_WRONG, fileRowIndex)
+    }
+
+    if (newRows.size() != 0) {
+        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+    }
+
     // сравнение итогов
     if (total) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+        def totalColumnsIndexMap = [
+                'income'           : 23,
+                'deduction'        : 24,
+                'taxBase'          : 25,
+                'calculated'       : 26,
+                'withheld'         : 27,
+                'listed'           : 28,
+                'withheldAgent'    : 29,
+                'nonWithheldAgent' : 30,
+                'col_041_1'        : 32,
+                'col_043_1_1'      : 34,
+                'col_043_1_2'      : 36,
+                'col_043_1_3'      : 38,
+                'col_043_1_4'      : 40,
+                'col_043_1_5'      : 42,
+                'col_041_2'        : 44,
+                'col_043_2_1'      : 46,
+                'col_043_2_2'      : 48,
+                'col_043_2_3'      : 50,
+                'col_043_2_4'      : 52,
+                'col_043_2_5'      : 54,
+                'col_041_3'        : 56,
+                'col_043_3_1'      : 58,
+                'col_043_3_2'      : 60,
+                'col_043_3_3'      : 62,
+                'col_043_3_4'      : 64,
+                'col_043_3_5'      : 66,
+                'col_052_3_1'      : 68,
+                'col_052_3_2'      : 70
+        ]
+
+        // итоговая строка для сверки сумм
+        def totalTmp = formData.createDataRow()
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+        }
+
+        // подсчет итогов
+        def dataRows = dataRowHelper.allCached
+        for (def row : dataRows) {
+            if (row.getAlias()) {
+                continue
+            }
+            totalColumnsIndexMap.keySet().asList().each { alias ->
+                def value1 = totalTmp.getCell(alias).value
+                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+                totalTmp.getCell(alias).setValue(value1 + value2, null)
+            }
+        }
+
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
             def v1 = total.getCell(alias).value
@@ -869,30 +888,18 @@ void importTransportData() {
             }
         }
     }
-
-    if (dataRows.size() != 0) {
-        dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
-        dataRows.clear()
-    }
 }
 
 /** Добавляет строку в текущий буфер строк. */
-boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def totalTmp) {
+boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
     if (rowCells == null) {
         return true
     }
-
     def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
     if (newRow == null) {
         return false
     }
-    // подсчет сумм для итогов
-    totalColumnsIndexMap.keySet().asList().each { alias ->
-        def value1 = totalTmp.getCell(alias).value
-        def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
-        totalTmp.getCell(alias).setValue(value1 + value2, null)
-    }
-    dataRowsCut.add(newRow)
+    rows.add(newRow)
     return true
 }
 
@@ -918,30 +925,13 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     def required = true
     def int colOffset = 1
-    def int colIndex = 1
+    def int colIndex = 0
 
-    // Графа 1
-    newRow.innRF = pure(rowCells[colIndex])
-
-    // Графа 2
-    colIndex++
-    newRow.inn = pure(rowCells[colIndex])
-
-    // Графа 3
-    colIndex++
-    newRow.surname = pure(rowCells[colIndex])
-
-    // Графа 4
-    colIndex++
-    newRow.name = pure(rowCells[colIndex])
-
-    // Графа 5
-    colIndex++
-    newRow.patronymic = pure(rowCells[colIndex])
-
-    // Графа 6
-    colIndex++
-    newRow.status = pure(rowCells[colIndex])
+    // графа 1..6
+    ['innRF', 'inn', 'surname', 'name', 'patronymic', 'status'].each { alias ->
+        colIndex++
+        newRow[alias] = pure(rowCells[colIndex])
+    }
 
     // Графа 7
     colIndex++
@@ -967,33 +957,11 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     colIndex++
     newRow.region = getId(4L, pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
 
-    // Графа 13
-    colIndex++
-    newRow.district = pure(rowCells[colIndex])
-
-    // Графа 14
-    colIndex++
-    newRow.city = pure(rowCells[colIndex])
-
-    // Графа 15
-    colIndex++
-    newRow.locality = pure(rowCells[colIndex])
-
-    // Графа 16
-    colIndex++
-    newRow.street = pure(rowCells[colIndex])
-
-    // Графа 17
-    colIndex++
-    newRow.house = pure(rowCells[colIndex])
-
-    // Графа 18
-    colIndex++
-    newRow.housing = pure(rowCells[colIndex])
-
-    // Графа 19
-    colIndex++
-    newRow.apartment = pure(rowCells[colIndex])
+    // графа 13..19
+    ['district', 'city', 'locality', 'street', 'house', 'housing', 'apartment'].each { alias ->
+        colIndex++
+        newRow[alias] = pure(rowCells[colIndex])
+    }
 
     // Графа 20 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
     colIndex++
@@ -1003,41 +971,11 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     colIndex++
     newRow.address = pure(rowCells[colIndex])
 
-    // Графа 22
-    colIndex++
-    newRow.taxRate = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 23
-    colIndex++
-    newRow.income = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 24
-    colIndex++
-    newRow.deduction = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 25
-    colIndex++
-    newRow.taxBase = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 26
-    colIndex++
-    newRow.calculated = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 27
-    colIndex++
-    newRow.withheld = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 28
-    colIndex++
-    newRow.listed = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 29
-    colIndex++
-    newRow.withheldAgent = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-
-    // Графа 30
-    colIndex++
-    newRow.nonWithheldAgent = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 22..30
+    ['taxRate', 'income', 'deduction', 'taxBase', 'calculated', 'withheld', 'listed', 'withheldAgent', 'nonWithheldAgent'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
+    }
 
     // Графа 31 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»
     colIndex++
