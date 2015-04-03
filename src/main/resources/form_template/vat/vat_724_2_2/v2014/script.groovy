@@ -269,7 +269,7 @@ void importTransportData() {
 
     // сравнение итогов
     if (total) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = [ 'base' : 4 ]
         // подсчет итогов
         def itogValues = ['base' : calcItog(dataRows)]

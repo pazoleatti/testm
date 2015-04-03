@@ -691,8 +691,8 @@ void importTransportData() {
 
     // сравнение итогов
     if (total) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
-        def totalColumnsIndexMap = [ 'baseSum': 4, 'ndsSum' : 6, 'ndsBookSum' : 8, 'ndsDealSum' : 9 ]
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [ 'baseSum' : 4, 'ndsSum' : 6, 'ndsBookSum' : 8, 'ndsDealSum' : 9 ]
         // итоговая строка для сверки сумм
         def totalTmp = formData.createDataRow()
         totalColumnsIndexMap.keySet().asList().each { alias ->
@@ -700,7 +700,10 @@ void importTransportData() {
         }
 
         // подсчет итогов
-        dataRows.each { row ->
+        for (def row : dataRows) {
+            if (row.getAlias()) {
+                continue
+            }
             totalColumnsIndexMap.keySet().asList().each { alias ->
                 def value1 = totalTmp.getCell(alias).value
                 def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)

@@ -582,7 +582,7 @@ void importTransportData() {
 
     // сравнение итогов
     if (totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = [
                 'avepropertyPricerageCost' : 6,
                 'workersCount'             : 7,
