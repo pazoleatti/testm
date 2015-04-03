@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -75,7 +73,7 @@ public class TransportDataController {
                 items.get(0).getInputStream(), logger);
 
         // Загрузка из каталога
-        if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
+        /*if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
             // Diasoft
             loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
         }
@@ -94,7 +92,7 @@ public class TransportDataController {
 
         if (!logger.getEntries().isEmpty()) {
             response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
-        }
+        }*/
     }
 
     @ExceptionHandler(ServiceLoggerException.class)

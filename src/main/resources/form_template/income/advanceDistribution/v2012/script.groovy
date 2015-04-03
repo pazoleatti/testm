@@ -460,11 +460,7 @@ def calc14(def row) {
 
 def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     def tmp
-    // графа 18 и 19 расчитывается в конце потому что требует значения графы 20, 21, 22
     // графа 18
-    // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-    def currentSum = dataRows?.sum { (it.getAlias() == null) ? it.taxSum : 0 } ?: 0
-    def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? it.taxSum : 0 } ?: 0
     switch (reportPeriod.order) {
         case 1: //«графа 18» = «графа 14»
             tmp = row.taxSum
@@ -473,6 +469,9 @@ def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
             tmp = null
             break
         default:
+            // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+            def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+            def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
             // остальные
             if (currentSum) {
                 tmp = (currentSum - previousSum) * (row.taxSum / currentSum)

@@ -519,7 +519,7 @@ void importTransportData() {
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
-    char QUOTE = '\''
+    char QUOTE = '\0'
 
     checkBeforeGetXml(ImportInputStream, UploadFileName)
 
@@ -527,11 +527,11 @@ void importTransportData() {
         logger.error(WRONG_RNU_FORMAT)
     }
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
 
     String[] rowCells
     int countEmptyRow = 0	// количество пустых строк
@@ -540,14 +540,6 @@ void importTransportData() {
     int totalRowCount = 0   // счетчик кол-ва итогов
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def newRows = []
-
-    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
-    def totalColumnsIndexMap = [
-            'avepropertyPricerageCost' : 6,
-            'workersCount'             : 7,
-            'subjectTaxCredit'         : 8,
-            'decreaseTaxSum'           : 9
-    ]
 
     while ((rowCells = reader.readNext()) != null) {
         fileRowIndex++
@@ -590,6 +582,13 @@ void importTransportData() {
 
     // сравнение итогов
     if (totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [
+                'avepropertyPricerageCost' : 6,
+                'workersCount'             : 7,
+                'subjectTaxCredit'         : 8,
+                'decreaseTaxSum'           : 9
+        ]
         // итоговая строка для сверки сумм
         def totalRow = getTotalRow(dataRowHelper.allCached)
 
