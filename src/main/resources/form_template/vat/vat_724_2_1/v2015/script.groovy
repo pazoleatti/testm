@@ -279,7 +279,7 @@ void importTransportData() {
     int TOTAL_ROW_COUNT = 1
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
-    char QUOTE = '\''
+    char QUOTE = '\0'
 
     checkBeforeGetXml(ImportInputStream, UploadFileName)
 
@@ -330,7 +330,7 @@ void importTransportData() {
 
     // сравнение итогов
     if (total) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = [ 'realizeCost' : 4, 'obtainCost' : 5 ]
         // подсчет итогов
         def itogValues = calcItog(dataRows)

@@ -196,9 +196,12 @@ public abstract class AbstractLoadTransportDataService {
             zaos.setEncoding(ZIP_ENCODING);
             zaos.putArchiveEntry(new ZipArchiveEntry(file.getName()));
             InputStream inputStream = file.getInputStream();
-            IOUtils.copy(inputStream, zaos);
-            zaos.closeArchiveEntry();
-            IOUtils.closeQuietly(inputStream);
+			try {
+            	IOUtils.copy(inputStream, zaos);
+            	zaos.closeArchiveEntry();
+			} finally {
+            	IOUtils.closeQuietly(inputStream);
+			}
 
             // Файл с логами, если логи есть
             if (errorList != null && !errorList.isEmpty()) {
@@ -211,7 +214,6 @@ public abstract class AbstractLoadTransportDataService {
                 IOUtils.copy(new ByteArrayInputStream(sb.toString().getBytes()), zaos);
                 zaos.closeArchiveEntry();
             }
-
             IOUtils.closeQuietly(zaos);
 
             // Удаление

@@ -479,7 +479,7 @@ void importTransportData() {
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
-    char QUOTE = '\''
+    char QUOTE = '\0'
 
     checkBeforeGetXml(ImportInputStream, UploadFileName)
 
@@ -544,7 +544,7 @@ void importTransportData() {
 
     // сравнение итогов
     if (total) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = [ 'sum' : 4, 'sum2' : 6 ]
 
         // итоговая строка для сверки сумм
@@ -554,7 +554,10 @@ void importTransportData() {
         }
 
         // подсчет итогов
-        dataRows.each { row ->
+        for (def row : dataRows) {
+            if (row.getAlias()) {
+                continue
+            }
             totalColumnsIndexMap.keySet().asList().each { alias ->
                 def value1 = totalTmp.getCell(alias).value
                 def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
