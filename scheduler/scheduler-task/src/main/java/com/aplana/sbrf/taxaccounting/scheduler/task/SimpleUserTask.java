@@ -22,12 +22,11 @@ import java.util.Map;
 @Local(UserTaskLocal.class)
 @Remote(UserTaskRemote.class)
 @Stateless
-public class SimpleUserTask implements UserTask {
-    private static final Log LOG = LogFactory.getLog(SimpleUserTask.class);
+public class SimpleUserTask extends AbstractUserTask {
 
     @Override
-    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
-        LOG.info("SimpleUserTask started");
+    public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+        log.info("SimpleUserTask started");
     }
 
     @Override

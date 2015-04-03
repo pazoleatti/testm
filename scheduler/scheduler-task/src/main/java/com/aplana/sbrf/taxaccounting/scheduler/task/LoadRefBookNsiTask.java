@@ -30,7 +30,7 @@ import java.util.Map;
 @Remote(UserTaskRemote.class)
 @Stateless
 @Interceptors(SchedulerInterceptor.class)
-public class LoadRefBookNsiTask implements UserTask {
+public class LoadRefBookNsiTask extends AbstractUserTask {
 
     @Autowired
     LoadRefBookDataService loadRefBookDataService;
@@ -39,8 +39,10 @@ public class LoadRefBookNsiTask implements UserTask {
     TAUserService userService;
 
     @Override
-    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+    public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+        log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
         loadRefBookDataService.importRefBookNsi(userService.getSystemUserInfo(), new Logger());
+        log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
     }
 
     @Override

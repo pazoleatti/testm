@@ -27,15 +27,16 @@ import java.util.Map;
 @Remote(UserTaskRemote.class)
 @Stateless
 @Interceptors(SchedulerInterceptor.class)
-public class CleanBlobDataTask implements UserTask {
-    // private final Log log = LogFactory.getLog(getClass());
+public class CleanBlobDataTask extends AbstractUserTask {
 
     @Autowired
     BlobDataService blobDataService;
 
     @Override
-    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+    public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+        log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
         blobDataService.clean();
+        log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
     }
 
     @Override

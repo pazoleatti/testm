@@ -34,9 +34,7 @@ import java.util.Map;
 @Remote(UserTaskRemote.class)
 @Stateless
 @Interceptors(SchedulerInterceptor.class)
-public class RemoveUnnecessaryLocksTask implements UserTask {
-
-    private final Log logger = LogFactory.getLog(getClass());
+public class RemoveUnnecessaryLocksTask extends AbstractUserTask {
 
     private static final String secCountParam = "Время жизни блокировки (секунд)";
 
@@ -44,7 +42,8 @@ public class RemoveUnnecessaryLocksTask implements UserTask {
     LockDataService lockDataService;
 
     @Override
-    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+    public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+        log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
         if (!params.containsKey(secCountParam)){
             throw new TaskExecutionException("Ошибка получения аргументов задачи");
         } else {
@@ -52,9 +51,10 @@ public class RemoveUnnecessaryLocksTask implements UserTask {
                 Integer sec = (Integer) params.get(secCountParam).getTypifiedValue();
                 lockDataService.unlockIfOlderThan(sec);
             } catch (InvalidTaskParamException e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
+        log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
     }
 
     @Override
