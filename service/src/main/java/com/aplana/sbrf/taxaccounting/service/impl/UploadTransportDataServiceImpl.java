@@ -59,7 +59,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     final static String U2_1 = " Код подразделения «%s» не существует в АС «Учет налогов»!";
     final static String U2_2 = " Код налоговой формы «%s» не существует в АС «Учет налогов»!";
     final static String U2_3 = " Код отчетного периода «%s» не существует в налоговом периоде %d года в АС «Учет налогов»!";
-    final static String U3 = "Файл «%s» не загружен, т.к. пользователь не имеет доступа к содержащейся в нем налоговой форме «%s» подразделения «%s»!";
+    final static String U3_1 = "Указанное в транспортном файле подразделение «%s» недоступно текущему пользователю!";
+    final static String U3_2 = "Для подразделения «%s» не назначено первичной или выходной налоговой формы «%s»!";
     final static String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
             "в связи с чем для нее не существует каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
@@ -363,14 +364,14 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                     Arrays.asList(formType.getTaxType()), null, null);
 
             if (!departmentList.contains(formDepartment.getId())) {
-                logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
+                logger.warn(U3_1, formDepartment.getName());
                 return null;
             }
 
             // Назначение подразделению типа и вида НФ
             if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY) &&
                     !departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL)) {
-                logger.warn(U3, fileName, formType.getName(), formDepartment.getName());
+                logger.warn(U3_2, formDepartment.getName(), formType.getName());
                 return null;
             }
 
