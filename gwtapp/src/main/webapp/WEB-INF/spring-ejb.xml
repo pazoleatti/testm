@@ -11,10 +11,11 @@
                      jndi-name="ejblocal:${releaseName}/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal"
                      business-interface="com.aplana.sbrf.taxaccounting.service.MessageService"/>
 
-    <jee:local-slsb
+    <!--<jee:local-slsb
             id="taskManager"
             jndi-name="ejblocal:${releaseName}/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal"
             business-interface="com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager"
             lookup-home-on-startup="true"
-            />
+            />-->
+    <bean id="taskManager" class="com.aplana.sbrf.taxaccounting.scheduler.core.manager.TaskManagerMock" />
 </beans>
