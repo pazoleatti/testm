@@ -147,8 +147,24 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         ImportCounter wrongImportCounter = new ImportCounter();
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
         List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, loadedFileNameList, logger, wrongImportCounter);
+        String departmentName = departmentService.getDepartment(departmentId).getName();
         if (workFilesList.isEmpty()) {
-            log(userInfo, LogData.L3, logger, departmentService.getDepartment(departmentId).getName());
+            log(userInfo, LogData.L3, logger, departmentName);
+            return wrongImportCounter;
+        }
+
+        // Проверка каталога, указанного в параметре "Путь к каталогу архива" и "Путь к каталогу ошибок" для ТБ, на наличие доступа
+        String archivePath = getFormDataArchivePath(userInfo, departmentId, logger);
+        String errorPath = getFormDataErrorPath(userInfo, departmentId, logger);
+        boolean isArchive = archivePath == null || !FileWrapper.canReadFolder(archivePath + "/") || !FileWrapper.canWriteFolder(archivePath + "/");
+        boolean isError = errorPath == null || !FileWrapper.canReadFolder(errorPath + "/") || !FileWrapper.canWriteFolder(errorPath + "/");
+        if (isArchive || isError) {
+            if (isArchive && !isError)
+                log(userInfo, LogData.L42_1, logger, archivePath, departmentName);
+            else if (!isArchive && isError)
+                log(userInfo, LogData.L42_2, logger, errorPath, departmentName);
+            else
+                log(userInfo, LogData.L42_3, logger, archivePath, errorPath, departmentName);
             return wrongImportCounter;
         }
 
