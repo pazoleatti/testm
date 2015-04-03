@@ -732,7 +732,7 @@
 			<fieldDescription><![CDATA[@НалИсчПрод]]></fieldDescription>
 		</field>
 		<field name="180_НалУплПокНА" class="java.lang.String">
-			<fieldDescription><![CDATA[]]></fieldDescription>
+			<fieldDescription><![CDATA[@НалУплПокНА]]></fieldDescription>
 		</field>
 		<field name="190_НалВычОбщ" class="java.lang.String">
 			<fieldDescription><![CDATA[@НалВычОбщ]]></fieldDescription>
