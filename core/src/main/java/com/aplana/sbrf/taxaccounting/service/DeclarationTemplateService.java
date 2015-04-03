@@ -64,6 +64,13 @@ public interface DeclarationTemplateService {
 	 * @return jrxml-файл в виде строки
 	 */
 	String getJrxml(int declarationTemplateId);
+
+    /**
+     * Получить шаблон Jrxml-файла
+     * @param declarationTemplateId идентификатор вида декларации
+     * @return jrxml-файл в виде строки
+     */
+    String getXsd(int declarationTemplateId);
 	
 	/**
 	 * Получить jasper-файл

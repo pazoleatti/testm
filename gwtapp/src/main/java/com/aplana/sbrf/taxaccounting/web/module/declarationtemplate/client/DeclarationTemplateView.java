@@ -14,6 +14,8 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -30,6 +32,27 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	interface MyDriver extends SimpleBeanEditorDriver<DeclarationTemplateExt, DeclarationTemplateView> {
 	}
 
+    interface UrlTemplates extends SafeHtmlTemplates {
+        @Template("download/downloadJrxml/{0}")
+        SafeHtml getDownloadJrxmlUrl(int dtId);
+
+        @Template("download/downloadXsd/{0}")
+        SafeHtml getDownloadXsdlUrl(int dtId);
+
+        @Template("download/declarationTemplate/downloadDect/{0}")
+        SafeHtml getDownloadDTUrl(int dtId);
+
+        @Template("download/uploadJrxml/{0}")
+        SafeHtml getUploadJrxmlUrl(int dtId);
+
+        @Template("download/uploadXsd/{0}")
+        SafeHtml getUploadXsdlUrl(int dtId);
+
+        @Template("download/declarationTemplate/uploadDect/{0}")
+        SafeHtml getUploadDTUrl(int dtId);
+    }
+
+    private static final UrlTemplates urlTemplates = GWT.create(UrlTemplates.class);
 	private final MyDriver driver = GWT.create(MyDriver.class);
 
     private final static int DEFAULT_TABLE_TOP_POSITION = 140;
@@ -45,19 +68,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	
 	@UiField
 	@Editor.Ignore
-	FileUpload uploadJrxml;
+	FileUploadWidget uploadJrxmlFile;
 
     @UiField
     @Editor.Ignore
-    FileUpload uploadDectFile;
-
-	@UiField
-	@Editor.Ignore
-	FormPanel uploadJrxmlForm;
-	
-	@UiField
-	@Editor.Ignore
-	FormPanel uploadDectForm;
+    FileUploadWidget uploadDectFile;
 
 	@UiField
 	@Editor.Ignore
@@ -81,7 +96,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiField
     @Editor.Ignore
-    FileUploadWidget fileUploader;
+    FileUploadWidget uploadXsdFile;
 
     @UiField
     @Editor.Ignore
@@ -102,84 +117,67 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     @Editor.Ignore
     Anchor downloadJrxmlButton;
+
+    @UiField
+    @Editor.Ignore
+    Anchor downloadXsd;
+
     @UiField
     LinkAnchor returnAnchor;
-
-    private static String respPattern = "(<pre.*>)(.+?)(</pre>)";
 
     @Inject
 	@UiConstructor
 	public DeclarationTemplateView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-        FormElement.as(uploadJrxmlForm.getElement()).setAcceptCharset("UTF-8");
-        FormElement.as(uploadDectForm.getElement()).setAcceptCharset("UTF-8");
+        FormElement.as(uploadJrxmlFile.getElement()).setAcceptCharset("UTF-8");
+        FormElement.as(uploadDectFile.getElement()).setAcceptCharset("UTF-8");
 		driver.initialize(this);
-
-		uploadDectForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-			@Override
-			public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                if(event.getResults() == null){
-                    getUiHandlers().uploadDectFail("Ошибки при импорте формы.");
-                    return;
-                }
-                String resultString = event.getResults().toLowerCase();
-                if (resultString.contains(ERROR_RESP)) {
-                    String errorUuid = resultString.replaceAll(respPattern, "$2");
-                    getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
-                    uploadDectForm.reset();
-                }else if (resultString.toLowerCase().contains(ERROR)) {
-                    String errorText = resultString.replaceAll(respPattern, "$2");
-                    getUiHandlers().uploadDectFail(errorText.replaceFirst(ERROR, ""));
-                    uploadDectForm.reset();
-                } else {
-                    String uuid = resultString.replaceAll(respPattern, "$2");
-                    getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));
-                }
-			}
-		});
-
-        uploadJrxmlForm.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                if(event.getResults() == null){
-                    getUiHandlers().uploadDectFail("Ошибки при импорте формы.");
-                    return;
-                }
-                String resultString = event.getResults().toLowerCase();
-                String uuid = resultString.replaceAll(respPattern, "$2");
-                if (resultString.contains(ERROR_RESP)) {
-                    getUiHandlers().uploadDectResponseWithErrorUuid(uuid.replaceFirst(ERROR_RESP, ""));
-                    uploadJrxmlForm.reset();
-                }else if (resultString.toLowerCase().contains(ERROR)) {
-                    getUiHandlers().uploadDectFail(uuid.replaceFirst(ERROR, ""));
-                    uploadJrxmlForm.reset();
-                } else {
-                    getUiHandlers().uploadDectResponseWithUuid(uuid.replaceFirst(SUCCESS_RESP, ""));
-                }
-            }
-        });
 	}
 
 	@Override
 	public void setDeclarationTemplate(final DeclarationTemplateExt declarationTemplateExt) {
-        uploadDectForm.reset();
-        uploadJrxmlForm.reset();
-        Integer id = declarationTemplateExt.getDeclarationTemplate().getId();
-		uploadDectForm.setAction(GWT.getHostPageBaseURL() + "download/declarationTemplate/uploadDect/" + (id != null?id:0));
-		uploadJrxmlForm.setAction(GWT.getHostPageBaseURL() + "download/uploadJrxml/" + (id != null?id:0));
+        /*uploadDectForm.reset();*/
+        /*uploadJrxmlForm.reset();*/
+        Integer id = declarationTemplateExt.getDeclarationTemplate().getId() != null ?
+                declarationTemplateExt.getDeclarationTemplate().getId() : 0;
+        uploadDectFile.setActionUrl(urlTemplates.getUploadDTUrl(id).asString());
+        uploadJrxmlFile.setActionUrl(urlTemplates.getUploadJrxmlUrl(id).asString());
+        uploadXsdFile.setActionUrl(urlTemplates.getUploadXsdlUrl(id).asString());
         title.setText(declarationTemplateExt.getDeclarationTemplate().getType().getName());
         driver.edit(declarationTemplateExt);
-
-        downloadDectButton.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
-        uploadJrxml.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
-        uploadDectFile.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
-        fileUploader.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
-        downloadJrxmlButton.setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
+        setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
+        if (declarationTemplateExt.getDeclarationTemplate().getId() != null){
+            setHref(declarationTemplateExt.getDeclarationTemplate().getId());
+        }
 	}
 
     @Override
     public void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler) {
-        fileUploader.addValueChangeHandler(valueChangeHandler);
+        uploadDectFile.addValueChangeHandler(valueChangeHandler);
+        uploadJrxmlFile.addValueChangeHandler(valueChangeHandler);
+        uploadXsdFile.addValueChangeHandler(valueChangeHandler);
+    }
+
+    @Override
+    public void addSubmitHandler(FormPanel.SubmitCompleteHandler submitCompleteHandler) {
+        uploadDectFile.addSubmitCompleteHandler(submitCompleteHandler);
+        uploadJrxmlFile.addSubmitCompleteHandler(submitCompleteHandler);
+        uploadXsdFile.addSubmitCompleteHandler(submitCompleteHandler);
+    }
+
+    private void setEnabled(boolean isEnable){
+        downloadDectButton.setEnabled(isEnable);
+        uploadJrxmlFile.setEnabled(isEnable);
+        uploadDectFile.setEnabled(isEnable);
+        uploadXsdFile.setEnabled(isEnable);
+        downloadJrxmlButton.setEnabled(isEnable);
+        downloadXsd.setEnabled(isEnable);
+    }
+
+    private void setHref(int dtId){
+        downloadJrxmlButton.setHref(urlTemplates.getDownloadJrxmlUrl(dtId).asString());
+        downloadXsd.setHref(urlTemplates.getDownloadXsdlUrl(dtId).asString());
+        downloadDectButton.setHref(urlTemplates.getDownloadDTUrl(dtId).asString());
     }
 
     @Override
@@ -248,16 +246,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
                         getUiHandlers().save();
                     }
                 });
-	}
-
-	@UiHandler("downloadJrxmlButton")
-	public void onDownloadJrxmlButton(ClickEvent event){
-		getUiHandlers().downloadJrxml();
-	}
-	
-	@UiHandler("downloadDectButton")
-	public void onDownloadDectButton(ClickEvent event){
-		getUiHandlers().downloadDect();
 	}
 
     @UiHandler("activateVersion")

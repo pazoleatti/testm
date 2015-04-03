@@ -54,8 +54,9 @@
             margin: 4px 9px;
             border-top: 1px solid #aeaeac;
         }
-        .submit {
-            margin-top: 2px;;
+        .upload {
+            margin-top: 25px;
+            margin-left: 25px;
         }
     </ui:style>
 
@@ -91,14 +92,9 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar childValign="middle" height="100%">
-                            <style:LinkAnchor text="Экспорт макета" ui:field="downloadDectButton"
+                            <style:LinkAnchor text="Экспорт макета" ui:field="downloadDectButton" img="resources/img/down_cc.png"
                                               title="Экспорт макета деклараций"/>
-                            <g:FormPanel ui:field="uploadDectForm" encoding="multipart/form-data" method="post">
-                                <g:HorizontalPanel>
-                                    <g:FileUpload ui:field="uploadDectFile" name="uploadDectFile"/>
-                                    <g:SubmitButton text="Импорт макета"/>
-                                </g:HorizontalPanel>
-                            </g:FormPanel>
+                            <fileuplod:FileUploadWidget ui:field="uploadDectFile" text="Импорт макета"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -160,24 +156,26 @@
                         <g:HTML addStyleNames="{style.separator}"/>
                     </g:cell>
 
-                    <g:VerticalPanel addStyleNames="{style.btnPanel2}">
-                        <g:HorizontalPanel height="30px">
-                            <g:Label width="150px" text="Файл xsd"/>
-                            <fileuplod:FileUploadWidget ui:field="fileUploader" text="Загрузить xsd"/>
-                        </g:HorizontalPanel>
-                        <g:HorizontalPanel height="30px">
-                            <g:Label width="150px" text="Файл jrxml"/>
-                            <!--TODO (Ramil Timerbaev) нужно допилить виджеты загрузки на подобие "загрузить"-->
-                            <g:FormPanel ui:field="uploadJrxmlForm" encoding="multipart/form-data" method="post">
-                                <style:LeftBar>
-                                    <g:FileUpload name="uploadJrxmlFile" ui:field="uploadJrxml"/>
-                                    <g:SubmitButton text="Импорт" addStyleNames="{style.submit}"/>
-                                </style:LeftBar>
-                            </g:FormPanel>
-                            <style:LinkAnchor text="Скачать jrxml" ui:field="downloadJrxmlButton"
-                                              title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
-                        </g:HorizontalPanel>
-                    </g:VerticalPanel>
+                    <g:HorizontalPanel addStyleNames="{style.btnPanel2}">
+                        <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
+                            <g:cell>
+                                <fileuplod:FileUploadWidget ui:field="uploadXsdFile" extension="zip" text="Загрузить xsd"/>
+                            </g:cell>
+                            <g:cell>
+                                <fileuplod:FileUploadWidget ui:field="uploadJrxmlFile" text="Загрузить jrxml"/>
+                            </g:cell>
+                        </g:VerticalPanel>
+                        <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
+                            <g:cell>
+                                <style:LinkAnchor text="Скачать xsd" ui:field="downloadXsd" img="resources/img/down_cc.png"
+                                                  addStyleNames="{style.marginLeft}" title="Скачать xsd"/>
+                            </g:cell>
+                            <g:cell>
+                                <style:LinkAnchor text="Скачать jrxml" ui:field="downloadJrxmlButton" img="resources/img/down_cc.png"
+                                                  title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
+                            </g:cell>
+                        </g:VerticalPanel>
+                    </g:HorizontalPanel>
                 </g:HorizontalPanel>
 
                 <cm:CodeMirror ui:field="createScript" addStyleNames="{style.table}"/>
