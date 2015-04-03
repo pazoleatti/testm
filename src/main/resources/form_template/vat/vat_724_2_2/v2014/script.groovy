@@ -218,7 +218,7 @@ void importTransportData() {
     int TOTAL_ROW_COUNT = 1
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
-    char QUOTE = '\''
+    char QUOTE = '\0'
 
     checkBeforeGetXml(ImportInputStream, UploadFileName)
 

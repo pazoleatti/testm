@@ -372,7 +372,7 @@ void importTransportData() {
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
-    char QUOTE = '\''
+    char QUOTE = '\0'
 
     checkBeforeGetXml(ImportInputStream, UploadFileName)
 
