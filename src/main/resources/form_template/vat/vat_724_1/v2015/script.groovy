@@ -650,14 +650,6 @@ void importTransportData() {
     def total = null		// итоговая строка со значениями из тф для добавления
     def mapRows = [:]
 
-    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
-    def totalColumnsIndexMap = [
-            'baseSum'    : 4,
-            'ndsSum'     : 6,
-            'ndsBookSum' : 8,
-            'ndsDealSum' : 9
-    ]
-
     while ((rowCells = reader.readNext()) != null) {
         fileRowIndex++
 
@@ -699,6 +691,8 @@ void importTransportData() {
 
     // сравнение итогов
     if (total) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+        def totalColumnsIndexMap = [ 'baseSum': 4, 'ndsSum' : 6, 'ndsBookSum' : 8, 'ndsDealSum' : 9 ]
         // итоговая строка для сверки сумм
         def totalTmp = formData.createDataRow()
         totalColumnsIndexMap.keySet().asList().each { alias ->
@@ -754,7 +748,7 @@ boolean addRow(def mapRows, String[] rowCells, def columnCount, def fileRowIndex
         return false
     }
 
-    // определить раздел и добавить строку в нужный раздел
+    // определить раздел по техническому полю и добавить строку в нужный раздел
     sectionIndex = pure(rowCells[10])
     if (mapRows[sectionIndex] == null) {
         mapRows[sectionIndex] = []
