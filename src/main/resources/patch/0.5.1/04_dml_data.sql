@@ -30,6 +30,7 @@ UPDATE form_type SET name='Налоговые вычеты за прошедши
 
 --http://jira.aplana.com/browse/SBRFACCTAX-10884: Добавить время блокировки для задач планировщика в бд
 INSERT INTO configuration_lock (key, timeout) VALUES ('SCHEDULER_TASK', 86400000);
+INSERT INTO configuration_lock (key, timeout) VALUES ('FILE', 86400000);
 
 COMMIT;
 EXIT;

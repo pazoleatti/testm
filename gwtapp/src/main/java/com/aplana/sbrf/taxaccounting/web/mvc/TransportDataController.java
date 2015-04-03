@@ -88,11 +88,11 @@ public class TransportDataController {
                     loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
 
             loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger);
-        }
+        }*/
 
         if (!logger.getEntries().isEmpty()) {
             response.getWriter().printf("uuid %s", logEntryService.save(logger.getEntries()));
-        }*/
+        }
     }
 
     @ExceptionHandler(ServiceLoggerException.class)
