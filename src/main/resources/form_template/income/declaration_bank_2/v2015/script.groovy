@@ -1008,7 +1008,7 @@ void generateXML() {
                                 РаспрНалСубРФ(
                                         ТипНП: typeNP,
                                         ОбРасч: getRefBookValue(26, row.calcFlag)?.CODE?.value,
-                                        НаимОП: getRefBookValue(30, row.regionBankDivision)?.NAME?.value,
+                                        НаимОП: row.divisionName,
                                         КППОП: row.kpp,
                                         ОбязУплНалОП: getRefBookValue(25, row.obligationPayTax)?.CODE?.value,
                                         НалБазаОрг: nalBazaOrg,
