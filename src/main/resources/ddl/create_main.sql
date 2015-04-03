@@ -927,16 +927,3 @@ comment on column tax_type.id is 'Символьный идентификато�
 comment on column tax_type.name is 'Тип налога';
 
 --------------------------------------------------------------------------------------------------------
-create table async_log
-(
-key varchar2(36) not null,
-creation_date timestamp not null,
-data blob
-);
-
-comment on table async_log is 'Хранение логов';
-comment on column async_log.key is 'Ключ сообщения';
-comment on column async_log.creation_date is 'Дата создания';
-comment on column async_log.data is 'Бинарные данные';
-
---------------------------------------------------------------------------------------------------------

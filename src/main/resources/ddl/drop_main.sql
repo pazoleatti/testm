@@ -90,4 +90,3 @@ drop table async_task_type;
 drop table configuration_email;
 drop table configuration_lock;
 drop table tax_type;
-drop table async_log;
