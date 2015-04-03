@@ -20,7 +20,9 @@
         <constructor-arg index="0" ref="dataSource"/>
     </bean>
     <context:annotation-config/>
-    <tx:jta-transaction-manager/>
+    <bean id="transactionManager" class="org.springframework.transaction.jta.WebSphereUowTransactionManager">
+        <property name="allowCustomIsolationLevels" value="true"/>
+    </bean>
     <tx:annotation-driven/>
     <aop:config proxy-target-class="true"/>
 </beans>
