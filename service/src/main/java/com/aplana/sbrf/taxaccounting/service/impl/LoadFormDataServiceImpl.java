@@ -443,7 +443,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 userInfo.getUser().getId(),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
         // Ззащита от перехода в режим редактирования для импортируемой нф
-        LockData lockDataImport = lockDataService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId() + "_import",
+        lockDataService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId() + "_import",
                 userInfo.getUser().getId(),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
         if (lockData!=null)

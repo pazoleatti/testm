@@ -97,7 +97,11 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
 		if (!action.isReadOnly()) {
 			try {
-				formDataService.lock(action.getFormDataId(), userInfo);
+                // Ззащита от перехода в режим редактирования для импортируемой нф
+                LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + action.getFormDataId() + "_import");
+                if (lockImport == null) {
+                    formDataService.lock(action.getFormDataId(), userInfo);
+                }
 			} catch (Exception e){
 				//
 			}
@@ -294,12 +298,12 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		if (lockInformation != null || lockImport != null) {
             LockData lockData;
             boolean forcedLock = false;
-            if (lockInformation != null) {
-                lockData = lockInformation;
-            } else {
+            if (lockImport != null) {
                 lockData = lockImport;
                 //Надо заблокировать даже от автора блокировки
                 forcedLock = true;
+            } else {
+                lockData = lockInformation;
             }
 			// Если данная форма уже заблокирована другим пользотелем
 			result.setLockedByUser(taUserService.getUser(lockData.getUserId()).getName());
