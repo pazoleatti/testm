@@ -13,10 +13,10 @@
     <artifactId>scheduler</artifactId>
 
     <modules>
-        <module>scheduler-core</module>
         <module>scheduler-api</module>
-        <module>scheduler-task</module>
         <module>scheduler-mock</module>
+        <!--<module>scheduler-task</module>
+        <module>scheduler-core</module>-->
     </modules>
 
 
