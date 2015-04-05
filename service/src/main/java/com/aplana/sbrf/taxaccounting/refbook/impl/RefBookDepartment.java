@@ -724,6 +724,17 @@ public class RefBookDepartment implements RefBookDataProvider {
                 );
             }
         }else {
+            //Если нет родительского то это подразделение Банк
+            if (parentDepartmentId == null)
+                return;
+            //Проверяем аттрибут "действующее подразделение" у родительского подразделения
+            Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
+            if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
+                throw new ServiceLoggerException(
+                        "Подразделение не может быть отредактировано, так как нельзя установить для него признак \"Действующее\", если оно находится в составе недействующего подразделения!",
+                        logEntryService.save(logger.getEntries())
+                );
+            }
             Department currDepartment = departmentService.getDepartment(recordId.intValue());
             boolean isChangeActive = values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() != (currDepartment.isActive() ? 1 :0);
             if (!isChangeActive)
@@ -738,17 +749,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                         );
                     }
                 }
-            }
-            //Если нет родительского то это подразделение Банк
-            if (parentDepartmentId == null)
-                return;
-            //Проверяем аттрибут "действующее подразделение" у родительского подразделения
-            Department parentDep = departmentService.getDepartment(parentDepartmentId.intValue());
-            if (!parentDep.isActive() && values.get(DEPARTMENT_ACTIVE_NAME).getNumberValue().intValue() == 1){
-                throw new ServiceLoggerException(
-                        "Подразделение не может быть отредактировано, так как нельзя установить для него признак \"Действующее\", если оно находится в составе недействующего подразделения!",
-                        logEntryService.save(logger.getEntries())
-                );
             }
         }
 
