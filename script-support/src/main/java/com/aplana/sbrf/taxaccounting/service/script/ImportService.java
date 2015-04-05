@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,4 +70,15 @@ public interface ImportService {
      */
     String getData(InputStream inputStream, String fileName, String charset, String startStr, String endStr,
                    Integer columnsCount, Integer headerRowCount) throws IOException;
+    /**
+     * Выполняет указанную логику в новой транзакции
+     * @param logic код выполняемый в транзакции
+     */
+    void executeInNewTransaction(TransactionLogic logic);
+
+    /**
+     * Выполняет указанную логику в новой транзакции. Вовращает результат
+     * @param logic код выполняемый в транзакции
+     */
+    <T> T returnInNewTransaction(TransactionLogic<T> logic);
 }

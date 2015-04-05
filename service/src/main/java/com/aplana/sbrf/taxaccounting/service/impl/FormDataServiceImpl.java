@@ -577,10 +577,10 @@ public class FormDataServiceImpl implements FormDataService {
             formDataAccessService.canDelete(userInfo, formDataId);
 
             FormData formData = formDataDao.get(formDataId, false);
-            auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
             formDataDao.delete(formDataId);
             deleteReport(formDataId, null);
+            auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
         }
 	}
 

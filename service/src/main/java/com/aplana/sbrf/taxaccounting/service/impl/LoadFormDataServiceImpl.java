@@ -413,7 +413,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     /**
      * Загрузка ТФ конкретной НФ. Только этот метод в сервисе транзакционный.
      */
-    @Transactional
     private boolean importFormData(TAUserInfo userInfo, int departmentId, FileWrapper currentFile, FormData formData,
                                    FormType formType,
                                    FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod,
@@ -443,6 +442,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         LockData lockData = lockDataService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(),
                 userInfo.getUser().getId(),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+        // Ззащита от перехода в режим редактирования для импортируемой нф
+        LockData lockDataImport = lockDataService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId() + "_import",
+                userInfo.getUser().getId(),
+                lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
         if (lockData!=null)
             throw new ServiceException(String.format(
                     LOCK_MSG,
@@ -492,6 +495,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         } finally {
             // Снимаем блокировку
             lockDataService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(), userInfo.getUser().getId());
+            lockDataService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId() + "_import", userInfo.getUser().getId());
         }
 
         // 20 Загрузка формы завершена
