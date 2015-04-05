@@ -5,15 +5,12 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.script.Point;
 import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -46,9 +43,6 @@ public class ImportServiceImpl implements ImportService {
     private static final char QUOTE = '\'';
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-
-    @Autowired
-    TransactionHelper transactionHelper;
 
     @Override
     public String getData(InputStream inputStream, String fileName, String charset) throws IOException {
@@ -119,16 +113,6 @@ public class ImportServiceImpl implements ImportService {
             return getXMLStringFromCSV(inputStream, charset);
         }
         throw new IllegalArgumentException("Формат файла не может быть " + format + ".");
-    }
-
-    @Override
-    public void executeInNewTransaction(TransactionLogic logic) {
-        transactionHelper.executeInNewTransaction(logic);
-    }
-
-    @Override
-    public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
-        return transactionHelper.returnInNewTransaction(logic);
     }
 
     /**
