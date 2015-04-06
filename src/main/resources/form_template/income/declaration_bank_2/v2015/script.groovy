@@ -1075,7 +1075,7 @@ void generateXML() {
                                         ДивНал9 : getLong(row.dividendSumForTaxStavka9),
                                         ДивНал0 : getLong(row.dividendSumForTaxStavka0))
                                 // Лист 03 В
-                                if (dataRowsTaxAgent != null) {
+                                if (dataRowsTaxAgent != null && dataRowsDividend.indexOf(row) == 0) {
                                     isAgentUsed = true
                                     dataRowsTaxAgent.each { rowAgent ->
                                         // 0..n
