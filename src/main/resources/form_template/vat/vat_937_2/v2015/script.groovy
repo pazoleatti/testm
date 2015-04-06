@@ -782,7 +782,7 @@ void importTransportData() {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, fileRowIndex)
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
         // добавить итоговую строку
