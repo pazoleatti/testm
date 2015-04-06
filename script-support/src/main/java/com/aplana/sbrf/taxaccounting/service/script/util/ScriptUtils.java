@@ -95,7 +95,7 @@ public final class ScriptUtils {
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
 
     @SuppressWarnings("unused")
-    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна. Загрузка файла не выполнена.";
+    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
 
     private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
 

@@ -167,6 +167,9 @@ void generateXML() {
                             }
                             continue
                         }
+                        if (row.fix != null) {
+                            continue
+                        }
                         hasPage = true
                         def code005 = row.rowNumber
                         def code010 = row.date?.format('dd.MM.yyyy')
