@@ -81,12 +81,14 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
             } else {
                 logger.info("Получены: %s.", StringUtils.join(catalogStrList.toArray(), ", ", null));
             }
-            // Импорт справочников из ЦАС НСИ
-            loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
-            // Импорт справочников из Diasoft Custody
-            loadRefBookDataService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
-            // Импорт справочников в справочник "Средняя стоимость транспортных средств"
-            loadRefBookDataService.importRefBookAvgCost(securityService.currentUserInfo(), logger);
+            if (loadRefBookDataService.checkPathArchiveError(securityService.currentUserInfo(), logger)){
+                // Импорт справочников из ЦАС НСИ
+                loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
+                // Импорт справочников из Diasoft Custody
+                loadRefBookDataService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
+                // Импорт справочников в справочник "Средняя стоимость транспортных средств"
+                loadRefBookDataService.importRefBookAvgCost(securityService.currentUserInfo(), logger);
+            }
         } else {
             logger.warn("Не указан путь ни к одному из каталогов загрузки ТФ, содержащих данные справочников.");
         }

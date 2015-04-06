@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -138,6 +139,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ImportCounter wrongImportCounter = new ImportCounter();
         // Каталогов может быть несколько, хоть сейчас в ConfigurationParam и ограничено одним значением для всех справочников
         for (String path : refBookDirectoryList) {
+            if (!checkPath(path)) {
+                log(userInfo, LogData.L42_2, logger, path, refBookName);
+                continue;
+            }
             // Набор файлов, которые уже обработали
             Set<String> ignoreFileSet = new HashSet<String>();
             // Файлы которые надо перенести в каталог ошибок
@@ -358,6 +363,37 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     @Override
     public ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger) {
         return importRefBookNsi(userInfo, null, logger);
+    }
+
+    @Override
+    public boolean checkPathArchiveError(TAUserInfo userInfo, Logger logger) {
+        String archivePath = getRefBookArchivePath(userInfo, logger);
+        String errorPath = getRefBookErrorPath(userInfo, logger);
+        List<String> pathList = new ArrayList<String>();
+        if (!checkPath(archivePath)) {
+            pathList.add("к каталогу архива «" + archivePath + "»");
+        }
+        if (!checkPath(errorPath)) {
+            pathList.add("к каталогу ошибок «" + errorPath + "»");
+        }
+        if (!pathList.isEmpty()) {
+            log(userInfo, LogData.L42_1, logger, StringUtils.join(pathList, ", "));
+            return false;
+        }
+        return true;
+    }
+
+
+    private boolean checkPath(String path) {
+        if (path == null || !FileWrapper.canReadFolder(path + "/") || !FileWrapper.canWriteFolder(path + "/"))
+            return false;
+        try {
+            ResourceUtils.getSharedResource(path + "/");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
