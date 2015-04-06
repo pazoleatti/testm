@@ -58,6 +58,7 @@ public class TestScriptHelper {
     private RefBookDataProvider refBookDataProvider;
     private DepartmentReportPeriodService departmentReportPeriodService;
     private FormTypeService formTypeService;
+    private TransactionHelper transactionHelper;
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -113,6 +114,7 @@ public class TestScriptHelper {
         refBookDataProvider = mockHelper.getRefBookDataProvider();
         departmentReportPeriodService = mockHelper.mockDepartmentReportPeriodService();
         formTypeService = mockHelper.mockFormTypeService();
+        transactionHelper = mockHelper.mockTransactionHelper();
     }
 
     /**
