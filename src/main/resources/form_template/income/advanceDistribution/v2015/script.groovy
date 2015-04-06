@@ -227,7 +227,13 @@ void calc() {
 
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", departmentParamsDate, -1, null, false)
+            def departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+
+            def depParam = getDepParam(departmentParam)
+            def depId = depParam.get('CODE').getNumberValue().intValue()
+
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$depId", departmentParamsDate, -1, null, false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
             continue
