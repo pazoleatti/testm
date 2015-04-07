@@ -7,11 +7,6 @@ public interface DeclarationTemplateUiHandlers extends UiHandlers {
 	void reset();
 	void close();
     void activate(boolean force);
-	void downloadJrxml();
-	void downloadDect();
-	void uploadDectResponseWithUuid(String s);
-    void uploadDectResponseWithErrorUuid(String s);
-	void uploadDectFail(String msg);
     int getDeclarationId();
     void onHistoryClicked();
 }

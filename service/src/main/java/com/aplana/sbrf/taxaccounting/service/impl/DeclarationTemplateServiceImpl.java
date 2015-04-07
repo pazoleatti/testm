@@ -40,6 +40,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private final static String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
+    private static final String XSD_NOT_FOUND = "Файл xsd к макету не прикреплен!";
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -127,7 +128,24 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
 	}
 
-	@Override
+    @Override
+    public String getXsd(int declarationTemplateId) {
+        DeclarationTemplate dt = this.get(declarationTemplateId);
+        if (dt.getXsdId()==null){
+            throw new ServiceException(XSD_NOT_FOUND);
+        }
+        BlobData xsdBlob = blobDataService.get(dt.getXsdId());
+        try {
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(xsdBlob.getInputStream(), writer, ENCODING);
+            return writer.toString();
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new ServiceException(e.toString());
+        }
+    }
+
+    @Override
 	public InputStream getJasper(int declarationTemplateId) {
         ByteArrayOutputStream  compiledReport = new ByteArrayOutputStream();
         String jrxml = getJrxml(declarationTemplateId);

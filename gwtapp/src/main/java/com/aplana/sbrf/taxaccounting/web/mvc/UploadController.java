@@ -6,6 +6,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,10 +29,25 @@ public class UploadController {
     @Autowired
     BlobDataService blobDataService;
 
+    /**
+     * Метод исключительно для загрузки содержимого на страницу.
+     * Сделан в следствии того, что нет возможности использовать html5 спецификацию.
+     * Задача, в рамках которой делалось http://jira.aplana.com/browse/SBRFACCTAX-10779
+     * @throws FileUploadException
+     * @throws IOException
+     */
     @RequestMapping(value = "/patterntemp", method = RequestMethod.POST)
-    public void processUploadXlsTemp(HttpServletRequest request, HttpServletResponse response)
+    public void processUploadTemp(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
-        processUpload(request, response);
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
+
+        FileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        List<FileItem> items = upload.parseRequest(request);
+        FileItem fileItem = items.get(0);
+        IOUtils.copy(fileItem.getInputStream(), response.getWriter(), "UTF-8");
     }
 
     @RequestMapping(value = "/pattern", method = RequestMethod.POST)

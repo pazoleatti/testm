@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.scheduler.task;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
@@ -20,6 +22,7 @@ import javax.ejb.Stateless;
 import javax.interceptor.Interceptors;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Задача по загрузке ТФ справочников Diasoft
@@ -38,9 +41,18 @@ public class LoadRefBookDiasoftTask implements UserTask {
     @Autowired
     TAUserService userService;
 
+    @Autowired
+    private LockDataService lockDataService;
+
     @Override
     public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
-         loadRefBookDataService.importRefBookDiasoft(userService.getSystemUserInfo(), new Logger());
+        String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+        lockDataService.lock(key, userId, lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+        try {
+            loadRefBookDataService.importRefBookDiasoft(userService.getSystemUserInfo(), new Logger());
+        } finally {
+            lockDataService.unlock(key, userId);
+        }
     }
 
     @Override
