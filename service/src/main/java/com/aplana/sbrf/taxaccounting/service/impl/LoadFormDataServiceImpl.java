@@ -192,227 +192,231 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 continue;
             }
 
-            // Обработка файла
-            TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
-            String formCode = transportDataParam.getFormCode();
-            String reportPeriodCode = transportDataParam.getReportPeriodCode();
-            Integer year = transportDataParam.getYear();
-            String departmentCode = transportDataParam.getDepartmentCode();
+            try {
+                // Обработка файла
+                TransportDataParam transportDataParam = TransportDataParam.valueOf(fileName);
+                String formCode = transportDataParam.getFormCode();
+                String reportPeriodCode = transportDataParam.getReportPeriodCode();
+                Integer year = transportDataParam.getYear();
+                String departmentCode = transportDataParam.getDepartmentCode();
 
-            // Подразделение НФ
-            Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
-            formDepartmentId = formDepartment != null ? formDepartment.getId(): null;
+                // Подразделение НФ
+                Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
+                formDepartmentId = formDepartment != null ? formDepartment.getId(): null;
 
-            // Не задан код подразделения или код формы
-            if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
-                log(userInfo, LogData.L4, logger, fileName, path);
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), fileName, path))), logger);
-                fail++;
-                continue;
-            }
-
-            // ЭЦП
-            List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
-            if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
-                boolean check = false;
-                try {
-                    check = signService.checkSign(currentFile.getPath(), 0);
-                } catch (Exception e) {
-                    log(userInfo, LogData.L36, logger, e.getMessage());
-                }
-                if (!check) {
-                    log(userInfo, LogData.L16, logger, fileName);
+                // Не задан код подразделения или код формы
+                if (departmentCode == null || formCode == null || reportPeriodCode == null || year == null) {
+                    log(userInfo, LogData.L4, logger, fileName, path);
                     // Разблокировка файла
                     lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L16.getText())), logger);
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), fileName, path))), logger);
                     fail++;
                     continue;
                 }
-                log(userInfo, LogData.L15, logger, fileName);
-            } else {
-                log(userInfo, LogData.L15_1, logger, fileName);
-            }
 
-            log(userInfo, LogData.L15_FD, logger, fileName);
-            if (transportDataParam.getMonth() == null) {
-                log(userInfo, LogData.L15_RP, logger, getFileNamePart(formCode), getFileNamePart(departmentCode),
-                        getFileNamePart(reportPeriodCode), getFileNamePart(year));
-            } else {
-                log(userInfo, LogData.L15_M, logger, getFileNamePart(formCode), getFileNamePart(departmentCode),
-                        getFileNamePart(reportPeriodCode), getFileNamePart(year),
-                        getFileNamePart(transportDataParam.getMonth()));
-            }
+                // ЭЦП
+                List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
+                if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                    boolean check = false;
+                    try {
+                        check = signService.checkSign(currentFile.getPath(), 0);
+                    } catch (Exception e) {
+                        log(userInfo, LogData.L36, logger, e.getMessage());
+                    }
+                    if (!check) {
+                        log(userInfo, LogData.L16, logger, fileName);
+                        // Разблокировка файла
+                        lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                        moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                                Arrays.asList(new LogEntry(LogLevel.ERROR, LogData.L16.getText())), logger);
+                        fail++;
+                        continue;
+                    }
+                    log(userInfo, LogData.L15, logger, fileName);
+                } else {
+                    log(userInfo, LogData.L15_1, logger, fileName);
+                }
 
-            // Указан несуществующий код подразделения
-            if (formDepartment == null) {
-                log(userInfo, LogData.L5, logger, fileName);
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), fileName))), logger);
-                fail++;
-                continue;
-            }
+                log(userInfo, LogData.L15_FD, logger, fileName);
+                if (transportDataParam.getMonth() == null) {
+                    log(userInfo, LogData.L15_RP, logger, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                            getFileNamePart(reportPeriodCode), getFileNamePart(year));
+                } else {
+                    log(userInfo, LogData.L15_M, logger, getFileNamePart(formCode), getFileNamePart(departmentCode),
+                            getFileNamePart(reportPeriodCode), getFileNamePart(year),
+                            getFileNamePart(transportDataParam.getMonth()));
+                }
 
-            // Указан несуществующий код налоговой формы
-            FormType formType = formTypeService.getByCode(formCode);
-            if (formType == null) {
-                log(userInfo, LogData.L6, logger, fileName);
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), fileName))), logger);
-                fail++;
-                continue;
-            }
+                // Указан несуществующий код подразделения
+                if (formDepartment == null) {
+                    log(userInfo, LogData.L5, logger, fileName);
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L5.getText(), fileName))), logger);
+                    fail++;
+                    continue;
+                }
 
-            formTypeId = formType.getId();
+                // Указан несуществующий код налоговой формы
+                FormType formType = formTypeService.getByCode(formCode);
+                if (formType == null) {
+                    log(userInfo, LogData.L6, logger, fileName);
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), fileName))), logger);
+                    fail++;
+                    continue;
+                }
 
-            FormDataKind formDataKind = FormDataKind.PRIMARY;
+                formTypeId = formType.getId();
 
-            // Назначение подразделению типа и вида НФ
-            boolean existedPrimaryAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY);
-            boolean existedAdditionalAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
-            // если нет назначения на первичную и выходную, то ошибка
-            if (!existedPrimaryAssigning && !existedAdditionalAssigning) {
-                log(userInfo, LogData.L14, logger, formType.getName(), formDepartment.getName());
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
-                                formType.getName(), formDepartment.getName()))), logger);
-                fail++;
-                continue;
-            } else if (!existedPrimaryAssigning) {
-                // иначе если нет назначения на первичную, то ищем выходную
-                formDataKind = FormDataKind.ADDITIONAL;
-            }
+                FormDataKind formDataKind = FormDataKind.PRIMARY;
 
-            // Указан недопустимый код периода
-            ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
-            if (reportPeriod == null) {
-                log(userInfo, LogData.L7, logger, fileName);
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), fileName))), logger);
-                fail++;
-                continue;
-            }
+                // Назначение подразделению типа и вида НФ
+                boolean existedPrimaryAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY);
+                boolean existedAdditionalAssigning = departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL);
+                // если нет назначения на первичную и выходную, то ошибка
+                if (!existedPrimaryAssigning && !existedAdditionalAssigning) {
+                    log(userInfo, LogData.L14, logger, formType.getName(), formDepartment.getName());
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L14.getText(),
+                                    formType.getName(), formDepartment.getName()))), logger);
+                    fail++;
+                    continue;
+                } else if (!existedPrimaryAssigning) {
+                    // иначе если нет назначения на первичную, то ищем выходную
+                    formDataKind = FormDataKind.ADDITIONAL;
+                }
 
-            // Последний отчетный период подразделения для указанного отчетного периода
-            DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getLast(formDepartment.getId(),
-                    reportPeriod.getId());
+                // Указан недопустимый код периода
+                ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
+                if (reportPeriod == null) {
+                    log(userInfo, LogData.L7, logger, fileName);
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), fileName))), logger);
+                    fail++;
+                    continue;
+                }
 
-            // Открытость периода
-            if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
-                String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
-                log(userInfo, LogData.L9, logger, formType.getName(), reportPeriodName);
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L9.getText(),
-                                formType.getName(), reportPeriodName))), logger);
-                fail++;
-                continue;
-            }
+                // Последний отчетный период подразделения для указанного отчетного периода
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.getLast(formDepartment.getId(),
+                        reportPeriod.getId());
 
-            if (departmentReportPeriod.getCorrectionDate() != null) {
-                String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
-                log(userInfo, LogData.L8, logger, formType.getName(), reportPeriodName);
-            }
+                // Открытость периода
+                if (departmentReportPeriod == null || !departmentReportPeriod.isActive()) {
+                    String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
+                    log(userInfo, LogData.L9, logger, formType.getName(), reportPeriodName);
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L9.getText(),
+                                    formType.getName(), reportPeriodName))), logger);
+                    fail++;
+                    continue;
+                }
 
-            // Поиск экземпляра НФ
-            FormData formData;
+                if (departmentReportPeriod.getCorrectionDate() != null) {
+                    String reportPeriodName = reportPeriod.getTaxPeriod().getYear() + " - " + reportPeriod.getName();
+                    log(userInfo, LogData.L8, logger, formType.getName(), reportPeriodName);
+                }
 
-            // Признак ежемесячной формы по файлу
-            boolean monthly = transportDataParam.getMonth() != null;
+                // Поиск экземпляра НФ
+                FormData formData;
 
-            // Актуальный шаблон НФ, введенный в действие
-            Integer formTemplateId;
-            try {
-                formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
-            } catch (Exception e) {
-                // Если шаблона нет, то не загружаем ТФ
-                log(userInfo, LogData.L21, logger, e.getMessage());
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), e.getMessage()))), logger);
-                fail++;
-                continue;
-            }
+                // Признак ежемесячной формы по файлу
+                boolean monthly = transportDataParam.getMonth() != null;
 
-            FormTemplate formTemplate = formTemplateService.get(formTemplateId);
-            if (monthly != formTemplate.isMonthly()) {
-                log(userInfo, LogData.L4, logger, fileName, path);
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), fileName, path))), logger);
-                fail++;
-                continue;
-            }
+                // Актуальный шаблон НФ, введенный в действие
+                Integer formTemplateId;
+                try {
+                    formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
+                } catch (Exception e) {
+                    // Если шаблона нет, то не загружаем ТФ
+                    log(userInfo, LogData.L21, logger, e.getMessage());
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), e.getMessage()))), logger);
+                    fail++;
+                    continue;
+                }
 
-            formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(),
-                    monthly ? transportDataParam.getMonth() : null);
+                FormTemplate formTemplate = formTemplateService.get(formTemplateId);
+                if (monthly != formTemplate.isMonthly()) {
+                    log(userInfo, LogData.L4, logger, fileName, path);
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), fileName, path))), logger);
+                    fail++;
+                    continue;
+                }
 
-            // Экземпляр уже есть и не в статусе «Создана»
-            if (formData != null && formData.getState() != WorkflowState.CREATED) {
-                // Сообщение об ошибке в общий лог и в файл со списком ошибок
+                formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(),
+                        monthly ? transportDataParam.getMonth() : null);
+
+                // Экземпляр уже есть и не в статусе «Создана»
+                if (formData != null && formData.getState() != WorkflowState.CREATED) {
+                    // Сообщение об ошибке в общий лог и в файл со списком ошибок
+                    Logger localLogger = new Logger();
+                    localLogger.error(LogData.L17.getText());
+                    log(userInfo, LogData.L17, logger, formType.getName(), formDepartment.getName());
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            localLogger.getEntries(), logger);
+                    fail++;
+                    continue;
+                }
+
+                // флаг того что форма уже создана
+                boolean formWasCreated = false;
+                if (formData != null) {
+                    // 13А.1 Существует и имеет статус "Создана"
+                    formWasCreated = true;
+                    log(userInfo, LogData.L13, logger);
+                }
+
+                // Загрузка данных в НФ (скрипт)
                 Logger localLogger = new Logger();
-                localLogger.error(LogData.L17.getText());
-                log(userInfo, LogData.L17, logger, formType.getName(), formDepartment.getName());
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        localLogger.getEntries(), logger);
-                fail++;
-                continue;
-            }
+                boolean result;
+                try {
+                    // Загрузка
+                    result = importFormData(userInfo, departmentId, currentFile, formData, formType, formTemplate,
+                            departmentReportPeriod, formDataKind, transportDataParam, formWasCreated, localLogger);
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
 
-            // флаг того что форма уже создана
-            boolean formWasCreated = false;
-            if (formData != null) {
-                // 13А.1 Существует и имеет статус "Создана"
-                formWasCreated = true;
-                log(userInfo, LogData.L13, logger);
-            }
+                    // Вывод скрипта в область уведомлений
+                    logger.getEntries().addAll(localLogger.getEntries());
+                } catch (Exception e) {
+                    // Вывод скрипта в область уведомлений
+                    logger.getEntries().addAll(localLogger.getEntries());
+                    // Вывод в область уведомленеий и ЖА
+                    log(userInfo, LogData.L21, logger, e.getMessage());
+                    // Разблокировка файла
+                    lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
+                    // Перемещение в каталог ошибок
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
+                            localLogger.getEntries(), logger);
+                    fail++;
+                    continue;
+                }
 
-            // Загрузка данных в НФ (скрипт)
-            Logger localLogger = new Logger();
-            boolean result;
-            try {
-                // Загрузка
-                result = importFormData(userInfo, departmentId, currentFile, formData, formType, formTemplate,
-                        departmentReportPeriod, formDataKind, transportDataParam, formWasCreated, localLogger);
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-
-                // Вывод скрипта в область уведомлений
-                logger.getEntries().addAll(localLogger.getEntries());
-            } catch (Exception e) {
-                // Вывод скрипта в область уведомлений
-                logger.getEntries().addAll(localLogger.getEntries());
-                // Вывод в область уведомленеий и ЖА
-                log(userInfo, LogData.L21, logger, e.getMessage());
-                // Разблокировка файла
-                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                // Перемещение в каталог ошибок
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger), currentFile,
-                        localLogger.getEntries(), logger);
-                fail++;
-                continue;
-            }
-
-            if (result) {
-                success++;
-            } else {
-                fail++;
+                if (result) {
+                    success++;
+                } else {
+                    fail++;
+                }
+            } finally {
+                lockDataService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId(), true);
             }
         }
 
