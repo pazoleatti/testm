@@ -559,7 +559,16 @@ void logicCheck() {
     xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
     def xmlData = new XmlSlurper().parseText(xmlString)
 
-    // 1. Существующие экземпляры декларации по НДС (раздел 8/8.1/9/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
+    // 1. Не создан ни один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения
+    // ИЛИ
+    // Создан только один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения.
+    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
+    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
+    if(has8 && has8n){
+        logger.error("Созданы два экземпляра декларации раздела 8 (раздел 8 и раздел 8 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 8 необходимо удалить!")
+    }
+
+    // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     declarations().each { declaration ->
         def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
@@ -568,10 +577,8 @@ void logicCheck() {
         }
     }
 
-    // 2. Атрибуты признаки наличия разделов 8-11 заполнены согласно алгоритмам
+    // 3. Атрибуты признаки наличия разделов 8-11 (в том числе раздел 8 без консолид. формы) заполнены согласно алгоритмам
     if (hasOneOrMoreDeclaration() == 1) {
-        def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
-        def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
         def checkMap = [
                 'Признак наличия разделов с 8 по 12'
                 : [getXmlValue(xmlData.@'ПризнНал8-12'.text()) as BigDecimal, hasOneOrMoreDeclaration()],

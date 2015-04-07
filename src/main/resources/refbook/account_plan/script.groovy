@@ -323,7 +323,7 @@ def getFileRecords(def inputStream) {
         def xmlFactory = XMLInputFactory.newInstance()
         xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE)
         xmlFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
-        reader = xmlFactory.createXMLStreamReader(inputStream)
+        reader = xmlFactory.createXMLStreamReader(inputStream, "windows-1251")
 
         // пройтись по файлу и собрать значения
         while (reader.hasNext()) {

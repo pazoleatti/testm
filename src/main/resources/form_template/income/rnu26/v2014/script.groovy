@@ -3,6 +3,8 @@ package form_template.income.rnu26.v2014
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import au.com.bytecode.opencsv.CSVReader
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -712,141 +714,221 @@ void addData(def xml, int headRowCount) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 17, 1)
-    addTransportData(xml)
+    int COLUMN_COUNT = 17
+    int TOTAL_ROW_COUNT = 1
+    int ROW_MAX = 1000
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
 
-    // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumns, logger, false)
-}
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
 
-void addTransportData(def xml) {
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-    def rows = []
-    def int rowIndex = 1
 
-    for (def row : xml.row) {
-        rnuIndexRow++
+    String[] rowCells
+    int countEmptyRow = 0	// количество пустых строк
+    int fileRowIndex = 0    // номер строки в файле
+    int rowIndex = 0        // номер строки в НФ
+    int totalRowCount = 0   // счетчик кол-ва итогов
+    def total = null		// итоговая строка со значениями из тф для добавления
+    def newRows = []
 
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    while ((rowCells = reader.readNext()) != null) {
+        fileRowIndex++
+
+        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+        if (isEmptyRow) {
+            if (countEmptyRow > 0) {
+                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+                totalRowCount++
+                // итоговая строка тф
+                total = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                break
+            }
+            countEmptyRow++
+            continue
+        }
+
+        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
+        // обычная строка
+        if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
             break
         }
 
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
-        (getBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        (getBalancePeriod() ? ['rowNumber'] : autoFillColumns).each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        // графа 2
-        xmlIndexCol = 2
-        newRow.issuer = row.cell[xmlIndexCol].text()
-        // графа 3
-        xmlIndexCol = 3
-        newRow.shareType = getRecordIdImport(97, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
-        // графа 4
-        xmlIndexCol = 4
-        newRow.tradeNumber = row.cell[xmlIndexCol].text()
-        // графа 5
-        xmlIndexCol = 5
-        newRow.currency = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
-        // графа 6
-        xmlIndexCol = 6
-        newRow.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 7
-        xmlIndexCol = 7
-        newRow.lotSizeCurrent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 9
-        xmlIndexCol = 9
-        newRow.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 8
-        xmlIndexCol = 8
-        newRow.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 10
-        xmlIndexCol = 10
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, false)
-        // графа 11
-        xmlIndexCol = 11
-        newRow.marketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 12
-        xmlIndexCol = 12
-        newRow.rubCourse = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 13
-        xmlIndexCol = 13
-        newRow.marketQuotationInRub = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 14
-        xmlIndexCol = 14
-        newRow.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 15
-        xmlIndexCol = 15
-        newRow.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 16
-        xmlIndexCol = 16
-        newRow.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 17
-        xmlIndexCol = 17
-        newRow.reserveRecovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        rows.add(newRow)
-
-        if (rows.size() > 1000) {
-            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-            rows.clear()
+        // периодически сбрасываем строки
+        if (newRows.size() > ROW_MAX) {
+            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+            newRows.clear()
         }
     }
+    reader.close()
 
-    if (xml.rowTotal.size() == 1) {
-        rnuIndexRow = rnuIndexRow + 2
+    // проверка итоговой строки
+    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
+        logger.error(ROW_FILE_WRONG, fileRowIndex)
+    }
 
-        def row = xml.rowTotal[0]
+    if (newRows.size() != 0) {
+        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+    }
 
-        def total = formData.createDataRow()
-        total.setAlias('total')
-        total.fix = 'Общий итог'
-        total.getCell('fix').colSpan = 2
-        allColumns.each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
+    // сравнение итогов
+    if (total) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [
+                'lotSizePrev' : 6,
+                'lotSizeCurrent' : 7,
+                'reserveCalcValuePrev' : 8,
+                'cost' : 9,
+                'costOnMarketQuotation' : 14,
+                'reserveCalcValue' : 15,
+                'reserveCreation' : 16,
+                'reserveRecovery' : 17
+        ]
+
+        // итоговая строка для сверки сумм
+        def totalTmp = formData.createDataRow()
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
         }
 
-        // графа 6
-        xmlIndexCol = 6
-        total.lotSizePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 7
-        xmlIndexCol = 7
-        total.lotSizeCurrent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 9
-        xmlIndexCol = 9
-        total.cost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 8
-        xmlIndexCol = 8
-        total.reserveCalcValuePrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 14
-        xmlIndexCol = 14
-        total.costOnMarketQuotation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 15
-        xmlIndexCol = 15
-        total.reserveCalcValue = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 16
-        xmlIndexCol = 16
-        total.reserveCreation = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 17
-        xmlIndexCol = 17
-        total.reserveRecovery = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // подсчет итогов
+        def dataRows = dataRowHelper.allCached
+        for (def row : dataRows) {
+            if (row.getAlias()) {
+                continue
+            }
+            totalColumnsIndexMap.keySet().asList().each { alias ->
+                def value1 = totalTmp.getCell(alias).value
+                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+                totalTmp.getCell(alias).setValue(value1 + value2, null)
+            }
+        }
 
-        rows.add(total)
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = total.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+
+        // добавить в нф итоговую строку
+        def totalRow = getCalcTotalRow(dataRows)
+        dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
+    }
+}
+
+/** Добавляет строку в текущий буфер строк. */
+boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    if (rowCells == null) {
+        return true
+    }
+    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
+    if (newRow == null) {
+        return false
+    }
+    rows.add(newRow)
+    return true
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    (getBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    (getBalancePeriod() ? ['rowNumber'] : autoFillColumns).each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
-    if(rows.size()> 0){
-        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
     }
 
+    def int colOffset = 1
+    def int colIndex = 0
+
+    // графа 2
+    colIndex = 2
+    newRow.issuer = pure(rowCells[colIndex])
+    // графа 3
+    colIndex = 3
+    newRow.shareType = getRecordIdImport(97, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    // графа 4
+    colIndex = 4
+    newRow.tradeNumber = pure(rowCells[colIndex])
+    // графа 5
+    colIndex = 5
+    newRow.currency = getRecordIdImport(15, 'CODE_2', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    // графа 6
+    colIndex = 6
+    newRow.lotSizePrev = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 7
+    colIndex = 7
+    newRow.lotSizeCurrent = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 9
+    colIndex = 9
+    newRow.cost = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 8
+    colIndex = 8
+    newRow.reserveCalcValuePrev = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 10
+    colIndex = 10
+    newRow.signSecurity = getRecordIdImport(62, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    // графа 11
+    colIndex = 11
+    newRow.marketQuotation = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 12
+    colIndex = 12
+    newRow.rubCourse = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 13
+    colIndex = 13
+    newRow.marketQuotationInRub = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 14
+    colIndex = 14
+    newRow.costOnMarketQuotation = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 15
+    colIndex = 15
+    newRow.reserveCalcValue = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 16
+    colIndex = 16
+    newRow.reserveCreation = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    // графа 17
+    colIndex = 17
+    newRow.reserveRecovery = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
 }
 
 // обновить индексы строк
