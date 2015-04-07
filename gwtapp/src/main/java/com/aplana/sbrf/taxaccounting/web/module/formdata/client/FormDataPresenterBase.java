@@ -129,6 +129,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     public static final String MANUAL = "manual";
     public static final String CORRECTION = "correction";
     public static final String UUID = "uuid";
+    public static final String FREE = "free";
 
 	protected HandlerRegistration closeFormDataHandlerRegistration;
 
@@ -155,6 +156,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected boolean readOnlyMode;
 
 	protected boolean forceEditMode = false;
+    protected boolean free;
 	
 	protected boolean fixedRows;
     // Признак отображения вида для форм в корректирующих периодах, true - обычный режим, false - режим отображения изенений

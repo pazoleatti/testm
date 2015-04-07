@@ -76,6 +76,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setManual(Boolean.parseBoolean(request.getParameter(MANUAL, "false")));
         action.setUuid(request.getParameter(UUID, null));
         action.setCorrectionDiff(Boolean.parseBoolean(request.getParameter(CORRECTION, "false")));
+        free = Boolean.parseBoolean(request.getParameter(FREE, "false"));
         getFormData(action);
 	}
 
@@ -90,6 +91,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             action.setManual(formData.isManual());
 			action.setFormDataTemplateId(formData.getFormTemplateId());
             action.setCorrectionDiff(!absoluteView);
+            action.setFree(free);
             action.setInnerLogUuid(innerLogUuid);
             dispatcher.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<GetRowsDataResult>() {
