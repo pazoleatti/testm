@@ -39,8 +39,8 @@ public class SourceServiceImpl implements SourceService {
     private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s \"%s\" в периоде %s.";
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
-    private static final String FORM_INSTANCES_MSG = "Для корректной передачи данных в форму-приёмник необходимо выполнить повторный перевод в статус \"Принята\" формы \"%s\" для подразделения \"%s\" в периодах: \"%s\"";
-    private static final String DECLARATION_INSTANCES_MSG = "Для корректного получении данных необходимо выполнить повторное формирование при помощи кнопки \"Обновить\" во всех экземплярах \"%s\" для подразделения \"%s\" в периодах: \"%s\"";
+    private static final String FORM_INSTANCE_MSG = "\"%s\", \"%s\", подразделение \"%s\", период \"%s%s\"";
+    private static final String DECLARATION_INSTANCE_MSG = "\"%s\", подразделение \"%s\", период \"%s%s\"";
     private static final String EDIT_FATAL_ERROR = "Найдены экземпляры \"%s\" для подразделения \"%s\" в периодах: \"%s\" в статусе \"Принята\". Для удаления их назначения в качестве источника необходимо выполнить их возврат из статуса \"Принята\"";
     private static final String DELETE_FATAL_ERROR_BEGIN = "Найдены экземпляры в статусе \"Принята\":";
     private static final String DELETE_FATAL_ERROR_MID = "\"%s\" для подразделения \"%s\" в периодах: \"%s\"";
@@ -374,31 +374,58 @@ public class SourceServiceImpl implements SourceService {
             /** Получаем промежуточные периоды, которые будут объединены при создании новой версии */
             List<SourceObject> emptyPeriods = sourceDao.getEmptyPeriods(sourcePair,
                     newPeriodStart, newPeriodEnd);
-            List<String> acceptedSources = new ArrayList<String>();
+            List<ConsolidatedInstance> consolidatedInstances = new ArrayList<ConsolidatedInstance>();
             if (!emptyPeriods.isEmpty()) {
                 for (SourceObject empty : emptyPeriods) {
                     /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
-                    acceptedSources.addAll(checkAcceptedFormData(sourceDao.findAcceptedInstances(empty.getSourcePair().getSource(),
-                            empty.getPeriodStart(), empty.getPeriodEnd())));
+                    consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(empty.getSourcePair().getSource(),
+                            empty.getPeriodStart(), empty.getPeriodEnd()));
                 }
             } else {
                 /** Получаем источники, имеющие принятые экземпляры в создаваемом новом периоде */
-                acceptedSources.addAll(checkAcceptedFormData(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                        newPeriodStart, newPeriodEnd)));
+                consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(sourcePair.getSource(),
+                        newPeriodStart, newPeriodEnd));
             }
-            if (!acceptedSources.isEmpty()) {
-                if (declaration) {
-                    /** Надо обновить декларации-приемники в периодах внутри промежуточных, за которые есть принятые источники (входные) */
-                    logger.warn(String.format(DECLARATION_INSTANCES_MSG,
-                            sourcePair.getDestinationType(),
-                            destinationDepartmentName,
-                            StringUtils.join(acceptedSources, ", ")));
-                }  else {
-                    /** Надо перепринять формы-источники, отчетный период которых попадает в промежуточные периоды */
-                    logger.warn(String.format(FORM_INSTANCES_MSG,
-                            sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
-                            sourceDepartmentName,
-                            StringUtils.join(acceptedSources, ", ")));
+
+            if (!consolidatedInstances.isEmpty()) {
+                boolean hasForm = false;
+                boolean hasDeclaration = false;
+
+                /** Надо переконсолидировать декларации-приемники */
+                for (ConsolidatedInstance consolidatedInstance : consolidatedInstances) {
+                    if (consolidatedInstance.isDeclaration()) {
+                        if (!hasDeclaration) {
+                            logger.warn("Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\" в декларациях: ");
+                            hasDeclaration = true;
+                        }
+                        logger.warn(String.format(DECLARATION_INSTANCE_MSG,
+                                consolidatedInstance.getType(),
+                                consolidatedInstance.getDepartment(),
+                                consolidatedInstance.getPeriod(),
+                                        consolidatedInstance.getCorrectionDate() != null
+                                                ? " " + SIMPLE_DATE_FORMAT.format(consolidatedInstance.getCorrectionDate())
+                                                : "")
+                        );
+                    }
+                }
+
+                /** Надо переконсолидировать нф-приемники */
+                for (ConsolidatedInstance consolidatedInstance : consolidatedInstances) {
+                    if (!consolidatedInstance.isDeclaration()) {
+                        if (!hasForm) {
+                            logger.warn("Для коррекции консолидированных данных необходимо нажать на кнопку \"Консолидация\" в формах: ");
+                            hasForm = true;
+                        }
+                        logger.warn(String.format(FORM_INSTANCE_MSG,
+                                        consolidatedInstance.getType(),
+                                        consolidatedInstance.getFormKind(),
+                                        consolidatedInstance.getDepartment(),
+                                        consolidatedInstance.getPeriod(),
+                                        consolidatedInstance.getCorrectionDate() != null
+                                                ? " " + SIMPLE_DATE_FORMAT.format(consolidatedInstance.getCorrectionDate())
+                                                : "")
+                        );
+                    }
                 }
             }
         }
