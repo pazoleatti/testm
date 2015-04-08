@@ -359,7 +359,17 @@ void generateXML() {
 
     // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
     def dataRowsApp2 = getDataRows(formDataCollection, 415)
+    def isCFOApp2 = false
 
+    // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов (ЦФО НДФЛ)."
+    def dataRowsApp2CFO = getDataRows(formDataCollection, 418)
+    if (dataRowsApp2 == null) {
+        isCFOApp2 = true
+        dataRowsApp2 = dataRowsApp2CFO
+    } else if (dataRowsApp2CFO != null) {
+        logger.warn("Неверно настроены источники декларации Банка! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Консолидация произведена из «%s».",
+                formTypeService.get(415).name, formTypeService.get(418)?.name, formTypeService.get(415)?.name)
+    }
     /** НалВыпл311ФБ за предыдущий отчетный период. Код строки декларации 250. */
     def nalVipl311FBOld = 0
     /** НалВыпл311Суб за предыдущий отчетный период. Код строки декларации 260. */
@@ -1262,9 +1272,14 @@ void generateXML() {
                 // Приложение к налоговой декларации - конец
 
                 // Приложение №2
+                // сортируем по ФИО, потом по остальным полям
+                if (isCFOApp2) {
+                    def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'status', 'birthday', 'citizenship', 'code', 'series', 'postcode', 'region', 'district', 'city', 'locality', 'street', 'house', 'housing', 'apartment','country', 'address']
+                    sortRows(dataRowsApp2, sortColumns)
+                }
                 for (def row : dataRowsApp2) {
                     //НомерСправ  Справка №
-                    def nomerSprav = row.refNum
+                    def nomerSprav = isCFOApp2 ? (dataRowsApp2.indexOf(row) + 1) : row.refNum
                     //ДатаСправ   Дата составления
                     def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
                     //Тип         Тип
