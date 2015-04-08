@@ -192,8 +192,8 @@ void logicCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam)
-        def depId = depParam.get('CODE').getNumberValue().intValue()
-        def departmentName = depParam?.NAME?.stringValue
+        def depId = depParam?.get('CODE')?.getNumberValue()?.intValue() ?: -1
+        def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
         def incomeParamTable = getIncomeParamTable(depParam)
 
@@ -244,11 +244,11 @@ void logicCheck() {
 
         // Проверки НСИ
         def depParam = getDepParam(departmentParam)
-        def departmentName = depParam?.NAME?.stringValue
+        def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
         def incomeParamTable = getIncomeParamTable(depParam)
 
         // 2. Проверка значения графы «Наименование подразделения для декларации»
-        for (int i = 0; i < incomeParamTable.size(); i++) {
+        for (int i = 0; i < incomeParamTable?.size(); i++) {
             if (row.kpp != null && row.kpp != '') {
                 if (incomeParamTable?.get(i)?.KPP?.stringValue == row.kpp) {
                     if (incomeParamTable?.get(i)?.ADDITIONAL_NAME?.stringValue != row.divisionName) {
@@ -329,15 +329,14 @@ def calc4(def row) {
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
-    for (int i = 0; i < incomeParamTable.size(); i++) {
+    for (int i = 0; i < incomeParamTable?.size(); i++) {
         if (row.kpp != null && row.kpp != '') {
             if (incomeParamTable?.get(i)?.KPP?.stringValue == row.kpp) {
-                divisionName = incomeParamTable?.get(i)?.ADDITIONAL_NAME?.stringValue
-                break
+                return incomeParamTable?.get(i)?.ADDITIONAL_NAME?.stringValue
             }
         }
     }
-    return divisionName
+    return null
 }
 
 // Расчет итоговой строки
@@ -568,6 +567,9 @@ def getProvider(def long providerId) {
 // Получение параметров подразделения, форма настроек которого будет использоваться
 // для получения данных (согласно алгоритму 1.8.4.5.1)
 def getDepParam(def departmentParam) {
+    if (departmentParam == null) {
+        return null
+    }
     def departmentId = departmentParam.get('CODE').getNumberValue().intValue()
     def departmentType = departmentService.get(departmentId).getType()
     if (departmentType.equals(departmentType.TERR_BANK)) {
@@ -582,6 +584,9 @@ def getDepParam(def departmentParam) {
 
 // Получение параметров (справочник 330)
 def getIncomeParamTable(def depParam) {
+    if (depParam == null) {
+        return null
+    }
     def depId = depParam.get('CODE').getNumberValue().intValue()
     def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
     if (incomeParam != null && !incomeParam.isEmpty()) {

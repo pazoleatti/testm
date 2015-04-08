@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.source.AcceptedFormData;
+import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
 import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import org.springframework.dao.DataAccessException;
@@ -364,6 +365,80 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 return acceptedFormData;
             }
         });
+    }
+
+    private static final String FINC_CONSOLIDATED_FORMS = "select tfd.kind as kind, tfmt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate \n" +
+            "from department_form_type dft\n" +
+            "join form_template ft on ft.type_id = dft.form_type_id\n" +
+            "join department_report_period drp on drp.department_id = dft.department_id\n" +
+            "join form_data fd on (fd.kind = dft.kind and fd.form_template_id = ft.id and fd.department_report_period_id = drp.id)\n" +
+            "join form_data_consolidation fdc on fdc.source_form_data_id = fd.id\n" +
+            "join form_data tfd on tfd.id = fdc.target_form_data_id\n" +
+            "join form_template tft on tft.id = tfd.form_template_id\n" +
+            "join form_type tfmt on tfmt.id = tft.type_id\n" +
+            "join department_report_period tdrp on tdrp.id = tfd.department_report_period_id\n" +
+            "join department td on td.id = tdrp.department_id\n" +
+            "join report_period trp on trp.id = tdrp.report_period_id\n" +
+            "join tax_period ttp on ttp.id = trp.tax_period_id\n" +
+            "where dft.id = :source and (\n" +
+            "(:periodStart <= trp.calendar_start_date and (:periodEnd is null or :periodEnd >= trp.calendar_start_date)) or\n" +
+            "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
+            ")";
+
+    private static final String FINC_CONSOLIDATED_DECLARATIONS = "select dt.name as kind, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate \n" +
+            "from department_form_type dft\n" +
+            "join form_template ft on ft.type_id = dft.form_type_id\n" +
+            "join department_report_period drp on drp.department_id = dft.department_id\n" +
+            "join form_data fd on (fd.kind = dft.kind and fd.form_template_id = ft.id and fd.department_report_period_id = drp.id)\n" +
+            "join declaration_data_consolidation ddc on ddc.source_form_data_id = fd.id\n" +
+            "join declaration_data tdd on tdd.id = ddc.target_declaration_data_id\n" +
+            "join declaration_template tdt on tdt.id = tdd.declaration_template_id\n" +
+            "join declaration_type dt on dt.id = tdt.declaration_type_id\n" +
+            "join department_report_period tdrp on tdrp.id = tdd.department_report_period_id\n" +
+            "join department td on td.id = tdrp.department_id\n" +
+            "join report_period trp on trp.id = tdrp.report_period_id\n" +
+            "join tax_period ttp on ttp.id = trp.tax_period_id\n" +
+            "where dft.id = :source and (\n" +
+            "(:periodStart <= trp.calendar_start_date and (:periodEnd is null or :periodEnd >= trp.calendar_start_date)) or\n" +
+            "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
+            ")";
+
+    @Override
+    public List<ConsolidatedInstance> findConsolidatedInstances(Long source, Date periodStart, Date periodEnd) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("source", source);
+        params.put("periodStart", periodStart);
+        params.put("periodEnd", periodEnd);
+        List<ConsolidatedInstance> formsAndDeclarations = new ArrayList<ConsolidatedInstance>();
+
+        /** Получаем формы, которые консолидируются из указанного источника */
+        formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FINC_CONSOLIDATED_FORMS, params, new RowMapper<ConsolidatedInstance>() {
+            @Override
+            public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
+                ConsolidatedInstance form = new ConsolidatedInstance();
+                form.setFormKind(rs.getString("kind"));
+                form.setType(rs.getString("type"));
+                form.setDepartment(rs.getString("department"));
+                form.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
+                form.setCorrectionDate(rs.getDate("correctionDate"));
+                return form;
+            }
+        }));
+
+        /** Получаем декларации, которые консолидируются из указанного источника */
+        formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FINC_CONSOLIDATED_DECLARATIONS, params, new RowMapper<ConsolidatedInstance>() {
+            @Override
+            public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
+                ConsolidatedInstance declaration = new ConsolidatedInstance();
+                declaration.setFormKind(rs.getString("kind"));
+                declaration.setDepartment(rs.getString("department"));
+                declaration.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
+                declaration.setCorrectionDate(rs.getDate("correctionDate"));
+                declaration.setDeclaration(true);
+                return declaration;
+            }
+        }));
+        return formsAndDeclarations;
     }
 
     private static final String GET_DEPARTMENT_NAMES = "select dft.id, d.name from department d \n" +
