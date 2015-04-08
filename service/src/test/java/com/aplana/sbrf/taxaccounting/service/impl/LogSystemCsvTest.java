@@ -39,16 +39,14 @@ public class LogSystemCsvTest {
 
             list.add(item);
         }
-        File file = null;
-        try{
-            LogSystemCsvBuilder builder = new LogSystemCsvBuilder(list);
-            file = builder.createBlobDataFile();
-            System.out.println(file.getAbsolutePath());
+        LogSystemCsvBuilder builder = new LogSystemCsvBuilder(list);
+        String reportPath = null;
+        try {
+            reportPath = builder.createReport();
         } finally {
-            assert file != null;
-            if (!file.delete()){
-                System.out.println("Файл не удалился");
-            }
+            assert reportPath != null;
+            File file = new File(reportPath);
+            file.delete();
         }
     }
 }

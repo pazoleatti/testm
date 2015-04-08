@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.springframework.util.ClassUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -234,6 +235,13 @@ public class FormDataXlsxReportBuilderTestMock {
 	@Test
 	public void testReport() throws IOException{
 		FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data,true, dataRows, refBookValue);
-        builder.createBlobData();
-	}
+        String reportPath = null;
+        try {
+            reportPath = builder.createReport();
+        } finally {
+            assert reportPath != null;
+            File file = new File(reportPath);
+            file.delete();
+        }
+    }
 }

@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print.formdata;
 
-import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Color;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -15,7 +15,10 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
@@ -148,6 +151,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     private Map<String, XSSFFont> fontMap = new HashMap<String, XSSFFont>();
 
     public FormDataXlsmReportBuilder() throws IOException {
+        super("report", ".xlsm");
         InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
         try {
             workBook = WorkbookFactory.create(templeteInputStream);
