@@ -155,4 +155,15 @@ public interface DeclarationTemplateDao {
     List<Map<String,Object>> versionTemplateCountByType(Collection<Integer> typeIds);
 
     int updateVersionStatus(VersionedObjectStatus versionStatus, int decTemplateId);
+
+    /**
+     * Проверка существования активного шаблона декларации
+     * с типом declarationTypeId и датой актуальности которой является период включающий
+     * reportPeriodId
+     *
+     * @param declarationTypeId вид шаблона
+     * @param reportPeriodId отчетный период
+     * @return
+     */
+    boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId);
 }

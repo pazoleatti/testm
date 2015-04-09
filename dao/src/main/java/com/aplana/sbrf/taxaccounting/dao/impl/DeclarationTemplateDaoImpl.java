@@ -82,18 +82,21 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 		}
 	}
 
-	@Override
+    private String getActiveVersionSql(){
+            return "with templatesByVersion as (Select ID, DECLARATION_TYPE_ID, STATUS, VERSION, row_number() " +
+                (isSupportOver() ? "over(partition by DECLARATION_TYPE_ID order by version)" : "over()") +
+                " rn from declaration_template where DECLARATION_TYPE_ID = ? and status in (0, 1, 2))" +
+                "select ID from (select rv.ID ID, rv.STATUS, rv.DECLARATION_TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version versionTo from templatesByVersion rv " +
+                "left outer join templatesByVersion rv2 on rv.DECLARATION_TYPE_ID = rv2.DECLARATION_TYPE_ID and rv.rn+1 = rv2.rn) " +
+                "where STATUS = 0 and ((TRUNC(versionFrom, 'DD') <= ? and TRUNC(versionTo, 'DD') >= ?) or (TRUNC(versionFrom, 'DD') <= ? and versionTo is null))";
+    }
+
+    @Override
 	public int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId) {
         JdbcTemplate jt = getJdbcTemplate();
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
         try {
-            String ACTIVE_VERSION_SQL = "with templatesByVersion as (Select ID, DECLARATION_TYPE_ID, STATUS, VERSION, row_number() " +
-                    (isSupportOver() ? "over(partition by DECLARATION_TYPE_ID order by version)" : "over()") +
-                    " rn from declaration_template where DECLARATION_TYPE_ID = ? and status in (0, 1, 2))" +
-                    "select ID from (select rv.ID ID, rv.STATUS, rv.DECLARATION_TYPE_ID RECORD_ID, rv.VERSION versionFrom, rv2.version versionTo from templatesByVersion rv " +
-                    "left outer join templatesByVersion rv2 on rv.DECLARATION_TYPE_ID = rv2.DECLARATION_TYPE_ID and rv.rn+1 = rv2.rn) " +
-                    "where STATUS = 0 and ((TRUNC(versionFrom, 'DD') <= ? and TRUNC(versionTo, 'DD') >= ?) or (TRUNC(versionFrom, 'DD') <= ? and versionTo is null))";
-            return jt.queryForInt(ACTIVE_VERSION_SQL,
+            return jt.queryForInt(getActiveVersionSql(),
                     new Object[]{declarationTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
                     new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}
             );
@@ -455,6 +458,21 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         } catch (DataAccessException e){
             logger.error("Ошибка при обновлении статуса версии " + decTemplateId, e);
             throw new DaoException("Ошибка при обновлении статуса версии", e);
+        }
+    }
+
+    @Override
+    public boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId) {
+        JdbcTemplate jt = getJdbcTemplate();
+        ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
+        try {
+            return jt.queryForInt(getActiveVersionSql(),
+                    new Object[]{declarationTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
+                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}) > 0;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }catch(IncorrectResultSizeDataAccessException e){
+            throw new DaoException("Для даного вида декларации %d - %s найдено несколько активных шаблонов деклараций.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
         }
     }
 }

@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources;
 
 import com.aplana.gwt.client.ModalWindow;
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
@@ -49,6 +51,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @UiField
     DataGrid<FormToFormRelation> table;
     @UiField
+    CheckBox declaration;
+    @UiField
     CheckBox source;
     @UiField
     CheckBox destination;
@@ -61,7 +65,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         super(eventBus);
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
-        init();
+        initColumns();
+        table.setRowCount(0);
+        dataProvider.addDataDisplay(table);
         initCheckboxes();
     }
 
@@ -73,6 +79,14 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @UiHandler("close")
     public void onCloseClicked(ClickEvent event){
         modalWindow.hide();
+    }
+
+    @UiHandler("declaration")
+    public void onDeclarationClicked(ClickEvent event){
+        source.setVisible(!declaration.getValue());
+        destination.setVisible(!declaration.getValue());
+        initColumns();
+        updateTableData();
     }
 
     @UiHandler("source")
@@ -90,7 +104,11 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         updateTableData();
     }
 
-    private void init(){
+    private void initColumns(){
+        while (table.getColumnCount() > 0) {
+            table.removeColumn(0);
+        }
+
         Column<FormToFormRelation, String> counterColumn = new Column<FormToFormRelation, String>(new ClickableTextCell()){
 
             @Override
@@ -146,7 +164,10 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         TextColumn<FormToFormRelation> formKindColumn = new TextColumn<FormToFormRelation>() {
             @Override
             public String getValue(FormToFormRelation object) {
-                return object.getFormDataKind().getName();
+                if (object.getFormType()!= null)
+                    return object.getFormDataKind().getName();
+                else
+                    return "";
             }
         };
 
@@ -169,21 +190,36 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             @Override
             public void render(Cell.Context context, FormToFormRelation object, SafeHtmlBuilder sb) {
                 String link;
-                if (object.isCreated()) {
-                    link = "<a href=\"#"
-                            + FormDataPresenter.NAME_TOKEN + ";"
-                            + FormDataPresenter.FORM_DATA_ID + "="
-                            + object.getFormDataId() + "\">"
-                            + object.getFormType().getName() + "</a>";
+                if (object.getFormType() != null) {
+                    if (object.isCreated()) {
+                        link = "<a href=\"#"
+                                + FormDataPresenter.NAME_TOKEN + ";"
+                                + FormDataPresenter.FORM_DATA_ID + "="
+                                + object.getFormDataId() + "\">"
+                                + object.getFormType().getName() + "</a>";
+                    } else {
+                        link = object.getFormType().getName();
+                    }
                 } else {
-                    link = object.getFormType().getName();
+                    if (object.isCreated()) {
+                        link = "<a href=\"#"
+                                + DeclarationDataTokens.declarationData + ";"
+                                + DeclarationDataTokens.declarationId + "="
+                                + object.getDeclarationDataId() + "\">"
+                                + object.getDeclarationType().getName() + "</a>";
+                    } else {
+                        link = object.getDeclarationType().getName();
+                    }
                 }
                 sb.appendHtmlConstant(link);
             }
 
             @Override
             public String getValue(FormToFormRelation formToFormRelation) {
-                return formToFormRelation.getFormType().getName();
+                if (formToFormRelation.getFormType()!= null)
+                    return formToFormRelation.getFormType().getName();
+                else
+                    return formToFormRelation.getDeclarationType().getName();
             }
         };
 
@@ -196,6 +232,22 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
+        TextColumn<FormToFormRelation> declarationTaxOrganColumn = new TextColumn<FormToFormRelation>() {
+            @Override
+            public String getValue(FormToFormRelation object) {
+                return object.getTaxOrganCode() != null ? object.getTaxOrganCode() : "";
+            }
+        };
+
+        TextColumn<FormToFormRelation> declarationTaxOrganKppColumn = new TextColumn<FormToFormRelation>() {
+            @Override
+            public String getValue(FormToFormRelation object) {
+                return object.getKpp() != null ? object.getKpp() : "";
+            }
+        };
+
+        Boolean isDeclaration = declaration.getValue();
+
         table.addColumn(counterColumn, "№");
         table.setColumnWidth(counterColumn, 20, Style.Unit.PX);
         table.addColumn(sourceColumn, "Источник / Приёмник");
@@ -203,22 +255,51 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(departmentColumn, "Подразделение");
         table.addColumn(correctionDateColumn, "Дата сдачи корректировки");
         table.setColumnWidth(correctionDateColumn, 85, Style.Unit.PX);
-        table.addColumn(formKindColumn, "Тип формы");
-        table.setColumnWidth(formKindColumn, 100, Style.Unit.PX);
-        table.addColumn(formTypeColumn, "Вид формы");
-        table.setColumnWidth(formTypeColumn, 100, Style.Unit.PX);
+        if (!isDeclaration) {
+            table.addColumn(formKindColumn, "Тип формы");
+            table.setColumnWidth(formKindColumn, 100, Style.Unit.PX);
+            table.addColumn(formTypeColumn, "Вид формы");
+            table.setColumnWidth(formTypeColumn, 100, Style.Unit.PX);
+        } else {
+            if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
+                table.addColumn(formTypeColumn, "Вид декларации");
+            } else {
+                table.addColumn(formTypeColumn, "Вид уведоления");
+            }
+            table.setColumnWidth(formTypeColumn, 100, Style.Unit.PX);
+        }
         table.addColumn(yearColumn, "Год");
         table.addColumn(periodColumn, "Период");
-        table.addColumn(monthColumn, "Месяц");
-        table.addColumn(performerColumn, "Исполнитель");
-        table.addColumn(stateColumn, "Состояние формы");
+        if (!isDeclaration) {
+            table.addColumn(monthColumn, "Месяц");
+            table.addColumn(performerColumn, "Исполнитель");
+        } else {
+            switch (getUiHandlers().getTaxType()) {
+                case PROPERTY:
+                case TRANSPORT:
+                    table.addColumn(declarationTaxOrganColumn, "Налоговый орган");
+                case INCOME:
+                    table.addColumn(declarationTaxOrganKppColumn, "КПП");
+                    break;
+            }
+        }
+        if (!isDeclaration) {
+            table.addColumn(stateColumn, "Состояние формы");
+        } else {
+            if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
+                table.addColumn(stateColumn, "Состояние декларации");
+            } else {
+                table.addColumn(stateColumn, "Состояние уведоления");
+            }
+        }
         table.setColumnWidth(stateColumn, 120, Style.Unit.PX);
-        table.setRowCount(0);
-        dataProvider.addDataDisplay(table);
     }
 
     private void initCheckboxes() {
+        declaration.setValue(false);
+        source.setVisible(true);
         source.setValue(true);
+        destination.setVisible(true);
         destination.setValue(true);
         uncreated.setValue(false);
     }
@@ -226,6 +307,11 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @Override
     public void setTableData(List<FormToFormRelation> result) {
         tableData = result;
+        if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
+            declaration.setText("Декларации");
+        } else {
+            declaration.setText("Уведомления");
+        }
         initCheckboxes();
         updateTableData();
     }
@@ -233,14 +319,18 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private void updateTableData() {
         List<FormToFormRelation> filteredData = new LinkedList<FormToFormRelation>();
         if (tableData != null) {
+            boolean dec = declaration.getValue();
             boolean src = source.getValue();
             boolean dst = destination.getValue();
             boolean uncr = uncreated.getValue();
+            if (dec)
+                dst = true;
 
             for (FormToFormRelation formToFormRelation : tableData) {
                 boolean fSrc = formToFormRelation.isSource();
                 boolean fCr = formToFormRelation.isCreated();
-                if ((src && fSrc || dst && !fSrc) && (uncr || fCr)) {
+                boolean fDec = formToFormRelation.getFormType()==null;
+                if ((src && fSrc || dst && !fSrc) && (uncr || fCr) && (fDec == dec)) {
                     filteredData.add(formToFormRelation);
                 }
             }

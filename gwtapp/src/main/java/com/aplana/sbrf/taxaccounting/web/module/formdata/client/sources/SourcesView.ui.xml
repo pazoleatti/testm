@@ -43,6 +43,7 @@
 
         <g:FlowPanel addStyleNames="{style.mainPanel}">
             <g:HorizontalPanel spacing="10" height="22px" verticalAlignment="middle" addStyleNames="{style.checkboxes}">
+                <g:CheckBox ui:field="declaration" text="Декларации"/>
                 <g:CheckBox ui:field="source" text="Источники"/>
                 <g:CheckBox ui:field="destination" text="Приемники"/>
                 <g:CheckBox ui:field="uncreated" text="Не созданные"/>

@@ -16,6 +16,15 @@ public class FormToFormRelation implements Serializable {
     /** Тип НФ */
     private FormDataKind formDataKind;
 
+    /** Вид декларации */
+    private DeclarationType declarationType;
+
+    /** Налоговый орган */
+    private String taxOrganCode;
+
+    /** КПП */
+    private String kpp;
+
     /** Статус */
     private WorkflowState state;
 
@@ -30,6 +39,9 @@ public class FormToFormRelation implements Serializable {
 
     /** Идентификатор созданной формы */
     private Long formDataId;
+
+    /** Идентификатор созданной декларации */
+    private Long declarationDataId;
 
     private Date correctionDate;
 
@@ -95,6 +107,30 @@ public class FormToFormRelation implements Serializable {
         this.formDataKind = formDataKind;
     }
 
+    public DeclarationType getDeclarationType() {
+        return declarationType;
+    }
+
+    public void setDeclarationType(DeclarationType declarationType) {
+        this.declarationType = declarationType;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
+    }
+
     public WorkflowState getState() {
         return state;
     }
@@ -109,6 +145,14 @@ public class FormToFormRelation implements Serializable {
 
     public void setFormDataId(Long formDataId) {
         this.formDataId = formDataId;
+    }
+
+    public Long getDeclarationDataId() {
+        return declarationDataId;
+    }
+
+    public void setDeclarationDataId(Long declarationDataId) {
+        this.declarationDataId = declarationDataId;
     }
 
     public Date getCorrectionDate() {
