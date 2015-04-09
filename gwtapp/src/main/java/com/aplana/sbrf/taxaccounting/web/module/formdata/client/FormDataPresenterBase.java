@@ -17,6 +17,7 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
@@ -99,8 +100,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         int getPageSize();
 
 		void updateData();
-		
+
         void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler);
+
+		void addSubmitCompleteHandler(FormPanel.SubmitCompleteHandler submitCompleteHandler);
 
         void isCanEditPage(boolean visible);
 
