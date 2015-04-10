@@ -179,7 +179,7 @@ public class DeclarationTemplateController {
             Logger customLog = new Logger();
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
             String xsdBlobIdOld = declarationTemplate.getXsdId();
-            String xsdBlobId = blobDataService.create(zis, declarationTemplate.getType().getName() + "_xsd");
+            String xsdBlobId = blobDataService.create(zis, entry.getName());
             declarationTemplate.setXsdId(xsdBlobId);
             declarationTemplateService.save(declarationTemplate);
 

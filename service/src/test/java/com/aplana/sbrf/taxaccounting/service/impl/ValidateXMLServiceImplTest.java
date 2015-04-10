@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -19,6 +20,8 @@ import org.springframework.util.ClassUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -129,5 +132,17 @@ public class ValidateXMLServiceImplTest implements Runnable {
         data.setDeclarationTemplateId(3);
         data.setId(5l);
         Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null));
+    }
+
+    @Test
+    public void fileInfoTest() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = validateService.getClass().getDeclaredMethod("fileInfo", Logger.class);
+        method.setAccessible(true);
+        Logger logger = new Logger();
+        method.invoke(validateService, logger);
+        
+        Assert.assertTrue(!logger.containsLevel(LogLevel.ERROR));
+        Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
+        System.out.println(logger.getEntries().get(0).getMessage());
     }
 }
