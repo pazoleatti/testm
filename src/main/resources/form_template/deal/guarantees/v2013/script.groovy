@@ -75,7 +75,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['fullName', 'docNumber', 'docDate', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -180,11 +180,6 @@ void logicCheck() {
             def msg1 = dealDoneDateCell.column.name
             def msg2 = dealDateCell.column.name
             rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
-        }
-        // Проверка положительной суммы
-        if (sumCell.value <= 0) {
-            def msg1 = sumCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
         }
     }
 
