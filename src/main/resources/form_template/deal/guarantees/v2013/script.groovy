@@ -176,12 +176,6 @@ void logicCheck() {
             def msg2 = dealDateCell.column.name
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
-
-        // Проверка положительной суммы
-        if (sumCell.value <= 0) {
-            def msg1 = sumCell.column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
-        }
     }
 
     if (formData.kind == FormDataKind.CONSOLIDATED) {
