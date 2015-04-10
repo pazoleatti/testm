@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
@@ -359,7 +360,17 @@ void generateXML() {
 
     // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов"
     def dataRowsApp2 = getDataRows(formDataCollection, 415)
+    def isCFOApp2 = false
 
+    // Приложение №2 "Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов (ЦФО НДФЛ)."
+    def dataRowsApp2CFO = getDataRows(formDataCollection, 418)
+    if (dataRowsApp2 == null) {
+        isCFOApp2 = true
+        dataRowsApp2 = dataRowsApp2CFO
+    } else if (dataRowsApp2CFO != null) {
+        logger.warn("Неверно настроены источники декларации Банка! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Консолидация произведена из «%s».",
+                formTypeService.get(415).name, formTypeService.get(418)?.name, formTypeService.get(415)?.name)
+    }
     /** НалВыпл311ФБ за предыдущий отчетный период. Код строки декларации 250. */
     def nalVipl311FBOld = 0
     /** НалВыпл311Суб за предыдущий отчетный период. Код строки декларации 260. */
@@ -1262,13 +1273,25 @@ void generateXML() {
                 // Приложение к налоговой декларации - конец
 
                 // Приложение №2
+                // сортируем по ФИО, потом по остальным полям
+                if (isCFOApp2) {
+                    def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
+                    sortRows(dataRowsApp2, sortColumns)
+                }
+
+                //ДатаСправ   Дата составления
+                def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
+                //Тип         Тип
+                def type = String.format("%02d", reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId))
+
+                if (dataRowsApp2) {
+                    fillRecordsMap([4L, 10L, 350L, 360L, 370L])
+                }
+
+                def index = 0
                 for (def row : dataRowsApp2) {
                     //НомерСправ  Справка №
-                    def nomerSprav = row.refNum
-                    //ДатаСправ   Дата составления
-                    def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
-                    //Тип         Тип
-                    def type = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
+                    def nomerSprav = isCFOApp2 ? (++index) : row.refNum
                     //ИННФЛ       ИНН
                     def innFL = row.innRF
                     //ИННИно       ИНН
@@ -1334,7 +1357,7 @@ void generateXML() {
                     СведДохФЛ(
                             НомерСправ : nomerSprav,
                             ДатаСправ : dataSprav,
-                            Тип : String.format("%02d", type)) {
+                            Тип : type) {
                         //1..1
                         ФЛПолучДох(
                                 ИННФЛ : innFL,
@@ -2069,4 +2092,21 @@ def getDepartmentParamTable(def departmentParamId) {
         departmentParamTable = departmentParamTableList.get(0)
     }
     return departmentParamTable
+}
+
+// Загрузка всех записей справочников в кеш.
+def fillRecordsMap(def refBookIds) {
+    refBookIds.each { refBookId ->
+        def provider = refBookFactory.getDataProvider(refBookId)
+        def records = provider.getRecords(getEndDate(), null, null, null)
+        if (records) {
+            records.each { record ->
+                def recordId = record.get(RefBook.RECORD_ID_ALIAS).numberValue
+                def key = getRefBookCacheKey(refBookId, recordId)
+                if (!refBookCache.containsKey(key)) {
+                    refBookCache.put(key, refBookService.getRecordData(refBookId, recordId));
+                }
+            }
+        }
+    }
 }

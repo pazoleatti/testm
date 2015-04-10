@@ -154,8 +154,8 @@ void logicCheck() {
         def msgOut = outcomeSumCell.column.name
 
         // Проверка доходов и расходов
-        if (outcomeSumCell == null && incomeSum == null) {
-            rowError(logger, row, "Строка $rowNum: Графа «$msgOut» должна быть заполнена, если не заполнена графа «$msgIn»!")
+        if (outcomeSumCell.value == null && incomeSumCell.value  == null) {
+            rowError(logger, row, "Строка $rowNum: Графа «$msgIn» должна быть заполнена, если не заполнена графа «$msgOut»!")
         }
 
         // Корректность даты заключения сделки
