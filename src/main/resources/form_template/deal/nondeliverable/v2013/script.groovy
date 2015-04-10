@@ -189,14 +189,6 @@ void logicCheck() {
             def msg2 = row.getCell('transactionDeliveryDate').column.name
             rowError(logger, row, "Строка $rowNum: «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
-
-        // Проверка положительной суммы
-        if (incomeSumCell.value != null && incomeSumCell.value <= 0) {
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msgIn» должно быть больше «0»!")
-        }
-        if (outcomeSumCell.value != null && outcomeSumCell.value <= 0) {
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msgOut» должно быть больше «0»!")
-        }
     }
 
     if (formData.kind == FormDataKind.CONSOLIDATED) {

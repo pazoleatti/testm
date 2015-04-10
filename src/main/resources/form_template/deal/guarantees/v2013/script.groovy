@@ -78,7 +78,7 @@ def groupColumns = ['fullName', 'docNumber', 'docDate']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['fullName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'price', 'total', 'dealDoneDate']
+def nonEmptyColumns = ['fullName', 'docNumber', 'docDate', 'sum', 'price', 'total', 'dealDoneDate']
 
 // Дата окончания отчетного периода
 @Field
