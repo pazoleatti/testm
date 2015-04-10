@@ -217,8 +217,7 @@ void logicCheck() {
     totalRows.each { key, val ->
         if (totalRows.get(key) != sumRowsByCode.get(key)) {
             def msg =  formData.createDataRow().getCell('sum').column.name
-            def code = getKnu(Long.valueOf(key))
-            logger.error("Неверное итоговое значение по коду '$code' графы «$msg»!")
+            logger.error("Неверное итоговое значение по коду '$key' графы «$msg»!")
         }
     }
 
