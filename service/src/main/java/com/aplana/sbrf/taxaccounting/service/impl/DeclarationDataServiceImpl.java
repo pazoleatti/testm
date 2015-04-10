@@ -218,7 +218,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void check(Logger logger, long id, TAUserInfo userInfo) {
         declarationDataScriptingService.executeScript(userInfo,
                 declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-        validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.CHECK);
+        validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.CHECK, null);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
@@ -270,7 +270,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Map<String, Object> exchangeParams = new HashMap<String, Object>();
                     declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
                     declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
                     declarationData.setAccepted(true);
@@ -407,32 +407,70 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         StringWriter writer = new StringWriter();
         exchangeParams.put(DeclarationDataScriptParams.XML, writer);
 
-        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
+        File xmlFile = null;
+        Writer fileWriter = null;
+        FileInputStream inputStream = null;
 
-        String xml = XML_HEADER.concat(writer.toString());
+        try {
+            try {
+                try {
+                    xmlFile = File.createTempFile("file_for_validate", ".xml");
+                    fileWriter = new FileWriter(xmlFile);
+                    fileWriter.write(XML_HEADER);
+                } catch (IOException e) {
+                    new ServiceException("Ошибка при формировании временного файла для XML", e);
+                }
+                exchangeParams.put(DeclarationDataScriptParams.XML, fileWriter);
+                declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
+            } finally {
+                try {
+                    if (fileWriter != null) fileWriter.close();
+                } catch (IOException e) {
+                    log.warn("", e);
+                }
+            }
 
-        reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xml.getBytes()), ""), ReportType.XML_DEC);
+            validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, xmlFile);
 
-        validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE);
+            try {
+                try {
+                    inputStream = new FileInputStream(xmlFile);
+                } catch (FileNotFoundException e) {
+                    throw new ServiceException("XML не сформирован", e);
+                }
+                reportService.createDec(declarationData.getId(), blobDataService.create(inputStream, ""), ReportType.XML_DEC);
+            } finally {
+                try {
+                    if (inputStream != null) inputStream.close();
+                } catch (IOException e) {
+                    log.warn("", e);
+                }
+            }
+        } finally {
+            if (xmlFile != null && !xmlFile.delete())
+                log.warn(String.format("Файл %s не был удален", xmlFile.getName()));
+        }
     }
 
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                     FormDataEvent operation) {
+                                     FormDataEvent operation, File xmlFile) {
         Locale oldLocale = Locale.getDefault();
         Locale.setDefault(new Locale("ru", "RU"));
-        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
-        if (xmlUuid == null) {
-            TaxType taxType = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
-            String declarationName = (taxType == TaxType.DEAL ? "уведомлении" : "декларации");
-            String operationName = (operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle());
-            String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
-            throw new ServiceException(msg);
+        if (xmlFile == null) {
+            String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
+            if (xmlUuid == null) {
+                TaxType taxType = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
+                String declarationName = (taxType == TaxType.DEAL ? "уведомлении" : "декларации");
+                String operationName = (operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle());
+                String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
+                throw new ServiceException(msg);
+            }
         }
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
             try {
-                validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal);
+                validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile);
             } catch (Exception e) {
                 log.error(VALIDATION_ERR_MSG, e);
                 logger.error(e);

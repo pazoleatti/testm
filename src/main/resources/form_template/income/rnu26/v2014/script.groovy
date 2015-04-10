@@ -73,7 +73,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, formDataDepartment.id, logger)
+        formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
         break
@@ -241,20 +241,8 @@ void calc() {
         i++
     }
     updateIndexes(dataRows)
-    // запись
-    dataRowHelper.clear()
-    def rows = []
-    dataRows.each { row ->
-        rows.add(row)
-        if (rows.size() > 1000) {
-            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-            rows.clear()
-        }
-    }
-    if (rows.size() > 0) {
-        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-        rows.clear()
-    }
+
+    dataRowHelper.save(dataRows)
 }
 
 // Логические проверки
@@ -976,7 +964,7 @@ def String getIssueName(def Integer issuer) {
     mapIssuers.each { key, value ->
         if (issuer.equals(value)) {
             retStr = key.substring(0, key.indexOf("|"))
-            return
+            return retStr
         }
     }
     return retStr

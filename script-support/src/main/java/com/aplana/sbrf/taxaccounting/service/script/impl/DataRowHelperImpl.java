@@ -134,6 +134,9 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public void save(List<DataRow<Cell>> dataRows) {
+        dataRowDao.removeRows(fd);
+        this.dataRows = new ArrayList<DataRow<Cell>>();
+
         updateIndexes(dataRows);
         FormDataUtils.cleanValueOwners(dataRows);
 		dataRowDao.saveRows(fd, dataRows);
@@ -204,6 +207,6 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
     @Override
     public void saveSort() {
         updateIndexes(dataRows);
-        dataRowDao.saveSortRows(dataRows);
+        dataRowDao.saveSortRows(dataRows, fd);
     }
 }

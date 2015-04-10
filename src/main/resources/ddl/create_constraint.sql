@@ -150,7 +150,6 @@ alter table form_data_performer add constraint formdata_performer_fk_dept foreig
 
 alter table data_row add constraint data_row_pk primary key (id);
 alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
-alter table data_row add constraint data_row_uniq_form_data_order unique(form_data_id, ord, type, manual);
 alter table data_row add constraint data_row_chk_type check (type in (-1, 0, 1));
 alter table data_row add constraint data_row_chk_manual check (manual in (0, 1));
 

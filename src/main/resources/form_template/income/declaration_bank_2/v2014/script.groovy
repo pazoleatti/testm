@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
@@ -1274,16 +1275,23 @@ void generateXML() {
                 // Приложение №2
                 // сортируем по ФИО, потом по остальным полям
                 if (isCFOApp2) {
-                    def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'status', 'birthday', 'citizenship', 'code', 'series', 'postcode', 'region', 'district', 'city', 'locality', 'street', 'house', 'housing', 'apartment','country', 'address']
+                    def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
                     sortRows(dataRowsApp2, sortColumns)
                 }
+
+                //ДатаСправ   Дата составления
+                def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
+                //Тип         Тип
+                def type = String.format("%02d", reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId))
+
+                if (dataRowsApp2) {
+                    fillRecordsMap([4L, 10L, 350L, 360L, 370L])
+                }
+
+                def index = 0
                 for (def row : dataRowsApp2) {
                     //НомерСправ  Справка №
-                    def nomerSprav = isCFOApp2 ? (dataRowsApp2.indexOf(row) + 1) : row.refNum
-                    //ДатаСправ   Дата составления
-                    def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
-                    //Тип         Тип
-                    def type = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId)
+                    def nomerSprav = isCFOApp2 ? (++index) : row.refNum
                     //ИННФЛ       ИНН
                     def innFL = row.innRF
                     //ИННИно       ИНН
@@ -1349,7 +1357,7 @@ void generateXML() {
                     СведДохФЛ(
                             НомерСправ : nomerSprav,
                             ДатаСправ : dataSprav,
-                            Тип : String.format("%02d", type)) {
+                            Тип : type) {
                         //1..1
                         ФЛПолучДох(
                                 ИННФЛ : innFL,
@@ -2084,4 +2092,21 @@ def getDepartmentParamTable(def departmentParamId) {
         departmentParamTable = departmentParamTableList.get(0)
     }
     return departmentParamTable
+}
+
+// Загрузка всех записей справочников в кеш.
+def fillRecordsMap(def refBookIds) {
+    refBookIds.each { refBookId ->
+        def provider = refBookFactory.getDataProvider(refBookId)
+        def records = provider.getRecords(getEndDate(), null, null, null)
+        if (records) {
+            records.each { record ->
+                def recordId = record.get(RefBook.RECORD_ID_ALIAS).numberValue
+                def key = getRefBookCacheKey(refBookId, recordId)
+                if (!refBookCache.containsKey(key)) {
+                    refBookCache.put(key, refBookService.getRecordData(refBookId, recordId));
+                }
+            }
+        }
+    }
 }
