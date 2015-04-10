@@ -208,6 +208,16 @@ void logicCheck() {
             def msg2 = row.getCell('transactionDeliveryDate').column.name
             rowWarning(logger, row, "Строка $rowNum: «$msg1» не может быть меньше «$msg2»!")
         }
+
+        // Проверка положительной суммы
+        if (incomeSum != null && incomeSum <= 0) {
+            def msg1 = row.getCell('incomeSum').column.name
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
+        }
+        if (consumptionSum != null && consumptionSum <= 0) {
+            def msg1 = row.getCell('consumptionSum').column.name
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
+        }
     }
 
     if (formData.kind == FormDataKind.CONSOLIDATED) {
