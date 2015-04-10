@@ -355,7 +355,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     public Date getDTVersionEndDate(int typeId, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
-                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
+                throw new DataRetrievalFailureException("Дата начала актуальности версии не должна быть null");
 
             Date date = getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
                     " from declaration_template where declaration_type_id = ?" +
@@ -372,7 +372,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
     public int getNearestDTVersionIdRight(int typeId, List<Integer> statusList, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
-                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
+                throw new DataRetrievalFailureException("Дата начала актуальности версии не должна быть null");
 
             Map<String, Object> valueMap =  new HashMap<String, Object>();
             valueMap.put("typeId", typeId);

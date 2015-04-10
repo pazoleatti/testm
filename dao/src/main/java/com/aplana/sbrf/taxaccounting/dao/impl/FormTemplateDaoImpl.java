@@ -341,7 +341,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     public Date getFTVersionEndDate(int formTypeId, Date actualBeginVersion) {
         try {
             if (actualBeginVersion == null)
-                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
+                throw new DataRetrievalFailureException("Дата начала актуальности версии не должна быть null");
 
             Date date = getJdbcTemplate().queryForObject("select  MIN(version) - INTERVAL '1' day" +
                     " from form_template where type_id = ? and TRUNC(version, 'DD') > ? and status in (0,1,2)",
@@ -362,7 +362,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         valueMap.put("actualBeginVersion", actualBeginVersion);
         try {
             if (actualBeginVersion == null)
-                throw new DataRetrievalFailureException("Дата начала актуализации версии не должна быть null");
+                throw new DataRetrievalFailureException("Дата начала актуальности версии не должна быть null");
 
             return getNamedParameterJdbcTemplate().queryForInt("select * from (select id from form_template where type_id = :typeId" +
                     " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version) where rownum = 1", valueMap);

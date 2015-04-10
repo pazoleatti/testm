@@ -303,7 +303,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         }
         if (formTemplateExt.getActualEndVersionDate() != null &&
                 formTemplate.getVersion().compareTo(formTemplateExt.getActualEndVersionDate()) > 0 ){
-            Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
+            Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуальности.");
             return;
         }
         for (FormStyle formStyle : formTemplate.getStyles()) {
