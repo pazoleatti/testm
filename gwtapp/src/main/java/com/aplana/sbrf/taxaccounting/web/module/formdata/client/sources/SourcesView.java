@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.dom.client.Style;
@@ -51,13 +52,15 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @UiField
     DataGrid<FormToFormRelation> table;
     @UiField
-    CheckBox declaration;
+    LinkButton switchMode;
     @UiField
     CheckBox source;
     @UiField
     CheckBox destination;
     @UiField
     CheckBox uncreated;
+
+    private boolean isForm;
     private ListDataProvider<FormToFormRelation> dataProvider = new ListDataProvider<FormToFormRelation>();
 
     @Inject
@@ -65,6 +68,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         super(eventBus);
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
+        isForm = true;
         initColumns();
         table.setRowCount(0);
         dataProvider.addDataDisplay(table);
@@ -81,11 +85,11 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         modalWindow.hide();
     }
 
-    @UiHandler("declaration")
-    public void onDeclarationClicked(ClickEvent event){
-        source.setVisible(!declaration.getValue());
-        destination.setVisible(!declaration.getValue());
+    @UiHandler("switchMode")
+    public void onSwitchModeClicked(ClickEvent event){
+        isForm = !isForm;
         initColumns();
+        updateSwitchMode();
         updateTableData();
     }
 
@@ -246,8 +250,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        Boolean isDeclaration = declaration.getValue();
-
         table.addColumn(counterColumn, "№");
         table.setColumnWidth(counterColumn, 20, Style.Unit.PX);
         table.addColumn(sourceColumn, "Источник / Приёмник");
@@ -255,7 +257,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(departmentColumn, "Подразделение");
         table.addColumn(correctionDateColumn, "Дата сдачи корректировки");
         table.setColumnWidth(correctionDateColumn, 85, Style.Unit.PX);
-        if (!isDeclaration) {
+        if (isForm) {
             table.addColumn(formKindColumn, "Тип формы");
             table.setColumnWidth(formKindColumn, 100, Style.Unit.PX);
             table.addColumn(formTypeColumn, "Вид формы");
@@ -266,11 +268,11 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             } else {
                 table.addColumn(formTypeColumn, "Вид уведоления");
             }
-            table.setColumnWidth(formTypeColumn, 100, Style.Unit.PX);
+            table.setColumnWidth(formTypeColumn, 110, Style.Unit.PX);
         }
         table.addColumn(yearColumn, "Год");
         table.addColumn(periodColumn, "Период");
-        if (!isDeclaration) {
+        if (isForm) {
             table.addColumn(monthColumn, "Месяц");
             table.addColumn(performerColumn, "Исполнитель");
         } else {
@@ -283,7 +285,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
                     break;
             }
         }
-        if (!isDeclaration) {
+        if (isForm) {
             table.addColumn(stateColumn, "Состояние формы");
         } else {
             if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
@@ -296,7 +298,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     }
 
     private void initCheckboxes() {
-        declaration.setValue(false);
         source.setVisible(true);
         source.setValue(true);
         destination.setVisible(true);
@@ -304,14 +305,23 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         uncreated.setValue(false);
     }
 
+    private void updateSwitchMode() {
+        if (!isForm) {
+            switchMode.setText("Налоговые формы");
+        } else if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
+            switchMode.setText("Декларации");
+        } else {
+            switchMode.setText("Уведомления");
+        }
+        source.setVisible(isForm);
+        destination.setVisible(isForm);
+    }
+
     @Override
     public void setTableData(List<FormToFormRelation> result) {
         tableData = result;
-        if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
-            declaration.setText("Декларации");
-        } else {
-            declaration.setText("Уведомления");
-        }
+        isForm = true;
+        updateSwitchMode();
         initCheckboxes();
         updateTableData();
     }
@@ -319,18 +329,17 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private void updateTableData() {
         List<FormToFormRelation> filteredData = new LinkedList<FormToFormRelation>();
         if (tableData != null) {
-            boolean dec = declaration.getValue();
             boolean src = source.getValue();
             boolean dst = destination.getValue();
             boolean uncr = uncreated.getValue();
-            if (dec)
+            if (!isForm)
                 dst = true;
 
             for (FormToFormRelation formToFormRelation : tableData) {
                 boolean fSrc = formToFormRelation.isSource();
                 boolean fCr = formToFormRelation.isCreated();
-                boolean fDec = formToFormRelation.getFormType()==null;
-                if ((src && fSrc || dst && !fSrc) && (uncr || fCr) && (fDec == dec)) {
+                boolean fForm = formToFormRelation.getFormType() != null;
+                if ((src && fSrc || dst && !fSrc) && (uncr || fCr) && (fForm == isForm)) {
                     filteredData.add(formToFormRelation);
                 }
             }

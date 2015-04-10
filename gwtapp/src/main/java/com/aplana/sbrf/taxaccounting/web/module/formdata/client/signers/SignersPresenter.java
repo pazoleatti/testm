@@ -65,7 +65,7 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
                         getView().setReadOnlyMode(SignersPresenter.this.readOnlyMode);
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
                         Integer department = formData1.getPerformer() != null && formData1.getPerformer().getPrintDepartmentId() != null ?
-                                formData1.getPerformer().getPrintDepartmentId() : formData1.getDepartmentId();
+                                formData1.getPerformer().getPrintDepartmentId() : null;
                         getView().setDepartment(department);
                         String reportDepartmentName = getReportDepartmentName(result.getDepartments(), department);
                         getView().setReportDepartmentName(reportDepartmentName);
@@ -104,11 +104,12 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
 		this.formData = formData;
 	}
 
-    private String getReportDepartmentName(List<Department> departments, Integer department) {
+    @Override
+    public String getReportDepartmentName(List<Department> departments, Integer department) {
         Department reportDepartment = null;
         // ищем подразделение по id
         for (Department dep : departments) {
-            if (dep.getId() == department){
+            if (department != null && dep.getId() == department){
                 reportDepartment = dep;
                 break;
             }

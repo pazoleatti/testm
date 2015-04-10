@@ -43,10 +43,19 @@
 
         <g:FlowPanel addStyleNames="{style.mainPanel}">
             <g:HorizontalPanel spacing="10" height="22px" verticalAlignment="middle" addStyleNames="{style.checkboxes}">
-                <g:CheckBox ui:field="declaration" text="Декларации"/>
-                <g:CheckBox ui:field="source" text="Источники"/>
-                <g:CheckBox ui:field="destination" text="Приемники"/>
-                <g:CheckBox ui:field="uncreated" text="Не созданные"/>
+                <g:cell width="100%">
+                    <g:HorizontalPanel horizontalAlignment="left">
+                        <g:CheckBox ui:field="source" text="Источники"/>
+                        <g:CheckBox ui:field="destination" text="Приемники"/>
+                        <g:CheckBox ui:field="uncreated" text="Не созданные"/>
+                    </g:HorizontalPanel>
+                </g:cell>
+                <g:cell width="100%">
+                    <g:Label/>
+                </g:cell>
+                <g:cell horizontalAlignment="right">
+                    <style:LinkButton ui:field="switchMode" text="Декларации" disableImage="true" />
+                </g:cell>
             </g:HorizontalPanel>
 
             <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{style.widgetWrapper}">
