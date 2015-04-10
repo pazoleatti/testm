@@ -230,7 +230,7 @@ def getRate(def Date date, def value) {
 
 // Проверка валюты currencyCode на рубли
 def isRubleCurrency(def currencyCode) {
-    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE.stringValue in ['810', '643']) : false
+    return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
 }
 
 def calcTotalRow(def dataRows) {
@@ -395,9 +395,9 @@ void logicCheck() {
     for (def map : uniq456.keySet()) {
         def rowList = uniq456.get(map)
         if (rowList.size() > 1) {
-            loggerError(null, "Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
+            loggerError(null, String.format("Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
                     "счета=%s, документа № %s от %s.", refBookService.getStringValue(28, map.get(4), 'NUMBER').toString(),
-                    map.get(5).toString(), dateFormat.format(map.get(6)))
+                    map.get(5).toString(), dateFormat.format(map.get(6))))
         }
     }
 
