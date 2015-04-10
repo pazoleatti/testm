@@ -152,8 +152,8 @@ void logicCheck() {
         def msgOut = outcomeSumCell.column.name
 
         // Проверка доходов и расходов
-        if (outcomeSumCell == null && incomeSum == null) {
-            rowError(logger, row, "Строка $rowNum: Графа «$msgOut» должна быть заполнена, если не заполнена графа «$msgIn»!")
+        if (outcomeSumCell.value == null && incomeSumCell.value  == null) {
+            rowError(logger, row, "Строка $rowNum: Графа «$msgIn» должна быть заполнена, если не заполнена графа «$msgOut»!")
         }
 
         // Корректность даты заключения сделки
@@ -191,13 +191,11 @@ void logicCheck() {
         }
 
         // Проверка положительной суммы
-        if (incomeSum != null && incomeSum <= 0) {
-            def msg1 = row.getCell('incomeSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
+        if (incomeSumCell.value != null && incomeSumCell.value <= 0) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgIn» должно быть больше «0»!")
         }
-        if (consumptionSum != null && consumptionSum <= 0) {
-            def msg1 = row.getCell('consumptionSum').column.name
-            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть больше «0»!")
+        if (outcomeSumCell.value != null && outcomeSumCell.value <= 0) {
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msgOut» должно быть больше «0»!")
         }
     }
 
