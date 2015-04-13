@@ -146,7 +146,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void save() {
         if (declarationTemplateExt.getEndDate() != null &&
-                declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >=0 ){
+                declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >0 ){
             Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
             return;
         }
