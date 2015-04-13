@@ -1441,10 +1441,15 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     String type = attribute.getAttributeType().toString() + "_VALUE";
                     // Здесь проставляем номера таблиц
                     if (attribute.getAttributeType().equals(RefBookAttributeType.STRING)) {
-                        clauseForGroup.append(valuesTableName).append(".attribute_id = ? AND UPPER(").append(valuesTableName).append(".").append(type).append(") = UPPER(?) ");
+                        clauseForGroup.append(valuesTableName).append(".attribute_id = ? AND (UPPER(").append(valuesTableName).append(".").append(type).append(") = UPPER(?) ");
                     } else {
-                        clauseForGroup.append(valuesTableName).append(".attribute_id = ? AND ").append(valuesTableName).append(".").append(type).append(" = ? ");
+                        clauseForGroup.append(valuesTableName).append(".attribute_id = ? AND (").append(valuesTableName).append(".").append(type).append(" = ? ");
                     }
+                    // добавляем проверку на null для необязательных уникальных полей
+                    if (!attribute.isRequired()) {
+                        clauseForGroup.append("OR (").append(valuesTableName).append(".").append(type).append(" IS NULL AND ? IS NULL)");
+                    }
+                    clauseForGroup.append(")");
 
                     /*************************************Добавление параметров****************************************/
                     selectParams.add(attribute.getId());
@@ -1465,6 +1470,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.DATE)) {
                         selectParams.add(recordValues.get(attribute.getAlias()).getDateValue());
                         whereParams.add(recordValues.get(attribute.getAlias()).getDateValue());
+                    }
+                    if (!attribute.isRequired()) {
+                        selectParams.add(selectParams.get(selectParams.size() - 1));
+                        whereParams.add(whereParams.get(whereParams.size() - 1));
                     }
                     /**************************************************************************************************/
 
