@@ -413,6 +413,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         try {
             try {
+                log.info(String.format("Запущено создание временного файла для декларации %s", declarationData.getId()));
                 try {
                     xmlFile = File.createTempFile("file_for_validate", ".xml");
                     fileWriter = new FileWriter(xmlFile);
@@ -420,8 +421,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } catch (IOException e) {
                     new ServiceException("Ошибка при формировании временного файла для XML", e);
                 }
+                log.info(String.format("Закончено создание временного файла для декларации %s", declarationData.getId()));
                 exchangeParams.put(DeclarationDataScriptParams.XML, fileWriter);
+                log.info(String.format("Запущено выполнение скрипта расчета декларации %s", declarationData.getId()));
                 declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
+                log.info(String.format("Закончено выполнение скрипта расчета декларации %s", declarationData.getId()));
             } finally {
                 try {
                     if (fileWriter != null) fileWriter.close();
@@ -438,7 +442,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } catch (FileNotFoundException e) {
                     throw new ServiceException("XML не сформирован", e);
                 }
+                log.info(String.format("Запущено сохранение в бд для декларации %s", declarationData.getId()));
                 reportService.createDec(declarationData.getId(), blobDataService.create(inputStream, ""), ReportType.XML_DEC);
+                log.info(String.format("Закончено сохранение в бд для декларации %s", declarationData.getId()));
             } finally {
                 try {
                     if (inputStream != null) inputStream.close();
@@ -455,6 +461,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                                      FormDataEvent operation, File xmlFile) {
         Locale oldLocale = Locale.getDefault();
+        log.info(String.format("Получение данных декларации %s", declarationData.getId()));
         Locale.setDefault(new Locale("ru", "RU"));
         if (xmlFile == null) {
             String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
@@ -470,12 +477,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
             try {
+                log.info(String.format("Запущена валидация декларации %s", declarationData.getId()));
                 validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile);
+                log.info(String.format("Закончена валидация декларации %s", declarationData.getId()));
             } catch (Exception e) {
+                log.info(String.format("Запущено сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
                 log.error(VALIDATION_ERR_MSG, e);
                 logger.error(e);
                 Locale.setDefault(oldLocale);
-                throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                String uuid = logEntryService.save(logger.getEntries());
+                log.info(String.format("Закончено сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
+                throw new ServiceLoggerException(VALIDATION_ERR_MSG, uuid);
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
