@@ -3,7 +3,7 @@
     <fixedRows>true</fixedRows>
     <name>Расходы, учитываемые в простых РНУ (расходы простые)</name>
     <fullName>Расходы, учитываемые в простых РНУ Сбербанка (расходы простые)</fullName>
-    <code>787/Р/1</code>
+    <header>787/Р/1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionTypeId</alias>
         <checking>false</checking>
@@ -106,7 +106,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>opuSumByTableP</alias>
         <checking>true</checking>
-        <name>в Таблице "Р"</name>
+        <name>в Таблице &quot;Р&quot;</name>
         <order>12</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -131,22 +131,8 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Редактирование (светло-голубой)</alias>
-        <backColor>LIGHT_BLUE</backColor>
-        <bold>false</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Итого (светло-коричневый)</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Заголовок раздела (серый)</alias>
-        <backColor>GREY</backColor>
+        <alias>Голубой</alias>
+        <backColor>BLUE</backColor>
         <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
@@ -159,17 +145,24 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Голубой</alias>
-        <backColor>BLUE</backColor>
+        <alias>Заголовок раздела (серый)</alias>
+        <backColor>GREY</backColor>
         <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Строковое значение КП</alias>
-        <backColor>GREY</backColor>
+        <alias>Итого (светло-коричневый)</alias>
+        <backColor>LIGHT_BROWN</backColor>
         <bold>true</bold>
-        <fontColor>DARK_BLUE</fontColor>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Логическая проверка</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
@@ -180,9 +173,23 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Числовое значение КП</alias>
-        <backColor>WHITE</backColor>
+        <alias>Редактирование (светло-голубой)</alias>
+        <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Спец. значение в контрольных графах</alias>
+        <backColor>RED</backColor>
+        <bold>true</bold>
+        <fontColor>WHITE</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Строковое значение КП</alias>
+        <backColor>GREY</backColor>
+        <bold>true</bold>
         <fontColor>DARK_BLUE</fontColor>
         <italic>false</italic>
     </styles>
@@ -194,17 +201,10 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Спец. значение в контрольных графах</alias>
-        <backColor>RED</backColor>
-        <bold>true</bold>
-        <fontColor>WHITE</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Логическая проверка</alias>
+        <alias>Числовое значение КП</alias>
         <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>RED</fontColor>
+        <bold>false</bold>
+        <fontColor>DARK_BLUE</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
