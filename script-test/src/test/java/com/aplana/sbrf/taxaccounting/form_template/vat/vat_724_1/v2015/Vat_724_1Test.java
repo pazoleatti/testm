@@ -185,11 +185,16 @@ public class Vat_724_1Test extends ScriptTestBase {
         when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
 
+        FormType formType = new FormType();
+        formType.setId(TYPE_ID);
+        formType.setTaxType(TaxType.VAT);
+
         // Один экземпляр-источник
         FormData sourceFormData = new FormData();
         sourceFormData.initFormTemplateParams(testHelper.getFormTemplate());
         sourceFormData.setId(2L);
         sourceFormData.setState(WorkflowState.ACCEPTED);
+        sourceFormData.setFormType(formType);
         when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(KIND), eq(DEPARTMENT_ID),
                 anyInt(), any(Integer.class))).thenReturn(sourceFormData);
 

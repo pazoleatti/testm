@@ -1,7 +1,6 @@
-package com.aplana.sbrf.taxaccounting.form_template.vat.vat_724_4.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.vat.vat_724_7.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -9,10 +8,13 @@ import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -21,13 +23,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
- * Налоговые вычеты за прошедший налоговый период, связанные с изменением условий или расторжением договора,
- * в случае возврата ранее реализованных товаров (отказа от услуг) или возврата соответствующих сумм авансовых платежей
- * (Отчёт по сумме НДС, уплаченного в бюджет, в случае возврата ранее реализованных товаров (отказа от услуг)
- * или возврата соответствующих сумм авансовых платежей) (v.2015).
+ * (724.7) Отчёт о суммах НДС начисленных налоговым агентом по договорам аренды имущества (балансовый счёт 60309.03)
  */
-public class Vat_724_4Test extends ScriptTestBase {
-    private static final int TYPE_ID = 10603;
+public class Vat_724_7Test extends ScriptTestBase {
+    private static final int TYPE_ID = 605;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -51,7 +50,17 @@ public class Vat_724_4Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Vat_724_4Test.class);
+        return getDefaultScriptTestMockHelper(Vat_724_7Test.class);
+    }
+
+    @Before
+    public void mockFormDataService() {
+        Department department = new Department();
+        department.setId(DEPARTMENT_ID);
+        department.setName("Подразделение");
+        department.setType(DepartmentType.TERR_BANK);
+
+        when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
     }
 
     @After
@@ -71,8 +80,8 @@ public class Vat_724_4Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        // должны быть ошибки из за пустых обязательных полей
-        Assert.assertTrue("Must have error in total rows (sums)", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        // ошибок быть не должно
+        checkLogger();
     }
 
     // Расчет пустой
@@ -137,47 +146,6 @@ public class Vat_724_4Test extends ScriptTestBase {
         checkLogger();
     }
 
-    /** Проверить загруженные данные. */
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
-        long recordId = 1L;
-        Map<Long, String> valueMap = new HashMap<Long, String>();
-        valueMap.put(1L, "A");
-        valueMap.put(2L, "B");
-
-        for (DataRow<Cell> row : dataRows) {
-            if (row.getAlias() != null) {
-                continue;
-            }
-
-            BigDecimal expected;
-
-            // TODO (Ramil Timerbaev) зависимые поля не разыменованные
-            // графа 2
-            // String expectedString = "accountName" + valueMap.get(recordId);
-            // Assert.assertEquals("row.name[" + row.getIndex() + "]", expectedString, row.getCell("name").getRefBookDereference());
-
-            // графа 3
-            expected = roundValue(recordId, 0);
-            Assert.assertEquals("row.number[" + row.getIndex() + "]", expected, row.getCell("number").getNumericValue());
-
-            // графа 4
-            expected = roundValue(1L, 2);
-            Assert.assertEquals("row.sum[" + row.getIndex() + "]", expected, row.getCell("sum").getNumericValue());
-
-            // графа 5
-            Assert.assertNotNull("row.number2[" + row.getIndex() + "]", row.getCell("number2").getStringValue());
-
-            // графа 6
-            expected = roundValue(1L, 2);
-            Assert.assertEquals("row.sum2[" + row.getIndex() + "]", expected, row.getCell("sum2").getNumericValue());
-
-            // графа 7
-            Assert.assertNotNull("row.nds[" + row.getIndex() + "]", row.getCell("nds").getStringValue());
-
-            recordId++;
-        }
-    }
-
     // Консолидация
     @Test
     public void composeTest() {
@@ -214,11 +182,53 @@ public class Vat_724_4Test extends ScriptTestBase {
         testHelper.initRowData();
 
         // Консолидация
-        int expected = testHelper.getDataRowHelper().getAll().size() + 2;
+        int expected = testHelper.getDataRowHelper().getAll().size() + 2 + 2; // 2 строки из одного источника и +подзаголовок и +подитог источника (подразделения)
         testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
 
         checkLogger();
+    }
+
+    /** Проверить загруженные данные. */
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        long index = 1;
+        BigDecimal expected;
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() != null) {
+                continue;
+            }
+
+            // графа 2
+            Assert.assertNotNull("row.operDate[" + row.getIndex() + "]", row.getCell("operDate").getDateValue());
+
+            // графа 3
+            Assert.assertNotNull("row.name[" + row.getIndex() + "]", row.getCell("name").getStringValue());
+
+            // графа 4
+            Assert.assertNotNull("row.inn[" + row.getIndex() + "]", row.getCell("inn").getStringValue());
+
+            // графа 5
+            Assert.assertNotNull("row.balanceNumber[" + row.getIndex() + "]", row.getCell("balanceNumber").getStringValue());
+
+            // графа 6
+            expected = roundValue(index, 2);
+            Assert.assertEquals("row.sum[" + row.getIndex() + "]", expected, row.getCell("sum").getNumericValue());
+
+            // графа 7
+            Assert.assertNotNull("row.orderNumber[" + row.getIndex() + "]", row.getCell("orderNumber").getDateValue());
+
+            // графа 8
+            expected = roundValue(index, 2);
+            Assert.assertEquals("row.ndsSum[" + row.getIndex() + "]", expected, row.getCell("ndsSum").getNumericValue());
+
+            // графа 9
+            Assert.assertNotNull("row.sfDate[" + row.getIndex() + "]", row.getCell("sfDate").getDateValue());
+
+            // графа 10
+            Assert.assertNotNull("row.sfNumber[" + row.getIndex() + "]", row.getCell("sfNumber").getStringValue());
+
+            index++;
+        }
     }
 
     // Округляет число до требуемой точности
