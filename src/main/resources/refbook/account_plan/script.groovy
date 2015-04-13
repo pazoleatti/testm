@@ -61,12 +61,6 @@ void importFromXML() {
     LogMessageDecorator oldDecorator = logger.getMessageDecorator()
     logger.setMessageDecorator(getLogMessageDecorator(oldDecorator))
 
-    // мапа для хранения мап новыми записями по дате начала записи для операции 6
-    // (дата начала записи -> мапа для хранения списка новых записей по дате окончания записи (дата окончания записи -> список записей))
-    def newRecords6Map = [:]
-    // мапа для хранения мап новыми записями по дате начала записи для операции 9
-    def newRecords9Map = [:]
-
     for (def row : fileRecords) {
         def BSSCH    = row?.BSSCH?.value    // Номер счета
         def NMBSP    = row?.NMBSP?.value    // Полное наименование
@@ -112,19 +106,13 @@ void importFromXML() {
                 refBookRecord.setRecordId(null)
                 refBookRecord.setValues(['ACCOUNT' : row.BSSCH, 'ACCOUNT_NAME' : row.NMBSP])
 
-                // сохранить изменения по 9ой операции
-                saveChanges(newRecords9Map, dataProvider)
-                // добавить текущую запись для вставки
-                addRecord(newRecords6Map, versionFrom, versionTo, refBookRecord)
+                dataProvider.createRecordVersionWithoutLock(logger, versionFrom, versionTo, [refBookRecord])
             } else {
                 // tmpMap[-6].add(BSSCH)
                 // log("$BSSCH=======6 false. ")
             }
             continue
         }
-
-        // сохранить изменения по 6ой операции
-        saveChanges(newRecords6Map, dataProvider)
 
         def recId = actualRecordId
         def record = dataProvider.getRecordData(actualRecordId)
@@ -180,9 +168,6 @@ void importFromXML() {
                 // Запись справочника должна быть отредактирована: NMBSP должно быть присвоено атрибуту Наименование счета справочника Системы
                 record?.ACCOUNT_NAME?.value = NMBSP
 
-                // сохранить изменения по 9ой операции
-                saveChanges(newRecords9Map, dataProvider)
-
                 dataProvider.updateRecordVersionWithoutLock(logger, recId, null, null, record);
                 continue
             }
@@ -197,9 +182,6 @@ void importFromXML() {
                 def versionFrom = (BEG_DATE ?: defaultDate)
                 def versionTo = END_DATE
                 record?.ACCOUNT_NAME?.value = NMBSP
-
-                // сохранить изменения по 9ой операции
-                saveChanges(newRecords9Map, dataProvider)
 
                 dataProvider.updateRecordVersionWithoutLock(logger, recId, versionFrom, versionTo, record)
             } else {
@@ -220,9 +202,6 @@ void importFromXML() {
                 def versionFrom = recordVersion.versionStart
                 def versionTo = END_DATE
                 record?.ACCOUNT_NAME?.value = NMBSP
-
-                // сохранить изменения по 9ой операции
-                saveChanges(newRecords9Map, dataProvider)
 
                 dataProvider.updateRecordVersionWithoutLock(logger, recId, versionFrom, versionTo, record)
             } else {
@@ -246,8 +225,7 @@ void importFromXML() {
                 refBookRecord.setRecordId(rbRecordId)
                 refBookRecord.setValues(['ACCOUNT' : row.BSSCH, 'ACCOUNT_NAME' : row.NMBSP])
 
-                // добавить текущую запись для вставки
-                addRecord(newRecords9Map, versionFrom, versionTo, refBookRecord)
+                dataProvider.createRecordVersionWithoutLock(logger, versionFrom, versionTo, [refBookRecord])
             } else {
                 // tmpMap[-9].add(BSSCH)
                 // log("$BSSCH=======9 false. ")
@@ -255,10 +233,6 @@ void importFromXML() {
             continue
         }
     }
-
-    // сохранить изменения по 6ой и 9ой операции
-    saveChanges(newRecords6Map, dataProvider)
-    saveChanges(newRecords9Map, dataProvider)
 
     // TODO (Ramil Timerbaev) потом убрать
     // tmpList.each {
@@ -489,46 +463,4 @@ def getLogMessageDecorator(LogMessageDecorator oldDecorator) {
         }
     }
     return logMessageDecorator
-}
-
-/**
- * Добавить запись в мапу для хранения мап со списками записей.
- *
- * @param recordsMap мап для хранения мап со списками записей
- * @param versionFrom дата начала актуальности записи
- * @param versionTo дата окончания актуальности записи
- * @param refBookRecord запись для добавления
- */
-void addRecord(def recordsMap, def versionFrom, def versionTo, def refBookRecord) {
-    // если на дату versionFrom были записи, то добавить новую запись
-    if (recordsMap[versionFrom]) {
-        // если на дату versionTo были записи. то добавить новую запись туда
-        if (recordsMap[versionFrom][versionTo]) {
-            recordsMap[versionFrom][versionTo].add(refBookRecord)
-        } else {
-            // записей до этого не было, добавить новый список с одной новой записью
-            recordsMap[versionFrom][versionTo] = [refBookRecord]
-        }
-    } else {
-        // на дату versionFrom не было записей, добавляем на эту запись мапу и на дату окончания versionTo добавить новый список с одной новой записью
-        recordsMap[versionFrom] = [:]
-        recordsMap[versionFrom][versionTo] = [refBookRecord]
-    }
-}
-
-/**
- * Добавить записи из мап с записями в базу.
- *
- * @param recordsMap мапа для хранения мап со списком записей
- * @param dataProvider для доступа к справочнику
- */
-void saveChanges(def recordsMap, def dataProvider) {
-    if (!recordsMap.isEmpty()) {
-        recordsMap.each { versionFrom, map ->
-            map.each { versionTo, newRecords ->
-                dataProvider.createRecordVersionWithoutLock(logger, versionFrom, versionTo, newRecords)
-            }
-        }
-        recordsMap.clear()
-    }
 }
