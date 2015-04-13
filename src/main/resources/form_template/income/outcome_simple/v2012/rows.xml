@@ -2435,7 +2435,7 @@
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Проценты по полученным депозитам от некоммерческих организаций, находящихся в государственной (кроме федеральной) собственности"/>
-        <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.2131"/>
+        <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.21310"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1"/>
         <cell alias="rnu7Field12PrevTaxPeriod" colSpan="1" rowSpan="1"/>
