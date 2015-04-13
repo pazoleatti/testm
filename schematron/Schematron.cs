@@ -43,8 +43,14 @@ class Schematron {
 			bool result = reader.Validate(pXml, xmlTargetFileName, pXsd);
 			IVsaxErrorHandler errors = reader.ErrorHandler;
 			Console.WriteLine(result && errors.Errors.Count == 0 ? "Result: SUCCESS" : "Result: FAIL");
+			int errcounter = 0;
 			foreach (ErrorsStruct e in errors.Errors) {
-				Console.WriteLine(e.XPath + " : " + e.ErrorText);
+			    if (errcounter > 100)
+                {
+                    break;
+                }
+                Console.WriteLine(e.XPath + " : " + e.ErrorText);
+				errcounter++;
 			}
 			//VsaxProtocol.WriteProtocolTo("Protocol.xml", errors);
 			

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import java.util.*;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
@@ -59,6 +61,12 @@ public class Vat_724_1Test extends ScriptTestBase {
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
     }
 
+    @After
+    public void resetMock() {
+        reset(testHelper.getRefBookFactory());
+        testHelper.reset();
+    }
+
     @Test
     public void create() {
         testHelper.execute(FormDataEvent.CREATE);
@@ -70,9 +78,7 @@ public class Vat_724_1Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        // TODO (Ramil Timerbaev) почему то в новых строках в числовых ячейках вместо null заданы нули, поэтому сообщений об ошибках нет, а должны быть
-        // Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
-        Assert.assertFalse(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     // Расчет пустой
@@ -109,22 +115,22 @@ public class Vat_724_1Test extends ScriptTestBase {
         checkLogger();
     }
 
-    // TODO (Ramil Timerbaev)
-    // @Test
+    @Test
     public void importTransportFileTest() {
+        int expected = testHelper.getDataRowHelper().getAll().size() + 7;
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(22, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
-        System.out.println("====" + testHelper.getLogger().getEntries().size());
         checkLogger();
     }
 
-    // @Test
+    @Test
     public void importExcelTest() {
+        int expected = testHelper.getDataRowHelper().getAll().size() + 7;
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        Assert.assertEquals(22, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
@@ -167,9 +173,8 @@ public class Vat_724_1Test extends ScriptTestBase {
         }
     }
 
-    // TODO (Ramil Timerbaev)
     // Консолидация
-    // @Test
+    @Test
     public void composeTest() {
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();
@@ -199,8 +204,9 @@ public class Vat_724_1Test extends ScriptTestBase {
         testHelper.initRowData();
 
         // Консолидация
+        int expected = testHelper.getDataRowHelper().getAll().size() + 7 * 3; // 7 строк в 7 разделов и для каждой строки подзаголовок и подитог подразделения
         testHelper.execute(FormDataEvent.COMPOSE);
-        Assert.assertEquals(22, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
 
         checkLogger();
     }
