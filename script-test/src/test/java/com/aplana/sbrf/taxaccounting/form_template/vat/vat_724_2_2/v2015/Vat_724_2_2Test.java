@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.form_template.vat.vat_724_2_2.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -9,9 +11,15 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 /**
  * Расчёт суммы налога по операциям по реализации товаров (работ, услуг), обоснованность применения
@@ -140,5 +148,51 @@ public class Vat_724_2_2Test extends ScriptTestBase {
                 }
             }
         }
+    }
+
+    // Консолидация
+    @Test
+    public void composeTest() {
+        // Назначен один тип формы
+        DepartmentFormType departmentFormType = new DepartmentFormType();
+        departmentFormType.setKind(KIND);
+        departmentFormType.setDepartmentId(DEPARTMENT_ID);
+        departmentFormType.setFormTypeId(TYPE_ID);
+        departmentFormType.setId(1);
+        when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
+                any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
+
+        FormType formType = new FormType();
+        formType.setId(TYPE_ID);
+        formType.setTaxType(TaxType.VAT);
+
+        // Один экземпляр-источник
+        FormData sourceFormData = new FormData();
+        sourceFormData.initFormTemplateParams(testHelper.getFormTemplate());
+        sourceFormData.setId(2L);
+        sourceFormData.setState(WorkflowState.ACCEPTED);
+        sourceFormData.setFormType(formType);
+        when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(KIND), eq(DEPARTMENT_ID),
+                anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+
+        // DataRowHelper НФ-источника
+        DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
+        when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
+
+        // Данные НФ-источника, формируются импортом
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+
+        sourceDataRowHelper.save(testHelper.getDataRowHelper().getAll());
+        testHelper.initRowData();
+
+        int expected = testHelper.getDataRowHelper().getAll().size();
+
+        // Консолидация
+        testHelper.execute(FormDataEvent.COMPOSE);
+        Assert.assertEquals("Row count must not change, form is fixed", expected, testHelper.getDataRowHelper().getAll().size());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+
+        checkLogger();
     }
 }
