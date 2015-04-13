@@ -7,14 +7,11 @@ import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
 
 /**
  * Расчёт суммы налога по операциям по реализации товаров (работ, услуг), обоснованность применения
@@ -48,19 +45,10 @@ public class Vat_724_2_2Test extends ScriptTestBase {
         return getDefaultScriptTestMockHelper(Vat_724_2_2Test.class);
     }
 
-    @Before
-    public void mockFormDataService() {
-        Department department = new Department();
-        department.setId(DEPARTMENT_ID);
-        department.setName("Подразделение");
-        department.setType(DepartmentType.TERR_BANK);
-
-        when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
-    }
-
     @After
     public void resetMock() {
         reset(testHelper.getRefBookFactory());
+        testHelper.reset();
     }
 
     @Test
@@ -119,18 +107,20 @@ public class Vat_724_2_2Test extends ScriptTestBase {
 
     @Test
     public void importTransportFileTest() {
+        int expected = testHelper.getDataRowHelper().getAll().size();
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(12, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
 
-    // @Test
+    @Test
     public void importExcelTest() {
+        int expected = testHelper.getDataRowHelper().getAll().size();
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        Assert.assertEquals(12, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }
