@@ -1155,7 +1155,7 @@
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Поступления в возмещение причинённых убытков, в том числе страховое возмещение от страховщиков"/>
-        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17302"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17302.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
