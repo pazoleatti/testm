@@ -483,7 +483,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                     }
                     break
             // рну 4
-                case formTypeId_RNU6:
+                case formTypeId_RNU4:
                     rows8.each { rowNum ->
                         def row = getDataRow(dataRows, "R$rowNum")
 
