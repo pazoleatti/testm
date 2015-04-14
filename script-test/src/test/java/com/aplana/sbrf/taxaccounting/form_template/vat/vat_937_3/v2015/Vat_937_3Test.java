@@ -24,6 +24,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
+ * Итоговые данные из журнала полученных и выставленных счетов-фактур по посреднической деятельности.
+ *
  * @author bkinzyabulatov
  */
 
