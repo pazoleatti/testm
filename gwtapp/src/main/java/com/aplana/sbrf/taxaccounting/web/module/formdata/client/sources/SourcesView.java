@@ -44,6 +44,10 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private final PopupPanel widget;
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
+    public static final String TITLE_FORM = "Налоговые формы";
+    public static final String TITLE_DEC = "Декларации";
+    public static final String TITLE_FORM_DEAL = "Формы";
+    public static final String TITLE_DEC_DEAL = "Уведомления";
 
     @UiField
     Button close;
@@ -52,7 +56,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @UiField
     DataGrid<FormToFormRelation> table;
     @UiField
-    LinkButton switchMode;
+    LinkButton formDecAnchor;
+    @UiField
+    Label formDecLabel;
     @UiField
     CheckBox source;
     @UiField
@@ -85,8 +91,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         modalWindow.hide();
     }
 
-    @UiHandler("switchMode")
-    public void onSwitchModeClicked(ClickEvent event){
+    @UiHandler("formDecAnchor")
+    public void changeView(ClickEvent event){
         isForm = !isForm;
         initColumns();
         updateSwitchMode();
@@ -306,13 +312,15 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     }
 
     private void updateSwitchMode() {
-        if (!isForm) {
-            switchMode.setText("Налоговые формы");
-        } else if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
-            switchMode.setText("Декларации");
-        } else {
-            switchMode.setText("Уведомления");
-        }
+        boolean isTaxTypeDeal = TaxType.DEAL.equals(getUiHandlers().getTaxType());
+        formDecAnchor.setText(isForm ?
+                (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
+                (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+
+        formDecLabel.setText(!isForm ?
+                (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
+                (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+
         source.setVisible(isForm);
         destination.setVisible(isForm);
     }
