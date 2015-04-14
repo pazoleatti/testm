@@ -6,10 +6,14 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.google.gwt.event.shared.HasHandlers;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 
 public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
+
+    private static final String SC_500_SERVER_NOT_RESPONDING = "Не удалось получить ответ сервера на последний запрос: сервер не отвечает.";
+    private static final String SC_500_CONNECTION_TIMEOUT = "Не удалось получить ответ сервера на последний запрос: время ожидания ответа истекло.";
 
 	private HasHandlers hasHandlers;
 
@@ -73,6 +77,17 @@ public final class MessageOnFailureCallback<T> implements AsyncCallback<T> {
             }
         } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {
             MessageEvent.fire(hasHandlers, true, "Не удалось получить ответ сервера на последний запрос.", caught);
+        } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == Response.SC_INTERNAL_SERVER_ERROR) {
+            String msg = ((StatusCodeException) caught).getEncodedResponse();
+            if (msg.contains("DPWWA1239E")) {
+                MessageEvent.fire(hasHandlers, true, SC_500_SERVER_NOT_RESPONDING, caught);
+            } else if (msg.contains("DPWWA1235E")) {
+                MessageEvent.fire(hasHandlers, true, SC_500_CONNECTION_TIMEOUT, caught);
+            } else {
+                MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
+            }
+        } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 12002) {
+            MessageEvent.fire(hasHandlers, true, SC_500_CONNECTION_TIMEOUT, caught);
         } else {
             MessageEvent.fire(hasHandlers, true, caught.getLocalizedMessage(), caught);
         }
