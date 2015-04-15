@@ -29,7 +29,7 @@ public abstract class AbstractMenuView extends ViewImpl implements AbstractMenuP
                 menu.addItem(template.div(item.getName()).asString(), true, subMenuBar);
             } else {
                 com.google.gwt.user.client.ui.MenuItem subMenuItem =
-                        new com.google.gwt.user.client.ui.MenuItem(template.link(item.getLink(), template.div(item.getName())));
+                        new com.google.gwt.user.client.ui.MenuItem(template.link(item.getLink(), template.div(item.getName()), item.getTarget()));
                 // Спрятать меню после выбора элемента
                 subMenuItem.setScheduledCommand(new Scheduler.ScheduledCommand() {
                     @Override
@@ -47,8 +47,8 @@ public abstract class AbstractMenuView extends ViewImpl implements AbstractMenuP
     }
 
     interface LocalHtmlTemplates extends SafeHtmlTemplates {
-        @Template("<a style=\"color:#000000; text-decoration:none;\" href=\"{0}\">{1}</a>")
-        SafeHtml link(String url, SafeHtml divName);
+        @Template("<a style=\"color:#000000; text-decoration:none;\" href=\"{0}\" target=\"{2}\">{1}</a>")
+        SafeHtml link(String url, SafeHtml divName, String target);
 
         @Template("<div>{0}</div>")
         SafeHtml div(String name);

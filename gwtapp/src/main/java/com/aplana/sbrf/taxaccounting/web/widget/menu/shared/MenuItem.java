@@ -11,6 +11,7 @@ public class MenuItem implements Serializable{
 	private String link;
 	private String meta;
 	private List<MenuItem> subMenu = new ArrayList<MenuItem>();
+    private String target;
 
 	public MenuItem(){};
 
@@ -24,6 +25,7 @@ public class MenuItem implements Serializable{
 		super();
 		this.name = name;
 		this.link = link;
+        target = "";
 	}
 
 	public MenuItem(String name, String link, String meta) {
@@ -31,9 +33,18 @@ public class MenuItem implements Serializable{
 		this.name = name;
 		this.link = link;
 		this.meta = meta;
+        target = "";
 	}
-	
-	public String getName() {
+
+    public MenuItem(String name, String link, String meta, String target) {
+        super();
+        this.name = name;
+        this.link = link;
+        this.meta = meta;
+        this.target = target;
+    }
+
+    public String getName() {
 		return name;
 	}
 	public void setName(String name) {
@@ -57,4 +68,12 @@ public class MenuItem implements Serializable{
 	public void setMeta(String meta) {
 		this.meta = meta;
 	}
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
 }

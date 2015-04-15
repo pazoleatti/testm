@@ -18,7 +18,9 @@ public class CacheController {
 	@RequestMapping(value = "/clear-cache",method = RequestMethod.GET)
 	public void clearCache(HttpServletResponse resp) throws IOException {
 		cacheManagerDecorator.clearAll();
-		resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        resp.setContentType("text/plain");
+        resp.setCharacterEncoding("UTF-8");
+        resp.getWriter().printf("Кэш сброшен");
 	}
 
 }
