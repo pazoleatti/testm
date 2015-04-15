@@ -37,6 +37,8 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Сервис для работы с декларациями
@@ -51,6 +53,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     protected static final Log log = LogFactory.getLog(DeclarationDataService.class);
 
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
+    private static final int BUFFER = 1024;
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
@@ -125,6 +128,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             "Не выполнена консолидация данных из формы %s %s %s %s %d %s в статусе %s";
     private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
             "Не выполнена консолидация данных из формы %s %s %s %s %d %s - экземпляр формы не создан";
+    private static final String FILE_NOT_DELETE = "Временный файл %s не удален";
 
     private static final Date MAX_DATE;
     private static final Calendar CALENDAR = Calendar.getInstance();
@@ -499,13 +503,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         try {
             try {
-                try {
-                    xmlFile = File.createTempFile("file_for_validate", ".xml");
-                    fileWriter = new FileWriter(xmlFile);
-                    fileWriter.write(XML_HEADER);
-                } catch (IOException e) {
-                    new ServiceException("Ошибка при формировании временного файла для XML", e);
-                }
+                xmlFile = File.createTempFile("file_for_validate", ".xml");
+                fileWriter = new FileWriter(xmlFile);
+                fileWriter.write(XML_HEADER);
                 exchangeParams.put(DeclarationDataScriptParams.XML, fileWriter);
                 declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
             } finally {
@@ -520,23 +520,48 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
             validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, xmlFile);
 
+            //Архивирование перед сохраннеием в базу
+            File zipOutFile = File.createTempFile(xmlFile.getName(), ".zip");
+            FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+            ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+            ZipEntry zipEntry = new ZipEntry(xmlFile.getName());
+            zos.putNextEntry(zipEntry);
+            FileInputStream fi = new FileInputStream(xmlFile);
+            BufferedInputStream origin = new BufferedInputStream(fi, 10*BUFFER);
+
             try {
+                //Буферизированная запись
+                byte data[] = new byte[10*BUFFER];
+                int count;
+                while((count = origin.read(data)) != -1) {
+                    zos.write(data, 0, count);
+                }
+
                 try {
-                    inputStream = new FileInputStream(xmlFile);
+                    inputStream = new FileInputStream(zipOutFile);
                 } catch (FileNotFoundException e) {
                     throw new ServiceException("XML не сформирован", e);
                 }
                 reportService.createDec(declarationData.getId(), blobDataService.create(inputStream, ""), ReportType.XML_DEC);
             } finally {
+                IOUtils.closeQuietly(fi);
+                IOUtils.closeQuietly(zos);
+                IOUtils.closeQuietly(origin);
                 try {
                     if (inputStream != null) inputStream.close();
                 } catch (IOException e) {
                     log.warn("", e);
                 }
+                if (zipOutFile.delete()){
+                    log.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                }
             }
+        } catch (IOException e) {
+            log.error("", e);
+            new ServiceException("", e);
         } finally {
             if (xmlFile != null && !xmlFile.delete())
-                log.warn(String.format("Файл %s не был удален", xmlFile.getName()));
+                log.warn(String.format(FILE_NOT_DELETE, xmlFile.getName()));
         }
     }
 

@@ -37,6 +37,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 @Service
 public class ValidateXMLServiceImpl implements ValidateXMLService {
@@ -75,10 +76,9 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
         @Override
         public void run() {
-            log.debug("Запустили поток для проверки xml.");
             Process process;
             try {
-                log.debug("Запускаем проверку xml.");
+                log.info("Запускаем проверку xml.");
                 process = (new ProcessBuilder(params)).start();
                 /*process.waitFor();*/
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
@@ -140,12 +140,11 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
             //Получаем xml
             if (xmlFile == null) {
-                xmlFileBD = File.createTempFile("file_for_validate", ".xml");
+                BlobData xmlBlob = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC));
+                xmlFileBD = File.createTempFile(xmlBlob.getName()!=null? xmlBlob.getName() : "file_for_validate", ".xml");
                 outputStream = new FileOutputStream(xmlFileBD);
-                inputStream = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC)).getInputStream();
-                log.info("Xml copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-                IOUtils.closeQuietly(inputStream);
-                IOUtils.closeQuietly(outputStream);
+                inputStream = xmlBlob.getInputStream();
+                unzip(outputStream, inputStream);
                 params[1] = xmlFileBD.getAbsolutePath();
             } else {
                 params[1] = xmlFile.getAbsolutePath();
@@ -343,7 +342,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         } catch (URISyntaxException e) {
             throw new ServiceException("Ошибка при проверке xsd.", e);
         }
+    }
 
-
+    private void unzip(FileOutputStream outFile, InputStream zipXml) throws IOException {
+        ZipInputStream zis = new ZipInputStream(zipXml);
+        while (zis.getNextEntry() != null){
+            log.info("Xml copy, total number of bytes " + IOUtils.copy(zis, outFile));
+        }
+        IOUtils.closeQuietly(zis);
+        IOUtils.closeQuietly(outFile);
     }
 }

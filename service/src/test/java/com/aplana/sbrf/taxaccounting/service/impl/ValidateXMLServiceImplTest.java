@@ -34,8 +34,8 @@ public class ValidateXMLServiceImplTest implements Runnable {
     private static final String XSD_1 = "NO_NDS.12_1_003_07_05_04_01.xsd";
     private static final String XSD_2 = "1020.xsd";
     private static final String XSD_3 = "NO_NDS.8_1_003_01_05_04_01.xsd";
-    private static final String XML_1 = "NO_NDS.12_1_1_0212345678020012345_20140331_1.xml";
-    private static final String XML_2 = "NO_NDS.8_1_1_0212345678020012345_20140331_1.xml";
+    private static final String ZIP_XML_1 = "NO_NDS.12_1_1_0212345678020012345_20140331_1.zip";
+    private static final String ZIP_XML_2 = "NO_NDS.8_1_1_0212345678020012345_20140331_1.zip";
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -63,7 +63,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         BlobData blobDataXml = new BlobData();
         InputStream inputStreamXml = Thread.currentThread().getContextClassLoader().
                 getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
-                        File.separator + "validate" + File.separator + XML_1);
+                        File.separator + "validate" + File.separator + ZIP_XML_1);
         blobDataXml.setInputStream(inputStreamXml);
         String uuidXml = UUID.randomUUID().toString();
         when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(ReportType.XML_DEC))).thenReturn(uuidXml);
@@ -92,7 +92,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         BlobData blobDataXml = new BlobData();
         InputStream inputStreamXml = Thread.currentThread().getContextClassLoader().
                 getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
-                        File.separator + "validate" + File.separator + XML_1);
+                        File.separator + "validate" + File.separator + ZIP_XML_1);
         blobDataXml.setInputStream(inputStreamXml);
         String uuidXml = UUID.randomUUID().toString();
         when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(ReportType.XML_DEC))).thenReturn(uuidXml);
@@ -124,7 +124,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         String uuidXml2 = UUID.randomUUID().toString();
         InputStream inputStreamXml2 = Thread.currentThread().getContextClassLoader().
                 getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
-                        File.separator + "validate" + File.separator + XML_1);
+                        File.separator + "validate" + File.separator + ZIP_XML_1);
         blobDataXml2.setInputStream(inputStreamXml2);
         when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(ReportType.XML_DEC))).thenReturn(uuidXml2);
 
@@ -151,7 +151,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         }
     }
 
-    //@Test
+    @Test
     public void validateLargeXml() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
@@ -170,7 +170,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         String uuidXml2 = UUID.randomUUID().toString();
         InputStream inputStreamXml2 = Thread.currentThread().getContextClassLoader().
                 getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
-                        File.separator + "validate" + File.separator + XML_2);
+                        File.separator + "validate" + File.separator + ZIP_XML_2);
         blobDataXml2.setInputStream(inputStreamXml2);
         when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(ReportType.XML_DEC))).thenReturn(uuidXml2);
 
@@ -183,7 +183,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
         data.setDeclarationTemplateId(3);
         data.setId(5l);
         Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null));
-        Assert.assertEquals(2, logger.getEntries().size());
+        Assert.assertEquals(3, logger.getEntries().size());
     }
 
     @Override
