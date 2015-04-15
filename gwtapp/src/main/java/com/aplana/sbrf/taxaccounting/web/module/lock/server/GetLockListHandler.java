@@ -51,12 +51,6 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
         GetLockListResult result = new GetLockListResult();
         List<LockDataItem> locks = new ArrayList<LockDataItem>();
 
-        System.out.println("sleep started!");
-        try {
-            Thread.sleep(3600000 * 2);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         PagingResult<LockData> records = lockService.getLocks(action.getFilter(), action.getStartIndex(), action.getCountOfRecords(),
                 action.getSearchOrdering(), action.isAscSorting());
         for (LockData lockData : records) {
@@ -67,7 +61,6 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
             lock.setDateLock(df.format(lockData.getDateLock()));
             locks.add(lock);
         }
-        System.out.println("sleep finished!");
 
         result.setLocks(locks);
         result.setTotalCountOfRecords(records.getTotalCount());
