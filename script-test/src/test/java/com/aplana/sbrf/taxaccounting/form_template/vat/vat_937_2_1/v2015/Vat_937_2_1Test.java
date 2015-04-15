@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.vat.vat_937_3.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.vat.vat_937_2_1.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -24,13 +24,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
- * Итоговые данные из журнала полученных и выставленных счетов-фактур по посреднической деятельности.
- *
- * @author bkinzyabulatov
+ * Сведения из дополнительных листов книги продаж.
  */
-
-public class Vat_937_3Test extends ScriptTestBase {
-    private static final int TYPE_ID = 619;
+public class Vat_937_2_1Test extends ScriptTestBase {
+    private static final int TYPE_ID = 617;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -54,7 +51,7 @@ public class Vat_937_3Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Vat_937_3Test.class);
+        return getDefaultScriptTestMockHelper(Vat_937_2_1Test.class);
     }
 
     @Before
@@ -64,11 +61,12 @@ public class Vat_937_3Test extends ScriptTestBase {
         department.setName("Подразделение");
         department.setType(DepartmentType.TERR_BANK);
 
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-        departmentReportPeriod.setCorrectionDate(null);
-
-        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
+
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setBalance(false);
+
+        when(testHelper.getDepartmentReportPeriodService().get(DEPARTMENT_PERIOD_ID)).thenReturn(departmentReportPeriod);
     }
 
     @After
@@ -88,22 +86,29 @@ public class Vat_937_3Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        Assert.assertFalse(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        // должны быть ошибки из за пустых обязательных полей в строке "итого"
+        Assert.assertTrue("Must have empty required cells", testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     // Расчет пустой
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
-        checkLogger();
+        // должны быть ошибки из за пустых обязательных полей в строке "итого"
+        Assert.assertTrue("Must have empty required cells", testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     @Test
     public void addDelRowTest() {
+        int expected = testHelper.getDataRowHelper().getAll().size() + 1;
+
         // Добавление
         testHelper.execute(FormDataEvent.ADD_ROW);
-        Assert.assertEquals(testHelper.getFormTemplate().getRows().size() + 1, testHelper.getDataRowHelper().getAll().size());
+        // ошибок быть не должно
         checkLogger();
+        // Количество строк должно увеличиться на 1
+        Assert.assertEquals("Add new row", expected, testHelper.getDataRowHelper().getAll().size());
+
         // Удаление
         DataRow<Cell> addDataRow = null;
         for (DataRow<Cell> dataRow : testHelper.getDataRowHelper().getAll()) {
@@ -112,10 +117,12 @@ public class Vat_937_3Test extends ScriptTestBase {
                 break;
             }
         }
-        Assert.assertNotNull(addDataRow);
+        // Количество строк должно уменьшиться на 1
         testHelper.setCurrentDataRow(addDataRow);
         testHelper.execute(FormDataEvent.DELETE_ROW);
-        Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
+        expected--;
+        // Количество строк должно уменьшиться на 1
+        Assert.assertEquals("Delete row", expected, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
 
@@ -143,67 +150,6 @@ public class Vat_937_3Test extends ScriptTestBase {
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
-    }
-
-    /** Проверить загруженные данные. */
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
-        for (DataRow<Cell> row : dataRows) {
-            if (row.getAlias() != null) {
-                continue;
-            }
-
-            BigDecimal expected;
-
-            switch (row.getIndex()) {
-                case 2:
-                    // 14 графа
-                    Assert.assertNull("row.cost[" + row.getIndex() + "]", row.getCell("cost").getNumericValue());
-
-                    // 15 графа
-                    Assert.assertNull("row.vatSum[" + row.getIndex() + "]", row.getCell("vatSum").getNumericValue());
-
-                    // 16 графа
-                    expected = roundValue(67L, 2);
-                    Assert.assertEquals("row.diffDec[" + row.getIndex() + "]", expected, row.getCell("diffDec").getNumericValue());
-
-                    // 17 графа
-                    expected = roundValue(568L, 2);
-                    Assert.assertEquals("row.diffInc[" + row.getIndex() + "]", expected, row.getCell("diffInc").getNumericValue());
-
-                    // 18 графа
-                    expected = roundValue(5L, 2);
-                    Assert.assertEquals("row.diffVatDec[" + row.getIndex() + "]", expected, row.getCell("diffVatDec").getNumericValue());
-
-                    // 19 графа
-                    expected = roundValue(547L, 2);
-                    Assert.assertEquals("row.diffVatInc[" + row.getIndex() + "]", expected, row.getCell("diffVatInc").getNumericValue());
-                    break;
-                case 5:
-                    // 14 графа
-                    expected = roundValue(43536L, 2);
-                    Assert.assertEquals("row.cost[" + row.getIndex() + "]", expected, row.getCell("cost").getNumericValue());
-
-                    // 15 графа
-                    expected = roundValue(658L, 2);
-                    Assert.assertEquals("row.vatSum[" + row.getIndex() + "]", expected, row.getCell("vatSum").getNumericValue());
-
-                    // 16 графа
-                    expected = roundValue(756L, 2);
-                    Assert.assertEquals("row.diffDec[" + row.getIndex() + "]", expected, row.getCell("diffDec").getNumericValue());
-
-                    // 17 графа
-                    expected = roundValue(76L, 2);
-                    Assert.assertEquals("row.diffInc[" + row.getIndex() + "]", expected, row.getCell("diffInc").getNumericValue());
-
-                    // 18 графа
-                    expected = roundValue(5L, 2);
-                    Assert.assertEquals("row.diffVatDec[" + row.getIndex() + "]", expected, row.getCell("diffVatDec").getNumericValue());
-
-                    // 19 графа
-                    expected = roundValue(-22L, 2);
-                    Assert.assertEquals("row.diffVatInc[" + row.getIndex() + "]", expected, row.getCell("diffVatInc").getNumericValue());
-            }
-        }
     }
 
     // Консолидация
@@ -242,11 +188,57 @@ public class Vat_937_3Test extends ScriptTestBase {
         testHelper.initRowData();
 
         // Консолидация
-        int expected = testHelper.getDataRowHelper().getAll().size() + 2 * 3; // 2 строк в 2 разделах и для каждой строки подзаголовок и подитог подразделения
+        int expected = testHelper.getDataRowHelper().getAll().size() + 2 + 3; // 2 строки из одного источника и + 2 подзаголовка (с названием подразделения и с редактируемой графой) и +подитог источника (всего)
         testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
 
         checkLogger();
+    }
+
+    /** Проверить загруженные данные. */
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        long index = 1;
+        BigDecimal expected;
+        String MSG = "row.%s[%d]";
+
+        String [] strColumns = { "opTypeCode", "invoiceNumDate", "invoiceCorrNumDate", "corrInvoiceNumDate",
+                "corrInvCorrNumDate", "buyerName", "buyerInnKpp", "mediatorName", "mediatorInnKpp",
+                "paymentDocNumDate", "currNameCode" };
+
+        String [] numColumns = { "saleCostACurr", "saleCostARub", "saleCostB18", "saleCostB10",
+                "saleCostB0", "vatSum18", "vatSum10", "bonifSalesSum" };
+
+        String [] firstRowColumns = { "saleCostB18", "saleCostB10",
+                "saleCostB0", "vatSum18", "vatSum10", "bonifSalesSum" };
+
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() != null) {
+                if ("head".equals(row.getAlias())) {
+                    // 14..19
+                    expected = roundValue(10L, 2);
+                    for (String alias : firstRowColumns) {
+                        String msg = String.format(MSG, alias, row.getIndex());
+                        Assert.assertEquals(msg, expected, row.getCell(alias).getNumericValue());
+                    }
+                }
+                continue;
+            }
+
+            // графа 2..12
+            for (String alias : strColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                Assert.assertNotNull(msg, row.getCell(alias).getStringValue());
+            }
+
+            // 13а..19
+            expected = roundValue(index, 2);
+            for (String alias : numColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                Assert.assertEquals(msg, expected, row.getCell(alias).getNumericValue());
+            }
+
+            index++;
+        }
     }
 
     // Округляет число до требуемой точности
@@ -257,5 +249,4 @@ public class Vat_937_3Test extends ScriptTestBase {
             return null;
         }
     }
-
 }
