@@ -77,14 +77,14 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     }
 
     /**
-     * Возвращает спринг-бины доcтупные для использования в скрипте.
+     * Возвращает спринг-бины доступные для использования в скрипте.
      */
     private Map<String, ?> getScriptExposedBeans() {
         Map<String, Object> beans = new HashMap<String, Object>();
 
-        for (Map.Entry<String, ?> entry : applicationContext.getBeansWithAnnotation(ScriptExposed.class).entrySet()) {
-            Object bean = entry.getValue();
-            beans.put(entry.getKey(), bean);
+        // http://jira.aplana.com/browse/SBRFACCTAX-10954 Передаем в скрипты все спринговые бины
+        for(String name: applicationContext.getBeanDefinitionNames()) {
+            beans.put(name, applicationContext.getBean(name));
         }
 
         return beans;
