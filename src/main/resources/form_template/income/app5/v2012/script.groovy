@@ -239,8 +239,7 @@ void logicCheck() {
 
         def departmentParam
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            departmentParam = getRefBookValue(30, row.regionBankDivision)
         }
         // 1. Проверка на заполнение поля «<Наименование поля>»
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
@@ -325,8 +324,7 @@ def calc2(def row) {
 def calc4(def row) {
     def departmentParam
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+        departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
