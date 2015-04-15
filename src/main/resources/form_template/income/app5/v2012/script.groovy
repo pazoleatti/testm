@@ -176,8 +176,7 @@ void logicCheckBeforeCalc() {
         // 1. Проверка наличия значения «Наименование подразделения» в справочнике «Подразделения»
         def departmentParam
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            departmentParam = getRefBookValue(30, row.regionBankDivision)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
             rowServiceException(row, errorMsg + "Не найдено подразделение территориального банка!")
@@ -307,7 +306,7 @@ void calc() {
 def calc2(def row) {
     def departmentParam
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+        departmentParam =  getRefBookValue(30, row.regionBankDivision)
     }
     if (departmentParam == null || departmentParam.isEmpty()) {
         return null
