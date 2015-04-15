@@ -22,6 +22,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importFromXML()
         break
+    case FormDataEvent.SAVE:
+        save()
+        break
 }
 
 @Field
@@ -229,4 +232,10 @@ void importFromXML() {
         dataProvider.updateRecordsWithoutLock(userInfo, version, updateList)
     }
     scriptStatusHolder.setSuccessCount(insertList.size() + updateList.size())
+}
+
+void save() {
+    saveRecords.each {
+        it.CODE_LETTER.value = it.NAME.value = it.CODE_NUMBER.value
+    }
 }
