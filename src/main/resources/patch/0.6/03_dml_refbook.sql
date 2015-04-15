@@ -2,5 +2,17 @@
 update ref_book_attribute set visible = 1, read_only = 1 where id in (350, 360);
 update ref_book_value set string_value = replace(string_value, '.', '') where attribute_id in (350, 360);
 
+--http://jira.aplana.com/browse/SBRFACCTAX-11010: Справочник "Курсы валют"(22) сделать нередактируемыми буквенный код и наименование валюты + исправить записи
+update ref_book_attribute set read_only = 1 where id in (82, 83);
+
+merge into ref_book_value tgt
+using (
+  select rbv.record_id, rbv.attribute_id, rbv80.reference_value
+  from ref_book_value rbv
+  join ref_book_value rbv80 on rbv80.attribute_id = 80 and rbv.attribute_id in (82, 83) and rbv.record_id = rbv80.record_id and rbv.reference_value <> rbv80.reference_value) src
+on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)  
+when matched then
+     update set tgt.reference_value = src.reference_value;
+
 COMMIT;
 EXIT;
