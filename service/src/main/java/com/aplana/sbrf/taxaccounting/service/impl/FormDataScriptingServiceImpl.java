@@ -97,13 +97,15 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     }
 
     /**
-     * Возвращает спринг-бины доcтупные для использования в скрипте.
+     * Возвращает спринг-бины доступные для использования в скрипте.
      *
      * @param taxType тип налога
      * @param event событие
      */
     private Map<String, ?> getScriptExposedBeans(TaxType taxType, FormDataEvent event){
         Map<String, Object> beans = new HashMap<String, Object>();
+
+        beans.put("dataSource", applicationContext.getBean("dataSource"));
 
         for(Map.Entry<String, ?> entry:applicationContext.getBeansWithAnnotation(ScriptExposed.class).entrySet()){
             Object bean = entry.getValue();

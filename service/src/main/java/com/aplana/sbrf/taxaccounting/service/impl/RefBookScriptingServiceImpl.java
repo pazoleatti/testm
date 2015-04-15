@@ -93,6 +93,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
         // Биндиг параметров для выполнения скрипта
         Bindings bindings = scriptEngine.createBindings();
+        bindings.put("dataSource", applicationContext.getBean("dataSource"));
         // ScriptExposed
         Map<String, ?> scriptComponents = applicationContext.getBeansWithAnnotation(ScriptExposed.class);
         for (Object component : scriptComponents.values()) {
