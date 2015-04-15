@@ -359,6 +359,9 @@ def setValues(def dataRows, String[] rowCells, def columnCount, def fileRowIndex
     if (rowCells == null) {
         return true
     }
+    if (rowIndex - 1 >= dataRows.size()) {
+        return false
+    }
     // найти нужную строку нф
     def dataRow = dataRows.get(rowIndex - 1)
     // заполнить строку нф значениями из тф
