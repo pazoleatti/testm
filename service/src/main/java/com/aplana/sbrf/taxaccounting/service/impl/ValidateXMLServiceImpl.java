@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -31,7 +33,9 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -47,6 +51,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private static final String SUCCESS_FLAG = "SUCCESS";
     public static final String TAG_FILE = "Файл";
     public static final String ATTR_FILE_ID = "ИдФайл";
+    public static final Charset WINDOWS_1251 = Charset.forName("windows-1251");
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -54,17 +59,63 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private BlobDataService blobDataService;
     @Autowired
     private ReportService reportService;
+    @Autowired
+    private LockDataService lockDataService;
 
     private URL url;
 
+    private class ProcessRunner implements Runnable{
+        private String[] params;
+        private Logger logger;
+
+        private ProcessRunner(String[] params, Logger logger) {
+            this.params = params;
+            this.logger = logger;
+        }
+
+        @Override
+        public void run() {
+            log.debug("Запустили поток для проверки xml.");
+            Process process;
+            try {
+                log.debug("Запускаем проверку xml.");
+                process = (new ProcessBuilder(params)).start();
+                /*process.waitFor();*/
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
+                try {
+                    String s = reader.readLine();
+                    if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
+                        logger.info("Проверка xml по xsd завершена успешно.");
+                    } else if(s!=null) {
+                        while ((s = reader.readLine()) != null) {
+                            if (!s.startsWith("Execution time:")) {
+                                logger.error(s);
+                            }
+                        }
+                    }
+                    /*lock.notify();*/
+                } finally {
+                    process.destroy();
+                    reader.close();
+                }
+            } catch (UnsupportedEncodingException e) {
+                log.error("", e);
+                throw new ServiceException("", e);
+            } catch (IOException e) {
+                log.error("", e);
+                throw new ServiceException("", e);
+            }
+        }
+    }
+
     private class SAXHandler extends DefaultHandler{
         String fileName = "";
+
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             if (qName.equals(TAG_FILE)){
                 fileName = attributes.getValue(ATTR_FILE_ID);
-                return;
             }
         }
     }
@@ -81,15 +132,10 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
         FileOutputStream outputStream;
         InputStream inputStream;
-        BufferedReader reader;
-        File xsdFile = null, xmlFileBD = null, vsax3File = null;
+        File xsdFile = null, xmlFileBD = null;
         try {
-            vsax3File = File.createTempFile("VSAX3",".exe");
-            outputStream = new FileOutputStream(vsax3File);
-            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
-            log.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-            inputStream.close();
-            outputStream.close();
+            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            File vsax3File = new File(uri);
             params[0] = vsax3File.getAbsolutePath();
 
             //Получаем xml
@@ -98,8 +144,8 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                 outputStream = new FileOutputStream(xmlFileBD);
                 inputStream = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC)).getInputStream();
                 log.info("Xml copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-                inputStream.close();
-                outputStream.close();
+                IOUtils.closeQuietly(inputStream);
+                IOUtils.closeQuietly(outputStream);
                 params[1] = xmlFileBD.getAbsolutePath();
             } else {
                 params[1] = xmlFile.getAbsolutePath();
@@ -118,42 +164,40 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             //Имя файла
             InputSource inputSource;
             if (xmlFile != null) {
-                inputSource = new InputSource(new FileReader(xmlFile));
+                inputSource = new InputSource(new InputStreamReader(new FileInputStream(xmlFile), WINDOWS_1251));
             } else {
-                inputSource = new InputSource(new FileReader(xmlFileBD));
+                inputSource = new InputSource(new InputStreamReader(new FileInputStream(xmlFileBD), WINDOWS_1251));
             }
             SAXHandler handler = new SAXHandler();
             factory.newSAXParser().parse(inputSource, handler);
             params[3] = handler.fileName;
             log.info("File name: " + handler.fileName);
 
-            Process process = (new ProcessBuilder(params)).start();
-            reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
+            int timeout = lockDataService.getLockTimeout(LockData.LockObjects.XSD_VALIDATION);
+            ProcessRunner runner = new ProcessRunner(params, logger);
+            Thread threadRunner = new Thread(runner);
+            threadRunner.start();
             try {
-                String s = reader.readLine();
-                if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
-                    process.waitFor();
-                    return true;
-                } else {
-                    while ((s = reader.readLine()) != null) {
-                        if (!s.startsWith("Execution time:")) {
-                            if (isErrorFatal) {
-                                logger.error(s);
-                            } else {
-                                logger.warn(s);
-                            }
-                        }
+                long startTime = new Date().getTime();
+                while (1==1) {
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
-                    process.waitFor();
-                    return false;
+                    if (Math.abs(new Date().getTime() - startTime) > timeout) {
+                        threadRunner.interrupt();
+                        logger.warn(String.format("Время ожидания (%d мс) для установки блокировки истекло", timeout));
+                        return false;
+                    }
+                    if (!threadRunner.isAlive()){
+                        return !logger.containsLevel(LogLevel.ERROR);
+                    }
                 }
-            } catch (InterruptedException e) {
-                log.error("", e);
-                return false;
+
             } finally {
-                process.destroy();
-                reader.close();
                 logger.info("Проверка выполнена по файлу xsd %s", blobData.getName());
+                fileInfo(logger);
             }
         } catch (IOException e) {
             log.error("", e);
@@ -164,11 +208,10 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         } catch (ParserConfigurationException e) {
             log.error("", e);
             throw new ServiceException("Ошибка при разборе xml.", e);
+        } catch (URISyntaxException e) {
+            log.error("", e);
+            throw new ServiceException("", e);
         } finally {
-            //assert xsdFile!= null;
-            if (xsdFile != null && !vsax3File.delete()){
-                log.warn(String.format("Файл %s не был удален", vsax3File.getName()));
-            }
             if (xsdFile != null && !xsdFile.delete()){
                 log.warn(String.format("Файл %s не был удален", xsdFile.getName()));
             }
