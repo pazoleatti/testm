@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -85,6 +86,8 @@ public class TaxFormNominationPresenter
         FlexiblePager getFormPager();
 
         FlexiblePager getDeclarationPager();
+
+        Pair<TaxNominationColumnEnum, Boolean> getSort();
     }
 
     private TaxType taxType;
@@ -177,6 +180,9 @@ public class TaxFormNominationPresenter
          action.setDepartmentsIds(getView().getDepartments());
          action.setTaxType(taxType.getCode());
          action.setForm(getView().isForm());
+         Pair<TaxNominationColumnEnum, Boolean> sort = getView().getSort();
+         action.setSortColumn(sort.getFirst());
+         action.setAsc(sort.getSecond());
          action.setCount(getView().isForm() ? getView().getFormPager().getPageSize() : getView().getDeclarationPager().getPageSize());
 
          return action;

@@ -339,11 +339,24 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 .addValue("taxType", String.valueOf(taxType));
 
         // order
-        String order = "";
+        StringBuffer order = new StringBuffer("");
         if (queryParams != null && queryParams.getSearchOrdering() != null) {
-            order = " ORDER BY " + queryParams.getSearchOrdering().toString();
-            if (!queryParams.isAscending())
-                order += " DESC";
+            String asc = queryParams.isAscending()?"":" DESC";
+            Set<Enum<TaxNominationColumnEnum>> set = new LinkedHashSet<Enum<TaxNominationColumnEnum>>();
+            set.add(queryParams.getSearchOrdering());
+            set.add(TaxNominationColumnEnum.DEPARTMENT_FULL_NAME);
+            set.add(TaxNominationColumnEnum.FORM_KIND);
+            set.add(TaxNominationColumnEnum.FORM_TYPE);
+
+            boolean first = true;
+            for(Enum<TaxNominationColumnEnum> column: set) {
+                if (first)
+                    order.append("ORDER BY ");
+                else
+                    order.append(", ");
+                order.append(column.name() + asc);
+                first = false;
+            }
         }
 
         // departments
@@ -430,7 +443,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                         "ON p.ID = dft.PERFORMER_DEP_ID\n" +
                         "WHERE ft.tax_type = :taxType\n" +
                         departmentClause +
-                        order+
+                        order.toString() +
                     ")";
 
         // Limit
