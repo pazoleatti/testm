@@ -132,10 +132,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
         FileOutputStream outputStream;
         InputStream inputStream;
-        File xsdFile = null, xmlFileBD = null;
+        File xsdFile = null, xmlFileBD = null, vsax3File = null;
         try {
-            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
-            File vsax3File = new File(uri);
+            vsax3File = File.createTempFile("VSAX3",".exe");
+            outputStream = new FileOutputStream(vsax3File);
+            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
+            log.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+            inputStream.close();
+            outputStream.close();
             params[0] = vsax3File.getAbsolutePath();
 
             //Получаем xml
@@ -207,15 +211,15 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         } catch (ParserConfigurationException e) {
             log.error("", e);
             throw new ServiceException("Ошибка при разборе xml.", e);
-        } catch (URISyntaxException e) {
-            log.error("", e);
-            throw new ServiceException("", e);
         } finally {
             if (xsdFile != null && !xsdFile.delete()){
                 log.warn(String.format("Файл %s не был удален", xsdFile.getName()));
             }
             if (xmlFile == null && xmlFileBD != null && !xmlFileBD.delete()){
                 log.warn(String.format("Файл %s не был удален", xmlFileBD.getName()));
+            }
+            if (vsax3File != null && !vsax3File.delete()){
+                log.warn(String.format("Файл %s не был удален", vsax3File.getName()));
             }
         }
     }
