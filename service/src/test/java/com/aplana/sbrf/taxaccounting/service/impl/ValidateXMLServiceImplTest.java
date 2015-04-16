@@ -203,6 +203,8 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
     @Test
     public void fileInfoTest() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
         Method method = validateService.getClass().getDeclaredMethod("fileInfo", Logger.class);
         method.setAccessible(true);
         Logger logger = new Logger();
