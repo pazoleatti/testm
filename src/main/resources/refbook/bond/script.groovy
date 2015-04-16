@@ -20,6 +20,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importFromNSI()
         break
+    case FormDataEvent.SAVE:
+        save()
+        break
 }
 
 @Field
@@ -243,5 +246,15 @@ void importFromNSI() {
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
+    }
+}
+
+void save() {
+    saveRecords.each {
+        def Date startDate = it.START_DATE?.dateValue
+        def Date endDate = it.END_DATE?.dateValue
+        if (startDate != null && endDate != null && startDate > endDate) {
+            logger.error("Поле «Дата окончания действия» должно быть больше или равно полю «Дата начала действия»!")
+        }
     }
 }
