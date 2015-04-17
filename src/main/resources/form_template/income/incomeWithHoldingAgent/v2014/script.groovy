@@ -536,11 +536,7 @@ void importTransportData() {
                 'all'             : 4,
                 'rateZero'        : 5,
                 'distributionSum' : 6,
-                'firstMonth'      : 10,
-                'lastMonth'       : 11,
                 'allSum'          : 12,
-                'type'            : 16,
-                'rate'            : 22,
                 'dividends'       : 23,
                 'sum'             : 24,
                 'withheldSum'     : 27
