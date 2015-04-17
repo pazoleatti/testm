@@ -181,23 +181,23 @@ void calc() {
 
 void changeDateFormat(def row){
     // графа 3
-    if (row.invoiceNumDate && !row.invoiceNumDate.matches(pattern1000DateImport)) {
+    if (row.invoiceNumDate && row.invoiceNumDate.matches(pattern1000DateImport)) {
         row.invoiceNumDate = row.invoiceNumDate?.replaceFirst(pattern1000DateImport, replaceDatePattern)
     }
     // графа 4
-    if (row.invoiceCorrNumDate && !row.invoiceCorrNumDate.matches(pattern3DateImport)) {
+    if (row.invoiceCorrNumDate && row.invoiceCorrNumDate.matches(pattern3DateImport)) {
         row.invoiceCorrNumDate = row.invoiceCorrNumDate?.replaceFirst(pattern3DateImport, replaceDatePattern)
     }
     // графа 5
-    if (row.corrInvoiceNumDate && !row.corrInvoiceNumDate.matches(pattern256DateImport)) {
+    if (row.corrInvoiceNumDate && row.corrInvoiceNumDate.matches(pattern256DateImport)) {
         row.corrInvoiceNumDate = row.corrInvoiceNumDate?.replaceFirst(pattern256DateImport, replaceDatePattern)
     }
     // графа 6
-    if (row.corrInvCorrNumDate && !row.corrInvCorrNumDate.matches(pattern3DateImport)) {
+    if (row.corrInvCorrNumDate && row.corrInvCorrNumDate.matches(pattern3DateImport)) {
         row.corrInvCorrNumDate = row.corrInvCorrNumDate?.replaceFirst(pattern3DateImport, replaceDatePattern)
     }
     // графа 11
-    if (row.paymentDocNumDate && !row.paymentDocNumDate.matches(pattern256DateImport)) {
+    if (row.paymentDocNumDate && row.paymentDocNumDate.matches(pattern256DateImport)) {
         row.paymentDocNumDate = row.paymentDocNumDate?.replaceFirst(pattern256DateImport, replaceDatePattern)
     }
 }
