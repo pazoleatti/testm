@@ -26,7 +26,8 @@ public final class LockData {
         FILE,
         CONFIGURATION_PARAMS,
         SCHEDULER_TASK,
-        XSD_VALIDATION
+        XSD_VALIDATION,
+        LOAD_TRANSPORT_DATA     //Для задач асинх загрузки ТФ
     }
 
 	/* Идентификатор блокировки */

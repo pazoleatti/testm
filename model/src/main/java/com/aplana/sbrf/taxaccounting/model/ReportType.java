@@ -14,10 +14,14 @@ public enum ReportType {
     XML_DEC(1, "XML", 6L, 116L),
     PDF_DEC(2, "PDF", 7L, 107L),
     JASPER_DEC(3, "JASPER", 8L, 108L),
+
     ARCHIVE_AUDIT(0, "ARCHIVE_AUDIT", 10L, 110L),
     CSV_AUDIT(1, "CSV_AUDIT", 11l, 111L),
 
-    ZIP_IFRS(0, "Zip", 9L, 109L);
+    ZIP_IFRS(0, "Zip", 9L, 109L),
+
+    UPLOAD_TF(0, "UploadTF", 12L, 112L),
+    LOAD_ALL_TF(1, "LoadAllTF", 13L, 113L);
 
     private int id;
     private String name;

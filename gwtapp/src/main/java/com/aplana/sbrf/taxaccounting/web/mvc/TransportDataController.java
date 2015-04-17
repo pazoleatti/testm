@@ -1,17 +1,18 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
+import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.UploadResult;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
-import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
+import com.gwtplatform.dispatch.shared.ActionException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -28,9 +29,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Controller
 public class TransportDataController {
@@ -43,16 +42,13 @@ public class TransportDataController {
     private SecurityService securityService;
 
     @Autowired
-    private UploadTransportDataService uploadTransportDataService;
-
-    @Autowired
-    private LoadFormDataService loadFormDataService;
-
-    @Autowired
-    private LoadRefBookDataService loadRefBookDataService;
-
-    @Autowired
     private LockDataService lockDataService;
+
+    @Autowired
+    private BlobDataService blobDataService;
+
+    @Autowired
+    private AsyncManager asyncManager;
 
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
     public void upload(HttpServletRequest request, HttpServletResponse response)
@@ -75,34 +71,44 @@ public class TransportDataController {
         }
 
         TAUserInfo userInfo = securityService.currentUserInfo();
+        int userId = userInfo.getUser().getId();
 
-
-        // Загрузка в каталог
-        UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, fileName,
-                items.get(0).getInputStream(), logger);
-
-        String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        lockDataService.lock(key, userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
-        try {
-            // Загрузка из каталога
-            if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
-                // Diasoft
-                loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
+        String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
+        LockData lockData = lockDataService.lock(key, userId,
+                lockDataService.getLockTimeout(LockData.LockObjects.LOAD_TRANSPORT_DATA));
+        if (lockData == null) {
+            String uuidFile = blobDataService.create(items.get(0).getInputStream(), fileName);
+            try {
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("uuidFile", uuidFile);
+                params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
+                params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                try {
+                    lockDataService.addUserWaitingForLock(key, userId);
+                    asyncManager.executeAsync(ReportType.UPLOAD_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
+                    logger.info("Задача загрузки ТФ запущена");
+                } catch (AsyncTaskException e) {
+                    lockDataService.unlock(key, userId);
+                    logger.error("Ошибка при постановке в очередь задачи формирования декларации.");
+                }
+            } catch(Exception e) {
+                try {
+                    blobDataService.delete(uuidFile);
+                } catch(Exception e1) {}
+                try {
+                    lockDataService.unlock(key, userId);
+                } catch (ServiceException e2) {
+                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
+                        throw e2;
+                    }
+                }
+                if (e instanceof ServiceLoggerException) {
+                    throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                } else {
+                    throw new ServiceException(e.getMessage(), e);
+                }
             }
-            if (!uploadResult.getAvgCostFileNameList().isEmpty()) {
-                loadRefBookDataService.importRefBookAvgCost(userInfo, uploadResult.getAvgCostFileNameList(), logger);
-            }
-
-            if (!uploadResult.getFormDataFileNameList().isEmpty()) {
-                // НФ
-                // Пересечение списка доступных приложений и списка загруженных приложений
-                List<Integer> departmentList = new ArrayList(CollectionUtils.intersection(
-                        loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
-
-                loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger);
-            }
-        } finally {
-            lockDataService.unlock(key, userInfo.getUser().getId());
         }
 
         if (!logger.getEntries().isEmpty()) {
