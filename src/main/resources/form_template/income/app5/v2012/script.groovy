@@ -2,6 +2,7 @@ package form_template.income.app5.v2012
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -195,7 +196,7 @@ void logicCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam)
-        def depId = depParam.get('CODE').getNumberValue().intValue()
+        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
         def departmentName = depParam?.NAME?.stringValue
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
         def incomeParamTable = getIncomeParamTable(depParam)
@@ -567,7 +568,7 @@ def getProvider(def long providerId) {
 // Получение параметров подразделения, форма настроек которого будет использоваться
 // для получения данных (согласно алгоритму 1.8.4.5.1)
 def getDepParam(def departmentParam) {
-    def departmentId = departmentParam.get('CODE').getNumberValue().intValue()
+    def departmentId = departmentParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def departmentType = departmentService.get(departmentId).getType()
     if (departmentType.equals(departmentType.TERR_BANK)) {
         depParam = departmentParam
@@ -581,7 +582,7 @@ def getDepParam(def departmentParam) {
 
 // Получение параметров (справочник 330)
 def getIncomeParamTable(def depParam) {
-    def depId = depParam.get('CODE').getNumberValue().intValue()
+    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
     if (incomeParam != null && !incomeParam.isEmpty()) {
         def link = incomeParam.get(0).record_id.value
