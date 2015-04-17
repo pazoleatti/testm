@@ -215,7 +215,7 @@ public class Vat_724_7Test extends ScriptTestBase {
             Assert.assertEquals("row.sum[" + row.getIndex() + "]", expected, row.getCell("sum").getNumericValue());
 
             // графа 7
-            Assert.assertNotNull("row.orderNumber[" + row.getIndex() + "]", row.getCell("orderNumber").getDateValue());
+            Assert.assertNotNull("row.orderNumber[" + row.getIndex() + "]", row.getCell("orderNumber").getStringValue());
 
             // графа 8
             expected = roundValue(index, 2);
