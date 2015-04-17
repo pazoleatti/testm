@@ -268,34 +268,36 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
     private void getData() {
         LogCleanEvent.fire(DepartmentConfigPropertyPresenter.this);
         GetRefBookValuesAction action = new GetRefBookValuesAction();
-        action.setRefBookId(getCurrentRefBookId());
-        action.setSlaveRefBookId(getCurrentTableRefBookId());
-        action.setReportPeriodId(getView().getReportPeriodId());
-        action.setDepartmentId(getView().getDepartmentId());
+        if (getView().getReportPeriodId() != null) {
+            action.setRefBookId(getCurrentRefBookId());
+            action.setSlaveRefBookId(getCurrentTableRefBookId());
+            action.setReportPeriodId(getView().getReportPeriodId());
+            action.setDepartmentId(getView().getDepartmentId());
 
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetRefBookValuesResult>() {
-                    @Override
-                    public void onSuccess(GetRefBookValuesResult result) {
-                        if (result.getNotTableValues() == null || result.getNotTableValues().isEmpty()) {
-                            getView().clearNonTableData();
-                            getView().clearTableData();
-                            DepartmentConfigPropertyPresenter.this.recordId = null;
-                            return;
-                        }
-                        getView().fillNotTableData(result.getNotTableValues());
-                        if (result.getRecordId() != null) {
-                            DepartmentConfigPropertyPresenter.this.recordId = result.getRecordId();
-                        }
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<GetRefBookValuesResult>() {
+                        @Override
+                        public void onSuccess(GetRefBookValuesResult result) {
+                            if (result.getNotTableValues() == null || result.getNotTableValues().isEmpty()) {
+                                getView().clearNonTableData();
+                                getView().clearTableData();
+                                DepartmentConfigPropertyPresenter.this.recordId = null;
+                                return;
+                            }
+                            getView().fillNotTableData(result.getNotTableValues());
+                            if (result.getRecordId() != null) {
+                                DepartmentConfigPropertyPresenter.this.recordId = result.getRecordId();
+                            }
 
-                        if (result.getTableValues() != null && !result.getTableValues().isEmpty()) {
-                            List<Map<String, TableCell>> tableData = result.getTableValues();
-                            getView().setTableData(0, tableData.size(), tableData);
-                        } else {
-                            getView().clearTableData();
+                            if (result.getTableValues() != null && !result.getTableValues().isEmpty()) {
+                                List<Map<String, TableCell>> tableData = result.getTableValues();
+                                getView().setTableData(0, tableData.size(), tableData);
+                            } else {
+                                getView().clearTableData();
+                            }
                         }
-                    }
-                }, this));
+                    }, this));
+        }
     }
 
     private void createTableColumns() {
