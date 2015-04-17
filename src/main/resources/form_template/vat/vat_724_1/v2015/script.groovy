@@ -534,7 +534,7 @@ void addData(def xml, int headRowCount) {
         }
 
         // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == "") {
+        if (!(row.cell[1].text() == null || row.cell[1].text() == "")) {
             title = row.cell[1].text()
             if (isFirstSection && title == 'Итого') {
                 isFirstSection = false
