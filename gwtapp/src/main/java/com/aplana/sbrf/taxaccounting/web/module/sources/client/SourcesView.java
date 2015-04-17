@@ -825,7 +825,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @Override
     public SourcesSearchOrdering getSearchOrderingLeftTable() {
         if (sortByColumnLeftTable == null) {
-            sortByColumnLeftTable = SourcesSearchOrdering.KIND;
+            sortByColumnLeftTable = SourcesSearchOrdering.TYPE;
         }
         return sortByColumnLeftTable;
     }
@@ -833,7 +833,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @Override
     public SourcesSearchOrdering getSearchOrderingRightTable() {
         if (sortByColumnRightTable == null) {
-            sortByColumnRightTable = SourcesSearchOrdering.KIND;
+            sortByColumnRightTable = SourcesSearchOrdering.TYPE;
         }
         return sortByColumnRightTable;
     }
@@ -841,7 +841,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @Override
     public SourcesSearchOrdering getSearchOrderingDownTable() {
         if (sortByColumnDownTable == null) {
-            sortByColumnDownTable = SourcesSearchOrdering.DEPARTMENT;
+            sortByColumnDownTable = SourcesSearchOrdering.TYPE;
         }
         return sortByColumnDownTable;
     }
