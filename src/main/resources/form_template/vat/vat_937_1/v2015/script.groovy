@@ -95,6 +95,27 @@ def sortColumns = ['dateRegistration', 'invoice', 'typeCode', 'invoiceCorrecting
         'invoiceCorrectingCorrection', 'documentPay', 'salesman', 'salesmanInnKpp', 'agentName',
         'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
 
+@Field
+def pattern1000DateImport = "^(\\S.{0,999}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern3DateImport = "^(\\d{1,3}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern256DateImport = "^(\\S.{0,255}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern1000Date = "^(\\S.{0,999}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def pattern3Date = "^(\\d{1,3}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def pattern256Date = "^(\\S.{0,255}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def replaceDatePattern = "\$1 \$2\\.\$4\\.\$6"
+
 // Дата начала отчетного периода
 @Field
 def startDate = null
@@ -123,6 +144,29 @@ void calc() {
     sortFormDataRows()
 }
 
+void changeDateFormat(def row){
+    // графа 3
+    if (row.invoice && !row.invoice.matches(pattern1000DateImport)) {
+        row.invoice = row.invoice?.replaceFirst(pattern1000DateImport, replaceDatePattern)
+    }
+    // графа 4
+    if (row.invoiceCorrecting && !row.invoiceCorrecting.matches(pattern3DateImport)) {
+        row.invoiceCorrecting = row.invoiceCorrecting?.replaceFirst(pattern3DateImport, replaceDatePattern)
+    }
+    // графа 5
+    if (row.invoiceCorrection && !row.invoiceCorrection.matches(pattern256DateImport)) {
+        row.invoiceCorrection = row.invoiceCorrection?.replaceFirst(pattern256DateImport, replaceDatePattern)
+    }
+    // графа 6
+    if (row.invoiceCorrectingCorrection && !row.invoiceCorrectingCorrection.matches(pattern3DateImport)) {
+        row.invoiceCorrectingCorrection = row.invoiceCorrectingCorrection?.replaceFirst(pattern3DateImport, replaceDatePattern)
+    }
+    // графа 7
+    if (row.documentPay && !row.documentPay.matches(pattern256DateImport)) {
+        row.documentPay = row.documentPay?.replaceFirst(pattern256DateImport, replaceDatePattern)
+    }
+}
+
 void logicCheck() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -149,23 +193,23 @@ void logicCheck() {
         }
         // Проверки форматов
         // графа 3
-        if (row.invoice && !row.invoice.matches("^\\S.{0,999}( ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4}))?\$")) {
+        if (row.invoice && !row.invoice.matches(pattern1000Date)) {
             loggerError(row, String.format("Строка %s: Графа «%s» заполнена неверно! Ожидаемое значение: «%s». Только номер обязателен для заполнения.", index, getColumnName(row,'invoice'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 4
-        if (row.invoiceCorrecting && !row.invoiceCorrecting.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrecting && !row.invoiceCorrecting.matches(pattern3Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrecting'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 5
-        if (row.invoiceCorrection && !row.invoiceCorrection.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrection && !row.invoiceCorrection.matches(pattern256Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrection'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 6
-        if (row.invoiceCorrectingCorrection && !row.invoiceCorrectingCorrection.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrectingCorrection && !row.invoiceCorrectingCorrection.matches(pattern3Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrectingCorrection'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 7
-        if (row.documentPay && !row.documentPay.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.documentPay && !row.documentPay.matches(pattern256Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'documentPay'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата» формат, «ДД.ММ.ГГГГ»>"))
         }
         // графа 10
@@ -378,6 +422,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
         newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
+        changeDateFormat(newRow)
         rows.add(newRow)
     }
     rows.add(getFixedRow('Всего', 'total'))
