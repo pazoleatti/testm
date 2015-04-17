@@ -296,7 +296,7 @@ void addData(def xml, int headRowCount) {
         newRow.sum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
 
         // графа 7
-        newRow.orderNumber = parseDate(row.cell[7].text(), "dd.MM.yyyy", xlsIndexRow, 7 + colOffset, logger, true)
+        newRow.orderNumber = row.cell[7].text()
 
         // графа 8
         newRow.ndsSum = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
@@ -518,7 +518,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // графа 7
     colIndex++
-    newRow.orderNumber = parseDate(pure(rowCells[colIndex]), "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.orderNumber = pure(rowCells[colIndex])
 
     // графа 8
     colIndex++

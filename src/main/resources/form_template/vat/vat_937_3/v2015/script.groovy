@@ -3,7 +3,6 @@ package form_template.vat.vat_937_3.v2015
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 
 import java.text.SimpleDateFormat
@@ -102,6 +101,27 @@ def totalSumColumns = ['cost', 'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'di
 @Field
 def sections = ['1', '2']
 
+@Field
+def pattern1000DateImport = "^(\\S.{0,999}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern3DateImport = "^(\\d{1,3}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern256DateImport = "^(\\S.{0,255}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern1000Date = "^(\\S.{0,999}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def pattern3Date = "^(\\d{1,3}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def pattern256Date = "^(\\S.{0,255}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def replaceDatePattern = "\$1 \$2\\.\$4\\.\$6"
+
 // Признак периода ввода остатков
 @Field
 def isBalancePeriod
@@ -144,7 +164,7 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    calc1(dataRows)
+    calc1AndChangeDateFormat(dataRows)
     calcTotal(dataRows)
 
     dataRowHelper.save(dataRows)
@@ -229,25 +249,25 @@ void logicCheck() {
 
         // 3. Проверка формата заполнения
         // 3.1 графа 4
-        if (row.invoiceNumDate != null && !row.invoiceNumDate.matches("^\\S.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceNumDate != null && !row.invoiceNumDate.matches(pattern1000Date)) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'invoiceNumDate'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // 3.1 графа 12
-        if (isFirstSection && row.mediatorNumDate != null && !row.mediatorNumDate.matches("^\\S.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (isFirstSection && row.mediatorNumDate != null && !row.mediatorNumDate.matches(pattern1000Date)) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'mediatorNumDate'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
 
         // 3.2 графа 5
-        if (row.invoiceCorrNumDate != null && !row.invoiceCorrNumDate.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrNumDate != null && !row.invoiceCorrNumDate.matches(pattern3Date)) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'invoiceCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // 3.2 графа 7
-        if (row.corrInvCorrNumDate != null && !row.corrInvCorrNumDate.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvCorrNumDate != null && !row.corrInvCorrNumDate.matches(pattern3Date)) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
 
         // 3.3 графа 6
-        if (row.corrInvoiceNumDate != null && !row.corrInvoiceNumDate.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvoiceNumDate != null && !row.corrInvoiceNumDate.matches(pattern256Date)) {
             loggerError(row, String.format(WRONG1_ERROR_MSG, index, getColumnName(row,'corrInvoiceNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
 
@@ -687,7 +707,7 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
 }
 
 /** Рассчитать нумерацию строк. Для каждой части нф нумерация начинается с 1. */
-void calc1(def dataRows) {
+void calc1AndChangeDateFormat(def dataRows) {
     def index1 = getPrevLastIndex(true)
     def index2 = getPrevLastIndex(false)
     def isFirstSection = null
@@ -704,6 +724,28 @@ void calc1(def dataRows) {
 
         // графа 1
         row.rowNumber = (isFirstSection ? ++index1 : ++index2)
+
+        if (formDataEvent == FormDataEvent.IMPORT) {
+            if (row.invoiceNumDate != null && row.invoiceNumDate.matches(pattern1000DateImport)) {
+                row.invoiceNumDate = row.invoiceNumDate?.replaceFirst(pattern1000DateImport, replaceDatePattern)
+            }
+
+            if (isFirstSection && row.mediatorNumDate != null && row.mediatorNumDate.matches(pattern1000DateImport)) {
+                row.mediatorNumDate = row.mediatorNumDate?.replaceFirst(pattern1000DateImport, replaceDatePattern)
+            }
+
+            if (row.invoiceCorrNumDate != null && row.invoiceCorrNumDate.matches(pattern3DateImport)) {
+                row.invoiceCorrNumDate = row.invoiceCorrNumDate?.replaceFirst(pattern3DateImport, replaceDatePattern)
+            }
+
+            if (row.corrInvCorrNumDate != null && row.corrInvCorrNumDate.matches(pattern3DateImport)) {
+                row.corrInvCorrNumDate = row.corrInvCorrNumDate.replaceFirst(pattern3DateImport, replaceDatePattern)
+            }
+
+            if (row.corrInvoiceNumDate != null && row.corrInvoiceNumDate.matches(pattern256DateImport)) {
+                row.corrInvoiceNumDate = row.corrInvoiceNumDate.replaceFirst(pattern256DateImport, replaceDatePattern)
+            }
+        }
     }
 }
 

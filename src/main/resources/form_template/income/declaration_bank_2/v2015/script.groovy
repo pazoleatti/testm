@@ -434,7 +434,7 @@ void generateXML() {
     /** ВырРеалТовСоб. Код строки декларации 011. */
     def virRealTovSob = getVirRealTovSob(dataRowsComplexIncome, dataRowsSimpleIncome)
     /** ВырРеалИмПрав. Строка декларации 013. Код вида дохода = 10855, 10880, 10900. */
-    def virRealImPrav = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10855, 10880, 10900]))
+    def virRealImPrav = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10855, 10870, 10880, 10900]))
     /** ВырРеалИмПроч. Строка декларации 014. Код вида дохода = 10850. */
     def virRealImProch = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10850]))
     /** ВырРеалВс. Код строки декларации 010. */
@@ -472,7 +472,7 @@ void generateXML() {
     /** ОстСтРеалАИ. Код строки декларации 040. Код вида расхода = 21760. */
     def ostStRealAI = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21760]))
     /** РеалИмущПрав. Код строки декларации 059. Код вида расхода = 21450, 21740, 21750. */
-    def realImushPrav = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21450, 21740, 21750]))
+    def realImushPrav = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21450, 21470, 21740, 21750]))
     /** ПриобрРеалИмущ. Код строки декларации 060. Код вида расхода = 21770. */
     def priobrRealImush = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21770]))
     /* АктивРеалПред. Код строки декларации 061. */
@@ -480,7 +480,7 @@ void generateXML() {
     /** ПриобРеалЦБ. Код строки декларации 070. Код вида расхода = 21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680. */
     def priobrRealCB = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680]))
     /** СумОтклЦен. Код строки декларации 071. Код вида расходов = 21685, 21690, 21695. */
-    def sumOtklCen = empty
+    def sumOtklCen = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21685, 21690, 21695]))
     /** ПриобРеалЦБОрг. Код строки декларации 072. Расходы, связанные с приобритением и реализацией (выбытием, в том числе погашением) ценных бумаг, обращающихся на организованном рынке ценных бумаг */
     def priobRealCBOrg = empty
     /** СумОтклЦенОрг. Код строки декларации 073. Суммы отклонения от максимальной (расчетной) цены */
@@ -1588,9 +1588,9 @@ def getRashVnerealVs(def dataRows, def dataRowsSimple) {
     def result = 0.0
 
     // Код вида расхода = 22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
-    // 22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240 - графа 9
+    // 22670, 22690, 22695, 23120, 23130, 23140, 23240 - графа 9
     result += getComplexConsumptionSumRows9(dataRows, [22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
-                                                       22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240])
+                                                       22670, 22690, 22695, 23120, 23130, 23140, 23240])
 
     // Код вида расхода = 22000, 22010, 22020, 22030, 22040, 22050, 22060, 22070, 22080, 22090, 22100, 22110,
     // 22120, 22130, 22140, 22150, 22160, 22170, 22180, 22190, 22200, 22210, 22220, 22230, 22240, 22250, 22260,

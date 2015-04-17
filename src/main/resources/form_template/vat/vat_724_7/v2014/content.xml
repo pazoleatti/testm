@@ -75,14 +75,15 @@
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>orderNumber</alias>
         <checking>false</checking>
-        <columnType>DATE</columnType>
+        <columnType>STRING</columnType>
         <name>НДС. Номер мемориального ордера</name>
         <order>8</order>
         <width>7</width>
-        <formatId>0</formatId>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>ndsSum</alias>

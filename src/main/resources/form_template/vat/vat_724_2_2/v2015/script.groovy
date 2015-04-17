@@ -235,6 +235,9 @@ void addTransportData(def xml) {
         }
 
         def indexRow = rnuIndexRow - 2
+        if (indexRow - 1 >= dataRows.size()) {
+            break
+        }
         def dataRow = dataRows.get(indexRow - 1)
 
         def values = [:]

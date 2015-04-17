@@ -19,6 +19,7 @@ void save() {
     saveRecords.each {
         def String balanceAccount = it.BALANCE_ACCOUNT?.stringValue
         def String opu = it.OPU?.stringValue
-        it.NUMBER = new RefBookValue(RefBookAttributeType.STRING, (balanceAccount ?: '') + (opu ?: ''))
+        def String number = ((balanceAccount ?: '') + (opu ?: '')).replaceAll('.', '')
+        it.NUMBER = new RefBookValue(RefBookAttributeType.STRING, number)
     }
 }

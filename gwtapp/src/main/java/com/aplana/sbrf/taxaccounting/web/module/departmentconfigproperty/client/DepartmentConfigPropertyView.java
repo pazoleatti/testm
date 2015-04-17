@@ -696,7 +696,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @Override
     public Integer getReportPeriodId() {
-        return periodPickerPopup.getValue().get(0);
+        return (!periodPickerPopup.getValue().isEmpty()) ? periodPickerPopup.getValue().get(0) : null;
     }
 
     @Override

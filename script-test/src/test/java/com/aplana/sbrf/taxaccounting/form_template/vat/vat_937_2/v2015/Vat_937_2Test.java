@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.vat.vat_724_7.v2014;
+package com.aplana.sbrf.taxaccounting.form_template.vat.vat_937_2.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
@@ -23,10 +23,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
- * (724.7) Отчёт о суммах НДС начисленных налоговым агентом по договорам аренды имущества (балансовый счёт 60309.03)
+ * Итоговые данные книги продаж.
  */
-public class Vat_724_7Test extends ScriptTestBase {
-    private static final int TYPE_ID = 605;
+public class Vat_937_2Test extends ScriptTestBase {
+    private static final int TYPE_ID = 1608;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -50,7 +50,7 @@ public class Vat_724_7Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Vat_724_7Test.class);
+        return getDefaultScriptTestMockHelper(Vat_937_2Test.class);
     }
 
     @Before
@@ -61,6 +61,11 @@ public class Vat_724_7Test extends ScriptTestBase {
         department.setType(DepartmentType.TERR_BANK);
 
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
+
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setBalance(false);
+
+        when(testHelper.getDepartmentReportPeriodService().get(DEPARTMENT_PERIOD_ID)).thenReturn(departmentReportPeriod);
     }
 
     @After
@@ -193,39 +198,29 @@ public class Vat_724_7Test extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         long index = 1;
         BigDecimal expected;
+        String [] strColumns = { "opTypeCode", "invoiceNumDate", "invoiceCorrNumDate", "corrInvoiceNumDate",
+                "corrInvCorrNumDate", "buyerName", "buyerInnKpp", "mediatorName", "mediatorInnKpp",
+                "paymentDocNumDate", "currNameCode" };
+        String [] numColumns = { "saleCostACurr", "saleCostARub", "saleCostB18", "saleCostB10",
+                "saleCostB0", "vatSum18", "vatSum10", "bonifSalesSum" };
+        String MSG = "row.%s[%d]";
         for (DataRow<Cell> row : dataRows) {
             if (row.getAlias() != null) {
                 continue;
             }
 
-            // графа 2
-            Assert.assertNotNull("row.operDate[" + row.getIndex() + "]", row.getCell("operDate").getDateValue());
+            // графа 2..12
+            for (String alias : strColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                Assert.assertNotNull(msg, row.getCell(alias).getStringValue());
+            }
 
-            // графа 3
-            Assert.assertNotNull("row.name[" + row.getIndex() + "]", row.getCell("name").getStringValue());
-
-            // графа 4
-            Assert.assertNotNull("row.inn[" + row.getIndex() + "]", row.getCell("inn").getStringValue());
-
-            // графа 5
-            Assert.assertNotNull("row.balanceNumber[" + row.getIndex() + "]", row.getCell("balanceNumber").getStringValue());
-
-            // графа 6
+            // 13а..19
             expected = roundValue(index, 2);
-            Assert.assertEquals("row.sum[" + row.getIndex() + "]", expected, row.getCell("sum").getNumericValue());
-
-            // графа 7
-            Assert.assertNotNull("row.orderNumber[" + row.getIndex() + "]", row.getCell("orderNumber").getStringValue());
-
-            // графа 8
-            expected = roundValue(index, 2);
-            Assert.assertEquals("row.ndsSum[" + row.getIndex() + "]", expected, row.getCell("ndsSum").getNumericValue());
-
-            // графа 9
-            Assert.assertNotNull("row.sfDate[" + row.getIndex() + "]", row.getCell("sfDate").getDateValue());
-
-            // графа 10
-            Assert.assertNotNull("row.sfNumber[" + row.getIndex() + "]", row.getCell("sfNumber").getStringValue());
+            for (String alias : numColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                Assert.assertEquals(msg, expected, row.getCell(alias).getNumericValue());
+            }
 
             index++;
         }
