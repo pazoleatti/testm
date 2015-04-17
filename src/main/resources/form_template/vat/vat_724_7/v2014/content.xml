@@ -111,7 +111,7 @@
         <name>Счёт-фактура. Номер</name>
         <order>11</order>
         <width>10</width>
-        <maxLength>17</maxLength>
+        <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <styles>
