@@ -233,8 +233,8 @@ public class GetMainMenuActionHandler extends
                         + ConfigurationPresenter.TOKEN));
                 adminMenuItem.getSubMenu().add(new MenuItem("Миграция данных", NUMBER_SIGN
                         + MigrationTokens.migration));
-                /*adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
-                        + SchedulerTokens.taskList));*/
+                adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
+                        + SchedulerTokens.taskList));
             }
 
             if (currentUser.hasRole(TARole.ROLE_CONF)) {

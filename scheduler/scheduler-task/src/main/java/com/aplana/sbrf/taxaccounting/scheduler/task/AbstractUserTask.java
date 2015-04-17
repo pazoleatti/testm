@@ -31,7 +31,9 @@ public abstract class AbstractUserTask implements UserTask {
         if ((lockData = lockDataService.lock(key, TAUser.SYSTEM_USER_ID,
                 lockDataService.getLockTimeout(LockData.LockObjects.SCHEDULER_TASK))) == null) {
             try {
+                log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
                 executeBusinessLogic(params, userId);
+                log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
             } finally {
                 lockDataService.unlock(key, TAUser.SYSTEM_USER_ID, true);
             }

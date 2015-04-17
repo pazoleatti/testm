@@ -40,9 +40,7 @@ public class LoadRefBookNsiTask extends AbstractUserTask {
 
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
-        log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
         loadRefBookDataService.importRefBookNsi(userService.getSystemUserInfo(), new Logger());
-        log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
     }
 
     @Override

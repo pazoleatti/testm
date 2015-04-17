@@ -34,9 +34,7 @@ public class CleanBlobDataTask extends AbstractUserTask {
 
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
-        log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
         blobDataService.clean();
-        log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
     }
 
     @Override

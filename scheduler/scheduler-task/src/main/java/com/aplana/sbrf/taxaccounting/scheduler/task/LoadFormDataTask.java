@@ -52,7 +52,6 @@ public class LoadFormDataTask extends AbstractUserTask {
 
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
-        log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
         if (!params.containsKey(TB_NAME)){
             throw new TaskExecutionException("Не достасточно параметров для запуска задачи");
         }
@@ -83,7 +82,6 @@ public class LoadFormDataTask extends AbstractUserTask {
         }
 
         loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger());
-        log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
     }
 
     @Override

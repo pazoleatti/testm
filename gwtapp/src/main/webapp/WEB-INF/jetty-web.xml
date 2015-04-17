@@ -37,7 +37,7 @@
 					<Put name="url">
 						jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL
 					</Put>
-					<Put name="user">TAX_0_5</Put>
+					<Put name="user">TAX_NEXT</Put>
 					<Put name="password">TAX</Put>
 				</Get>
 				<Call name="init" />
@@ -128,10 +128,10 @@
     </New>
 
     <!-- Подмена EJB-модуля TaskManager на maven-зависимость для dev-mode -->
-    <!--<New class="org.mortbay.jetty.plus.naming.Resource">
+    <New class="org.mortbay.jetty.plus.naming.Resource">
         <Arg>ejblocal:${releaseName}/scheduler-core.jar/TaskManagerBean#com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManagerLocal</Arg>
         <Arg>
             <New class="com.aplana.sbrf.taxaccounting.scheduler.core.manager.TaskManagerMock"/>
         </Arg>
-    </New>-->
+    </New>
 </Configure>

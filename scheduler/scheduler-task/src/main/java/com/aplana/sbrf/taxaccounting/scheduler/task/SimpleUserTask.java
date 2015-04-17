@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParamType;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
 import com.aplana.sbrf.taxaccounting.service.PropertyLoader;
+import com.aplana.sbrf.taxaccounting.service.SchedulerInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
@@ -15,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import javax.ejb.Local;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
+import javax.interceptor.Interceptors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ import java.util.Map;
 @Local(UserTaskLocal.class)
 @Remote(UserTaskRemote.class)
 @Stateless
+@Interceptors(SchedulerInterceptor.class)
 public class SimpleUserTask extends AbstractUserTask {
 
     @Override
