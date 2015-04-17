@@ -128,6 +128,8 @@ public class DeclarationTemplateController {
         try {
             if (items.get(0) != null && items.get(0).getSize() == 0)
                 throw new ServiceException("Файл jrxml пустой.");
+            if (!items.get(0).getName().endsWith(".jrxml"))
+                throw new ServiceException("Формат файла должен быть *.jrxml");
             inputStream = items.get(0).getInputStream();
             Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
             Logger customLog = new Logger();
