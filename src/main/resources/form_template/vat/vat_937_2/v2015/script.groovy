@@ -111,6 +111,27 @@ def sortColumns = ['invoiceNumDate', 'opTypeCode', 'invoiceCorrNumDate', 'corrIn
         'buyerName', 'buyerInnKpp', 'mediatorName', 'mediatorInnKpp', 'paymentDocNumDate', 'currNameCode',
         'saleCostACurr', 'saleCostARub', 'saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum']
 
+@Field
+def pattern1000DateImport = "^(\\S.{0,999}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern3DateImport = "^(\\d{1,3}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern256DateImport = "^(\\S.{0,255}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
+
+@Field
+def pattern1000Date = "^(\\S.{0,999}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def pattern3Date = "^(\\d{1,3}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def pattern256Date = "^(\\S.{0,255}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def replaceDatePattern = "\$1 \$2\\.\$4\\.\$6"
+
 // Признак периода ввода остатков
 @Field
 def isBalancePeriod
@@ -156,6 +177,29 @@ void calc() {
 
     // Сортировка групп и строк
     sortFormDataRows()
+}
+
+void changeDateFormat(def row){
+    // графа 3
+    if (row.invoiceNumDate && !row.invoiceNumDate.matches(pattern1000DateImport)) {
+        row.invoiceNumDate = row.invoiceNumDate?.replaceFirst(pattern1000DateImport, replaceDatePattern)
+    }
+    // графа 4
+    if (row.invoiceCorrNumDate && !row.invoiceCorrNumDate.matches(pattern3DateImport)) {
+        row.invoiceCorrNumDate = row.invoiceCorrNumDate?.replaceFirst(pattern3DateImport, replaceDatePattern)
+    }
+    // графа 5
+    if (row.corrInvoiceNumDate && !row.corrInvoiceNumDate.matches(pattern256DateImport)) {
+        row.corrInvoiceNumDate = row.corrInvoiceNumDate?.replaceFirst(pattern256DateImport, replaceDatePattern)
+    }
+    // графа 6
+    if (row.corrInvCorrNumDate && !row.corrInvCorrNumDate.matches(pattern3DateImport)) {
+        row.corrInvCorrNumDate = row.corrInvCorrNumDate?.replaceFirst(pattern3DateImport, replaceDatePattern)
+    }
+    // графа 11
+    if (row.paymentDocNumDate && !row.paymentDocNumDate.matches(pattern256DateImport)) {
+        row.paymentDocNumDate = row.paymentDocNumDate?.replaceFirst(pattern256DateImport, replaceDatePattern)
+    }
 }
 
 void logicCheck() {
@@ -205,19 +249,19 @@ void logicCheck() {
         }
         // Проверки форматов
         // графа 3
-        if (row.invoiceNumDate && !row.invoiceNumDate.matches("^\\S.{0,999} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceNumDate && !row.invoiceNumDate.matches(pattern1000Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceNumDate'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 4
-        if (row.invoiceCorrNumDate && !row.invoiceCorrNumDate.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrNumDate && !row.invoiceCorrNumDate.matches(pattern3Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 5
-        if (row.corrInvoiceNumDate && !row.corrInvoiceNumDate.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvoiceNumDate && !row.corrInvoiceNumDate.matches(pattern256Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvoiceNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 6
-        if (row.corrInvCorrNumDate && !row.corrInvCorrNumDate.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.corrInvCorrNumDate && !row.corrInvCorrNumDate.matches(pattern3Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 8
@@ -229,7 +273,7 @@ void logicCheck() {
             loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'mediatorInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 11
-        if (row.paymentDocNumDate && !row.paymentDocNumDate.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.paymentDocNumDate && !row.paymentDocNumDate.matches(pattern256Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'paymentDocNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 12
@@ -457,6 +501,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
         newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
+        changeDateFormat(newRow)
         rows.add(newRow)
     }
     calcTotalSum(rows, totalRow, totalSumColumns)
