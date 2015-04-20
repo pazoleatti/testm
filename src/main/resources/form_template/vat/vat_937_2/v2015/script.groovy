@@ -451,7 +451,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 8
         xmlIndexCol++
-        newRow.buyerInnKpp = row.cell[xmlIndexCol].text()
+        newRow.buyerInnKpp = row.cell[xmlIndexCol].text().replaceAll(' ', '')
 
         // Графа 9
         xmlIndexCol++
@@ -459,7 +459,7 @@ void addData(def xml, int headRowCount) {
 
         // Графа 10
         xmlIndexCol++
-        newRow.mediatorInnKpp = row.cell[xmlIndexCol].text()
+        newRow.mediatorInnKpp = row.cell[xmlIndexCol].text().replaceAll(' ', '')
 
         // Графа 11
         xmlIndexCol++
