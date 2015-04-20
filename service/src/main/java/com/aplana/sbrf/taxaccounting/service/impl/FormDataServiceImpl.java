@@ -971,7 +971,7 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getEndDate());
         if (departmentFormTypesSources.isEmpty()){
             logger.error("Для текущей формы не назначено ни одного источника");
-            throw new ServiceLoggerException("Операция не выполнена", logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException(ERROR, logEntryService.save(logger.getEntries()));
         }
 
         //Блокировка текущей формы
@@ -994,6 +994,9 @@ public class FormDataServiceImpl implements FormDataService {
         //Блокировка всех экземпляров источников
         try {
             String lockKey;
+            msgPull.clear();
+            //Переменная для отмечания консолидации в таблице консолидации
+            HashSet<Long> srcIds = new HashSet<Long>(departmentFormTypesSources.size());
             for (DepartmentFormType sourceDFT : departmentFormTypesSources){
                 // Последний отчетный период подразделения
                 DepartmentReportPeriod sourceDepartmentReportPeriod =
@@ -1003,6 +1006,9 @@ public class FormDataServiceImpl implements FormDataService {
                 }
                 FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
                         sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+                if (sourceForm == null){
+                    continue;
+                }
                 // Проверяем/устанавливаем блокировку для источников
                 lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + sourceDFT.getId();
                 LockData lockData = lockService.lock(
@@ -1021,39 +1027,8 @@ public class FormDataServiceImpl implements FormDataService {
                 } else {
                     lockedForms.add(lockKey);
                 }
-            }
-            //2А. Выводим ошибки блокировок
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Ошибка при консолидации", logEntryService.save(logger.getEntries()));
-            }
-            //3. Консолидируем
-            HashSet<Long> srcIds = new HashSet<Long>(departmentFormTypesSources.size());
-            msgPull.clear();
 
-            for (DepartmentFormType sourceDFT : departmentFormTypesSources){
-                DepartmentReportPeriod sourceDepartmentReportPeriod =
-                        departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
-                if (sourceDepartmentReportPeriod == null) {
-                    continue;
-                }
-                FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                        sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
-                if (sourceForm==null){
-                    continue;
-                }
-                if (!sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
-                    continue;
-                }
-                ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-                scriptComponentContext.setUserInfo(userInfo);
-                scriptComponentContext.setLogger(logger);
-                FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
-                ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-                Integer periodOrder =
-                        (formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
-                formDataCompositionService.compose(formData, sourceDepartmentReportPeriod.getId(),
-                        periodOrder, sourceDFT.getFormTypeId(), sourceDFT.getKind());
-
+                //Запись на будущее, чтобы второго цикла не делать
                 srcIds.add(sourceForm.getId());
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
@@ -1066,6 +1041,20 @@ public class FormDataServiceImpl implements FormDataService {
                                 "")
                 ));
             }
+            //2А. Выводим ошибки блокировок
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException("Ошибка при консолидации", logEntryService.save(logger.getEntries()));
+            }
+            //3. Консолидируем
+            ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+            scriptComponentContext.setUserInfo(userInfo);
+            scriptComponentContext.setLogger(logger);
+            FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
+            ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
+            /*Integer periodOrder =
+                    (formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;*/
+            formDataCompositionService.compose(formData, 0, null, formData.getFormType().getId(), formData.getKind());
+
             //Удаление отчета НФ
             reportService.delete(formData.getId(), null);
             //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией

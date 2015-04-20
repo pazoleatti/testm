@@ -36,5 +36,6 @@ public interface FormDataCompositionService {
 	 * @param formTypeId Вид формы-приемника
 	 * @param kind  Тип формы-приемника
 	 */
+    //TODO: после разделения принятия и консолидации, появились все параметры кроме formData не нужны, возможно надо удалить
 	void compose(FormData formData, int departmentReportPeriodId, Integer periodOrder, int formTypeId, FormDataKind kind);
 }
