@@ -26,7 +26,7 @@ class GitReport {
                         def scanResult = scanSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
                         if (!scanResult.isEmpty()) {
                             tr {
-                                td(colspan: 7, class: 'hdr', Main.TAX_FOLDERS[folderName])
+                                td(colspan: 8, class: 'hdr', Main.TAX_FOLDERS[folderName])
                             }
                             tr {
                                 th 'type_id'
@@ -34,6 +34,7 @@ class GitReport {
                                 th 'Название'
                                 th 'Версия git'
                                 th 'Версия БД'
+                                th 'Заголовок'
                                 th 'Сравнение скриптов'
                                 th 'Сравнение стилей'
                             }
@@ -52,6 +53,7 @@ class GitReport {
                                     }
                                     td result.versionGit
                                     td result.versionDB
+                                    td(class: (result.errorCode ? 'td_error' : 'td_ok'), result.checkCode)
                                     td(class: (result.error ? 'td_error' : 'td_ok'), result.check)
                                     td(class: (result.errorStyle ? 'td_error' : 'td_ok'), result.checkStyle)
                                 }
@@ -112,6 +114,8 @@ class GitReport {
                                 result.versionDB = versions[version]?.version
                                 scanResult.add(result)
 
+                                def codeDB = versions[version]?.code ?: ""
+
                                 // Сравнение скриптов
                                 def scriptFile = new File("$versionFolder/script.groovy")
                                 if (!scriptFile.exists()) {
@@ -148,6 +152,14 @@ class GitReport {
                                 } else {
                                     def Map mapStylesXml = [:]
                                     def xml = new XmlSlurper().parseText(contentFile.getText())
+                                    def codeXml = xml.header?.text() ?: xml.code?.text()
+                                    if (codeDB != codeXml) {
+                                        result.checkCode = "Значение в БД \"$codeDB\" отличается от значения в GIT \"$codeXml\""
+                                        result.errorCode = true
+                                    } else {
+                                        result.checkCode = "Ok"
+                                        result.errorCode = false
+                                    }
                                     def stylesDb = versions[version]?.styles
                                     // Собираем все стили из xml
                                     for (def styleXml : xml.styles) {
@@ -245,7 +257,7 @@ class GitReport {
         def sql = Sql.newInstance(Main.DB_URL, Main.DB_USER, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
         def map = [:]
 
-        sql.eachRow("select id, type_id, to_char(version, 'RRRR') as version, name, script, status from form_template where status not in (-1, 2)") {
+        sql.eachRow("select id, type_id, to_char(version, 'RRRR') as version, name, header, script, status from form_template where status not in (-1, 2)") {
             def type_id = it.type_id as Integer
             if (map[type_id] == null) {
                 map.put((Integer) it.type_id, [:])
@@ -256,6 +268,7 @@ class GitReport {
             version.type_id = it.type_id as Integer
             version.version = it.version
             version.name = it.name
+            version.code = it.header
             version.status = it.status
             version.script = it.script?.characterStream?.text
             map[type_id].put(it.version, version)
