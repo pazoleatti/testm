@@ -367,19 +367,19 @@ void generateXML() {
                     (has812 ? [ПризнНал12: sign12] : [:])) {
         Документ(
                 // ТИТУЛЬНЫЙ ЛИСТ
-                // Номер корректировки
-                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
+                КНД: '1151001',
+                // Дата формирования документа
+                ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 // Налоговый период (код)
                 Период: period,
                 // Отчетный год
                 ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.year,
                 // Код налогового органа
                 КодНО: taxOrganCode,
+                // Номер корректировки
+                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 // Код места, по которому представляется документ
                 ПоМесту: taxPlaceTypeCode,
-                // Дата формирования документа
-                ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
-                КНД: '1151001'
         ) {
             // ТИТУЛЬНЫЙ ЛИСТ
             СвНП(
