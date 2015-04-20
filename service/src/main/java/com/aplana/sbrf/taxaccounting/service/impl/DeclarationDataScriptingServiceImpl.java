@@ -42,11 +42,13 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     private Properties versionInfoProperties;
 
 	/**
-	 * Возвращает спринг-бины доcтупные для использования в скрипте создания декларации.
+	 * Возвращает спринг-бины доступные для использования в скрипте создания декларации.
 	 * @param taxType вид налога
 	 */
 	private Map<String, ?> getScriptExposedBeans(TaxType taxType, FormDataEvent event){
 		Map<String, Object> beans = new HashMap<String, Object>();
+
+        beans.put("dataSource", applicationContext.getBean("dataSource"));
 
 		for(Map.Entry<String, ?> entry:applicationContext.getBeansWithAnnotation(ScriptExposed.class).entrySet()){
 			Object bean = entry.getValue();

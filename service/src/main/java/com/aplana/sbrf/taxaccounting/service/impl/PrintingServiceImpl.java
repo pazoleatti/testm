@@ -28,8 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +74,7 @@ public class PrintingServiceImpl implements PrintingService {
 
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved) {
+        String filePath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
             FormDataReport data = new FormDataReport();
@@ -101,18 +102,22 @@ public class PrintingServiceImpl implements PrintingService {
                 getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
 
             FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, refBookValue);
-            return blobDataService.create(new ByteArrayInputStream(builder.createBlobData()), FILE_NAME + POSTFIX);
+            filePath = builder.createReport();
+            return blobDataService.create(new FileInputStream(filePath), FILE_NAME + POSTFIX);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");
         } catch (DaoException ex) {
             throw new ServiceException(ex.getMessage());
+        }finally {
+            cleanTmp(filePath);
         }
 
 	}
 
     @Override
     public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved) {
+        String reportPath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
             FormDataReport data = new FormDataReport();
@@ -140,61 +145,83 @@ public class PrintingServiceImpl implements PrintingService {
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                     getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
             FormDataCSVReportBuilder builder = new FormDataCSVReportBuilder(data, isShowChecked, dataRows, refBookValue);
-            return blobDataService.create(new ByteArrayInputStream(builder.createBlobData()), FILE_NAME + ".csv");
+            reportPath = builder.createReport();
+            return blobDataService.create(new FileInputStream(reportPath), FILE_NAME + ".csv");
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");
         } catch (DaoException ex) {
             throw new ServiceException(ex.getMessage());
+        } finally {
+            cleanTmp(reportPath);
         }
     }
 
     @Override
 	public String generateExcelLogEntry(List<LogEntry> listLogEntries) {
+        String reportPath = null;
 		try {
 			LogEntryReportBuilder builder = new LogEntryReportBuilder(listLogEntries);
-            return blobDataService.create(new ByteArrayInputStream(builder.createBlobData()), "Список_ошибок.xlsx");
+            reportPath = builder.createReport();
+            return blobDataService.create(new FileInputStream(reportPath), "Список_ошибок.xlsx");
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			throw new ServiceException("Ошибка при создании печатной формы." + LogEntryReportBuilder.class);
-		}
+		}finally {
+            cleanTmp(reportPath);
+        }
 	}
 
     @Override
     public String generateExcelUsers(List<TAUserView> taUserViewList) {
+        String reportPath = null;
         try {
             TAUsersReportBuilder taBuilder = new TAUsersReportBuilder(taUserViewList);
-            return blobDataService.create(new ByteArrayInputStream(taBuilder.createBlobData()), "Список_пользователей.xlsx");
+            reportPath = taBuilder.createReport();
+            return blobDataService.create(new FileInputStream(reportPath), "Список_пользователей.xlsx");
         }catch (IOException e){
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы." + TAUsersReportBuilder.class);
+        }finally {
+            cleanTmp(reportPath);
         }
     }
 
     @Override
     public String generateExcelLogSystem(List<LogSearchResultItem> resultItems) {
+        String reportPath = null;
         try {
             LogSystemXlsxReportBuilder builder = new LogSystemXlsxReportBuilder(resultItems);
-            return blobDataService.create(new ByteArrayInputStream(builder.createBlobData()), "Журнал_аудита.xlsx");
+            reportPath = builder.createReport();
+            return blobDataService.create(new FileInputStream(reportPath), "Журнал_аудита.xlsx");
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы." + LogSystemXlsxReportBuilder.class);
+        } finally {
+            cleanTmp(reportPath);
         }
     }
 
     @Override
     public String generateAuditCsv(List<LogSearchResultItem> resultItems) {
-        File zipCsv = null;
+        String reportPath = null;
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
-            zipCsv = logSystemCsvBuilder.createBlobDataFile();
-            return blobDataService.create(zipCsv, "Отчет.zip");
+            reportPath = logSystemCsvBuilder.createReport();
+            return blobDataService.create(new FileInputStream(reportPath), "");
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemXlsxReportBuilder.class);
         } finally {
-            if (zipCsv != null && !zipCsv.delete()) {
-                logger.warn(String.format("Временный файл %s не удален.", zipCsv.getAbsolutePath()));
+            cleanTmp(reportPath);
+        }
+    }
+
+    private void cleanTmp(String filePath){
+        if (filePath != null){
+            File file = new File(filePath);
+            if (file.delete()){
+                logger.warn(String.format("Временный файл %s не был удален", filePath));
             }
         }
     }

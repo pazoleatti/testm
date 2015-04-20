@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
@@ -19,6 +21,8 @@ import org.springframework.util.ClassUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
@@ -26,6 +30,12 @@ import static org.mockito.Mockito.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("ValidateServiceImplTest.xml")
 public class ValidateXMLServiceImplTest implements Runnable {
+
+    private static final String XSD_1 = "NO_NDS.12_1_003_07_05_04_01.xsd";
+    private static final String XSD_2 = "1020.xsd";
+    private static final String XSD_3 = "NO_NDS.8_1_003_01_05_04_01.xsd";
+    private static final String ZIP_XML_1 = "NO_NDS.12_1_1_0212345678020012345_20140331_1.zip";
+    private static final String ZIP_XML_2 = "NO_NDS.8_1_1_0212345678020012345_20140331_1.zip";
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -35,10 +45,11 @@ public class ValidateXMLServiceImplTest implements Runnable {
     private ReportService reportService;
     @Autowired
     private ValidateXMLService validateService;
+    @Autowired
+    private LockDataService lockDataService;
 
     @Before
     public void init() throws IOException {
-        //Success
         String uuidXsd1 = UUID.randomUUID().toString();
         DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
         declarationTemplate1.setXsdId(uuidXsd1);
@@ -46,48 +57,50 @@ public class ValidateXMLServiceImplTest implements Runnable {
         BlobData blobDataXsd = new BlobData();
         InputStream inputStreamXsd = Thread.currentThread().getContextClassLoader().
                 getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
-                        File.separator + "validate" + File.separator + "NO_NDS.12_1_003_07_05_04_01.xsd");
+                        File.separator + "validate" + File.separator + XSD_1);
         blobDataXsd.setInputStream(inputStreamXsd);
 
         BlobData blobDataXml = new BlobData();
-        String uuidXml = UUID.randomUUID().toString();
         InputStream inputStreamXml = Thread.currentThread().getContextClassLoader().
                 getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
-                        File.separator + "validate" + File.separator + "NO_NDS.12_1_1_0212345678020012345_20140331_1.xml");
+                        File.separator + "validate" + File.separator + ZIP_XML_1);
         blobDataXml.setInputStream(inputStreamXml);
+        String uuidXml = UUID.randomUUID().toString();
         when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(ReportType.XML_DEC))).thenReturn(uuidXml);
 
         when(blobDataService.get(uuidXsd1)).thenReturn(blobDataXsd);
         when(blobDataService.get(uuidXml)).thenReturn(blobDataXml);
 
-        //Fail
-        String uuidXsd2 = UUID.randomUUID().toString();
-        DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
-        declarationTemplate2.setXsdId(uuidXsd2);
-        when(declarationTemplateService.get(3)).thenReturn(declarationTemplate2);
-        BlobData blobDataXsd2 = new BlobData();
-        InputStream inputStreamXsd2 = Thread.currentThread().getContextClassLoader().
-                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
-                        File.separator + "validate" + File.separator + "1020.xsd");
-        blobDataXsd2.setInputStream(inputStreamXsd2);
-
-        BlobData blobDataXml2 = new BlobData();
-        String uuidXml2 = UUID.randomUUID().toString();
-        InputStream inputStreamXml2 = Thread.currentThread().getContextClassLoader().
-                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
-                        File.separator + "validate" + File.separator + "report.jrxml");
-        blobDataXml2.setInputStream(inputStreamXml2);
-        when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(ReportType.XML_DEC))).thenReturn(uuidXml2);
-
-        when(blobDataService.get(uuidXsd2)).thenReturn(blobDataXsd2);
-        when(blobDataService.get(uuidXml2)).thenReturn(blobDataXml2);
+        when(lockDataService.getLockTimeout(LockData.LockObjects.XSD_VALIDATION)).thenReturn(10000);
     }
 
-    //@Test
-    public void validateTestSample(){
-        Logger logger = new Logger();
+    @Test
+    public void validateTestSampleSuccess(){
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
+
+        String uuidXsd1 = UUID.randomUUID().toString();
+        DeclarationTemplate declarationTemplate1 = new DeclarationTemplate();
+        declarationTemplate1.setXsdId(uuidXsd1);
+        when(declarationTemplateService.get(5)).thenReturn(declarationTemplate1);
+        BlobData blobDataXsd = new BlobData();
+        InputStream inputStreamXsd = Thread.currentThread().getContextClassLoader().
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
+                        File.separator + "validate" + File.separator + XSD_1);
+        blobDataXsd.setInputStream(inputStreamXsd);
+
+        BlobData blobDataXml = new BlobData();
+        InputStream inputStreamXml = Thread.currentThread().getContextClassLoader().
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
+                        File.separator + "validate" + File.separator + ZIP_XML_1);
+        blobDataXml.setInputStream(inputStreamXml);
+        String uuidXml = UUID.randomUUID().toString();
+        when(reportService.getDec(any(TAUserInfo.class), eq(3l), eq(ReportType.XML_DEC))).thenReturn(uuidXml);
+
+        when(blobDataService.get(uuidXsd1)).thenReturn(blobDataXsd);
+        when(blobDataService.get(uuidXml)).thenReturn(blobDataXml);
+
+        Logger logger = new Logger();
         TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(5);
@@ -96,7 +109,28 @@ public class ValidateXMLServiceImplTest implements Runnable {
     }
 
     @Test
-    public void validateTest(){
+    public void validateTestFail(){
+        String uuidXsd2 = UUID.randomUUID().toString();
+        DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
+        declarationTemplate2.setXsdId(uuidXsd2);
+        when(declarationTemplateService.get(3)).thenReturn(declarationTemplate2);
+        BlobData blobDataXsd2 = new BlobData();
+        InputStream inputStreamXsd2 = Thread.currentThread().getContextClassLoader().
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
+                        File.separator + "validate" + File.separator + XSD_2);
+        blobDataXsd2.setInputStream(inputStreamXsd2);
+
+        BlobData blobDataXml2 = new BlobData();
+        String uuidXml2 = UUID.randomUUID().toString();
+        InputStream inputStreamXml2 = Thread.currentThread().getContextClassLoader().
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
+                        File.separator + "validate" + File.separator + ZIP_XML_1);
+        blobDataXml2.setInputStream(inputStreamXml2);
+        when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(ReportType.XML_DEC))).thenReturn(uuidXml2);
+
+        when(blobDataService.get(uuidXsd2)).thenReturn(blobDataXsd2);
+        when(blobDataService.get(uuidXml2)).thenReturn(blobDataXml2);
+
         Logger logger = new Logger();
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
@@ -104,16 +138,52 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
-        Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null));
+        Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null));
     }
 
     @Test
     public void validateDiffThreads(){
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
+
         for (int i=1; i<=3; i++){
             new Thread(this).run();
         }
+    }
+
+    @Test
+    public void validateLargeXml() throws IOException {
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
+        String uuidXsd2 = UUID.randomUUID().toString();
+        DeclarationTemplate declarationTemplate2 = new DeclarationTemplate();
+        declarationTemplate2.setXsdId(uuidXsd2);
+        when(declarationTemplateService.get(3)).thenReturn(declarationTemplate2);
+        BlobData blobDataXsd2 = new BlobData();
+        InputStream inputStreamXsd2 = Thread.currentThread().getContextClassLoader().
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
+                        File.separator + "validate" + File.separator + XSD_3);
+        blobDataXsd2.setInputStream(inputStreamXsd2);
+        blobDataXsd2.setName(XSD_3);
+
+        BlobData blobDataXml2 = new BlobData();
+        String uuidXml2 = UUID.randomUUID().toString();
+        InputStream inputStreamXml2 = Thread.currentThread().getContextClassLoader().
+                getResourceAsStream(ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) +
+                        File.separator + "validate" + File.separator + ZIP_XML_2);
+        blobDataXml2.setInputStream(inputStreamXml2);
+        when(reportService.getDec(any(TAUserInfo.class), eq(5l), eq(ReportType.XML_DEC))).thenReturn(uuidXml2);
+
+        when(blobDataService.get(uuidXsd2)).thenReturn(blobDataXsd2);
+        when(blobDataService.get(uuidXml2)).thenReturn(blobDataXml2);
+
+        Logger logger = new Logger();
+        TAUserInfo userInfo = new TAUserInfo();
+        DeclarationData data = new DeclarationData();
+        data.setDeclarationTemplateId(3);
+        data.setId(5l);
+        Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null));
+        Assert.assertEquals(3, logger.getEntries().size());
     }
 
     @Override
@@ -126,8 +196,22 @@ public class ValidateXMLServiceImplTest implements Runnable {
         }
         TAUserInfo userInfo = new TAUserInfo();
         DeclarationData data = new DeclarationData();
-        data.setDeclarationTemplateId(3);
-        data.setId(5l);
+        data.setDeclarationTemplateId(5);
+        data.setId(3l);
         Assert.assertTrue(validateService.validate(data, userInfo, logger, true, null));
+    }
+
+    @Test
+    public void fileInfoTest() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+            return;
+        Method method = validateService.getClass().getDeclaredMethod("fileInfo", Logger.class);
+        method.setAccessible(true);
+        Logger logger = new Logger();
+        method.invoke(validateService, logger);
+        
+        Assert.assertTrue(!logger.containsLevel(LogLevel.ERROR));
+        Assert.assertTrue(logger.containsLevel(LogLevel.INFO));
+        System.out.println(logger.getEntries().get(0).getMessage());
     }
 }

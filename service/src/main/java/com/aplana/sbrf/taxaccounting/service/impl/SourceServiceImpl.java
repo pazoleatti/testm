@@ -39,8 +39,8 @@ public class SourceServiceImpl implements SourceService {
     private static final String DELETE_SUCCESS_MSG = "Удалено назначение \"%s\" в роли %s %s \"%s\" в периоде %s.";
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
-    private static final String FORM_INSTANCES_MSG = "Для корректной передачи данных в форму-приёмник необходимо выполнить повторный перевод в статус \"Принята\" формы \"%s\" для подразделения \"%s\" в периодах: \"%s\"";
-    private static final String DECLARATION_INSTANCES_MSG = "Для корректного получении данных необходимо выполнить повторное формирование при помощи кнопки \"Обновить\" во всех экземплярах \"%s\" для подразделения \"%s\" в периодах: \"%s\"";
+    private static final String FORM_INSTANCE_MSG = "\"%s\", \"%s\", подразделение \"%s\", период \"%s%s\"";
+    private static final String DECLARATION_INSTANCE_MSG = "\"%s\", подразделение \"%s\", период \"%s%s\"";
     private static final String EDIT_FATAL_ERROR = "Найдены экземпляры \"%s\" для подразделения \"%s\" в периодах: \"%s\" в статусе \"Принята\". Для удаления их назначения в качестве источника необходимо выполнить их возврат из статуса \"Принята\"";
     private static final String DELETE_FATAL_ERROR_BEGIN = "Найдены экземпляры в статусе \"Принята\":";
     private static final String DELETE_FATAL_ERROR_MID = "\"%s\" для подразделения \"%s\" в периодах: \"%s\"";
@@ -95,6 +95,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Autowired
     private FormDataDao formDataDao;
+
+    @Autowired
+    private DeclarationDataDao declarationDataDao;
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
@@ -374,31 +377,58 @@ public class SourceServiceImpl implements SourceService {
             /** Получаем промежуточные периоды, которые будут объединены при создании новой версии */
             List<SourceObject> emptyPeriods = sourceDao.getEmptyPeriods(sourcePair,
                     newPeriodStart, newPeriodEnd);
-            List<String> acceptedSources = new ArrayList<String>();
+            List<ConsolidatedInstance> consolidatedInstances = new ArrayList<ConsolidatedInstance>();
             if (!emptyPeriods.isEmpty()) {
                 for (SourceObject empty : emptyPeriods) {
                     /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
-                    acceptedSources.addAll(checkAcceptedFormData(sourceDao.findAcceptedInstances(empty.getSourcePair().getSource(),
-                            empty.getPeriodStart(), empty.getPeriodEnd())));
+                    consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(empty.getSourcePair().getSource(),
+                            empty.getPeriodStart(), empty.getPeriodEnd()));
                 }
             } else {
                 /** Получаем источники, имеющие принятые экземпляры в создаваемом новом периоде */
-                acceptedSources.addAll(checkAcceptedFormData(sourceDao.findAcceptedInstances(sourcePair.getSource(),
-                        newPeriodStart, newPeriodEnd)));
+                consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(sourcePair.getSource(),
+                        newPeriodStart, newPeriodEnd));
             }
-            if (!acceptedSources.isEmpty()) {
-                if (declaration) {
-                    /** Надо обновить декларации-приемники в периодах внутри промежуточных, за которые есть принятые источники (входные) */
-                    logger.warn(String.format(DECLARATION_INSTANCES_MSG,
-                            sourcePair.getDestinationType(),
-                            destinationDepartmentName,
-                            StringUtils.join(acceptedSources, ", ")));
-                }  else {
-                    /** Надо перепринять формы-источники, отчетный период которых попадает в промежуточные периоды */
-                    logger.warn(String.format(FORM_INSTANCES_MSG,
-                            sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
-                            sourceDepartmentName,
-                            StringUtils.join(acceptedSources, ", ")));
+
+            if (!consolidatedInstances.isEmpty()) {
+                boolean hasForm = false;
+                boolean hasDeclaration = false;
+
+                /** Надо переконсолидировать декларации-приемники */
+                for (ConsolidatedInstance consolidatedInstance : consolidatedInstances) {
+                    if (consolidatedInstance.isDeclaration()) {
+                        if (!hasDeclaration) {
+                            logger.warn("Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\" в декларациях: ");
+                            hasDeclaration = true;
+                        }
+                        logger.warn(String.format(DECLARATION_INSTANCE_MSG,
+                                consolidatedInstance.getType(),
+                                consolidatedInstance.getDepartment(),
+                                consolidatedInstance.getPeriod(),
+                                        consolidatedInstance.getCorrectionDate() != null
+                                                ? " " + SIMPLE_DATE_FORMAT.format(consolidatedInstance.getCorrectionDate())
+                                                : "")
+                        );
+                    }
+                }
+
+                /** Надо переконсолидировать нф-приемники */
+                for (ConsolidatedInstance consolidatedInstance : consolidatedInstances) {
+                    if (!consolidatedInstance.isDeclaration()) {
+                        if (!hasForm) {
+                            logger.warn("Для коррекции консолидированных данных необходимо нажать на кнопку \"Консолидация\" в формах: ");
+                            hasForm = true;
+                        }
+                        logger.warn(String.format(FORM_INSTANCE_MSG,
+                                        consolidatedInstance.getType(),
+                                        consolidatedInstance.getFormKind(),
+                                        consolidatedInstance.getDepartment(),
+                                        consolidatedInstance.getPeriod(),
+                                        consolidatedInstance.getCorrectionDate() != null
+                                                ? " " + SIMPLE_DATE_FORMAT.format(consolidatedInstance.getCorrectionDate())
+                                                : "")
+                        );
+                    }
                 }
             }
         }
@@ -1176,6 +1206,10 @@ public class SourceServiceImpl implements SourceService {
         formToFormRelations.addAll(createFormToFormRelationModel(destinationsForm, departmentReportPeriod,
                 periodOrder, false));
 
+        List<DepartmentDeclarationType> destinationsDeclaration = getDeclarationDestinations(departmentId, formTypeId, kind,
+                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+        formToFormRelations.addAll(createFormToFormRelationModel(destinationsDeclaration, departmentReportPeriod));
+
         return formToFormRelations;
     }
 
@@ -1274,6 +1308,20 @@ public class SourceServiceImpl implements SourceService {
     }
 
     /**
+     * Метод для составления списка с информацией об источниках приемниках
+     */
+    private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentDeclarationType> departmentDeclarationTypes,
+                                                                   DepartmentReportPeriod departmentReportPeriod){
+        List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
+
+        // По назначениям
+        for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
+            formToFormRelations.addAll(getDestinationList(departmentDeclarationType, departmentReportPeriod));
+        }
+        return formToFormRelations;
+    }
+
+    /**
      * Подготовка общей модели для сущестувющих и не существующих экземпляров
      */
     private FormToFormRelation getRelationCommon(boolean isSource, DepartmentFormType departmentFormType,
@@ -1291,6 +1339,24 @@ public class SourceServiceImpl implements SourceService {
             formToFormRelation.setPeriodName(departmentreportPeriod.getReportPeriod().getName());
         }
         formToFormRelation.setMonth(periodOrder != null ? Months.fromId(periodOrder).getTitle() : "");
+        return formToFormRelation;
+    }
+
+    /**
+     * Подготовка общей модели для сущестувющих и не существующих экземпляров
+     */
+    private FormToFormRelation getRelationCommon(DepartmentDeclarationType departmentDeclarationType,
+                                                 DepartmentReportPeriod departmentreportPeriod) {
+        FormToFormRelation formToFormRelation = new FormToFormRelation();
+        formToFormRelation.setSource(false);
+        formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentDeclarationType.getDepartmentId()));
+        if (departmentreportPeriod != null) {
+            if (departmentreportPeriod.getCorrectionDate() != null) {
+                formToFormRelation.setCorrectionDate(departmentreportPeriod.getCorrectionDate());
+            }
+            formToFormRelation.setYear(departmentreportPeriod.getReportPeriod().getTaxPeriod().getYear());
+            formToFormRelation.setPeriodName(departmentreportPeriod.getReportPeriod().getName());
+        }
         return formToFormRelation;
     }
 
@@ -1326,6 +1392,30 @@ public class SourceServiceImpl implements SourceService {
                 // Источников нет
                 return null;
             }
+        }
+        return formToFormRelation;
+    }
+
+    /**
+     * Заполенени модели отношения данными из экземпляра декларации или не созданного экземпляра
+     */
+    private FormToFormRelation performFormDataRelation(DeclarationData declarationData, FormToFormRelation formToFormRelation,
+                                                       DepartmentDeclarationType departmentDeclarationType,
+                                                       DepartmentReportPeriod departmentReportPeriod) {
+        if (declarationData != null) {
+            // Созданный экземпляр найден
+            formToFormRelation.setCreated(true);
+            formToFormRelation.setDeclarationType(declarationTypeDao.get(departmentDeclarationType.getDeclarationTypeId()));
+            formToFormRelation.setDeclarationDataId(declarationData.getId());
+            formToFormRelation.setState(declarationData.isAccepted()?WorkflowState.ACCEPTED:WorkflowState.CREATED);
+            formToFormRelation.setKpp(declarationData.getKpp());
+            formToFormRelation.setTaxOrganCode(declarationData.getTaxOrganCode());
+        } else {
+            // Экземпляр не найден
+            formToFormRelation.setCreated(false);
+            formToFormRelation.setDeclarationType(declarationTypeDao.get(departmentDeclarationType.getDeclarationTypeId()));
+            formToFormRelation.setYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
+            formToFormRelation.setPeriodName(departmentReportPeriod.getReportPeriod().getName());
         }
         return formToFormRelation;
     }
@@ -1418,6 +1508,63 @@ public class SourceServiceImpl implements SourceService {
              if (formToFormRelation != null) {
                  retVal.add(formToFormRelation);
              }
+        }
+        return retVal;
+    }
+
+    /**
+     * Список экземпляров-приемников
+     * @param departmentDeclarationType Назначение
+     * @param departmentReportPeriod Отчетный период подраделения формы, для которой ищутся формы-приемники
+     */
+    private List<FormToFormRelation> getDestinationList(DepartmentDeclarationType departmentDeclarationType,
+                                                        DepartmentReportPeriod departmentReportPeriod) {
+        List<FormToFormRelation> retVal = new LinkedList<FormToFormRelation>();
+        if (!declarationTemplateDao.existDeclarationTemplate(departmentDeclarationType.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()))
+            return retVal;
+
+        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
+        filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
+        filter.setDepartmentIdList(Arrays.asList(departmentDeclarationType.getDepartmentId()));
+        // Список всех отчетных периодов
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
+        //TODO: код похож на дублирующий из метода com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao.getLast
+        // Приемник в корректирующем периоде может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
+        // периоды удаляем из списка
+        if (departmentReportPeriod.getCorrectionDate() != null) {
+            List<DepartmentReportPeriod> delList = new LinkedList<DepartmentReportPeriod>();
+            for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
+                if (destinationReportPeriod.getCorrectionDate() == null ||
+                        destinationReportPeriod.getCorrectionDate().before(departmentReportPeriod.getCorrectionDate())) {
+                    delList.add(destinationReportPeriod);
+                }
+            }
+            departmentReportPeriodList.removeAll(delList);
+        }
+
+        for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
+            // Поиск экземпляра декларации в каждом существующем отчетном периоде подразделения
+            List<DeclarationData> declarationDataList = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(), destinationReportPeriod.getId().intValue());
+
+            if (declarationDataList.isEmpty()) {
+                FormToFormRelation formToFormRelation = performFormDataRelation(null,
+                        getRelationCommon(departmentDeclarationType, destinationReportPeriod), departmentDeclarationType,
+                        departmentReportPeriod);
+
+                if (formToFormRelation != null) {
+                    retVal.add(formToFormRelation);
+                }
+            } else {
+                for (DeclarationData declarationData: declarationDataList) {
+                    FormToFormRelation formToFormRelation = performFormDataRelation(declarationData,
+                            getRelationCommon(departmentDeclarationType, destinationReportPeriod), departmentDeclarationType,
+                            departmentReportPeriod);
+
+                    if (formToFormRelation != null) {
+                        retVal.add(formToFormRelation);
+                    }
+                }
+            }
         }
         return retVal;
     }

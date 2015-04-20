@@ -72,7 +72,9 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
                 // вначале сортируем по типу источник/приемник
                 if (o1.isSource() ^ (!o2.isSource())){
                     // если тип (источник или приемник) совпали то сортируем по типу формы
-                    int type = o1.getFormType().getName().compareTo(o2.getFormType().getName());
+                    String name1 = o1.getFormType() != null?o1.getFormType().getName():o1.getDeclarationType().getName();
+                    String name2 = o2.getFormType() != null?o2.getFormType().getName():o2.getDeclarationType().getName();
+                    int type = name1.compareTo(name2);
                     if (type != 0){
                         return type;
                     } else{

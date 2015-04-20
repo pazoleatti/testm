@@ -33,7 +33,8 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 	private static final Log logger = LogFactory.getLog(LogSystemXlsxReportBuilder.class);
 
     public LogSystemXlsxReportBuilder(List<LogSearchResultItem> items) {
-        this.workBook = new SXSSFWorkbook();
+        super("audit",".xlsx");
+        this.workBook = new SXSSFWorkbook(500);
         this.sheet = workBook.createSheet("Журнал аудита");
         sheet.getLastRowNum();
         this.items = items;
@@ -186,6 +187,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
             cellNumber = 0;
         }
+        sheet.groupRow(10, 15);
     }
 
     @Override

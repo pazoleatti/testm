@@ -27,6 +27,7 @@
         <module>async</module>
         <module>common</module>
         <module>script-test</module>
+        <module>schematron</module>
     </modules>
 
 	<properties>

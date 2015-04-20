@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBui
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,13 @@ public class TAUsersReportBuilderTest {
     @Test
     public void createReportTest() throws IOException {
         TAUsersReportBuilder report = new TAUsersReportBuilder(taUserList);
-        report.createBlobData();
+        String reportPath = null;
+        try {
+            reportPath = report.createReport();
+        } finally {
+            assert reportPath != null;
+            File file = new File(reportPath);
+            file.delete();
+        }
     }
 }

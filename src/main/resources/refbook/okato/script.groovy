@@ -154,7 +154,7 @@ void importFromXML() {
     def hasChanges = false
 
     // По версиям
-    versions.each { version ->
+    versions.each { Date version ->
         // Добавляемые/обновляемые записи
         def addMap = addByVersionMap.get(version)
         // Удаляемые записи
@@ -189,28 +189,41 @@ void importFromXML() {
             okatoSet.addAll(delMap.keySet())
         }
 
-        // Получение частями актуальных записей для сравнения с записями из ТФ
-        def tempList = []
-        def actualRecordList = []
-        okatoSet.each { okato ->
-            if (tempList.size() < 500) {
-                tempList.add(okato)
-            } else {
-                actualRecordList.addAll(dataProvider.getRecords(version, null, getFilterString(tempList), null))
-                tempList.clear()
-            }
-        }
-        if (!tempList.isEmpty()) {
-            actualRecordList.addAll(dataProvider.getRecords(version, null, getFilterString(tempList), null))
-            tempList.clear()
+        def recordIds = dataProvider.getUniqueRecordIds(version, getFilterString(okatoSet))
+
+        // Получение актуальных записей для сравнения с записями из ТФ
+        def actualRecords = [:]
+        if (recordIds != null && !recordIds.empty) {
+            actualRecords = dataProvider.getRecordData(recordIds)
         }
 
-        println("Import OKATO: Current found record count = " + actualRecordList.size())
+        println("Import OKATO: Current found record count = " + actualRecords.size())
 
         // Построение Map для списка актуальных записей
         def actualRecordMap = [:]
-        actualRecordList.each { actualMap ->
+        actualRecords.each { key, actualMap ->
             actualRecordMap.put(actualMap.OKATO.stringValue, actualMap)
+        }
+
+        // находим новые записи у которых актуальных версий нет
+        def newOkatoSet = [] as Set
+        addMap?.each { okato, value ->
+            if (actualRecordMap.get(okato)?.NAME?.stringValue == null) {
+                newOkatoSet.add(okato)
+            }
+        }
+
+        // Для новых записей рассматриваем вариант, что записи грузятся на дату до начала актуальности
+        if(!newOkatoSet.isEmpty()) {
+            recordIds = dataProvider.getUniqueRecordIds(null, getFilterString(newOkatoSet)) // version = null
+            if (recordIds != null && !recordIds.empty) {
+                actualRecords = dataProvider.getRecordData(recordIds)
+
+                actualRecords.each { key, actualMap ->
+                    actualRecordMap.put(actualMap.OKATO.stringValue, actualMap)
+                }
+            }
+            println("Import OKATO: Current found record count for early date = " + actualRecords.size())
         }
 
         // Поиск добавляемых и поиск обновляемых среди добавляемых (при совпадении версий)

@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
 import com.google.gwt.cell.client.*;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -91,6 +92,7 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     private ColumnSortEvent.ListHandler<FormDataSigner> sortHandler = new ColumnSortEvent.ListHandler<FormDataSigner>(dataProvider.getList());
     private HandlerRegistration columnSortEventRegistration;
 
+    private List<Department> departments;
     @Inject
     public SignersView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
@@ -101,6 +103,16 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
     @Override
     public Widget asWidget() {
         return widget;
+    }
+
+    @UiHandler("departmentPicker")
+    public void departmentChange(ValueChangeEvent<List<Integer>> event) {
+        List<Integer> values = event.getValue();
+        if (values.isEmpty()) {
+            setReportDepartmentName("");
+        } else {
+            setReportDepartmentName(getUiHandlers().getReportDepartmentName(departments, values.get(0)));
+        }
     }
 
     @Override
@@ -120,12 +132,16 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 
     @Override
     public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
+        this.departments = departments;
         departmentPicker.setAvalibleValues(departments, availableDepartments);
     }
 
     @Override
     public void setDepartment(Integer department) {
-        departmentPicker.setValue(Arrays.asList(department));
+        if (department == null)
+            departmentPicker.setValue(null);
+        else
+            departmentPicker.setValue(Arrays.asList(department));
     }
 
     @Override
@@ -242,7 +258,12 @@ public class SignersView extends PopupViewWithUiHandlers<SignersUiHandlers> impl
 
         performer.setName(name.getText());
         performer.setPhone(phone.getText());
-        performer.setPrintDepartmentId(departmentPicker.getValue().get(0));
+        List<Integer> printDepartmentId = departmentPicker.getValue();
+        if (printDepartmentId != null && !printDepartmentId.isEmpty()) {
+            performer.setPrintDepartmentId(printDepartmentId.get(0));
+        } else {
+            performer.setPrintDepartmentId(null);
+        }
         performer.setReportDepartmentName(reportDepartmentName.getText());
 
         if (validateSigners()) {

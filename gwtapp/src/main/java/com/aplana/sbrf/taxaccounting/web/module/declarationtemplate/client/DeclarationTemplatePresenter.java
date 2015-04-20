@@ -15,11 +15,12 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.DeclarationVersionHistoryPresenter;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -93,6 +94,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
+        void addSubmitHandler(FormPanel.SubmitCompleteHandler submitCompleteHandler);
         void activateButtonName(String name);
         void activateButton(boolean isVisible);
         void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
@@ -147,7 +149,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void save() {
         if (declarationTemplateExt.getEndDate() != null &&
                 declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >0 ){
-            Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
+            Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуальности.");
             return;
         }
         if (declarationTemplate.getName() == null || declarationTemplate.getName().isEmpty()){
@@ -244,16 +246,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         }, this));
     }
 
-    @Override
-	public void downloadJrxml() {
-		Window.open(GWT.getHostPageBaseURL() + "download/downloadJrxml/" + declarationTemplate.getId(), null, null);
-	}
-	
-	@Override
-	public void downloadDect() {
-		Window.open(GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId(), null, null);		
-	}
-
     private void setDeclarationTemplate() {
         final int declarationId = Integer.valueOf(placeManager.getCurrentPlaceRequest().getParameter(DeclarationTemplateTokens.declarationTemplateId, "0"));
 		if (declarationId != 0) {
@@ -302,26 +294,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 
-	@Override
-	public void uploadDectResponseWithUuid(String uuid) {
-        if (uuid != null && !uuid.isEmpty() && !uuid.contains("<pre")){
-            LogAddEvent.fire(this, uuid);
-        }
-        Dialog.infoMessage("Файл jrxml сохранен");
-		setDeclarationTemplate();
-	}
-
-    @Override
-    public void uploadDectResponseWithErrorUuid(String uuid) {
-        LogAddEvent.fire(this, uuid);
-        Dialog.errorMessage("Не удалось импортировать шаблон");
-    }
-
-    @Override
-	public void uploadDectFail(String msg) {
-        Dialog.errorMessage("Ошибка: " + msg);
-	}
-
     @Override
     public int getDeclarationId() {
         return declarationTemplate.getId() != null ? declarationTemplate.getId() : 0;
@@ -336,15 +308,26 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         addToPopupSlot(versionHistoryPresenter);
     }
 
+    private static String respPattern = "(<pre.*>)(.*)(</pre>)";
     @Override
     protected void onBind() {
         super.onBind();
-        ValueChangeHandler<String> declarationValueChangeHandler = new ValueChangeHandler<String>() {
+
+        FormPanel.SubmitCompleteHandler submitCompleteHandler = new FormPanel.SubmitCompleteHandler() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                declarationTemplate.setXsdId(event.getValue());
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                String uuid = event.getResults().replaceAll(respPattern, "$2");
+                LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                if (uuid.isEmpty()){
+                    Dialog.infoMessage("Файл загружен");
+                    return;
+                }
+                JSONValue jsonValue = JSONParser.parseLenient(uuid);
+                String value = jsonValue.isObject().get("errorUuid").toString().replaceAll("\"", "").trim();
+                LogAddEvent.fire(DeclarationTemplatePresenter.this, value);
+                Dialog.errorMessage("Не удалось импортировать шаблон");
             }
         };
-        getView().addDeclarationValueHandler(declarationValueChangeHandler);
+        getView().addSubmitHandler(submitCompleteHandler);
     }
 }

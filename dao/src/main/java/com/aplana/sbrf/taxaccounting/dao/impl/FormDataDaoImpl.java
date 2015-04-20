@@ -144,11 +144,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     @Transactional(readOnly = false)
     public void savePerformerSigner(FormData formData) {
-        if (formData.getPerformer() != null &&
-                (StringUtils.hasLength(formData.getPerformer().getName())
-                        || StringUtils.hasLength(formData.getPerformer().getPhone())
-                        || formData.getPerformer().getPrintDepartmentId() != null)
-                ) {
+        if (formData.getPerformer() != null) {
             formPerformerDao.save(formData.getId(), formData.isManual(), formData.getPerformer());
         }
         if (formData.getSigners() != null) {

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -37,7 +39,10 @@ public class SaveConfigurationHandler extends
     private DepartmentService departmentService;
 
     @Autowired
-    LogEntryService logEntryService;
+    private LogEntryService logEntryService;
+
+    @Autowired
+    private LockDataService lockDataService;
 
     public SaveConfigurationHandler() {
         super(SaveConfigurationAction.class);
@@ -46,37 +51,43 @@ public class SaveConfigurationHandler extends
     @Override
     public SaveConfigurationResult execute(SaveConfigurationAction action,
                                            ExecutionContext context) throws ActionException {
-        Logger logger = new Logger();
-        // Дубли ТБ можно проверить только на клиенте, т.к. структура хранения уже не допкскает дубли, поэтому проверка
-        // на клиенте, а сообщения на сервере
-        if (!action.getDublicateDepartmentIdSet().isEmpty()) {
-            for (int departmentId : action.getDublicateDepartmentIdSet()) {
-                Department department = departmentService.getDepartment(departmentId);
-                logger.error(UNIQUE_DEPARTMENT_ERROR, department.getName());
-            }
-        }
 
-        for (Map.Entry<Integer, Set<String>> entry : action.getNotSetFields().entrySet()) {
-            Integer departmentId = entry.getKey();
-            if (departmentId != null) {
-                Department department = departmentService.getDepartment(departmentId);
-                for (String fieldName : entry.getValue()) {
-                    logger.error(NOT_SET_ERROR, fieldName, department.getName());
-                }
-            } else {
-                for (String fieldName : entry.getValue()) {
-                    logger.error(NOT_SET_DEPARTMENT_ERROR, fieldName);
+        if (!lockDataService.isLockExists(LockData.LockObjects.CONFIGURATION_PARAMS.name(), true)) {
+            Logger logger = new Logger();
+
+            // Дубли ТБ можно проверить только на клиенте, т.к. структура хранения уже не допкскает дубли, поэтому проверка
+            // на клиенте, а сообщения на сервере
+            if (!action.getDublicateDepartmentIdSet().isEmpty()) {
+                for (int departmentId : action.getDublicateDepartmentIdSet()) {
+                    Department department = departmentService.getDepartment(departmentId);
+                    logger.error(UNIQUE_DEPARTMENT_ERROR, department.getName());
                 }
             }
-        }
 
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            configurationService.saveAllConfig(securityService.currentUserInfo(), action.getModel(), logger);
-        }
+            for (Map.Entry<Integer, Set<String>> entry : action.getNotSetFields().entrySet()) {
+                Integer departmentId = entry.getKey();
+                if (departmentId != null) {
+                    Department department = departmentService.getDepartment(departmentId);
+                    for (String fieldName : entry.getValue()) {
+                        logger.error(NOT_SET_ERROR, fieldName, department.getName());
+                    }
+                } else {
+                    for (String fieldName : entry.getValue()) {
+                        logger.error(NOT_SET_DEPARTMENT_ERROR, fieldName);
+                    }
+                }
+            }
 
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException("Ошибки при сохранении конфигурационных параметров.",
-                    logEntryService.save(logger.getEntries()));
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                configurationService.saveAllConfig(securityService.currentUserInfo(), action.getModel(), logger);
+            }
+
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException("Ошибки при сохранении конфигурационных параметров.",
+                        logEntryService.save(logger.getEntries()));
+            }
+        } else {
+            throw new ActionException("Нельзя изменить конфигурационные параметры во время загрузки ТФ.");
         }
         return new SaveConfigurationResult();
     }

@@ -1,10 +1,10 @@
 package refbook.currency_rate
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.model.util.Pair
 import groovy.transform.Field
 
 import javax.xml.namespace.QName
@@ -22,13 +22,67 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importFromXML()
         break
+    case FormDataEvent.SAVE:
+        save()
+        break
 }
 
 @Field
-def REFBOOK_ID = 22
+int REFBOOK_ID = 22
 
 @Field
 def EMPTY_DATA_ERROR = "Сообщение не содержит значений, соответствующих загружаемым данным!"
+
+//// Кэши и константы
+@Field
+def recordCache = [:]
+@Field
+def refBookCache = [:]
+
+@Field
+def sdf = new SimpleDateFormat('dd.MM.yyyy')
+
+/**
+ * Аналог FormDataServiceImpl.getRefBookRecord(...) но ожидающий получения из справочника больше одной записи.
+ * @return первая из найденных записей
+ */
+def getRecord(def refBookId, def filter, Date date) {
+    if (refBookId == null) {
+        return null
+    }
+    String dateStr = sdf.format(date)
+    if (recordCache.containsKey(refBookId)) {
+        Long recordId = recordCache.get(refBookId).get(dateStr + filter)
+        if (recordId != null) {
+            if (refBookCache != null) {
+                def key = getRefBookCacheKey(refBookId, recordId)
+                return refBookCache.get(key)
+            } else {
+                def retVal = new HashMap<String, RefBookValue>()
+                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
+                return retVal
+            }
+        }
+    } else {
+        recordCache.put(refBookId, [:])
+    }
+
+    def provider = refBookFactory.getDataProvider(refBookId)
+
+    def records = provider.getRecords(date, null, filter, null)
+    // отличие от FormDataServiceImpl.getRefBookRecord(...)
+    if (records.size() > 0) {
+        def retVal = records.get(0)
+        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
+        recordCache.get(refBookId).put(dateStr + filter, recordId)
+        if (refBookCache != null) {
+            def key = getRefBookCacheKey(refBookId, recordId)
+            refBookCache.put(key, retVal)
+        }
+        return retVal
+    }
+    return null
+}
 
 void importFromXML() {
     def dataProvider = refBookFactory.getDataProvider(REFBOOK_ID)
@@ -51,8 +105,6 @@ void importFromXML() {
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE)
         reader = factory.createXMLStreamReader(inputStream)
 
-        def currencyDataProvider = refBookFactory.getDataProvider(15)
-
         while (reader.hasNext()) {
             if (reader.startElement) {
 
@@ -69,9 +121,9 @@ void importFromXML() {
                 // Код валюты
                 if (currencySector && reader.getName().equals(QName.valueOf("Code"))) {
                     def String val = reader.getElementText()
-                    def records = currencyDataProvider.getRecords(version, null, "LOWER(CODE) = LOWER('$val')", null)
-                    if (records.size() > 0) {
-                        code = records.get(0).record_id.numberValue
+                    def record = getRecord(15, "LOWER(CODE) = LOWER('$val')", version)
+                    if (record != null) {
+                        code = record.record_id.numberValue
                     } else {
                         code = null
                         logger.warn("В справочнике «Общероссийский классификатор валют» отсутствует элемент с кодом '$val'")
@@ -117,29 +169,46 @@ void importFromXML() {
     }
 
     // Получение идентификаторов строк
-    def filterStr = ''
-    fileRecords.each { record ->
-        filterStr += ((record == fileRecords.getAt(0)) ? "" : " or ") + " CODE_NUMBER = " + record.CODE_NUMBER.referenceValue
+    StringBuilder filterVersion = new StringBuilder("")
+    fileRecords.eachWithIndex { record, index ->
+        filterVersion.append((index == 0) ? "" : " or ").append(" CODE_NUMBER = ").append(record.CODE_NUMBER.referenceValue)
     }
 
-    def recordIds = dataProvider.getUniqueRecordIds(null, filterStr)
+    //Получаем те записи, актуальные на дату version
+    def recordIds = dataProvider.getUniqueRecordIds(version, filterVersion.toString())
 
     // Получение записей
     def existRecords = [:]
     if (recordIds != null && !recordIds.empty) {
-        def size = recordIds.size()
-        def delta = 1000
-        for (int start = 0; start < size; start += delta) {
-            def end = ((start + delta > size) ? size : (start + delta)) - 1
-            def subExistRecords = dataProvider.getRecordData(recordIds[start..end])
-            existRecords.putAll(subExistRecords)
-        }
+        existRecords = dataProvider.getRecordData(recordIds)
     }
 
     // CODE_NUMBER → Запись
     def existMap = [:]
     existRecords.each { key, record ->
         existMap.put(record.CODE_NUMBER.referenceValue, record)
+    }
+
+    // на невероятный случай загрузки курса до первой версии, чтобы корректно нашел запись
+    def preVersionFileRecords = fileRecords.findAll { record ->
+        existMap[record.CODE_NUMBER.referenceValue] == null
+    }
+
+    if (preVersionFileRecords != null && !preVersionFileRecords.isEmpty()) {
+        def filterPreVersion = new StringBuilder("")
+        preVersionFileRecords.eachWithIndex { record, index ->
+            filterPreVersion.append((index == 0) ? "" : " or ").append(" CODE_NUMBER = ").append(record.CODE_NUMBER.referenceValue)
+        }
+        // ищем без привязки к версии
+        def preVersionRecordIds = dataProvider.getUniqueRecordIds(null, filterPreVersion.toString())
+
+        def preVersionRecords = [:]
+        if (preVersionRecordIds != null && !preVersionRecordIds.empty) {
+            preVersionRecords = dataProvider.getRecordData(preVersionRecordIds)
+        }
+        preVersionRecords.each { key, record ->
+            existMap.put(record.CODE_NUMBER.referenceValue, record)
+        }
     }
 
     fileRecords.each { record ->
@@ -163,4 +232,10 @@ void importFromXML() {
         dataProvider.updateRecordsWithoutLock(userInfo, version, updateList)
     }
     scriptStatusHolder.setSuccessCount(insertList.size() + updateList.size())
+}
+
+void save() {
+    saveRecords.each {
+        it.CODE_LETTER.value = it.NAME.value = it.CODE_NUMBER.value
+    }
 }

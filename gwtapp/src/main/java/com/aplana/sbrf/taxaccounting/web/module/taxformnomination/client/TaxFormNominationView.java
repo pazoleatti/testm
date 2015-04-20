@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
@@ -88,15 +89,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		protected void onRangeChanged(HasData<FormTypeKind> display) {
 			if (getUiHandlers() != null){
 				final Range range = display.getVisibleRange();
-				TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT_FULL_NAME;
-				boolean asc = true;
-				if(formGrid.getColumnSortList().size()>0){
-					ColumnSortList.ColumnSortInfo columnSortInfo = formGrid.getColumnSortList().get(0);
-					sort = TaxNominationColumnEnum.valueOf(columnSortInfo.getColumn().getDataStoreName());
-					asc = columnSortInfo.isAscending();
-				}
-
-				getUiHandlers().onFormRangeChange(range.getStart(), range.getLength(), sort, asc);
+                Pair<TaxNominationColumnEnum, Boolean> sort = getSort();
+				getUiHandlers().onFormRangeChange(range.getStart(), range.getLength(), sort.getFirst(), sort.getSecond());
 			}
 		}
 	};
@@ -475,6 +469,18 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
     @Override
     public FlexiblePager getDeclarationPager() {
         return declarationPager;
+    }
+
+    @Override
+    public Pair<TaxNominationColumnEnum, Boolean> getSort() {
+        TaxNominationColumnEnum sort = TaxNominationColumnEnum.DEPARTMENT_FULL_NAME;
+        Boolean asc = true;
+        if(formGrid.getColumnSortList().size()>0){
+            ColumnSortList.ColumnSortInfo columnSortInfo = formGrid.getColumnSortList().get(0);
+            sort = TaxNominationColumnEnum.valueOf(columnSortInfo.getColumn().getDataStoreName());
+            asc = columnSortInfo.isAscending();
+        }
+        return new Pair<TaxNominationColumnEnum, Boolean>(sort, asc);
     }
 
 }

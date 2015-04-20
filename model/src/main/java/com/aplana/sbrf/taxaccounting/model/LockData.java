@@ -16,14 +16,18 @@ public final class LockData {
         DECLARATION_DATA,
         DECLARATION_CREATE,
         FORM_DATA,
-        FORM_DATA_IMPORT,
-        FORM_DATA_CREATE,
+        FORM_DATA_IMPORT,      //Блокировка при импорте xls
+        FORM_DATA_CREATE,      //Блокировка при создании вручную, через интерфейс
         DECLARATION_TEMPLATE,
         FORM_TEMPLATE,
         LOG_SYSTEM_BACKUP,
         LOG_SYSTEM_CSV,
         IFRS,
-        FILE
+        FILE,
+        CONFIGURATION_PARAMS,
+        SCHEDULER_TASK,
+        XSD_VALIDATION,
+        LOAD_TRANSPORT_DATA     //Для задач асинх загрузки ТФ
     }
 
 	/* Идентификатор блокировки */

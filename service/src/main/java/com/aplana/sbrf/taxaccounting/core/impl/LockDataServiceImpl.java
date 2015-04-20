@@ -113,7 +113,7 @@ public class LockDataServiceImpl implements LockDataService {
                                         "пользователем \"%s\"(%s).", blocker.getLogin(), blocker.getId()));
                             }
                             dao.deleteLock(key);
-                        } else {
+                        } else if (!force) {
                             log.warn(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
                         }
                     }

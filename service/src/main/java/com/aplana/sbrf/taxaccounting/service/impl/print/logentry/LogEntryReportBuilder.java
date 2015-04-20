@@ -24,6 +24,7 @@ public class LogEntryReportBuilder extends AbstractReportBuilder {
 
 	
 	public LogEntryReportBuilder(List<LogEntry> list){
+        super("log", ".xlsx");
         this.list = list;
 		this.workBook = new XSSFWorkbook();
 		this.sheet = workBook.createSheet("Учет налогов");

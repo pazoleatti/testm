@@ -5,9 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,31 +26,34 @@ public abstract class AbstractReportBuilder {
 
     protected Map<Integer, Integer> widthCellsMap = new HashMap<Integer, Integer>();
 
+    private String prefix;
+    private String postfix;
+
+    protected AbstractReportBuilder() {
+        this.prefix = "";
+        this.postfix = "";
+    }
+
+    protected AbstractReportBuilder(String fileName, String postfix) {
+        this.prefix = fileName;
+        this.postfix = postfix;
+    }
+
     /**
      * Формирование отчета. Условно разбит на шесть частей.
      * Порядок формирования заголовка и шапки таблицы в такой последовательности не случайно,
      * а по причине наличия нулевых столбцов в налоговых отчетах, чтобы потом некоторые значения не пропали.
-     * @return массив byte[]
+     * @return путь до сформированного файла
      * @throws IOException
      */
-    public final byte[] createBlobData() throws IOException  {
+    public final String createReport() throws IOException {
         fillHeader();
         createTableHeaders();
         createDataForTable();
         cellAlignment();
         fillFooter();
         setPrintSetup();
-        return flushBlobData();
-    }
-
-    public final File createBlobDataFile() throws IOException  {
-        fillHeader();
-        createTableHeaders();
-        createDataForTable();
-        cellAlignment();
-        fillFooter();
-        setPrintSetup();
-        return flushBlobDataFile();
+        return flush();
     }
 
     protected void cellAlignment() {
@@ -89,15 +90,12 @@ public abstract class AbstractReportBuilder {
         //Nothing
     }
 
-    protected byte[] flushBlobData() throws IOException {
-        ByteArrayOutputStream data = new ByteArrayOutputStream();
-        workBook.write(data);
+    protected String flush() throws IOException {
+        File file = File.createTempFile(prefix, postfix);
+        OutputStream out = new FileOutputStream(file);
+        workBook.write(out);
 
-        return data.toByteArray();
-    }
-
-    protected File flushBlobDataFile() throws IOException {
-        return null;
+        return file.getAbsolutePath();
     }
 
     /**

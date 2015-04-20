@@ -14,6 +14,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.ReportService" />
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.core.api.LockDataService" />
+    </bean>
     
     <bean id="validateService" class="com.aplana.sbrf.taxaccounting.service.impl.ValidateXMLServiceImpl"/>
 

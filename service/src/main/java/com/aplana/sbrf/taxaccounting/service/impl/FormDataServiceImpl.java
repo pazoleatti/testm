@@ -550,7 +550,9 @@ public class FormDataServiceImpl implements FormDataService {
 
     private void checkPerformer(Logger logger, FormData formData) {
         boolean check = true;
-        if (formData.getPerformer() == null || formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null || formData.getSigners().size() == 0) {
+        if (formData.getPerformer() == null || formData.getPerformer().getPrintDepartmentId() == null || formData.getSigners().size() == 0 ||
+                    formData.getPerformer().getReportDepartmentName() == null || formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null ||
+                    formData.getPerformer().getReportDepartmentName().trim().isEmpty() || formData.getPerformer().getName().trim().isEmpty() || formData.getPerformer().getPhone().trim().isEmpty()) {
             check = false;
         }
         if (check)
@@ -938,9 +940,9 @@ public class FormDataServiceImpl implements FormDataService {
         for (DepartmentFormType destinationDFT : destinationDFTs){
             DepartmentReportPeriod destinationDRP =
                     departmentReportPeriodService.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
-            FormData sourceForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
+            FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
                     destinationDRP.getId(), formData.getPeriodOrder());
-            if (sourceForm != null && sourceForm.getState() != WorkflowState.CREATED){
+            if (destinationForm != null && destinationForm.getState() != WorkflowState.CREATED){
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(formData.getDepartmentId()).getName(),
                         formData.getKind().getName(),
@@ -1027,6 +1029,7 @@ public class FormDataServiceImpl implements FormDataService {
             //3. Консолидируем
             HashSet<Long> srcIds = new HashSet<Long>(departmentFormTypesSources.size());
             msgPull.clear();
+
             for (DepartmentFormType sourceDFT : departmentFormTypesSources){
                 DepartmentReportPeriod sourceDepartmentReportPeriod =
                         departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
@@ -1038,14 +1041,17 @@ public class FormDataServiceImpl implements FormDataService {
                 if (sourceForm==null){
                     continue;
                 }
+                if (!sourceForm.getState().equals(WorkflowState.ACCEPTED)) {
+                    continue;
+                }
                 ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
                 scriptComponentContext.setUserInfo(userInfo);
                 scriptComponentContext.setLogger(logger);
                 FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
                 ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
                 Integer periodOrder =
-                        (sourceForm.getKind() == FormDataKind.PRIMARY || sourceForm.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
-                formDataCompositionService.compose(sourceForm, sourceDepartmentReportPeriod.getId(),
+                        (formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;
+                formDataCompositionService.compose(formData, sourceDepartmentReportPeriod.getId(),
                         periodOrder, sourceDFT.getFormTypeId(), sourceDFT.getKind());
 
                 srcIds.add(sourceForm.getId());

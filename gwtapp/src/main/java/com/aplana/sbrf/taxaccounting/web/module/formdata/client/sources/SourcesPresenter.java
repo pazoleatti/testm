@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SourcesAction;
@@ -51,6 +52,11 @@ public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> i
     public void setFormData(FormData formData) {
         this.formData = formData;
         reloadData();
+    }
+
+    @Override
+    public TaxType getTaxType() {
+        return formData.getFormType().getTaxType();
     }
 }
 

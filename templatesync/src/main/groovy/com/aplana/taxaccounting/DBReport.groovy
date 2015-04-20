@@ -73,7 +73,7 @@ class DBReport {
                 table(class: 'rt') {
                     Main.TAX_FOLDERS.keySet().each { taxName ->
                         tr {
-                            td(colspan: 14, class: 'hdr', Main.TAX_FOLDERS[taxName])
+                            td(colspan: 16, class: 'hdr', Main.TAX_FOLDERS[taxName])
                         }
                         tr {
                             th(rowspan: 2, 'type_id')
@@ -81,11 +81,12 @@ class DBReport {
                             th(rowspan: 2, 'Версия')
                             th(rowspan: 2, "$prefix1 id")
                             th(rowspan: 2, "$prefix2 id")
-                            th(colspan: 10, 'Результат сравнения')
+                            th(colspan: 11, 'Результат сравнения')
                         }
                         tr {
                             th 'name'
                             th 'fullname'
+                            th 'header'
                             th 'fixedrows'
                             th 'datarows'
                             th 'dataheaders'
@@ -138,6 +139,7 @@ class DBReport {
                                     // Признак сравнения
                                     def nameC = tmp1?.name == tmp2?.name ? '+' : '—'
                                     def fullnameC = tmp1?.fullname == tmp2?.fullname ? '+' : '—'
+                                    def codeC = tmp1?.code == tmp2?.code ? '+' : '—'
                                     def fixedrowsC = tmp1?.fixed_rows == tmp2?.fixed_rows ? '+' : '—'
                                     def datarowsC = dataRowsEqual ? '+' : '—'
                                     def dataheadersC = tmp1?.data_headers == tmp2?.data_headers ? '+' : '—'
@@ -301,6 +303,12 @@ class DBReport {
                                             td(class: 'td_ok', fullnameC)
                                         } else {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.fullname}, $prefix2 = ${tmp2?.fullname}", fullnameC)
+                                        }
+
+                                        if (codeC == '+') {
+                                            td(class: 'td_ok', codeC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.code}, $prefix2 = ${tmp2?.code}", codeC)
                                         }
 
                                         if (fixedrowsC == '+') {

@@ -14,8 +14,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -35,7 +33,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     FileUpload uploader;
 
     @UiField
-    FormPanel uploadFormDataXls;
+    FormPanel uploadData;
 
     @UiField
     LinkButton uploadButton;
@@ -61,18 +59,28 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     }
 
     public interface IconResource extends ClientBundle{
-        @Source("importIcon.png")
+        @Source("up_cc.png")
         ImageResource icon();
     }
 
     private String value;
+    private boolean isSimpleButton;
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String actionTempUrl = "upload/uploadController/patterntemp/";
     private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
+    private String extension;
 
     @Override
     public String getValue() {
         return value;
+    }
+
+    /**
+     * Устанавливает расширение файлов желаемых для загрузки
+     * @param extension расширение
+     */
+    public void setExtension(String extension) {
+        this.extension = extension;
     }
 
     @Override
@@ -88,9 +96,31 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         }
     }
 
+    /**
+     * По умолчанию используются стандартные url для загрузки файлов на сервер,
+     * но возможны специфичные контроллеры(напрcимер, для деклараций)
+     * @param actionUrl - url контроллера, который будет обрабатывать запрос
+     */
+    public void setActionUrl(String actionUrl){
+        uploadData.setAction(GWT.getHostPageBaseURL() + actionUrl);
+    }
+
+    /**
+     * Используется чтобы установить является кнопка для загрузки файла на сервер и дальнейшего сохранения в бд.
+     * Иначе просто чтобы прокинуть файл на сервер и вернуть его содержимое
+     * (сделано так как работа с файловой системой с клента возможна только с поддержкой html5)
+     * @param simpleButton false - с сохранением в бд
+     */
     public void setSimpleButton(boolean simpleButton){
+        this.isSimpleButton = simpleButton;
+        uploadData.setAction(simpleButton ?
+                GWT.getHostPageBaseURL() + actionTempUrl : GWT.getHostPageBaseURL() + actionUrl);
         uploadButton.setVisible(!simpleButton);
         justButton.setVisible(simpleButton);
+    }
+
+    public HandlerRegistration addSubmitCompleteHandler(FormPanel.SubmitCompleteHandler handler) {
+        return uploadData.addHandler(handler, FormPanel.SubmitCompleteEvent.getType());
     }
 
     @Override
@@ -114,21 +144,35 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     @UiConstructor
     public FileUploadWidget() {
         initWidget(uiBinder.createAndBindUi(this));
-        uploadFormDataXls.setAction(GWT.getHostPageBaseURL() + actionUrl);
-        uploadFormDataXls.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+        uploadData.setAction(GWT.getHostPageBaseURL() + actionUrl);
+        uploadData.addSubmitHandler(new FormPanel.SubmitHandler() {
+            @Override
+            public void onSubmit(FormPanel.SubmitEvent event) {
+                String fileName = uploader.getFilename();
+                int dotPos = fileName.lastIndexOf('.') + 1;
+                String ext = fileName.substring(dotPos);
+                if (extension != null && !ext.equals(extension)){
+                    throw new RuntimeException("Необходимо расширение файла " + extension);
+                }
+            }
+        });
+        uploadData.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains("uuid")) {
-                    String uuid = event.getResults().replaceAll(jsonPattern, "$2");
-                    JSONValue jsonValue = JSONParser.parseLenient(uuid);
-                    String value = jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim();
-                    EndLoadFileEvent.fire(FileUploadWidget.this, value);
-                    setValue(value, true);
-                } else {
+                if (!isSimpleButton) {
                     EndLoadFileEvent.fire(FileUploadWidget.this, true);
-                    setValue("");
+                    /*if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains("uuid")) {
+                        String uuid = event.getResults().replaceAll(jsonPattern, "$2");
+                        JSONValue jsonValue = JSONParser.parseLenient(uuid);
+                        String value = jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim();
+                        EndLoadFileEvent.fire(FileUploadWidget.this, value);
+                        setValue(value, true);
+                    } else {
+                        EndLoadFileEvent.fire(FileUploadWidget.this, true);
+                        setValue("");
+                    }
+                    uploadData.reset();*/
                 }
-                uploadFormDataXls.reset();
             }
         });
         uploader.getElement().setId("uploaderWidget");
@@ -136,7 +180,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             @Override
             public void onChange(ChangeEvent event) {
                 StartLoadFileEvent.fire(FileUploadWidget.this, uploader.getFilename());
-                uploadFormDataXls.submit();
+                uploadData.submit();
             }
         });
     }
@@ -150,18 +194,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     private void uploaderClick(){
         uploader.getElement().<InputElement>cast().click();
-    }
-
-    /**
-     * Метод для совместимости с прошлой версией.
-     * Сейчас используется всегда uploadAsTemporal = false
-     * @param asTemporal true - через создание временной записи, false - сохраненние в постоянное хранилище
-     */
-    public void setUploadAsTemporal(boolean asTemporal){
-        if (asTemporal)
-            uploadFormDataXls.setAction(GWT.getHostPageBaseURL() + actionTempUrl);
-        else
-            uploadFormDataXls.setAction(GWT.getHostPageBaseURL() + actionUrl);
     }
 
     public void setText(String text) {

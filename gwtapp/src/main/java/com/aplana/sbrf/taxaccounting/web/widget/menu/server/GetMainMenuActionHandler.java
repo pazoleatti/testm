@@ -249,7 +249,7 @@ public class GetMainMenuActionHandler extends
                         + DeclarationTemplateTokens.declarationTemplateList));
                 templateMenu.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN
                         + RefBookListTokens.REFBOOK_LIST_ADMIN));
-                templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK));
+                templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK, "", "_blank"));
                 templateMenu.getSubMenu().add(new MenuItem("Экспорт макетов", DOWNLOAD_ALL_TEMPLATES));
             }
 
