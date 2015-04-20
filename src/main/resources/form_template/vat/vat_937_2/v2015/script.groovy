@@ -735,14 +735,6 @@ void importTransportData() {
     char SEPARATOR = '|'
     char QUOTE = '\''
 
-importTransportData() {
-    int COLUMN_COUNT = 20
-    int TOTAL_ROW_COUNT = 1
-    int ROW_MAX = 1000
-    def DEFAULT_CHARSET = "cp866"
-    char SEPARATOR = '|'
-    char QUOTE = '\''
-
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     dataRowHelper.clear()
 

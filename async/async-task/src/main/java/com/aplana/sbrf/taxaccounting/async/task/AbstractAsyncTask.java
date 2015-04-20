@@ -67,7 +67,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     public void execute(final Map<String, Object> params) {
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
-        log.info(String.format("Запущена асинхронная задача с ключом %s и датой окончания %s", lock, sdf.format(lockDateEnd)));
+        log.info(String.format("Запущена асинхронная задача с ключом %s и датой окончания %s", lock, sdf.format(lockDate)));
         transactionHelper.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
