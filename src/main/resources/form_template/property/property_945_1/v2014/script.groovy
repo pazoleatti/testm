@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation
 import com.aplana.sbrf.taxaccounting.model.Formats
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import au.com.bytecode.opencsv.CSVReader
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -873,54 +875,135 @@ void addData(def xml, int headRowCount) {
 }
 
 void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 7, 0)
+    int COLUMN_COUNT = 7
+    int TOTAL_ROW_COUNT = 0
+    int ROW_MAX = 1000
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
 
-    addTransportData(xml)
-}
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
 
-void addTransportData(def xml) {
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-    def rows = []
-    def int rowIndex = 1
+    dataRowHelper.clear()
 
-    for (def row : xml.row) {
-        rnuIndexRow++
+    String[] rowCells
+    int countEmptyRow = 0	// количество пустых строк
+    int fileRowIndex = 0    // номер строки в файле
+    int rowIndex = 0        // номер строки в НФ
+    int totalRowCount = 0   // счетчик кол-ва итогов
+    def total = null		// итоговая строка со значениями из тф для добавления
+    def newRows = []
 
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    while ((rowCells = reader.readNext()) != null) {
+        fileRowIndex++
+
+        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+        if (isEmptyRow) {
+            if (countEmptyRow > 0) {
+                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+                totalRowCount++
+                // итоговая строка тф
+                total = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                break
+            }
+            countEmptyRow++
+            continue
+        }
+
+        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
+        // обычная строка
+        if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
             break
         }
 
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
-
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
+        // периодически сбрасываем строки
+        if (newRows.size() > ROW_MAX) {
+            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+            newRows.clear()
         }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        // графа 1
-        newRow.name = row.cell[1].text()
-        // графа 2
-        newRow.taxBase1 = parseNumber(row.cell[2].text(), rnuIndexRow, 2 + colOffset, logger, true)
-        // графа 3
-        newRow.taxBase2 = parseNumber(row.cell[3].text(), rnuIndexRow, 3 + colOffset, logger, true)
-        // графа 4
-        newRow.taxBase3 = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
-        // графа 5
-        newRow.taxBase4 = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
-        // графа 6
-        newRow.taxBase5 = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
-        // графа 7
-        newRow.taxBaseSum = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
-
-        rows.add(newRow)
     }
-    dataRowHelper.save(rows)
+    reader.close()
+
+    // проверка итоговой строки
+    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
+        logger.error(ROW_FILE_WRONG, fileRowIndex)
+    }
+
+    if (newRows.size() != 0) {
+        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+    }
+}
+
+/** Добавляет строку в текущий буфер строк. */
+boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    if (rowCells == null) {
+        return true
+    }
+    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
+    if (newRow == null) {
+        return false
+    }
+    rows.add(newRow)
+    return true
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
+    }
+
+    def int colOffset = 1
+
+    // графа 1
+    newRow.name = pure(rowCells[1])
+    // графа 2
+    newRow.taxBase1 = parseNumber(pure(rowCells[2]), fileRowIndex, 2 + colOffset, logger, true)
+    // графа 3
+    newRow.taxBase2 = parseNumber(pure(rowCells[3]), fileRowIndex, 3 + colOffset, logger, true)
+    // графа 4
+    newRow.taxBase3 = parseNumber(pure(rowCells[4]), fileRowIndex, 4 + colOffset, logger, true)
+    // графа 5
+    newRow.taxBase4 = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
+    // графа 6
+    newRow.taxBase5 = parseNumber(pure(rowCells[6]), fileRowIndex, 6 + colOffset, logger, true)
+    // графа 7
+    newRow.taxBaseSum = parseNumber(pure(rowCells[7]), fileRowIndex, 7 + colOffset, logger, true)
+
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */

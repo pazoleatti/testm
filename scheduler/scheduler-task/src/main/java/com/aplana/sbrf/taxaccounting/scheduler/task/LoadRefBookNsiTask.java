@@ -33,7 +33,7 @@ import java.util.UUID;
 @Remote(UserTaskRemote.class)
 @Stateless
 @Interceptors(SchedulerInterceptor.class)
-public class LoadRefBookNsiTask implements UserTask {
+public class LoadRefBookNsiTask extends AbstractUserTask {
 
     @Autowired
     LoadRefBookDataService loadRefBookDataService;
@@ -45,7 +45,7 @@ public class LoadRefBookNsiTask implements UserTask {
     private LockDataService lockDataService;
 
     @Override
-    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+    public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         lockDataService.lock(key, userId, lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
         try {

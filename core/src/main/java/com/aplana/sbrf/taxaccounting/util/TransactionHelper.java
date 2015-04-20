@@ -6,6 +6,7 @@ package com.aplana.sbrf.taxaccounting.util;
  * Для решения этой проблемы, транзакция создается вручную
  * @author dloshkarev
  */
+@ScriptExposed
 public interface TransactionHelper {
     /**
      * Выполняет указанную логику в новой транзакции

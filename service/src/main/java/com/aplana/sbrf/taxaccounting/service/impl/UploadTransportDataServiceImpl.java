@@ -165,7 +165,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                         CheckResult checkResult = checkFileNameAccess(userInfo, entry.getName(), logger);
                         if (checkResult != null) {
                             try {
-                                if (copyFileFromStream(userInfo, zais, checkResult.getPath(), entry.getName(), logger)) {
+                                if (copyFileFromStream(userInfo, zais, checkResult, entry.getName(), logger)) {
                                     if (checkResult.isRefBook()) {
                                         if (loadRefBookDataService.isDiasoftFile(entry.getName())) {
                                             diasoftFileNameList.add(entry.getName());
@@ -211,7 +211,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 CheckResult checkResult = checkFileNameAccess(userInfo, fileName, logger);
                 if (checkResult != null) {
                     try {
-                        if (copyFileFromStream(userInfo, inputStream, checkResult.getPath(),
+                        if (copyFileFromStream(userInfo, inputStream, checkResult,
                                 fileName, logger)) {
                             if (checkResult.isRefBook()) {
                                 if (loadRefBookDataService.isDiasoftFile(fileName)) {
@@ -250,15 +250,25 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     /**
      * Копирование файла из потока в каталог загрузки
      */
-    private boolean copyFileFromStream(TAUserInfo userInfo, InputStream inputStream, String folderPath, String fileName, Logger logger)
+    private boolean copyFileFromStream(TAUserInfo userInfo, InputStream inputStream, CheckResult checkResult, String fileName, Logger logger)
             throws IOException {
-        if (folderPath != null) {
-            FileWrapper file = ResourceUtils.getSharedResource(folderPath + "/" + fileName, false);
+        if (checkResult.getPath() != null) {
+            try {
+                ResourceUtils.getSharedResource(checkResult.getPath() + "/");
+            } catch (Exception e) {
+                if (checkResult.isRefBook()) {
+                    log(userInfo, LogData.L34_1, logger, checkResult.getRefBookName(), fileName);
+                } else {
+                    log(userInfo, LogData.L34_2, logger, departmentService.getDepartment(checkResult.getDepartmentTbId()).getName(), fileName);
+                }
+                return false;
+            }
+            FileWrapper file = ResourceUtils.getSharedResource(checkResult.getPath() + "/" + fileName, false);
             boolean exist = file.exists();
             OutputStream outputStream = file.getOutputStream();
             IOUtils.copy(inputStream, outputStream);
             IOUtils.closeQuietly(outputStream);
-            log(userInfo, LogData.L32, logger, fileName, folderPath);
+            log(userInfo, LogData.L32, logger, fileName, checkResult.getPath());
             if (exist) {
                 logger.info(U1, fileName);
             }
@@ -295,6 +305,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY, 0,
                         DIASOFT_NAME, LogData.L34_1, logger));
                 checkResult.setRefBook(true);
+                checkResult.setRefBookName(DIASOFT_NAME);
                 return checkResult;
             }
 
@@ -302,6 +313,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 checkResult.setPath(getUploadPath(userInfo, fileName, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY, 0,
                         AVG_COST_NAME, LogData.L34_1, logger));
                 checkResult.setRefBook(true);
+                checkResult.setRefBookName(AVG_COST_NAME);
                 return checkResult;
             }
 
@@ -449,6 +461,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private class CheckResult {
         private String path;
         private boolean refBook;
+        private String refBookName;
         Integer departmentTbId;
 
         public String getPath() {
@@ -465,6 +478,14 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
 
         public void setRefBook(boolean refBook) {
             this.refBook = refBook;
+        }
+
+        public String getRefBookName() {
+            return refBookName;
+        }
+
+        public void setRefBookName(String refBookName) {
+            this.refBookName = refBookName;
         }
 
         public Integer getDepartmentTbId() {

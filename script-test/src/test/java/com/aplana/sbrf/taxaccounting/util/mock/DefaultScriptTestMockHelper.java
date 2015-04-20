@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.script.impl.ImportServiceImpl;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -234,6 +235,12 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
     public FormTypeService mockFormTypeService() {
         FormTypeService formTypeService = mock(FormTypeService.class);
         return formTypeService;
+    }
+
+    @Override
+    public TransactionHelper mockTransactionHelper() {
+        TransactionHelper transactionHelper = mock(TransactionHelper.class);
+        return transactionHelper;
     }
 
     /**
