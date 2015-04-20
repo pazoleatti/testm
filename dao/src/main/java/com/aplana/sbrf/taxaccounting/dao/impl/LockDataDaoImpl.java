@@ -107,7 +107,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void unlockAllByUserId(int userId, boolean ignoreError) {
         try {
-            getJdbcTemplate().update("delete from lock_data ld where user_id = ? and not exists (select 1 from lock_data_subscribers lds where lds.lock_key=ld.key)", userId);
+            getJdbcTemplate().update("delete from lock_data ld where user_id = ? and (not exists (select 1 from lock_data_subscribers lds where lds.lock_key=ld.key) or ld.date_before < sysdate)", userId);
         } catch (DataAccessException e) {
             if (ignoreError) {
 				LOG.error(e);

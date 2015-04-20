@@ -21,7 +21,7 @@
         <cell alias="inn" colSpan="1" rowSpan="1" value="ИНН"/>
         <cell alias="balanceNumber" colSpan="1" rowSpan="1" value="Номер балансового счёта учёта суммы арендной платы"/>
         <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма арендной платы, уплаченная арендодателю"/>
-        <cell alias="orderNumber" colSpan="1" rowSpan="1" value="номер мемориального ордера"/>
+        <cell alias="orderNumber" colSpan="1" rowSpan="1" value="Номер мемориального ордера"/>
         <cell alias="ndsSum" colSpan="1" rowSpan="1" value="сумма"/>
         <cell alias="sfDate" colSpan="1" rowSpan="1" value="дата"/>
         <cell alias="sfNumber" colSpan="1" rowSpan="1" value="номер"/>

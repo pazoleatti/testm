@@ -66,9 +66,6 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         break
-    case FormDataEvent.IMPORT_TRANSPORT_FILE:
-        importTransportData()
-        break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
         break
@@ -401,108 +398,6 @@ void addData(def xml, headRowCount) {
 
         rows.add(newRow)
     }
-    dataRowHelper.save(rows)
-}
-
-void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 23, 0)
-    addTransportData(xml)
-}
-
-
-void addTransportData(def xml) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        rnuIndexRow++
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-
-        // графа 1
-
-        // графа 2
-        newRow.emitent = row.cell[2].text()
-
-        // графа 3
-        newRow.decreeNumber = row.cell[3].text()
-
-        // графа 4
-        newRow.inn = row.cell[4].text()
-
-        // графа 5
-        newRow.kpp = row.cell[5].text()
-
-        // графа 6
-        newRow.recType = row.cell[6].text()
-
-        // графа 7
-        newRow.title = row.cell[7].text()
-
-        // графа 8
-        newRow.zipCode = row.cell[8].text()
-
-        // графа 9
-        newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[9].text(), rnuIndexRow, 9 + colOffset, false)
-
-        // графа 10
-        newRow.area = row.cell[10].text()
-
-        // графа 11
-        newRow.city = row.cell[11].text()
-
-        // графа 12
-        newRow.region = row.cell[12].text()
-
-        // графа 13
-        newRow.street = row.cell[13].text()
-
-        // графа 14
-        newRow.homeNumber = row.cell[14].text()
-
-        // графа 15
-        newRow.corpNumber = row.cell[15].text()
-
-        // графа 16
-        newRow.apartment = row.cell[16].text()
-
-        // графа 17
-        newRow.surname = row.cell[17].text()
-
-        // графа 18
-        newRow.name = row.cell[18].text()
-
-        // графа 19
-        newRow.patronymic = row.cell[19].text()
-
-        // графа 20
-        newRow.phone = row.cell[20].text()
-
-        // графа 21
-        newRow.dividendDate = parseDate(row.cell[21].text(), "dd.MM.yyyy", rnuIndexRow, 21 + colOffset, logger, true)
-
-        // графа 22
-        newRow.sumDividend = parseNumber(row.cell[22].text(), rnuIndexRow, 22 + colOffset, logger, true)
-
-        // графа 23
-        newRow.sumTax = parseNumber(row.cell[23].text(), rnuIndexRow, 23 + colOffset, logger, true)
-
-        rows.add(newRow)
-    }
-
     dataRowHelper.save(rows)
 }
 

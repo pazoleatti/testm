@@ -48,6 +48,14 @@ public interface LoadRefBookDataService {
     ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger);
 
     /**
+     * Проверка доступа к каталогам архива и ошибок
+     * @param userInfo
+     * @param logger
+     * @return
+     */
+    boolean checkPathArchiveError(TAUserInfo userInfo, Logger logger);
+
+    /**
      * Соответствие имени файла ТФ справочников, поставляемых ЦАС НСИ:
      * «Коды ОКАТО»
      * «Коды субъектов Российской Федерации»

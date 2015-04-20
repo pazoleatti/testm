@@ -88,16 +88,18 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
                 logger.info("Получен: %s.", catalogStrList.get(0));
             } else {
                 logger.info("Получены: %s.", StringUtils.join(catalogStrList.toArray(), ", ", null));
-            }
+            }                    
             String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
             lockDataService.lock(key, userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
             try {
-                // Импорт справочников из ЦАС НСИ
-                loadRefBookDataService.importRefBookNsi(userInfo, logger);
-                // Импорт справочников из Diasoft Custody
-                loadRefBookDataService.importRefBookDiasoft(userInfo, logger);
-                // Импорт справочников в справочник "Средняя стоимость транспортных средств"
-                loadRefBookDataService.importRefBookAvgCost(userInfo, logger);
+                if (loadRefBookDataService.checkPathArchiveError(securityService.currentUserInfo(), logger)){
+                    // Импорт справочников из ЦАС НСИ
+                    loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
+                    // Импорт справочников из Diasoft Custody
+                    loadRefBookDataService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
+                    // Импорт справочников в справочник "Средняя стоимость транспортных средств"
+                    loadRefBookDataService.importRefBookAvgCost(securityService.currentUserInfo(), logger);
+                }
             } finally {
                 lockDataService.unlock(key, userInfo.getUser().getId());
             }

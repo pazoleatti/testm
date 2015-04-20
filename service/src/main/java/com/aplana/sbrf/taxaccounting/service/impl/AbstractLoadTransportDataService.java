@@ -77,6 +77,9 @@ public abstract class AbstractLoadTransportDataService {
         L37("Не указан путь к каталогу загрузки для %s!", LogLevel.ERROR, true, false),
         L38("Не задан алгоритм загрузки для %s!", LogLevel.ERROR, true, false),
         L41("Файл %s пропущен, т.к. он уже обрабатывается системой.", LogLevel.ERROR, true, false),
+        L42("Нет доступа %s ТБ «%s»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L42_1("Нет доступа %s справочников! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L42_2("Нет доступа к каталогу загрузки «%s» %s! Загрузка не выполнена.", LogLevel.ERROR, true, false),
         // Сообщения которых нет в постановке
         L_1("Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
         L_2("Не указан каталог архива в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false);
@@ -197,9 +200,12 @@ public abstract class AbstractLoadTransportDataService {
             zaos.setEncoding(ZIP_ENCODING);
             zaos.putArchiveEntry(new ZipArchiveEntry(file.getName()));
             InputStream inputStream = file.getInputStream();
-            IOUtils.copy(inputStream, zaos);
-            zaos.closeArchiveEntry();
-            IOUtils.closeQuietly(inputStream);
+			try {
+            	IOUtils.copy(inputStream, zaos);
+            	zaos.closeArchiveEntry();
+			} finally {
+            	IOUtils.closeQuietly(inputStream);
+			}
 
             // Файл с логами, если логи есть
             if (errorList != null && !errorList.isEmpty()) {
@@ -212,7 +218,6 @@ public abstract class AbstractLoadTransportDataService {
                 IOUtils.copy(new ByteArrayInputStream(sb.toString().getBytes()), zaos);
                 zaos.closeArchiveEntry();
             }
-
             IOUtils.closeQuietly(zaos);
 
             // Удаление

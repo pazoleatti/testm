@@ -18,8 +18,8 @@
     </row>
     <row alias="">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" value="КНУ"/>
-        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" value="Группа расходов"/>
-        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" value="Вид расхода по операцям"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1" value="Группа расхода"/>
+        <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" value="Вид расхода по операциям"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" value="Балансовый счёт по учёту расхода"/>
         <cell alias="rnu7Field10Sum" colSpan="1" rowSpan="1" value="РНУ-7 (графа 10) сумма"/>
         <cell alias="rnu7Field12Accepted" colSpan="1" rowSpan="1" value="сумма"/>

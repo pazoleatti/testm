@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.*;
@@ -58,6 +59,7 @@ public class TestScriptHelper {
     private RefBookDataProvider refBookDataProvider;
     private DepartmentReportPeriodService departmentReportPeriodService;
     private FormTypeService formTypeService;
+    private TransactionHelper transactionHelper;
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -113,6 +115,7 @@ public class TestScriptHelper {
         refBookDataProvider = mockHelper.getRefBookDataProvider();
         departmentReportPeriodService = mockHelper.mockDepartmentReportPeriodService();
         formTypeService = mockHelper.mockFormTypeService();
+        transactionHelper = mockHelper.mockTransactionHelper();
     }
 
     /**
@@ -143,6 +146,11 @@ public class TestScriptHelper {
             FormTemplateContent formTemplateContent = (FormTemplateContent) unmarshaller.unmarshal(
                     new InputStreamReader(new FileInputStream(path + CONTENT_FILE_NAME), XML_ENCODING));
             formTemplateContent.fillFormTemplate(formTemplate);
+            // для поправки столбцов с длинными названиями, которые имеют символ переноса
+            for (Column column : formTemplate.getColumns()) {
+                String value = StringUtils.cleanString(column.getName());
+                column.setName(value);
+            }
             // rows.xml
             formTemplate.getRows().clear();
             String rowsString = readFile(path + ROWS_FILE_NAME, XML_ENCODING);

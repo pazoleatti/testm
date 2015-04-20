@@ -54,10 +54,11 @@ public final class SqlUtils {
      * @param size размер идентификаторов в условии in
 	 */
     public static String transformToSqlInStatement(String prefix, Collection<?> collection, int size) {
-        checkListSize(collection);
+        HashSet<Object> set = new HashSet<Object>(collection);
+        checkListSize(set);
 
         List<String> strings = new ArrayList<String>();
-        List<List<?>> lists = new ArrayList<List<?>>(splitCollection(collection, size));
+        List<List<?>> lists = new ArrayList<List<?>>(splitCollection(set, size));
 
         for (List<?> list : lists) {
             StringBuffer buffer = new StringBuffer();

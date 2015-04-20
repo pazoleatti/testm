@@ -1,6 +1,9 @@
 package form_template.income.app5.v2012
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -16,11 +19,11 @@ import groovy.transform.Field
 // графа 3  - regionBankDivision        атрибут 161 NAME "Наименование подразделение" - справочник 30 "Подразделения"
 // графа 4  - divisionName
 // графа 5  - kpp
-// графа 5  - avepropertyPricerageCost
-// графа 6  - workersCount
-// графа 7  - subjectTaxCredit
-// графа 8  - decreaseTaxSum
-// графа 9  - taxRate
+// графа 6  - avepropertyPricerageCost
+// графа 7  - workersCount
+// графа 8  - subjectTaxCredit
+// графа 9  - decreaseTaxSum
+// графа 10 - taxRate
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -174,8 +177,7 @@ void logicCheckBeforeCalc() {
         // 1. Проверка наличия значения «Наименование подразделения» в справочнике «Подразделения»
         def departmentParam
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            departmentParam = getRefBookValue(30, row.regionBankDivision)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
             rowServiceException(row, errorMsg + "Не найдено подразделение территориального банка!")
@@ -194,7 +196,7 @@ void logicCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam)
-        def depId = depParam.get('CODE').getNumberValue().intValue()
+        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
         def departmentName = depParam?.NAME?.stringValue
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
         def incomeParamTable = getIncomeParamTable(depParam)
@@ -238,8 +240,7 @@ void logicCheck() {
 
         def departmentParam
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            departmentParam = getRefBookValue(30, row.regionBankDivision)
         }
         // 1. Проверка на заполнение поля «<Наименование поля>»
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
@@ -305,7 +306,7 @@ void calc() {
 def calc2(def row) {
     def departmentParam
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(), -1, null, false)
+        departmentParam =  getRefBookValue(30, row.regionBankDivision)
     }
     if (departmentParam == null || departmentParam.isEmpty()) {
         return null
@@ -324,8 +325,7 @@ def calc2(def row) {
 def calc4(def row) {
     def departmentParam
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+        departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
@@ -471,7 +471,7 @@ def getNewRow() {
     return newRow
 }
 
-void importTransportData() {
+void importTransportData2() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 10, 1)
     addTransportData(xml)
 }
@@ -568,7 +568,7 @@ def getProvider(def long providerId) {
 // Получение параметров подразделения, форма настроек которого будет использоваться
 // для получения данных (согласно алгоритму 1.8.4.5.1)
 def getDepParam(def departmentParam) {
-    def departmentId = departmentParam.get('CODE').getNumberValue().intValue()
+    def departmentId = departmentParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def departmentType = departmentService.get(departmentId).getType()
     if (departmentType.equals(departmentType.TERR_BANK)) {
         depParam = departmentParam
@@ -582,7 +582,7 @@ def getDepParam(def departmentParam) {
 
 // Получение параметров (справочник 330)
 def getIncomeParamTable(def depParam) {
-    def depId = depParam.get('CODE').getNumberValue().intValue()
+    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
     if (incomeParam != null && !incomeParam.isEmpty()) {
         def link = incomeParam.get(0).record_id.value
@@ -590,4 +590,162 @@ def getIncomeParamTable(def depParam) {
         return incomeParamTable
     }
     return null
+}
+
+void importTransportData() {
+    int COLUMN_COUNT = 10
+    int TOTAL_ROW_COUNT = 1
+    int ROW_MAX = 1000
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.clear()
+
+    String[] rowCells
+    int countEmptyRow = 0	// количество пустых строк
+    int fileRowIndex = 0    // номер строки в файле
+    int rowIndex = 0        // номер строки в НФ
+    int totalRowCount = 0   // счетчик кол-ва итогов
+    def totalTF = null		// итоговая строка со значениями из тф для добавления
+    def newRows = []
+
+    while ((rowCells = reader.readNext()) != null) {
+        fileRowIndex++
+
+        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+        if (isEmptyRow) {
+            if (countEmptyRow > 0) {
+                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+                totalRowCount++
+                // итоговая строка тф
+                totalTF = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                break
+            }
+            countEmptyRow++
+            continue
+        }
+
+        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
+        // обычная строка
+        if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
+            break
+        }
+
+        // периодически сбрасываем строки
+        if (newRows.size() > ROW_MAX) {
+            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+            newRows.clear()
+        }
+    }
+    reader.close()
+
+    // проверка итоговой строки
+    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
+        logger.error(ROW_FILE_WRONG, fileRowIndex)
+    }
+
+    if (newRows.size() != 0) {
+        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+    }
+
+    // сравнение итогов
+    if (totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [
+                'avepropertyPricerageCost' : 6,
+                'workersCount'             : 7,
+                'subjectTaxCredit'         : 8,
+                'decreaseTaxSum'           : 9
+        ]
+        // итоговая строка для сверки сумм
+        def totalRow = getTotalRow(dataRowHelper.allCached)
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+
+        // добавить итоговую строку
+        dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
+    }
+}
+
+/** Добавляет строку в текущий буфер строк. */
+boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    if (rowCells == null) {
+        return true
+    }
+    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
+    if (newRow == null) {
+        return false
+    }
+    dataRowsCut.add(newRow)
+    return true
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
+    }
+
+    def int colOffset = 1
+    def int colIndex = 1
+
+    // графа 2, 3
+    ['regionBank', 'regionBankDivision'].each { alias ->
+        colIndex++
+        newRow[alias] = getRecordIdImport(30, 'NAME', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
+    }
+
+    // графа 4, 5
+    ['divisionName', 'kpp'].each { alias ->
+        colIndex++
+        newRow[alias] = pure(rowCells[colIndex])
+    }
+
+    // графа 6..10
+    ['avepropertyPricerageCost', 'workersCount', 'subjectTaxCredit', 'decreaseTaxSum', 'taxRate'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell).intern()
 }

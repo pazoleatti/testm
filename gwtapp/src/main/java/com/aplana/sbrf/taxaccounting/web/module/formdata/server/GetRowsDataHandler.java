@@ -50,35 +50,41 @@ public class GetRowsDataHandler extends
             action.setManual(false);
         }
 		GetRowsDataResult result = new GetRowsDataResult();
-		// Фиксированные строки из шаблона
+
+        // Фиксированные строки из шаблона
         FormTemplate formTemplate = formTemplateService.get(action.getFormDataTemplateId());
 
-        // Обновление измененных строк во временном срезе
-		if (!action.getModifiedRows().isEmpty()) {
-			dataRowService.update(securityService.currentUserInfo(), action.getFormDataId(),
-					action.getModifiedRows(), action.isManual());
-		}
-        // Отображаемый диапазон строк
-		DataRowRange dataRowRange;
-		if (formTemplate.isFixedRows()) {
-			dataRowRange = new DataRowRange(1, dataRowService.getRowCount(action.getFormDataId(),
-                    action.isReadOnly() || action.isCorrectionDiff(), action.isManual()));
-		} else {
-			dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
-		}
-
-        // Порция строк, режим отображения различий для корр. периода также как и режим редактирования работат со
-        // временным срезом
-        PagingResult<DataRow<Cell>> rows = dataRowService.getDataRows(action.getFormDataId(), dataRowRange,
-                action.isReadOnly() && !action.isCorrectionDiff(), action.isManual());
-
-        Collections.sort(rows, new Comparator<DataRow<Cell>>() {
-            @Override
-            public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
-                return o1.getIndex().compareTo(o2.getIndex());
+        if (!action.isFree()) {
+            // Обновление измененных строк во временном срезе
+            if (!action.getModifiedRows().isEmpty()) {
+                dataRowService.update(securityService.currentUserInfo(), action.getFormDataId(),
+                        action.getModifiedRows(), action.isManual());
             }
-        });
-		result.setDataRows(rows);
+            // Отображаемый диапазон строк
+            DataRowRange dataRowRange;
+            if (formTemplate.isFixedRows()) {
+                dataRowRange = new DataRowRange(1, dataRowService.getRowCount(action.getFormDataId(),
+                        action.isReadOnly() || action.isCorrectionDiff(), action.isManual()));
+            } else {
+                dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
+            }
+
+            // Порция строк, режим отображения различий для корр. периода также как и режим редактирования работат со
+            // временным срезом
+            PagingResult<DataRow<Cell>> rows = dataRowService.getDataRows(action.getFormDataId(), dataRowRange,
+                    action.isReadOnly() && !action.isCorrectionDiff(), action.isManual());
+
+            Collections.sort(rows, new Comparator<DataRow<Cell>>() {
+                @Override
+                public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+                    return o1.getIndex().compareTo(o2.getIndex());
+                }
+            });
+            result.setDataRows(rows);
+        } else {
+            result.setDataRows(new PagingResult<DataRow<Cell>>());
+        }
+
 
         Logger logger = new Logger();
         refBookHelper.dataRowsDereference(logger, result.getDataRows(),

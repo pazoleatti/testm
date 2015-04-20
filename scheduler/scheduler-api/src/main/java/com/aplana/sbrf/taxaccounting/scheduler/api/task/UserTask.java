@@ -15,10 +15,12 @@ import java.util.Map;
 public interface UserTask {
     /**
      * Метод реализующий логику задачи. Вызывается планировщиком.
-     * @param params параметрвы выполнения задачи
+     * @param params параметры выполнения задачи
+     * @param userId идентификатор пользователя, создавшего задачу
+     * @param taskId идентификатор текущей задачи
      * @throws TaskExecutionException
      */
-    void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException;
+    void execute(Map<String, TaskParam> params, int userId, long taskId) throws TaskExecutionException;
 
     /**
      * Возвращает название задачи. Необходимо для отображения списка задач

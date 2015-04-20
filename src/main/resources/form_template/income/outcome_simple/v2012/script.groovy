@@ -55,11 +55,7 @@ switch (formDataEvent) {
         checkRnu14Accepted()
         break
     case FormDataEvent.COMPOSE:
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper?.allCached
-        isBank() ? consolidationBank(dataRows) : consolidationSummary(dataRows)
-        calculationBasicSum(dataRows)
-        dataRowHelper.update(dataRows)
+        consolidation()
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -89,6 +85,12 @@ def resetColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTax
 
 @Field
 def totalColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
+
+@Field
+def formTypeId_RNU7 = 311
+
+@Field
+def formTypeId_RNU5 = 317
 
 @Field
 def formatY = new SimpleDateFormat('yyyy')
@@ -203,6 +205,32 @@ void logicCheck() {
     checkTotalSum(row50002, need50002)
 }
 
+void consolidation() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper?.allCached
+    def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(), getReportPeriodStartDate(), getReportPeriodEndDate())
+    def isFromSummary = isFromSummary(formSources)
+    isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
+    calculationBasicSum(dataRows)
+    dataRowHelper.update(dataRows)
+}
+
+boolean isFromSummary(def formSources) {
+    def isSummarySource = formSources.find { it.formTypeId == formData.formType.id } != null
+    def isPrimarySource = formSources.find { it.formTypeId in [formTypeId_RNU7, formTypeId_RNU5] } != null
+    if (isSummarySource && isPrimarySource) {
+        logger.warn("Неверно настроены источники формы \"%s\" для подразделения \"%s\"! Одновременно указаны в качестве источников сводные и первичные налоговые формы. Консолидация произведена из сводных налоговых форм.",
+                formData.formType.name, formDataDepartment.name)
+        return true
+    } else if (isSummarySource || isPrimarySource) {
+        return isSummarySource
+    } else {
+        logger.warn("Неверно настроены источники формы \"%s\" для подразделения \"%s\"! Не указаны в качестве источников корректные сводные или первичные налоговые формы.",
+                formData.formType.name, formDataDepartment.name)
+        return true
+    }
+}
+
 void calculationBasicSum(def dataRows) {
     def row50001 = getDataRow(dataRows, row50001alias)
     def row50002 = getDataRow(dataRows, row50002alias)
@@ -283,7 +311,7 @@ void calculationControlGraphs(def dataRows) {
 }
 
 /** Скрипт для консолидации данных из сводных расходов простых уровня ОП в сводные уровня банка. */
-def consolidationBank(def dataRows) {
+def consolidationFromSummary(def dataRows, def formSources) {
 
     // очистить форму
     dataRows.each { row ->
@@ -298,8 +326,7 @@ def consolidationBank(def dataRows) {
     }
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    for (departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate())) {
+    formSources.each { departmentFormType ->
         def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             def childData = formDataService.getDataRowHelper(child)
@@ -319,7 +346,7 @@ def consolidationBank(def dataRows) {
 }
 
 /** Консолидация данных из рну-7 и рну-5 в сводные расходы простые уровня ОП. */
-void consolidationSummary(def dataRows) {
+void consolidationFromPrimary(def dataRows, def formSources) {
 
     // очистить форму
     dataRows.each { row ->
@@ -376,14 +403,13 @@ void consolidationSummary(def dataRows) {
     fillRecordsMap(27, 'CODE', knuList, getReportPeriodEndDate())
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
-    departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
-            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+    formSources.each {
         def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def dataRowsChild = formDataService.getDataRowHelper(child)?.allCached
             switch (child.formType.id) {
             // рну 7
-                case 311:
+                case formTypeId_RNU7:
                     ([3, 12] + (15..35) + (39..50) + (52..55) + (57..59) + (63..79) + (92..96) + (99..102) +
                             (104..107) + (182..184) + (191..195) + [200, 205, 206] + (208..212)).each {
                         def alias = 'R' + it
@@ -413,7 +439,7 @@ void consolidationSummary(def dataRows) {
                     break
 
             // рну 5
-                case 317:
+                case formTypeId_RNU5:
                     ((2..107) + (110..212)).each {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
