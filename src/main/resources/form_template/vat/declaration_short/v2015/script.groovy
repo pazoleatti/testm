@@ -447,6 +447,12 @@ void generateXML() {
                             }
                         }
                     }
+                } else if (declarationType == 20) {
+                    СумУплНА(
+                            КБК: '18210301000011000110',
+                            ОКТМО: okato,
+                            СумИсчисл: getSection2Agg(dataRowsMap)
+                    )
                 }
 
                 // РАЗДЕЛ 3
@@ -540,19 +546,6 @@ void generateXML() {
                                     НалВосст: empty
                             )
                         }
-
-                        /*for (def row : dataRowsMap[602]) {
-                            if (row.getAlias() == 'itog') {
-                                continue
-                            }
-                            СумОпер4(
-                                    КодОпер: row.code,
-                                    НалБаза: round(row.base ?: empty),
-                                    НалВычПод: empty,
-                                    НалНеПод: empty,
-                                    НалВосст: empty
-                            )
-                        }*/
                     }
                 }
 
@@ -573,17 +566,6 @@ void generateXML() {
                                     НалНеВыч: round(getNalNeVich(code))
                             )
                         }
-                        /*for (def row : dataRowsMap[601]) {
-                            if (row.getAlias() == 'itog') {
-                                continue
-                            }
-                            СумОпер7(
-                                    КодОпер: row.code,
-                                    СтРеалТов: round(row.realizeCost ?: empty),
-                                    СтПриобТов: round(row.obtainCost ?: empty),
-                                    НалНеВыч: round(getNalNeVich(row))
-                            )
-                        }*/
                     }
                 }
 
@@ -709,12 +691,6 @@ def BigDecimal hasOneOrMoreDeclaration() {
     return hasDeclaration
 }
 
-/**
- * Получить список значений для раздела 2.
- *
- * @param dataRowsMap мапа со строками форм-источников
- * @return список мап со значениями
- */
 def getSection2Rows(def dataRowsMap) {
     def rows = []
     // форма 724.6
@@ -742,6 +718,25 @@ def getSection2Rows(def dataRowsMap) {
         rows.add(newRow)
     }
     return rows
+}
+
+def getSection2Agg(def dataRowsMap) {
+    def sumIschisl = empty
+    // форма 724.6
+    for (def row : dataRowsMap[604]) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        sumIschisl += row.sum2
+    }
+    // форма 724.7
+    for (def row : dataRowsMap[605]) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        sumIschisl += row.ndsSum
+    }
+    return round(sumIschisl)
 }
 
 def round(def value) {
