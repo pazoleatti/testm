@@ -315,11 +315,11 @@ void generateXML() {
         def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum')
         def totalRow6ndsSum  = getDataRowSum(rows724_1, 'total_6', 'ndsSum')
         def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum')
-        def totalRow7ndsSum = getDataRowSum(rows724_1, 'total_7', 'ndsSum')
         def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
+        def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum')
 
         nalBaza010 = totalRow1baseSum + totalRow7baseSum
-        sumNal010 = totalRow1ndsSum + totalRow7ndsSum
+        sumNal010 = totalRow1ndsSum + totalRow7ndsBookSum
 
         nalBaza020 = totalRow2baseSum
         sumNal020 = totalRow2ndsSum
@@ -348,7 +348,7 @@ void generateXML() {
     /** НалВосстОбщ. Код строки 110 Графа 5. */
     def nalVosstObsh = sumNal010 + sumNal020 + sumNal030 + sumNal040 + sumNal070 + sumNal105 + sumNal106 + sumNal107 + sumNal108
     /** НалВычОбщ. Код строки 190 Графа 5. */
-    def nalVichObsh = round(nalPredNPPriob + nalIschProd)
+    def nalVichObsh = round(nalPredNPPriob + nalIschProd + nalUplPokNA)
     /** НалПУ164. Код строки 200 и код строки 210.*/
     def nalPU164 = (nalVosstObsh - nalVichObsh).abs().intValue()
 
@@ -367,19 +367,19 @@ void generateXML() {
                     (has812 ? [ПризнНал12: sign12] : [:])) {
         Документ(
                 // ТИТУЛЬНЫЙ ЛИСТ
-                // Номер корректировки
-                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
+                КНД: '1151001',
+                // Дата формирования документа
+                ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 // Налоговый период (код)
                 Период: period,
                 // Отчетный год
                 ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.year,
                 // Код налогового органа
                 КодНО: taxOrganCode,
+                // Номер корректировки
+                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 // Код места, по которому представляется документ
-                ПоМесту: taxPlaceTypeCode,
-                // Дата формирования документа
-                ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
-                КНД: '1151001'
+                ПоМесту: taxPlaceTypeCode
         ) {
             // ТИТУЛЬНЫЙ ЛИСТ
             СвНП(
