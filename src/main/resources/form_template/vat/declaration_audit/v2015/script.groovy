@@ -86,6 +86,7 @@ def getProvider(def long providerId) {
 def declarations() {
     [
             declaration8 : [12, 'Декларация по НДС (раздел 8)'],
+            declaration8n: [18, 'Декларация по НДС (раздел 8 без консолид. формы)'],
             declaration81: [13, 'Декларация по НДС (раздел 8.1)'],
             declaration9 : [14, 'Декларация по НДС (раздел 9)'],
             declaration91: [15, 'Декларация по НДС (раздел 9.1)'],
@@ -209,8 +210,12 @@ void generateXML() {
     def reorgFormCode = departmentParam?.REORG_FORM_CODE?.referenceValue
     def prPodp = (signatoryId != null ? signatoryId : 1)
 
+    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
+    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
+
     def sign812 = hasOneOrMoreDeclaration()
-    def sign8 = isDeclarationExist(declarations().declaration8[0])
+    def has812 = (sign812 == 1)
+    def sign8 = (has8 || has8n) ? 1 : 0
     def sign81 = isDeclarationExist(declarations().declaration81[0])
     def sign9 = isDeclarationExist(declarations().declaration9[0])
     def sign91 = isDeclarationExist(declarations().declaration91[0])
@@ -218,7 +223,7 @@ void generateXML() {
     def sign11 = isDeclarationExist(declarations().declaration11[0])
     def sign12 = 0
 
-    def nameDecl8 = getDeclarationFileName(declarations().declaration8[0])
+    def nameDecl8 = has8 ? getDeclarationFileName(declarations().declaration8[0]) : getDeclarationFileName(declarations().declaration8n[0])
     def nameDecl81 = getDeclarationFileName(declarations().declaration81[0])
     def nameDecl9 = getDeclarationFileName(declarations().declaration9[0])
     def nameDecl91 = getDeclarationFileName(declarations().declaration91[0])
@@ -312,8 +317,11 @@ void generateXML() {
 
     /** НалПредНППриоб . Код строки 120 Графа 3. */
     def nalPredNPPriob = empty
+    /** НалУплПокНА . Код строки 180 Графа 3. */
+    def nalUplPokNA = empty
     if (rows724_4) {
         nalPredNPPriob = round(getDataRow(rows724_4, 'total1')?.sum2 ?: empty)
+        nalUplPokNA = round(getDataRow(rows724_4, 'total2')?.sum2 ?: empty)
     }
 
     /** НалВосстОбщ. Код строки 110 Графа 5. */
@@ -325,17 +333,17 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл: declarationService.generateXmlFileId(4, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
-            ВерсПрог: applicationVersion,
-            ВерсФорм: formatVersion,
-            'ПризнНал8-12': sign812,
-            ПризнНал8: sign8,
-            ПризнНал81: sign81,
-            ПризнНал9: sign9,
-            ПризнНал91: sign91,
-            ПризнНал10: sign10,
-            ПризнНал11: sign11,
-            ПризнНал12: sign12) {
+            [ИдФайл: declarationService.generateXmlFileId(4, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp)] +
+                    [ВерсПрог: applicationVersion] +
+                    [ВерсФорм: formatVersion] +
+                    ['ПризнНал8-12': sign812] +
+                    (has812 ? [ПризнНал8: sign8] : [:]) +
+                    (has812 ? [ПризнНал81: sign81] : [:]) +
+                    (has812 ? [ПризнНал9: sign9] : [:]) +
+                    (has812 ? [ПризнНал91: sign91] : [:]) +
+                    (has812 ? [ПризнНал10: sign10] : [:]) +
+                    (has812 ? [ПризнНал11: sign11] : [:]) +
+                    (has812 ? [ПризнНал12: sign12] : [:])) {
         Документ(
                 // ТИТУЛЬНЫЙ ЛИСТ
                 // Номер корректировки
@@ -487,7 +495,7 @@ void generateXML() {
                             НалУплТамож: empty,
                             НалУплНОТовТС: empty,
                             НалИсчПрод: nalIschProd,
-                            НалУплПокНА: empty,
+                            НалУплПокНА: nalUplPokNA,
                             НалВычОбщ: nalVichObsh
                     )
                 }
@@ -554,7 +562,16 @@ void logicCheck() {
     xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
     def xmlData = new XmlSlurper().parseText(xmlString)
 
-    // 1. Существующие экземпляры декларации по НДС (раздел 8/8.1/9/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
+    // 1. Не создан ни один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения
+    // ИЛИ
+    // Создан только один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения.
+    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
+    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
+    if(has8 && has8n){
+        logger.error("Созданы два экземпляра декларации раздела 8 (раздел 8 и раздел 8 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 8 необходимо удалить!")
+    }
+
+    // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     declarations().each { declaration ->
         def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
@@ -563,29 +580,31 @@ void logicCheck() {
         }
     }
 
-    // 2. Атрибуты признаки наличия разделов 8-11 заполнены согласно алгоритмам
-    def checkMap = [
-            'Признак наличия разделов с 8 по 12'
-            : [getXmlValue(xmlData.@'ПризнНал8-12'.text()) as BigDecimal, hasOneOrMoreDeclaration()],
-            'Признак наличия сведений из книги покупок об операциях, отражаемых за истекший налоговый период'
-            : [getXmlValue(xmlData.@ПризнНал8.text()) as BigDecimal, isDeclarationExist(declarations().declaration8[0])],
-            'Признак наличия сведений из дополнительного листа книги покупок'
-            : [getXmlValue(xmlData.@ПризнНал81.text()) as BigDecimal, isDeclarationExist(declarations().declaration81[0])],
-            'Признак наличия сведений из книги продаж об операциях, отражаемых за истекший налоговый период'
-            : [getXmlValue(xmlData.@ПризнНал9.text()) as BigDecimal, isDeclarationExist(declarations().declaration9[0])],
-            'Признак наличия сведений из дополнительного листа книги продаж'
-            : [getXmlValue(xmlData.@ПризнНал91.text()) as BigDecimal, isDeclarationExist(declarations().declaration91[0])],
-            'Признак наличия сведений из журнала учета выставленных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
-            : [getXmlValue(xmlData.@ПризнНал10.text()) as BigDecimal, isDeclarationExist(declarations().declaration10[0])],
-            'Признак наличия сведений из журнала учета полученных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
-            : [getXmlValue(xmlData.@ПризнНал11.text()) as BigDecimal, isDeclarationExist(declarations().declaration11[0])],
-            'Признак наличия сведений из счетов-фактур, выставленных лицами, указанными в пункте 5 статьи 173 Налогового кодекса Российской Федерации'
-            : [getXmlValue(xmlData.@ПризнНал12.text()) as BigDecimal, 0]
+    // 3. Атрибуты признаки наличия разделов 8-11 (в том числе раздел 8 без консолид. формы) заполнены согласно алгоритмам
+    if (hasOneOrMoreDeclaration() == 1) {
+        def checkMap = [
+                'Признак наличия разделов с 8 по 12'
+                : [getXmlValue(xmlData.@'ПризнНал8-12'.text()) as BigDecimal, hasOneOrMoreDeclaration()],
+                'Признак наличия сведений из книги покупок об операциях, отражаемых за истекший налоговый период'
+                : [getXmlValue(xmlData.@ПризнНал8.text()) as BigDecimal, (has8 || has8n) ? 1 : 0],
+                'Признак наличия сведений из дополнительного листа книги покупок'
+                : [getXmlValue(xmlData.@ПризнНал81.text()) as BigDecimal, isDeclarationExist(declarations().declaration81[0])],
+                'Признак наличия сведений из книги продаж об операциях, отражаемых за истекший налоговый период'
+                : [getXmlValue(xmlData.@ПризнНал9.text()) as BigDecimal, isDeclarationExist(declarations().declaration9[0])],
+                'Признак наличия сведений из дополнительного листа книги продаж'
+                : [getXmlValue(xmlData.@ПризнНал91.text()) as BigDecimal, isDeclarationExist(declarations().declaration91[0])],
+                'Признак наличия сведений из журнала учета выставленных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
+                : [getXmlValue(xmlData.@ПризнНал10.text()) as BigDecimal, isDeclarationExist(declarations().declaration10[0])],
+                'Признак наличия сведений из журнала учета полученных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
+                : [getXmlValue(xmlData.@ПризнНал11.text()) as BigDecimal, isDeclarationExist(declarations().declaration11[0])],
+                'Признак наличия сведений из счетов-фактур, выставленных лицами, указанными в пункте 5 статьи 173 Налогового кодекса Российской Федерации'
+                : [getXmlValue(xmlData.@ПризнНал12.text()) as BigDecimal, 0]
 
-    ]
-    checkMap.each { key, value ->
-        if (value[0] != value[1]) {
-            logger.error("Атрибут «$key» файла формата xml заполнен неверно! Для исправления необходимо пересчитать данные декларации (кнопка «Рассчитать»).")
+        ]
+        checkMap.each { key, value ->
+            if (value[0] != value[1]) {
+                logger.error("Атрибут «$key» файла формата xml заполнен неверно! Для исправления необходимо пересчитать данные декларации (кнопка «Рассчитать»).")
+            }
         }
     }
 }

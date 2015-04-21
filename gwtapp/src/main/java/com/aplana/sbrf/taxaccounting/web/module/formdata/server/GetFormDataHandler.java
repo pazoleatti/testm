@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -61,6 +62,9 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     @Autowired
     private DiffService diffService;
 
+    @Autowired
+    private LockDataService lockDataService;
+
     private static final long REF_BOOK_ID = 8L;
     private static final String REF_BOOK_VALUE_NAME = "CODE";
     private final static String RESTRICT_EDIT_MESSAGE = "Нет прав на редактирование налоговой формы!";
@@ -93,7 +97,11 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
 		if (!action.isReadOnly()) {
 			try {
-				formDataService.lock(action.getFormDataId(), userInfo);
+                // Ззащита от перехода в режим редактирования для импортируемой нф
+                LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + action.getFormDataId() + "_import");
+                if (lockImport == null) {
+                    formDataService.lock(action.getFormDataId(), userInfo);
+                }
 			} catch (Exception e){
 				//
 			}
@@ -284,12 +292,23 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
 		LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(),
                 securityService.currentUserInfo());
+        // Ззащита от перехода в режим редактирования для импортируемой нф
+        LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + action.getFormDataId() + "_import");
 
-		if (lockInformation != null) {
+		if (lockInformation != null || lockImport != null) {
+            LockData lockData;
+            boolean forcedLock = false;
+            if (lockImport != null) {
+                lockData = lockImport;
+                //Надо заблокировать даже от автора блокировки
+                forcedLock = true;
+            } else {
+                lockData = lockInformation;
+            }
 			// Если данная форма уже заблокирована другим пользотелем
-			result.setLockedByUser(taUserService.getUser(lockInformation.getUserId()).getName());
-			result.setLockDate(getFormedDate(lockInformation.getDateLock()));
-			if (lockInformation.getUserId() == userInfo.getUser().getId()) {
+			result.setLockedByUser(taUserService.getUser(lockData.getUserId()).getName());
+			result.setLockDate(getFormedDate(lockData.getDateLock()));
+			if (lockData.getUserId() == userInfo.getUser().getId() && !forcedLock) {
 				if (action.isReadOnly()) {
 					formMode = FormMode.READ_UNLOCKED;
 				} else {

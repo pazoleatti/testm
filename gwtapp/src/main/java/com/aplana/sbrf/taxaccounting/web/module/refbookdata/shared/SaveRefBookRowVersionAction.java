@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 
-import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 import java.util.Date;
 import java.util.Map;
 
-public class SaveRefBookRowVersionAction extends UnsecuredActionImpl<SaveRefBookRowVersionResult> implements ActionName {
+public class SaveRefBookRowVersionAction extends UnsecuredActionImpl<SaveRefBookRowVersionResult> {
 
 	Long refBookId;
 	Long recordId;
@@ -62,9 +61,4 @@ public class SaveRefBookRowVersionAction extends UnsecuredActionImpl<SaveRefBook
     public void setRecordCommonId(Long recordCommonId) {
         this.recordCommonId = recordCommonId;
     }
-
-    @Override
-	public String getName() {
-		return "Сохранить изменения в версии записи справочника";
-	}
 }

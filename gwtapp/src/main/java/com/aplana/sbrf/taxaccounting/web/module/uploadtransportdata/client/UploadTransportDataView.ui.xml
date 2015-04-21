@@ -22,10 +22,10 @@
                 <g:VerticalPanel spacing="10">
                     <g:HorizontalPanel>
                         <g:Button ui:field="uploadButton" width="300px"
-                                  text="Загрузить ТФ с локального компьютера"
-                                  title="Загрузка ТФ с компьютера пользователя. Может быть загружен один ТФ или архив zip, содержащий множество ТФ."/>
+                                  text="Загрузить ТФ в каталог загрузки"
+                                  title="1 шаг. Загрузка ТФ с компьютера пользователя в каталог загрузки. Может быть загружен один ТФ или архив zip, содержащий множество ТФ"/>
                         <g:cell verticalAlignment="middle">
-                            <g:Label addStyleNames="{style.marginLeft15}" text="Загрузка ТФ с компьютера пользователя. Может быть загружен один ТФ или архив zip, содержащий множество ТФ."/>
+                            <g:Label addStyleNames="{style.marginLeft15}" text="1 шаг. Загрузка ТФ с компьютера пользователя в каталог загрузки. Может быть загружен один ТФ или архив zip, содержащий множество ТФ"/>
                         </g:cell>
                         <g:FormPanel ui:field="formPanel" encoding="multipart/form-data" method="post">
                             <g:FileUpload ui:field="uploader" name="uploader" visible="false"/>
@@ -34,10 +34,10 @@
 
                     <g:HorizontalPanel>
                         <g:Button ui:field="loadButton" width="300px"
-                                  text="Загрузить ТФ из каталога загрузки"
-                                  title="Загрузка всех доступных ТФ, находящихся в централизованном каталоге загрузки."/>
+                                  text="Обработать ТФ из каталога загрузки"
+                                  title="2 шаг. Обработка всех доступных ТФ, находящихся в централизованном каталоге загрузки."/>
                         <g:cell verticalAlignment="middle">
-                            <g:Label addStyleNames="{style.marginLeft15}" text="Загрузка всех доступных ТФ, находящихся в централизованном каталоге загрузки."/>
+                            <g:Label addStyleNames="{style.marginLeft15}" text="2 шаг. Обработка всех доступных ТФ, находящихся в централизованном каталоге загрузки."/>
                         </g:cell>
                     </g:HorizontalPanel>
 

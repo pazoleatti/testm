@@ -227,7 +227,13 @@ void calc() {
 
         def incomeParam
         if (row.regionBankDivision != null) {
-            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$row.regionBankDivision", departmentParamsDate, -1, null, false)
+            def departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
+                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+
+            def depParam = getDepParam(departmentParam)
+            def depId = depParam.get('CODE').getNumberValue().intValue()
+
+            incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$depId", departmentParamsDate, -1, null, false)
         }
         if (incomeParam == null || incomeParam.isEmpty()) {
             continue
@@ -460,11 +466,7 @@ def calc14(def row) {
 
 def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     def tmp
-    // графа 18 и 19 расчитывается в конце потому что требует значения графы 20, 21, 22
     // графа 18
-    // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-    def currentSum = dataRows?.sum { (it.getAlias() == null) ? it.taxSum : 0 } ?: 0
-    def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? it.taxSum : 0 } ?: 0
     switch (reportPeriod.order) {
         case 1: //«графа 18» = «графа 14»
             tmp = row.taxSum
@@ -473,6 +475,9 @@ def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
             tmp = null
             break
         default:
+            // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+            def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+            def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
             // остальные
             if (currentSum) {
                 tmp = (currentSum - previousSum) * (row.taxSum / currentSum)
@@ -1165,6 +1170,7 @@ def getProvider(def long providerId) {
 def getDepParam(def departmentParam) {
     def departmentId = departmentParam.get('CODE').getNumberValue().intValue()
     def departmentType = departmentService.get(departmentId).getType()
+    def depParam
     if (departmentType.equals(departmentType.TERR_BANK)) {
         depParam = departmentParam
     } else {

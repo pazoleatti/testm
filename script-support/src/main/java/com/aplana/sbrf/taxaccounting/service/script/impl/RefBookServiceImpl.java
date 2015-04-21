@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -28,6 +30,9 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Autowired
     private RefBookHelper refBookHelper;
+
+    @Autowired
+    private TransactionHelper transactionHelper;
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
@@ -59,6 +64,16 @@ public class RefBookServiceImpl implements RefBookService {
     @Override
     public void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows, List<Column> columns) {
         refBookHelper.dataRowsDereference(logger, dataRows, columns);
+    }
+
+    @Override
+    public void executeInNewTransaction(TransactionLogic logic) {
+        transactionHelper.executeInNewTransaction(logic);
+    }
+
+    @Override
+    public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
+        return transactionHelper.returnInNewTransaction(logic);
     }
 
     private RefBookValue getValue(Long refBookId, Long recordId, String alias) {

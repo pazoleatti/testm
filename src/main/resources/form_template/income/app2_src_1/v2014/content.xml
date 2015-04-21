@@ -221,7 +221,7 @@
         <name>Адрес места жительства за пределами Российской Федерации</name>
         <order>21</order>
         <width>6</width>
-        <maxLength>20</maxLength>
+        <maxLength>255</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

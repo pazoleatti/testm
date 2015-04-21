@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 
 import java.util.Collection;
 import java.util.Date;
@@ -42,4 +43,15 @@ public interface RefBookService {
      */
     @SuppressWarnings("unused")
     public void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows, List<Column> columns);
+    /**
+     * Выполняет указанную логику в новой транзакции
+     * @param logic код выполняемый в транзакции
+     */
+    void executeInNewTransaction(TransactionLogic logic);
+
+    /**
+     * Выполняет указанную логику в новой транзакции. Вовращает результат
+     * @param logic код выполняемый в транзакции
+     */
+    <T> T returnInNewTransaction(TransactionLogic<T> logic);
 }

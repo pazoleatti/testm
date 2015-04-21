@@ -18,6 +18,7 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 	int formDataTemplateId;
 	List<DataRow<Cell>> modifiedRows;
     String innerLogUuid;
+    private boolean free;
 
     public String getInnerLogUuid() {
         return innerLogUuid;
@@ -87,4 +88,12 @@ public class GetRowsDataAction extends UnsecuredActionImpl<GetRowsDataResult> im
 	public String getName() {
 		return "Получить строки";
 	}
+
+    public void setFree(boolean free) {
+        this.free = free;
+    }
+
+    public boolean isFree() {
+        return free;
+    }
 }

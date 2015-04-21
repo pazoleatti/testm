@@ -33,9 +33,7 @@ import java.util.*;
 @Remote(UserTaskRemote.class)
 @Stateless
 @Interceptors(SchedulerInterceptor.class)
-public class LoadFormDataTask implements UserTask{
-
-    private final Log logger = LogFactory.getLog(getClass());
+public class LoadFormDataTask extends AbstractUserTask {
 
     @Autowired
     LoadFormDataService loadFormDataService;
@@ -54,7 +52,7 @@ public class LoadFormDataTask implements UserTask{
     private static final String ALL_DEPARTMENTS_LABEL = "Все подразделения";
 
     @Override
-    public void execute(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
+    public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         if (!params.containsKey(TB_NAME)){
             throw new TaskExecutionException("Не достасточно параметров для запуска задачи");
         }
@@ -64,7 +62,7 @@ public class LoadFormDataTask implements UserTask{
         try {
             departmentId = (Integer) param.getTypifiedValue();
         } catch (InvalidTaskParamException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new TaskExecutionException("Не верный тип параметра задачи");
         }
 

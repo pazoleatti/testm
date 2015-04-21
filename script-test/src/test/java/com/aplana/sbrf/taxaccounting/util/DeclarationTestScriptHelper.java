@@ -48,6 +48,7 @@ public class DeclarationTestScriptHelper {
     private RefBookFactory refBookFactory;
     private RefBookDataProvider refBookDataProvider;
     private DeclarationService declarationService;
+    private TransactionHelper transactionHelper;
 
     private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -99,6 +100,7 @@ public class DeclarationTestScriptHelper {
         refBookFactory = mockHelper.mockRefBookFactory();
         refBookDataProvider = mockHelper.getRefBookDataProvider();
         declarationService = mockHelper.getDeclarationService();
+        transactionHelper = mockHelper.mockTransactionHelper();
     }
 
     /**

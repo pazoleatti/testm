@@ -4,9 +4,10 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -66,7 +67,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
         // пересобирается ли форма
         boolean isRecompose = true;
         // Если экземпляр не найден, то он создается
-        if (formData == null) {
+        /*if (formData == null) {
             isRecompose = false;
             DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
             int formTemplateId = 0;
@@ -82,7 +83,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
         } else {
             FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
             formData.initFormTemplateParams(formTemplate);
-        }
+        }*/
 
         if (formData.getState() != WorkflowState.ACCEPTED) {
             auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(),

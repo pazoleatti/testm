@@ -149,7 +149,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	public void save() {
         if (declarationTemplateExt.getEndDate() != null &&
                 declarationTemplate.getVersion().compareTo(declarationTemplateExt.getEndDate()) >0 ){
-            Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуальности.");
+            Dialog.infoMessage("Дата окончания не может быть меньше даты начала актуализации.");
             return;
         }
         if (declarationTemplate.getName() == null || declarationTemplate.getName().isEmpty()){
