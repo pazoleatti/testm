@@ -19,6 +19,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -255,15 +256,8 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             //Создание настоящей и фиктивной версии
             return createVersions(versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
-        } catch (Exception e) {
-            if (logger != null) {
-                logger.error(e);
-                logger.clear(LogLevel.INFO);
-                throw new ServiceLoggerException("Запись не сохранена. Обнаружены фатальные ошибки!",
-                        logEntryService.save(logger.getEntries()));
-            } else {
-                throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!");
-            }
+        } catch (DataAccessException e) {
+            throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!", e);
         }
     }
 
@@ -351,23 +345,20 @@ public class RefBookUniversal implements RefBookDataProvider {
     private void checkParentConflict(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
         List<Pair<Long, Integer>> checkResult = refBookDao.checkParentConflict(versionFrom, versionTo, records);
         if (!checkResult.isEmpty()) {
-            boolean error = false;
             for (Pair<Long, Integer> conflict : checkResult) {
                 //Дата окончания периода актуальности проверяемой версии больше даты окончания периода актуальности родительской записи для проверяемой версии
                 if (conflict.getSecond() == 1) {
                     logger.error("Запись "+findNameByParent(records, conflict.getFirst())+
                             ": Дата окончания периода актуальности версии должна быть не больше даты окончания периода актуальности записи, которая является родительской в иерархии!");
-                    error = true;
                 }
                 //Дата начала периода актуальности проверяемой версии меньше даты начала периода актуальности родительской записи для проверяемой версии
                 if (conflict.getSecond() == -1) {
                     logger.error("Запись "+findNameByParent(records, conflict.getFirst())+
                             ": Дата начала периода актуальности версии должна быть не меньше даты начала периода актуальности записи, которая является родительской в иерархии!");
-                    error = true;
                 }
             }
-            if (error) {
-                throw new ServiceException("Обнаружен конфликт с датой актуальности родительского элемента");
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException("Запись не сохранена. Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
             }
         }
     }
