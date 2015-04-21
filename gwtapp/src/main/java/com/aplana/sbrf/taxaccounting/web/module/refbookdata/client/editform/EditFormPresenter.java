@@ -291,7 +291,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
                 final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
                 final Long newDepType;
-                if (map.containsKey("TYPE")) {
+                if (map.containsKey("TYPE") && map.get("TYPE").getReferenceValue() != null) {
                     newDepType = map.get("TYPE").getReferenceValue();
                 } else {
                     newDepType = 0L;
@@ -319,7 +319,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                                         if (result.isException()) {
                                                             Dialog.errorMessage("Редактирование подразделения", "Обнаружены фатальные ошибки!");
                                                         } else {
-                                                            depType = newDepType;
+                                                            if (isDepartments) {
+                                                                depType = newDepType;
+                                                            }
                                                             setIsFormModified(false);
                                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                                             getView().updateInputFields();
@@ -348,7 +350,9 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                                         if (result.isException()) {
                                             Dialog.errorMessage("Запись не сохранена", "Обнаружены фатальные ошибки!");
                                         } else {
-                                            depType = newDepType;
+                                            if (isDepartments) {
+                                                depType = newDepType;
+                                            }
                                             setIsFormModified(false);
                                             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                             getView().updateInputFields();
