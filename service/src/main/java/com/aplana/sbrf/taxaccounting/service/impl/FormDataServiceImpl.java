@@ -70,7 +70,6 @@ public class FormDataServiceImpl implements FormDataService {
             "Налоговая форма-источник «%s» %s, %s, «%s» заблокирована пользователем %s в %s. Попробуйте выполнить операцию позже";
     private static final String SOURCE_MSG_ERROR =
             "Существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
-    private static final String ERROR = "Операция не выполнена";
     //Выводит информацию о НФ в определенном формате
     private static final String FORM_DATA_INFO_MSG = "%s %s %s %s %s";
     private static final String NOT_CONSOLIDATE_DESTINATION_FORM_WARNING =
@@ -815,7 +814,7 @@ public class FormDataServiceImpl implements FormDataService {
                         if (logger.containsLevel(LogLevel.ERROR)) {
                             logger.clear(LogLevel.WARNING);
                             logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, NOT_CONSOLIDATED_SOURCE_FORM_ERR));
-                            throw new ServiceLoggerException(ERROR, logEntryService.save(logger.getEntries()));
+                            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
                         }
                         //Если консолидация из всех принятых источников текущего экземпляра была выполнена, но есть непринятые или несозданные источники
                         if (!notAcceptedFDSources.isEmpty()) {
@@ -985,14 +984,14 @@ public class FormDataServiceImpl implements FormDataService {
         //1А. Отчетный период закрыт
         if (!departmentReportPeriod.isActive()){
             logger.error("Отчетный период закрыт, консолидация не может быть выполнена");
-            throw new ServiceLoggerException(ERROR, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
         }
         //1Б. Статус экземпляра не допускает его редактирование
         if (formData.getState() != WorkflowState.CREATED) {
-            logger.error("Форма находится в статусе %s, консолидация возможна только в статусе \"Создана\"",
+            logger.error("Форма находится в статусе \"%s\", консолидация возможна только в статусе \"Создана\"",
                     formData.getState().getName()
             );
-            throw new ServiceLoggerException(ERROR, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
         }
         //1В. Проверяем формы-приемники
         List<DepartmentFormType> destinationDFTs = departmentFormTypeDao.getFormDestinations(
@@ -1024,7 +1023,7 @@ public class FormDataServiceImpl implements FormDataService {
             logger.error(SOURCE_MSG_ERROR);
             for (String s : msgPull)
                 logger.error(s);
-            throw new ServiceLoggerException(ERROR, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
         }
 
         //Система проверяет экземпляр на возможность выполнения консолидации в него. Существание хотя бы одной назначенной формы-источника.
@@ -1036,7 +1035,7 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getEndDate());
         if (departmentFormTypesSources.isEmpty()){
             logger.error("Для текущей формы не назначено ни одного источника");
-            throw new ServiceLoggerException(ERROR, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
         }
 
         //Блокировка текущей формы
@@ -1051,7 +1050,7 @@ public class FormDataServiceImpl implements FormDataService {
                             LOCK_CURRENT, userInfo.getUser().getLogin(),
                             SDF_HH_MM_DD_MM_YYYY.format(lockDataCurrent.getDateLock()))
             );
-            throw new ServiceLoggerException(ERROR, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
         } else {
             lockedForms.add(lockCurrentKey);
         }
