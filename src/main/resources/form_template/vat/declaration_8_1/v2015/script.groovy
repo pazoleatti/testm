@@ -142,8 +142,8 @@ void generateXML() {
         if (formData.formType.id == 616) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-            code005 = getDataRow(sourceDataRows, 'head')?.nds // "Итого"
-            code190 = getDataRow(sourceDataRows, 'total')?.nds // "Всего"
+            code005 = (getCode005() ?: 0)
+            code190 = code005 + (getDataRow(sourceDataRows, 'total')?.nds ?: 0) // "Всего"
         }
     }
     if (corrNumber > 0) {
@@ -314,4 +314,24 @@ def getCurrencyCode(String str) {
         }
     }
     return null
+}
+
+def getCode005() {
+    def result = null
+    def declarationTypeId = 12
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def declarationData8 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
+    if (declarationData8 == null || !declarationData8.accepted) {
+        return result
+    }
+    if (declarationData8.id != null) {
+        def xmlString = declarationService.getXmlData(declarationData8.id)
+        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+        if (xmlString == null) {
+            return result
+        }
+        def xmlData = new XmlSlurper().parseText(xmlString)
+        result = xmlData?.Документ?.КнигаПокуп?.@СумНДСВсКПк?.text()
+    }
+    return result
 }

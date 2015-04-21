@@ -143,14 +143,16 @@ void generateXML() {
         if (formData.formType.id == 617) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-            def headRow = getDataRow(sourceDataRows, 'head') // "Итого"
+
+            def codes = getCodes()
+            code020 = codes?.@СтПродБезНДС18?.text()
+            code030 = codes?.@СтПродБезНДС10?.text()
+            code040 = codes?.@СтПродБезНДС0?.text()
+            code050 = codes?.@СумНДСВсКПр18?.text()
+            code060 = codes?.@СумНДСВсКПр10?.text()
+            code070 = codes?.@СтПродОсвВсКПр?.text()
+
             def totalRow = getDataRow(sourceDataRows, 'total') // "Всего"
-            code020 = headRow?.saleCostB18
-            code030 = headRow?.saleCostB10
-            code040 = headRow?.saleCostB0
-            code050 = headRow?.vatSum18
-            code060 = headRow?.vatSum10
-            code070 = headRow?.bonifSalesSum
             code310 = totalRow?.saleCostB18
             code320 = totalRow?.saleCostB10
             code330 = totalRow?.saleCostB0
@@ -344,4 +346,24 @@ def getCurrencyCode(String str) {
         }
     }
     return null
+}
+
+def getCodes() {
+    def result = null
+    def declarationTypeId = 14
+    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    def declarationData9 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
+    if (declarationData9 == null || !declarationData9.accepted) {
+        return result
+    }
+    if (declarationData9.id != null) {
+        def xmlString = declarationService.getXmlData(declarationData9.id)
+        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
+        if (xmlString == null) {
+            return result
+        }
+        def xmlData = new XmlSlurper().parseText(xmlString)
+        result = xmlData?.Документ?.КнигаПрод
+    }
+    return result
 }

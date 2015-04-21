@@ -1,4 +1,4 @@
-package form_template.vat.declaration_fns.v2015
+package form_template.vat.declaration_short.v2015
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -13,15 +13,15 @@ import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
 
 /**
- * Декларация по НДС (раздел 1-7)
+ * Декларация по НДС (короткая, раздел 1-7)
  *
- * совпадает с "Декларация по НДС (аудит, раздел 1-7)" и "Декларация по НДС (короткая, раздел 1-7)", кроме заполнения секции "РАЗДЕЛ 2"
+ * совпадает с "Декларация по НДС (раздел 1-7)" и "Декларация по НДС (аудит, раздел 1-7)" и , кроме заполнения секции "РАЗДЕЛ 2"
  *
- * declarationTemplateId=2004
+ * declarationTemplateId=1027
  */
 
 @Field
-def declarationType = 4;
+def declarationType = 20;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -367,19 +367,19 @@ void generateXML() {
                     (has812 ? [ПризнНал12: sign12] : [:])) {
         Документ(
                 // ТИТУЛЬНЫЙ ЛИСТ
-                // Номер корректировки
-                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
+                КНД: '1151001',
+                // Дата формирования документа
+                ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 // Налоговый период (код)
                 Период: period,
                 // Отчетный год
                 ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.year,
                 // Код налогового органа
                 КодНО: taxOrganCode,
+                // Номер корректировки
+                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 // Код места, по которому представляется документ
                 ПоМесту: taxPlaceTypeCode,
-                // Дата формирования документа
-                ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
-                КНД: '1151001'
         ) {
             // ТИТУЛЬНЫЙ ЛИСТ
             СвНП(
@@ -394,7 +394,6 @@ void generateXML() {
                         ) {
                             reorgFormCode = reorgFormCode != null ? getRefBookValue(5, reorgFormCode).CODE.stringValue : null
                             def boolean isReorg = reorgFormCode != null && !reorgFormCode.equals('0')
-
                             if (reorgFormCode != null) {
                                 СвРеоргЮЛ(
                                         [ФормРеорг: reorgFormCode] +
