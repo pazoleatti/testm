@@ -215,7 +215,6 @@ void addData(def xml, int headRowCount) {
 
 void importTransportData() {
     int COLUMN_COUNT =4
-    int TOTAL_ROW_COUNT = 1
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
@@ -236,8 +235,7 @@ void importTransportData() {
     int countEmptyRow = 0	// количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
-    int totalRowCount = 0   // счетчик кол-ва итогов
-    def total = null		// итоговая строка со значениями из тф для добавления
+    def totalTF = null		// итоговая строка со значениями из тф для добавления
 
     while ((rowCells = reader.readNext()) != null) {
         fileRowIndex++
@@ -246,9 +244,12 @@ void importTransportData() {
         if (isEmptyRow) {
             if (countEmptyRow > 0) {
                 // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-                totalRowCount++
-                total = formData.createDataRow()
-                fillRow(total, reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex, false)
+                rowCells = reader.readNext()
+                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+                if (!isEmptyRow) {
+                    totalTF = formData.createDataRow()
+                    fillRow(totalTF, rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex, false)
+                }
                 break
             }
             countEmptyRow++
@@ -262,25 +263,21 @@ void importTransportData() {
     }
     reader.close()
 
-    // проверка итоговой строки
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
+    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+    def totalColumnsIndexMap = [ 'base' : 4 ]
+    // подсчет итогов
+    def itogValues = ['base' : calcItog(dataRows)]
+    def totalRow = getDataRow(dataRows, 'itog')
+    totalColumnsIndexMap.keySet().asList().each { alias ->
+        totalRow[alias] = itogValues[alias]
     }
 
     // сравнение итогов
-    if (total) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [ 'base' : 4 ]
-        // подсчет итогов
-        def itogValues = ['base' : calcItog(dataRows)]
-        def totalRow = getDataRow(dataRows, 'itog')
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalRow[alias] = itogValues[alias]
-        }
+    if (totalTF) {
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = total.getCell(alias).value
+            def v1 = totalTF.getCell(alias).value
             def v2 = totalRow.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
