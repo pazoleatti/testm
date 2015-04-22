@@ -144,11 +144,19 @@ void addData(def xml, int headRowCount) {
 
         // графа 3
         xmlIndexCol++
-        dataRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if(rowIndex != 1 && rowIndex != 2){
+            dataRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }else{
+            dataRow.date = null
+        }
 
         // графа 4
         xmlIndexCol++
-        dataRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if(rowIndex != 2) {
+            dataRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        } else {
+            dataRow.sum = null
+        }
     }
     dataRowHelper.save(dataRows)
 }
