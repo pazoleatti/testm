@@ -747,7 +747,7 @@ def round(def value) {
 def specialCode = '1010276'
 
 @Field
-def opuCodes = ['26411.01', '26411.02']
+def opuCodes = ['26411.01']
 
 @Field
 def knuCodes = ['20860', '20870']
