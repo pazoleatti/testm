@@ -744,7 +744,6 @@ void save(def dataRows) {
 
 void importTransportData() {
     int COLUMN_COUNT = 20
-    int TOTAL_ROW_COUNT = 1
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
@@ -766,8 +765,7 @@ void importTransportData() {
     int countEmptyRow = 0   // количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
-    int totalRowCount = 0   // счетчик кол-ва итогов
-    def total = null        // итоговая строка со значениями из тф для добавления
+    def totalTF = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     while ((rowCells = reader.readNext()) != null) {
@@ -777,9 +775,10 @@ void importTransportData() {
         if (isEmptyRow) {
             if (countEmptyRow > 0) {
                 // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-                totalRowCount++
                 // итоговая строка тф
-                total = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                rowCells = reader.readNext()
+                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+                totalTF = (isEmptyRow ? null : getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex))
                 break
             }
             countEmptyRow++
@@ -800,28 +799,23 @@ void importTransportData() {
     }
     reader.close()
 
-    // проверка итоговой строки
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
-
     if (newRows.size() != 0) {
         dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
     }
 
+    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+    def totalColumnsIndexMap = ['saleCostB18' : 15, 'saleCostB10' : 16, 'saleCostB0' : 17, 'vatSum18' : 18, 'vatSum10' : 19, 'bonifSalesSum' : 20]
+    // подсчет итогов
+    def totalRow = getFixedRow('Всего', 'total')
+    calcTotalSum(dataRowHelper.allCached, totalRow, totalColumnsIndexMap.keySet().asList())
+    // добавить итоговую строку
+    dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
+
     // сравнение итогов
-    if (total) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['saleCostB18' : 15, 'saleCostB10' : 16, 'saleCostB0' : 17, 'vatSum18' : 18, 'vatSum10' : 19, 'bonifSalesSum' : 20]
-
-        // подсчет итогов
-        def totalRow = getFixedRow('Всего', 'total')
-        def dataRows = dataRowHelper.allCached
-        calcTotalSum(dataRows, totalRow, totalColumnsIndexMap.keySet().asList())
-
+    if (totalTF) {
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = total.getCell(alias).value
+            def v1 = totalTF.getCell(alias).value
             def v2 = totalRow.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
@@ -830,8 +824,6 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-        // добавить итоговую строку
-        dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
     }
 }
 
