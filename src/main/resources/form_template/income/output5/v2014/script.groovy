@@ -59,7 +59,11 @@ void logicCheck() {
 
         // 1. Проверка на заполнение
         if (row.getAlias() != 'R2') {
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            if(row.getAlias() == 'R1'){
+                checkNonEmptyColumns(row, index, nonEmptyColumns - 'date', logger, true)
+            } else{
+                checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            }
         }
     }
 }
