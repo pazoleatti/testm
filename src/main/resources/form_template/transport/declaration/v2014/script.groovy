@@ -1,7 +1,6 @@
 package form_template.transport.declaration.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -197,7 +196,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
 
                         // Данные текущего квартала
                         reportPeriodMap[reportPeriod.order] = reportPeriod
-                        formDataMap[reportPeriod.order] = formDataCollection?.find(departmentId, 200, FormDataKind.SUMMARY)
+                        formDataMap[reportPeriod.order] = formDataCollection?.records?.find { it.formType.id == 200 }
                         if (formDataMap[reportPeriod.order] != null) {
                             // «Своя» сводная есть и «Принята»
                             rowsDataMap[reportPeriod.order] = formDataService.getDataRowHelper(formDataMap[reportPeriod.order]).getAllCached()

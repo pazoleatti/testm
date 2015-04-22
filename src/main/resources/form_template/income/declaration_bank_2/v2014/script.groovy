@@ -2,7 +2,6 @@ package form_template.income.declaration_bank_2.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -112,14 +111,13 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
     def sourceFormType = formTypeService.get(sourceFormTypeId)
     def success = true
 
-    def departmentId = declarationData.getDepartmentId()
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
-    def departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
+    def departmentFormType = formDataCollection?.records?.find { it.formType.id == sourceFormTypeId }
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     if (departmentFormType == null) {
         sourceFormTypeId = 417
         sourceFormType = formTypeService.get(sourceFormTypeId)
-        departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
+        departmentFormType = formDataCollection?.records?.find { it.formType.id == sourceFormTypeId }
     }
     if (departmentFormType == null) {
         if (loggerNeed) {
