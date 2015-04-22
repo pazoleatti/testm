@@ -34,7 +34,10 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers, SetFocus.SetFocusHandler {
@@ -759,7 +762,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 getView().showConsolidation(
                                         WorkflowState.ACCEPTED != formData.getState()
                                                 &&
-                                        (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind()));
+                                                (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind())
+                                                &&
+                                                result.isReadOnly());
 
                                 onTimerReport(ReportType.EXCEL, false);
                                 onTimerReport(ReportType.CSV, false);
@@ -777,9 +782,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             builder.append(", ").append(Formats.getRussianMonthNameWithTier(retFormDataResult.getFormData().getPeriodOrder()));
         }
         if (retFormDataResult.getDepartmentReportPeriod().getCorrectionDate() != null) {
-            builder.append(", корр. (" +
-                    DATE_TIME_FORMAT.format(retFormDataResult.getDepartmentReportPeriod().getCorrectionDate())
-                    + ")");
+            builder.append(", корр. (").append(DATE_TIME_FORMAT.format(retFormDataResult.getDepartmentReportPeriod().getCorrectionDate())).append(")");
         }
         return builder.toString();
     }
