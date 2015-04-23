@@ -186,14 +186,14 @@ List<String> getErrorVersion(record) {
     errorList
 }
 
-def getDataRowSum(def dataRows, def String rowAlias, def String cellAlias){
+def getDataRowSum(def dataRows, def String rowAlias, def String cellAlias, def useRound = true){
     def sum = empty
     for (DataRow<Cell> row : dataRows) {
         if (rowAlias.equals(row.getAlias())) {
             sum += row.getCell(cellAlias).value ?: empty
         }
     }
-    return round(sum)
+    return (useRound ? round(sum) : sum)
 }
 
 void generateXML() {
@@ -306,14 +306,14 @@ void generateXML() {
         def totalRow1ndsSum = getDataRowSum(rows724_1, 'total_1', 'ndsSum')
         def totalRow2baseSum = getDataRowSum(rows724_1, 'total_2', 'baseSum')
         def totalRow2ndsSum = getDataRowSum(rows724_1, 'total_2', 'ndsSum')
-        def totalRow3baseSum = getDataRowSum(rows724_1, 'total_3', 'baseSum')
-        def totalRow3ndsSum = getDataRowSum(rows724_1, 'total_3', 'ndsSum')
+        def totalRow3baseSum = getDataRowSum(rows724_1, 'total_3', 'baseSum', false)
+        def totalRow3ndsSum = getDataRowSum(rows724_1, 'total_3', 'ndsSum', false)
         def totalRow4baseSum = getDataRowSum(rows724_1, 'total_4', 'baseSum')
         def totalRow4ndsSum = getDataRowSum(rows724_1, 'total_4', 'ndsSum')
         def totalRow5baseSum = getDataRowSum(rows724_1, 'total_5', 'baseSum')
         def totalRow5ndsSum = getDataRowSum(rows724_1, 'total_5', 'ndsSum')
-        def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum')
-        def totalRow6ndsSum  = getDataRowSum(rows724_1, 'total_6', 'ndsSum')
+        def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum', false)
+        def totalRow6ndsSum  = getDataRowSum(rows724_1, 'total_6', 'ndsSum', false)
         def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum')
         def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
         def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum')
@@ -324,8 +324,8 @@ void generateXML() {
         nalBaza020 = totalRow2baseSum
         sumNal020 = totalRow2ndsSum
 
-        nalBaza030 = totalRow3baseSum + totalRow6baseSum
-        sumNal030 = totalRow3ndsSum + totalRow6ndsSum
+        nalBaza030 = round(totalRow3baseSum + totalRow6baseSum)
+        sumNal030 = round(totalRow3ndsSum + totalRow6ndsSum)
 
         nalBaza040 = totalRow4baseSum
         sumNal040 = totalRow4ndsSum
