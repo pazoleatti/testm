@@ -31,8 +31,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 
 @Controller
@@ -168,29 +166,21 @@ public class DeclarationTemplateController {
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(req);
         resp.setCharacterEncoding("UTF-8");
-        InputStream inputStream = null;
         try {
             if (items.get(0) != null && items.get(0).getSize() == 0)
                 throw new ServiceException("Файл xsd пустой.");
-            inputStream = items.get(0).getInputStream();
-            ZipInputStream zis = new ZipInputStream(inputStream);
-            ZipEntry entry = zis.getNextEntry();
-            if (entry == null){
-                throw new ServiceException("Архив пустой");
-            }
+            FileItem item = items.get(0);
+
             Logger customLog = new Logger();
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
             String xsdBlobIdOld = declarationTemplate.getXsdId();
-            String xsdBlobId = blobDataService.create(zis, entry.getName());
+            String xsdBlobId = blobDataService.create(item.getInputStream(), item.getName());
             declarationTemplate.setXsdId(xsdBlobId);
             declarationTemplateService.save(declarationTemplate);
 
             deleteBlobs(customLog, xsdBlobIdOld);
             checkErrors(customLog, resp);
         }  finally {
-            if (inputStream!= null){
-                IOUtils.closeQuietly(inputStream);
-            }
             declarationTemplateService.unlock(declarationTemplateId, userInfo);
         }
     }
