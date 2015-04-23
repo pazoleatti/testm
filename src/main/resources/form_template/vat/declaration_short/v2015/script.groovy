@@ -186,14 +186,14 @@ List<String> getErrorVersion(record) {
     errorList
 }
 
-def getDataRowSum(def dataRows, def String rowAlias, def String cellAlias){
+def getDataRowSum(def dataRows, def String rowAlias, def String cellAlias, def useRound = true){
     def sum = empty
     for (DataRow<Cell> row : dataRows) {
         if (rowAlias.equals(row.getAlias())) {
             sum += row.getCell(cellAlias).value ?: empty
         }
     }
-    return round(sum)
+    return (useRound ? round(sum) : sum)
 }
 
 void generateXML() {
@@ -306,26 +306,26 @@ void generateXML() {
         def totalRow1ndsSum = getDataRowSum(rows724_1, 'total_1', 'ndsSum')
         def totalRow2baseSum = getDataRowSum(rows724_1, 'total_2', 'baseSum')
         def totalRow2ndsSum = getDataRowSum(rows724_1, 'total_2', 'ndsSum')
-        def totalRow3baseSum = getDataRowSum(rows724_1, 'total_3', 'baseSum')
-        def totalRow3ndsSum = getDataRowSum(rows724_1, 'total_3', 'ndsSum')
+        def totalRow3baseSum = getDataRowSum(rows724_1, 'total_3', 'baseSum', false)
+        def totalRow3ndsSum = getDataRowSum(rows724_1, 'total_3', 'ndsSum', false)
         def totalRow4baseSum = getDataRowSum(rows724_1, 'total_4', 'baseSum')
         def totalRow4ndsSum = getDataRowSum(rows724_1, 'total_4', 'ndsSum')
         def totalRow5baseSum = getDataRowSum(rows724_1, 'total_5', 'baseSum')
         def totalRow5ndsSum = getDataRowSum(rows724_1, 'total_5', 'ndsSum')
-        def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum')
-        def totalRow6ndsSum  = getDataRowSum(rows724_1, 'total_6', 'ndsSum')
+        def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum', false)
+        def totalRow6ndsSum  = getDataRowSum(rows724_1, 'total_6', 'ndsSum', false)
         def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum')
-        def totalRow7ndsSum = getDataRowSum(rows724_1, 'total_7', 'ndsSum')
         def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
+        def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum')
 
         nalBaza010 = totalRow1baseSum + totalRow7baseSum
-        sumNal010 = totalRow1ndsSum + totalRow7ndsSum
+        sumNal010 = totalRow1ndsSum + totalRow7ndsBookSum
 
         nalBaza020 = totalRow2baseSum
         sumNal020 = totalRow2ndsSum
 
-        nalBaza030 = totalRow3baseSum + totalRow6baseSum
-        sumNal030 = totalRow3ndsSum + totalRow6ndsSum
+        nalBaza030 = round(totalRow3baseSum + totalRow6baseSum)
+        sumNal030 = round(totalRow3ndsSum + totalRow6ndsSum)
 
         nalBaza040 = totalRow4baseSum
         sumNal040 = totalRow4ndsSum
@@ -348,7 +348,7 @@ void generateXML() {
     /** НалВосстОбщ. Код строки 110 Графа 5. */
     def nalVosstObsh = sumNal010 + sumNal020 + sumNal030 + sumNal040 + sumNal070 + sumNal105 + sumNal106 + sumNal107 + sumNal108
     /** НалВычОбщ. Код строки 190 Графа 5. */
-    def nalVichObsh = round(nalPredNPPriob + nalIschProd)
+    def nalVichObsh = round(nalPredNPPriob + nalIschProd + nalUplPokNA)
     /** НалПУ164. Код строки 200 и код строки 210.*/
     def nalPU164 = (nalVosstObsh - nalVichObsh).abs().intValue()
 
@@ -379,7 +379,7 @@ void generateXML() {
                 // Номер корректировки
                 НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 // Код места, по которому представляется документ
-                ПоМесту: taxPlaceTypeCode,
+                ПоМесту: taxPlaceTypeCode
         ) {
             // ТИТУЛЬНЫЙ ЛИСТ
             СвНП(
@@ -394,6 +394,7 @@ void generateXML() {
                         ) {
                             reorgFormCode = reorgFormCode != null ? getRefBookValue(5, reorgFormCode).CODE.stringValue : null
                             def boolean isReorg = reorgFormCode != null && !reorgFormCode.equals('0')
+
                             if (reorgFormCode != null) {
                                 СвРеоргЮЛ(
                                         [ФормРеорг: reorgFormCode] +
@@ -446,6 +447,12 @@ void generateXML() {
                             }
                         }
                     }
+                } else if (declarationType == 20) {
+                    СумУплНА(
+                            КБК: '18210301000011000110',
+                            ОКТМО: okato,
+                            СумИсчисл: getSection2Agg(dataRowsMap)
+                    )
                 }
 
                 // РАЗДЕЛ 3
@@ -539,19 +546,6 @@ void generateXML() {
                                     НалВосст: empty
                             )
                         }
-
-                        /*for (def row : dataRowsMap[602]) {
-                            if (row.getAlias() == 'itog') {
-                                continue
-                            }
-                            СумОпер4(
-                                    КодОпер: row.code,
-                                    НалБаза: round(row.base ?: empty),
-                                    НалВычПод: empty,
-                                    НалНеПод: empty,
-                                    НалВосст: empty
-                            )
-                        }*/
                     }
                 }
 
@@ -572,17 +566,6 @@ void generateXML() {
                                     НалНеВыч: round(getNalNeVich(code))
                             )
                         }
-                        /*for (def row : dataRowsMap[601]) {
-                            if (row.getAlias() == 'itog') {
-                                continue
-                            }
-                            СумОпер7(
-                                    КодОпер: row.code,
-                                    СтРеалТов: round(row.realizeCost ?: empty),
-                                    СтПриобТов: round(row.obtainCost ?: empty),
-                                    НалНеВыч: round(getNalNeVich(row))
-                            )
-                        }*/
                     }
                 }
 
@@ -708,12 +691,6 @@ def BigDecimal hasOneOrMoreDeclaration() {
     return hasDeclaration
 }
 
-/**
- * Получить список значений для раздела 2.
- *
- * @param dataRowsMap мапа со строками форм-источников
- * @return список мап со значениями
- */
 def getSection2Rows(def dataRowsMap) {
     def rows = []
     // форма 724.6
@@ -743,6 +720,25 @@ def getSection2Rows(def dataRowsMap) {
     return rows
 }
 
+def getSection2Agg(def dataRowsMap) {
+    def sumIschisl = empty
+    // форма 724.6
+    for (def row : dataRowsMap[604]) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        sumIschisl += row.sum2
+    }
+    // форма 724.7
+    for (def row : dataRowsMap[605]) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        sumIschisl += row.ndsSum
+    }
+    return round(sumIschisl)
+}
+
 def round(def value) {
     return ((BigDecimal) value)?.setScale(0, BigDecimal.ROUND_HALF_UP)
 }
@@ -751,7 +747,7 @@ def round(def value) {
 def specialCode = '1010276'
 
 @Field
-def opuCodes = ['26411.01', '26411.02']
+def opuCodes = ['26411.01']
 
 @Field
 def knuCodes = ['20860', '20870']

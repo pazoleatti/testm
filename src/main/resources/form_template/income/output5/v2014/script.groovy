@@ -59,7 +59,11 @@ void logicCheck() {
 
         // 1. Проверка на заполнение
         if (row.getAlias() != 'R2') {
-            checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            if(row.getAlias() == 'R1'){
+                checkNonEmptyColumns(row, index, nonEmptyColumns - 'date', logger, true)
+            } else{
+                checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+            }
         }
     }
 }
@@ -140,11 +144,19 @@ void addData(def xml, int headRowCount) {
 
         // графа 3
         xmlIndexCol++
-        dataRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if(rowIndex != 1 && rowIndex != 2){
+            dataRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }else{
+            dataRow.date = null
+        }
 
         // графа 4
         xmlIndexCol++
-        dataRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        if(rowIndex != 2) {
+            dataRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        } else {
+            dataRow.sum = null
+        }
     }
     dataRowHelper.save(dataRows)
 }

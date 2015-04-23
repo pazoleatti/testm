@@ -7,7 +7,21 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
+import org.springframework.jndi.JndiTemplate
+import javax.sql.DataSource
+import java.sql.Statement
+import java.sql.PreparedStatement
+
 import java.text.SimpleDateFormat
+
+@Field
+Statement stmt
+
+@Field
+PreparedStatement dataRowStatement
+
+@Field
+PreparedStatement dataCellStatement
 
 /**
  * Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с
@@ -17,6 +31,8 @@ import java.text.SimpleDateFormat
  * 31.03.2015 - Ramil Timerbaev:
  *      Добавлена массовая загрузка справочных записей в кеш.
  *      Не стал добавлять сообещние при нескольких записях с одинаковым кодом.
+ * 21.04.2015 - доработки от Марата:
+ *      При загрузке тф скрипт напрямую записывает данные в базу.
  *
  * Первичная форма.
  */
@@ -758,7 +774,6 @@ def roundValue(def value, int precision = 2) {
 
 void importTransportData() {
     int COLUMN_COUNT = 70
-    int TOTAL_ROW_COUNT = 1
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
@@ -780,105 +795,98 @@ void importTransportData() {
     int countEmptyRow = 0   // количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
-    int totalRowCount = 0   // счетчик кол-ва итогов
-    def total = null        // итоговая строка со значениями из тф для добавления
+    def totalTF = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     loadRecordIdsInMap()
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
-        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-        if (isEmptyRow) {
-            if (countEmptyRow > 0) {
-                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-                totalRowCount++
-                // итоговая строка тф
-                total = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
-                break
-            }
-            countEmptyRow++
-            continue
-        }
 
-        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
-        // обычная строка
-        if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
-            break
-        }
-
-        // периодически сбрасываем строки
-        if (newRows.size() > ROW_MAX) {
-            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
-            newRows.clear()
-        }
+    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+    def totalColumnsIndexMap = [
+            'income'           : 23,
+            'deduction'        : 24,
+            'taxBase'          : 25,
+            'calculated'       : 26,
+            'withheld'         : 27,
+            'listed'           : 28,
+            'withheldAgent'    : 29,
+            'nonWithheldAgent' : 30,
+            'col_041_1'        : 32,
+            'col_043_1_1'      : 34,
+            'col_043_1_2'      : 36,
+            'col_043_1_3'      : 38,
+            'col_043_1_4'      : 40,
+            'col_043_1_5'      : 42,
+            'col_041_2'        : 44,
+            'col_043_2_1'      : 46,
+            'col_043_2_2'      : 48,
+            'col_043_2_3'      : 50,
+            'col_043_2_4'      : 52,
+            'col_043_2_5'      : 54,
+            'col_041_3'        : 56,
+            'col_043_3_1'      : 58,
+            'col_043_3_2'      : 60,
+            'col_043_3_3'      : 62,
+            'col_043_3_4'      : 64,
+            'col_043_3_5'      : 66,
+            'col_052_3_1'      : 68,
+            'col_052_3_2'      : 70
+    ]
+    // итоговая строка для сверки сумм
+    def totalTmp = formData.createDataRow()
+    totalColumnsIndexMap.keySet().asList().each { alias ->
+        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
     }
-    reader.close()
 
-    // проверка итоговой строки
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
+    // подключение к базе
+    def template = new JndiTemplate()
+    def DataSource dataSource = template.lookup('java:comp/env/jdbc/TaxAccDS')
+    def connection = dataSource.connection
+    try {
+        createStatements(connection)
+        // удалить все строки НФ
+        clearFormData(formData)
 
-    if (newRows.size() != 0) {
-        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
-    }
-
-    // сравнение итогов
-    if (total) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
-        def totalColumnsIndexMap = [
-                'income'           : 23,
-                'deduction'        : 24,
-                'taxBase'          : 25,
-                'calculated'       : 26,
-                'withheld'         : 27,
-                'listed'           : 28,
-                'withheldAgent'    : 29,
-                'nonWithheldAgent' : 30,
-                'col_041_1'        : 32,
-                'col_043_1_1'      : 34,
-                'col_043_1_2'      : 36,
-                'col_043_1_3'      : 38,
-                'col_043_1_4'      : 40,
-                'col_043_1_5'      : 42,
-                'col_041_2'        : 44,
-                'col_043_2_1'      : 46,
-                'col_043_2_2'      : 48,
-                'col_043_2_3'      : 50,
-                'col_043_2_4'      : 52,
-                'col_043_2_5'      : 54,
-                'col_041_3'        : 56,
-                'col_043_3_1'      : 58,
-                'col_043_3_2'      : 60,
-                'col_043_3_3'      : 62,
-                'col_043_3_4'      : 64,
-                'col_043_3_5'      : 66,
-                'col_052_3_1'      : 68,
-                'col_052_3_2'      : 70
-        ]
-
-        // итоговая строка для сверки сумм
-        def totalTmp = formData.createDataRow()
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-        }
-
-        // подсчет итогов
-        def dataRows = dataRowHelper.allCached
-        for (def row : dataRows) {
-            if (row.getAlias()) {
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+            if (isEmptyRow) {
+                if (countEmptyRow > 0) {
+                    // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+                    // итоговая строка тф
+                    totalTF = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                    break
+                }
+                countEmptyRow++
                 continue
             }
-            totalColumnsIndexMap.keySet().asList().each { alias ->
-                def value1 = totalTmp.getCell(alias).value
-                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                totalTmp.getCell(alias).setValue(value1 + value2, null)
+
+            // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
+            // обычная строка
+            if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
+                break
+            }
+
+            // периодически сбрасываем строки
+            if (newRows.size() >= ROW_MAX) {
+                insertRows(formData, newRows, rowIndex)
+                calcTotal(totalTmp, newRows, totalColumnsIndexMap)
+                newRows.clear()
             }
         }
+        reader.close()
 
+        if (newRows.size() != 0) {
+            insertRows(formData, newRows, rowIndex)
+            calcTotal(totalTmp, newRows, totalColumnsIndexMap)
+        }
+    } finally {
+        connection.close()
+    }
+    // сравнение итогов
+    if (totalTF) {
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = total.getCell(alias).value
+            def v1 = totalTF.getCell(alias).value
             def v2 = totalTmp.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
@@ -886,6 +894,20 @@ void importTransportData() {
             if (v1 == null || v1 != null && v1 != v2) {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
+        }
+    }
+}
+
+def calcTotal(def totalTmp, def rows, def totalColumnsIndexMap) {
+    // подсчет итогов
+    for (def row : rows) {
+        if (row.getAlias()) {
+            continue
+        }
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            def value1 = totalTmp.getCell(alias).value
+            def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+            totalTmp.getCell(alias).setValue(value1 + value2, null)
         }
     }
 }
@@ -1178,4 +1200,97 @@ def getId(def refBookId, def code, def rowIndex, def colIndex) {
         logger.warn(msg)
     }
     return result
+}
+
+
+/**
+ Удаляет все строки НФ из постоянного и временного среза
+ */
+def clearFormData(def formData) {
+    updateQuery("delete from data_row where form_data_id = ${formData.id}");
+}
+
+/**
+ Получает информацию о графах [alias:[id, type]]
+ */
+def getFormColumnTypes(def formTemplateId) {
+    def result = [:]
+    def rs = selectQuery("select id, alias, type from form_column where form_template_id = ${formTemplateId}")
+    while (rs.next()) {
+        def id = rs.getLong(1)
+        def alias = rs.getString(2)
+        def type = rs.getString(3)
+        result[alias] = ['id':id, 'type':type]
+    }
+    return result
+}
+
+def insertRows(def formData, def rows, def totalCount) {
+    def columns = getFormColumnTypes(formData.formTemplateId)
+    int startOrd = totalCount - rows.size() + 1;
+    def ids = getNextIds(rows.size(), 'seq_data_row')
+
+    for (int i = 0; i < rows.size(); i++) {
+        dataRowStatement.setLong(1, ids[i])
+        dataRowStatement.setLong(2, formData.id)
+        dataRowStatement.setLong(3, (startOrd + i) * 100000)
+        dataRowStatement.setLong(4, 0) // постоянный срез
+        dataRowStatement.addBatch()
+
+        def row = rows[i]
+        columns.each{column ->
+            def alias = column.key
+            def value = row.get(alias)
+            if (value != null) {
+                def type = column.value.type
+                value = row[alias]
+                if (value != null) {
+                    dataCellStatement.setLong(1, ids[i])
+                    dataCellStatement.setLong(2, column.value.id)
+                    dataCellStatement.setNull(3, java.sql.Types.VARCHAR)
+                    dataCellStatement.setNull(4, java.sql.Types.INTEGER)
+                    dataCellStatement.setNull(5, java.sql.Types.DATE)
+                    switch (type) {
+                        case 'N': dataCellStatement.setBigDecimal(4, value)
+                            break;
+                        case 'S': dataCellStatement.setString(3, value)
+                            break;
+                        case 'R': dataCellStatement.setLong(4, value.longValue())
+                            break;
+                        case 'D': dataCellStatement.setDate(5, new java.sql.Date(value.getTime()))
+                            break;
+                    }
+                    dataCellStatement.addBatch()
+                }
+            }
+        }
+    }
+    dataRowStatement.executeBatch()
+    dataCellStatement.executeBatch()
+}
+
+def getNextIds(def count, def sequenceName) {
+    def result = []
+    def rs = selectQuery("select ${sequenceName}.nextval from dual connect by level <= ${count}")
+    while (rs.next()) {
+        result += rs.getLong(1)
+    }
+    return result
+}
+
+/**
+ Создаем шаблоны запросов
+ */
+def createStatements(def connection) {
+    stmt = connection.createStatement()
+    dataRowStatement = connection.prepareStatement("insert into data_row (id, form_data_id, ord, type) values (?, ?, ?, ?)")
+    dataCellStatement = connection.prepareStatement("insert into data_cell (row_id, column_id, svalue, nvalue, dvalue) values (?, ?, ?, ?, ?)")
+}
+
+def updateQuery(def sql) {
+    stmt.executeUpdate(sql)
+}
+
+def selectQuery(def sql) {
+    stmt.executeQuery(sql)
 }

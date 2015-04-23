@@ -513,7 +513,6 @@ def getIncomeParamTable(def depParam) {
 
 void importTransportData() {
     int COLUMN_COUNT = 10
-    int TOTAL_ROW_COUNT = 1
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
@@ -535,7 +534,6 @@ void importTransportData() {
     int countEmptyRow = 0	// количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
-    int totalRowCount = 0   // счетчик кол-ва итогов
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def newRows = []
 
@@ -546,9 +544,10 @@ void importTransportData() {
         if (isEmptyRow) {
             if (countEmptyRow > 0) {
                 // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-                totalRowCount++
                 // итоговая строка тф
-                totalTF = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                rowCells = reader.readNext()
+                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+                totalTF = (isEmptyRow ? null : getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex))
                 break
             }
             countEmptyRow++
@@ -569,14 +568,13 @@ void importTransportData() {
     }
     reader.close()
 
-    // проверка итоговой строки
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
-
     if (newRows.size() != 0) {
         dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
     }
+
+    def totalRow = getTotalRow(dataRowHelper.allCached)
+    // добавить итоговую строку
+    dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
 
     // сравнение итогов
     if (totalTF) {
@@ -587,9 +585,6 @@ void importTransportData() {
                 'subjectTaxCredit'         : 8,
                 'decreaseTaxSum'           : 9
         ]
-        // итоговая строка для сверки сумм
-        def totalRow = getTotalRow(dataRowHelper.allCached)
-
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
@@ -602,9 +597,6 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-
-        // добавить итоговую строку
-        dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
     }
 }
 
