@@ -67,7 +67,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     public void execute(final Map<String, Object> params) {
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDateEnd = (Date) params.get(LOCK_DATE_END.name());
-        log.info(String.format("Запущена асинхронная задача с ключом %s и датой окончания %s", lock, sdf.format(lockDateEnd)));
+        log.info(String.format("Запущена асинхронная задача с ключом %s и датой окончания %s (%s)", lock, sdf.format(lockDateEnd), lockDateEnd.getTime()));
         transactionHelper.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
@@ -88,17 +88,31 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         throw new RuntimeException("Задача \"" + getAsyncTaskName() + "\" больше не актуальна.");
                     }
                 } catch (final Exception e) {
-                    log.error("Произошла ошибка при выполнении асинхронной задачи", e);
-                    if (lockService.isLockExists(lock, lockDateEnd)) {
+                    try {
+                        log.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой окончания %s (%s)",
+                                lock, sdf.format(lockDateEnd), lockDateEnd.getTime()), e);
+                        if (lockService.isLockExists(lock, lockDateEnd)) {
+                            transactionHelper.executeInNewTransaction(new TransactionLogic() {
+                                @Override
+                                public void execute() {
+                                    log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
+                                    if (e instanceof ServiceLoggerException) {
+                                        sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                                    } else {
+                                        sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), null);
+                                    }
+                                }
+
+                                @Override
+                                public Object executeWithReturn() {
+                                    return null;
+                                }
+                            });
+                        }
+                    } finally {
                         transactionHelper.executeInNewTransaction(new TransactionLogic() {
                             @Override
                             public void execute() {
-                                log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
-                                if (e instanceof ServiceLoggerException) {
-                                    sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                                } else {
-                                    sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), null);
-                                }
                                 log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
                                 lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                             }
