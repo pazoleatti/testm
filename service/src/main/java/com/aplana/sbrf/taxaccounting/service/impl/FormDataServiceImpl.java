@@ -21,6 +21,8 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ import java.util.*;
 @Service("unlockFormData")
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
+    protected static final Log log = LogFactory.getLog(FormDataServiceImpl.class);
 
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
@@ -143,8 +146,12 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
+        String key = LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual;
+        log.info(String.format("Начался импорт excel-файла в налоговую форму по ключу %s", key));
         loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT);
-        if (lockService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual)) {
+        log.info(String.format("Закончился импорт excel-файла в налоговую форму по ключу %s", key));
+        if (lockService.isLockExists(key)) {
+            log.info(String.format("Снятие блокировки после импорта excel-файла по ключу %s", key));
             lockService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual, userInfo.getUser().getId());
         } else {
             //Если блокировка уже не существует, значит загружаемые данные не актуальны - откатываем их
@@ -163,7 +170,8 @@ public class FormDataServiceImpl implements FormDataService {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId), userInfo.getUser());
+        String key = LockData.LockObjects.FORM_DATA.name() + "_" + formDataId;
+        checkLockedMe(lockService.getLock(key), userInfo.getUser());
 
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
 
@@ -173,6 +181,7 @@ public class FormDataServiceImpl implements FormDataService {
         InputStream dataFileInputStream = null;
 
         try {
+            log.info(String.format("Создание временного файла: %s", key));
             dataFile = File.createTempFile("dataFile", ".original");
             dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
             IOUtils.copy(inputStream, dataFileOutputStream);
@@ -180,6 +189,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             String ext = getFileExtention(fileName);
 
+            log.info(String.format("Проверка ЭЦП: %s", key));
             // Проверка ЭЦП
             // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
             boolean check = false;
@@ -212,13 +222,17 @@ public class FormDataServiceImpl implements FormDataService {
                 Map<String, Object> additionalParameters = new HashMap<String, Object>();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
+                log.info(String.format("Выполнение скрипта началось: %s", key));
                 formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+                log.info(String.format("Выполнение скрипта закончилось: %s", key));
                 IOUtils.closeQuietly(dataFileInputStream);
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта",
-                        logEntryService.save(logger.getEntries()));
+                log.info(String.format("Сохранение ошибок началось: %s", key));
+                String uuid = logEntryService.save(logger.getEntries());
+                log.info(String.format("Сохранение ошибок закончилось: %s", key));
+                throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
             } else if (isInner) {
                 logger.info("Данные загружены");
             }
