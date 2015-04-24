@@ -82,8 +82,10 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                             throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                         }
+                        log.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
+                        String uuid = logEntryService.save(logger.getEntries());
                         log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
-                        sendNotifications(lock, getNotificationMsg(params), logEntryService.save(logger.getEntries()));
+                        sendNotifications(lock, getNotificationMsg(params), uuid);
                     } else {
                         throw new RuntimeException("Задача \"" + getAsyncTaskName() + "\" больше не актуальна.");
                     }
@@ -110,18 +112,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             });
                         }
                     } finally {
-                        transactionHelper.executeInNewTransaction(new TransactionLogic() {
-                            @Override
-                            public void execute() {
-                                log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
-                                lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
-                            }
-
-                            @Override
-                            public Object executeWithReturn() {
-                                return null;
-                            }
-                        });
+                        log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
+                        lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                     }
                     log.info(String.format("Для задачи с ключом %s выполняется откат транзакции", lock));
                     if (e instanceof ServiceLoggerException) {
@@ -137,10 +129,14 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 return null;
             }
         });
-        log.info(String.format("Для задачи с ключом %s выполняется пост-обработка", lock));
-        executePostLogic(params);
-        log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки после успешного завершения", lock));
-        lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+
+        try {
+            log.info(String.format("Для задачи с ключом %s выполняется пост-обработка", lock));
+            executePostLogic(params);
+        } finally {
+            log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки после успешного завершения", lock));
+            lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
+        }
         log.info(String.format("Для задачи с ключом %s завершено выполнение", lock));
     }
 
@@ -158,7 +154,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * @param lock ключ блокировки
      */
     private void sendNotifications(String lock, String msg, String uuid) {
-        log.debug("Sending notification has been started");
+        log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
         if (msg != null && !msg.isEmpty()) {
             //Получаем список пользователей-подписчиков, для которых надо сформировать оповещение
             List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
@@ -176,6 +172,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 notificationService.saveList(notifications);
             }
         }
-        log.debug("Sending notification has been finished");
+        log.info(String.format("Для задачи с ключом %s закончена рассылка уведомлений", lock));
     }
 }
