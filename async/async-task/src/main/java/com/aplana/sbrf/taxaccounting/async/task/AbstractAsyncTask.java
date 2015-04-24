@@ -82,10 +82,25 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
                             throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
                         }
-                        log.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
-                        String uuid = logEntryService.save(logger.getEntries());
-                        log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
-                        sendNotifications(lock, getNotificationMsg(params), uuid);
+
+                        transactionHelper.executeInNewTransaction(new TransactionLogic() {
+                            @Override
+                            public void execute() {
+                                try {
+                                    log.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
+                                    String uuid = logEntryService.save(logger.getEntries());
+                                    log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
+                                    sendNotifications(lock, getNotificationMsg(params), uuid);
+                                } catch (Exception e) {
+                                    log.error("Произошла ошибка при рассылке сообщений", e);
+                                }
+                            }
+
+                            @Override
+                            public Object executeWithReturn() {
+                                return null;
+                            }
+                        });
                     } else {
                         throw new RuntimeException("Задача \"" + getAsyncTaskName() + "\" больше не актуальна.");
                     }
