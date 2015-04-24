@@ -2,6 +2,7 @@ package form_template.vat.declaration_9_sources.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -24,6 +25,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK:
         checkDepartmentParams(LogLevel.ERROR)
+        logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
         checkDepartmentParams(LogLevel.ERROR)
@@ -355,4 +357,21 @@ def getSources() {
     }
     sourceFormDataList.sort { FormData formData -> getRefBookValue(30, formData.departmentId)?.NAME?.value }
     return sourceFormDataList
+}
+
+void logicCheck() {
+    int rowCount = 0
+    int rowCountPrev = 1
+    for (def FormData formData : getSources()) {
+        rowCount += formDataService.getDataRowHelper(formData).getSavedCount()-1
+        ReportPeriod reportPeriod =  reportPeriodService.get(formData.reportPeriodId)
+        logger.info(String.format("Порядковый номер %s-%s текущего раздела декларации. Данные получены из налоговой формы: %s «%s» подразделения «%s» за %s %s.",
+                rowCountPrev, rowCount,
+                formData.kind.name, formData.formType.name,
+                getRefBookValue(30, formData.departmentId)?.NAME?.value,
+                reportPeriod.name,
+                reportPeriod.taxPeriod?.year)
+        )
+        rowCountPrev = rowCount + 1
+    }
 }
