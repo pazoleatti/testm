@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.web.widget.style;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.Anchor;
@@ -40,6 +42,7 @@ public class LinkAnchor extends Anchor{
 
 	private String text = "";
 	private String url = DEFAULT_URL;
+    private HandlerRegistration clickHandler;
 
 	public LinkAnchor() {
 		super(templates.img(DEFAULT_URL));
@@ -74,14 +77,20 @@ public class LinkAnchor extends Anchor{
     }
 
     @Override
-    public void fireEvent(GwtEvent<?> event){
-        if (this.isEnabled())
-            super.fireEvent(event);
-    }
-
-    @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
+        //Для предотвращения дефолтного поведения <a>, т.к. срабатывает даже в случае enable=false
+        if (enabled){
+            if (clickHandler!=null)
+                clickHandler.removeHandler();
+        } else{
+            clickHandler = addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    event.preventDefault();
+                }
+            });
+        }
         if (enabled){
             getElement().getStyle().setColor("#004276");
             getElement().getStyle().setCursor(Style.Cursor.POINTER);

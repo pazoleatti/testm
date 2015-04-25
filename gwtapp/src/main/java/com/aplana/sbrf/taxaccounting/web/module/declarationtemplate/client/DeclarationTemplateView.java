@@ -3,9 +3,11 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.gwt.client.mask.ui.YearMaskBox;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTemplateExt;
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FormElement;
@@ -14,6 +16,7 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -33,11 +36,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	}
 
     interface UrlTemplates extends SafeHtmlTemplates {
-        @Template("download/downloadJrxml/{0}")
-        SafeHtml getDownloadJrxmlUrl(int dtId);
-
-        @Template("download/downloadXsd/{0}")
-        SafeHtml getDownloadXsdlUrl(int dtId);
+        @Template("download/downloadByUuid/{0}")
+        SafeHtml getDownloadUrl(String uuid);
 
         @Template("download/declarationTemplate/downloadDect/{0}")
         SafeHtml getDownloadDTUrl(int dtId);
@@ -140,44 +140,61 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         /*uploadJrxmlForm.reset();*/
         Integer id = declarationTemplateExt.getDeclarationTemplate().getId() != null ?
                 declarationTemplateExt.getDeclarationTemplate().getId() : 0;
+        DeclarationTemplate template = declarationTemplateExt.getDeclarationTemplate();
         uploadDectFile.setActionUrl(urlTemplates.getUploadDTUrl(id).asString());
         uploadJrxmlFile.setActionUrl(urlTemplates.getUploadJrxmlUrl(id).asString());
         uploadXsdFile.setActionUrl(urlTemplates.getUploadXsdlUrl(id).asString());
-        title.setText(declarationTemplateExt.getDeclarationTemplate().getType().getName());
+        title.setText(template.getType().getName());
         driver.edit(declarationTemplateExt);
-        setEnabled(declarationTemplateExt.getDeclarationTemplate().getId() != null);
-        if (declarationTemplateExt.getDeclarationTemplate().getId() != null){
-            setHref(declarationTemplateExt.getDeclarationTemplate().getId());
+        setEnabled(template.getId() != null);
+        downloadJrxmlButton.setEnabled(template.getJrxmlBlobId() != null);
+        downloadXsd.setEnabled(template.getXsdId()!=null);
+        if (template.getId() != null){
+            setHref(template);
         }
 	}
 
     @Override
-    public void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler) {
-        uploadDectFile.addValueChangeHandler(valueChangeHandler);
-        uploadJrxmlFile.addValueChangeHandler(valueChangeHandler);
-        uploadXsdFile.addValueChangeHandler(valueChangeHandler);
+    public HandlerRegistration addValueChangeHandlerJrxml(ValueChangeHandler<String> valueChangeHandler) {
+        return uploadJrxmlFile.addValueChangeHandler(valueChangeHandler);
     }
 
     @Override
-    public void addSubmitHandler(FormPanel.SubmitCompleteHandler submitCompleteHandler) {
-        uploadDectFile.addSubmitCompleteHandler(submitCompleteHandler);
-        uploadJrxmlFile.addSubmitCompleteHandler(submitCompleteHandler);
-        uploadXsdFile.addSubmitCompleteHandler(submitCompleteHandler);
+    public HandlerRegistration addValueChangeHandlerXsd(ValueChangeHandler<String> valueChangeHandler) {
+        return uploadXsdFile.addValueChangeHandler(valueChangeHandler);
+    }
+
+    @Override
+    public HandlerRegistration addChangeHandlerHandlerDect(ValueChangeHandler<String> valueChangeHandler) {
+        return uploadDectFile.addValueChangeHandler(valueChangeHandler);
+    }
+
+    @Override
+    public HandlerRegistration addEndLoadHandlerHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler) {
+        return uploadXsdFile.addEndLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addEndLoadHandlerHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler) {
+        return uploadJrxmlFile.addEndLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addEndLoadHandlerHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler) {
+        return uploadDectFile.addEndLoadHandler(handler);
     }
 
     private void setEnabled(boolean isEnable){
-        downloadDectButton.setEnabled(isEnable);
         uploadJrxmlFile.setEnabled(isEnable);
         uploadDectFile.setEnabled(isEnable);
         uploadXsdFile.setEnabled(isEnable);
-        downloadJrxmlButton.setEnabled(isEnable);
-        downloadXsd.setEnabled(isEnable);
+        downloadDectButton.setEnabled(isEnable);
     }
 
-    private void setHref(int dtId){
-        downloadJrxmlButton.setHref(urlTemplates.getDownloadJrxmlUrl(dtId).asString());
-        downloadXsd.setHref(urlTemplates.getDownloadXsdlUrl(dtId).asString());
-        downloadDectButton.setHref(urlTemplates.getDownloadDTUrl(dtId).asString());
+    private void setHref(DeclarationTemplate dt){
+        downloadJrxmlButton.setHref(urlTemplates.getDownloadUrl(dt.getJrxmlBlobId()!=null?dt.getJrxmlBlobId():"").asString());
+        downloadXsd.setHref(urlTemplates.getDownloadUrl(dt.getXsdId()!= null? dt.getXsdId():"").asString());
+        downloadDectButton.setHref(urlTemplates.getDownloadDTUrl(dt.getId()).asString());
     }
 
     @Override

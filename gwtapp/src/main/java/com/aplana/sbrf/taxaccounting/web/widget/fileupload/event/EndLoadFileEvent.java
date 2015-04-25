@@ -28,7 +28,14 @@ public class EndLoadFileEvent extends GwtEvent<EndLoadFileEvent.EndLoadFileHandl
         void onEndLoad(EndLoadFileEvent event);
     }
 
+    /**
+     * Идентификатор логгера
+     */
     private String uuid;
+    /**
+     * Если true - значит в {@link com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent#uuid}
+     * находится список ошибок
+     */
     private Boolean isHasError;
 
     public EndLoadFileEvent() {

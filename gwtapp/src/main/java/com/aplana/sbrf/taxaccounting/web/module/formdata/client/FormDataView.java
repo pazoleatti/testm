@@ -814,11 +814,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-    public void addSubmitCompleteHandler(FormPanel.SubmitCompleteHandler submitCompleteHandler) {
-        fileUploader.addSubmitCompleteHandler(submitCompleteHandler);
-    }
-
-    @Override
     public void isCanEditPage(boolean visible){
         pager.isCanEditPage(visible);
     }
