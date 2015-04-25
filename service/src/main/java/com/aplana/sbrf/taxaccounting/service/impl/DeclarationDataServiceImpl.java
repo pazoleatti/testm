@@ -323,6 +323,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
     @Override
+    public InputStream getXmlDataAsStream(long declarationId, TAUserInfo userInfo) {
+        declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL1);
+        String xmlUuid = reportService.getDec(userInfo, declarationId, ReportType.XML_DEC);
+        if (xmlUuid == null) {
+            return null;
+        }
+        return blobDataService.get(xmlUuid).getInputStream();
+    }
+
+    @Override
     public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
         try {
