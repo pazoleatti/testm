@@ -88,6 +88,7 @@ def declarations() {
             declaration8n: [18, 'Декларация по НДС (раздел 8 без консолид. формы)'],
             declaration81: [13, 'Декларация по НДС (раздел 8.1)'],
             declaration9 : [14, 'Декларация по НДС (раздел 9)'],
+            declaration9n: [21, 'Декларация по НДС (раздел 9 без консолид. формы)'],
             declaration91: [15, 'Декларация по НДС (раздел 9.1)'],
             declaration10: [16, 'Декларация по НДС (раздел 10)'],
             declaration11: [17, 'Декларация по НДС (раздел 11)']
@@ -222,11 +223,14 @@ void generateXML() {
     def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
     def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
 
+    def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
+    def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
+
     def sign812 = hasOneOrMoreDeclaration()
     def has812 = (sign812 == 1)
     def sign8 = (has8 || has8n) ? 1 : 0
     def sign81 = isDeclarationExist(declarations().declaration81[0])
-    def sign9 = isDeclarationExist(declarations().declaration9[0])
+    def sign9 = (has9 || has9n) ? 1 : 0
     def sign91 = isDeclarationExist(declarations().declaration91[0])
     def sign10 = isDeclarationExist(declarations().declaration10[0])
     def sign11 = isDeclarationExist(declarations().declaration11[0])
@@ -234,7 +238,7 @@ void generateXML() {
 
     def nameDecl8 = has8 ? getDeclarationFileName(declarations().declaration8[0]) : getDeclarationFileName(declarations().declaration8n[0])
     def nameDecl81 = getDeclarationFileName(declarations().declaration81[0])
-    def nameDecl9 = getDeclarationFileName(declarations().declaration9[0])
+    def nameDecl9 =  has9 ? getDeclarationFileName(declarations().declaration9[0]) : getDeclarationFileName(declarations().declaration9n[0])
     def nameDecl91 = getDeclarationFileName(declarations().declaration91[0])
     def nameDecl10 = getDeclarationFileName(declarations().declaration10[0])
     def nameDecl11 = getDeclarationFileName(declarations().declaration11[0])
@@ -598,7 +602,16 @@ void logicCheck() {
         logger.error("Созданы два экземпляра декларации раздела 8 (раздел 8 и раздел 8 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 8 необходимо удалить!")
     }
 
-    // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
+    // 1. Не создан ни один из экземпляров декларации по НДС (раздел 9), (раздел 9 без консолид. формы) текущего периода и подразделения
+    // ИЛИ
+    // Создан только один из экземпляров декларации по НДС (раздел 9), (раздел 9 без консолид. формы) текущего периода и подразделения.
+    def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
+    def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
+    if(has9 && has9n){
+        logger.error("Созданы два экземпляра декларации раздела 9 (раздел 9 и раздел 9 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 9 необходимо удалить!")
+    }
+
+    // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/раздел 9 без консолид. формы/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     declarations().each { declaration ->
         def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
@@ -607,7 +620,7 @@ void logicCheck() {
         }
     }
 
-    // 3. Атрибуты признаки наличия разделов 8-11 (в том числе раздел 8 без консолид. формы) заполнены согласно алгоритмам
+    // 3. Атрибуты признаки наличия разделов 8-11 (в том числе раздел 8 и 9 без консолид. формы) заполнены согласно алгоритмам
     if (hasOneOrMoreDeclaration() == 1) {
         def checkMap = [
                 'Признак наличия разделов с 8 по 12'
@@ -617,7 +630,7 @@ void logicCheck() {
                 'Признак наличия сведений из дополнительного листа книги покупок'
                 : [getXmlValue(xmlData.@ПризнНал81.text()) as BigDecimal, isDeclarationExist(declarations().declaration81[0])],
                 'Признак наличия сведений из книги продаж об операциях, отражаемых за истекший налоговый период'
-                : [getXmlValue(xmlData.@ПризнНал9.text()) as BigDecimal, isDeclarationExist(declarations().declaration9[0])],
+                : [getXmlValue(xmlData.@ПризнНал9.text()) as BigDecimal, (has9 || has9n) ? 1 : 0],
                 'Признак наличия сведений из дополнительного листа книги продаж'
                 : [getXmlValue(xmlData.@ПризнНал91.text()) as BigDecimal, isDeclarationExist(declarations().declaration91[0])],
                 'Признак наличия сведений из журнала учета выставленных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
