@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -227,11 +228,10 @@ void calc() {
 
         def incomeParam
         if (row.regionBankDivision != null) {
-            def departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            def departmentParam = getRefBookValue(30, row.regionBankDivision)
 
             def depParam = getDepParam(departmentParam)
-            def depId = depParam.get('CODE').getNumberValue().intValue()
+            def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
 
             incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$depId", departmentParamsDate, -1, null, false)
         }
@@ -352,8 +352,7 @@ def calc4(def row) {
     def departmentParam
     def divisionName
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+        departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
@@ -372,8 +371,7 @@ def calc9(def row) {
     def departmentParam
     def calcFlag
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+        departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
@@ -392,8 +390,7 @@ def calc10(def row) {
     def departmentParam
     def obligationPayTax
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+        departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
@@ -514,8 +511,7 @@ void logicalCheckBeforeCalc() {
         def index = row.getIndex()
         def errorMsg = "Строка ${index}: "
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            departmentParam = getRefBookValue(30, row.regionBankDivision)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
             logger.error(errorMsg + "Не найдено подразделение территориального банка!")
@@ -533,7 +529,7 @@ void logicalCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam)
-        def depId = depParam?.get('CODE')?.getNumberValue()?.intValue() ?: -1
+        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int ?: -1
         def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
         def incomeParamTable = getIncomeParamTable(depParam)
@@ -1168,7 +1164,7 @@ def getProvider(def long providerId) {
 // Получение параметров подразделения, форма настроек которого будет использоваться
 // для получения данных (согласно алгоритму 6.2.5.8.7.1)
 def getDepParam(def departmentParam) {
-    def departmentId = departmentParam.get('CODE').getNumberValue().intValue()
+    def departmentId = departmentParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def departmentType = departmentService.get(departmentId).getType()
     if (departmentType.equals(departmentType.TERR_BANK)) {
         depParam = departmentParam
@@ -1182,7 +1178,7 @@ def getDepParam(def departmentParam) {
 
 // Получение параметров (справочник 330)
 def getIncomeParamTable(def depParam) {
-    def depId = depParam.get('CODE').getNumberValue().intValue()
+    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
     if (incomeParam != null && !incomeParam.isEmpty()) {
         def link = incomeParam.get(0).record_id.value

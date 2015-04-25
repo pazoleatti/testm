@@ -2,6 +2,7 @@ package form_template.income.app5.v2012
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
@@ -195,7 +196,7 @@ void logicCheckBeforeCalc() {
         }
 
         // Определение условий для проверок 2, 3, 4
-        def depParam = getDepParam(departmentParam)
+        def depParam = getDepParam(departmentParam, index)
         def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
         def departmentName = depParam?.NAME?.stringValue
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
@@ -246,7 +247,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // Проверки НСИ
-        def depParam = getDepParam(departmentParam)
+        def depParam = getDepParam(departmentParam, index)
         def departmentName = depParam?.NAME?.stringValue
         def incomeParamTable = getIncomeParamTable(depParam)
 
@@ -323,11 +324,12 @@ def calc2(def row) {
 
 // наименование подразделения в декларации
 def calc4(def row) {
+    def divisionName
     def departmentParam
     if (row.regionBankDivision != null) {
         departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
-    def depParam = getDepParam(departmentParam)
+    def depParam = getDepParam(departmentParam, row.getIndex())
     def incomeParamTable = getIncomeParamTable(depParam)
     for (int i = 0; i < incomeParamTable.size(); i++) {
         if (row.kpp != null && row.kpp != '') {
@@ -567,7 +569,8 @@ def getProvider(def long providerId) {
 
 // Получение параметров подразделения, форма настроек которого будет использоваться
 // для получения данных (согласно алгоритму 1.8.4.5.1)
-def getDepParam(def departmentParam) {
+def getDepParam(def departmentParam, def rowNum) {
+    def depParam
     def departmentId = departmentParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def departmentType = departmentService.get(departmentId).getType()
     if (departmentType.equals(departmentType.TERR_BANK)) {
@@ -575,8 +578,15 @@ def getDepParam(def departmentParam) {
     } else {
         def tbCode = (Integer) departmentParam.get('PARENT_ID').getReferenceValue()
         def taxPlaningTypeCode = departmentService.get(tbCode).getType().MANAGEMENT.getCode()
-        depParam = getProvider(30).getRecords(getReportPeriodEndDate(), null, "PARENT_ID = ${departmentParam.get('PARENT_ID').getReferenceValue()} and TYPE = $taxPlaningTypeCode", null).get(0)
+        depParamList = getProvider(30).getRecords(getReportPeriodEndDate(), null, "PARENT_ID = $tbCode and TYPE = $taxPlaningTypeCode", null)
+        if(depParamList != null && depParamList.size()>0){
+            depParam = depParamList.get(0)
+        }
+        if(depParam == null){
+            throw new ServiceException("Строка $rowNum: Не найдены параметры подразделения")
+        }
     }
+
     return depParam
 }
 
