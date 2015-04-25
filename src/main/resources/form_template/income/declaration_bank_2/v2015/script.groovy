@@ -417,8 +417,8 @@ void generateXML() {
     def ubitRealPrZU = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21390]))
     /** ВыручРеалПТДоСр. Код строки декларации 100. Код вида дохода = 10860. */
     def viruchRealPTDoSr = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10860]))
-    /** ВыручРеалПТПосСр. Код строки декларации 110. Код вида дохода = 10870. */
-    def viruchRealPTPosSr = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10870]))
+    /** ВыручРеалПТПосСр. Код строки декларации 110. Код вида дохода = 10870. Не заполняется с 2015 года. */
+    def viruchRealPTPosSr = getLong(0)
     /** Убыт1Соот269. Код строки декларации 140. Код вида расхода = 21490. */
     def ubit1Soot269 = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21490]))
     /** Убыт1Прев269. Код строки декларации 150. Код вида расхода = 21500. */
@@ -490,8 +490,8 @@ void generateXML() {
     def ubitProshObsl = empty
     /** СтоимРеалПТДоСр. Код строки декларации 120. Код вида расхода = 21460. */
     def stoimRealPTDoSr = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21460]))
-    /** СтоимРеалПТПосСр. Код строки декларации 130. Код вида расхода = 21470. */
-    def stoimRealPTPosSr = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21470]))
+    /** СтоимРеалПТПосСр. Код строки декларации 130. Код вида расхода = 21470. Не заполняется с 2015 года. */
+    def stoimRealPTPosSr = getLong(0)
     /** РасхРеалТов. Код строки декларации 190. */
     def rashRealTov = empty
     /** РасхДоговДУИ. Код строки декларации 220. */
