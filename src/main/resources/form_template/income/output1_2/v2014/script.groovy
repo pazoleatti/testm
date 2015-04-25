@@ -112,7 +112,7 @@ def sbString2 = "Открытое акционерное общество \"Сб
 def graph3String = "7707083893"
 
 @Field
-def sourceFormType = 419
+def sourceFormType = 10070
 
 @Field
 def startDate = null
