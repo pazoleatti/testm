@@ -1163,8 +1163,8 @@ void generateXML() {
                             break
                         case 4:
                             nalBaza04 = getSimpleIncomeSumRows8(dataRowsSimpleIncome, [14010])
-                            stavNal = 9
-                            nalDivNeRFPred = nalDivNeRFPredOld + nalDivNeRFOld
+                            stavNal = 13
+                            nalDivNeRFPred = (isFirstPeriod ? 0 : nalDivNeRFPredOld + nalDivNeRFOld)
                             nalDivNeRF = (getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_DIVIDENDS') ?: 0)
                             break
                         case 5:
