@@ -415,7 +415,7 @@ def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
 
 def calc12(def row, def taxBase) {
     if (row.baseTaxOf != null && checkFormat(row.baseTaxOf, baseTaxOfPattern) && taxBase != null) {
-        return roundValue(taxBase * new BigDecimal(row.baseTaxOf) / 100, 0)
+        return roundValue((18 / 20) * taxBase * new BigDecimal(row.baseTaxOf) / 100, 0)
     }
     return 0
 }
@@ -735,125 +735,11 @@ def getData(def formData) {
  * @author ekuvshinov
  */
 def getTaxBase() {
-    // доходы простые
-    def dataIncomeSimple = getData(getFormDataSummary(301))
-
-    // доходы сложные
-    def dataIncomeComplex = getData(getFormDataSummary(302))
-
+    def result = 0
     // расходы сложные
     def dataOutcomeComplex = getData(getFormDataSummary(303))
 
-    // расходы простые
-    def dataOutcomeSimple = getData(getFormDataSummary(304))
-
-    BigDecimal taxBase = 0
-    BigDecimal group1 = 0
-    BigDecimal group2 = 0
-    BigDecimal group3 = 0
-    BigDecimal group4 = 0
-    BigDecimal group5 = 0
-    Map<String, BigDecimal> sum = [:]
-    ['sum5', 'sum6', 'sum7', 'sum12', 'sum14', 'sum15', 'sum18', 'sum13', 'sum16', 'sum17', 'sum19', 'sum26', 'sum27',
-     'sum28', 'sum29', 'sum37', 'sum38', 'sum39', 'sum40'].each{
-        sum[it] = 0
-    }
-    // доходы сложные
-    if (dataIncomeComplex != null) {
-        for (row in dataIncomeComplex.allCached) {
-            // Если ячейка не объединена, то она должна быть в списке
-            String khy = row.getCell('incomeTypeId').hasValueOwner() ? row.getCell('incomeTypeId').getValueOwner().value : row.getCell('incomeTypeId').value
-
-            BigDecimal incomeTaxSumS = (BigDecimal) (row.getCell('incomeTaxSumS').hasValueOwner() ? row.getCell('incomeTaxSumS').getValueOwner().value : row.getCell('incomeTaxSumS').value)
-            incomeTaxSumS = incomeTaxSumS ?: 0
-            //k1
-            if (khy in ['10633', '10634', '10650', '10670']) {
-                group1 += incomeTaxSumS
-            }
-            //k5 ВырРеалИмПрав
-            if (khy in ['10855', '10880', '10900']) {
-                sum.sum5 += incomeTaxSumS
-            }
-            //k6 ВырРеалИмПроч
-            if (khy in ['10850']) {
-                sum.sum6 += incomeTaxSumS
-            }
-            //k7 ВырРеалЦБВс
-            if (khy in ['11180', '11190', '11200', '11210', '11220', '11230', '11240', '11250', '11260']) {
-                sum.sum7 += incomeTaxSumS
-            }
-            //k8
-            if (khy in ['11405', '11410', '11415', '13040', '13045', '13050', '13055', '13060', '13065', '13070', '13090', '13100', '13110', '13120', '13250', '13650', '13655', '13660', '13665', '13670', '13675', '13680', '13685', '13690', '13695', '13700', '13705', '13710', '13715', '13720', '13780', '13785', '13790', '13940', '13950', '13960', '13970', '13980', '13990', '14140', '14170', '14180', '14190', '14200', '14210', '14220', '14230', '14240', '14250', '14260', '14270', '14280', '14290', '14300', '14310', '14320']) {
-                group2 += incomeTaxSumS
-            }
-            //k12 ВыручРеалАИ
-            if (khy in ['10840']) {
-                sum.sum12 += incomeTaxSumS
-            }
-            //k14 ВыручРеалПТДоСр
-            if (khy in ['10860']) {
-                sum.sum14 += incomeTaxSumS
-            }
-            //k15 ВыручРеалПТПосСр
-            if (khy in ['10870']) {
-                sum.sum15 += incomeTaxSumS
-            }
-            //k18 ЦенаРеалПравЗУ
-            if (khy in ['10890']) {
-                sum.sum18 += incomeTaxSumS
-            }
-            //k20
-            if (khy in ['13655', '13660', '13665', '13675', '13680', '13685', '13690', '13695', '13705', '13710', '13780', '13785', '13790']) {
-                group3 += incomeTaxSumS
-            }
-        }
-    }
-    // Доходы простые
-    if (dataIncomeSimple != null) {
-        for (row in dataIncomeSimple.allCached) {
-            String khy = row.getCell('incomeTypeId').hasValueOwner() ? row.getCell('incomeTypeId').getValueOwner().value : row.getCell('incomeTypeId').value
-
-            // графа 8
-            BigDecimal rnu4Field5Accepted = (BigDecimal) (row.getCell('rnu4Field5Accepted').hasValueOwner() ? row.getCell('rnu4Field5Accepted').getValueOwner().value : row.getCell('rnu4Field5Accepted').value)
-            rnu4Field5Accepted = rnu4Field5Accepted ?: 0
-
-            // графа 5
-            BigDecimal rnu6Field10Sum = (BigDecimal) (row.getCell('rnu6Field10Sum').hasValueOwner() ? row.getCell('rnu6Field10Sum').getValueOwner().value : row.getCell('rnu6Field10Sum').value)
-            rnu6Field10Sum = rnu6Field10Sum ?: 0
-
-            // графа 6
-            BigDecimal rnu6Field12Accepted = (BigDecimal) (row.getCell('rnu6Field12Accepted').hasValueOwner() ? row.getCell('rnu6Field12Accepted').getValueOwner().value : row.getCell('rnu6Field12Accepted').value)
-            rnu6Field12Accepted = rnu6Field12Accepted ?: 0
-            //k2
-            if (khy in ['10001', '10006', '10041', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10370', '10380', '10390', '10450', '10460', '10470', '10480', '10490', '10571', '10580', '10590', '10600', '10610', '10630', '10631', '10632', '10640', '10680', '10690', '10740', '10744', '10748', '10752', '10756', '10760', '10770', '10790', '10800', '11140', '11150', '11160', '11170', '11320', '11325', '11330', '11335', '11340', '11350', '11360', '11370', '11375']) {
-                group1 += rnu4Field5Accepted
-            }
-            //k3
-            if (khy in ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640', '10680', '10690', '11340', '11350', '11370', '11375']) {
-                group1 += rnu6Field10Sum
-            }
-            //k4
-            if (khy in ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640', '10680', '10690', '11340', '11350', '11370', '11375']) {
-                group1 -= rnu6Field12Accepted
-            }
-            //k9
-            if (khy in ['11380', '11385', '11390', '11395', '11400', '11420', '11430', '11840', '11850', '11855', '11860', '11870', '11880', '11930', '11970', '12000', '12010', '12030', '12050', '12070', '12090', '12110', '12130', '12150', '12170', '12190', '12210', '12230', '12250', '12270', '12290', '12320', '12340', '12360', '12390', '12400', '12410', '12420', '12430', '12830', '12840', '12850', '12860', '12870', '12880', '12890', '12900', '12910', '12920', '12930', '12940', '12950', '12960', '12970', '12980', '12985', '12990', '13000', '13010', '13020', '13030', '13035', '13080', '13130', '13140', '13150', '13160', '13170', '13180', '13190', '13230', '13240', '13290', '13300', '13310', '13320', '13330', '13340', '13400', '13410', '13725', '13730', '13920', '13925', '13930', '14000', '14010', '14015', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14120', '14130', '14150', '14160']) {
-                group2 += rnu4Field5Accepted
-            }
-            //k10
-            if (khy in ['11860', '11870', '11880', '11930', '11970', '12000', '13930', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14130', '14150', '14160']) {
-                group2 += rnu6Field10Sum
-            }
-            //k11
-            if (khy in ['11860', '11870', '11880', '11930', '11970', '12000', '13930', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14130', '14150', '14160']) {
-                group2 -= rnu6Field12Accepted
-            }
-            //k21
-            if (khy in ['14000', '14010', '14015']) {
-                group3 += rnu4Field5Accepted
-            }
-        }
-    }
+    // TODO (Ramil Timerbaev) похоже считает не правильно
     // Расходы сложные
     if (dataOutcomeComplex != null) {
         for (row in dataOutcomeComplex.allCached) {
@@ -862,125 +748,25 @@ def getTaxBase() {
             // 9
             BigDecimal consumptionTaxSumS = (BigDecimal) (row.getCell('consumptionTaxSumS').hasValueOwner() ? row.getCell('consumptionTaxSumS').getValueOwner().value : row.getCell('consumptionTaxSumS').value)
             consumptionTaxSumS = consumptionTaxSumS ?: 0
-
-            //k13 УбытРеалАИ
-            if (khy in ['21780']) {
-                sum.sum13 += consumptionTaxSumS
-            }
-            //k16 Убыт1Прев269
-            if (khy in ['21500']) {
-                sum.sum16 += consumptionTaxSumS
-            }
-            //k17 Убыт2РеалПТ
-            if (khy in ['21510']) {
-                sum.sum17 += consumptionTaxSumS
-            }
-            //k19 УбытРеалЗУ
-            if (khy in ['21390']) {
-                sum.sum19 += consumptionTaxSumS
-            }
-            //k22
-            if (khy in ['20320', '20321', '20470', '20750', '20755', '20760', '20765', '20770', '20775', '20780', '20785', '21210', '21280', '21345', '21355', '21365', '21370', '21375', '21380', '21630', '21640']) {
-                group4 += consumptionTaxSumS
-            }
-            //k26 РеалИмущПрав
-            if (khy in ['21450', '21740', '21750']) {
-                sum.sum26 -= consumptionTaxSumS
-            }
-            //k27 ПриобрРеалИмущ
             if (khy in ['21770']) {
-                sum.sum27 -= consumptionTaxSumS
+                result += consumptionTaxSumS
             }
-            //k28 ПриобРеалЦБ
             if (khy in ['21662', '21664', '21666', '21668', '21670', '21672', '21674', '21676', '21678', '21680']) {
-                sum.sum28 -= consumptionTaxSumS
+                result -= consumptionTaxSumS
             }
-            //k29 УбытРеалАмИм
-            if (khy in ['21520', '21530']) {
-                sum.sum29 -= consumptionTaxSumS
-            }
-            //k30
-            if (khy in ['22492', '22500', '22505', '22585', '22590', '22595', '22660', '22664', '22668', '22670', '22690', '22695', '22700', '23120', '23130', '23140', '23240']) {
-                group5 += consumptionTaxSumS
-            }
-            //k34
-            if (khy in ['23150']) {
-                group5 -= consumptionTaxSumS
-            }
-            //k35
-            if (khy in ['23160']) {
-                group5 -= consumptionTaxSumS
-            }
-            //k36
-            if (khy in ['23170']) {
-                group5 -= consumptionTaxSumS
-            }
-            //k37 ОстСтРеалАИ
             if (khy in ['21760']) {
-                sum.sum37 -= consumptionTaxSumS
+                result -= consumptionTaxSumS
             }
-            //k38 СтоимРеалПТДоСр
             if (khy in ['21460']) {
-                sum.sum38 -= consumptionTaxSumS
+                result += consumptionTaxSumS
+                result4 += consumptionTaxSumS
             }
-            //k39 СтоимРеалПТПосСр
-            if (khy in ['21470']) {
-                sum.sum39 -= consumptionTaxSumS
-            }
-            //k40 СумНевозмЗатрЗУ
             if (khy in ['21385']) {
-                sum.sum40 -= consumptionTaxSumS
+                result += consumptionTaxSumS
             }
         }
     }
-    // Расходы простые
-    if (dataOutcomeSimple != null) {
-        for (row in dataOutcomeSimple.allCached) {
-            String khy = row.getCell('consumptionTypeId').hasValueOwner() ? row.getCell('consumptionTypeId').getValueOwner().value : row.getCell('consumptionTypeId').value
-
-            // 8
-            BigDecimal rnu5Field5Accepted = (BigDecimal) (row.getCell('rnu5Field5Accepted').hasValueOwner() ? row.getCell('rnu5Field5Accepted').getValueOwner().value : row.getCell('rnu5Field5Accepted').value)
-            rnu5Field5Accepted = rnu5Field5Accepted ?: 0
-
-            // 5
-            BigDecimal rnu7Field10Sum = (BigDecimal) (row.getCell('rnu7Field10Sum').hasValueOwner() ? row.getCell('rnu7Field10Sum').getValueOwner().value : row.getCell('rnu7Field10Sum').value)
-            rnu7Field10Sum = rnu7Field10Sum ?: 0
-
-            // 6
-            BigDecimal rnu7Field12Accepted = (BigDecimal) (row.getCell('rnu7Field12Accepted').hasValueOwner() ? row.getCell('rnu7Field12Accepted').getValueOwner().value : row.getCell('rnu7Field12Accepted').value)
-            rnu7Field12Accepted = rnu7Field12Accepted ?: 0
-
-            //k23
-            if (khy in ['20291', '20300', '20310', '20330', '20332', '20334', '20336', '20338', '20339', '20340', '20360', '20364', '20368', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500', '20510', '20520', '20530', '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20820', '20825', '20830', '20840', '20850', '20860', '20870', '20880', '20890', '20920', '20940', '20945', '20950', '20960', '20970', '21020', '21025', '21030', '21050', '21055', '21060', '21065', '21080', '21130', '21140', '21150', '21154', '21158', '21170', '21270', '21290', '21295', '21300', '21305', '21310', '21315', '21320', '21325', '21340', '21350', '21360', '21400', '21405', '21410', '21580', '21590', '21600', '21610', '21620', '21660', '21700', '21710', '21720', '21730', '21790', '21800', '21810']) {
-                group4 += rnu5Field5Accepted
-            }
-            //k24
-            if (khy in ['20300', '20360', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500', '20530', '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20825', '20830', '20840', '20850', '20870', '20880', '20890', '20950', '20960', '20970', '21020', '21025', '21030', '21050', '21055', '21060', '21065', '21080', '21130', '21140', '21150', '21154', '21158', '21170', '21400', '21405', '21410', '21580', '21590', '21620', '21660', '21700', '21710', '21730', '21790', '21800', '21810']) {
-                group4 += rnu7Field10Sum
-            }
-            //k25
-            if (khy in ['20300', '20360', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500', '20530', '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20825', '20830', '20840', '20850', '20870', '20880', '20890', '20950', '20960', '20970', '21020', '21025', '21030', '21050', '21055', '21060', '21065', '21080', '21130', '21140', '21150', '21154', '21158', '21170', '21400', '21405', '21410', '21580', '21590', '21620', '21660', '21700', '21710', '21730', '21790', '21800', '21810']) {
-                group4 -= rnu7Field12Accepted
-            }
-            //k31
-            if (khy in ['22000', '22010', '22020', '22030', '22040', '22050', '22060', '22070', '22080', '22090', '22100', '22110', '22120', '22130', '22140', '22150', '22160', '22170', '22180', '22190', '22200', '22210', '22220', '22230', '22240', '22250', '22260', '22270', '22280', '22290', '22300', '22310', '22320', '22330', '22340', '22350', '22360', '22370', '22380', '22385', '22390', '22395', '22400', '22405', '22410', '22415', '22420', '22425', '22430', '22435', '22440', '22445', '22450', '22455', '22460', '22465', '22470', '22475', '22480', '22485', '22490', '22496', '22498', '22530', '22534', '22538', '22540', '22544', '22548', '22550', '22560', '22565', '22570', '22575', '22580', '22600', '22610', '22640', '22680', '22710', '22715', '22720', '22750', '22760', '22800', '22810', '22840', '22850', '22860', '22870', '23040', '23050', '23100', '23110', '23200', '23210', '23220', '23230', '23250', '23260', '23270', '23280']) {
-                group5 += rnu5Field5Accepted
-            }
-            //k32
-            if (khy in ['22570', '22575', '22580', '22720', '22750', '22760', '22800', '22810', '23200', '23210', '23230', '23250', '23260', '23270', '23280']) {
-                group5 += rnu7Field10Sum
-            }
-            //k33
-            if (khy in ['22570', '22575', '22580', '22720', '22750', '22760', '22800', '22810', '23200', '23210', '23230', '23250', '23260', '23270', '23280']) {
-                group5 -= rnu7Field12Accepted
-            }
-        }
-    }
-    // taxBase = распределяемая налоговая база за отчётный период
-    sum.each { key, value ->
-        taxBase += roundValue(value, 0)
-    }
-    return taxBase + roundValue(group1, 0) + roundValue(group2, 0) - roundValue(group3, 0) - roundValue(group4, 0) - roundValue(group5, 0)
+    return (result < 0 ? 0 : result)
 }
 
 /**
