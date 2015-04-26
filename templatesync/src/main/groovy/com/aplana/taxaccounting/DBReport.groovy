@@ -11,16 +11,31 @@ class DBReport {
     // Сравненение шаблонов в БД
     def static void compareDBFormTemplate(def prefix1, def prefix2) {
         // Запросы на получение макетов
-        def sqlTemplate1 = "select id, type_id, data_rows, fixed_rows, name, fullname, header as code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)"
-        def sqlTemplate2 = "select id, type_id, data_rows, fixed_rows, name, fullname, header as code, data_headers, to_char(version, 'RRRR') as version, status, script, monthly from form_template where status not in (-1, 2)"
+        def sqlTemplate1 = "SELECT ft1.id " +
+                " ,ft1.type_id " +
+                " ,ft1.data_rows " +
+                " ,ft1.fixed_rows " +
+                " ,ft1.NAME " +
+                " ,ft1.fullname " +
+                " ,ft1.header AS code " +
+                " ,ft1.data_headers " +
+                " ,to_char(ft1.version, 'RRRR') AS version " +
+                " ,(select to_char(MIN(ft2.version) - INTERVAL '1' day, 'RRRR') from form_template ft2 where ft1.type_id = ft2.type_id AND TRUNC(ft2.version, 'DD') > ft1.version AND ft2.STATUS IN (0,1,2) group by ft2.type_id) AS versionEnd " +
+                " ,ft1.STATUS " +
+                " ,ft1.script " +
+                " ,ft1.monthly " +
+                "FROM form_template ft1 " +
+                "WHERE  " +
+                " ft1.STATUS NOT IN (-1,2)"
+        def sqlTemplate2 = sqlTemplate1
 
         // Запросы на получение колонок
         def sqlColumns1 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
-        def sqlColumns2 = "select id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id, format, filter, parent_column_id, (select alias from form_column fc2 where fc2.id = fc1.parent_column_id) as parent_alias, attribute_id2, numeration_row from form_column fc1 where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by ord"
+        def sqlColumns2 = sqlColumns1
 
         // Запросы на получение стилей
         def sqlStyles1 = "select alias, form_template_id, font_color, back_color, italic, bold from form_style where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by alias"
-        def sqlStyles2 = "select alias, form_template_id, font_color, back_color, italic, bold from form_style where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by alias"
+        def sqlStyles2 = sqlStyles1
 
         // Перечень всех всерсий в БД (заполняется в getTemplates)
         def allVersions = [:]
@@ -73,7 +88,7 @@ class DBReport {
                 table(class: 'rt') {
                     Main.TAX_FOLDERS.keySet().each { taxName ->
                         tr {
-                            td(colspan: 16, class: 'hdr', Main.TAX_FOLDERS[taxName])
+                            td(colspan: 17, class: 'hdr', Main.TAX_FOLDERS[taxName])
                         }
                         tr {
                             th(rowspan: 2, 'type_id')
@@ -81,11 +96,12 @@ class DBReport {
                             th(rowspan: 2, 'Версия')
                             th(rowspan: 2, "$prefix1 id")
                             th(rowspan: 2, "$prefix2 id")
-                            th(colspan: 11, 'Результат сравнения')
+                            th(colspan: 12, 'Результат сравнения')
                         }
                         tr {
                             th 'name'
                             th 'fullname'
+                            th 'endversion'
                             th 'header'
                             th 'fixedrows'
                             th 'datarows'
@@ -139,6 +155,7 @@ class DBReport {
                                     // Признак сравнения
                                     def nameC = tmp1?.name == tmp2?.name ? '+' : '—'
                                     def fullnameC = tmp1?.fullname == tmp2?.fullname ? '+' : '—'
+                                    def versionEndC = tmp1?.versionEnd == tmp2?.versionEnd ? '+' : '—'
                                     def codeC = tmp1?.code == tmp2?.code ? '+' : '—'
                                     def fixedrowsC = tmp1?.fixed_rows == tmp2?.fixed_rows ? '+' : '—'
                                     def datarowsC = dataRowsEqual ? '+' : '—'
@@ -236,6 +253,7 @@ class DBReport {
                                             data.columnsSet2 = columnsSet2
                                             data.type_id = type_id
                                             data.version = version
+                                            data.versionEnd = version
                                             data.prefix1 = prefix1
                                             data.prefix2 = prefix2
                                             columnTableData.put("_${type_id}_${version}", data)
@@ -303,6 +321,12 @@ class DBReport {
                                             td(class: 'td_ok', fullnameC)
                                         } else {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.fullname}, $prefix2 = ${tmp2?.fullname}", fullnameC)
+                                        }
+
+                                        if (versionEndC == '+') {
+                                            td(class: 'td_ok', versionEndC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.versionEnd}, $prefix2 = ${tmp2?.versionEnd}", versionEndC)
                                         }
 
                                         if (codeC == '+') {
@@ -444,6 +468,7 @@ class DBReport {
             version.code = it.code
             version.data_headers = it.data_headers?.characterStream?.text
             version.version = it.version
+            version.versionEnd = it.versionEnd
             version.status = it.status
             version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
             version.monthly = it.monthly as Integer
