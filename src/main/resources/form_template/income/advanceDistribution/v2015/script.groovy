@@ -132,11 +132,11 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 // Атрибуты для итогов
 @Field
 def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit',
-        'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
-        'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
-        'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
-        'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
+                    'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
+                    'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
+                    'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
+                    'everyMonthForThirdKvartalNextPeriod',
+                    'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
 
 @Field
 def formDataCache = [:]
@@ -145,7 +145,7 @@ def helperCache = [:]
 
 @Field
 def summaryMap = [301 : "Доходы, учитываемые в простых РНУ", 302 : "Сводная форма начисленных доходов",
-        303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
+                  303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
 
 @Field
 def baseTaxOfPattern = "[0-9]{1,3}(\\.[0-9]{0,15})?"
@@ -739,7 +739,6 @@ def getTaxBase() {
     // расходы сложные
     def dataOutcomeComplex = getData(getFormDataSummary(303))
 
-    // TODO (Ramil Timerbaev) похоже считает не правильно
     // Расходы сложные
     if (dataOutcomeComplex != null) {
         for (row in dataOutcomeComplex.allCached) {
@@ -758,11 +757,10 @@ def getTaxBase() {
                 result -= consumptionTaxSumS
             }
             if (khy in ['21460']) {
-                result += consumptionTaxSumS
-                result4 += consumptionTaxSumS
+                result -= consumptionTaxSumS
             }
             if (khy in ['21385']) {
-                result += consumptionTaxSumS
+                result -= consumptionTaxSumS
             }
         }
     }
