@@ -149,11 +149,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void setSourceTitle(String title) {
-        sources.setText(title);
-    }
-
-    @Override
 	public void showAccept(boolean show) {
 		acceptButton.setVisible(show);
 	}
