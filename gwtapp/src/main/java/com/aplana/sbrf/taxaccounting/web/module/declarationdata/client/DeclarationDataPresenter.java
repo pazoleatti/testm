@@ -101,8 +101,6 @@ public class DeclarationDataPresenter
         void showState(boolean accepted);
 
         void showNoPdf(String text);
-
-        void setSourceTitle(String title);
     }
 
 	private final DispatchAsync dispatcher;
