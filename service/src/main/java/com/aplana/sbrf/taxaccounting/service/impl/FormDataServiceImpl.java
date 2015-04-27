@@ -71,7 +71,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String SOURCE_MSG_ERROR =
             "Существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
     //Выводит информацию о НФ в определенном формате
-    private static final String FORM_DATA_INFO_MSG = "%s %s %s %s %s";
+    private static final String FORM_DATA_INFO_MSG = "«%s», «%s», «%s», «%s», «%s»";
     private static final String NOT_CONSOLIDATE_DESTINATION_FORM_WARNING =
             "Не выполнена консолидация данных в форму %s %s %s %s %d %s";
     private static final String NOT_CONSOLIDATE_SOURCE_FORM_WARNING =
