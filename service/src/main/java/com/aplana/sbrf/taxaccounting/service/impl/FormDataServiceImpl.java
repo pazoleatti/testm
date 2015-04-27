@@ -1097,7 +1097,7 @@ public class FormDataServiceImpl implements FormDataService {
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         sourceDFT.getKind().getName(),
-                        formData.getFormType().getName(),
+                        formTypeService.get(sourceDFT.getFormTypeId()).getName(),
                         reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
                         (sourceDepartmentReportPeriod.getCorrectionDate() != null ?
                                 SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate())
