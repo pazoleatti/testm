@@ -281,7 +281,7 @@ void generateXML() {
         xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true, true)
         if (xmlData9month != null) {
             avPlatUpl1CvFB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатУпл1КвФБ.text() ?: 0)
-            avPlatUpl1CvSub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатУпл1КвСуб.text() ?: 0)
+            avPlatUpl1CvSubB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатУпл1КвСуб.text() ?: 0)
         }
     }
 
