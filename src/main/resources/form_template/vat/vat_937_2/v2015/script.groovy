@@ -893,7 +893,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 13а..19 (20)
     ['saleCostACurr', 'saleCostARub', 'saleCostB18', 'saleCostB10', 'saleCostB0', 'vatSum18', 'vatSum10', 'bonifSalesSum'].each { alias ->
         colIndex++
-        def cell = pure(rowCells[colIndex])?.replaceAll(",", ".").replaceAll(" ", "") // это не просто пробел в конце заменяем, а хитрый разделитель тысяч, надо на код заменить (Марат)
+        def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
         if (cell != null && cell != '') {
             if (checkNumber(newRow, alias, cell, fileRowIndex)) {
                 newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
