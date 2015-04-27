@@ -159,10 +159,10 @@
                     <g:HorizontalPanel addStyleNames="{style.btnPanel2}">
                         <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
                             <g:cell>
-                                <fileuplod:FileUploadWidget ui:field="uploadXsdFile" extension="zip" text="Загрузить xsd"/>
+                                <fileuplod:FileUploadWidget ui:field="uploadXsdFile" extension="xsd" text="Загрузить xsd"/>
                             </g:cell>
                             <g:cell>
-                                <fileuplod:FileUploadWidget ui:field="uploadJrxmlFile" text="Загрузить jrxml"/>
+                                <fileuplod:FileUploadWidget ui:field="uploadJrxmlFile" extension="jrxml" text="Загрузить jrxml"/>
                             </g:cell>
                         </g:VerticalPanel>
                         <g:VerticalPanel addStyleNames="{style.upload}" height="30px">

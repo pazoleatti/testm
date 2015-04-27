@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -15,6 +17,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -26,13 +30,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 
 @Controller
@@ -125,6 +129,7 @@ public class DeclarationTemplateController {
         List<FileItem> items = upload.parseRequest(req);
         resp.setCharacterEncoding("UTF-8");
         InputStream inputStream = null;
+        JSONObject resultUuid = new JSONObject();
         try {
             if (items.get(0) != null && items.get(0).getSize() == 0)
                 throw new ServiceException("Файл jrxml пустой.");
@@ -136,15 +141,20 @@ public class DeclarationTemplateController {
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
 
             String jrxmBlobIdOld = declarationTemplate.getJrxmlBlobId();
-            String jrxmBlobId = blobDataService.create(inputStream,
-                    declarationTemplate.getType().getName() +"_jrxml");
+            String jrxmBlobId = blobDataService.create(inputStream, items.get(0).getName());
+            resultUuid.put(UuidEnum.UUID.toString(), jrxmBlobId);
             declarationTemplate.setJrxmlBlobId(jrxmBlobId);
             declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
             mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
 
             deleteBlobs(customLog, jrxmBlobIdOld);
             checkErrors(customLog, resp);
-        }  finally {
+            resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
+            resp.getWriter().printf(resultUuid.toString());
+        } catch (JSONException e) {
+            logger.error(e);
+            throw new ServiceException("", e);
+        } finally {
             if (inputStream!= null){
                 IOUtils.closeQuietly(inputStream);
             }
@@ -168,76 +178,65 @@ public class DeclarationTemplateController {
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(req);
         resp.setCharacterEncoding("UTF-8");
-        InputStream inputStream = null;
+        JSONObject resultUuid = new JSONObject();
+
         try {
             if (items.get(0) != null && items.get(0).getSize() == 0)
                 throw new ServiceException("Файл xsd пустой.");
-            inputStream = items.get(0).getInputStream();
-            ZipInputStream zis = new ZipInputStream(inputStream);
-            ZipEntry entry = zis.getNextEntry();
-            if (entry == null){
-                throw new ServiceException("Архив пустой");
-            }
+            FileItem item = items.get(0);
+
             Logger customLog = new Logger();
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
             String xsdBlobIdOld = declarationTemplate.getXsdId();
-            String xsdBlobId = blobDataService.create(zis, entry.getName());
+            String xsdBlobId = blobDataService.create(item.getInputStream(), item.getName());
             declarationTemplate.setXsdId(xsdBlobId);
+            resultUuid.put(UuidEnum.UUID.toString(), xsdBlobId);
             declarationTemplateService.save(declarationTemplate);
 
             deleteBlobs(customLog, xsdBlobIdOld);
             checkErrors(customLog, resp);
-        }  finally {
-            if (inputStream!= null){
-                IOUtils.closeQuietly(inputStream);
-            }
+            resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
+            resp.getWriter().printf(resultUuid.toString());
+        } catch (JSONException e) {
+            logger.error(e);
+            throw new ServiceException("", e);
+        } finally {
             declarationTemplateService.unlock(declarationTemplateId, userInfo);
         }
     }
 
-	@RequestMapping(value = "/downloadJrxml/{declarationTemplateId}",method = RequestMethod.GET)
-	public void processDownloadJrxml(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
+	@RequestMapping(value = "/downloadByUuid/{uuid}",method = RequestMethod.GET)
+	public void processDownloadJrxml(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-        String jrxml = declarationTemplateService.getJrxml(declarationTemplateId);
-        if (jrxml == null) {
-            throw new ServiceException("Файл jrxml к макету не прикреплен.");
-        }
-        OutputStream respOut = resp.getOutputStream();
-        String fileName = "DeclarationTemplate_" + declarationTemplateId + ".jrxml";
-        resp.setContentType("text/xml");
-        resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-        resp.setCharacterEncoding("UTF-8");
-        respOut.write(jrxml.getBytes("UTF-8"));
-        respOut.close();
-    }
+        BlobData blobData = blobDataService.get(uuid);
 
-    @RequestMapping(value = "/downloadXsd/{declarationTemplateId}",method = RequestMethod.GET)
-    public void processDownloadXsd(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        String xsd = declarationTemplateService.getXsd(declarationTemplateId);
-        OutputStream respOut = resp.getOutputStream();
-        String fileName = "DeclarationTemplate_" + declarationTemplateId + ".xsd";
+        OutputStream respOut = new BufferedOutputStream(resp.getOutputStream());
         resp.setContentType("text/xml");
-        resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        resp.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(blobData.getName(), "UTF-8") + "\"");
         resp.setCharacterEncoding("UTF-8");
-        respOut.write(xsd.getBytes("UTF-8"));
-        respOut.close();
+        int size = IOUtils.copy(blobData.getInputStream(), respOut);
+        resp.setBufferSize(size);
+        IOUtils.closeQuietly(respOut);
     }
 
     @ExceptionHandler(ServiceLoggerException.class)
-    public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException {
+    public void logServiceExceptionHandler(ServiceLoggerException e, final HttpServletResponse response) throws IOException, JSONException {
+        JSONObject errors = new JSONObject();
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().printf("{errorUuid : \"%s\"}", e.getUuid());
+        errors.put(UuidEnum.ERROR_UUID.toString(), e.getUuid());
+        response.getWriter().printf(errors.toString());
     }
 
 	@ExceptionHandler(Exception.class)
-	public void exceptionHandler(Exception e, final HttpServletResponse response) {
+	public void exceptionHandler(Exception e, final HttpServletResponse response) throws JSONException {
 		response.setCharacterEncoding("UTF-8");
-		logger.warn(e.getLocalizedMessage(), e);
+		logger.error(e.getLocalizedMessage(), e);
+        JSONObject errors = new JSONObject();
 		try {
             Logger log = new Logger();
             log.error(e.getMessage());
-			response.getWriter().printf("{errorUuid : \"%s\"}", logEntryService.save(log.getEntries()));
+            errors.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(log.getEntries()));
+			response.getWriter().printf(errors.toString());
 		} catch (IOException ioException) {
 			logger.error(ioException.getMessage(), ioException);
 		}
@@ -259,7 +258,7 @@ public class DeclarationTemplateController {
 
     private void checkErrors(Logger logger, HttpServletResponse response) throws IOException {
         if (!logger.getEntries().isEmpty()){
-            response.getWriter().printf("{errorUuid : \"%s\"}", logEntryService.save(logger.getEntries()));
+           throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
 }

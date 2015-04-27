@@ -64,7 +64,7 @@ public class FormTemplateController {
 		resp.setCharacterEncoding("UTF-8");
 
 		formTemplateImpexService.exportFormTemplate(formTemplateId, resp.getOutputStream());
-		resp.getOutputStream().close();
+		IOUtils.closeQuietly(resp.getOutputStream());
 	}
 
     @RequestMapping(value = "formTemplate/downloadAll")

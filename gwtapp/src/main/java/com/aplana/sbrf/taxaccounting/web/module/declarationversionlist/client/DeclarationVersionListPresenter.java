@@ -108,7 +108,7 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         GetDTVersionListAction action = new GetDTVersionListAction();
-        action.setDeclarationFormTypeId(Integer.parseInt(request.getParameter(DeclarationTemplateTokens.declarationType, "")));
+        action.setDeclarationFormTypeId(Integer.parseInt(request.getParameter(DeclarationTemplateTokens.declarationType, "-1")));
         dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<GetDTVersionListResult>() {
                     @Override

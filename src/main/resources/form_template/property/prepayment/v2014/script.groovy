@@ -1,7 +1,6 @@
 package form_template.property.prepayment.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
@@ -411,7 +410,7 @@ def getProvider(def long providerId) {
 
 // Получить строки формы.
 def getDataRows(def taxOrganCode, def kpp, def formTypeId, def formDataCollection) {
-    def formList = formDataCollection?.findAllByFormTypeAndKind(formTypeId, FormDataKind.SUMMARY)
+    def formList = formDataCollection?.records?.findAll { it.formType.id == formTypeId }
     def dataRows = []
     for (def form : formList) {
         dataRows += (formDataService.getDataRowHelper(form)?.getAll()?.findAll() { row ->

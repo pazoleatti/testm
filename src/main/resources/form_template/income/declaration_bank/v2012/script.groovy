@@ -1,7 +1,6 @@
 package form_template.income.declaration_bank.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
@@ -129,9 +128,8 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
     def sourceFormType = formTypeService.get(sourceFormTypeId)
     def success = true
 
-    def departmentId = declarationData.getDepartmentId()
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
-    def departmentFormType = formDataCollection.find(departmentId, sourceFormTypeId, FormDataKind.ADDITIONAL)
+    def departmentFormType = formDataCollection?.records?.find { it.formType.id == sourceFormTypeId }
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     if (departmentFormType == null) {
         if (loggerNeed) {
@@ -346,36 +344,36 @@ void generateXML() {
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
-    def dataRowsComplexIncome = getDataRows(formDataCollection, 302, [FormDataKind.SUMMARY])
+    def dataRowsComplexIncome = getDataRows(formDataCollection, 302)
 
     /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleIncome = getDataRows(formDataCollection, 301, [FormDataKind.SUMMARY])
+    def dataRowsSimpleIncome = getDataRows(formDataCollection, 301)
 
     /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
-    def dataRowsComplexConsumption = getDataRows(formDataCollection, 303, [FormDataKind.SUMMARY])
+    def dataRowsComplexConsumption = getDataRows(formDataCollection, 303)
 
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleConsumption = getDataRows(formDataCollection, 304, [FormDataKind.SUMMARY])
+    def dataRowsSimpleConsumption = getDataRows(formDataCollection, 304)
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
-    def dataRowsAdvance = getDataRows(formDataCollection, 500, [FormDataKind.SUMMARY])
+    def dataRowsAdvance = getDataRows(formDataCollection, 500)
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def dataRowsDividend = getDataRows(formDataCollection, newDeclaration ? 411 : 306, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
+    def dataRowsDividend = getDataRows(formDataCollection, newDeclaration ? 411 : 306)
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def dataRowsTaxAgent = getDataRows(formDataCollection, newDeclaration ? 413 : 307, [FormDataKind.SUMMARY, FormDataKind.ADDITIONAL])
+    def dataRowsTaxAgent = getDataRows(formDataCollection, newDeclaration ? 413 : 307)
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
-    def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308, [FormDataKind.ADDITIONAL])
+    def dataRowsTaxSum = getDataRows(formDataCollection, newDeclaration ? 412 : 308)
 
     /** форма «Остатки по начисленным авансовым платежам». */
-    def dataRowsRemains = getDataRows(formDataCollection, 309, [FormDataKind.PRIMARY])
+    def dataRowsRemains = getDataRows(formDataCollection, 309)
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
-    def dataRowsSum = getDataRows(formDataCollection, 417, [FormDataKind.ADDITIONAL])
+    def dataRowsSum = getDataRows(formDataCollection, 417)
 
     /*
      * Получение значении декларации за предыдущий период.
@@ -1853,8 +1851,8 @@ def getXmlValue(def value) {
 }
 
 /** Получить строки формы. */
-def getDataRows(def formDataCollection, def formTemplateId, def List<FormDataKind> kinds) {
-    def formList = kinds.sum { formDataCollection?.findAllByFormTypeAndKind(formTemplateId, it) }
+def getDataRows(def formDataCollection, def formTypeId) {
+    def formList = formDataCollection?.records?.findAll { it.formType.id == formTypeId }
     def dataRows = []
     for (def form : formList) {
         dataRows += (formDataService.getDataRowHelper(form)?.getAll()?:[])

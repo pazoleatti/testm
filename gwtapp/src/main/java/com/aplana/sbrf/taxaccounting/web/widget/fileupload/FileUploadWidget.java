@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 
+import com.aplana.sbrf.taxaccounting.model.UuidEnum;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
@@ -14,6 +16,8 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -67,7 +71,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     private boolean isSimpleButton;
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String actionTempUrl = "upload/uploadController/patterntemp/";
-    private static String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
+    private static String respPattern = "(?i:<pre*>)|(?i:</pre>)";
     private String extension;
 
     @Override
@@ -160,18 +164,22 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                 if (!isSimpleButton) {
-                    EndLoadFileEvent.fire(FileUploadWidget.this, true);
-                    /*if (!event.getResults().toLowerCase().contains("error") && event.getResults().toLowerCase().contains("uuid")) {
-                        String uuid = event.getResults().replaceAll(jsonPattern, "$2");
-                        JSONValue jsonValue = JSONParser.parseLenient(uuid);
-                        String value = jsonValue.isObject().get("uuid").toString().replaceAll("\"", "").trim();
-                        EndLoadFileEvent.fire(FileUploadWidget.this, value);
-                        setValue(value, true);
-                    } else {
-                        EndLoadFileEvent.fire(FileUploadWidget.this, true);
-                        setValue("");
+                    String result = event.getResults().replaceAll(respPattern, "");
+                    LogCleanEvent.fire(FileUploadWidget.this);
+                    JSONObject answer = JSONParser.parseLenient(result).isObject();
+                    if (answer.get(UuidEnum.UUID.toString()) != null){
+                        setValue(answer.get(UuidEnum.UUID.toString()).isString().stringValue(), true);
                     }
-                    uploadData.reset();*/
+                    String uuid = null;
+                    boolean isErrors = false;
+                    if (answer.get(UuidEnum.SUCCESS_UUID.toString()) != null){
+                        uuid = answer.get(UuidEnum.SUCCESS_UUID.toString()).isString().stringValue();
+                    } else if (answer.get(UuidEnum.ERROR_UUID.toString()) != null){
+                        uuid = answer.get(UuidEnum.ERROR_UUID.toString()).isString().stringValue();
+                        isErrors = true;
+                    }
+
+                    EndLoadFileEvent.fire(FileUploadWidget.this, uuid, isErrors);
                 }
             }
         });

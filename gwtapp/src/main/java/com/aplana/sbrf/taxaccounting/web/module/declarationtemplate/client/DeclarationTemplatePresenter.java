@@ -14,13 +14,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.DTCreateNewTypeEvent;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.DeclarationVersionHistoryPresenter;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -93,8 +92,12 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         String ERROR = "error ";
 
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
-        void addDeclarationValueHandler(ValueChangeHandler<String> valueChangeHandler);
-        void addSubmitHandler(FormPanel.SubmitCompleteHandler submitCompleteHandler);
+        HandlerRegistration addValueChangeHandlerJrxml(ValueChangeHandler<String> valueChangeHandler);
+        HandlerRegistration addValueChangeHandlerXsd(ValueChangeHandler<String> valueChangeHandler);
+        HandlerRegistration addChangeHandlerHandlerDect(ValueChangeHandler<String> valueChangeHandler);
+        HandlerRegistration addEndLoadHandlerHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addEndLoadHandlerHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addEndLoadHandlerHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler);
         void activateButtonName(String name);
         void activateButton(boolean isVisible);
         void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
@@ -308,26 +311,74 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         addToPopupSlot(versionHistoryPresenter);
     }
 
-    private static String respPattern = "(<pre.*>)(.*)(</pre>)";
+    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[6];
     @Override
     protected void onBind() {
         super.onBind();
 
-        FormPanel.SubmitCompleteHandler submitCompleteHandler = new FormPanel.SubmitCompleteHandler() {
+        ValueChangeHandler<String> vchJrxml = new ValueChangeHandler<String>() {
             @Override
-            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                String uuid = event.getResults().replaceAll(respPattern, "$2");
-                LogCleanEvent.fire(DeclarationTemplatePresenter.this);
-                if (uuid.isEmpty()){
-                    Dialog.infoMessage("Файл загружен");
-                    return;
-                }
-                JSONValue jsonValue = JSONParser.parseLenient(uuid);
-                String value = jsonValue.isObject().get("errorUuid").toString().replaceAll("\"", "").trim();
-                LogAddEvent.fire(DeclarationTemplatePresenter.this, value);
-                Dialog.errorMessage("Не удалось импортировать шаблон");
+            public void onValueChange(ValueChangeEvent<String> event) {
+                Dialog.infoMessage("Файл загружен");
+                declarationTemplateExt.getDeclarationTemplate().setJrxmlBlobId(event.getValue());
+                getView().setDeclarationTemplate(declarationTemplateExt);
             }
         };
-        getView().addSubmitHandler(submitCompleteHandler);
+        ValueChangeHandler<String> vchXsd = new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                Dialog.infoMessage("Файл загружен");
+                declarationTemplateExt.getDeclarationTemplate().setXsdId(event.getValue());
+                getView().setDeclarationTemplate(declarationTemplateExt);
+            }
+        };
+        ValueChangeHandler<String> vchDect = new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                Dialog.infoMessage("Файл загружен");
+            }
+        };
+        EndLoadFileEvent.EndLoadFileHandler loadFileHandlerXsd = new EndLoadFileEvent.EndLoadFileHandler() {
+            @Override
+            public void onEndLoad(EndLoadFileEvent event) {
+                if (event.isHasError()){
+                    Dialog.errorMessage("Не удалось импортировать шаблон");
+                }
+                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
+            }
+        };
+        EndLoadFileEvent.EndLoadFileHandler loadFileHandlerJrxml = new EndLoadFileEvent.EndLoadFileHandler() {
+            @Override
+            public void onEndLoad(EndLoadFileEvent event) {
+                if (event.isHasError()){
+                    Dialog.errorMessage("Не удалось импортировать шаблон");
+                }
+                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
+            }
+        };
+        EndLoadFileEvent.EndLoadFileHandler loadFileHandlerDect = new EndLoadFileEvent.EndLoadFileHandler() {
+            @Override
+            public void onEndLoad(EndLoadFileEvent event) {
+                if (event.isHasError()){
+                    Dialog.errorMessage("Не удалось макет");
+                }
+                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
+            }
+        };
+
+        handlerRegistrations[0] = getView().addValueChangeHandlerJrxml(vchJrxml);
+        handlerRegistrations[1] = getView().addValueChangeHandlerXsd(vchXsd);
+        handlerRegistrations[2] = getView().addChangeHandlerHandlerDect(vchDect);
+        handlerRegistrations[3] = getView().addEndLoadHandlerHandlerXsd(loadFileHandlerXsd);
+        handlerRegistrations[4] = getView().addEndLoadHandlerHandlerJrxml(loadFileHandlerJrxml);
+        handlerRegistrations[5] = getView().addEndLoadHandlerHandlerDect(loadFileHandlerDect);
+    }
+
+    @Override
+    protected void onUnbind() {
+        super.onUnbind();
+        for (HandlerRegistration han : handlerRegistrations){
+            han.removeHandler();
+        }
     }
 }

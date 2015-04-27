@@ -24,9 +24,10 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManual
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -34,13 +35,13 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers, SetFocus.SetFocusHandler {
-
-    private static final String UUID_STRING = "uuid";
-    private static final String jsonPattern = "(<pre.*>)(.+?)(</pre>)";
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
@@ -759,7 +760,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 getView().showConsolidation(
                                         WorkflowState.ACCEPTED != formData.getState()
                                                 &&
-                                        (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind()));
+                                                (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind())
+                                                &&
+                                                result.isReadOnly());
 
                                 onTimerReport(ReportType.EXCEL, false);
                                 onTimerReport(ReportType.CSV, false);
@@ -777,9 +780,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             builder.append(", ").append(Formats.getRussianMonthNameWithTier(retFormDataResult.getFormData().getPeriodOrder()));
         }
         if (retFormDataResult.getDepartmentReportPeriod().getCorrectionDate() != null) {
-            builder.append(", корр. (" +
-                    DATE_TIME_FORMAT.format(retFormDataResult.getDepartmentReportPeriod().getCorrectionDate())
-                    + ")");
+            builder.append(", корр. (").append(DATE_TIME_FORMAT.format(retFormDataResult.getDepartmentReportPeriod().getCorrectionDate())).append(")");
         }
         return builder.toString();
     }
@@ -787,26 +788,19 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     @Override
     protected void onBind() {
         super.onBind();
-
-        FormPanel.SubmitCompleteHandler submitCompleteHandler = new FormPanel.SubmitCompleteHandler() {
+        ValueChangeHandler<String> valueChangeHandler = new ValueChangeHandler<String>() {
             @Override
-            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                if (event.getResults().toLowerCase().contains(UUID_STRING)) {
-                    String uuid = event.getResults().replaceAll(jsonPattern, "$2");
-                    int startIndex = uuid.indexOf(UUID_STRING) + UUID_STRING.length() + 4;
-                    int endIndex = startIndex + 36;
-                    if (endIndex <= uuid.length()) {
-                        uuid = uuid.substring(startIndex, endIndex);
-                    }
-                    UploadDataRowsAction action = new UploadDataRowsAction();
-                    action.setUuid(uuid);
-                    action.setFormData(formData);
-                    dispatcher.execute(action, createDataRowResultCallback(true));
-                }
+            public void onValueChange(ValueChangeEvent<String> event) {
+                String uuid = event.getValue();
+
+                UploadDataRowsAction action = new UploadDataRowsAction();
+                action.setUuid(uuid);
+                action.setFormData(formData);
+                dispatcher.execute(action, createDataRowResultCallback(true));
             }
         };
 
-        getView().addSubmitCompleteHandler(submitCompleteHandler);
+        getView().addFileUploadValueChangeHandler(valueChangeHandler);
         addRegisteredHandler(SetFocus.getType(), this);
     }
 
