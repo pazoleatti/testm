@@ -73,9 +73,6 @@ switch (formDataEvent) {
         calc()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
-        // (Marat) вернул импорт из rnu обратно
-        //importData()
-        //calc()
         importTransportData()
         break
     case FormDataEvent.SORT_ROWS:
@@ -821,7 +818,6 @@ void importTransportData() {
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
-    logger.info("Проверено ${newRows.size()} строк")
 
     // вставляем строки в БД
     //logger.error("Фиктивная ошибка, чтобы не было загрузки в БД") // отключил загрузку в БД
@@ -841,7 +837,6 @@ void importTransportData() {
         if (buffer.size() > 0) {
             dataRowHelper.insert(buffer, i - buffer.size() + 1)
         }
-        logger.info("Загружено ${newRows.size()} строк")
     }
 }
 
