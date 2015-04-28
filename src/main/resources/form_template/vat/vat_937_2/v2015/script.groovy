@@ -843,8 +843,6 @@ void importTransportData() {
         }
         logger.info("Загружено ${newRows.size()} строк")
     }
-    dataRowsCut.add(newRow)
-    return true
 }
 
 boolean isEmptyCells(def rowCells) {
