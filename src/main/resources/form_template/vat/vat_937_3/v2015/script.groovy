@@ -912,7 +912,6 @@ void importTransportData() {
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
-    logger.info("Проверено ${rowCount} строк")
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
@@ -951,7 +950,6 @@ void importTransportData() {
         if (buffer.size() > 0) {
             dataRowHelper.insert(buffer, i - buffer.size() + 1)
         }
-        logger.info("Загружено ${newRows.size()} строк")
     }
 }
 
@@ -1008,7 +1006,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 14..19
     ['cost', 'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'diffVatInc'].each { alias ->
         colIndex++
-        def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")?.replaceAll(" ", "") // это не просто пробел в конце заменяем, а хитрый разделитель тысяч, надо на код заменить (Марат)
+        def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
         if (cell != null && cell != '') {
             if (checkNumber(newRow, alias, cell, fileRowIndex)) {
                 newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)

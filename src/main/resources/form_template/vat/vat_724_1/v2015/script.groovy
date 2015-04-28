@@ -3,6 +3,8 @@ package form_template.vat.vat_724_1.v2015
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.NumericColumn
+import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
@@ -621,17 +623,15 @@ void sortFormDataRows() {
 }
 
 void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
     int COLUMN_COUNT = 9
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
-
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
 
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -648,40 +648,52 @@ void importTransportData() {
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def mapRows = [:]
 
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
-
-        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-        if (isEmptyRow) {
-            if (countEmptyRow > 0) {
-                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
                 // итоговая строка тф
                 rowCells = reader.readNext()
-                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-                totalTF = (isEmptyRow ? null : getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex))
+                if (rowCells != null && !isEmptyCells(rowCells)) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                }
                 break
             }
-            countEmptyRow++
-            continue
-        }
 
-        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
-        // обычная строка
-        if (countEmptyRow != 0 && !addRow(mapRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
-            break
-        }
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
+            if (rowCells.length < 10) {
+                continue
+            }
+            // определить раздел по техническому полю и добавить строку в нужный раздел
+            def sectionIndex = pure(rowCells[10])
+            if (mapRows[sectionIndex] == null) {
+                mapRows[sectionIndex] = []
+            }
 
-        // периодически сбрасываем строки
-        if (getNewRowCount(mapRows) > ROW_MAX) {
-            insertRows(dataRowHelper, mapRows)
-            mapRows.clear()
+            mapRows[sectionIndex].add(newRow)
         }
+    } finally {
+        reader.close()
     }
-    reader.close()
 
-    if (getNewRowCount(mapRows) != 0) {
-        insertRows(dataRowHelper, mapRows)
+    def newRows = mapRows.values().sum { it }
+    if (!logger.containsLevel(LogLevel.ERROR) && newRows?.size() > 0) {
+        def newRowCount = (newRows?.size() ?: 0)
+        insertRows(dataRowHelper, mapRows, newRowCount, ROW_MAX)
     }
+    dataRows = dataRowHelper.allCached
 
     // сравнение итогов
     if (totalTF) {
@@ -692,7 +704,6 @@ void importTransportData() {
         totalColumnsIndexMap.keySet().asList().each { alias ->
             totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
         }
-
         // подсчет итогов
         for (def row : dataRows) {
             if (row.getAlias()) {
@@ -704,7 +715,6 @@ void importTransportData() {
                 totalTmp.getCell(alias).setValue(value1 + value2, null)
             }
         }
-
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
@@ -714,10 +724,13 @@ void importTransportData() {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
     }
+    logger.info("Проверено ${dataRows.size()} строк")
 
     // расчет итогов
     for (def section : sections) {
@@ -777,6 +790,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     def int colOffset = 1
     def int colIndex
+    def cell
 
     // графа 3 - атрибут 900 - ACCOUNT - «Номер счета», справочник 101 «План счетов бухгалтерского учета»
     colIndex = 3
@@ -793,27 +807,22 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // графа 4
     colIndex = 4
-    newRow.baseSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+    setNumber(newRow, rowCells, 'baseSum', 4, fileRowIndex, colOffset)
 
     // графа 5
-    colIndex = 5
-    newRow.ndsNum = pure(rowCells[colIndex])
+    setString(newRow, rowCells, 'ndsNum', 5, fileRowIndex)
 
     // графа 6
-    colIndex = 6
-    newRow.ndsSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+    setNumber(newRow, rowCells, 'ndsSum', 6, fileRowIndex, colOffset)
 
     // графа 7
-    colIndex = 7
-    newRow.ndsRate = pure(rowCells[colIndex])
+    setString(newRow, rowCells, 'ndsRate', 7, fileRowIndex)
 
     // графа 8
-    colIndex = 8
-    newRow.ndsBookSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+    setNumber(newRow, rowCells, 'ndsBookSum', 8, fileRowIndex, colOffset)
 
     // графа 9
-    colIndex = 9
-    newRow.ndsDealSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+    setNumber(newRow, rowCells, 'ndsDealSum', 9, fileRowIndex, colOffset)
 
     // Техническое поле(группа)
     colIndex = 10
@@ -823,26 +832,96 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     return newRow
 }
 
+/**
+ * Задать строкое значение в ячейку новой строки.
+ *
+ * @param newRow новая строка
+ * @param rowCells значния строки из ТФ
+ * @param alias алиас графы
+ * @param colIndex номер графы в ТФ
+ * @param fileRowIndex номер строки в ТФ
+ */
+void setString(def newRow, def rowCells, def alias, def colIndex, def fileRowIndex) {
+    def cell = pure(rowCells[colIndex])
+    if (checkString(newRow, alias, cell, fileRowIndex)) {
+        newRow[alias] = cell
+    }
+}
+
+/**
+ * Задать числовое значение в ячейку новой строки.
+ *
+ * @param newRow новая строка
+ * @param rowCells значния строки из ТФ
+ * @param alias алиас графы
+ * @param colIndex номер графы в ТФ
+ * @param colOffset отступ по колонкам
+ * fileRowIndex номер строки в ТФ
+ */
+void setNumber(def newRow, def rowCells, def alias, def colIndex, def fileRowIndex, def colOffset) {
+    def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
+    if (checkNumber(newRow, alias, cell, fileRowIndex)) {
+        newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
+    }
+}
+
 String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
 }
 
-/** Получить количество новых строк в мапе во всех разделах. */
-def getNewRowCount(def mapRows) {
-    return mapRows.entrySet().sum { entry -> entry.value.size() }
-}
-
 /** Вставить данные в нф по разделам. */
-def insertRows(def dataRowHelper, def mapRows) {
+void insertRows(def dataRowHelper, def mapRows, def newRowCount, def rowMax) {
     sections.each { section ->
         def copyRows = mapRows[section]
         if (copyRows != null && !copyRows.isEmpty()) {
             def dataRows = dataRowHelper.allCached
-            def insertIndex = getDataRow(dataRows, getLastRowAlias(section)).getIndex()
-            dataRowHelper.insert(copyRows, insertIndex)
+            def insertIndex = getDataRow(dataRows, getFirstRowAlias(section)).getIndex()
 
+            def buffer = []
+            def i = 0;
+            copyRows.each() {
+                buffer.add(copyRows[i++])
+                if (buffer.size() == rowMax) {
+                    def index = insertIndex + i - buffer.size() + 1
+                    dataRowHelper.insert(buffer, index)
+                    buffer = []
+                }
+            }
+            if (buffer.size() > 0) {
+                def index = insertIndex + i - buffer.size() + 1
+                dataRowHelper.insert(buffer, index)
+            }
             // поправить индексы, потому что они после вставки не пересчитываются
             updateIndexes(dataRows)
         }
     }
+    logger.info("Загружено $newRowCount строк")
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
+
+boolean checkString(def tmpRow, def alias, def value, def fileRowIndex) {
+    StringColumn column = tmpRow.getCell(alias).getColumn()
+    if (column.getMaxLength() < value.size()) {
+        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение $value превышает допустимый размер " + column.getMaxLength())
+        return false
+    }
+    return true
+}
+
+boolean checkNumber(def tmpRow, def alias, def value, def fileRowIndex) {
+    NumericColumn column = tmpRow.getCell(alias).getColumn()
+    def sepId = value.indexOf('.')
+    def tmp = sepId == -1 ? value : value.substring(0, value.indexOf('.'))
+    if (column.getMaxLength() - column.getPrecision() < tmp.size()) {
+        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' превышает допустимый размер до запятой " + (column.getMaxLength() - column.getPrecision()))
+        return false
+    }
+    if (!value.matches("[0-9.,-]*")) {
+        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' содержит недопустимые символы")
+        return false
+    }
+    return true
 }
