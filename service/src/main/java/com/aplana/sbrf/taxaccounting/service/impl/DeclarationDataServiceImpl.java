@@ -411,6 +411,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	}
 
     @Override
+    public InputStream getXmlDataAsStream(long declarationId, TAUserInfo userInfo) {
+        declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL1);
+        String xmlUuid = reportService.getDec(userInfo, declarationId, ReportType.XML_DEC);
+        if (xmlUuid == null) {
+            return null;
+        }
+        return blobDataService.get(xmlUuid).getInputStream();
+    }
+
+    @Override
     public String getXmlDataFileName(long declarationDataId, TAUserInfo userInfo) {
         declarationDataAccessService.checkEvents(userInfo, declarationDataId, FormDataEvent.GET_LEVEL0);
         try {
@@ -469,14 +479,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void setPdfDataBlobs(Logger logger,
                                      DeclarationData declarationData, TAUserInfo userInfo) {
+        log.info(String.format("Получение uuid декларации %s", declarationData.getId()));
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid != null) {
+            log.info(String.format("Получение данных декларации %s", declarationData.getId()));
             InputStream xml = blobDataService.get(xmlUuid).getInputStream();
+            log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
             JasperPrint jasperPrint = fillReport(xml,
                     declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
 
+            log.info(String.format("Сохранение PDF в БД для декларации %s", declarationData.getId()));
             reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
             try {
+                log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
                 reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);

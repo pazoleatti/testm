@@ -2,6 +2,7 @@ package form_template.income.declaration_bank_2.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -275,27 +276,15 @@ void generateXML() {
     /** Принятая декларация за период «9 месяцев» предыдущего налогового периода. */
     def xmlData9month = null
     /** Используемые поля декларации за период «9 месяцев» предыдущего налогового периода. */
-    /** НалВыпл311ФБ за предыдущий отчетный период. Код строки декларации 250. */
-    def nalVipl311FB9month = 0
-    /** НалВыпл311Суб за предыдущий отчетный период. Код строки декларации 260. */
-    def nalVipl311Sub9month = 0
-    /** НалИсчислФБ. Код строки декларации 190. */
-    def nalIschislFB9month = 0
-    /** НалИсчислСуб. Столбец «Сумма налога». */
-    def nalIschislSub9month = 0
-    /** АвПлатМесСуб. Код строки декларации 310. */
-    def avPlatMesSub9month = 0
-    /** АвПлатМесФБ. Код строки декларации 300. */
-    def avPlatMesFB9month = 0
+    /** АвПлатУпл1КвФБ. Код строки декларации 330. */
+    def avPlatUpl1CvFB9month = 0
+    /** АвПлатУпл1КвСуб. Код строки декларации 340. */
+    def avPlatUpl1CvSubB9month = 0
     if (isFirstPeriod) {
         xmlData9month = getXmlData(getReportPeriod9month(prevReportPeriod)?.id, departmentId, true, true)
         if (xmlData9month != null) {
-            nalVipl311FB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311ФБ.text() ?: 0)
-            nalVipl311Sub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалВыпл311Суб.text() ?: 0)
-            nalIschislFB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалИсчислФБ.text() ?: 0)
-            nalIschislSub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@НалИсчислСуб.text() ?: 0)
-            avPlatMesSub9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатМесСуб.text() ?: 0)
-            avPlatMesFB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатМесФБ.text() ?: 0)
+            avPlatUpl1CvFB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатУпл1КвФБ.text() ?: 0)
+            avPlatUpl1CvSubB9month = new BigDecimal(xmlData9month.Документ.Прибыль.РасчНал.@АвПлатУпл1КвСуб.text() ?: 0)
         }
     }
 
@@ -419,8 +408,8 @@ void generateXML() {
     def ubitRealPrZU = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21390]))
     /** ВыручРеалПТДоСр. Код строки декларации 100. Код вида дохода = 10860. */
     def viruchRealPTDoSr = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10860]))
-    /** ВыручРеалПТПосСр. Код строки декларации 110. Код вида дохода = 10870. */
-    def viruchRealPTPosSr = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10870]))
+    /** ВыручРеалПТПосСр. Код строки декларации 110. Код вида дохода = 10870. Не заполняется с 2015 года. */
+    def viruchRealPTPosSr = getLong(0)
     /** Убыт1Соот269. Код строки декларации 140. Код вида расхода = 21490. */
     def ubit1Soot269 = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21490]))
     /** Убыт1Прев269. Код строки декларации 150. Код вида расхода = 21500. */
@@ -492,8 +481,8 @@ void generateXML() {
     def ubitProshObsl = empty
     /** СтоимРеалПТДоСр. Код строки декларации 120. Код вида расхода = 21460. */
     def stoimRealPTDoSr = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21460]))
-    /** СтоимРеалПТПосСр. Код строки декларации 130. Код вида расхода = 21470. */
-    def stoimRealPTPosSr = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21470]))
+    /** СтоимРеалПТПосСр. Код строки декларации 130. Код вида расхода = 21470. Не заполняется с 2015 года. */
+    def stoimRealPTPosSr = getLong(0)
     /** РасхРеалТов. Код строки декларации 190. */
     def rashRealTov = empty
     /** РасхДоговДУИ. Код строки декларации 220. */
@@ -546,13 +535,13 @@ void generateXML() {
     def avPlatMesFB = isTaxPeriod ? empty : (nalIschislFB - (!isFirstPeriod ? nalIschislFBOld : 0))
     /** АвНачислФБ. Код строки декларации 220. */
     def avNachislFB
-    if(isFirstPeriod){
-        if(xmlData9month != null){
-            avNachislFB = nalIschislFB9month - nalVipl311FB9month + avPlatMesFB9month
-        }   else{
+    if (isFirstPeriod) {
+        if (xmlData9month != null) {
+            avNachislFB = getLong(avPlatUpl1CvFB9month)
+        } else {
             avNachislFB = getTotalFromForm(dataRowsRemains, 'sum1')
         }
-    }   else{
+    } else {
         avNachislFB = nalIschislFBOld - nalVipl311FBOld + avPlatMesFBOld
     }
     /** АвПлатМесСуб. Код строки декларации 310. */
@@ -567,13 +556,13 @@ void generateXML() {
     def avPlatUpl1Cv = (reportPeriod != null && reportPeriod.order == 3 ? avPlatUpl1CvFB + avPlatUpl1CvSub : empty)
     /** АвНачислСуб. Код строки декларации 230. 200 - 260 + 310. */
     def avNachislSub
-    if(isFirstPeriod){
-        if(xmlData9month != null){
-            avNachislSub = getLong(nalIschislSub9month - nalVipl311Sub9month + avPlatMesSub9month)
-        }   else{
+    if (isFirstPeriod) {
+        if (xmlData9month != null) {
+            avNachislSub = getLong(avPlatUpl1CvSubB9month)
+        } else {
             avNachislSub = getTotalFromForm( dataRowsRemains, 'sum2')
         }
-    }   else{
+    } else {
         avNachislSub =  getLong(nalIschislSubOld - nalVipl311SubOld + avPlatMesSubOld)
     }
     /** АвНачисл. Код строки декларации 210. */
@@ -1165,8 +1154,8 @@ void generateXML() {
                             break
                         case 4:
                             nalBaza04 = getSimpleIncomeSumRows8(dataRowsSimpleIncome, [14010])
-                            stavNal = 9
-                            nalDivNeRFPred = nalDivNeRFPredOld + nalDivNeRFOld
+                            stavNal = 13
+                            nalDivNeRFPred = (isFirstPeriod ? 0 : nalDivNeRFPredOld + nalDivNeRFOld)
                             nalDivNeRF = (getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_DIVIDENDS') ?: 0)
                             break
                         case 5:
@@ -1183,7 +1172,7 @@ void generateXML() {
                         nalNachislPred = 0
                         nalNachislPosl = 0
                     } else {
-                        nalNachislPred = nalNachislPredOld + nalNachislPoslOld
+                        nalNachislPred = (isFirstPeriod ? 0 : nalNachislPredOld + nalNachislPoslOld)
                         nalNachislPosl = nalIschisl04 - nalDivNeRFPred - nalDivNeRF - nalNachislPred
                     }
 
@@ -1223,165 +1212,167 @@ void generateXML() {
                 }
                 // Приложение к налоговой декларации - конец
 
-                // Приложение №2
-                // сортируем по ФИО, потом по остальным полям
-                if (isCFOApp2) {
-                    def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
-                    sortRows(dataRowsApp2, sortColumns)
-                }
+                // Приложение №2 к налоговой декларации - формирутеся только для периода "год"
+                if (isTaxPeriod) {
+                    // сортируем по ФИО, потом по остальным полям
+                    if (isCFOApp2 && dataRowsApp2 != null) {
+                        def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
+                        sortRows(dataRowsApp2, sortColumns)
+                    }
 
-                //ДатаСправ   Дата составления
-                def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
-                //Тип         Тип
-                def type = String.format("%02d", reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId))
+                    //ДатаСправ   Дата составления
+                    def dataSprav = (docDate != null ? docDate : new Date()).format("dd.MM.yyyy")
+                    //Тип         Тип
+                    def type = String.format("%02d", reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId))
 
-                if (dataRowsApp2) {
-                    fillRecordsMap([4L, 10L, 350L, 360L, 370L])
-                }
+                    if (dataRowsApp2) {
+                        fillRecordsMap([4L, 10L, 350L, 360L, 370L])
+                    }
 
-                def index = 0
-                def rowNum = 1
-                for (def row : dataRowsApp2) {
-                    rowNum++
-                    //НомерСправ  Справка №
-                    def nomerSprav = isCFOApp2 ? (++index) : row.refNum
-                    //ИННФЛ       ИНН
-                    def innFL = row.innRF
-                    //ИННИно       ИНН
-                    def innIno = row.inn
-                    //Фамилия     Фамилия
-                    def surname = row.surname
-                    //Имя         Имя
-                    def givenName = row.name
-                    //Отчество    Отчество
-                    def parentName = row.patronymic
-                    //СтатусНП    Статус налогоплательщика
-                    def statusNP = row.status
-                    //ДатаРожд    Дата рождения
-                    def dataRozhd = row.birthday?.format('dd.MM.yyyy')
-                    //Гражд       Гражданство (код страны)
-                    def grazhd = getRefBookValue(10, row.citizenship)?.CODE?.value
-                    //КодВидДок   Код вида документа, удостоверяющего личность
-                    def kodVidDok = getRefBookValue(360, row.code)?.CODE?.value
-                    //СерНомДок   Серия и номер документа
-                    def serNomDok = row.series
-                    //Индекс      Почтовый индекс
-                    def zipCode = row.postcode
-                    //КодРегион   Регион (код)
-                    def subdivisionRF = getRefBookValue(4, row.region)?.CODE?.value
-                    //Район       Район
-                    def area = row.district
-                    //Город       Город
-                    def city = row.city
-                    //НаселПункт  Населенный пункт (село, поселок)
-                    def region = row.locality
-                    //Улица       Улица (проспект, переулок)
-                    def street = row.street
-                    //Дом         Номер дома (владения)
-                    def homeNumber = row.house
-                    //Корпус      Номер корпуса (строения)
-                    def corpNumber = row.housing
-                    //Кварт       Номер квартиры
-                    def apartment = row.apartment
-                    //ОКСМ        Код страны
-                    def oksm = getRefBookValue(10, row.country)?.CODE?.value
-                    //АдрТекст    Адрес места жительства за пределами Российской Федерации
-                    def adrText = row.address
-                    //Ставка      Налоговая ставка
-                    def stavka = row.taxRate
-                    //СумДохОбщ   Общая сумма дохода
-                    def sumDohObsh = row.income
-                    //СумВычОбщ   Общая сумма вычетов
-                    def sumVichObsh = row.deduction
-                    //НалБаза     Налоговая база
-                    def nalBazaApp2 = row.taxBase
-                    //НалИсчисл   Сумма налога исчисленная
-                    def nalIschislApp2 = row.calculated
-                    //НалУдерж    Сумма налога удержанная
-                    def nalUderzh = row.withheld
-                    //НалУплач Сумма налога перечисленная
-                    def nalUplach = row.listed
-                    //НалУдержЛиш Сумма налога, излишне удержанная налоговым агентом
-                    def nalUderzhLish = row.withheldAgent
-                    //НалНеУдерж  Сумма налога, не удержанная налоговым агентом
-                    def nalNeUderzh = row.nonWithheldAgent
+                    def index = 0
+                    def rowNum = 1
+                    for (def row : dataRowsApp2) {
+                        //НомерСправ  Справка №
+                        def nomerSprav = isCFOApp2 ? (++index) : row.refNum
+                        //ИННФЛ       ИНН
+                        def innFL = row.innRF
+                        //ИННИно       ИНН
+                        def innIno = row.inn
+                        //Фамилия     Фамилия
+                        def surname = row.surname
+                        //Имя         Имя
+                        def givenName = row.name
+                        //Отчество    Отчество
+                        def parentName = row.patronymic
+                        //СтатусНП    Статус налогоплательщика
+                        def statusNP = row.status
+                        //ДатаРожд    Дата рождения
+                        def dataRozhd = row.birthday?.format('dd.MM.yyyy')
+                        //Гражд       Гражданство (код страны)
+                        def grazhd = getRefBookValue(10, row.citizenship)?.CODE?.value
+                        //КодВидДок   Код вида документа, удостоверяющего личность
+                        def kodVidDok = getRefBookValue(360, row.code)?.CODE?.value
+                        //СерНомДок   Серия и номер документа
+                        def serNomDok = row.series
+                        //Индекс      Почтовый индекс
+                        def zipCode = row.postcode
+                        //КодРегион   Регион (код)
+                        def subdivisionRF = getRefBookValue(4, row.region)?.CODE?.value
+                        //Район       Район
+                        def area = row.district
+                        //Город       Город
+                        def city = row.city
+                        //НаселПункт  Населенный пункт (село, поселок)
+                        def region = row.locality
+                        //Улица       Улица (проспект, переулок)
+                        def street = row.street
+                        //Дом         Номер дома (владения)
+                        def homeNumber = row.house
+                        //Корпус      Номер корпуса (строения)
+                        def corpNumber = row.housing
+                        //Кварт       Номер квартиры
+                        def apartment = row.apartment
+                        //ОКСМ        Код страны
+                        def oksm = getRefBookValue(10, row.country)?.CODE?.value
+                        //АдрТекст    Адрес места жительства за пределами Российской Федерации
+                        def adrText = row.address
+                        //Ставка      Налоговая ставка
+                        def stavka = row.taxRate
+                        //СумДохОбщ   Общая сумма дохода
+                        def sumDohObsh = row.income
+                        //СумВычОбщ   Общая сумма вычетов
+                        def sumVichObsh = row.deduction
+                        //НалБаза     Налоговая база
+                        def nalBazaApp2 = row.taxBase
+                        //НалИсчисл   Сумма налога исчисленная
+                        def nalIschislApp2 = row.calculated
+                        //НалУдерж    Сумма налога удержанная
+                        def nalUderzh = row.withheld
+                        //НалУплач Сумма налога перечисленная
+                        def nalUplach = row.listed
+                        //НалУдержЛиш Сумма налога, излишне удержанная налоговым агентом
+                        def nalUderzhLish = row.withheldAgent
+                        //НалНеУдерж  Сумма налога, не удержанная налоговым агентом
+                        def nalNeUderzh = row.nonWithheldAgent
 
-                    // 0..n
-                    СведДохФЛ(
-                            НомерСправ : nomerSprav,
-                            ДатаСправ : dataSprav,
-                            Тип : type) {
-                        //1..1
-                        ФЛПолучДох(
-                                ИННФЛ : innFL,
-                                ИННИно : innIno,
-                                СтатусНП : statusNP,
-                                ДатаРожд : dataRozhd,
-                                Гражд : grazhd,
-                                КодВидДок : kodVidDok,
-                                СерНомДок : serNomDok
-                        ) {
-                            // 1..1
-                            ФИО([Фамилия : surname, Имя : givenName] + (parentName != null ? [Отчество : parentName] : []))
+                        // 0..n
+                        СведДохФЛ(
+                                НомерСправ : nomerSprav,
+                                ДатаСправ : dataSprav,
+                                Тип : type) {
+                            //1..1
+                            ФЛПолучДох(
+                                    ИННФЛ : innFL,
+                                    ИННИно : innIno,
+                                    СтатусНП : statusNP,
+                                    ДатаРожд : dataRozhd,
+                                    Гражд : grazhd,
+                                    КодВидДок : kodVidDok,
+                                    СерНомДок : serNomDok
+                            ) {
+                                // 1..1
+                                ФИО([Фамилия : surname, Имя : givenName] + (parentName != null ? [Отчество : parentName] : []))
+                                //0..1
+                                АдрМЖРФ(
+                                        (zipCode ? [Индекс : zipCode] : [:]) +
+                                                [КодРегион : subdivisionRF] +
+                                                (area? [Район : area] : [:]) +
+                                                (city ? [Город : city] : [:]) +
+                                                (region ? [НаселПункт : region] : [:]) +
+                                                (street ? [Улица : street] : [:]) +
+                                                (homeNumber ? [Дом : homeNumber] : [:]) +
+                                                (corpNumber ? [Корпус : corpNumber] : [:]) +
+                                                (apartment ? [Кварт : apartment] : [:]))
+                                //0..1
+                                АдрМЖИно(ОКСМ : oksm, АдрТекст : adrText)
+                            }
+                            //1..1
+                            ДохНалПер(
+                                    [Ставка : stavka, СумДохОбщ : sumDohObsh] +
+                                            (sumVichObsh != null ? [СумВычОбщ : sumVichObsh] : []) +
+                                            [НалБаза : nalBazaApp2, НалИсчисл : nalIschislApp2] +
+                                            (nalUderzh != null ? [НалУдерж : nalUderzh] : []) +
+                                            (nalUplach != null ? [НалУплач : nalUplach] : []) +
+                                            (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
+                                            (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
+                            )
                             //0..1
-                            АдрМЖРФ(
-                                    (zipCode ? [Индекс : zipCode] : [:]) +
-                                            [КодРегион : subdivisionRF] +
-                                            (area? [Район : area] : [:]) +
-                                            (city ? [Город : city] : [:]) +
-                                            (region ? [НаселПункт : region] : [:]) +
-                                            (street ? [Улица : street] : [:]) +
-                                            (homeNumber ? [Дом : homeNumber] : [:]) +
-                                            (corpNumber ? [Корпус : corpNumber] : [:]) +
-                                            (apartment ? [Кварт : apartment] : [:]))
-                            //0..1
-                            АдрМЖИно(ОКСМ : oksm, АдрТекст : adrText)
-                        }
-                        //1..1
-                        ДохНалПер(
-                                [Ставка : stavka, СумДохОбщ : sumDohObsh] +
-                                        (sumVichObsh != null ? [СумВычОбщ : sumVichObsh] : []) +
-                                        [НалБаза : nalBazaApp2, НалИсчисл : nalIschislApp2] +
-                                        (nalUderzh != null ? [НалУдерж : nalUderzh] : []) +
-                                        (nalUplach != null ? [НалУплач : nalUplach] : []) +
-                                        (nalUderzhLish != null ? [НалУдержЛиш : nalUderzhLish] : []) +
-                                        (nalNeUderzh != null ? [НалНеУдерж : nalNeUderzh] : [])
-                        )
-                        //0..1
-                        СпрДохФЛ() {
-                            3.times{ index_1 ->
-                                //КодДоход    040 (Код дохода)
-                                def kodDohod040 = getRefBookValue(370, row["col_040_${index_1 + 1}"])?.CODE?.value
-                                //СумДоход    041 (Сумма дохода)
-                                def sumDohod041 = row["col_041_${index_1 + 1}"]
+                            СпрДохФЛ() {
+                                3.times{ index_1 ->
+                                    //КодДоход    040 (Код дохода)
+                                    def kodDohod040 = getRefBookValue(370, row["col_040_${index_1 + 1}"])?.CODE?.value
+                                    //СумДоход    041 (Сумма дохода)
+                                    def sumDohod041 = row["col_041_${index_1 + 1}"]
 
-                                СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
-                                    5.times{ index_2 ->
-                                        //КодВычет    042 (Код вычета)
-                                        def kodVichet042 = getRefBookValue(350, row["col_042_${index_1 + 1}_${index_2 + 1}"])?.CODE?.value
-                                        //СумВычет    043 (Сумма вычета)
-                                        def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
+                                    СумДох(КодДоход : kodDohod040, СумДоход : sumDohod041) {
+                                        5.times{ index_2 ->
+                                            //КодВычет    042 (Код вычета)
+                                            def kodVichet042 = getRefBookValue(350, row["col_042_${index_1 + 1}_${index_2 + 1}"])?.CODE?.value
+                                            //СумВычет    043 (Сумма вычета)
+                                            def sumVichet043 = row["col_043_${index_1 + 1}_${index_2 + 1}"]
 
-                                        //1..n
-                                        СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
+                                            //1..n
+                                            СумВыч(КодВычет : kodVichet042, СумВычет : sumVichet043)
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        //0..1
-                        НалВычСтанд() {
-                            2.times{ index_1 ->
-                                //КодВычет    051 (Код вычета)
-                                def kodVichet051 = getRefBookValue(350, row["col_051_3_${index_1 + 1}"])?.CODE?.value
-                                //СумВычет    052 (Сумма вычета)
-                                def sumVichet052 = row["col_052_3_${index_1 + 1}"]
-                                //1..n
-                                СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
+                            //0..1
+                            НалВычСтанд() {
+                                2.times{ index_1 ->
+                                    //КодВычет    051 (Код вычета)
+                                    def kodVichet051 = getRefBookValue(350, row["col_051_3_${index_1 + 1}"])?.CODE?.value
+                                    //СумВычет    052 (Сумма вычета)
+                                    def sumVichet052 = row["col_052_3_${index_1 + 1}"]
+                                    //1..n
+                                    СумВыч(КодВычет : kodVichet051, СумВычет : sumVichet052)
+                                }
                             }
                         }
                     }
                 }
+                // Приложение №2 к налоговой декларации - конец
                 if (rowNum >= 10000)
                     decParams.setShowReport(false)
             }

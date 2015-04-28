@@ -63,8 +63,8 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['jurName', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
-        'dealsMode', 'date1', 'date2', 'percentIncomeSum', 'percentConsumptionSum', 'priceFirstCurrency',
-        'currencyCode', 'courseCB', 'priceFirstRub', 'transactionDate']
+                       'dealsMode', 'date1', 'date2', 'percentIncomeSum', 'percentConsumptionSum', 'priceFirstCurrency',
+                       'currencyCode', 'courseCB', 'priceFirstRub', 'transactionDate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -73,7 +73,7 @@ def autoFillColumns = ['rowNum', 'innKio', 'country', 'countryCode']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['jurName', 'contractNum', 'contractDate', 'transactionNum', 'transactionDeliveryDate',
-        'date1', 'date2', 'priceFirstCurrency', 'currencyCode', 'courseCB', 'priceFirstRub', 'transactionDate']
+                       'date1', 'date2', 'priceFirstCurrency', 'currencyCode', 'courseCB', 'priceFirstRub', 'transactionDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -168,9 +168,15 @@ void logicCheck() {
 
         // Корректность даты исполнения 1–ой части сделки
         def dt1 = row.date1
-        if (dt1 != null && (dt1 < dFrom || dt1 > dTo)) {
-            def msg = row.getCell('date1').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg» не может быть больше даты окончания отчётного периода или меньше даты его начала!")
+        if (dt1 != null) {
+            if ( dt1 > dTo) {
+                def msg = row.getCell('date1').column.name
+                rowError(logger, row, "Строка $rowNum: Значение графы «$msg» не может быть больше даты окончания отчётного периода!")
+            }
+            if (dt1 < dFrom ) {
+                def msg = row.getCell('date1').column.name
+                rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg» не может быть меньше даты начала отчётного периода!")
+            }
         }
 
         // Корректность даты совершения сделки
