@@ -1127,10 +1127,15 @@ public class FormDataServiceImpl implements FormDataService {
             sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
             sourceService.addFormDataConsolidationInfo(formData.getId(), srcIds);
 
-            //Вывод сообщений в панель уведомлений
-            logger.info("Выполнена консолидация данных из форм-источников:");
-            for (String s : msgPull){
-                logger.info(s);
+            //8.Система проверяет экземпляр на наличие записей о консолидации. Записи о консолидации найдены.
+            if (!srcIds.isEmpty()){
+                //9. Система выводит сообщение в панель уведомлений
+                logger.info("Выполнена консолидация данных из форм-источников:");
+                for (String s : msgPull){
+                    logger.info(s);
+                }
+            } else {
+                logger.info("Данные текущей формы очищены. Не существует ни одной формы-источника, статус которой \"Принята\"");
             }
         } finally {
             //5. Система разблокирует текущий экземпляр и все налоговые формы - источники.
