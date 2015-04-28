@@ -377,7 +377,6 @@ void prevPeriodCheck() {
 
 void importTransportData() {
     int COLUMN_COUNT = 5
-    int TOTAL_ROW_COUNT = 1
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
@@ -402,7 +401,6 @@ void importTransportData() {
     int countEmptyRow = 0	// количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
-    int totalRowCount = 0   // счетчик кол-ва итогов
     def total = null		// итоговая строка со значениями из тф для добавления
     def newRows = []
 
@@ -413,9 +411,10 @@ void importTransportData() {
         if (isEmptyRow) {
             if (countEmptyRow > 0) {
                 // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-                totalRowCount++
                 // итоговая строка тф
-                total = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                rowCells = reader.readNext()
+                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+                totalTF = (isEmptyRow ? null : getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex))
                 break
             }
             countEmptyRow++
@@ -436,21 +435,24 @@ void importTransportData() {
     }
     reader.close()
 
-    // проверка итоговой строки
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
-
     if (newRows.size() != 0) {
         dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
     }
 
+    // пересчитываем строки итого
+    def dataRows = dataRowHelper.allCached
+    calcTotalSum(dataRows, totalQuarterRow, totalColumns)
+    // добавить в нф итоговую строку
+    dataRowHelper.insert(totalQuarterRow, dataRowHelper.allCached.size() + 1)
+    // строка Итого за текущий отчетный (налоговый) период
+    def dataRowsPrev = getDataRowsPrev()
+    totalRow.costs = getTotalValue(dataRows, dataRowsPrev)
+    dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
+
     // сравнение итогов
     if (total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [
-                'costs' : 5
-        ]
+        def totalColumnsIndexMap = [ 'costs' : 5 ]
 
         // итоговая строка для сверки сумм
         def totalTmp = formData.createDataRow()
@@ -459,7 +461,6 @@ void importTransportData() {
         }
 
         // подсчет итогов
-        def dataRows = dataRowHelper.allCached
         for (def row : dataRows) {
             if (row.getAlias()) {
                 continue
@@ -483,15 +484,6 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-
-        // пересчитываем строки итого
-        calcTotalSum(dataRows, totalQuarterRow, totalColumns)
-        // добавить в нф итоговую строку
-        dataRowHelper.insert(totalQuarterRow, dataRowHelper.allCached.size() + 1)
-        // строка Итого за текущий отчетный (налоговый) период
-        def dataRowsPrev = getDataRowsPrev()
-        totalRow.costs = getTotalValue(dataRows, dataRowsPrev)
-        dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
     }
 }
 

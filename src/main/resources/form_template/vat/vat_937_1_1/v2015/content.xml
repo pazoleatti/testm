@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Сведения из дополнительных листов книги покупок</name>
-    <fullName>Сведения из дополнительных листов книги покупок</fullName>
+    <name>(937.1.1) Сведения из дополнительных листов книги покупок</name>
+    <fullName>(937.1.1) Сведения из дополнительных листов книги покупок</fullName>
     <header>937.1.1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>

@@ -2,6 +2,7 @@ package form_template.income.app5.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
@@ -193,7 +194,7 @@ void logicCheckBeforeCalc() {
         }
 
         // Определение условий для проверок 2, 3, 4
-        def depParam = getDepParam(departmentParam)
+        def depParam = getDepParam(departmentParam, index)
         def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int ?: -1
         def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
@@ -244,7 +245,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
         // Проверки НСИ
-        def depParam = getDepParam(departmentParam)
+        def depParam = getDepParam(departmentParam, index)
         def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
         def incomeParamTable = getIncomeParamTable(depParam)
 
@@ -323,11 +324,12 @@ def calc2(def row) {
 
 // наименование подразделения в декларации
 def calc4(def row) {
+    def divisionName
     def departmentParam
     if (row.regionBankDivision != null) {
         departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
-    def depParam = getDepParam(departmentParam)
+    def depParam = getDepParam(departmentParam, row.getIndex())
     def incomeParamTable = getIncomeParamTable(depParam)
     for (int i = 0; i < incomeParamTable?.size(); i++) {
         if (row.kpp != null && row.kpp != '') {
@@ -485,10 +487,11 @@ def getProvider(def long providerId) {
 
 // Получение параметров подразделения, форма настроек которого будет использоваться
 // для получения данных (согласно алгоритму 1.8.4.5.1)
-def getDepParam(def departmentParam) {
+def getDepParam(def departmentParam, def rowNum) {
     if (departmentParam == null) {
         return null
     }
+    def depParam
     def departmentId = departmentParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def departmentType = departmentService.get(departmentId).getType()
     if (departmentType.equals(departmentType.TERR_BANK)) {
@@ -496,8 +499,15 @@ def getDepParam(def departmentParam) {
     } else {
         def tbCode = (Integer) departmentParam.get('PARENT_ID').getReferenceValue()
         def taxPlaningTypeCode = departmentService.get(tbCode).getType().MANAGEMENT.getCode()
-        depParam = getProvider(30).getRecords(getReportPeriodEndDate(), null, "PARENT_ID = ${departmentParam.get('PARENT_ID').getReferenceValue()} and TYPE = $taxPlaningTypeCode", null).get(0)
+        depParamList = getProvider(30).getRecords(getReportPeriodEndDate(), null, "PARENT_ID = $tbCode and TYPE = $taxPlaningTypeCode", null)
+        if(depParamList != null && depParamList.size()>0){
+            depParam = depParamList.get(0)
+        }
+        if(depParam == null){
+            throw new ServiceException("Строка $rowNum: Не найдены параметры подразделения")
+        }
     }
+
     return depParam
 }
 
@@ -518,7 +528,6 @@ def getIncomeParamTable(def depParam) {
 
 void importTransportData() {
     int COLUMN_COUNT = 10
-    int TOTAL_ROW_COUNT = 1
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
@@ -540,7 +549,6 @@ void importTransportData() {
     int countEmptyRow = 0	// количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
-    int totalRowCount = 0   // счетчик кол-ва итогов
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def newRows = []
 
@@ -551,9 +559,10 @@ void importTransportData() {
         if (isEmptyRow) {
             if (countEmptyRow > 0) {
                 // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-                totalRowCount++
                 // итоговая строка тф
-                totalTF = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                rowCells = reader.readNext()
+                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+                totalTF = (isEmptyRow ? null : getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex))
                 break
             }
             countEmptyRow++
@@ -574,14 +583,13 @@ void importTransportData() {
     }
     reader.close()
 
-    // проверка итоговой строки
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
-
     if (newRows.size() != 0) {
         dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
     }
+
+    def totalRow = getTotalRow(dataRowHelper.allCached)
+    // добавить итоговую строку
+    dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
 
     // сравнение итогов
     if (totalTF) {
@@ -592,9 +600,6 @@ void importTransportData() {
                 'subjectTaxCredit'         : 8,
                 'decreaseTaxSum'           : 9
         ]
-        // итоговая строка для сверки сумм
-        def totalRow = getTotalRow(dataRowHelper.allCached)
-
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
@@ -607,9 +612,6 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-
-        // добавить итоговую строку
-        dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
     }
 }
 

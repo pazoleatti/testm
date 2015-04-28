@@ -1276,7 +1276,7 @@ void generateXML() {
 
                 // Приложение №2
                 // сортируем по ФИО, потом по остальным полям
-                if (isCFOApp2) {
+                if (isCFOApp2 && dataRowsApp2 != null) {
                     def sortColumns = ['surname', 'name', 'patronymic', 'innRF', 'inn', 'taxRate']
                     sortRows(dataRowsApp2, sortColumns)
                 }

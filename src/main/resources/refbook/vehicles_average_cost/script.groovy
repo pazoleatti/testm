@@ -40,13 +40,13 @@ void importFromXls() {
     }
 
     def xmlString = importService.getData(inputStream, ".xlsx", 'windows-1251', 'Средняя стоимость', null)
-    if (xmlString == null) {
+    if (xmlString == null || xmlString.isEmpty()) {
         logger.error('Отсутствие значений после обработки потока данных')
         return
     }
 
     def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
+    if (xml == null || xml.empty) {
         logger.error('Отсутствие значений после обработки потока данных')
         return
     }

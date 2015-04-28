@@ -1,4 +1,4 @@
-package form_template.vat.declaration_fns.v2015
+package form_template.vat.declaration_short.v2015
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -13,15 +13,15 @@ import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
 
 /**
- * Декларация по НДС (раздел 1-7)
+ * Декларация по НДС (короткая, раздел 1-7)
  *
- * совпадает с "Декларация по НДС (аудит, раздел 1-7)" и "Декларация по НДС (короткая, раздел 1-7)", кроме заполнения секции "РАЗДЕЛ 2"
+ * совпадает с "Декларация по НДС (раздел 1-7)" и "Декларация по НДС (аудит, раздел 1-7)" и , кроме заполнения секции "РАЗДЕЛ 2"
  *
- * declarationTemplateId=2004
+ * declarationTemplateId=1027
  */
 
 @Field
-def declarationType = 4;
+def declarationType = 20;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -34,9 +34,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
         checkDepartmentParams(LogLevel.ERROR)
         logicCheck()
-        break
-    case FormDataEvent.PRE_CALCULATION_CHECK:
-        checkDepartmentParams(LogLevel.WARNING)
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
