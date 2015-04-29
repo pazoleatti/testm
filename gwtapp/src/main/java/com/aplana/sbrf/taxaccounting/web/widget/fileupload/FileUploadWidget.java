@@ -68,10 +68,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     }
 
     private String value;
-    private boolean isSimpleButton;
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String actionTempUrl = "upload/uploadController/patterntemp/";
-    private static String respPattern = "(?i:<pre*>)|(?i:</pre>)";
+    private static String respPattern = "<pre.*?>|</pre>|<PRE.*?>|</PRE>";
     private String extension;
 
     @Override
@@ -116,15 +115,10 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
      * @param simpleButton false - с сохранением в бд
      */
     public void setSimpleButton(boolean simpleButton){
-        this.isSimpleButton = simpleButton;
         uploadData.setAction(simpleButton ?
                 GWT.getHostPageBaseURL() + actionTempUrl : GWT.getHostPageBaseURL() + actionUrl);
         uploadButton.setVisible(!simpleButton);
         justButton.setVisible(simpleButton);
-    }
-
-    public HandlerRegistration addSubmitCompleteHandler(FormPanel.SubmitCompleteHandler handler) {
-        return uploadData.addHandler(handler, FormPanel.SubmitCompleteEvent.getType());
     }
 
     @Override
@@ -163,24 +157,22 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         uploadData.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                if (!isSimpleButton) {
-                    String result = event.getResults().replaceAll(respPattern, "");
-                    LogCleanEvent.fire(FileUploadWidget.this);
-                    JSONObject answer = JSONParser.parseLenient(result).isObject();
-                    if (answer.get(UuidEnum.UUID.toString()) != null){
-                        setValue(answer.get(UuidEnum.UUID.toString()).isString().stringValue(), true);
-                    }
-                    String uuid = null;
-                    boolean isErrors = false;
-                    if (answer.get(UuidEnum.SUCCESS_UUID.toString()) != null){
-                        uuid = answer.get(UuidEnum.SUCCESS_UUID.toString()).isString().stringValue();
-                    } else if (answer.get(UuidEnum.ERROR_UUID.toString()) != null){
-                        uuid = answer.get(UuidEnum.ERROR_UUID.toString()).isString().stringValue();
-                        isErrors = true;
-                    }
-
-                    EndLoadFileEvent.fire(FileUploadWidget.this, uuid, isErrors);
+                String result = event.getResults().replaceAll(respPattern, "");
+                LogCleanEvent.fire(FileUploadWidget.this);
+                JSONObject answer = JSONParser.parseLenient(result).isObject();
+                if (answer.get(UuidEnum.UUID.toString()) != null){
+                    setValue(answer.get(UuidEnum.UUID.toString()).isString().stringValue(), true);
                 }
+                String uuid = null;
+                boolean isErrors = false;
+                if (answer.get(UuidEnum.SUCCESS_UUID.toString()) != null){
+                    uuid = answer.get(UuidEnum.SUCCESS_UUID.toString()).isString().stringValue();
+                } else if (answer.get(UuidEnum.ERROR_UUID.toString()) != null){
+                    uuid = answer.get(UuidEnum.ERROR_UUID.toString()).isString().stringValue();
+                    isErrors = true;
+                }
+
+                EndLoadFileEvent.fire(FileUploadWidget.this, uuid, isErrors);
             }
         });
         uploader.getElement().setId("uploaderWidget");
