@@ -794,12 +794,14 @@ public class FormDataServiceImpl implements FormDataService {
                                 reportPeriod.getCalendarStartDate(),
                                 reportPeriod.getEndDate());
                         ArrayList<FormData> notAcceptedFDSources = new ArrayList<FormData>();
+                        ArrayList<FormData> notConsolidatedFDSources = new ArrayList<FormData>();
                         for (DepartmentFormType sourceDFT : departmentFormTypesSources) {
                             DepartmentReportPeriod sourceDepartmentReportPeriod =
                                     departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
                             FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
                                     sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
                             if (sourceForm != null && sourceForm.getState() == WorkflowState.ACCEPTED && !sourceService.isFDSourceConsolidated(formDataId, sourceForm.getId())) {
+                                notConsolidatedFDSources.add(sourceForm);
                                 DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
                                 logger.error(NOT_CONSOLIDATED_SOURCE_FORM,
                                         departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
@@ -825,10 +827,10 @@ public class FormDataServiceImpl implements FormDataService {
                             }
                         }
                         //Если консолидация из всех принятых источников текущего экземпляра не была выполнена
-                        if (logger.containsLevel(LogLevel.ERROR)) {
+                        if (!notConsolidatedFDSources.isEmpty()) {
                             logger.clear(LogLevel.WARNING);
                             logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, NOT_CONSOLIDATED_SOURCE_FORM_ERR));
-                            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+                            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
                         }
                         //Если консолидация из всех принятых источников текущего экземпляра была выполнена, но есть непринятые или несозданные источники
                         if (!notAcceptedFDSources.isEmpty()) {
