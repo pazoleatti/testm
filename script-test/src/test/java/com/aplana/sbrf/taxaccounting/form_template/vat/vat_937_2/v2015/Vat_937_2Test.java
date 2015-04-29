@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.form_template.vat.vat_937_2.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -139,6 +140,15 @@ public class Vat_937_2Test extends ScriptTestBase {
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
+    }
+
+    @Test
+    public void importTransportFileTest2() {
+        int expected = testHelper.getDataRowHelper().getAll().size();
+        testHelper.setImportFileInputStream(getCustomInputStream("importFileWrong.rnu"));
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertTrue("Logger must contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));;
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.util;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange;
 import com.aplana.sbrf.taxaccounting.model.script.range.Range;
@@ -134,14 +135,18 @@ public class ScriptUtilsTest {
         Assert.assertNull(ScriptUtils.parseNumber(str6, 1, 1, null, false));
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void parseNumberTest2() {
-        ScriptUtils.parseNumber("0.0.1", 1, 1, null, true);
+        Logger logger = new Logger();
+        Assert.assertNull(ScriptUtils.parseNumber("0.0.1", 1, 1, logger, true));
+        Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void parseNumberTest3() {
-        ScriptUtils.parseNumber("  000AA", 1, 1, null, true);
+        Logger logger = new Logger();
+        Assert.assertNull(ScriptUtils.parseNumber("  000AA", 1, 1, logger, true));
+        Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
     }
 
     @Test
@@ -156,9 +161,11 @@ public class ScriptUtilsTest {
         Assert.assertEquals(date1, ScriptUtils.parseDate(str2, format, 1, 1, null, false));
     }
 
-    @Test(expected = ServiceException.class)
+    @Test
     public void parseDate2() {
-        ScriptUtils.parseDate("Hello", "dd.MM.yyyy", 1, 1, null, true);
+        Logger logger = new Logger();
+        Assert.assertNull(ScriptUtils.parseDate("Hello", "dd.MM.yyyy", 1, 1, logger, true));
+        Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
     }
 
     @Test

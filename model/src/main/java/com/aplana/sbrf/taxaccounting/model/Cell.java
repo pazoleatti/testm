@@ -29,6 +29,10 @@ public class Cell extends AbstractCell {
     private FormStyle clientStyle;
 
     private List<FormStyle> formStyleList;
+    /** Сообщение, формируемое при проверке ячеек */
+    private String errorMessage;
+    /** Включен ли режим проверки (true - записывать в ячейки, false - бросать исключение) */
+    private boolean errorMode;
 
     /**
      * Конструктор только для сериализации
@@ -86,7 +90,7 @@ public class Cell extends AbstractCell {
 				ColumnType.REFERENCE.equals(columnType) || ColumnType.AUTO.equals(columnType))
                 || value instanceof String && ColumnType.STRING.equals(columnType)
                 || value instanceof Date && ColumnType.DATE.equals(columnType))) {
-            throw new IllegalArgumentException(msg + "Несовместимые типы колонки и значения");
+            return showError(msg + "Несовместимые типы колонки и значения");
         }
 		switch (columnType) {
 			case AUTO:
@@ -100,23 +104,23 @@ public class Cell extends AbstractCell {
 				} else if (value instanceof Long) {
 					value = new BigDecimal((Long) value);
 				} else if (!(value instanceof BigDecimal)) {
-					throw new IllegalArgumentException(msg + "Несовместимые типы графы и значения. Тип значения: \"" + value.getClass().getName() +
-						"\", типа графы: \"" + columnType.getTitle() + "\". " +
-						"Значение должно иметь тип Integer, Long или BigDecimal. Для автонумеруемых и справочных граф еще и без дробной части");
+					return showError(msg + "Несовместимые типы графы и значения. Тип значения: \"" + value.getClass().getName() +
+                            "\", типа графы: \"" + columnType.getTitle() + "\". " +
+                            "Значение должно иметь тип Integer, Long или BigDecimal. Для автонумеруемых и справочных граф еще и без дробной части");
 				}
 
 				if (ColumnType.NUMBER.equals(columnType)) {
 					int precision = ((NumericColumn) getColumn()).getPrecision();
 					value = ((BigDecimal) value).setScale(precision, RoundingMode.HALF_UP);
 					if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
-						throw new IllegalArgumentException(msgValue + "превышает допустимую разрядность (" +
-								(((NumericColumn) getColumn()).getMaxLength() - ((NumericColumn) getColumn()).getPrecision()) +
-								" знаков)!");
+						return showError(msgValue + "превышает допустимую разрядность (" +
+                                (((NumericColumn) getColumn()).getMaxLength() - ((NumericColumn) getColumn()).getPrecision()) +
+                                " знаков)!");
 					}
 				} else { // ColumnType.AUTO ColumnType.REFBOOK
 					value = ((BigDecimal) value).setScale(0, RoundingMode.HALF_UP);
 					if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
-						throw new IllegalArgumentException(msgValue + "превышает допустимую разрядность (17 знаков)!");
+						return showError(msgValue + "превышает допустимую разрядность (17 знаков)!");
 					}
 				}
 				numericValue = (BigDecimal) value;
@@ -124,24 +128,34 @@ public class Cell extends AbstractCell {
 			}
 			case STRING: {
 				if (!getColumn().getValidationStrategy().matches((String) value)) {
-					throw new IllegalArgumentException(msg + "содержит значение '" +
-							value + "' длиннее " + ((StringColumn) getColumn()).getMaxLength());
+					return showError(msg + "содержит значение '" +
+                            value + "' длиннее " + ((StringColumn) getColumn()).getMaxLength());
 				}
 				stringValue = (String) value;
 				return getValue();
 			}
 			case DATE: {
                 if (((Date) value).before(DATE_1900)) { // Сделано из-за ограничений Excel при работе с датами SBRFACCTAX-9982
-                    throw new IllegalArgumentException(msg + "Не может быть указана более ранняя дата, чем 01.01.1900!");
+                    return showError(msg + "Не может быть указана более ранняя дата, чем 01.01.1900!");
                 }
 				dateValue = (Date) value;
 				return getValue();
 			}
 			case REFERENCE: {
-				throw new IllegalArgumentException(msg + "Нельзя устанавливать значения в зависимую графу!");
+				return showError(msg + "Нельзя устанавливать значения в зависимую графу!");
 			}
 		}
-		throw new IllegalArgumentException("Values of type " + value.getClass().getName() + " are not supported");
+		return showError("Values of type " + value.getClass().getName() + " are not supported");
+    }
+
+    /** Записывает сообщение об ошибке в ячейку или выбрасывает исключение */
+    private Object showError(String msg) {
+        if (errorMode) {
+            errorMessage = msg;
+        } else {
+            throw new IllegalArgumentException(msg);
+        }
+        return null;
     }
 
     public String getStringValue() {
@@ -296,6 +310,18 @@ public class Cell extends AbstractCell {
 
     public FormStyle getClientStyle() {
         return clientStyle;
+    }
+
+    public String getMessage() {
+        return errorMessage;
+    }
+
+    public void setMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public void setCheckMode(boolean errorMode) {
+        this.errorMode = errorMode;
     }
 
 	@Override

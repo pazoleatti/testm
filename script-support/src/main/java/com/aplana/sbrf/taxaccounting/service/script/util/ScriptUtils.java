@@ -336,14 +336,14 @@ public final class ScriptUtils {
             return new BigDecimal(tmp);
         } else {
             String msg = String.format(WRONG_NUMBER, indexRow, getXLSColumnName(indexColumn), value);
-            if (required) {
-                throw new ServiceException(msg);
-            } else {
-                if (logger != null) {
+            if (logger != null) {
+                if (required) {
+                    logger.error(msg);
+                } else {
                     logger.warn(msg);
                 }
-                return null;
             }
+            return null;
         }
     }
 
@@ -388,14 +388,14 @@ public final class ScriptUtils {
         }
         if (retVal == null) {
             String msg = String.format(WRONG_DATE, indexRow, getXLSColumnName(indexColumn), value, format);
-            if (required) {
-                throw new ServiceException(msg);
-            } else {
-                if (logger != null) {
+            if (logger != null) {
+                if (required) {
+                    logger.error(msg);
+                } else {
                     logger.warn(msg);
                 }
-                return null;
             }
+            return null;
         }
         return retVal;
     }
@@ -1397,6 +1397,22 @@ public final class ScriptUtils {
      */
     public static void rowError(Logger logger, DataRow<Cell> row, String msg) {
         rowLog(logger, row, msg, LogLevel.ERROR);
+    }
+
+    /**
+     * Вывод в логгер сообщений об ошибках, хранящихся в ячейках строк
+     * @param rows интересующие строки с сообщениями в ячейках
+     * @param logger логгер для вывода сообщений
+     */
+    public static void showMessages(List<DataRow<Cell>> rows, Logger logger) {
+        for (DataRow<Cell> row : rows) {
+            for (String cellAlias : row.keySet()){
+                String msg = row.getCell(cellAlias).getMessage();
+                if (msg != null && !msg.isEmpty()){
+                    rowError(logger, row, msg);
+                }
+            }
+        }
     }
 
     /**
