@@ -196,7 +196,7 @@ void logicCheck() {
         // Проверки форматов
         // графа 3
         if (row.invoice && !row.invoice.matches(pattern1000Date)) {
-            loggerError(row, String.format("Строка %s: Графа «%s» заполнена неверно! Ожидаемое значение: «%s». Только номер обязателен для заполнения.", index, getColumnName(row,'invoice'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
+            loggerError(row, String.format("Строка %s: Графа «%s» заполнена неверно! Ожидаемое значение: «%s». Номер обязателен для заполнения.", index, getColumnName(row,'invoice'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 4
         if (row.invoiceCorrecting && !row.invoiceCorrecting.matches(pattern3Date)) {
