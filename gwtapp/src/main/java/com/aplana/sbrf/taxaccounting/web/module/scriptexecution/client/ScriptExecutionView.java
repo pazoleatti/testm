@@ -2,11 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.scriptexecution.client;
 
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -26,10 +25,10 @@ public class ScriptExecutionView extends ViewWithUiHandlers<ScriptExecutionUiHan
     @Inject
     public ScriptExecutionView(Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-        uploadScript.addValueChangeHandler(new ValueChangeHandler<String>() {
+        uploadScript.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                script.setText(event.getValue());
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                script.setText(event.getResults());
             }
         });
     }

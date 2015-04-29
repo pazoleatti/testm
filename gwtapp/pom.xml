@@ -175,7 +175,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${springframework.version}</version>
+            <version>3.1.4.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

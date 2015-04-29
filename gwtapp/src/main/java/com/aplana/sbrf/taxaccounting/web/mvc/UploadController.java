@@ -1,21 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * User: avanteev
@@ -37,23 +37,33 @@ public class UploadController {
      * @throws IOException
      */
     @RequestMapping(value = "/patterntemp", method = RequestMethod.POST)
-    public void processUploadTemp(@RequestParam("uploader") MultipartFile file,
-            HttpServletRequest request, HttpServletResponse response)
+    public void processUploadTemp(HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
-        response.setContentType("text/plain");
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
 
-        IOUtils.copy(file.getInputStream(), response.getWriter(), "UTF-8");
+        FileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        List<FileItem> items = upload.parseRequest(request);
+        FileItem fileItem = items.get(0);
+        IOUtils.copy(fileItem.getInputStream(), response.getWriter(), "UTF-8");
     }
 
     @RequestMapping(value = "/pattern", method = RequestMethod.POST)
-    public void processUploadXls(@RequestParam("uploader") MultipartFile file,
-                                 HttpServletRequest request, HttpServletResponse response)
-            throws FileUploadException, IOException, JSONException {
+    public void processUploadXls(HttpServletRequest request, HttpServletResponse response)
+            throws FileUploadException, IOException {
+        processUpload(request, response);
+    }
+
+    private void processUpload(HttpServletRequest request, HttpServletResponse response) throws IOException, FileUploadException {
         request.setCharacterEncoding("UTF-8");
-        String uuid = blobDataService.create(file.getInputStream(), file.getName());
-        JSONObject result = new JSONObject();
-        result.put(UuidEnum.UUID.toString(), uuid);
-        response.getWriter().printf(result.toString());
+
+        FileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        List<FileItem> items = upload.parseRequest(request);
+        FileItem fileItem = items.get(0);
+        String uuid = blobDataService.create(fileItem.getInputStream(), fileItem.getName());
+        response.getWriter().printf("{uuid : \"%s\"}", uuid);
     }
 }
