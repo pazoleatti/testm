@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateTestEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateScriptCodeUiHandlers;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -21,16 +19,6 @@ public class FormTemplateScriptCodePresenter
 		Presenter<FormTemplateScriptCodePresenter.MyView, FormTemplateScriptCodePresenter.MyProxy>
 		implements FormTemplateScriptCodeUiHandlers,
 		FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler {
-
-    @Override
-    public void executeScript() {
-        if(formTemplate.getScript().hashCode() != getView().getScriptCode().hashCode()){
-            Dialog.warningMessage("Сначала нажмите кнопку \"Сохранить\"");
-            return;
-        }
-        formTemplate.setScript(getView().getScriptCode());
-        FormTemplateTestEvent.fire(FormTemplateScriptCodePresenter.this, formTemplate);
-    }
 
     /**
 	 * {@link FormTemplateMainPresenter}'s proxy.
