@@ -107,6 +107,9 @@ def pattern3DateImport = "^(\\d{1,3}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/
 def pattern256DateImport = "^(\\S.{0,255}) ([0-2]\\d|3[01])(\\.|/)(0\\d|1[012])(\\.|/)(\\d{4})\$"
 
 @Field
+def patternDate = "([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})"
+
+@Field
 def pattern1000Date = "^(\\S.{0,999})( ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4}))?\$"
 
 @Field
@@ -195,7 +198,7 @@ void logicCheck() {
         }
         // Проверки форматов
         // графа 3
-        if (row.invoice && !row.invoice.matches(pattern1000Date)) {
+        if (row.invoice && (!row.invoice.matches(pattern1000Date) || row.invoice.matches(patternDate))) {
             loggerError(row, String.format("Строка %s: Графа «%s» заполнена неверно! Ожидаемое значение: «%s». Только номер обязателен для заполнения.", index, getColumnName(row,'invoice'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 4
