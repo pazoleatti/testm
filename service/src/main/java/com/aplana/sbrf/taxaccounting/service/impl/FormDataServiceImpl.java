@@ -1312,7 +1312,7 @@ public class FormDataServiceImpl implements FormDataService {
      */
     void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        if (beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
+        if (!formData.isManual() && beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
                 && dataRowDao.isDataRowsCountChanged(formData.getId())) {
             updatePreviousRowNumber(formData, logger);
         }
