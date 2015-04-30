@@ -96,8 +96,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         formTemplateService.validateFormAutoNumerationColumn(formTemplate, logger);
         checkError(logger, SAVE_MESSAGE);
 
-        int id = formTemplateService.save(formTemplate);
         cleanData(oldFormTemplate, formTemplate);
+        int id = formTemplateService.save(formTemplate);
 
         logging(id, FormDataEvent.TEMPLATE_MODIFIED, user);
         return id;
