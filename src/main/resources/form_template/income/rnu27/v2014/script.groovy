@@ -876,7 +876,6 @@ def isBalancePeriod() {
 
 void importTransportData() {
     int COLUMN_COUNT = 17
-    int TOTAL_ROW_COUNT = 1
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
@@ -903,19 +902,20 @@ void importTransportData() {
 
     def dataRows = []
     String[] rowCells
-    // количество пустых строк
-    int countEmptyRow = 0
-    int fileRowIndex = 0 // номер строки в файле
-    int rowIndex = 0// номер строки в НФ
-    int totalRowCount = 0// счетчик кол-ва итогов
+    int countEmptyRow = 0   // количество пустых строк
+    int fileRowIndex = 0    // номер строки в файле
+    int rowIndex = 0        // номер строки в НФ
+    def totalTF = null      // итоговая строка со значениями из тф для добавления
+
     while ((rowCells = reader.readNext()) != null) {
         fileRowIndex++
         // если еще не было пустых строк, то это первая строка - заголовок
         if (rowCells.length == 1 && rowCells[0].length() < 1) { // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
             if (countEmptyRow > 0) {
-                totalRowCount++
                 // итоговая строка
-                addRow(dataRows, reader.readNext(), COLUMN_COUNT, fileRowIndex, ++rowIndex, true)
+                rowCells = reader.readNext()
+                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
+                totalTF = (isEmptyRow ? null : getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex, true))
                 break
             }
             countEmptyRow++
@@ -925,24 +925,42 @@ void importTransportData() {
         if (countEmptyRow != 0 && !addRow(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex, false)){
             break
         }
-        rowCells = null // очищаем кучу
         // периодически сбрасываем строки
         if (dataRows.size() > ROW_MAX) {
             dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
             dataRows.clear()
         }
     }
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
     reader.close()
+
     if (dataRows.size() != 0) {
         dataRowHelper.insert(dataRows, dataRowHelper.allCached.size() + 1)
         dataRows.clear()
     }
-    dataRows = null
-    dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumns, logger, true)
+
+    // итоговая строка
+    def totalRow = getCalcTotalRow(dataRowHelper.allCached)
+    dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
+
+    // сравнение итогов
+    if (totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [ 'prev' : 6, 'current' : 7, 'reserveCalcValuePrev' : 8, 'cost' : 9,
+                'costOnMarketQuotation' : 14, 'reserveCalcValue' : 15, 'reserveCreation' : 16, 'recovery' : 17 ]
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+    }
 }
 
 // Добавляет строку в текущий буфер строк
@@ -950,7 +968,26 @@ boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowI
     if (rowCells == null) {
         return true
     }
+    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex, false)
+    if (newRow == null) {
+        return false
+    }
+    dataRowsCut.add(newRow)
+    return true
+}
 
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isTotal итогова ли строка
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal) {
     def DataRow newRow = formData.createDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -1052,9 +1089,7 @@ boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowI
         colIndex = 17
         newRow.recovery = getNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset)
     }
-
-    dataRowsCut.add(newRow)
-    return true
+    return newRow
 }
 
 static String pure(String cell) {

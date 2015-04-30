@@ -561,9 +561,9 @@
 	</repositories>
 
 	<scm>
-		<connection>scm:git:https://git.aplana.com/git/sbrfacctax</connection>
-		<developerConnection>scm:git:https://git.aplana.com/git/sbrfacctax</developerConnection>
-		<url>https://git.aplana.com/git/sbrfacctax</url>
+		<connection>scm:git:https://scm.aplana.com/git/sbrfacctax</connection>
+		<developerConnection>scm:git:https://scm.aplana.com/git/sbrfacctax</developerConnection>
+		<url>https://scm.aplana.com/git/sbrfacctax</url>
 	</scm>
 
 	<issueManagement>
@@ -572,7 +572,7 @@
 	</issueManagement>
 
 	<ciManagement>
-		<url>http://172.16.127.19:8080/job/SBRF-NK-build</url>
+		<url>http://172.16.128.120:8080/job/tax-master-build</url>
 		<system>Jenkins</system>
 	</ciManagement>
 

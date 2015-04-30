@@ -84,13 +84,14 @@ public class DeclarationDataController {
     public void xml(@PathVariable int id, HttpServletResponse response)
             throws IOException {
 
-        String xmlData = declarationService.getXmlData(id, securityService.currentUserInfo());
+        Reader xmlReader = new InputStreamReader(declarationService.getXmlDataAsStream(id, securityService.currentUserInfo()), "windows-1251");
         String fileName = URLEncoder.encode(getFileName(id, securityService.currentUserInfo(), "xml"), ENCODING);
 
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
-        response.getOutputStream().write(xmlData.getBytes("windows-1251"));
+        IOUtils.copy(xmlReader, response.getOutputStream(), "windows-1251");
+        response.flushBuffer();
     }
 
     private String getFileName(long id, TAUserInfo userInfo, String fileExtension) {

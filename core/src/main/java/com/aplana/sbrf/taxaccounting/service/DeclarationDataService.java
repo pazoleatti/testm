@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -95,6 +96,14 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
 	String getXmlData(long declarationDataId, TAUserInfo userInfo);
+    /**
+     * Получить данные декларации в формате законодателя (XML)
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @return поток с данными
+     * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+     */
+    InputStream getXmlDataAsStream(long declarationDataId, TAUserInfo userInfo);
 	/**
 	 * Получить печатное представление данные декларации.
 	 * Получается путём подстановки данных декларации в формате xml в Jasper-reports отчёт, шаблона декларации

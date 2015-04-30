@@ -234,6 +234,8 @@ public class FormDataServiceTest {
         formDataDest.setFormType(formType1);
         when(formDataDao.find(dft1.getFormTypeId(), dft1.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
         when(formDataDao.find(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
+        when(formTypeService.get(dft1.getFormTypeId())).thenReturn(formType1);
+        when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType1);
 
         formDataService.compose(formData, userInfo, logger);
         // проверяем что источник удален

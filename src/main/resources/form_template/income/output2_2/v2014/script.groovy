@@ -88,7 +88,7 @@ def editableColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'titl
 def nonEmptyColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'dividendDate', 'sumDividend', 'sumTax']
 
 @Field
-def sourceFormType = 419
+def sourceFormType = 10070
 
 @Field
 def startDate = null

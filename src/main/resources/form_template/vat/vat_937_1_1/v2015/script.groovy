@@ -2,6 +2,8 @@ package form_template.vat.vat_937_1_1.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.NumericColumn
+import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -93,8 +95,17 @@ def totalSumColumns = ['nds']
 // Сортируемые атрибуты (графа 8, 3, 2, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16)
 @Field
 def sortColumns = ['dateRegistration', 'invoice', 'typeCode', 'invoiceCorrecting', 'invoiceCorrection',
-        'invoiceCorrectingCorrection', 'documentPay', 'salesman', 'salesmanInnKpp', 'agentName',
-        'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
+                   'invoiceCorrectingCorrection', 'documentPay', 'salesman', 'salesmanInnKpp', 'agentName',
+                   'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
+
+@Field
+def pattern1000Date = "^\\S.{0,999}( ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4}))?\$"
+
+@Field
+def pattern3Date = "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def pattern256Date = "^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
 
 // Дата начала отчетного периода
 @Field
@@ -132,7 +143,7 @@ void addNewRow() {
     }
 
     def index
-    if (currentDataRow != null && currentDataRow.getIndex() != -1 && currentDataRow.getAlias() in [null, 'head']) {
+    if (currentDataRow != null && currentDataRow.getIndex() != -1 && currentDataRow.getAlias() == null) {
         index = currentDataRow.getIndex() + 1
     } else {
         index = getDataRow(dataRows, 'total').getIndex()
@@ -179,23 +190,23 @@ void logicCheck() {
         }
         // Проверки форматов
         // графа 3
-        if (row.invoice && !row.invoice.matches("^\\S.{0,999}( ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4}))?\$")) {
+        if (row.invoice && !row.invoice.matches(pattern1000Date)) {
             loggerLog(row, String.format("Строка %s: Графа «%s» заполнена неверно! Ожидаемое значение: «%s». Только номер обязателен для заполнения.", index, getColumnName(row,'invoice'), "<Номер: тип поля «Строка/1000/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 4
-        if (row.invoiceCorrecting && !row.invoiceCorrecting.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrecting && !row.invoiceCorrecting.matches(pattern3Date)) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrecting'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 5
-        if (row.invoiceCorrection && !row.invoiceCorrection.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrection && !row.invoiceCorrection.matches(pattern256Date)) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrection'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 6
-        if (row.invoiceCorrectingCorrection && !row.invoiceCorrectingCorrection.matches("^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.invoiceCorrectingCorrection && !row.invoiceCorrectingCorrection.matches(pattern3Date)) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'invoiceCorrectingCorrection'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 7
-        if (row.documentPay && !row.documentPay.matches("^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$")) {
+        if (row.documentPay && !row.documentPay.matches(pattern256Date)) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'documentPay'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата» формат, «ДД.ММ.ГГГГ»>"))
         }
         // графа 10
@@ -215,9 +226,6 @@ void logicCheck() {
             loggerLog(row, String.format("Строка <Номер строки>: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 01, 02, …,13, 16, 17, …, 28.", index, getColumnName(row,'typeCode'), getColumnName(row,'typeCode')))
         }
     }
-
-    def headRow = getDataRow(dataRows, 'head')
-    checkNonEmptyColumns(headRow, headRow.getIndex(), totalSumColumns, logger, !isBalancePeriod())
 
     checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod())
 }
@@ -260,18 +268,12 @@ void importData() {
 void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    def dataRows = dataRowHelper.allCached
-    def headRow = getDataRow(dataRows, 'head')
-    def totalRow = getDataRow(dataRows, 'total')
-    totalSumColumns.each {headRow[it] = null}
-
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def xmlIndexRow = -1
     def int rowIndex = 1
-    def rows = [headRow]
-    boolean isHead = true
+    def rows = []
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -288,10 +290,6 @@ void addData(def xml, int headRowCount) {
 
         // Итоговые строки
         if (row.cell[0].text() == null || row.cell[0].text() == "") {
-            if (isHead) {
-                headRow.nds = parseNumber(row.cell[15].text(), xlsIndexRow, 15 + colOffset, logger, false)
-                isHead = false
-            }
             if (row.cell[1].text() == null || row.cell[1].text() == "") {
                 continue
             }
@@ -363,6 +361,9 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+    // подсчет итогов
+    def dataRows = dataRowHelper.allCached
+    def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(rows, totalRow, totalSumColumns)
     rows.add(totalRow)
     dataRowHelper.save(rows)
@@ -395,16 +396,12 @@ void sortFormDataRows() {
 
     // не производим сортировку в консолидированных формах
     if (dataRows[0].getAlias() == null) {
-        def headRow = getDataRow(dataRows, 'head')
         def totalRow = getDataRow(dataRows, 'total')
-        dataRows.remove(headRow)
         dataRows.remove(totalRow)
 
         sortRows(dataRows, sortColumns)
 
-        dataRows.add(0, headRow)
         dataRows.add(totalRow)
-
         dataRowHelper.saveSort()
     }
 }
@@ -421,10 +418,8 @@ void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def headRow = getDataRow(dataRows, 'head')
     def totalRow = getDataRow(dataRows, 'total')
-    headRow.nds = BigDecimal.ZERO
-    dataRows = [headRow]
+    dataRows = []
 
     // собрать из источников строки
     def formSources = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
@@ -440,13 +435,6 @@ void consolidation() {
                 def final department = departmentService.get(child.departmentId)
                 def depHeadRow = getFixedRow(department.name, "head_${department.id}", true)
                 dataRows.add(depHeadRow)
-                def subHeadRow = getFixedRow("Итого по ${department.name}", "sub_head_${department.id}", false)
-                // получить заголовок
-                def sourceHeadRow = getDataRow(childDataRows, 'head')
-                subHeadRow.nds = (sourceHeadRow.nds ?: BigDecimal.ZERO)
-                dataRows.add(subHeadRow)
-                // просуммировать значения заголовков
-                headRow.nds = headRow.nds + (sourceHeadRow.nds ?: BigDecimal.ZERO)
                 // добавить только нефиксированные строки
                 dataRows.addAll(childDataRows.findAll { row -> row.getAlias() == null || row.getAlias() == '' })
                 def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}", true)
@@ -478,83 +466,61 @@ def getFixedRow(String title, String alias, boolean isTotal) {
 }
 
 void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
     int COLUMN_COUNT = 16
-    int TOTAL_ROW_COUNT = 1
     int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
 
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
+    String[] rowCells
+    int fileRowIndex = 0    // номер строки в файле
+    int rowIndex = 0        // номер строки в НФ
+    def total = null		// итоговая строка со значениями из тф для добавления
+    def newRows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
-    String[] rowCells
-    int countEmptyRow = 0	// количество пустых строк
-    int fileRowIndex = 0    // номер строки в файле
-    int rowIndex = 0        // номер строки в НФ
-    int totalRowCount = 0   // счетчик кол-ва итогов
-    def total = null		// итоговая строка со значениями из тф для добавления
-    def newRows = []
-
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
-
-        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-        if (isEmptyRow) {
-            if (countEmptyRow > 0) {
-                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-                totalRowCount++
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
                 // итоговая строка тф
-                total = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                }
                 break
             }
-            countEmptyRow++
-            continue
+            newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
         }
-
-        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
-        // обычная строка
-        if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
-            break
-        }
-
-        // периодически сбрасываем строки
-        if (newRows.size() > ROW_MAX) {
-            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
-            newRows.clear()
-        }
-    }
-    reader.close()
-
-    // проверка итоговой строки
-    if (TOTAL_ROW_COUNT != 0 && totalRowCount != TOTAL_ROW_COUNT) {
-        logger.error(ROW_FILE_WRONG, fileRowIndex)
-    }
-
-    if (newRows.size() != 0) {
-        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+    }finally {
+        reader.close()
     }
 
     // сравнение итогов
     if (total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [ 'nds' : 16 ]
-
+        def totalColumnsIndexMap = ['nds' : 16]
         // подсчет итогов
-        def dataRows = dataRowHelper.allCached
         def totalRow = getFixedRow('Всего', 'total', true)
-        calcTotalSum(dataRows, totalRow, totalSumColumns)
-
-        // сравнение контрольных сумм
+        calcTotalSum(newRows, totalRow, totalColumnsIndexMap.keySet().asList())
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
             def v1 = total.getCell(alias).value
@@ -563,40 +529,38 @@ void importTransportData() {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-
-        // добавить в нф заголовок и итоговую строку
-        def headRow = dataRows.find { it.getAlias() == 'head' }
-        if (!headRow) {
-            headRow = getFixedRow('Итого', 'head', false)
-            dataRowHelper.insert(headRow, 1)
-        }
-        dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
-    }
-}
-
-/** Добавляет строку в текущий буфер строк. */
-boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    if (rowCells == null) {
-        return true
-    }
-    def newRow = getNewRowOrHeadRow(rowCells, columnCount, fileRowIndex, rowIndex)
-    if (newRow == null) {
-        return false
-    }
-    rows.add(newRow)
-    return true
-}
-
-/** Получить новую строку нф или заголовок по строке из тф (*.rnu). */
-def getNewRowOrHeadRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    if (rowIndex == 1) {
-        return getNewHeadRow(rowCells, columnCount, fileRowIndex, rowIndex)
+        // добавить итоговую строку
+        newRows.add(totalRow)
     } else {
-        return getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
+        logger.warn("В транспортном файле не найдена итоговая строка")
     }
+
+    // вставляем строки в БД
+    //logger.error("Фиктивная ошибка, чтобы не было загрузки в БД") // отключил загрузку в БД
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        dataRowHelper.clear()
+
+        def buffer = []
+        def i = 0;
+        newRows.each() {
+            buffer.add(newRows[i++])
+            if (buffer.size() == ROW_MAX) {
+                dataRowHelper.insert(buffer, i - buffer.size() + 1)
+                buffer = []
+            }
+        }
+        if (buffer.size() > 0) {
+            dataRowHelper.insert(buffer, i - buffer.size() + 1)
+        }
+    }
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }
 
 /**
@@ -615,8 +579,8 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     newRow.setImportIndex(fileRowIndex)
 
     if (rowCells.length != columnCount + 2) {
-        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
-        return null
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
+        return newRow
     }
 
     def int colOffset = 1
@@ -625,68 +589,66 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 2..7
     ['typeCode', 'invoice', 'invoiceCorrecting', 'invoiceCorrection', 'invoiceCorrectingCorrection', 'documentPay'].each { alias ->
         colIndex++
-        newRow[alias] = pure(rowCells[colIndex])
+        def cell = pure(rowCells[colIndex])
+        if (cell != null && cell != '') {
+            if (checkString(newRow, alias, cell, fileRowIndex)) {
+                newRow[alias] = cell
+            }
+        }
     }
 
     // графа 8
     colIndex++
-    newRow.dateRegistration = parseDate(pure(rowCells[colIndex]), "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.dateRegistration = parseDate(pure(rowCells[colIndex]), "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
 
     // графа 9..14
     ['salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency'].each { alias ->
         colIndex++
-        newRow[alias] = pure(rowCells[colIndex])
+        def cell = pure(rowCells[colIndex])
+        if (cell != null && cell != '') {
+            if (checkString(newRow, alias, cell, fileRowIndex)) {
+                newRow[alias] = cell
+            }
+        }
     }
 
-    // Графа 15
-    colIndex++
-    newRow.cost = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, false)
-
-    // Графа 16
-    colIndex++
-    newRow.nds = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, false)
-
-    return newRow
-}
-
-/**
- * Получить новую строку нф или заголовок по строке из тф (*.rnu).
- * Проверяет наличие надписи "Итого" (значит это заголовок) и формирует или
- *
- * @param rowCells список строк со значениями
- * @param columnCount количество колонок
- * @param fileRowIndex номер строки в тф
- * @param rowIndex строка в нф
- *
- * @return вернет строку нф или null, если количество значений в строке тф меньше
- */
-def getNewHeadRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    if (rowCells.length != columnCount + 2) {
-        def tmpRow = formData.createDataRow()
-        tmpRow.setIndex(rowIndex)
-        tmpRow.setImportIndex(fileRowIndex)
-        rowError(logger, tmpRow, String.format(ROW_FILE_WRONG, fileRowIndex))
-        return null
+    // графа 15, 16
+    ['cost', 'nds'].each { alias ->
+        colIndex++
+        def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
+        if (cell != null && cell != '') {
+            if (checkNumber(newRow, alias, cell, fileRowIndex)) {
+                newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
+            }
+        }
     }
-
-    def newRow
-    if ('Итого' == pure(rowCells[1])) {
-        newRow = getFixedRow('Итого', 'head', false)
-        newRow.setIndex(rowIndex)
-        newRow.setImportIndex(fileRowIndex)
-
-        def int colOffset = 1
-
-        // Графа 16
-        def colIndex = 16
-        newRow.nds = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, false)
-    } else {
-        newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
-    }
-
     return newRow
 }
 
 String pure(String cell) {
     return StringUtils.cleanString(cell)?.intern()
+}
+
+boolean checkString(def tmpRow, def alias, def value, def fileRowIndex) {
+    StringColumn column = tmpRow.getCell(alias).getColumn()
+    if (column.getMaxLength() < value.size()) {
+        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение $value превышает допустимый размер " + column.getMaxLength())
+        return false
+    }
+    return true
+}
+
+boolean checkNumber(def tmpRow, def alias, def value, def fileRowIndex) {
+    NumericColumn column = tmpRow.getCell(alias).getColumn()
+    def sepId = value.indexOf('.')
+    def tmp = sepId == -1 ? value : value.substring(0, value.indexOf('.'))
+    if (column.getMaxLength() - column.getPrecision() < tmp.size()) {
+        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' превышает допустимый размер до запятой " + (column.getMaxLength() - column.getPrecision()))
+        return false
+    }
+    if (!value.matches("[0-9.,-]*")) {
+        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' содержит недопустимые символы")
+        return false
+    }
+    return true
 }
