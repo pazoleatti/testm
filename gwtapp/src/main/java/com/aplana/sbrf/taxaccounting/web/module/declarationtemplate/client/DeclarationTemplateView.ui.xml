@@ -162,7 +162,7 @@
                                 <fileuplod:FileUploadWidget ui:field="uploadXsdFile" extension="xsd" text="Загрузить xsd"/>
                             </g:cell>
                             <g:cell>
-                                <fileuplod:FileUploadWidget ui:field="uploadJrxmlFile" extension="jrxml" text="Загрузить jrxml"/>
+                                <fileuplod:FileUploadWidget ui:field="uploadJrxmlFile" text="Загрузить jrxml"/>
                             </g:cell>
                         </g:VerticalPanel>
                         <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
