@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.lock.server;
 
+import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.web.module.lock.shared.DeleteLockAction;
-import com.aplana.sbrf.taxaccounting.web.module.lock.shared.DeleteLockResult;
+import com.aplana.sbrf.taxaccounting.web.module.lock.shared.StopAsyncAction;
+import com.aplana.sbrf.taxaccounting.web.module.lock.shared.StopAsyncResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
@@ -16,23 +17,27 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP')")
-public class DeleteLockHandler extends AbstractActionHandler<DeleteLockAction, DeleteLockResult> {
+public class StopAsyncHandler extends AbstractActionHandler<StopAsyncAction, StopAsyncResult> {
+
+    @Autowired
+    AsyncInterruptionManager asyncInterruptionManager;
 
     @Autowired
     LockDataService lockService;
 
-    public DeleteLockHandler() {
-        super(DeleteLockAction.class);
+    public StopAsyncHandler() {
+        super(StopAsyncAction.class);
     }
 
     @Override
-    public DeleteLockResult execute(DeleteLockAction action, ExecutionContext context) throws ActionException {
+    public StopAsyncResult execute(StopAsyncAction action, ExecutionContext context) throws ActionException {
+        asyncInterruptionManager.interruptAll();
         lockService.unlockAll(action.getKeys());
-        return new DeleteLockResult();
+        return new StopAsyncResult();
     }
 
     @Override
-    public void undo(DeleteLockAction action, DeleteLockResult result, ExecutionContext context) throws ActionException {
+    public void undo(StopAsyncAction action, StopAsyncResult result, ExecutionContext context) throws ActionException {
 
     }
 }

@@ -43,7 +43,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * Выполнение бизнес логики задачи
      * @param params параметры
      */
-    protected abstract void executeBusinessLogic(Map<String, Object> params, Logger logger);
+    protected abstract void executeBusinessLogic(Map<String, Object> params, Logger logger) throws InterruptedException;
 
     /**
      * Возвращает название задачи. Используется при выводе ошибок.

@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.async.mdb;
 import com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject;
 import com.aplana.sbrf.taxaccounting.async.entity.AsyncTaskTypeEntity;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskPersistenceException;
+import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManagerLocal;
+import com.aplana.sbrf.taxaccounting.async.manager.AsyncTaskThread;
 import com.aplana.sbrf.taxaccounting.async.persistence.AsyncTaskPersistenceServiceLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import org.apache.commons.logging.Log;
@@ -12,6 +14,8 @@ import javax.ejb.*;
 import javax.jms.*;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Map;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
 
 /**
  * Обработчик асинхронных задач из очереди с быстрым выполнением
@@ -27,6 +31,9 @@ public class ShortAsyncMDB implements MessageListener {
 
     @EJB
     private AsyncTaskPersistenceServiceLocal persistenceService;
+
+    @EJB
+    private AsyncInterruptionManagerLocal interruptionManager;
 
     @Override
     public void onMessage(Message message) {
@@ -46,9 +53,15 @@ public class ShortAsyncMDB implements MessageListener {
                 taskType = persistenceService.getTaskTypeById(taskTypeId);
                 //Запускаем класс-исполнитель
                 InitialContext ic = new InitialContext();
+                //Получаем данные задачи
                 AsyncTask task = (AsyncTask) ic.lookup(taskType.getHandlerJndi());
-                log.debug("Task with type \"" + taskType.getName() + "\" is starting in the short task queue");
-                task.execute(asyncMdbObject.getParams());
+                Map<String, Object> params = asyncMdbObject.getParams();
+                AsyncTaskThread thread = new AsyncTaskThread(task, params);
+                Thread threadRunner = new Thread(thread);
+                //Сохраняем данные о потоке-исполнителе в менеджере, для того чтобы можно было остановить поток
+                interruptionManager.addTask((String) params.get(LOCKED_OBJECT.name()), threadRunner);
+                //Запускаем класс-исполнитель в отдельном потоке
+                threadRunner.start();
             } else {
                 log.error("Unexpected empty message content. Instance of com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject cannot be null!");
             }
