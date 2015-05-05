@@ -83,12 +83,6 @@ public interface FormTemplateService {
     LockData getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo);
 
     /**
-     * Исполяет для теста написанный скрипт от имени пользователя controlUnp
-     * @param formTemplate - шаблон налоговой формы
-     */
-    void executeTestScript(FormTemplate formTemplate);
-
-    /**
      * Получение скрипта для {@link FormTemplate}.
      * @param formTemplateId - идентификатор налоговой формы
      * @return тело скрипта

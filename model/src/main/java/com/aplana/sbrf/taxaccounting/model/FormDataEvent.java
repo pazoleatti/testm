@@ -22,7 +22,6 @@ public enum FormDataEvent implements Serializable {
 	IMPORT(7, "Импорт данных"),
 	GET_LEVEL0(8, "Получение данных"),
 	GET_LEVEL1(9, "Получение защищенных данных"),
-    TEST(10, "Тестирование скриптов"),
 	MIGRATION (11, "Миграция из АС \"Ведение РНУ\""),
     AFTER_CREATE(12, "После создания"),
     SORT_ROWS (13, "Сортировка строк"),

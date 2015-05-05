@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
@@ -131,11 +132,11 @@ def groupColumns = ['regionBankDivision', 'regionBank']
 // Атрибуты для итогов
 @Field
 def totalColumns = ['propertyPrice', 'workersCount', 'subjectTaxCredit',
-        'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
-        'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
-        'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
-        'everyMonthForThirdKvartalNextPeriod',
-        'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
+                    'baseTaxOfRub', 'taxSum', 'taxSumOutside', 'taxSumToPay',
+                    'taxSumToReduction', 'everyMontherPaymentAfterPeriod',
+                    'everyMonthForKvartalNextPeriod', 'everyMonthForSecondKvartalNextPeriod',
+                    'everyMonthForThirdKvartalNextPeriod',
+                    'everyMonthForFourthKvartalNextPeriod', 'minimizeTaxSum']
 
 @Field
 def formDataCache = [:]
@@ -144,7 +145,7 @@ def helperCache = [:]
 
 @Field
 def summaryMap = [301 : "Доходы, учитываемые в простых РНУ", 302 : "Сводная форма начисленных доходов",
-        303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
+                  303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
 
 @Field
 def baseTaxOfPattern = "[0-9]{1,3}(\\.[0-9]{0,15})?"
@@ -202,7 +203,7 @@ void calc() {
     // Распределяемая налоговая база за отчетный период.
     def taxBase
     if (formDataEvent != FormDataEvent.COMPOSE) {
-        taxBase = roundValue(getTaxBase(), 0)
+        taxBase = roundValue(getTaxBaseAsDeclaration(), 0)
     }
     // Отчётный период.
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -227,11 +228,10 @@ void calc() {
 
         def incomeParam
         if (row.regionBankDivision != null) {
-            def departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            def departmentParam = getRefBookValue(30, row.regionBankDivision)
 
             def depParam = getDepParam(departmentParam)
-            def depId = depParam.get('CODE').getNumberValue().intValue()
+            def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
 
             incomeParam = getRefBookRecord(33, "DEPARTMENT_ID", "$depId", departmentParamsDate, -1, null, false)
         }
@@ -352,8 +352,7 @@ def calc4(def row) {
     def departmentParam
     def divisionName
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+        departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
@@ -372,8 +371,7 @@ def calc9(def row) {
     def departmentParam
     def calcFlag
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+        departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
@@ -392,8 +390,7 @@ def calc10(def row) {
     def departmentParam
     def obligationPayTax
     if (row.regionBankDivision != null) {
-        departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+        departmentParam = getRefBookValue(30, row.regionBankDivision)
     }
     def depParam = getDepParam(departmentParam)
     def incomeParamTable = getIncomeParamTable(depParam)
@@ -514,8 +511,7 @@ void logicalCheckBeforeCalc() {
         def index = row.getIndex()
         def errorMsg = "Строка ${index}: "
         if (row.regionBankDivision != null) {
-            departmentParam = getRefBookRecord(30, "CODE", "$row.regionBankDivision", getReportPeriodEndDate(),
-                    row.getIndex(), getColumnName(row, 'regionBankDivision'), false)
+            departmentParam = getRefBookValue(30, row.regionBankDivision)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
             logger.error(errorMsg + "Не найдено подразделение территориального банка!")
@@ -533,7 +529,7 @@ void logicalCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam)
-        def depId = depParam?.get('CODE')?.getNumberValue()?.intValue() ?: -1
+        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int ?: -1
         def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
         def incomeParamTable = getIncomeParamTable(depParam)
@@ -733,131 +729,404 @@ def getData(def formData) {
     return helperCache[formData.id]
 }
 
+def getDohIsklPrib(def dataRowsComplex, def dataRowsSimple) {
+    def result = 0.0
+
+    if (dataRowsComplex != null) {
+        // Код вида доходов = 13655, 13660, 13665, 13675, 13680, 13685, 13690,
+        // 13695, 13705, 13710, 13780, 13785, 13790
+        result += getComplexIncomeSumRows9(dataRowsComplex,
+                [13655, 13660, 13665, 13675, 13680, 13685, 13690, 13695, 13705, 13710, 13780, 13785, 13790])
+    }
+    if (dataRowsSimple != null) {
+        // Код вида дохода = 14000
+        result += getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu4Field5Accepted', [14000, 14010, 14015])
+    }
+    return getLong(result)
+}
+
+def getTaxBaseAsDeclaration() {
+
+    def empty = 0
+    // Данные налоговых форм.
+
+    /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
+    def dataRowsComplexIncome = getData(getFormDataSummary(302))?.allCached
+
+    /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
+    def dataRowsSimpleIncome = getData(getFormDataSummary(301))?.allCached
+
+    /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
+    def dataRowsComplexConsumption = getData(getFormDataSummary(303))?.allCached
+
+    /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
+    def dataRowsSimpleConsumption = getData(getFormDataSummary(304))?.allCached
+
+    /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
+    //    def dataRowsSum = getData(getFormDataSummary(421))?.allCached
+    //    if (dataRowsSum == null) {// TODO wtf?
+    //    }
+
+    /** ВыручРеалТов. Код строки декларации 180. */
+    def viruchRealTov = empty
+    /** ДохДоговДУИ. Код строки декларации 210. */
+    def dohDolgovDUI = empty
+    /** ДохДоговДУИ_ВнР. Код строки декларации 211. */
+    def dohDolgovDUI_VnR = empty
+    /** УбытОбОбслНеобл. Код строки декларации 201. */
+    def ubitObObslNeobl = empty
+    /** УбытДоговДУИ. Код строки декларации 230. */
+    def ubitDogovDUI = empty
+    /** УбытПрошПер. Код строки декларации 301. */
+    def ubitProshPer = empty
+    /** СумБезнадДолг. Код строки декларации 302. */
+    def sumBeznalDolg = empty
+    /** УбытПриравнВс. Код строки декларации 300. */
+    def ubitPriravnVs = ubitProshPer + sumBeznalDolg
+
+
+    /** ВыручРеалАИ. Код строки декларации 030. Код вида дохода = 10840. */
+    def viruchRealAI = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10840]))
+    /** УбытРеалАИ. Код строки декларации 060. Код вида расхода = 21780. */
+    def ubitRealAI = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21780]))
+    /** ЦенРеалПрЗУ. Код строки декларации 240. Код вида дохода = 10890. */
+    def cenRealPrZU = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10890]))
+    /** УбытРеалПрЗУ. Код строки декларации 260. Код вида расхода = 21390. */
+    def ubitRealPrZU = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21390]))
+    /** ВыручРеалПТДоСр. Код строки декларации 100. Код вида дохода = 10860. */
+    def viruchRealPTDoSr = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10860]))
+    /** ВыручРеалПТПосСр. Код строки декларации 110. Код вида дохода = 10870. */
+    def viruchRealPTPosSr = getLong(0)// TODO getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10870]))
+    /** Убыт1Прев269. Код строки декларации 150. Код вида расхода = 21500. */
+    def ubit1Prev269 = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21500]))
+    /** Убыт2РеалПТ. Код строки декларации 160. Код вида расхода = 21510. */
+    def ubit2RealPT = empty //TODO getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21510]))
+
+    /** ВырРеалТовСоб. Код строки декларации 011. */
+    def virRealTovSob = getVirRealTovSob(dataRowsComplexIncome, dataRowsSimpleIncome)
+    /** ВырРеалИмПрав. Строка декларации 013. Код вида дохода = 10855, 10880, 10900. */
+    def virRealImPrav = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10855, 10870, 10880, 10900]))//TODO
+    /** ВырРеалИмПроч. Строка декларации 014. Код вида дохода = 10850. */
+    def virRealImProch = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [10850]))
+    /** ВырРеалВс. Код строки декларации 010. */
+    def virRealVs = virRealTovSob + virRealImPrav + virRealImProch
+    /** ВырРеалЦБВс. Код строки декларации 020. Код вида дохода = 11180, 11190, 11200, 11210, 11220, 11230, 11240, 11250, 11260. */
+    def virRealCBVs = getLong(getComplexIncomeSumRows9(dataRowsComplexIncome, [11180, 11190, 11200, 11210, 11220, 11230, 11240, 11250, 11260]))
+    /** ВырРеалПред. Код строки декларации 023. */
+    def virRealPred = empty
+    /** ВыручОп302Ит. Код строки декларации 340. Строка 030 + строка 100 + строка 110 + строка 180 + (строка 210 – строка 211) + строка 240. */
+    def viruchOp302It = viruchRealAI + viruchRealPTDoSr + viruchRealPTPosSr + viruchRealTov + dohDolgovDUI - dohDolgovDUI_VnR + cenRealPrZU
+
+    /** ДохРеал, ВырРеалИтог. */
+    def dohReal = virRealVs + virRealCBVs + virRealPred + viruchOp302It
+    /** ДохВнереал. Код строки декларации 100. */
+    def dohVnereal = getDohVnereal(dataRowsComplexIncome, dataRowsSimpleIncome)
+    /** ПрямРасхРеал. Код строки декларации 010. */
+    def pramRashReal = empty
+    /** ПрямРасхТоргВс. Код строки декларации 020. */
+    def pramRashTorgVs = empty
+    /** КосвРасхВс. Код строки декларации 040. */
+    def cosvRashVs = getCosvRashVs(dataRowsComplexConsumption, dataRowsSimpleConsumption)
+    /** РасхВнереалВС. Строка 200. */
+    def rashVnerealVs = getRashVnerealVs(dataRowsComplexConsumption, dataRowsSimpleConsumption)
+    /** РасхВнереал. Строка 200 + строка 300. */
+    def rashVnereal = rashVnerealVs + ubitPriravnVs
+    /** ОстСтРеалАИ. Код строки декларации 040. Код вида расхода = 21760. */
+    def ostStRealAI = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21760]))
+    /** РеалИмущПрав. Код строки декларации 059. Код вида расхода = 21450, 21740, 21750. */
+    def realImushPrav = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21450, 21470, 21740, 21750]))// TODO
+    /** ПриобрРеалИмущ. Код строки декларации 060. Код вида расхода = 21770. */
+    def priobrRealImush = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21770]))
+    /* АктивРеалПред. Код строки декларации 061. */
+    def activRealPred = empty
+    /** ПриобРеалЦБ. Код строки декларации 070. Код вида расхода = 21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680. */
+    def priobrRealCB = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21662, 21664, 21666, 21668, 21670, 21672, 21674, 21676, 21678, 21680]))
+
+    /** УбытПрошОбсл. Код строки декларации 090. */
+    def ubitProshObsl = empty
+    /** СтоимРеалПТДоСр. Код строки декларации 120. Код вида расхода = 21460. */
+    def stoimRealPTDoSr = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21460]))
+    /** СтоимРеалПТПосСр. Код строки декларации 130. Код вида расхода = 21470. */
+    def stoimRealPTPosSr = getLong(0)//TODO
+    /** РасхРеалТов. Код строки декларации 190. */
+    def rashRealTov = empty
+    /** РасхДоговДУИ. Код строки декларации 220. */
+    def rashDolgovDUI = empty
+    /** РасхДоговДУИ_ВнР. Код строки декларации 221. */
+    def rashDolgovDUI_VnR = empty
+    /** НеВозЗатрПрЗУ. Код строки декларации 250. Код вида расхода = 21385. */
+    def neVozZatrPrZU = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21385]))
+    /** РасхОпер32, РасхОп302Ит. Код строки декларации = 080 или 350. */
+    def rashOper32 = ostStRealAI + stoimRealPTDoSr + stoimRealPTPosSr + rashRealTov + (rashDolgovDUI - rashDolgovDUI_VnR) + neVozZatrPrZU
+    /** УбытРеалАмИм. Код строки декларации 100. Код вида расхода = 21520, 21530. */
+    def ubitRealAmIm = getLong(getComplexConsumptionSumRows9(dataRowsComplexConsumption, [21520, 21530]))
+    /** УбытРеалЗемУч. Код строки декларации 110. */
+    def ubitRealZemUch = empty
+    /** НадбПокПред. Код строки декларации 120. */
+    def nadbPokPred = empty
+    /** РасхУмРеал, РасхПризнИтого. Код строки декларации 130. */
+    def rashUmReal = pramRashReal + pramRashTorgVs + cosvRashVs + realImushPrav +
+            priobrRealImush + activRealPred + priobrRealCB + rashOper32 + ubitProshObsl +
+            ubitRealAmIm + ubitRealZemUch + nadbPokPred
+    /** Убытки, УбытОп302. Код строки декларации 360. Cтрока 060 + строка 150 + строка 160 + строка 201+ строка 230 + строка 260. */
+    def ubitki = ubitRealAI + ubit1Prev269 + ubit2RealPT + ubitObObslNeobl + ubitDogovDUI + ubitRealPrZU
+    /** ПрибУб. */
+    def pribUb = dohReal + dohVnereal - rashUmReal - rashVnereal + ubitki
+    /** ДохИсклПриб. */
+    def dohIsklPrib = getDohIsklPrib(dataRowsComplexIncome, dataRowsSimpleIncome)
+    // НалБаза строка 60 - строка 70 - строка 80 - строка 90 - строка 400 (Приложение №2 к Листу 02)
+    def nalBaza = pribUb - dohIsklPrib - 0 - 0 - 0
+    /** НалБазаИсч, НалБазаОрг. */
+    def nalBazaIsch = getNalBazaIsch(nalBaza, 0)
+
+    return nalBazaIsch
+}
+
+
+def getDohVnereal(def dataRows, def dataRowsSimple) {
+    def result = 0.0
+
+    // Код вида дохода = 11405, 11410, 11415, 13040, 13045, 13050, 13055, 13060, 13065,
+    // 13070, 13090, 13100, 13110, 13120, 13250, 13650, 13655, 13660, 13665, 13670,
+    // 13675, 13680, 13685, 13690, 13695, 13700, 13705, 13710, 13715, 13720, 13780,
+    // 13785, 13790, 13940, 13950, 13960, 13970, 13980, 13990, 14140, 14170, 14180,
+    // 14190, 14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290,
+    // 14300, 14310, 14320
+    result += getComplexIncomeSumRows9(dataRows, [11405, 11410, 11415, 13040, 13045, 13050, 13055,
+                                                  13060, 13065, 13070, 13090, 13100, 13110, 13120, 13250, 13650, 13655, 13660, 13665,
+                                                  13670, 13675, 13680, 13685, 13690, 13695, 13700, 13705, 13710, 13715, 13720, 13780,
+                                                  13785, 13790, 13940, 13950, 13960, 13970, 13980, 13990, 14140, 14170, 14180, 14190,
+                                                  14200, 14210, 14220, 14230, 14240, 14250, 14260, 14270, 14280, 14290, 14300, 14310, 14320])
+
+    // Код вида дохода = 11380, 11385, 11390, 11395, 11400, 11420, 11430, 11840, 11850, 11855,
+    // 11860, 11870, 11880, 11930, 11970, 12000, 12010, 12030, 12050, 12070, 12090, 12110, 12130,
+    // 12150, 12170, 12190, 12210, 12230, 12250, 12270, 12290, 12320, 12340, 12360, 12390, 12400,
+    // 12410, 12420, 12430, 12830, 12840, 12850, 12860, 12870, 12880, 12890, 12900, 12910, 12920,
+    // 12930, 12940, 12950, 12960, 12970, 12980, 12985, 12990, 13000, 13010, 13020, 13030, 13035,
+    // 13080, 13130, 13140, 13150, 13160, 13170, 13180, 13190, 13230, 13240, 13290, 13300, 13310, 13320, 13330,
+    // 13340, 13400, 13410, 13725, 13730, 13920, 13925, 13930, 14000, 14010, 14015, 14020, 14030, 14040,
+    // 14050, 14060, 14070, 14080, 14090, 14100, 14110, 14120, 14130, 14150, 14160
+    result += getSimpleIncomeSumRows8(dataRowsSimple, [11380, 11385, 11390, 11395, 11400, 11420,
+                                                       11430, 11840, 11850, 11855, 11860, 11870, 11880, 11930, 11970, 12000, 12010, 12030,
+                                                       12050, 12070, 12090, 12110, 12130, 12150, 12170, 12190, 12210, 12230, 12250, 12270,
+                                                       12290, 12320, 12340, 12360, 12390, 12400, 12410, 12420, 12430, 12830, 12840, 12850,
+                                                       12860, 12870, 12880, 12890, 12900, 12910, 12920, 12930, 12940, 12950, 12960, 12970,
+                                                       12980, 12985, 12990, 13000, 13010, 13020, 13030, 13035, 13080, 13130, 13140, 13150, 13160, 13170,
+                                                       13180, 13190, 13230, 13240, 13290, 13300, 13310, 13320, 13330, 13340, 13400, 13410,
+                                                       13725, 13730, 13920, 13925, 13930, 14000, 14010, 14015, 14020, 14030, 14040, 14050, 14060,
+                                                       14070, 14080, 14090, 14100, 14110, 14120, 14130, 14150, 14160])
+
+    // Код вида дохода = 11860, 11870, 11880, 11930, 11970, 12000, 13930, 14020, 14030, 14040, 14050,
+    // 14060, 14070, 14080, 14090, 14100, 14110, 14130, 14150, 14160
+    def codes = [11860, 11870, 11880, 11930, 11970, 12000, 13930, 14020, 14030, 14040, 14050,
+                 14060, 14070, 14080, 14090, 14100, 14110, 14130, 14150, 14160]
+    // графа 5
+    result += getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu6Field10Sum', codes)
+    // графа 6
+    result -= getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu6Field12Accepted', codes)
+
+    return getLong(result)
+}
+
+def getComplexIncomeSumRows9(def dataRows, def codes) {
+    return getSumRowsByCol(dataRows, 'incomeTypeId', 'incomeTaxSumS', codes)
+}
+
+def getComplexConsumptionSumRows9(def dataRows, def codes) {
+    return getSumRowsByCol(dataRows, 'consumptionTypeId', 'consumptionTaxSumS', codes)
+}
+
+def getSimpleIncomeSumRows8(def dataRows, def codes) {
+    return getSumRowsByCol(dataRows, 'incomeTypeId', 'rnu4Field5Accepted', codes)
+}
+
+def getSumRowsByCol(def dataRows, def columnCode, def columnSum, def codes) {
+    def result = 0
+    if (!dataRows) {
+        return result
+    }
+    dataRows.each { row ->
+        def cell = row.getCell(columnSum)
+        if (row.getCell(columnCode).value in (String [])codes && !cell.hasValueOwner()) {
+            result += (cell.value ?: 0)
+        }
+    }
+    return result
+}
+
+def getVirRealTovSob(def dataRows, def dataRowsSimple) {
+    def result = 0.0
+
+    // Код вида дохода = 10633, 10634, 10650, 10670
+    result += getComplexIncomeSumRows9(dataRows, [10633, 10634, 10650, 10670])
+
+    // Код вида дохода = 10001, 10006, 10041, 10300, 10310, 10320, 10330, 10340, 10350, 10360, 10370,
+    // 10380, 10390, 10450, 10460, 10470, 10480, 10490, 10571, 10580, 10590, 10600, 10610, 10630,
+    // 10631, 10632, 10640, 10680, 10690, 10740, 10744, 10748, 10752, 10756, 10760, 10770, 10790,
+    // 10800, 11140, 11150, 11160, 11170, 11320, 11325, 11330, 11335, 11340, 11350, 11360, 11370, 11375
+    result += getSimpleIncomeSumRows8(dataRowsSimple, [10001, 10006, 10041, 10300, 10310, 10320,
+                                                       10330, 10340, 10350, 10360, 10370, 10380, 10390, 10450, 10460, 10470, 10480, 10490,
+                                                       10571, 10580, 10590, 10600, 10610, 10630, 10631, 10632, 10640, 10680, 10690, 10740,
+                                                       10744, 10748, 10752, 10756, 10760, 10770, 10790, 10800, 11140, 11150, 11160, 11170,
+                                                       11320, 11325, 11330, 11335, 11340, 11350, 11360, 11370, 11375])
+
+    // Код вида доходов = 10001, 10006, 10300, 10310, 10320, 10330, 10340, 10350, 10360, 10470,
+    // 10480, 10490, 10571, 10590, 10610, 10640, 10680, 10690, 11340, 11350, 11370, 11375
+    def codes = [10001, 10006, 10300, 10310, 10320, 10330, 10340, 10350, 10360, 10470, 10480,
+                 10490, 10571, 10590, 10610, 10640, 10680, 10690, 11340, 11350, 11370, 11375]
+
+    // графа 5
+    result += getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu6Field10Sum', codes)
+    // графа 6
+    result -= getSumRowsByCol(dataRowsSimple, 'incomeTypeId', 'rnu6Field12Accepted', codes)
+
+    return getLong(result)
+}
+
+def getCosvRashVs(def dataRows, def dataRowsSimple) {
+    def result = 0
+
+    // Код вида расхода = 20320, 20321, 20470, 20750, 20755, 20760, 20765, 20770,
+    // 20775, 20780, 20785, 21210, 21280, 21345, 21355, 21365, 21370, 21375, 21380, 21630, 21640
+    result += getComplexConsumptionSumRows9(dataRows, [20320, 20321, 20470, 20750, 20755, 20760, 20765,
+                                                       20770, 20775, 20780, 20785, 21210, 21280, 21345, 21355, 21365, 21370, 21375, 21380, 21630, 21640])
+
+    // Код вида расхода = 20291, 20300, 20310, 20330, 20332, 20334, 20336, 20338,
+    // 20339, 20340, 20360, 20364, 20368, 20370, 20430, 20434, 20438, 20440, 20442,
+    // 20446, 20448, 20450, 20452, 20454, 20456, 20458, 20460, 20464, 20468, 20475,
+    // 20480, 20485, 20490, 20500, 20510, 20520, 20530, 20540, 20550, 20690, 20694,
+    // 20698, 20700, 20710, 20810, 20812, 20814, 20816, 20820, 20825, 20830, 20840,
+    // 20850, 20860, 20870, 20880, 20890, 20920, 20940, 20945, 20950, 20960, 20970,
+    // 21020, 21025, 21030, 21050, 21055, 21060, 21065, 21080, 21130, 21140, 21150,
+    // 21154, 21158, 21170, 21270, 21290, 21295, 21300, 21305, 21310, 21315, 21320,
+    // 21325, 21340, 21350, 21360, 21400, 21405, 21410, 21580, 21590, 21600, 21610,
+    // 21620, 21660, 21700, 21710, 21720, 21730, 21790, 21800, 21810
+    result += getSimpleConsumptionSumRows8(dataRowsSimple, [20291, 20300, 20310, 20330, 20332, 20334,
+                                                            20336, 20338, 20339, 20340, 20360, 20364, 20368, 20370, 20430, 20434, 20438, 20440,
+                                                            20442, 20446, 20448, 20450, 20452, 20454, 20456, 20458, 20460, 20464, 20468, 20475,
+                                                            20480, 20485, 20490, 20500, 20510, 20520, 20530, 20540, 20550, 20690, 20694, 20698,
+                                                            20700, 20710, 20810, 20812, 20814, 20816, 20820, 20825, 20830, 20840, 20850, 20860,
+                                                            20870, 20880, 20890, 20920, 20940, 20945, 20950, 20960, 20970, 21020, 21025, 21030,
+                                                            21050, 21055, 21060, 21065, 21080, 21130, 21140, 21150, 21154, 21158, 21170, 21270,
+                                                            21290, 21295, 21300, 21305, 21310, 21315, 21320, 21325, 21340, 21350, 21360, 21400,
+                                                            21405, 21410, 21580, 21590, 21600, 21610, 21620, 21660, 21700, 21710, 21720, 21730,
+                                                            21790, 21800, 21810])
+
+    // графа 5
+    // Код вида дохода = 20300, 20360, 20370, 20430, 20434, 20438, 20440, 20442, 20446, 20448, 20450,
+    // 20452, 20454, 20456, 20458, 20460, 20464, 20468, 20475, 20480, 20485, 20490, 20500, 20530,
+    // 20540, 20550, 20690, 20694, 20698, 20700, 20710, 20810, 20812, 20814, 20816, 20825, 20830,
+    // 20840, 20850, 20870, 20880, 20890, 20950, 20960, 20970, 21020, 21025, 21030, 21050, 21055,
+    // 21060, 21065, 21080, 21130, 21140, 21150, 21154, 21158, 21170, 21400, 21405, 21410, 21580,
+    // 21590, 21620, 21660, 21700, 21710, 21730, 21790, 21800, 21810
+    result += getSumRowsByCol(dataRowsSimple, 'consumptionTypeId', 'rnu7Field10Sum', [20300, 20360, 20370, 20430,
+                                                                                      20434, 20438, 20440, 20442, 20446, 20448, 20450, 20452, 20454, 20456, 20458, 20460,
+                                                                                      20464, 20468, 20475, 20480, 20485, 20490, 20500, 20530, 20540, 20550, 20690, 20694,
+                                                                                      20698, 20700, 20710, 20810, 20812, 20814, 20816, 20825, 20830, 20840, 20850, 20870,
+                                                                                      20880, 20890, 20950, 20960, 20970, 21020, 21025, 21030, 21050, 21055, 21060, 21065,
+                                                                                      21080, 21130, 21140, 21150, 21154, 21158, 21170, 21400, 21405, 21410, 21580, 21590,
+                                                                                      21620, 21660, 21700, 21710, 21730, 21790, 21800, 21810])
+
+    // графа 6
+    // Код вида дохода = 20300, 20360, 20370, 20430, 20434, 20438, 20440, 20442, 20446, 20448, 20450,
+    // 20452, 20454, 20456, 20458, 20460, 20464, 20468, 20475, 20480, 20485, 20490, 20500, 20530,
+    // 20540, 20550, 20690, 20694, 20698, 20700, 20710, 20810, 20812, 20814, 20816, 20825, 20830,
+    // 20840, 20850, 20870, 20880, 20890, 20950, 20960, 20970, 21020, 21025, 21030, 21050, 21055,
+    // 21060, 21065, 21080, 21130, 21140, 21150, 21154, 21158, 21170, 21400, 21405, 21410, 21580,
+    // 21590, 2162021660, 21700, 21710, 21730, 21790, 21800, 21810
+    result -= getSumRowsByCol(dataRowsSimple, 'consumptionTypeId', 'rnu7Field12Accepted', [20300, 20360, 20370, 20430,
+                                                                                           20434, 20438, 20440, 20442, 20446, 20448, 20450, 20452, 20454, 20456, 20458, 20460,
+                                                                                           20464, 20468, 20475, 20480, 20485, 20490, 20500, 20530, 20540, 20550, 20690, 20694,
+                                                                                           20698, 20700, 20710, 20810, 20812, 20814, 20816, 20825, 20830, 20840, 20850, 20870,
+                                                                                           20880, 20890, 20950, 20960, 20970, 21020, 21025, 21030, 21050, 21055, 21060, 21065,
+                                                                                           21080, 21130, 21140, 21150, 21154, 21158, 21170, 21400, 21405, 21410, 21580, 21590,
+                                                                                           2162021660, 21700, 21710, 21730, 21790, 21800, 21810])
+
+    return getLong(result)
+}
+def getSimpleConsumptionSumRows8(def dataRows, def codes) {
+    return getSumRowsByCol(dataRows, 'consumptionTypeId', 'rnu5Field5Accepted', codes)
+}
+
+def getRashVnerealVs(def dataRows, def dataRowsSimple) {
+    def result = 0.0
+
+    // Код вида расхода = 22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+    // 22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240 - графа 9
+    result += getComplexConsumptionSumRows9(dataRows, [22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+                                                       22670, 22690, 22695, 23120, 23130, 23140, 23240])
+
+    // Код вида расхода = 22000, 22010, 22020, 22030, 22040, 22050, 22060, 22070, 22080, 22090, 22100, 22110,
+    // 22120, 22130, 22140, 22150, 22160, 22170, 22180, 22190, 22200, 22210, 22220, 22230, 22240, 22250, 22260,
+    // 22270, 22280, 22290, 22300, 22310, 22320, 22330, 22340, 22350, 22360, 22370, 22380, 22385, 22390, 22395,
+    // 22400, 22405, 22410, 22415, 22420, 22425, 22430, 22435, 22440, 22445, 22450, 22455, 22460, 22465, 22470,
+    // 22475, 22480, 22485, 22490, 22496, 22498, 22530, 22534, 22538, 22540, 22544, 22548, 22550, 22560, 22565,
+    // 22570, 22575, 22580, 22600, 22610, 22640, 22680, 22710, 22715, 22720, 22750, 22760, 22800, 22810, 22840,
+    // 22850, 22860, 22870, 23040, 23050, 23100, 23110, 23200, 23210, 23220, 23230, 23250, 23260, 23270, 23280
+    def knu = [ 22000, 22010, 22020, 22030, 22040, 22050, 22060, 22070,
+                22080, 22090, 22100, 22110, 22120, 22130, 22140, 22150, 22160, 22170, 22180,
+                22190, 22200, 22210, 22220, 22230, 22240, 22250, 22260, 22270, 22280, 22290,
+                22300, 22310, 22320, 22330, 22340, 22350, 22360, 22370, 22380, 22385, 22390,
+                22395, 22400, 22405, 22410, 22415, 22420, 22425, 22430, 22435, 22440, 22445,
+                22450, 22455, 22460, 22465, 22470, 22475, 22480, 22485, 22490, 22496, 22498,
+                22530, 22534, 22538, 22540, 22544, 22548, 22550, 22560, 22565, 22570, 22575,
+                22580, 22600, 22610, 22640, 22680, 22710, 22715, 22720, 22750, 22760, 22800,
+                22810, 22840, 22850, 22860, 22870, 23040, 23050, 23100, 23110, 23200, 23210,
+                23220, 23230, 23250, 23260, 23270, 23280 ]
+    result += getCalculatedSimpleConsumption(dataRowsSimple, knu)
+
+    // Код вида расхода = 23150, 23160, 23170 - графа 9
+    result -= getComplexConsumptionSumRows9(dataRows, [23150, 23160, 23170])
+
+    return getLong(result)
+}
+
+/** Подсчет простых расходов: сумма(графа 8 + графа 5 - графа 6). */
+def getCalculatedSimpleConsumption(def dataRowsSimple, def codes) {
+    def result = 0
+    if (dataRowsSimple == null) {
+        return result
+    }
+    dataRowsSimple.each { row ->
+        if (row.getCell('consumptionTypeId').value in (String [])codes) {
+            result +=
+                    (row.rnu5Field5Accepted ?: 0) +
+                            (row.rnu7Field10Sum ?: 0) -
+                            (row.rnu7Field12Accepted ?: 0)
+        }
+    }
+    return result
+}
+
+
+def getNalBazaIsch(def row100, def row110) {
+    def result
+    if (row100 != null && row110 != null && (row100 < 0 || row100 == row110)) {
+        result = 0.0
+    } else {
+        result = row100 - row110
+    }
+    return getLong(result)
+}
+
+// Получить округленное, целочисленное значение.
+def getLong(def value) {
+    if (value == null) {
+        return 0
+    }
+    return roundValue(value, 0)
+}
+
 /**
  * Расчитываем распределяемая налоговая база за отчётный период.
  *
  * @author ekuvshinov
  */
 def getTaxBase() {
-    // доходы простые
-    def dataIncomeSimple = getData(getFormDataSummary(301))
-
-    // доходы сложные
-    def dataIncomeComplex = getData(getFormDataSummary(302))
-
+    def result = 0
     // расходы сложные
     def dataOutcomeComplex = getData(getFormDataSummary(303))
 
-    // расходы простые
-    def dataOutcomeSimple = getData(getFormDataSummary(304))
-
-    BigDecimal taxBase = 0
-    BigDecimal group1 = 0
-    BigDecimal group2 = 0
-    BigDecimal group3 = 0
-    BigDecimal group4 = 0
-    BigDecimal group5 = 0
-    Map<String, BigDecimal> sum = [:]
-    ['sum5', 'sum6', 'sum7', 'sum12', 'sum14', 'sum15', 'sum18', 'sum13', 'sum16', 'sum17', 'sum19', 'sum26', 'sum27',
-     'sum28', 'sum29', 'sum37', 'sum38', 'sum39', 'sum40'].each{
-        sum[it] = 0
-    }
-    // доходы сложные
-    if (dataIncomeComplex != null) {
-        for (row in dataIncomeComplex.allCached) {
-            // Если ячейка не объединена, то она должна быть в списке
-            String khy = row.getCell('incomeTypeId').hasValueOwner() ? row.getCell('incomeTypeId').getValueOwner().value : row.getCell('incomeTypeId').value
-
-            BigDecimal incomeTaxSumS = (BigDecimal) (row.getCell('incomeTaxSumS').hasValueOwner() ? row.getCell('incomeTaxSumS').getValueOwner().value : row.getCell('incomeTaxSumS').value)
-            incomeTaxSumS = incomeTaxSumS ?: 0
-            //k1
-            if (khy in ['10633', '10634', '10650', '10670']) {
-                group1 += incomeTaxSumS
-            }
-            //k5 ВырРеалИмПрав
-            if (khy in ['10855', '10880', '10900']) {
-                sum.sum5 += incomeTaxSumS
-            }
-            //k6 ВырРеалИмПроч
-            if (khy in ['10850']) {
-                sum.sum6 += incomeTaxSumS
-            }
-            //k7 ВырРеалЦБВс
-            if (khy in ['11180', '11190', '11200', '11210', '11220', '11230', '11240', '11250', '11260']) {
-                sum.sum7 += incomeTaxSumS
-            }
-            //k8
-            if (khy in ['11405', '11410', '11415', '13040', '13045', '13050', '13055', '13060', '13065', '13070', '13090', '13100', '13110', '13120', '13250', '13650', '13655', '13660', '13665', '13670', '13675', '13680', '13685', '13690', '13695', '13700', '13705', '13710', '13715', '13720', '13780', '13785', '13790', '13940', '13950', '13960', '13970', '13980', '13990', '14140', '14170', '14180', '14190', '14200', '14210', '14220', '14230', '14240', '14250', '14260', '14270', '14280', '14290', '14300', '14310', '14320']) {
-                group2 += incomeTaxSumS
-            }
-            //k12 ВыручРеалАИ
-            if (khy in ['10840']) {
-                sum.sum12 += incomeTaxSumS
-            }
-            //k14 ВыручРеалПТДоСр
-            if (khy in ['10860']) {
-                sum.sum14 += incomeTaxSumS
-            }
-            //k15 ВыручРеалПТПосСр
-            if (khy in ['10870']) {
-                sum.sum15 += incomeTaxSumS
-            }
-            //k18 ЦенаРеалПравЗУ
-            if (khy in ['10890']) {
-                sum.sum18 += incomeTaxSumS
-            }
-            //k20
-            if (khy in ['13655', '13660', '13665', '13675', '13680', '13685', '13690', '13695', '13705', '13710', '13780', '13785', '13790']) {
-                group3 += incomeTaxSumS
-            }
-        }
-    }
-    // Доходы простые
-    if (dataIncomeSimple != null) {
-        for (row in dataIncomeSimple.allCached) {
-            String khy = row.getCell('incomeTypeId').hasValueOwner() ? row.getCell('incomeTypeId').getValueOwner().value : row.getCell('incomeTypeId').value
-
-            // графа 8
-            BigDecimal rnu4Field5Accepted = (BigDecimal) (row.getCell('rnu4Field5Accepted').hasValueOwner() ? row.getCell('rnu4Field5Accepted').getValueOwner().value : row.getCell('rnu4Field5Accepted').value)
-            rnu4Field5Accepted = rnu4Field5Accepted ?: 0
-
-            // графа 5
-            BigDecimal rnu6Field10Sum = (BigDecimal) (row.getCell('rnu6Field10Sum').hasValueOwner() ? row.getCell('rnu6Field10Sum').getValueOwner().value : row.getCell('rnu6Field10Sum').value)
-            rnu6Field10Sum = rnu6Field10Sum ?: 0
-
-            // графа 6
-            BigDecimal rnu6Field12Accepted = (BigDecimal) (row.getCell('rnu6Field12Accepted').hasValueOwner() ? row.getCell('rnu6Field12Accepted').getValueOwner().value : row.getCell('rnu6Field12Accepted').value)
-            rnu6Field12Accepted = rnu6Field12Accepted ?: 0
-            //k2
-            if (khy in ['10001', '10006', '10041', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10370', '10380', '10390', '10450', '10460', '10470', '10480', '10490', '10571', '10580', '10590', '10600', '10610', '10630', '10631', '10632', '10640', '10680', '10690', '10740', '10744', '10748', '10752', '10756', '10760', '10770', '10790', '10800', '11140', '11150', '11160', '11170', '11320', '11325', '11330', '11335', '11340', '11350', '11360', '11370', '11375']) {
-                group1 += rnu4Field5Accepted
-            }
-            //k3
-            if (khy in ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640', '10680', '10690', '11340', '11350', '11370', '11375']) {
-                group1 += rnu6Field10Sum
-            }
-            //k4
-            if (khy in ['10001', '10006', '10300', '10310', '10320', '10330', '10340', '10350', '10360', '10470', '10480', '10490', '10571', '10590', '10610', '10640', '10680', '10690', '11340', '11350', '11370', '11375']) {
-                group1 -= rnu6Field12Accepted
-            }
-            //k9
-            if (khy in ['11380', '11385', '11390', '11395', '11400', '11420', '11430', '11840', '11850', '11855', '11860', '11870', '11880', '11930', '11970', '12000', '12010', '12030', '12050', '12070', '12090', '12110', '12130', '12150', '12170', '12190', '12210', '12230', '12250', '12270', '12290', '12320', '12340', '12360', '12390', '12400', '12410', '12420', '12430', '12830', '12840', '12850', '12860', '12870', '12880', '12890', '12900', '12910', '12920', '12930', '12940', '12950', '12960', '12970', '12980', '12985', '12990', '13000', '13010', '13020', '13030', '13035', '13080', '13130', '13140', '13150', '13160', '13170', '13180', '13190', '13230', '13240', '13290', '13300', '13310', '13320', '13330', '13340', '13400', '13410', '13725', '13730', '13920', '13925', '13930', '14000', '14010', '14015', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14120', '14130', '14150', '14160']) {
-                group2 += rnu4Field5Accepted
-            }
-            //k10
-            if (khy in ['11860', '11870', '11880', '11930', '11970', '12000', '13930', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14130', '14150', '14160']) {
-                group2 += rnu6Field10Sum
-            }
-            //k11
-            if (khy in ['11860', '11870', '11880', '11930', '11970', '12000', '13930', '14020', '14030', '14040', '14050', '14060', '14070', '14080', '14090', '14100', '14110', '14130', '14150', '14160']) {
-                group2 -= rnu6Field12Accepted
-            }
-            //k21
-            if (khy in ['14000', '14010', '14015']) {
-                group3 += rnu4Field5Accepted
-            }
-        }
-    }
     // Расходы сложные
     if (dataOutcomeComplex != null) {
         for (row in dataOutcomeComplex.allCached) {
@@ -866,125 +1135,24 @@ def getTaxBase() {
             // 9
             BigDecimal consumptionTaxSumS = (BigDecimal) (row.getCell('consumptionTaxSumS').hasValueOwner() ? row.getCell('consumptionTaxSumS').getValueOwner().value : row.getCell('consumptionTaxSumS').value)
             consumptionTaxSumS = consumptionTaxSumS ?: 0
-
-            //k13 УбытРеалАИ
-            if (khy in ['21780']) {
-                sum.sum13 += consumptionTaxSumS
-            }
-            //k16 Убыт1Прев269
-            if (khy in ['21500']) {
-                sum.sum16 += consumptionTaxSumS
-            }
-            //k17 Убыт2РеалПТ
-            if (khy in ['21510']) {
-                sum.sum17 += consumptionTaxSumS
-            }
-            //k19 УбытРеалЗУ
-            if (khy in ['21390']) {
-                sum.sum19 += consumptionTaxSumS
-            }
-            //k22
-            if (khy in ['20320', '20321', '20470', '20750', '20755', '20760', '20765', '20770', '20775', '20780', '20785', '21210', '21280', '21345', '21355', '21365', '21370', '21375', '21380', '21630', '21640']) {
-                group4 += consumptionTaxSumS
-            }
-            //k26 РеалИмущПрав
-            if (khy in ['21450', '21740', '21750']) {
-                sum.sum26 -= consumptionTaxSumS
-            }
-            //k27 ПриобрРеалИмущ
             if (khy in ['21770']) {
-                sum.sum27 -= consumptionTaxSumS
+                result += consumptionTaxSumS
             }
-            //k28 ПриобРеалЦБ
             if (khy in ['21662', '21664', '21666', '21668', '21670', '21672', '21674', '21676', '21678', '21680']) {
-                sum.sum28 -= consumptionTaxSumS
+                result -= consumptionTaxSumS
             }
-            //k29 УбытРеалАмИм
-            if (khy in ['21520', '21530']) {
-                sum.sum29 -= consumptionTaxSumS
-            }
-            //k30
-            if (khy in ['22492', '22500', '22505', '22585', '22590', '22595', '22660', '22664', '22668', '22670', '22690', '22695', '22700', '23120', '23130', '23140', '23240']) {
-                group5 += consumptionTaxSumS
-            }
-            //k34
-            if (khy in ['23150']) {
-                group5 -= consumptionTaxSumS
-            }
-            //k35
-            if (khy in ['23160']) {
-                group5 -= consumptionTaxSumS
-            }
-            //k36
-            if (khy in ['23170']) {
-                group5 -= consumptionTaxSumS
-            }
-            //k37 ОстСтРеалАИ
             if (khy in ['21760']) {
-                sum.sum37 -= consumptionTaxSumS
+                result -= consumptionTaxSumS
             }
-            //k38 СтоимРеалПТДоСр
             if (khy in ['21460']) {
-                sum.sum38 -= consumptionTaxSumS
+                result -= consumptionTaxSumS
             }
-            //k39 СтоимРеалПТПосСр
-            if (khy in ['21470']) {
-                sum.sum39 -= consumptionTaxSumS
-            }
-            //k40 СумНевозмЗатрЗУ
             if (khy in ['21385']) {
-                sum.sum40 -= consumptionTaxSumS
+                result -= consumptionTaxSumS
             }
         }
     }
-    // Расходы простые
-    if (dataOutcomeSimple != null) {
-        for (row in dataOutcomeSimple.allCached) {
-            String khy = row.getCell('consumptionTypeId').hasValueOwner() ? row.getCell('consumptionTypeId').getValueOwner().value : row.getCell('consumptionTypeId').value
-
-            // 8
-            BigDecimal rnu5Field5Accepted = (BigDecimal) (row.getCell('rnu5Field5Accepted').hasValueOwner() ? row.getCell('rnu5Field5Accepted').getValueOwner().value : row.getCell('rnu5Field5Accepted').value)
-            rnu5Field5Accepted = rnu5Field5Accepted ?: 0
-
-            // 5
-            BigDecimal rnu7Field10Sum = (BigDecimal) (row.getCell('rnu7Field10Sum').hasValueOwner() ? row.getCell('rnu7Field10Sum').getValueOwner().value : row.getCell('rnu7Field10Sum').value)
-            rnu7Field10Sum = rnu7Field10Sum ?: 0
-
-            // 6
-            BigDecimal rnu7Field12Accepted = (BigDecimal) (row.getCell('rnu7Field12Accepted').hasValueOwner() ? row.getCell('rnu7Field12Accepted').getValueOwner().value : row.getCell('rnu7Field12Accepted').value)
-            rnu7Field12Accepted = rnu7Field12Accepted ?: 0
-
-            //k23
-            if (khy in ['20291', '20300', '20310', '20330', '20332', '20334', '20336', '20338', '20339', '20340', '20360', '20364', '20368', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500', '20510', '20520', '20530', '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20820', '20825', '20830', '20840', '20850', '20860', '20870', '20880', '20890', '20920', '20940', '20945', '20950', '20960', '20970', '21020', '21025', '21030', '21050', '21055', '21060', '21065', '21080', '21130', '21140', '21150', '21154', '21158', '21170', '21270', '21290', '21295', '21300', '21305', '21310', '21315', '21320', '21325', '21340', '21350', '21360', '21400', '21405', '21410', '21580', '21590', '21600', '21610', '21620', '21660', '21700', '21710', '21720', '21730', '21790', '21800', '21810']) {
-                group4 += rnu5Field5Accepted
-            }
-            //k24
-            if (khy in ['20300', '20360', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500', '20530', '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20825', '20830', '20840', '20850', '20870', '20880', '20890', '20950', '20960', '20970', '21020', '21025', '21030', '21050', '21055', '21060', '21065', '21080', '21130', '21140', '21150', '21154', '21158', '21170', '21400', '21405', '21410', '21580', '21590', '21620', '21660', '21700', '21710', '21730', '21790', '21800', '21810']) {
-                group4 += rnu7Field10Sum
-            }
-            //k25
-            if (khy in ['20300', '20360', '20370', '20430', '20434', '20438', '20440', '20442', '20446', '20448', '20450', '20452', '20454', '20456', '20458', '20460', '20464', '20468', '20475', '20480', '20485', '20490', '20500', '20530', '20540', '20550', '20690', '20694', '20698', '20700', '20710', '20810', '20812', '20814', '20816', '20825', '20830', '20840', '20850', '20870', '20880', '20890', '20950', '20960', '20970', '21020', '21025', '21030', '21050', '21055', '21060', '21065', '21080', '21130', '21140', '21150', '21154', '21158', '21170', '21400', '21405', '21410', '21580', '21590', '21620', '21660', '21700', '21710', '21730', '21790', '21800', '21810']) {
-                group4 -= rnu7Field12Accepted
-            }
-            //k31
-            if (khy in ['22000', '22010', '22020', '22030', '22040', '22050', '22060', '22070', '22080', '22090', '22100', '22110', '22120', '22130', '22140', '22150', '22160', '22170', '22180', '22190', '22200', '22210', '22220', '22230', '22240', '22250', '22260', '22270', '22280', '22290', '22300', '22310', '22320', '22330', '22340', '22350', '22360', '22370', '22380', '22385', '22390', '22395', '22400', '22405', '22410', '22415', '22420', '22425', '22430', '22435', '22440', '22445', '22450', '22455', '22460', '22465', '22470', '22475', '22480', '22485', '22490', '22496', '22498', '22530', '22534', '22538', '22540', '22544', '22548', '22550', '22560', '22565', '22570', '22575', '22580', '22600', '22610', '22640', '22680', '22710', '22715', '22720', '22750', '22760', '22800', '22810', '22840', '22850', '22860', '22870', '23040', '23050', '23100', '23110', '23200', '23210', '23220', '23230', '23250', '23260', '23270', '23280']) {
-                group5 += rnu5Field5Accepted
-            }
-            //k32
-            if (khy in ['22570', '22575', '22580', '22720', '22750', '22760', '22800', '22810', '23200', '23210', '23230', '23250', '23260', '23270', '23280']) {
-                group5 += rnu7Field10Sum
-            }
-            //k33
-            if (khy in ['22570', '22575', '22580', '22720', '22750', '22760', '22800', '22810', '23200', '23210', '23230', '23250', '23260', '23270', '23280']) {
-                group5 -= rnu7Field12Accepted
-            }
-        }
-    }
-    // taxBase = распределяемая налоговая база за отчётный период
-    sum.each { key, value ->
-        taxBase += roundValue(value, 0)
-    }
-    return taxBase + roundValue(group1, 0) + roundValue(group2, 0) - roundValue(group3, 0) - roundValue(group4, 0) - roundValue(group5, 0)
+    return (result < 0 ? 0 : result)
 }
 
 /**
@@ -1168,7 +1336,7 @@ def getProvider(def long providerId) {
 // Получение параметров подразделения, форма настроек которого будет использоваться
 // для получения данных (согласно алгоритму 6.2.5.8.7.1)
 def getDepParam(def departmentParam) {
-    def departmentId = departmentParam.get('CODE').getNumberValue().intValue()
+    def departmentId = departmentParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def departmentType = departmentService.get(departmentId).getType()
     if (departmentType.equals(departmentType.TERR_BANK)) {
         depParam = departmentParam
@@ -1182,7 +1350,7 @@ def getDepParam(def departmentParam) {
 
 // Получение параметров (справочник 330)
 def getIncomeParamTable(def depParam) {
-    def depId = depParam.get('CODE').getNumberValue().intValue()
+    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
     if (incomeParam != null && !incomeParam.isEmpty()) {
         def link = incomeParam.get(0).record_id.value

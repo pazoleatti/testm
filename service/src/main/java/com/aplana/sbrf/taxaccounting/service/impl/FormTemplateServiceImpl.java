@@ -4,12 +4,10 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
@@ -121,43 +119,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             public void execute() {
             }
         });
-    }
-
-    @Override
-    public void executeTestScript(FormTemplate formTemplate) {
-		// Создаем тестового пользователя
-		TAUser user = new TAUser();
-		user.setId(1);
-		user.setName("Василий Пупкин");
-		user.setActive(true);
-		user.setDepartmentId(1);
-		user.setLogin("vpupkin");
-		user.setEmail("vpupkin@aplana.com");
-
-        //Формируем контекст выполнения скрипта(userInfo)
-        TAUserInfo userInfo = new TAUserInfo();
-		userInfo.setUser(user);
-        userInfo.setIp("127.0.0.1");
-
-		// Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
-        FormData formData = new FormData(formTemplate);
-        formData.setState(WorkflowState.CREATED);
-        formData.setDepartmentId(userInfo.getUser().getDepartmentId());
-        formData.setKind(FormDataKind.PRIMARY);
-        formData.setDepartmentReportPeriodId(1);
-        formData.setReportPeriodId(1);
-
-        Logger log = new Logger();
-        scriptingService.executeScript(userInfo, formData, FormDataEvent.TEST, log, null);
-        if(!log.getEntries().isEmpty())
-        {
-            StringBuilder sb = new StringBuilder("В скрипте найдены ошибки: ");
-            for(LogEntry logEntry : log.getEntries())
-                sb.append(logEntry.getMessage());
-            throw new ServiceException(sb.toString());
-        }
-        logger.info("Script has been executed successful.");
-        throw new ServiceException("Скрипт выполнен успешно.");
     }
 
     @Override

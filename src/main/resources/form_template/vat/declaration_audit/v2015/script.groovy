@@ -1,5 +1,7 @@
 package form_template.vat.declaration_audit.v2015
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
@@ -11,15 +13,15 @@ import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
 
 /**
- * Декларация по НДС (короткая, раздел 1-7)
+ * Декларация по НДС (аудит, раздел 1-7)
  *
- * совпадает с "Декларация по НДС (раздел 1-7)", кроме заполнения секции "РАЗДЕЛ 2"
+ * совпадает с "Декларация по НДС (раздел 1-7)" и "Декларация по НДС (короткая, раздел 1-7)", кроме заполнения секции "РАЗДЕЛ 2"
  *
  * declarationTemplateId=2007
  */
 
 @Field
-def boolean shortDeclaration = true;
+def declarationType = 7;
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -89,6 +91,7 @@ def declarations() {
             declaration8n: [18, 'Декларация по НДС (раздел 8 без консолид. формы)'],
             declaration81: [13, 'Декларация по НДС (раздел 8.1)'],
             declaration9 : [14, 'Декларация по НДС (раздел 9)'],
+            declaration9n: [21, 'Декларация по НДС (раздел 9 без консолид. формы)'],
             declaration91: [15, 'Декларация по НДС (раздел 9.1)'],
             declaration10: [16, 'Декларация по НДС (раздел 10)'],
             declaration11: [17, 'Декларация по НДС (раздел 11)']
@@ -187,6 +190,16 @@ List<String> getErrorVersion(record) {
     errorList
 }
 
+def getDataRowSum(def dataRows, def String rowAlias, def String cellAlias, def useRound = true){
+    def sum = empty
+    for (DataRow<Cell> row : dataRows) {
+        if (rowAlias.equals(row.getAlias())) {
+            sum += row.getCell(cellAlias).value ?: empty
+        }
+    }
+    return (useRound ? round(sum) : sum)
+}
+
 void generateXML() {
     // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
@@ -213,11 +226,14 @@ void generateXML() {
     def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
     def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
 
+    def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
+    def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
+
     def sign812 = hasOneOrMoreDeclaration()
     def has812 = (sign812 == 1)
     def sign8 = (has8 || has8n) ? 1 : 0
     def sign81 = isDeclarationExist(declarations().declaration81[0])
-    def sign9 = isDeclarationExist(declarations().declaration9[0])
+    def sign9 = (has9 || has9n) ? 1 : 0
     def sign91 = isDeclarationExist(declarations().declaration91[0])
     def sign10 = isDeclarationExist(declarations().declaration10[0])
     def sign11 = isDeclarationExist(declarations().declaration11[0])
@@ -225,7 +241,7 @@ void generateXML() {
 
     def nameDecl8 = has8 ? getDeclarationFileName(declarations().declaration8[0]) : getDeclarationFileName(declarations().declaration8n[0])
     def nameDecl81 = getDeclarationFileName(declarations().declaration81[0])
-    def nameDecl9 = getDeclarationFileName(declarations().declaration9[0])
+    def nameDecl9 =  has9 ? getDeclarationFileName(declarations().declaration9[0]) : getDeclarationFileName(declarations().declaration9n[0])
     def nameDecl91 = getDeclarationFileName(declarations().declaration91[0])
     def nameDecl10 = getDeclarationFileName(declarations().declaration10[0])
     def nameDecl11 = getDeclarationFileName(declarations().declaration11[0])
@@ -244,10 +260,14 @@ void generateXML() {
     // Список данных форм-источников
     def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
     // Тип формы > Строки формы
-    def dataRowsMap = [:]
+    def Map<Integer,List> dataRowsMap = [:]
     for (def formData : formDataList) {
         def dataRows = formDataService.getDataRowHelper(formData)?.getAll()
-        dataRowsMap.put(formData.formType.id, dataRows)
+        if(dataRowsMap.containsKey(formData.formType.id)){
+            dataRowsMap.get(formData.formType.id).addAll(dataRows)
+        } else {
+            dataRowsMap.put(formData.formType.id, dataRows)
+        }
     }
 
     // РАЗДЕЛ 3
@@ -289,30 +309,38 @@ void generateXML() {
     /** НалИсчПрод. Код строки 170 Графа 3. */
     def nalIschProd = empty
     if (rows724_1) {
-        def totalRow1 = getDataRow(rows724_1, 'total_1')
-        def totalRow2 = getDataRow(rows724_1, 'total_2')
-        def totalRow3 = getDataRow(rows724_1, 'total_3')
-        def totalRow4 = getDataRow(rows724_1, 'total_4')
-        def totalRow5 = getDataRow(rows724_1, 'total_5')
-        def totalRow6 = getDataRow(rows724_1, 'total_6')
-        def totalRow7 = getDataRow(rows724_1, 'total_7')
+        def totalRow1baseSum = getDataRowSum(rows724_1, 'total_1', 'baseSum')
+        def totalRow1ndsSum = getDataRowSum(rows724_1, 'total_1', 'ndsSum')
+        def totalRow2baseSum = getDataRowSum(rows724_1, 'total_2', 'baseSum')
+        def totalRow2ndsSum = getDataRowSum(rows724_1, 'total_2', 'ndsSum')
+        def totalRow3baseSum = getDataRowSum(rows724_1, 'total_3', 'baseSum', false)
+        def totalRow3ndsSum = getDataRowSum(rows724_1, 'total_3', 'ndsSum', false)
+        def totalRow4baseSum = getDataRowSum(rows724_1, 'total_4', 'baseSum')
+        def totalRow4ndsSum = getDataRowSum(rows724_1, 'total_4', 'ndsSum')
+        def totalRow5baseSum = getDataRowSum(rows724_1, 'total_5', 'baseSum')
+        def totalRow5ndsSum = getDataRowSum(rows724_1, 'total_5', 'ndsSum')
+        def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum', false)
+        def totalRow6ndsSum  = getDataRowSum(rows724_1, 'total_6', 'ndsSum', false)
+        def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum')
+        def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
+        def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum')
 
-        nalBaza010 = round(totalRow1?.baseSum ?: empty) + round(totalRow7?.baseSum ?: empty)
-        sumNal010 = round(totalRow1?.ndsSum ?: empty) + round(totalRow7?.ndsSum ?: empty)
+        nalBaza010 = totalRow1baseSum + totalRow7baseSum
+        sumNal010 = totalRow1ndsSum + totalRow7ndsBookSum
 
-        nalBaza020 = round(totalRow2?.baseSum ?: empty)
-        sumNal020 = round(totalRow2?.ndsSum ?: empty)
+        nalBaza020 = totalRow2baseSum
+        sumNal020 = totalRow2ndsSum
 
-        nalBaza030 = round(totalRow3?.baseSum ?: empty) + round(totalRow6?.baseSum ?: empty)
-        sumNal030 = round(totalRow3?.ndsSum ?: empty) + round(totalRow6?.ndsSum ?: empty)
+        nalBaza030 = round(totalRow3baseSum + totalRow6baseSum)
+        sumNal030 = round(totalRow3ndsSum + totalRow6ndsSum)
 
-        nalBaza040 = round(totalRow4?.baseSum ?: empty)
-        sumNal040 = round(totalRow4?.ndsSum ?: empty)
+        nalBaza040 = totalRow4baseSum
+        sumNal040 = totalRow4ndsSum
 
-        nalBaza070 = round(totalRow5?.baseSum ?: empty)
-        sumNal070 = round(totalRow5?.ndsSum ?: empty)
+        nalBaza070 = totalRow5baseSum
+        sumNal070 = totalRow5ndsSum
 
-        nalIschProd = round(totalRow7?.ndsDealSum ?: empty)
+        nalIschProd = totalRow7ndsDealSum
     }
 
     /** НалПредНППриоб . Код строки 120 Графа 3. */
@@ -320,14 +348,14 @@ void generateXML() {
     /** НалУплПокНА . Код строки 180 Графа 3. */
     def nalUplPokNA = empty
     if (rows724_4) {
-        nalPredNPPriob = round(getDataRow(rows724_4, 'total1')?.sum2 ?: empty)
-        nalUplPokNA = round(getDataRow(rows724_4, 'total2')?.sum2 ?: empty)
+        nalPredNPPriob = getDataRowSum(rows724_4, 'total1', 'sum2')
+        nalUplPokNA = getDataRowSum(rows724_4, 'total2', 'sum2')
     }
 
     /** НалВосстОбщ. Код строки 110 Графа 5. */
     def nalVosstObsh = sumNal010 + sumNal020 + sumNal030 + sumNal040 + sumNal070 + sumNal105 + sumNal106 + sumNal107 + sumNal108
     /** НалВычОбщ. Код строки 190 Графа 5. */
-    def nalVichObsh = round(nalPredNPPriob + nalIschProd)
+    def nalVichObsh = round(nalPredNPPriob + nalIschProd + nalUplPokNA)
     /** НалПУ164. Код строки 200 и код строки 210.*/
     def nalPU164 = (nalVosstObsh - nalVichObsh).abs().intValue()
 
@@ -346,19 +374,19 @@ void generateXML() {
                     (has812 ? [ПризнНал12: sign12] : [:])) {
         Документ(
                 // ТИТУЛЬНЫЙ ЛИСТ
-                // Номер корректировки
-                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
+                КНД: '1151001',
+                // Дата формирования документа
+                ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
                 // Налоговый период (код)
                 Период: period,
                 // Отчетный год
                 ОтчетГод: reportPeriodService.get(declarationData.reportPeriodId).taxPeriod.year,
                 // Код налогового органа
                 КодНО: taxOrganCode,
+                // Номер корректировки
+                НомКорр: reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId),
                 // Код места, по которому представляется документ
-                ПоМесту: taxPlaceTypeCode,
-                // Дата формирования документа
-                ДатаДок: (docDate != null ? docDate : new Date()).format("dd.MM.yyyy"),
-                КНД: '1151001'
+                ПоМесту: taxPlaceTypeCode
         ) {
             // ТИТУЛЬНЫЙ ЛИСТ
             СвНП(
@@ -407,23 +435,31 @@ void generateXML() {
                 )
 
                 // РАЗДЕЛ 2
-                for (def row : getSection2Rows(dataRowsMap)) {
+                if (declarationType == 4 || declarationType == 7) {
+                    for (def row : getSection2Rows(dataRowsMap)) {
+                        СумУплНА(
+                                КБК: '18210301000011000110',
+                                ОКТМО: okato,
+                                СумИсчисл: round(row.sumIschisl ?: empty),
+                                КодОпер: row.codeOper,
+                                СумИсчислОтгр: empty,
+                                СумИсчислОпл: empty,
+                                СумИсчислНА: empty
+                        ) {
+                            if (declarationType == 4) {
+                                СведПродЮЛ(
+                                        [НаимПрод: row.naimProd ?: empty] +
+                                                (row.innULProd != null ? [ИННЮЛПрод: row.innULProd] : [:])
+                                )
+                            }
+                        }
+                    }
+                } else if (declarationType == 20) {
                     СумУплНА(
                             КБК: '18210301000011000110',
                             ОКТМО: okato,
-                            СумИсчисл: round(row.sumIschisl ?: empty),
-                            КодОпер: row.codeOper,
-                            СумИсчислОтгр: empty,
-                            СумИсчислОпл: empty,
-                            СумИсчислНА: empty
-                    ) {
-                        if (!shortDeclaration) {
-                            СведПродЮЛ(
-                                    [НаимПрод: row.naimProd ?: empty] +
-                                            (row.innULProd != null ? [ИННЮЛПрод: row.innULProd] : [:])
-                            )
-                        }
-                    }
+                            СумИсчисл: getSection2Agg(dataRowsMap)
+                    )
                 }
 
                 // РАЗДЕЛ 3
@@ -501,19 +537,17 @@ void generateXML() {
                 }
 
                 // РАЗДЕЛ 4
-                // TODO вопрос к заказчику о заполнении атрибутов: НалБаза, НалВосст, КорНалБазаУв, КорНалБазаУм
                 if (dataRowsMap[602]) {
                     НалПодтв0(
                             СумИсчислИтог: empty
                     ) {
                         // форма 724.2.2
-                        for (def row : dataRowsMap[602]) {
-                            if (row.getAlias() == 'itog') {
-                                continue
-                            }
+                        getDataRowSum(dataRowsMap[602], it, 'code')
+                        ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11'].each {
+                            code = dataRowsMap[602].find { row -> row.getAlias() == it }.code
                             СумОпер4(
-                                    КодОпер: row.code,
-                                    НалБаза: round(row.base ?: empty),
+                                    КодОпер: code,
+                                    НалБаза: getDataRowSum(dataRowsMap[602], it, 'base'),
                                     НалВычПод: empty,
                                     НалНеПод: empty,
                                     НалВосст: empty
@@ -528,15 +562,15 @@ void generateXML() {
                             ОплПостСв6Мес: empty
                     ) {
                         // форма 724.2.1
-                        for (def row : dataRowsMap[601]) {
-                            if (row.getAlias() == 'itog') {
-                                continue
-                            }
+                        ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10',
+                         'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17', 'R18', 'R19', 'R20',
+                         'R21', 'R22', 'R23', 'R24', 'R25'].each {
+                            code = dataRowsMap[601].find { row -> row.getAlias() == it }.code
                             СумОпер7(
-                                    КодОпер: row.code,
-                                    СтРеалТов: round(row.realizeCost ?: empty),
-                                    СтПриобТов: round(row.obtainCost ?: empty),
-                                    НалНеВыч: round(getNalNeVich(row))
+                                    КодОпер: code,
+                                    СтРеалТов: getDataRowSum(dataRowsMap[601], it,'realizeCost'),
+                                    СтПриобТов: getDataRowSum(dataRowsMap[601], it,'obtainCost'),
+                                    НалНеВыч: round(getNalNeVich(code))
                             )
                         }
                     }
@@ -571,7 +605,16 @@ void logicCheck() {
         logger.error("Созданы два экземпляра декларации раздела 8 (раздел 8 и раздел 8 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 8 необходимо удалить!")
     }
 
-    // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
+    // 1. Не создан ни один из экземпляров декларации по НДС (раздел 9), (раздел 9 без консолид. формы) текущего периода и подразделения
+    // ИЛИ
+    // Создан только один из экземпляров декларации по НДС (раздел 9), (раздел 9 без консолид. формы) текущего периода и подразделения.
+    def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
+    def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
+    if(has9 && has9n){
+        logger.error("Созданы два экземпляра декларации раздела 9 (раздел 9 и раздел 9 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 9 необходимо удалить!")
+    }
+
+    // 2. Существующие экземпляры декларации по НДС (раздел 8/раздел 8 без консолид. формы/8.1/9/раздел 9 без консолид. формы/9.1/10/11) текущего периода и подразделения находятся в состоянии «Принята»
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     declarations().each { declaration ->
         def declarationData = declarationService.getLast(declaration.value[0], declarationData.departmentId, reportPeriod.id)
@@ -580,7 +623,7 @@ void logicCheck() {
         }
     }
 
-    // 3. Атрибуты признаки наличия разделов 8-11 (в том числе раздел 8 без консолид. формы) заполнены согласно алгоритмам
+    // 3. Атрибуты признаки наличия разделов 8-11 (в том числе раздел 8 и 9 без консолид. формы) заполнены согласно алгоритмам
     if (hasOneOrMoreDeclaration() == 1) {
         def checkMap = [
                 'Признак наличия разделов с 8 по 12'
@@ -590,7 +633,7 @@ void logicCheck() {
                 'Признак наличия сведений из дополнительного листа книги покупок'
                 : [getXmlValue(xmlData.@ПризнНал81.text()) as BigDecimal, isDeclarationExist(declarations().declaration81[0])],
                 'Признак наличия сведений из книги продаж об операциях, отражаемых за истекший налоговый период'
-                : [getXmlValue(xmlData.@ПризнНал9.text()) as BigDecimal, isDeclarationExist(declarations().declaration9[0])],
+                : [getXmlValue(xmlData.@ПризнНал9.text()) as BigDecimal, (has9 || has9n) ? 1 : 0],
                 'Признак наличия сведений из дополнительного листа книги продаж'
                 : [getXmlValue(xmlData.@ПризнНал91.text()) as BigDecimal, isDeclarationExist(declarations().declaration91[0])],
                 'Признак наличия сведений из журнала учета выставленных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
@@ -664,12 +707,6 @@ def BigDecimal hasOneOrMoreDeclaration() {
     return hasDeclaration
 }
 
-/**
- * Получить список значений для раздела 2.
- *
- * @param dataRowsMap мапа со строками форм-источников
- * @return список мап со значениями
- */
 def getSection2Rows(def dataRowsMap) {
     def rows = []
     // форма 724.6
@@ -699,6 +736,25 @@ def getSection2Rows(def dataRowsMap) {
     return rows
 }
 
+def getSection2Agg(def dataRowsMap) {
+    def sumIschisl = empty
+    // форма 724.6
+    for (def row : dataRowsMap[604]) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        sumIschisl += row.sum2
+    }
+    // форма 724.7
+    for (def row : dataRowsMap[605]) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        sumIschisl += row.ndsSum
+    }
+    return round(sumIschisl)
+}
+
 def round(def value) {
     return ((BigDecimal) value)?.setScale(0, BigDecimal.ROUND_HALF_UP)
 }
@@ -707,7 +763,7 @@ def round(def value) {
 def specialCode = '1010276'
 
 @Field
-def opuCodes = ['26411.01', '26411.02']
+def opuCodes = ['26411.01']
 
 @Field
 def knuCodes = ['20860', '20870']
@@ -715,11 +771,11 @@ def knuCodes = ['20860', '20870']
 /**
  * Получить значение для НалНеВыч.
  *
- * @param row строка формы 724.2.1
+ * @param code строки формы 724.2.1
  */
-def getNalNeVich(def row) {
+def getNalNeVich(def code) {
     def order = reportPeriodService.get(declarationData.reportPeriodId)?.order
-    if (row.code == specialCode) {
+    if (code == specialCode) {
         // сумма кодов ОПУ из отчета 102
         def sumOpu = getSumByOpuCodes(opuCodes)
         if (order == 1) {

@@ -86,16 +86,14 @@ public class Vat_937_1_1Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        // должны быть ошибки из за пустых обязательных полей в строке "итого"
-        Assert.assertTrue("Must have empty required cells", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        checkLogger();
     }
 
     // Расчет пустой
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
-        // должны быть ошибки из за пустых обязательных полей в строке "итого"
-        Assert.assertTrue("Must have empty required cells", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        checkLogger();
     }
 
     @Test
@@ -188,7 +186,7 @@ public class Vat_937_1_1Test extends ScriptTestBase {
         testHelper.initRowData();
 
         // Консолидация
-        int expected = testHelper.getDataRowHelper().getAll().size() + 2 + 3; // 2 строки из одного источника и + 2 подзаголовка (с названием подразделения и с редактируемой графой) и +подитог источника (всего)
+        int expected = testHelper.getDataRowHelper().getAll().size() + 2 + 2; // 2 строки из одного источника и + подзаголовок (с названием подразделения) и +подитог источника (всего)
         testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
 
@@ -205,11 +203,6 @@ public class Vat_937_1_1Test extends ScriptTestBase {
         String MSG = "row.%s[%d]";
         for (DataRow<Cell> row : dataRows) {
             if (row.getAlias() != null) {
-                if ("head".equals(row.getAlias())) {
-                    // графа 16
-                    expected = roundValue(10L, 2);
-                    Assert.assertEquals("row.nds[" + row.getIndex() + "]", expected, row.getCell("nds").getNumericValue());
-                }
                 continue;
             }
 

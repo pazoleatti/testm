@@ -101,8 +101,6 @@ public class DeclarationDataPresenter
         void showState(boolean accepted);
 
         void showNoPdf(String text);
-
-        void setSourceTitle(String title);
     }
 
 	private final DispatchAsync dispatcher;
@@ -157,10 +155,8 @@ public class DeclarationDataPresenter
                                 sourcesPresenter.setTaxType(taxType);
 								if (!taxType.equals(TaxType.DEAL)) {
                                     getView().setType("Декларация");
-                                    getView().setSourceTitle("Источники декларации");
                                 } else {
                                     getView().setType("Уведомление");
-                                    getView().setSourceTitle("Источники уведомления");
                                 }
                                 String periodStr = result.getReportPeriodYear() + ", " + result.getReportPeriod();
                                 if (result.getCorrectionDate() != null) {

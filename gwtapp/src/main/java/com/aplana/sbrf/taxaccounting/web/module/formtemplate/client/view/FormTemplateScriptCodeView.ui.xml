@@ -3,21 +3,7 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
 
-    <ui:style>
-        .execute {
-            position: fixed;
-            text-align: right;
-            z-index: 100;
-        }
-
-    </ui:style>
-
     <fm:BodyContainer>
-        <g:VerticalPanel>
-            <g:cell height="30px">
-                <g:Button text="Тест" ui:field="executeScript" addStyleNames="{style.execute}"/>
-            </g:cell>
-        </g:VerticalPanel>
         <cm:CodeMirror ui:field="script"/>
     </fm:BodyContainer>
 

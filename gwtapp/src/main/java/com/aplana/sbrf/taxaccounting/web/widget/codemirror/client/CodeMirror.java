@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.codemirror.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.editor.client.IsEditor;
 import com.google.gwt.editor.client.LeafValueEditor;
 import com.google.gwt.editor.ui.client.adapters.HasTextEditor;
@@ -56,6 +57,15 @@ public class CodeMirror extends Composite implements IsEditor<LeafValueEditor<St
         if (fireEvents){
             ValueChangeEvent.fire(this, getValue());
         }
+
+        // Workaround
+        // Нужно сделать рефрешь иначе компонент не отображает текст
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                wrapper.refresh();
+            }
+        });
     }
 
     @Override

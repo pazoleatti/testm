@@ -1023,6 +1023,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public void addFormDataConsolidationInfo(Long tgtFormDataId, Collection<Long> srcFormDataIds) {
+        if (srcFormDataIds.isEmpty()){
+            return;
+        }
         sourceDao.addFormDataConsolidationInfo(tgtFormDataId, srcFormDataIds);
     }
 

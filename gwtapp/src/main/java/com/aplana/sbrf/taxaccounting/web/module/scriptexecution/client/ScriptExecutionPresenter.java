@@ -37,32 +37,7 @@ public class ScriptExecutionPresenter extends Presenter<ScriptExecutionPresenter
     @Override
     protected void onReveal() {
         super.onReveal();
-        getView().setScriptCode("import groovy.transform.Field\n" +
-                "import org.springframework.jndi.JndiTemplate\n" +
-                "\n" +
-                "import javax.sql.DataSource\n" +
-                "\n" +
-                "@Field\n" +
-                "def dataSourceName = 'java:comp/env/jdbc/TaxAccDS'\n" +
-                "\n" +
-                "try {\n" +
-                "    def template = new JndiTemplate()\n" +
-                "    def DataSource dataSource = template.lookup(dataSourceName)\n" +
-                "    def connection = dataSource.connection\n" +
-                "\n" +
-                "    def stmt = connection.createStatement()\n" +
-                "\n" +
-                "    def result = 0\n" +
-                "\n" +
-                "    result = stmt.executeQuery(\"select 1 from dual\")\n" +
-                "  \tif(result.next()){\n" +
-                "        logger.info(\"Запрос: ${result.getInt(1)}\")\n" +
-                "  \t}\n" +
-                "\n" +
-                "    connection.close()\n" +
-                "} catch (Exception ex) {\n" +
-                "    logger.error(\"Ошибка: ${ex.getLocalizedMessage()}\")\n" +
-                "}");
+        getView().setScriptCode("");
     }
 
     @Override

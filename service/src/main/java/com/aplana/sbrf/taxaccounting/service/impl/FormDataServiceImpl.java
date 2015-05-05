@@ -23,6 +23,8 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,7 @@ import java.util.*;
 @Service("unlockFormData")
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
+    protected static final Log log = LogFactory.getLog(FormDataServiceImpl.class);
 
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
@@ -71,7 +74,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String SOURCE_MSG_ERROR =
             "Существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
     //Выводит информацию о НФ в определенном формате
-    private static final String FORM_DATA_INFO_MSG = "%s %s %s %s %s";
+    private static final String FORM_DATA_INFO_MSG = "«%s», «%s», «%s», «%s»%s";
     private static final String NOT_CONSOLIDATE_DESTINATION_FORM_WARNING =
             "Не выполнена консолидация данных в форму %s %s %s %s %d %s";
     private static final String NOT_CONSOLIDATE_SOURCE_FORM_WARNING =
@@ -166,8 +169,12 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
+        String key = LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual;
+        log.info(String.format("Начался импорт excel-файла в налоговую форму по ключу %s", key));
         loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT);
-        if (lockService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual, false)) {
+        log.info(String.format("Закончился импорт excel-файла в налоговую форму по ключу %s", key));
+        if (lockService.isLockExists(key, false)) {
+            log.info(String.format("Снятие блокировки после импорта excel-файла по ключу %s", key));
             lockService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual, userInfo.getUser().getId());
         } else {
             //Если блокировка уже не существует, значит загружаемые данные не актуальны - откатываем их
@@ -186,7 +193,8 @@ public class FormDataServiceImpl implements FormDataService {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId), userInfo.getUser());
+        String key = LockData.LockObjects.FORM_DATA.name() + "_" + formDataId;
+        checkLockedMe(lockService.getLock(key), userInfo.getUser());
 
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
 
@@ -195,6 +203,7 @@ public class FormDataServiceImpl implements FormDataService {
         InputStream dataFileInputStream = null;
 
         try {
+            log.info(String.format("Создание временного файла: %s", key));
             dataFile = File.createTempFile("dataFile", ".original");
             dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
             IOUtils.copy(inputStream, dataFileOutputStream);
@@ -202,6 +211,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             String ext = getFileExtention(fileName);
 
+            log.info(String.format("Проверка ЭЦП: %s", key));
             // Проверка ЭЦП
             // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
             boolean check = false;
@@ -234,13 +244,17 @@ public class FormDataServiceImpl implements FormDataService {
                 Map<String, Object> additionalParameters = new HashMap<String, Object>();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
+                log.info(String.format("Выполнение скрипта началось: %s", key));
                 formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+                log.info(String.format("Выполнение скрипта закончилось: %s", key));
                 IOUtils.closeQuietly(dataFileInputStream);
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта",
-                        logEntryService.save(logger.getEntries()));
+                log.info(String.format("Сохранение ошибок началось: %s", key));
+                String uuid = logEntryService.save(logger.getEntries());
+                log.info(String.format("Сохранение ошибок закончилось: %s", key));
+                throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
             } else if (isInner) {
                 logger.info("Данные загружены");
             }
@@ -780,12 +794,14 @@ public class FormDataServiceImpl implements FormDataService {
                                 reportPeriod.getCalendarStartDate(),
                                 reportPeriod.getEndDate());
                         ArrayList<FormData> notAcceptedFDSources = new ArrayList<FormData>();
+                        ArrayList<FormData> notConsolidatedFDSources = new ArrayList<FormData>();
                         for (DepartmentFormType sourceDFT : departmentFormTypesSources) {
                             DepartmentReportPeriod sourceDepartmentReportPeriod =
                                     departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
                             FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
                                     sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
                             if (sourceForm != null && sourceForm.getState() == WorkflowState.ACCEPTED && !sourceService.isFDSourceConsolidated(formDataId, sourceForm.getId())) {
+                                notConsolidatedFDSources.add(sourceForm);
                                 DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
                                 logger.error(NOT_CONSOLIDATED_SOURCE_FORM,
                                         departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
@@ -811,10 +827,10 @@ public class FormDataServiceImpl implements FormDataService {
                             }
                         }
                         //Если консолидация из всех принятых источников текущего экземпляра не была выполнена
-                        if (logger.containsLevel(LogLevel.ERROR)) {
+                        if (!notConsolidatedFDSources.isEmpty()) {
                             logger.clear(LogLevel.WARNING);
                             logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, NOT_CONSOLIDATED_SOURCE_FORM_ERR));
-                            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+                            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
                         }
                         //Если консолидация из всех принятых источников текущего экземпляра была выполнена, но есть непринятые или несозданные источники
                         if (!notAcceptedFDSources.isEmpty()) {
@@ -956,6 +972,7 @@ public class FormDataServiceImpl implements FormDataService {
         updatePreviousRowNumberAttr(formData, workflowMove, logger);
     }
 
+    private static final String CORRECTION_PATTERN = ", «%s»";
     /**
      * Логика консолидации при переходе жц
      *
@@ -984,14 +1001,14 @@ public class FormDataServiceImpl implements FormDataService {
         //1А. Отчетный период закрыт
         if (!departmentReportPeriod.isActive()){
             logger.error("Отчетный период закрыт, консолидация не может быть выполнена");
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
         //1Б. Статус экземпляра не допускает его редактирование
         if (formData.getState() != WorkflowState.CREATED) {
             logger.error("Форма находится в статусе \"%s\", консолидация возможна только в статусе \"Создана\"",
                     formData.getState().getName()
             );
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
         //1В. Проверяем формы-приемники
         List<DepartmentFormType> destinationDFTs = departmentFormTypeDao.getFormDestinations(
@@ -1013,7 +1030,7 @@ public class FormDataServiceImpl implements FormDataService {
                         formData.getFormType().getName(),
                         reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
                         (destinationDRP.getCorrectionDate() != null ?
-                                SDF_DD_MM_YYYY.format(destinationDRP.getCorrectionDate())
+                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(destinationDRP.getCorrectionDate()))
                                 :
                                 "")
                 ));
@@ -1023,7 +1040,7 @@ public class FormDataServiceImpl implements FormDataService {
             logger.error(SOURCE_MSG_ERROR);
             for (String s : msgPull)
                 logger.error(s);
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
 
         //Система проверяет экземпляр на возможность выполнения консолидации в него. Существание хотя бы одной назначенной формы-источника.
@@ -1035,7 +1052,7 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getEndDate());
         if (departmentFormTypesSources.isEmpty()){
             logger.error("Для текущей формы не назначено ни одного источника");
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
 
         //Блокировка текущей формы
@@ -1050,7 +1067,7 @@ public class FormDataServiceImpl implements FormDataService {
                             LOCK_CURRENT, userInfo.getUser().getLogin(),
                             SDF_HH_MM_DD_MM_YYYY.format(lockDataCurrent.getDateLock()))
             );
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         } else {
             lockedForms.add(lockCurrentKey);
         }
@@ -1097,10 +1114,10 @@ public class FormDataServiceImpl implements FormDataService {
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         sourceDFT.getKind().getName(),
-                        formData.getFormType().getName(),
+                        formTypeService.get(sourceDFT.getFormTypeId()).getName(),
                         reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
                         (sourceDepartmentReportPeriod.getCorrectionDate() != null ?
-                                SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate())
+                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate()))
                                 :
                                 "")
                 ));
@@ -1127,10 +1144,15 @@ public class FormDataServiceImpl implements FormDataService {
             sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
             sourceService.addFormDataConsolidationInfo(formData.getId(), srcIds);
 
-            //Вывод сообщений в панель уведомлений
-            logger.info("Выполнена консолидация данных из форм-источников:");
-            for (String s : msgPull){
-                logger.info(s);
+            //8.Система проверяет экземпляр на наличие записей о консолидации. Записи о консолидации найдены.
+            if (!srcIds.isEmpty()){
+                //9. Система выводит сообщение в панель уведомлений
+                logger.info("Выполнена консолидация данных из форм-источников:");
+                for (String s : msgPull){
+                    logger.info(s);
+                }
+            } else {
+                logger.info("Данные текущей формы очищены. Не существует ни одной формы-источника, статус которой \"Принята\"");
             }
         } finally {
             //5. Система разблокирует текущий экземпляр и все налоговые формы - источники.
@@ -1290,7 +1312,7 @@ public class FormDataServiceImpl implements FormDataService {
      */
     void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        if (beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
+        if (!formData.isManual() && beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
                 && dataRowDao.isDataRowsCountChanged(formData.getId())) {
             updatePreviousRowNumber(formData, logger);
         }

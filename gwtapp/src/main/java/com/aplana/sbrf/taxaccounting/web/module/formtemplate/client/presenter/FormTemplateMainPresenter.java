@@ -34,7 +34,7 @@ import java.util.Date;
 
 
 public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplateMainPresenter.MyView, FormTemplateMainPresenter.MyProxy>
-		implements FormTemplateMainUiHandlers, FormTemplateSaveEvent.MyHandler, FormTemplateTestEvent.MyHandler, FormTemplateMainEvent.MyHandler,
+		implements FormTemplateMainUiHandlers, FormTemplateSaveEvent.MyHandler, FormTemplateMainEvent.MyHandler,
         CreateNewVersionEvent.MyHandler{
 
 	private HandlerRegistration closeFormTemplateHandlerRegistration;
@@ -44,42 +44,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
     private FormTemplateExt formTemplateExt;
 
     protected FormVersionHistoryPresenter versionHistoryPresenter;
-
-    @ProxyEvent
-    @Override
-    public void onTest(final FormTemplateTestEvent event) {
-        formTemplate = event.getFormTemplate();
-        final int formId = formTemplate.getId();
-        GetFormTestAction action = new GetFormTestAction();
-        action.setFormTemplate(formTemplate);
-
-        closeFormTemplateHandlerRegistration = Window.addWindowClosingHandler(new Window.ClosingHandler() {
-            @Override
-            public void onWindowClosing(Window.ClosingEvent event) {
-                unlockForm(formId);
-                closeFormTemplateHandlerRegistration.removeHandler();
-            }
-        });
-
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetFormTestResult>() {
-                    @Override
-                    public void onSuccess(GetFormTestResult result) {
-                        //Nothing, because always fault.
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        getView().setFormId(formTemplate.getId());
-                        getView().setTitle(formTemplate.getType().getName());
-                        RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
-                        FormTemplateExt formTemplateExt = new FormTemplateExt();
-                        formTemplateExt.setFormTemplate(formTemplate);
-                        FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, null);
-                        super.onFailure(caught);
-                    }
-                }, this));
-    }
 
     @Override
     @ProxyEvent
