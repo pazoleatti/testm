@@ -636,7 +636,7 @@ void deleteExtraRows(def dataRows) {
 
 /** Получить произвольную фиксированную строку со стилями. */
 def getFixedRow(String title, String alias) {
-    def total = formData.createDataRow()
+    def total = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     total.setAlias(alias)
     total.fix = title
     total.getCell('fix').colSpan = 13

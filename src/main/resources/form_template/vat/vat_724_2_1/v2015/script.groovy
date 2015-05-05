@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -49,7 +50,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+        }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -271,7 +274,10 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
         dataRow.obtainCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
     }
-    dataRowHelper.save(dataRows)
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.save(dataRows)
+    }
 }
 
 void importTransportData() {
@@ -308,7 +314,7 @@ void importTransportData() {
                 rowCells = reader.readNext()
                 isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
                 if (!isEmptyRow) {
-                    totalTF = formData.createDataRow()
+                    totalTF = formData.createStoreMessagingDataRow()
                     fillRow(totalTF, rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex, false)
                 }
                 break
@@ -323,6 +329,11 @@ void importTransportData() {
         }
     }
     reader.close()
+
+    showMessages(dataRows, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
 
     // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
     def totalColumnsIndexMap = [ 'realizeCost' : 4, 'obtainCost' : 5 ]
