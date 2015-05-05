@@ -26,12 +26,21 @@ public class AsyncInterruptionManagerSingleton implements AsyncInterruptionManag
 
     @Override
     public void interruptAll(Collection<String> keys) {
-        for (String key : keys) {
-            log.info(String.format("Останавливается асинхронная задача с ключом %s", key));
-            Thread task = tasks.get(key);
-            //TODO: так делать нехорошо, но иначе никак. Видел ошибку The exception is: java.sql.SQLException: OALL8 находится в противоречивом состоянии но на работу приложения это вроде не повлияло
-            task.stop();
-            tasks.remove(key);
+        synchronized(AsyncInterruptionManagerSingleton.class) {
+            try {
+                for (String key : keys) {
+                    log.info(String.format("Останавливается асинхронная задача с ключом %s", key));
+                    Thread task = tasks.get(key);
+                    if (task != null) {
+                        //TODO: так делать нехорошо, но иначе никак. Видел ошибку The exception is: java.sql.SQLException: OALL8 находится в противоречивом состоянии но на работу приложения это вроде не повлияло
+                        task.stop();
+                        tasks.remove(key);
+                    }
+                }
+            } catch (Exception e) {
+                log.error(e);
+                //Игнорируем ошибки
+            }
         }
     }
 
