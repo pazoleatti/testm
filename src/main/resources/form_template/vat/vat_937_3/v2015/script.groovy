@@ -518,8 +518,6 @@ void addData(def xml, int headRowCount) {
 
     // вставляем строки в БД
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
     dataRowHelper.save(newRows)
 }
 
@@ -829,7 +827,6 @@ void importTransportData() {
         logger.error(WRONG_RNU_FORMAT)
     }
     int COLUMN_COUNT = 19
-    int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
@@ -947,7 +944,6 @@ void importTransportData() {
 
     // вставляем строки в БД
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
     dataRowHelper.save(newRows)
 }
 
