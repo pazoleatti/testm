@@ -31,7 +31,7 @@ public class StopAsyncHandler extends AbstractActionHandler<StopAsyncAction, Sto
 
     @Override
     public StopAsyncResult execute(StopAsyncAction action, ExecutionContext context) throws ActionException {
-        asyncInterruptionManager.interruptAll();
+        asyncInterruptionManager.interruptAll(action.getKeys());
         lockService.unlockAll(action.getKeys());
         return new StopAsyncResult();
     }

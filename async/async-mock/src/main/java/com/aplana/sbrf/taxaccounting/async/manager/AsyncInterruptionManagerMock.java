@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.async.manager;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+
 @Service
 public class AsyncInterruptionManagerMock implements AsyncInterruptionManager {
     @Override
@@ -10,7 +12,7 @@ public class AsyncInterruptionManagerMock implements AsyncInterruptionManager {
     }
 
     @Override
-    public void interruptAsyncTask(String key) {
+    public void interruptAll(Collection<String> keys) {
 
     }
 

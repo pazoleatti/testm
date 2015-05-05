@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.manager;
 
+import java.util.Collection;
+
 /**
  * Менеджер для остановки запущенных асинхронных задач
  * @author dloshkarev
@@ -14,10 +16,10 @@ public interface AsyncInterruptionManager {
     void addTask(String key, Thread task);
 
     /**
-     * Останавливает выполнение задачи с указанным ключом блокировки
-     * @param key ключ блокировки
+     * Останавливает выполнение задач с указанными ключами блокировки
+     * @param keys ключи блокировки
      */
-    void interruptAsyncTask(String key);
+    void interruptAll(Collection<String> keys);
 
     /**
      * Останавливает все задачи из списока
