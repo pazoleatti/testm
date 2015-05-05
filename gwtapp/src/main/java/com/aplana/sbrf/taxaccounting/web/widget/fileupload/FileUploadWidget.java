@@ -71,7 +71,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     private boolean isSimpleButton;
     private static String actionUrl = "upload/uploadController/pattern/";
     private static String actionTempUrl = "upload/uploadController/patterntemp/";
-    private static String respPattern = "(?i:<pre*>)|(?i:</pre>)";
+    private static String respPattern = "<pre.*?>|</pre>|<PRE.*?>|</PRE>\"";
     private String extension;
 
     @Override

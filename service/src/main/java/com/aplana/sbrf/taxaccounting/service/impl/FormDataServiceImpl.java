@@ -74,7 +74,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String SOURCE_MSG_ERROR =
             "Существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
     //Выводит информацию о НФ в определенном формате
-    private static final String FORM_DATA_INFO_MSG = "«%s», «%s», «%s», «%s», «%s»";
+    private static final String FORM_DATA_INFO_MSG = "«%s», «%s», «%s», «%s»%s";
     private static final String NOT_CONSOLIDATE_DESTINATION_FORM_WARNING =
             "Не выполнена консолидация данных в форму %s %s %s %s %d %s";
     private static final String NOT_CONSOLIDATE_SOURCE_FORM_WARNING =
@@ -794,12 +794,14 @@ public class FormDataServiceImpl implements FormDataService {
                                 reportPeriod.getCalendarStartDate(),
                                 reportPeriod.getEndDate());
                         ArrayList<FormData> notAcceptedFDSources = new ArrayList<FormData>();
+                        ArrayList<FormData> notConsolidatedFDSources = new ArrayList<FormData>();
                         for (DepartmentFormType sourceDFT : departmentFormTypesSources) {
                             DepartmentReportPeriod sourceDepartmentReportPeriod =
                                     departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
                             FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
                                     sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
                             if (sourceForm != null && sourceForm.getState() == WorkflowState.ACCEPTED && !sourceService.isFDSourceConsolidated(formDataId, sourceForm.getId())) {
+                                notConsolidatedFDSources.add(sourceForm);
                                 DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
                                 logger.error(NOT_CONSOLIDATED_SOURCE_FORM,
                                         departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
@@ -825,10 +827,10 @@ public class FormDataServiceImpl implements FormDataService {
                             }
                         }
                         //Если консолидация из всех принятых источников текущего экземпляра не была выполнена
-                        if (logger.containsLevel(LogLevel.ERROR)) {
+                        if (!notConsolidatedFDSources.isEmpty()) {
                             logger.clear(LogLevel.WARNING);
                             logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, NOT_CONSOLIDATED_SOURCE_FORM_ERR));
-                            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+                            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
                         }
                         //Если консолидация из всех принятых источников текущего экземпляра была выполнена, но есть непринятые или несозданные источники
                         if (!notAcceptedFDSources.isEmpty()) {
@@ -970,6 +972,7 @@ public class FormDataServiceImpl implements FormDataService {
         updatePreviousRowNumberAttr(formData, workflowMove, logger);
     }
 
+    private static final String CORRECTION_PATTERN = ", «%s»";
     /**
      * Логика консолидации при переходе жц
      *
@@ -998,14 +1001,14 @@ public class FormDataServiceImpl implements FormDataService {
         //1А. Отчетный период закрыт
         if (!departmentReportPeriod.isActive()){
             logger.error("Отчетный период закрыт, консолидация не может быть выполнена");
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
         //1Б. Статус экземпляра не допускает его редактирование
         if (formData.getState() != WorkflowState.CREATED) {
             logger.error("Форма находится в статусе \"%s\", консолидация возможна только в статусе \"Создана\"",
                     formData.getState().getName()
             );
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
         //1В. Проверяем формы-приемники
         List<DepartmentFormType> destinationDFTs = departmentFormTypeDao.getFormDestinations(
@@ -1027,7 +1030,7 @@ public class FormDataServiceImpl implements FormDataService {
                         formData.getFormType().getName(),
                         reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
                         (destinationDRP.getCorrectionDate() != null ?
-                                SDF_DD_MM_YYYY.format(destinationDRP.getCorrectionDate())
+                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(destinationDRP.getCorrectionDate()))
                                 :
                                 "")
                 ));
@@ -1037,7 +1040,7 @@ public class FormDataServiceImpl implements FormDataService {
             logger.error(SOURCE_MSG_ERROR);
             for (String s : msgPull)
                 logger.error(s);
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
 
         //Система проверяет экземпляр на возможность выполнения консолидации в него. Существание хотя бы одной назначенной формы-источника.
@@ -1049,7 +1052,7 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getEndDate());
         if (departmentFormTypesSources.isEmpty()){
             logger.error("Для текущей формы не назначено ни одного источника");
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
 
         //Блокировка текущей формы
@@ -1064,7 +1067,7 @@ public class FormDataServiceImpl implements FormDataService {
                             LOCK_CURRENT, userInfo.getUser().getLogin(),
                             SDF_HH_MM_DD_MM_YYYY.format(lockDataCurrent.getDateLock()))
             );
-            throw new ServiceLoggerException(null, logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         } else {
             lockedForms.add(lockCurrentKey);
         }
@@ -1114,7 +1117,7 @@ public class FormDataServiceImpl implements FormDataService {
                         formTypeService.get(sourceDFT.getFormTypeId()).getName(),
                         reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
                         (sourceDepartmentReportPeriod.getCorrectionDate() != null ?
-                                SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate())
+                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate()))
                                 :
                                 "")
                 ));
@@ -1309,7 +1312,7 @@ public class FormDataServiceImpl implements FormDataService {
      */
     void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        if (beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
+        if (!formData.isManual() && beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
                 && dataRowDao.isDataRowsCountChanged(formData.getId())) {
             updatePreviousRowNumber(formData, logger);
         }

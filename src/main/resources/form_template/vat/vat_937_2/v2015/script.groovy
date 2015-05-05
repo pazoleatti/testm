@@ -1,14 +1,10 @@
 package form_template.vat.vat_937_2.v2015
 
 import au.com.bytecode.opencsv.CSVReader
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.StringColumn
-import com.aplana.sbrf.taxaccounting.model.NumericColumn
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
-
 /**
  * Итоговые данные книги продаж
  * formTemplateId=1608
@@ -330,7 +326,7 @@ void consolidation() {
 
 /** Получить произвольную фиксированную строку со стилями. */
 def getFixedRow(String title, String alias) {
-    def total = formData.createDataRow()
+    def total = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     total.setAlias(alias)
     total.fix = title
     total.getCell('fix').colSpan = 15
@@ -341,7 +337,7 @@ def getFixedRow(String title, String alias) {
 }
 
 void importData() {
-    def tmpRow = formData.createDataRow()
+    def tmpRow = formData.createStoreMessagingDataRow()
     def xml = getXML(ImportInputStream, importService, UploadFileName +".xlsx", getColumnName(tmpRow, 'rowNumber'), null)
 
     checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 20, 3)
@@ -507,187 +503,20 @@ void addData(def xml, int headRowCount) {
         changeDateFormat(newRow)
         rows.add(newRow)
     }
-    calcTotalSum(rows, totalRow, totalSumColumns)
-    rows.add(totalRow)
-    formDataService.getDataRowHelper(formData).save(rows)
-    rows = null
-}
 
-// TODO (Ramil Timerbaev) старая загрузка, потом удалить. Пока оставлено на случай сравнения производительности.
-void importTransportDataOld() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 20, 0)
-    addTransportData(xml)
-}
+    showMessages(rows, logger)
 
-void addTransportData(def xml) {
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-
-    def rows = []
-    def int rowIndex = 1
-
-    def totalTmp = formData.createDataRow()
-    totalSumColumns.each { alias ->
-        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        calcTotalSum(rows, totalRow, totalSumColumns)
+        rows.add(totalRow)
+        dataRowHelper.save(rows)
+        rows = null
     }
-
-    for (def row : xml.row) {
-        rnuIndexRow++
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(rnuIndexRow)
-
-        // Графа 2
-        def xmlIndexCol = 2
-        newRow.opTypeCode = row.cell[xmlIndexCol].text()
-
-        // Графа 3
-        xmlIndexCol++
-        newRow.invoiceNumDate = row.cell[xmlIndexCol].text()
-
-        // Графа 4
-        xmlIndexCol++
-        newRow.invoiceCorrNumDate = row.cell[xmlIndexCol].text()
-
-        // Графа 5
-        xmlIndexCol++
-        newRow.corrInvoiceNumDate = row.cell[xmlIndexCol].text()
-
-        // Графа 6
-        xmlIndexCol++
-        newRow.corrInvCorrNumDate = row.cell[xmlIndexCol].text()
-
-        // Графа 7
-        xmlIndexCol++
-        newRow.buyerName = row.cell[xmlIndexCol].text()
-
-        // Графа 8
-        xmlIndexCol++
-        newRow.buyerInnKpp = row.cell[xmlIndexCol].text()
-
-        // Графа 9
-        xmlIndexCol++
-        newRow.mediatorName = row.cell[xmlIndexCol].text()
-
-        // Графа 10
-        xmlIndexCol++
-        newRow.mediatorInnKpp = row.cell[xmlIndexCol].text()
-
-        // Графа 11
-        xmlIndexCol++
-        newRow.paymentDocNumDate = row.cell[xmlIndexCol].text()
-
-        // Графа 12
-        xmlIndexCol++
-        newRow.currNameCode = row.cell[xmlIndexCol].text()
-
-        // Графа 13а (13)
-        xmlIndexCol++
-        newRow.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 13б (14)
-        xmlIndexCol++
-        newRow.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 14 (15)
-        xmlIndexCol++
-        newRow.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 15 (16)
-        xmlIndexCol++
-        newRow.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 16 (17)
-        xmlIndexCol++
-        newRow.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 17 (18)
-        xmlIndexCol++
-        newRow.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 18 (19)
-        xmlIndexCol++
-        newRow.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 19 (20)
-        xmlIndexCol++
-        newRow.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        totalSumColumns.each { alias ->
-            def value1 = totalTmp.getCell(alias).value
-            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
-            totalTmp.getCell(alias).setValue(value1 + value2, null)
-        }
-
-        rows.add(newRow)
-    }
-
-    if (xml.rowTotal.size() == 1) {
-        rnuIndexRow = rnuIndexRow + 2
-
-        def row = xml.rowTotal[0]
-
-        def total = getFixedRow('Всего','total')
-
-        // Графа 13
-        def xmlIndexCol = 13
-        total.saleCostACurr = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 14
-        xmlIndexCol++
-        total.saleCostARub = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 15
-        xmlIndexCol++
-        total.saleCostB18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 16
-        xmlIndexCol++
-        total.saleCostB10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 17
-        xmlIndexCol++
-        total.saleCostB0 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 18
-        xmlIndexCol++
-        total.vatSum18 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 19
-        xmlIndexCol++
-        total.vatSum10 = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 20
-        xmlIndexCol++
-        total.bonifSalesSum = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        def colIndexMap = ['saleCostB18' : 15, 'saleCostB10' : 16, 'saleCostB0' : 17, 'vatSum18' : 18, 'vatSum10' : 19, 'bonifSalesSum' : 20]
-
-        for (def alias : totalSumColumns) {
-            def v1 = total.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-            }
-        }
-
-        rows.add(total)
-    }
-    formDataService.getDataRowHelper(formData).save(rows)
-    rows = null
 }
 
 /** Получить новую строку с заданными стилями. */
 def getNewRow() {
-    def newRow = formData.createDataRow()
+    def newRow = formData.createStoreMessagingDataRow()
     def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
     columns.each {
         newRow.getCell(it).editable = true
@@ -795,6 +624,8 @@ void importTransportData() {
         reader.close()
     }
 
+    showMessages(newRows, logger)
+
     // сравнение итогов
     if (total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
@@ -855,7 +686,7 @@ boolean isEmptyCells(def rowCells) {
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
 def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    def newRow = formData.createDataRow()
+    def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -882,9 +713,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
             cell = cell.replaceAll("[^0-9/]",'')
         }
         if (cell != null && cell != '') {
-            if (checkString(newRow, alias, cell, fileRowIndex)) {
-                newRow[alias] = cell
-            }
+            newRow[alias] = cell
         }
     }
 
@@ -893,9 +722,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         colIndex++
         def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
         if (cell != null && cell != '') {
-            if (checkNumber(newRow, alias, cell, fileRowIndex)) {
-                newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
-            }
+            newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
         }
     }
     return newRow
@@ -903,28 +730,4 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
 static String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
-}
-
-boolean checkString(def tmpRow, def alias, def value, def fileRowIndex) {
-    StringColumn column = tmpRow.getCell(alias).getColumn()
-    if (column.getMaxLength() < value.size()) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение $value превышает допустимый размер " + column.getMaxLength())
-        return false
-    }
-    return true
-}
-
-boolean checkNumber(def tmpRow, def alias, def value, def fileRowIndex) {
-    NumericColumn column = tmpRow.getCell(alias).getColumn()
-    def sepId = value.indexOf('.')
-    def tmp = sepId == -1 ? value : value.substring(0, value.indexOf('.'))
-    if (column.getMaxLength() - column.getPrecision() < tmp.size()) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' превышает допустимый размер до запятой " + (column.getMaxLength() - column.getPrecision()))
-        return false
-    }
-    if (!value.matches("[0-9.,-]*")) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' содержит недопустимые символы")
-        return false
-    }
-    return true
 }

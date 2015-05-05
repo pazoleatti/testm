@@ -32,10 +32,4 @@ public class FormTemplateScriptCodeView extends ViewWithUiHandlers<FormTemplateS
 	public String getScriptCode() {
 		return script.getText();
 	}
-
-    @UiHandler("executeScript")
-    public void onExecuteButtonClicked(ClickEvent event){
-        if(getUiHandlers() != null)
-            getUiHandlers().executeScript();
-    }
 }

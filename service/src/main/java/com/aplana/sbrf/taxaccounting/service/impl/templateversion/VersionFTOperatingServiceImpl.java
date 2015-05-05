@@ -64,7 +64,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                     formData.getFormType().getName(),
                     formData.getKind().getName(),
                     departmentService.getDepartment(formData.getDepartmentId()).getName(),
-                    period.getName() + (formData.getPeriodOrder() != null?Months.fromId(formData.getPeriodOrder()).getTitle():""),
+                    period.getName() + (formData.getPeriodOrder() != null ? (" - " + Months.fromId(formData.getPeriodOrder()).getTitle()) : ""),
                     period.getTaxPeriod().getYear(),
                     drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                             sdf.format(drp.getCorrectionDate())) : "");

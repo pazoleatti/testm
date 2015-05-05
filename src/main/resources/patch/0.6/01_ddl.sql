@@ -103,5 +103,14 @@ alter table declaration_data_consolidation add constraint decl_data_consolidatio
 --http://jira.aplana.com/browse/SBRFACCTAX-10729: FORM_DATA_PERFORMER:NAME сделать поле необязательным для заполнения
 alter table form_data_performer modify name null;
 
+---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-6078:  Возможность отключения поля "Дата актуальности" для неверсионных справочников
+alter table ref_book add (is_versioned number(1) default 1 not null);
+comment on column ref_book.is_versioned is 'Версионный справочник (0 - нет, 1 - да)';
+alter table ref_book add constraint ref_book_chk_versioned check (is_versioned in (0, 1));
+
+update ref_book set is_versioned = 0 where id in (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 204, 205, 400);
+---------------------------------------------------------------------------------------------
+
 commit;
 end;

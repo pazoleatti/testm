@@ -231,7 +231,19 @@ public class FormData extends IdentityObject<Long> {
         List<Cell> cells = FormDataUtils.createCells(formColumns, formStyles);
         return new DataRow<Cell>(cells);
     }
-    
+
+	/**
+	 * Фабричный метод создания новой строки
+	 * с ячейками, позволяющими хранить результаты стандартных проверок
+	 * @return
+	 */
+	public DataRow<Cell> createStoreMessagingDataRow(){
+		List<Cell> cells = FormDataUtils.createCells(formColumns, formStyles);
+		for (Cell cell : cells) {
+			cell.setCheckMode(true);
+		}
+		return new DataRow<Cell>(cells);
+	}
    
 	public boolean isReturnSign() {
 		return returnSign;
