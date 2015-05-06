@@ -57,8 +57,10 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -821,8 +823,6 @@ void importData() {
 }
 
 void addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
     def xmlIndexRow = -1
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
@@ -843,7 +843,7 @@ void addData(def xml, int headRowCount) {
             break
         }
 
-        def newRow = formData.createDataRow()
+        def newRow = formData.createStoreMessagingDataRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
@@ -871,7 +871,11 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
-    dataRowHelper.save(rows)
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
 }
 
 void importTransportData() {
@@ -925,18 +929,24 @@ void importTransportData() {
 
         // периодически сбрасываем строки
         if (newRows.size() > ROW_MAX) {
-            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+            showMessages(newRows, logger)
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+            }
             newRows.clear()
         }
     }
     reader.close()
 
     if (newRows.size() != 0) {
-        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+        showMessages(newRows, logger)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+        }
     }
 
     // сравнение итогов
-    if (totalTF) {
+    if (totalTF && !logger.containsLevel(LogLevel.ERROR)) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
         def totalColumnsIndexMap = [ 'taxBase1' : 2, 'taxBase2' : 3, 'taxBase3' : 4, 'taxBase4' : 5, 'taxBase5' : 6, 'taxBaseSum' : 7]
 
@@ -996,7 +1006,7 @@ boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, d
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
 def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    def newRow = formData.createDataRow()
+    def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
     editableColumns.each {

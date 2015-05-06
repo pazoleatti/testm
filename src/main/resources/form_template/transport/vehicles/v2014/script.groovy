@@ -94,8 +94,10 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         checkRegionId()
@@ -566,7 +568,7 @@ def copyRow(def row, def columns) {
 
 // Получить новую строку с заданными стилями.
 def getNewRow() {
-    def newRow = formData.createDataRow()
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     if (isBalancePeriod()) {
         (editableColumns + ['pastYear', 'base']).each {
             newRow.getCell(it).editable = true
@@ -831,9 +833,6 @@ void importData() {
 
 // Заполнить форму данными
 void addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
     def xmlIndexRow = -1 // Строки xml, от 0
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
@@ -997,20 +996,27 @@ void addData(def xml, int headRowCount) {
         mapRows[sectionAlias].add(newRow)
     }
 
-    deleteNotFixedRows(dataRows)
-
-    // копирование данных по разделам
     sections.each { section ->
-        def copyRows = mapRows[section]
-        if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(dataRows, section).getIndex()
-            dataRows.addAll(insertIndex, copyRows)
-            // поправить индексы, потому что они после вставки не пересчитываются
-            updateIndexes(dataRows)
-        }
+        showMessages(mapRows[section], logger)
     }
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        def dataRowHelper = formDataService.getDataRowHelper(formData)
+        def dataRows = dataRowHelper.allCached
 
-    dataRowHelper.save(dataRows)
+        deleteNotFixedRows(dataRows)
+
+        // копирование данных по разделам
+        sections.each { section ->
+            def copyRows = mapRows[section]
+            if (copyRows != null && !copyRows.isEmpty()) {
+                def insertIndex = getDataRow(dataRows, section).getIndex()
+                dataRows.addAll(insertIndex, copyRows)
+                // поправить индексы, потому что они после вставки не пересчитываются
+                updateIndexes(dataRows)
+            }
+        }
+        dataRowHelper.save(dataRows)
+    }
 }
 
 void importTransportData() {
@@ -1066,18 +1072,24 @@ void importTransportData() {
 
         // периодически сбрасываем строки
         if (getNewRowCount(mapRows) > ROW_MAX) {
-            insertRows(dataRowHelper, mapRows)
+            showMessages(mapRows, logger)
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                insertRows(dataRowHelper, mapRows)
+            }
             mapRows.clear()
         }
     }
     reader.close()
 
     if (getNewRowCount(mapRows) != 0) {
-        insertRows(dataRowHelper, mapRows)
+        showMessages(mapRows, logger)
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            insertRows(dataRowHelper, mapRows)
+        }
     }
 
     // сравнение итогов
-    if (totalTF) {
+    if (totalTF && !logger.containsLevel(LogLevel.ERROR)) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
         def totalColumnsIndexMap = [ 'costOnPeriodBegin' : 19, 'costOnPeriodEnd' : 20 ]
 

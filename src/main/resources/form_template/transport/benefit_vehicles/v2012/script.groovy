@@ -11,6 +11,9 @@ import groovy.transform.Field
 import java.text.SimpleDateFormat
 
 /**
+ * макет не актуален
+ *
+ *
  * Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
  * formTypeId=202
  *
