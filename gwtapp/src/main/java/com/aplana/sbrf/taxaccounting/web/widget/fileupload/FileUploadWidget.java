@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.fileupload;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
@@ -156,7 +157,8 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                 int dotPos = fileName.lastIndexOf('.') + 1;
                 String ext = fileName.substring(dotPos);
                 if (extension != null && !ext.equals(extension)){
-                    throw new RuntimeException("Необходимо расширение файла " + extension);
+                    event.cancel();
+                    Dialog.errorMessage("Необходимо расширение файла " + extension);
                 }
             }
         });
