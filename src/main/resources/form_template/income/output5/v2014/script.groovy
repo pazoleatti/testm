@@ -145,6 +145,7 @@ void addData(def xml, int headRowCount) {
         // графа 3
         xmlIndexCol++
         if(rowIndex != 1 && rowIndex != 2){
+            dataRow.getCell('date').setCheckMode(true)
             dataRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         }else{
             dataRow.date = null
@@ -153,10 +154,15 @@ void addData(def xml, int headRowCount) {
         // графа 4
         xmlIndexCol++
         if(rowIndex != 2) {
+            dataRow.getCell('sum').setCheckMode(true)
             dataRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         } else {
             dataRow.sum = null
         }
     }
-    dataRowHelper.save(dataRows)
+
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.save(dataRows)
+    }
 }
