@@ -1042,8 +1042,13 @@ public class FormDataServiceImpl implements FormDataService {
                 logger.error(s);
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
+        //1Г. Отчетный период экземпляра является периодом ввода остатков.
+        if (departmentReportPeriod.isBalance()){
+            logger.error("Отчетный период является периодом ввода остатков, консолидация не может быть выполнена");
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+        }
 
-        //Система проверяет экземпляр на возможность выполнения консолидации в него. Существание хотя бы одной назначенной формы-источника.
+        //1Д. Не существует ни одной назначенной формы-источника.
         List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
                 formData.getDepartmentId(),
                 formData.getFormType().getId(),
