@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * User: ibukanov
@@ -12,7 +11,6 @@ public class LogSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
-	private Date logDate;
 	private String ip;
 	private int eventId;
     private String userLogin;
@@ -58,14 +56,6 @@ public class LogSystem implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Date getLogDate() {
-		return logDate;
-	}
-
-	public void setLogDate(Date logDate) {
-		this.logDate = logDate;
 	}
 
 	public String getIp() {

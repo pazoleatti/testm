@@ -47,7 +47,6 @@ public class AuditServiceImpl implements AuditService {
             @Override
             public void execute() {
                 LogSystem log = new LogSystem();
-                log.setLogDate(new Date());
                 log.setIp(userInfo.getIp());
                 log.setEventId(event.getCode());
                 log.setUserLogin(userInfo.getUser().getLogin());

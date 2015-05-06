@@ -463,9 +463,8 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "insert into log_system (id, log_date, ip, event_id, user_login, roles, department_name, report_period_name, " +
                             "declaration_type_name, form_type_name, form_kind_id, note, user_department_name, form_department_id, " +
                             "blob_data_id, form_type_id)" +
-                            " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            " values (?, SYSDATE, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     id,
-                    logSystem.getLogDate(),
                     logSystem.getIp(),
                     logSystem.getEventId(),
                     logSystem.getUserLogin(),
