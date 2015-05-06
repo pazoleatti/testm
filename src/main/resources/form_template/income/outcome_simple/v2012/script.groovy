@@ -59,8 +59,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
         break
 }
 
@@ -729,7 +731,11 @@ void addData(def xml, int headRowCount) {
     if (rowIndex < maxRow) {
         logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
     }
-    dataRowHelper.update(rows)
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.update(rows)
+    }
 }
 
 // для уроня Банка:	проверка наличия и принятия РНУ-14
