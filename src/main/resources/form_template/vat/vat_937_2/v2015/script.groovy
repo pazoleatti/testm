@@ -66,7 +66,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+        }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -391,9 +393,6 @@ void importData() {
 void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
-    def dataRows = dataRowHelper.allCached
-    def totalRow = getDataRow(dataRows, 'total')
-
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
@@ -507,10 +506,10 @@ void addData(def xml, int headRowCount) {
     showMessages(rows, logger)
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
+        def totalRow = getFixedRow('Всего', 'total')
         calcTotalSum(rows, totalRow, totalSumColumns)
         rows.add(totalRow)
-        dataRowHelper.save(rows)
-        rows = null
+        formDataService.getDataRowHelper(formData).save(rows)
     }
 }
 
@@ -582,7 +581,6 @@ void importTransportData() {
         logger.error(WRONG_RNU_FORMAT)
     }
     int COLUMN_COUNT = 20
-    int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
@@ -590,7 +588,7 @@ void importTransportData() {
     String[] rowCells
     int fileRowIndex = 2    // номер строки в файле (1, 2, ..)
     int rowIndex = 0        // номер строки в НФ (1, 2, ..)
-    def total = null        // итоговая строка со значениями из тф для добавления
+    def totalTF = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -614,7 +612,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
                 }
                 break
             }
@@ -627,7 +625,7 @@ void importTransportData() {
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (total) {
+    if (totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['saleCostB18' : 15, 'saleCostB10' : 16, 'saleCostB0' : 17, 'vatSum18' : 18, 'vatSum10' : 19, 'bonifSalesSum' : 20]
         // подсчет итогов
@@ -635,7 +633,7 @@ void importTransportData() {
         calcTotalSum(newRows, totalRow, totalColumnsIndexMap.keySet().asList())
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = total.getCell(alias).value
+            def v1 = totalTF.getCell(alias).value
             def v2 = totalRow.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
@@ -651,23 +649,8 @@ void importTransportData() {
     }
 
     // вставляем строки в БД
-    //logger.error("Фиктивная ошибка, чтобы не было загрузки в БД") // отключил загрузку в БД
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        dataRowHelper.clear()
-
-        def buffer = []
-        def i = 0;
-        newRows.each() {
-            buffer.add(newRows[i++])
-            if (buffer.size() == ROW_MAX) {
-                dataRowHelper.insert(buffer, i - buffer.size() + 1)
-                buffer = []
-            }
-        }
-        if (buffer.size() > 0) {
-            dataRowHelper.insert(buffer, i - buffer.size() + 1)
-        }
+        formDataService.getDataRowHelper(formData).save(newRows)
     }
 }
 

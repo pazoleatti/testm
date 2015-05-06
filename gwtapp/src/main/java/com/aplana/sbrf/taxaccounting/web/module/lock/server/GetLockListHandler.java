@@ -30,7 +30,7 @@ import java.util.List;
  * @author dloshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP')")
 public class GetLockListHandler extends AbstractActionHandler<GetLockListAction, GetLockListResult> {
 
     private static final String DATE_FORMAT = "dd-MM-yyyy HH:mm";

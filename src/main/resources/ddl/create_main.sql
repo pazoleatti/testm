@@ -138,7 +138,7 @@ create table ref_book (
   type number(1) default 0 not null,
   read_only number(1) default 0 not null,
   region_attribute_id number(18,0),
-  table_name varchar2(100),
+  table_name varchar2(100), 
   is_versioned number(1) default 1 not null
 );
 

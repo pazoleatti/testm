@@ -2,9 +2,8 @@ package form_template.vat.vat_937_1.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.NumericColumn
-import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -65,7 +64,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+        }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -77,7 +78,7 @@ switch (formDataEvent) {
 
 @Field
 def allColumns = ['rowNum', 'typeCode', 'invoice', 'invoiceCorrecting', 'invoiceCorrection', 'invoiceCorrectingCorrection', 'documentPay', 'dateRegistration',
-                  'salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
+        'salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency', 'cost', 'nds']
 
 // Редактируемые атрибуты (графа )
 @Field
@@ -282,13 +283,12 @@ void consolidation() {
 
     def totalRow = getFixedRow('Всего','total')
     dataRows.add(totalRow)
-    save(dataRows)
-    dataRows = null
+    formDataService.getDataRowHelper(formData).save(dataRows)
 }
 
 /** Получить произвольную фиксированную строку со стилями. */
 def getFixedRow(String title, String alias) {
-    def total = formData.createDataRow()
+    def total = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     total.setAlias(alias)
     total.fix = title
     total.getCell('fix').colSpan = 15
@@ -364,202 +364,43 @@ void addData(def xml, int headRowCount) {
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
 
-        // Графа 2
-        def xmlIndexCol = 1
-        newRow.typeCode = row.cell[xmlIndexCol].text()
+        // графа 2..7
+        def xmlIndexCol = 0
+        ['typeCode', 'invoice', 'invoiceCorrecting', 'invoiceCorrection', 'invoiceCorrectingCorrection', 'documentPay'].each { alias ->
+            xmlIndexCol++
+            newRow[alias] = row.cell[xmlIndexCol].text()
+        }
 
-        // Графа 3
-        xmlIndexCol++
-        newRow.invoice = row.cell[xmlIndexCol].text()
-
-        // Графа 4
-        xmlIndexCol++
-        newRow.invoiceCorrecting = row.cell[xmlIndexCol].text()
-
-        // Графа 5
-        xmlIndexCol++
-        newRow.invoiceCorrection = row.cell[xmlIndexCol].text()
-
-        // Графа 6
-        xmlIndexCol++
-        newRow.invoiceCorrectingCorrection = row.cell[xmlIndexCol].text()
-
-        // Графа 7
-        xmlIndexCol++
-        newRow.documentPay = row.cell[xmlIndexCol].text()
-
-        // Графа 8
+        // графа 8
         xmlIndexCol++
         newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
-        // Графа 9
-        xmlIndexCol++
-        newRow.salesman = row.cell[xmlIndexCol].text()
+        // графа 9..14
+        ['salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency'].each { alias ->
+            xmlIndexCol++
+            newRow[alias] = row.cell[xmlIndexCol].text()
+        }
 
-        // Графа 10
-        xmlIndexCol++
-        newRow.salesmanInnKpp = row.cell[xmlIndexCol].text()
-
-        // Графа 11
-        xmlIndexCol++
-        newRow.agentName = row.cell[xmlIndexCol].text()
-
-        // Графа 12
-        xmlIndexCol++
-        newRow.agentInnKpp = row.cell[xmlIndexCol].text()
-
-        // Графа 13
-        xmlIndexCol++
-        newRow.declarationNum = row.cell[xmlIndexCol].text()
-
-        // Графа 14
-        xmlIndexCol++
-        newRow.currency = row.cell[xmlIndexCol].text()
-
-        // Графа 15
-        xmlIndexCol++
-        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 16
-        xmlIndexCol++
-        newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 15, 16
+        ['cost', 'nds'].each { alias ->
+            xmlIndexCol++
+            newRow[alias] = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
 
         changeDateFormat(newRow)
         rows.add(newRow)
     }
+    showMessages(rows, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
     rows.add(getFixedRow('Всего', 'total'))
-    save(rows)
-}
-
-// TODO (Ramil Timerbaev) старая загрузка, потом удалить. Пока оставлено на случай сравнения производительности.
-void importTransportDataOld() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 16, 1)
-    addTransportData(xml)
-}
-
-void addTransportData(def xml) {
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-
-    def rows = []
-    def int rowIndex = 1
-
-    def totalTmp = formData.createDataRow()
-    totalSumColumns.each { alias ->
-        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-    }
-
-    for (def row : xml.row) {
-        rnuIndexRow++
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(rnuIndexRow)
-
-        // Графа 2
-        def xmlIndexCol = 2
-        newRow.typeCode = row.cell[xmlIndexCol].text()
-
-        // Графа 3
-        xmlIndexCol++
-        newRow.invoice = row.cell[xmlIndexCol].text()
-
-        // Графа 4
-        xmlIndexCol++
-        newRow.invoiceCorrecting = row.cell[xmlIndexCol].text()
-
-        // Графа 5
-        xmlIndexCol++
-        newRow.invoiceCorrection = row.cell[xmlIndexCol].text()
-
-        // Графа 6
-        xmlIndexCol++
-        newRow.invoiceCorrectingCorrection = row.cell[xmlIndexCol].text()
-
-        // Графа 7
-        xmlIndexCol++
-        newRow.documentPay = row.cell[xmlIndexCol].text()
-
-        // Графа 8
-        xmlIndexCol++
-        newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 9
-        xmlIndexCol++
-        newRow.salesman = row.cell[xmlIndexCol].text()
-
-        // Графа 10
-        xmlIndexCol++
-        newRow.salesmanInnKpp = row.cell[xmlIndexCol].text()
-
-        // Графа 11
-        xmlIndexCol++
-        newRow.agentName = row.cell[xmlIndexCol].text()
-
-        // Графа 12
-        xmlIndexCol++
-        newRow.agentInnKpp = row.cell[xmlIndexCol].text()
-
-        // Графа 13
-        xmlIndexCol++
-        newRow.declarationNum = row.cell[xmlIndexCol].text()
-
-        // Графа 14
-        xmlIndexCol++
-        newRow.currency = row.cell[xmlIndexCol].text()
-
-        // Графа 15
-        xmlIndexCol++
-        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 16
-        xmlIndexCol++
-        newRow.nds = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        totalSumColumns.each { alias ->
-            def value1 = totalTmp.getCell(alias).value
-            def value2 = (newRow.getCell(alias).value ?: BigDecimal.ZERO)
-            totalTmp.getCell(alias).setValue(value1 + value2, null)
-        }
-
-        rows.add(newRow)
-    }
-
-    if (xml.rowTotal.size() == 1) {
-        rnuIndexRow = rnuIndexRow + 2
-
-        def row = xml.rowTotal[0]
-
-        def total = getFixedRow('Всего','total')
-
-        // Графа 16
-        total.nds = parseNumber(row.cell[16].text(), rnuIndexRow, 16 + colOffset, logger, true)
-
-        def colIndexMap = ['nds' : 16]
-
-        for (def alias : totalSumColumns) {
-            def v1 = total.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
-            }
-        }
-
-        rows.add(total)
-    }
-    save(rows)
+    formDataService.getDataRowHelper(formData).save(rows)
 }
 
 /** Получить новую строку с заданными стилями. */
 def getNewRow() {
-    def newRow = formData.createDataRow()
+    def newRow = formData.createStoreMessagingDataRow()
     def columns = (isBalancePeriod() ? allColumns - 'rowNum' : editableColumns)
     columns.each {
         newRow.getCell(it).editable = true
@@ -601,31 +442,12 @@ void sortFormDataRows() {
     }
 }
 
-void save(def dataRows) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    // запись
-    dataRowHelper.clear()
-    def rows = []
-    dataRows.each { row ->
-        rows.add(row)
-        if (rows.size() > 1000) {
-            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-            rows.clear()
-        }
-    }
-    if (rows.size() > 0) {
-        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-        rows.clear()
-    }
-}
-
 void importTransportData() {
     checkBeforeGetXml(ImportInputStream, UploadFileName)
     if (!UploadFileName.endsWith(".rnu")) {
         logger.error(WRONG_RNU_FORMAT)
     }
     int COLUMN_COUNT = 16
-    int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
@@ -664,7 +486,7 @@ void importTransportData() {
             }
             newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
         }
-    }finally {
+    } finally {
         reader.close()
     }
 
@@ -692,25 +514,12 @@ void importTransportData() {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    // вставляем строки в БД
-    //logger.error("Фиктивная ошибка, чтобы не было загрузки в БД") // отключил загрузку в БД
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        dataRowHelper.clear()
-
-        def buffer = []
-        def i = 0;
-        newRows.each() {
-            buffer.add(newRows[i++])
-            if (buffer.size() == ROW_MAX) {
-                dataRowHelper.insert(buffer, i - buffer.size() + 1)
-                buffer = []
-            }
-        }
-        if (buffer.size() > 0) {
-            dataRowHelper.insert(buffer, i - buffer.size() + 1)
-        }
+    showMessages(newRows, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
     }
+    // вставляем строки в БД
+    formDataService.getDataRowHelper(formData).save(newRows)
 }
 
 boolean isEmptyCells(def rowCells) {
@@ -741,7 +550,7 @@ boolean addRow(def dataRowsCut, String[] rowCells, def columnCount, def fileRowI
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
 def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    def newRow = formData.createDataRow()
+    def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -761,12 +570,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 2..7
     ['typeCode', 'invoice', 'invoiceCorrecting', 'invoiceCorrection', 'invoiceCorrectingCorrection', 'documentPay'].each { alias ->
         colIndex++
-        def cell = pure(rowCells[colIndex])
-        if (cell != null && cell != '') {
-            if (checkString(newRow, alias, cell, fileRowIndex)) {
-                newRow[alias] = cell
-            }
-        }
+        newRow[alias] = pure(rowCells[colIndex])
     }
 
     // графа 8
@@ -776,51 +580,18 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 9..14
     ['salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency'].each { alias ->
         colIndex++
-        def cell = pure(rowCells[colIndex])
-        if (cell != null && cell != '') {
-            if (checkString(newRow, alias, cell, fileRowIndex)) {
-                newRow[alias] = cell
-            }
-        }
+        newRow[alias] = pure(rowCells[colIndex])
     }
 
     // графа 15, 16
     ['cost', 'nds'].each { alias ->
         colIndex++
         def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
-        if (cell != null && cell != '') {
-            if (checkNumber(newRow, alias, cell, fileRowIndex)) {
-                newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
-            }
-        }
+        newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
     }
     return newRow
 }
 
 static String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
-}
-
-boolean checkString(def tmpRow, def alias, def value, def fileRowIndex) {
-    StringColumn column = tmpRow.getCell(alias).getColumn()
-    if (column.getMaxLength() < value.size()) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение $value превышает допустимый размер " + column.getMaxLength())
-        return false
-    }
-    return true
-}
-
-boolean checkNumber(def tmpRow, def alias, def value, def fileRowIndex) {
-    NumericColumn column = tmpRow.getCell(alias).getColumn()
-    def sepId = value.indexOf('.')
-    def tmp = sepId == -1 ? value : value.substring(0, value.indexOf('.'))
-    if (column.getMaxLength() - column.getPrecision() < tmp.size()) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' превышает допустимый размер до запятой " + (column.getMaxLength() - column.getPrecision()))
-        return false
-    }
-    if (!value.matches("[0-9.,-]*")) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' содержит недопустимые символы")
-        return false
-    }
-    return true
 }

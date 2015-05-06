@@ -2,8 +2,6 @@ package form_template.vat.vat_937_1_1.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.NumericColumn
-import com.aplana.sbrf.taxaccounting.model.StringColumn
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -66,7 +64,9 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+        }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -361,9 +361,14 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
+
+    showMessages(rows, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+
     // подсчет итогов
-    def dataRows = dataRowHelper.allCached
-    def totalRow = getDataRow(dataRows, 'total')
+    def totalRow = getFixedRow('Всего', 'total', true)
     calcTotalSum(rows, totalRow, totalSumColumns)
     rows.add(totalRow)
     dataRowHelper.save(rows)
@@ -371,7 +376,7 @@ void addData(def xml, int headRowCount) {
 
 /** Получить новую строку с заданными стилями. */
 def getNewRow() {
-    def newRow = formData.createDataRow()
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     def columns = (isBalancePeriod() ? allColumns - 'rowNum' : editableColumns)
     columns.each {
         newRow.getCell(it).editable = true
@@ -450,7 +455,7 @@ void consolidation() {
 
 /** Получить произвольную фиксированную строку со стилями. */
 def getFixedRow(String title, String alias, boolean isTotal) {
-    def total = formData.createDataRow()
+    def total = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     total.setAlias(alias)
     total.fix = title
     total.getCell('fix').colSpan = 16
@@ -471,7 +476,6 @@ void importTransportData() {
         logger.error(WRONG_RNU_FORMAT)
     }
     int COLUMN_COUNT = 16
-    int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
@@ -510,7 +514,7 @@ void importTransportData() {
             }
             newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
         }
-    }finally {
+    } finally {
         reader.close()
     }
 
@@ -538,25 +542,14 @@ void importTransportData() {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    // вставляем строки в БД
-    //logger.error("Фиктивная ошибка, чтобы не было загрузки в БД") // отключил загрузку в БД
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        dataRowHelper.clear()
-
-        def buffer = []
-        def i = 0;
-        newRows.each() {
-            buffer.add(newRows[i++])
-            if (buffer.size() == ROW_MAX) {
-                dataRowHelper.insert(buffer, i - buffer.size() + 1)
-                buffer = []
-            }
-        }
-        if (buffer.size() > 0) {
-            dataRowHelper.insert(buffer, i - buffer.size() + 1)
-        }
+    showMessages(newRows, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
     }
+
+    // вставляем строки в БД
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    dataRowHelper.save(newRows)
 }
 
 boolean isEmptyCells(def rowCells) {
@@ -589,12 +582,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 2..7
     ['typeCode', 'invoice', 'invoiceCorrecting', 'invoiceCorrection', 'invoiceCorrectingCorrection', 'documentPay'].each { alias ->
         colIndex++
-        def cell = pure(rowCells[colIndex])
-        if (cell != null && cell != '') {
-            if (checkString(newRow, alias, cell, fileRowIndex)) {
-                newRow[alias] = cell
-            }
-        }
+        newRow[alias] = pure(rowCells[colIndex])
     }
 
     // графа 8
@@ -604,51 +592,18 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 9..14
     ['salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency'].each { alias ->
         colIndex++
-        def cell = pure(rowCells[colIndex])
-        if (cell != null && cell != '') {
-            if (checkString(newRow, alias, cell, fileRowIndex)) {
-                newRow[alias] = cell
-            }
-        }
+        newRow[alias] = pure(rowCells[colIndex])
     }
 
     // графа 15, 16
     ['cost', 'nds'].each { alias ->
         colIndex++
         def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
-        if (cell != null && cell != '') {
-            if (checkNumber(newRow, alias, cell, fileRowIndex)) {
-                newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
-            }
-        }
+        newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
     }
     return newRow
 }
 
 String pure(String cell) {
     return StringUtils.cleanString(cell)?.intern()
-}
-
-boolean checkString(def tmpRow, def alias, def value, def fileRowIndex) {
-    StringColumn column = tmpRow.getCell(alias).getColumn()
-    if (column.getMaxLength() < value.size()) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение $value превышает допустимый размер " + column.getMaxLength())
-        return false
-    }
-    return true
-}
-
-boolean checkNumber(def tmpRow, def alias, def value, def fileRowIndex) {
-    NumericColumn column = tmpRow.getCell(alias).getColumn()
-    def sepId = value.indexOf('.')
-    def tmp = sepId == -1 ? value : value.substring(0, value.indexOf('.'))
-    if (column.getMaxLength() - column.getPrecision() < tmp.size()) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' превышает допустимый размер до запятой " + (column.getMaxLength() - column.getPrecision()))
-        return false
-    }
-    if (!value.matches("[0-9.,-]*")) {
-        logger.error("Строка $fileRowIndex, графа ${column.getOrder()}: Значение '$value' содержит недопустимые символы")
-        return false
-    }
-    return true
 }

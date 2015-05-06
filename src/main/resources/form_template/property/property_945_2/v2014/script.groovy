@@ -65,8 +65,10 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -434,17 +436,12 @@ void importData() {
 }
 
 void addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
     def xmlIndexRow = -1
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
     def rows = []
     def int rowIndex = 1
-
-    def totalRow = getDataRow(dataRows, 'total')
 
     for (def row : xml.row) {
         xmlIndexRow++
@@ -464,7 +461,7 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
-        def newRow = formData.createDataRow()
+        def newRow = formData.createStoreMessagingDataRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
@@ -515,8 +512,15 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
-    rows.add(totalRow)
-    dataRowHelper.save(rows)
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+        def templateRows = formTemplate.rows
+        rows.add(getDataRow(templateRows, 'total'))
+
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */

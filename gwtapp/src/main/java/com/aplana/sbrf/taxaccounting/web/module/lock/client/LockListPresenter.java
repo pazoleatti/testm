@@ -98,6 +98,22 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
     }
 
     @Override
+    public void onStopAsync() {
+        if (isSelectedTaskExist()) {
+            StopAsyncAction action = new StopAsyncAction();
+            action.setKeys(getView().getSelectedItem());
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<StopAsyncResult>() {
+                        @Override
+                        public void onSuccess(StopAsyncResult result) {
+                            getView().updateData(0);
+                            getView().clearSelection();
+                        }
+                    }, LockListPresenter.this));
+        }
+    }
+
+    @Override
     public void prepareFromRequest(PlaceRequest request) {
         super.prepareFromRequest(request);
         LogCleanEvent.fire(this);

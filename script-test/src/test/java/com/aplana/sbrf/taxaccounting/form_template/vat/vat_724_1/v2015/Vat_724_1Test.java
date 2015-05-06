@@ -59,6 +59,8 @@ public class Vat_724_1Test extends ScriptTestBase {
         department.setType(DepartmentType.TERR_BANK);
 
         when(testHelper.getDepartmentService().get(anyInt())).thenReturn(department);
+
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @After

@@ -12,6 +12,12 @@
             business-interface="com.aplana.sbrf.taxaccounting.async.manager.AsyncManager"
             lookup-home-on-startup="true"
             />
+    <jee:local-slsb
+            id="asyncInterruptionManager"
+            jndi-name="ejblocal:${releaseName}/async-core.jar/AsyncInterruptionManagerSingleton#com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManagerLocal"
+            business-interface="com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager"
+            lookup-home-on-startup="true"
+            />
     <!--<jee:local-slsb
             id="commonService"
             jndi-name="ejblocal:${releaseName}/common-core.jar/CommonServiceBean#com.aplana.sbrf.taxaccounting.common.service.CommonServiceLocal"

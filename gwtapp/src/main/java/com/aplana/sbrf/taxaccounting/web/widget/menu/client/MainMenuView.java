@@ -20,7 +20,7 @@ public class MainMenuView extends AbstractMenuView implements MainMenuPresenter.
     @Inject
     public MainMenuView(final Binder binder) {
         initWidget(binder.createAndBindUi(this));
-        final RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, "download/timer/ping/");
+        /*final RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, "download/timer/ping/");
         final RequestCallback requestCallback = new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -40,7 +40,7 @@ public class MainMenuView extends AbstractMenuView implements MainMenuPresenter.
                 }
             }
         };
-        timer.scheduleRepeating(300000);
+        timer.scheduleRepeating(300000);*/
     }
 
     @Override

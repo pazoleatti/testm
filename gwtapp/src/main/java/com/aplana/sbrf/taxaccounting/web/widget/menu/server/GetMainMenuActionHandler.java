@@ -227,6 +227,8 @@ public class GetMainMenuActionHandler extends
                 }
                 adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
                         + MembersTokens.MEMBERS));
+                adminMenuItem.getSubMenu().add(new MenuItem("Блокировки", NUMBER_SIGN
+                        + LockTokens.lockList));
             }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
@@ -236,8 +238,6 @@ public class GetMainMenuActionHandler extends
                         + MigrationTokens.migration));
                 adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
                         + SchedulerTokens.taskList));
-                adminMenuItem.getSubMenu().add(new MenuItem("Блокировки", NUMBER_SIGN
-                        + LockTokens.lockList));
             }
 
             if (currentUser.hasRole(TARole.ROLE_CONF)) {

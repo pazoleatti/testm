@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -31,12 +32,11 @@ public class TestAsyncTask extends AbstractAsyncTask {
     RefBookFactory refBookFactory;
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        System.out.println("TestAsyncTask started!");
-        /*TAUserInfo userInfo = (TAUserInfo) params.get("userInfo");
-        Logger logger = new Logger();
-        logger.setTaUserInfo(userInfo);
-        refBookFactory.getDataProvider(13L).deleteRecordVersions(logger, Arrays.asList(274873099L));*/
+    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) throws InterruptedException {
+        /*while (true) {
+            System.out.println("TestAsyncTask started: " + new Date().getTime());
+            Thread.sleep(1000);
+        }*/
     }
 
     @Override
