@@ -997,7 +997,9 @@ void addData(def xml, int headRowCount) {
     }
 
     sections.each { section ->
-        showMessages(mapRows[section], logger)
+        if(mapRows[section]!=null){
+            showMessages(mapRows[section], logger)
+        }
     }
     if (!logger.containsLevel(LogLevel.ERROR)) {
         def dataRowHelper = formDataService.getDataRowHelper(formData)
@@ -1072,7 +1074,11 @@ void importTransportData() {
 
         // периодически сбрасываем строки
         if (getNewRowCount(mapRows) > ROW_MAX) {
-            showMessages(mapRows, logger)
+            sections.each { section ->
+                if(mapRows[section]!=null){
+                    showMessages(mapRows[section], logger)
+                }
+            }
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 insertRows(dataRowHelper, mapRows)
             }
@@ -1082,7 +1088,11 @@ void importTransportData() {
     reader.close()
 
     if (getNewRowCount(mapRows) != 0) {
-        showMessages(mapRows, logger)
+        sections.each { section ->
+            if(mapRows[section]!=null){
+                showMessages(mapRows[section], logger)
+            }
+        }
         if (!logger.containsLevel(LogLevel.ERROR)) {
             insertRows(dataRowHelper, mapRows)
         }
