@@ -281,59 +281,55 @@ void addData(def xml, int headRowCount) {
 }
 
 void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
     int COLUMN_COUNT = 5
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
 
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
-
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    String[] rowCells
+    int fileRowIndex = 0    // номер строки в файле
+    def totalTF = null        // итоговая строка со значениями из тф для добавления
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-    String[] rowCells
-    int countEmptyRow = 0	// количество пустых строк
-    int fileRowIndex = 0    // номер строки в файле
-    int rowIndex = 0        // номер строки в НФ
-    def totalTF = null		// итоговая строка со значениями из тф для добавления
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
 
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
-
-        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-        if (isEmptyRow) {
-            if (countEmptyRow > 0) {
-                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
                 rowCells = reader.readNext()
-                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-                if (!isEmptyRow) {
+                if (rowCells != null) {
                     totalTF = formData.createStoreMessagingDataRow()
-                    fillRow(totalTF, rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex, false)
+                    fillRow(totalTF, rowCells, COLUMN_COUNT, fileRowIndex, false)
                 }
                 break
             }
-            countEmptyRow++
-            continue
+            setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex)
         }
-        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
-        // обычная строка
-        if (countEmptyRow != 0 && !setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
-            break
-        }
+    } finally {
+        reader.close()
     }
-    reader.close()
 
     showMessages(dataRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
-    }
 
     // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
     def totalColumnsIndexMap = [ 'realizeCost' : 4, 'obtainCost' : 5 ]
@@ -359,11 +355,13 @@ void importTransportData() {
             }
         }
     }
-    dataRowHelper.update(dataRows)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.update(dataRows)
+    }
 }
 
 /** Устанавливает значения из тф в строку нф. */
-def setValues(def dataRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+def setValues(def dataRows, String[] rowCells, def columnCount, def rowIndex) {
     if (rowCells == null) {
         return true
     }
@@ -373,7 +371,7 @@ def setValues(def dataRows, String[] rowCells, def columnCount, def fileRowIndex
     // найти нужную строку нф
     def dataRow = dataRows.get(rowIndex - 1)
     // заполнить строку нф значениями из тф
-    return fillRow(dataRow, rowCells, columnCount, fileRowIndex, rowIndex, true)
+    return fillRow(dataRow, rowCells, columnCount, rowIndex, true)
 }
 
 /**
@@ -383,12 +381,11 @@ def setValues(def dataRows, String[] rowCells, def columnCount, def fileRowIndex
  * @param rowCells список строк со значениями
  * @param columnCount количество колонок
  * @param fileRowIndex номер строки в тф
- * @param rowIndex строка в нф
  * @param checkFixedValues проверить ли фиксированные значения (при заполенении итоговой строки это не нужно делать)
  *
  * @return вернет true или false, если количество значений в строке тф меньше
  */
-def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def checkFixedValues) {
+def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex, def checkFixedValues) {
     dataRow.setImportIndex(fileRowIndex)
     if (rowCells.length != columnCount + 2) {
         rowError(logger, dataRow, String.format(ROW_FILE_WRONG, fileRowIndex))
@@ -416,7 +413,7 @@ def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex, d
         ['rowNum', 'code', 'name'].each { alias ->
             def value = values[alias].toString()
             def valueExpected = pure(dataRow.getCell(alias).value?.toString())
-            checkFixedValue(dataRow, value, valueExpected, rowIndex, alias, logger, true)
+            checkFixedValue(dataRow, value, valueExpected, fileRowIndex, alias, logger, true)
         }
     }
 
@@ -433,4 +430,8 @@ def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex, d
 
 String pure(String cell) {
     return StringUtils.cleanString(cell)?.intern()
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }

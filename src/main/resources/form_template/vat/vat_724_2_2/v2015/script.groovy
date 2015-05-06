@@ -220,59 +220,57 @@ void addData(def xml, int headRowCount) {
 }
 
 void importTransportData() {
-    int COLUMN_COUNT =4
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+    int COLUMN_COUNT = 4
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
 
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
-
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    String[] rowCells
+    int fileRowIndex = 0    // номер строки в файле
+    int rowIndex = 0        // номер строки в НФ
+    def totalTF = null        // итоговая строка со значениями из тф для добавления
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-    String[] rowCells
-    int countEmptyRow = 0	// количество пустых строк
-    int fileRowIndex = 0    // номер строки в файле
-    int rowIndex = 0        // номер строки в НФ
-    def totalTF = null		// итоговая строка со значениями из тф для добавления
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
 
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
-
-        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-        if (isEmptyRow) {
-            if (countEmptyRow > 0) {
-                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
                 rowCells = reader.readNext()
-                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-                if (!isEmptyRow) {
+                if (rowCells != null) {
                     totalTF = formData.createStoreMessagingDataRow()
-                    fillRow(totalTF, rowCells, COLUMN_COUNT, ++fileRowIndex, false)
+                    fillRow(totalTF, rowCells, COLUMN_COUNT, fileRowIndex, false)
                 }
                 break
             }
-            countEmptyRow++
-            continue
+            setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
         }
-        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
-        // обычная строка
-        if (countEmptyRow != 0 && !setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
-            break
-        }
+    } finally {
+        reader.close()
     }
-    reader.close()
 
     showMessages(dataRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
-    }
 
     // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
     def totalColumnsIndexMap = [ 'base' : 4 ]
@@ -298,7 +296,10 @@ void importTransportData() {
             }
         }
     }
-    dataRowHelper.update(dataRows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.update(dataRows)
+    }
 }
 
 /** Устанавливает значения из тф в строку нф. */
@@ -367,4 +368,8 @@ def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex, d
 
 String pure(String cell) {
     return StringUtils.cleanString(cell)?.intern()
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }
