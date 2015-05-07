@@ -38,12 +38,4 @@ public class StartLoadFileEvent extends GwtEvent<StartLoadFileEvent.StartLoadFil
     protected void dispatch(StartLoadFileHandler handler) {
         handler.onStartLoad(new StartLoadFileEvent(filename));
     }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
 }

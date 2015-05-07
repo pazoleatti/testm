@@ -770,7 +770,10 @@ create table lock_data
   key varchar2(1000) not null,
   user_id number(9) not null,
   date_before date not null,
-  date_lock date default current_date not null
+  date_lock date default current_date not null,
+  state varchar2(100),
+  state_date date,
+  description varchar2(4000)
 );
 
 comment on table lock_data is 'Информация о блокировках';
@@ -778,7 +781,9 @@ comment on column lock_data.key is 'Код блокировки';
 comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
 comment on column lock_data.date_before is 'Срок истечения блокировки';
 comment on column lock_data.date_lock is 'Дата установки блокировки';
-
+comment on column lock_data.state is 'Статус выполнения асинхронной задачи, связанной с блокировкой';
+comment on column lock_data.state_date is 'Дата последнего изменения статуса';
+comment on column lock_data.description is 'Описание блокировки';
 --------------------------------------------------------------------------------------------------------
 create table department_type
 (

@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AuditFieldList;
+import com.aplana.sbrf.taxaccounting.model.LogSystem;
+import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,9 +25,6 @@ import static org.junit.Assert.assertEquals;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AuditDaoTest {
 
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-    public static final int LENGTH = 1000;
-
     @Autowired
     private AuditDao auditDao;
 
@@ -33,8 +33,6 @@ public class AuditDaoTest {
     public void testAdd() {
         LogSystem logSystem = new LogSystem();
         logSystem.setId(10l);
-        Date date = new Date();
-        logSystem.setLogDate(date);
         logSystem.setIp("192.168.72.16");
         logSystem.setEventId(3);
         logSystem.setUserLogin("controlBank");

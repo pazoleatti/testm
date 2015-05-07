@@ -506,8 +506,6 @@ void importData() {
 }
 
 void addData(def xml, def headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
     def xmlIndexRow = -1
     def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
@@ -518,8 +516,7 @@ void addData(def xml, def headRowCount) {
     for (def row : xml.row) {
         xmlIndexRow++
         def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        /* Пропуск строк шапок */
+                                                   /* Пропуск строк шапок */
         if (xmlIndexRow <= headRowCount) {
             continue
         }
@@ -528,7 +525,7 @@ void addData(def xml, def headRowCount) {
             break
         }
 
-        def newRow = formData.createDataRow()
+        def newRow = formData.createStoreMessagingDataRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
         editableColumns.each {
@@ -568,7 +565,11 @@ void addData(def xml, def headRowCount) {
         }
         rows.add(newRow)
     }
-    dataRowHelper.save(rows)
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
 }
 
 void sortFormDataRows() {

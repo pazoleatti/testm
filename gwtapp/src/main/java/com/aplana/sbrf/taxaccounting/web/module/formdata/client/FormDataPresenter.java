@@ -579,6 +579,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             @Override
             public void onSuccess(ConsolidateResult result) {
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                getView().updateData();
             }
         }, this));
     }

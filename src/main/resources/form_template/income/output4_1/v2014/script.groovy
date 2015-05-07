@@ -1,7 +1,6 @@
 package form_template.income.output4_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import groovy.transform.Field
 
 /**
@@ -90,10 +89,16 @@ void addData(def xml, headRowCount) {
         dataRows[i - 1].setImportIndex(xlsIndexRow)
 
         xmlIndexCol = 2
+        dataRows[i - 1].getCell('dealDate').setCheckMode(true)
         dataRows[i - 1].dealDate = parseDate(row.cell[xmlIndexCol].text(), 'dd.MM.yyyy', xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
         xmlIndexCol = 3
+        dataRows[i - 1].getCell('taxSum').setCheckMode(true)
         dataRows[i - 1].taxSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
     }
-    dataRowHelper.save(dataRows)
+
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.save(dataRows)
+    }
 }
