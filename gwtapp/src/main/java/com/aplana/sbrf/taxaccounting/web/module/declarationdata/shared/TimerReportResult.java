@@ -10,7 +10,7 @@ public class TimerReportResult implements Result {
         EXIST, //существует
         LOCKED, //есть блокировка
         NOT_EXIST, //не существует
-        ERROR // возникли ошибки во время формирования отчета(только для PDF-отчета)
+        LIMIT // превышен лимит требований по формированию отчета
     }
     private StatusReport existReport;
     private Pdf pdf;

@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -13,8 +13,8 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreatePdfReportAction;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreatePdfReportResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -24,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +33,7 @@ import java.util.Map;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class CreateReportDeclarationHandler extends AbstractActionHandler<CreateReportAction, CreateReportResult> {
+public class CreatePdfDeclarationHandler extends AbstractActionHandler<CreatePdfReportAction, CreatePdfReportResult> {
 
     @Autowired
     private SecurityService securityService;
@@ -52,33 +53,52 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     @Autowired
     private LogEntryService logEntryService;
 
-    public CreateReportDeclarationHandler() {
-        super(CreateReportAction.class);
+    public CreatePdfDeclarationHandler() {
+        super(CreatePdfReportAction.class);
     }
 
     @Override
-    public CreateReportResult execute(CreateReportAction action, ExecutionContext executionContext) throws ActionException {
-        CreateReportResult result = new CreateReportResult();
+    public CreatePdfReportResult execute(CreatePdfReportAction action, ExecutionContext executionContext) throws ActionException {
+        CreatePdfReportResult result = new CreatePdfReportResult();
         Map<String, Object> params = new HashMap<String, Object>();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         LockData lockData = declarationDataService.lock(action.getDeclarationDataId(), userInfo);
         if (lockData == null) {
             try {
-                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), action.getType());
+                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), ReportType.PDF_DEC);
                 params.put("declarationDataId", action.getDeclarationDataId());
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                LockData lockDataReportTask;
-                if ((lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(),
-                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA))) == null) {
+                LockData lockDataReportTask = lockDataService.getLock(key);
+                if (lockDataReportTask != null && (action.isForce() != null && action.isForce())) {
+                    // Удаляем старую задачу
+                    List<Integer> users = lockDataService.getUsersWaitingForLock(key);
+                    lockDataService.unlock(key, userInfo.getUser().getId(), true);
+                } else if (action.isForce() != null && action.isForce() == false) {
+                    if (lockDataReportTask.getUserId() != userInfo.getUser().getId()) {
+                        try {
+                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                        } catch (ServiceException e) {
+                        }
+                    }
+                    logger.info("Пользователь подписан на получение оповещений по выполняющейся задаче на формирование формы предварительного просмотра");
+                }
+                lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(),
+                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
+                if (lockDataReportTask == null) {
                     try {
-                        String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), action.getType());
-                        if (uuid == null) {
+                        String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ReportType.PDF_DEC);
+                        if ((action.isForce() != null && action.isForce()) || uuid == null) { // || !action.isExistPdf()
+                            if (uuid != null) {
+                                reportService.deleteDec(reportService.getDec(userInfo, action.getDeclarationDataId(), ReportType.JASPER_DEC));
+                                reportService.deleteDec(uuid);
+                            }
+
                             params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
                             lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                            asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                            logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));
+                            asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                            logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", ReportType.PDF_DEC.getName()));
                         } else {
                             result.setExistReport(true);
                             lockDataService.unlock(key, userInfo.getUser().getId());
@@ -92,13 +112,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                         }
                     }
                 } else {
-                    if (lockDataReportTask.getUserId() != userInfo.getUser().getId()) {
-                        try {
-                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                        } catch (ServiceException e) {
-                        }
-                    }
-                    logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));
+                    result.setExistTask(true);
                 }
             } finally {
                 declarationDataService.unlock(action.getDeclarationDataId(), userInfo);
@@ -111,7 +125,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     }
 
     @Override
-    public void undo(CreateReportAction searchAction, CreateReportResult searchResult, ExecutionContext executionContext) throws ActionException {
+    public void undo(CreatePdfReportAction searchAction, CreatePdfReportResult searchResult, ExecutionContext executionContext) throws ActionException {
 
     }
 }

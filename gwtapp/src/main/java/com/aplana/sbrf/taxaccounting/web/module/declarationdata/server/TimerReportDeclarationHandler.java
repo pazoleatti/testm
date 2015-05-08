@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -72,10 +74,10 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
     private TimerReportResult.StatusReport getStatus(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
         String key = declarationDataService.generateAsyncTaskKey(declarationDataId, reportType);
         if (!lockDataService.isLockExists(key, false)) {
-            DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
             if (reportService.getDec(userInfo, declarationDataId, reportType) == null) {
-                if (declarationData.isShowReport() && ReportType.PDF_DEC.equals(reportType)) {
-                    return TimerReportResult.StatusReport.ERROR;
+                Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, reportType);
+                if (checkTaskLimit != null && checkTaskLimit.getFirst() == null) {
+                    return TimerReportResult.StatusReport.LIMIT;
                 } else {
                     return TimerReportResult.StatusReport.NOT_EXIST;
                 }

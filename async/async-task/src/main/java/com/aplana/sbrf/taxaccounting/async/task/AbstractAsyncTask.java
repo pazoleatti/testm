@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -162,6 +163,10 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      */
     protected void executePostLogic(Map<String, Object> params) {
         //
+    }
+
+    protected boolean isProductionMode() {
+        throw new UnsupportedOperationException();
     }
 
     /**

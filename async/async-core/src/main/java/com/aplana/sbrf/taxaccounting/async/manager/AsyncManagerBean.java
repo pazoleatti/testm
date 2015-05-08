@@ -42,13 +42,18 @@ public class AsyncManagerBean implements AsyncManager {
     private AsyncTaskPersistenceServiceLocal persistenceService;
 
     @Override
-    public void executeAsync(long taskTypeId, Map<String, Object> params, BalancingVariants balancingVariant) throws AsyncTaskException {
+    public void executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException {
         log.debug("Async task creation has been started");
         ConnectionFactory connectionFactory;
         Queue queue;
         Connection connection = null;
 
         try {
+            // Проверка параметров
+            checkParams(params);
+            // Проверка данных задачи
+            AsyncTask task = checkTaskData(taskTypeId);
+            BalancingVariants balancingVariant = task.checkTaskLimit(params);
             if (balancingVariant == BalancingVariants.SHORT) {
                 connectionFactory = shortAsyncConnectionFactory;
                 queue = shortAsyncQueue;
@@ -56,10 +61,7 @@ public class AsyncManagerBean implements AsyncManager {
                 connectionFactory = longAsyncConnectionFactory;
                 queue = longAsyncQueue;
             }
-            // Проверка параметров
-            checkParams(params);
-            // Проверка данных задачи
-            checkTaskData(taskTypeId);
+
             //Формирование сообщения в очередь
             AsyncMdbObject asyncMdbObject = new AsyncMdbObject();
             asyncMdbObject.setTaskTypeId(taskTypeId);
@@ -86,13 +88,13 @@ public class AsyncManagerBean implements AsyncManager {
         }
     }
 
-    private void checkTaskData(long taskTypeId) {
+    private AsyncTask checkTaskData(long taskTypeId) {
         String jndi = null;
         try {
             AsyncTaskTypeEntity taskType = persistenceService.getTaskTypeById(taskTypeId);
             jndi = taskType.getHandlerJndi();
             InitialContext ic = new InitialContext();
-            AsyncTask task = (AsyncTask) ic.lookup(jndi);
+            return (AsyncTask) ic.lookup(jndi);
         } catch (AsyncTaskPersistenceException e) {
             throw new IllegalArgumentException("Параметры асинхронной задачи с идентификатором " + taskTypeId + " не найдены в таблице ASYNC_TASK_TYPE", e);
         } catch (NamingException e) {

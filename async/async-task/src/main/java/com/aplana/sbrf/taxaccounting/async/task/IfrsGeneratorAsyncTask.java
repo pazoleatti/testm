@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -16,13 +17,7 @@ import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
-@Local(AsyncTaskLocal.class)
-@Remote(AsyncTaskRemote.class)
-@Stateless
-@Interceptors(AsyncTaskInterceptor.class)
-@TransactionManagement(TransactionManagementType.CONTAINER)
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
+public abstract class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
@@ -34,15 +29,20 @@ public class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
     private PeriodService periodService;
 
     @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+        return BalancingVariants.LONG;
+    }
+
+    @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("IfrsGeneratorAsyncTask has been started");
+        log.debug("IfrsGeneratorAsyncTaskImpl has been started");
         int userId = (Integer)params.get(USER_ID.name());
         Integer reportPeriod = (Integer)params.get("reportPeriodId");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
         ifrsDataService.calculate(logger, reportPeriod);
-        log.debug("IfrsGeneratorAsyncTask has been finished");
+        log.debug("IfrsGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override

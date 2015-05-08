@@ -71,6 +71,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public void deleteDec(String blobDataId) {
+        reportDao.deleteDec(blobDataId);
+        blobDataService.delete(blobDataId);
+    }
+
+    @Override
     public void deleteAudit(TAUserInfo userInfo, ReportType reportType) {
         reportDao.deleteAudit(userInfo.getUser().getId(), reportType);
     }
