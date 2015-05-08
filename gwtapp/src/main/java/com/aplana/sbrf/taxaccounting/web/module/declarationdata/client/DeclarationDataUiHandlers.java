@@ -16,6 +16,6 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void onInfoClicked();
     TaxType getTaxType();
     void onTimerReport(final ReportType reportType, final boolean isTimer);
-
+    void viewPdf(Boolean force);
     void onOpenSourcesDialog();
 }

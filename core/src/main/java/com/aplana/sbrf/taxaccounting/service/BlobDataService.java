@@ -55,6 +55,13 @@ public interface BlobDataService {
     BlobData get(String blobId);
 
     /**
+     * Получение длины данных в blob
+     * @param uuid
+     * @return
+     */
+    long getLength(String uuid);
+
+    /**
      * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
      * @return Количество удаленных запсией
      */

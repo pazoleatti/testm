@@ -83,6 +83,11 @@ public class BlobDataServiceImpl implements BlobDataService {
     }
 
     @Override
+    public long getLength(String uuid) {
+        return blobDataDao.getLength(uuid);
+    }
+
+    @Override
     public int clean() {
         return blobDataDao.clean();
     }

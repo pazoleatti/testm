@@ -86,7 +86,7 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
                     for(Integer userId: userIds) {
                         lockDataService.addUserWaitingForLock(key, userId);
                     }
-                    asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
+                    asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
                     logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");

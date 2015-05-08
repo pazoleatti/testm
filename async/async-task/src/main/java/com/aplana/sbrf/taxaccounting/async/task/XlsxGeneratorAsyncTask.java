@@ -1,8 +1,13 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
+import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,13 +19,7 @@ import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
-@Local(AsyncTaskLocal.class)
-@Remote(AsyncTaskRemote.class)
-@Stateless
-@Interceptors(AsyncTaskInterceptor.class)
-@TransactionManagement(TransactionManagementType.CONTAINER)
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
+public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
@@ -46,9 +45,31 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private DeclarationDataScriptingService scriptingService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
+    @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+        long declarationDataId = (Long)params.get("declarationDataId");
+        int userId = (Integer)params.get(USER_ID.name());
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(userId));
+
+        Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.EXCEL_DEC);
+        if (checkTaskLimit == null) {
+            throw new ServiceException("Декларация не сформирована");
+        } else if (checkTaskLimit.getFirst() == null) {
+                Logger logger = new Logger();
+                logger.error("Критерий возможности формирования печатного представления декларации задается в конфигурационных параметрах. За разъяснениями обратитесь к Администратору");
+                throw new ServiceLoggerException("Формирование печатного представления невозможно, т.к. xml файл декларации имеет слишком большой размер(%d байт)!",
+                        logEntryService.save(logger.getEntries()), checkTaskLimit.getSecond());
+        }
+        return checkTaskLimit.getFirst();
+    }
+
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("XlsxGeneratorAsyncTask has been started");
+        log.debug("XlsxGeneratorAsyncTaskImpl has been started");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
@@ -68,7 +89,7 @@ public class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
             }
         }
 
-        log.debug("XlsxGeneratorAsyncTask has been finished");
+        log.debug("XlsxGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override

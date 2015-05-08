@@ -93,7 +93,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                     lockDataService.unlock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.EXCEL_DEC), 0, true);
                     // ставим задачу в очередь
                     lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(ReportType.XML_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
+                    asyncManager.executeAsync(ReportType.XML_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);
                     logger.error("Ошибка при постановке в очередь задачи формирования декларации.");

@@ -73,7 +73,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
                 try {
                     lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.LONG);
+                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);

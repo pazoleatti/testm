@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
@@ -9,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -38,6 +40,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -476,14 +479,38 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return getBytesFromInputstream(reportService.getDec(userInfo, id, ReportType.PDF_DEC));
 	}
 
+    /**
+     * Получает InputStream xml-файла из zip-архива
+     * @param userInfo
+     * @param declarationData
+     * @return
+     */
+    private InputStream xmlInputStream(TAUserInfo userInfo, DeclarationData declarationData) {
+        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
+        if (xmlUuid != null) {
+            ZipInputStream zis = new ZipInputStream(blobDataService.get(xmlUuid).getInputStream());
+            ZipEntry entry = null;
+            try {
+                entry = zis.getNextEntry();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+            if (entry != null){
+                return zis;
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void setPdfDataBlobs(Logger logger,
                                      DeclarationData declarationData, TAUserInfo userInfo) {
-        log.info(String.format("Получение uuid декларации %s", declarationData.getId()));
-        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
-        if (xmlUuid != null) {
-            log.info(String.format("Получение данных декларации %s", declarationData.getId()));
-            InputStream xml = blobDataService.get(xmlUuid).getInputStream();
+        log.info(String.format("Получение данных декларации %s", declarationData.getId()));
+        InputStream xml = xmlInputStream(userInfo, declarationData);
+        if (xml != null) {
             log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
             JasperPrint jasperPrint = fillReport(xml,
                     declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
@@ -564,7 +591,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     inputStream = new FileInputStream(zipOutFile);
                 } catch (FileNotFoundException e) {
                     throw new ServiceException("XML не сформирован", e);
-                }            
+                }
                 log.info(String.format("Запущено сохранение в бд для декларации %s", declarationData.getId()));
                 reportService.createDec(declarationData.getId(), blobDataService.create(inputStream, ""), ReportType.XML_DEC);
                 log.info(String.format("Закончено сохранение в бд для декларации %s", declarationData.getId()));
@@ -815,5 +842,43 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     dt.getName(),
                     dd.isAccepted()?"принята":"не принята");
         }
+    }
+
+    @Override
+    public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
+        if (ReportType.PDF_DEC.equals(reportType)) {
+            String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+            if (uuid != null) {
+                Long size = blobDataService.getLength(uuid);
+                long maxSize = 150 * 1024;
+                long shortSize = 10 * 1024;
+                if (size > maxSize) {
+                    return new Pair<BalancingVariants, Long>(null, size);
+                } else if (size < shortSize) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+            } else {
+                return null;
+            }
+        } else if (ReportType.EXCEL_DEC.equals(reportType)) {
+            String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+            if (uuid != null) {
+                Long size = blobDataService.getLength(uuid);
+                long maxSize = 150 * 1024;
+                long shortSize = 10 * 1024;
+                if (size > maxSize) {
+                    return new Pair<BalancingVariants, Long>(null, size);
+                } else if (size < shortSize) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+            } else {
+                return null;
+            }
+        } else if (ReportType.XML_DEC.equals(reportType)) {
+            return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+        }
+        throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
     }
 }

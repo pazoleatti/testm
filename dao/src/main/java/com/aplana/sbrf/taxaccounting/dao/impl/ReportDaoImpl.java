@@ -147,6 +147,18 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         }
     }
 
+
+    @Override
+    public void deleteDec(String uuid) {
+        try{
+            getJdbcTemplate().update("DELETE FROM DECLARATION_REPORT WHERE BLOB_DATA_ID = ?",
+                    new Object[]{uuid},
+                    new int[]{Types.VARCHAR});
+        } catch (DataAccessException e){
+            throw new DaoException(String.format("Не удалось удалить записи с BLOB_DATA_ID = %d", uuid), e);
+        }
+    }
+
     @Override
     public void deleteAudit(int userId, ReportType reportType) {
         try{

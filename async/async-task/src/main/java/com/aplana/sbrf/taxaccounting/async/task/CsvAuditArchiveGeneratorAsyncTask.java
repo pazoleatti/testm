@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -10,20 +11,12 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ejb.*;
-import javax.interceptor.Interceptors;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
-@Local(AsyncTaskLocal.class)
-@Remote(AsyncTaskRemote.class)
-@Stateless
-@Interceptors(AsyncTaskInterceptor.class)
-@TransactionManagement(TransactionManagementType.CONTAINER)
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTask {
+public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTask {
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
     private static final String SUCCESS_MSG =
@@ -41,8 +34,13 @@ public class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTask {
     private ReportService reportService;
 
     @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+        return BalancingVariants.SHORT;
+    }
+
+    @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("CsvAuditGeneratorAsyncTask has been started");
+        log.debug("CsvAuditGeneratorAsyncTaskImpl has been started");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
@@ -60,7 +58,7 @@ public class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTask {
                 records.get(records.size()-1),
                 userInfo);
         /*result.setCountOfRemoveRecords(records.getTotalCount());*/
-        log.debug("CsvAuditGeneratorAsyncTask has been finished");
+        log.debug("CsvAuditGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override

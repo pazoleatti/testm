@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -9,20 +9,12 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ejb.*;
-import javax.interceptor.Interceptors;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
-@Local(AsyncTaskLocal.class)
-@Remote(AsyncTaskRemote.class)
-@Stateless
-@Interceptors(AsyncTaskInterceptor.class)
-@TransactionManagement(TransactionManagementType.CONTAINER)
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
+public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
     private static final String SUCCESS_MSG =
@@ -41,6 +33,11 @@ public class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
     AuditService auditService;
     @Autowired
     PrintingService printingService;
+
+    @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+        return BalancingVariants.SHORT;
+    }
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {

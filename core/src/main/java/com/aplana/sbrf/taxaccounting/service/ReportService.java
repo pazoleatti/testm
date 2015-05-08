@@ -78,6 +78,12 @@ public interface ReportService {
     void deleteDec(long declarationDataId);
 
     /**
+     * Удаление отчета по uuid
+     * @param uuid
+     */
+    void deleteDec(String uuid);
+
+    /**
      * @param declarationDataId
      */
     void deleteAudit(TAUserInfo userInfo, ReportType reportType);
