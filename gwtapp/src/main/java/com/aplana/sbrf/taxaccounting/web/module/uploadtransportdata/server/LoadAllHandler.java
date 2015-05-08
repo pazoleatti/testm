@@ -64,6 +64,8 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         LockData lockData = lockDataService.lock(key, userId,
+                LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
+                LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.LOAD_TRANSPORT_DATA));
         if (lockData == null) {
             try {

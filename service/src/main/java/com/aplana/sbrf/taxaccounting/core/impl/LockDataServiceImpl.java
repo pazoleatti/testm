@@ -39,7 +39,7 @@ public class LockDataServiceImpl implements LockDataService {
     private TransactionHelper tx;
 
 	@Override
-	public LockData lock(final String key, final int userId, final long age) {
+	public LockData lock(final String key, final int userId, final String description, final long age) {
         return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData executeWithReturn() {
@@ -49,7 +49,7 @@ public class LockDataServiceImpl implements LockDataService {
                         if (lock != null) {
                             return lock;
                         }
-                        internalLock(key, userId, age);
+                        internalLock(key, userId, age, description, null);
                     }
                     return null;
                 } catch (Exception e) {
@@ -63,6 +63,30 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
     @Override
+    public LockData lock(final String key, final int userId, final String description, final String state, final long age) {
+        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
+            @Override
+            public LockData executeWithReturn() {
+                try {
+                    synchronized(LockDataServiceImpl.class) {
+                        LockData lock = validateLock(dao.get(key, false));
+                        if (lock != null) {
+                            return lock;
+                        }
+                        internalLock(key, userId, age, description, state);
+                    }
+                    return null;
+                } catch (Exception e) {
+                    throw new ServiceException("Не удалось установить блокировку объекта", e);
+                }
+            }
+
+            @Override
+            public void execute() {}
+        });
+    }
+
+    @Override
     public LockData getLock(String key) {
         synchronized(LockDataServiceImpl.class) {
             return validateLock(dao.get(key, false));
@@ -70,12 +94,12 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
 	@Override
-	public void lockWait(final String key, final int userId, final long age, final long timeout) {
+	public void lockWait(final String key, final int userId, final long age, final String description, final long timeout) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
                 long startTime = new Date().getTime();
-                while (lock(key, userId, age) != null) {
+                while (lock(key, userId, description, age) != null) {
                     try {
                         Thread.sleep(SLEEP_TIME);
                     } catch (InterruptedException e) {
@@ -138,7 +162,10 @@ public class LockDataServiceImpl implements LockDataService {
             public void execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
-                        LockData lock = validateLock(dao.get(key, false));
+                        LockData lock = dao.get(key, false);
+                        String description = lock != null ? lock.getDescription() : null;
+                        String state = lock != null ? lock.getState() : null;
+                        lock = validateLock(lock);
                         if (lock != null) {
                             if (lock.getUserId() != userId) {
                                 TAUser blocker = userDao.getUser(lock.getUserId());
@@ -148,7 +175,7 @@ public class LockDataServiceImpl implements LockDataService {
                             Date dateBefore = new Date();
                             dao.updateLock(key, new Date(dateBefore.getTime() + age));
                         } else {
-                            internalLock(key, userId, age); // создаем блокировку, если ее не было
+                            internalLock(key, userId, age, description, state); // создаем блокировку, если ее не было
                         }
                     }
                 } catch (ServiceException e) {
@@ -258,6 +285,11 @@ public class LockDataServiceImpl implements LockDataService {
         dao.extendAll(keys, hours);
     }
 
+    @Override
+    public void updateState(String key, Date lockDate, String state) {
+        dao.updateState(key, lockDate, state);
+    }
+
     /**
 	 * Проверяет блокировку. Если срок ее действия вышел, то она удаляется
 	 */
@@ -275,8 +307,8 @@ public class LockDataServiceImpl implements LockDataService {
 	/**
 	 * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
 	 */
-	private void internalLock(String key, int userId, long age) {
+	private void internalLock(String key, int userId, long age, String description, String state) {
 		Date dateBefore = new Date();
-		dao.createLock(key, userId, new Date(dateBefore.getTime() + age));
+		dao.createLock(key, userId, new Date(dateBefore.getTime() + age), description, state);
 	}
 }

@@ -64,7 +64,9 @@ public class UploadTransportDataAsyncTaskSpring extends AbstractAsyncTask {
 
         BlobData blobData = blobDataService.get(uuidFile);
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        lockDataService.lock(key, userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
+        lockDataService.lock(key, userInfo.getUser().getId(),
+                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
+                lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
         try {
 
             // Загрузка в каталог

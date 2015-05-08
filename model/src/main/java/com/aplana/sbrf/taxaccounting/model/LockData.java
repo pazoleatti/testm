@@ -30,6 +30,56 @@ public final class LockData {
         LOAD_TRANSPORT_DATA     //Для задач асинх загрузки ТФ
     }
 
+    public enum DescriptionTemplate {
+        REF_BOOK("Справочник \"%s\""),
+        FORM_DATA("Налоговая форма \"%s\", \"%s\", подразделение \"%s\", период \"%s%s\""),
+        FORM_DATA_REPORT("Отчет в формате %s для налоговой формы \"%s\", \"%s\", подразделение \"%s\", период \"%s%s\""),
+        FORM_DATA_IMPORT("Импорт файла %s в налоговую форму \"%s\", \"%s\", подразделение \"%s\", период \"%s%s\""),
+        FORM_DATA_CREATE("Создание налоговой формы \"%s\", \"%s\", подразделение \"%s\", период \"%s%s\""),
+        DECLARATION("Декларация \"%s\", подразделение \"%s\", период \"%s%s\""),
+        DECLARATION_REPORT("Отчет в формате %s для декларации \"%s\", подразделение \"%s\", период \"%s%s\""),
+        DECLARATION_CREATE("Создание декларации \"%s\", подразделение \"%s\", период \"%s%s\""),
+        FILE("Файл \"%s\""),
+        DECLARATION_TEMPLATE("Шаблон декларации \"%s\" на дату %s"),
+        FORM_TEMPLATE("Шаблон налоговой формы \"%s\" на дату %s"),
+        LOG_SYSTEM_BACKUP("Архивация журнала аудита (до даты: %s)"),
+        LOG_SYSTEM_CSV("Печать журнала аудита по параметрам пользователя"),
+        IFRS("Формирование архива с отчетностью для МСФО за %s %s"),
+        CONFIGURATION_PARAMS("Конфигурационные параметры"),
+        SCHEDULER_TASK("Выполнение задачи планировщика \"%s\""),
+        LOAD_TRANSPORT_DATA("Импорт ТФ из каталога загрузки");
+
+        private String text;
+
+        private DescriptionTemplate(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+        }
+
+    public enum State {
+        IN_QUEUE("В очереди на выполнение"),
+        STARTED("Началось выполнение"),
+        BUSINESS_LOGIC("Выполняется бизнес-логика"),
+        SAVING_MSGS("Выполняется сохранение уведомлений"),
+        SENDING_MSGS("Выполняется рассылка уведомлений"),
+        SENDING_ERROR_MSGS("Произошла ошибка. Выполняется рассылка уведомлений"),
+        POST_LOGIC("Выполненяется пост-обработка");
+
+        private String text;
+
+        private State(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+
 	/* Идентификатор блокировки */
 	private String key;
 	/* Код пользователя, установившего блокировку*/
@@ -38,6 +88,12 @@ public final class LockData {
 	private Date dateBefore;
     /* Дата установки блокировки */
     private Date dateLock;
+    /* Cтатус выполнения асинхронной задачи, связанной с блокировкой */
+    private String state;
+    /* Дата последнего изменения статуса */
+    private Date stateDate;
+    /* Описание блокировки */
+    private String description;
 
 	public LockData(){
 	}
@@ -80,6 +136,30 @@ public final class LockData {
         this.dateLock = dateLock;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public Date getStateDate() {
+        return stateDate;
+    }
+
+    public void setStateDate(Date stateDate) {
+        this.stateDate = stateDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "LockData{" +
@@ -87,6 +167,9 @@ public final class LockData {
                 ", userId=" + userId +
                 ", dateBefore=" + dateBefore +
                 ", dateLock=" + dateLock +
+                ", state='" + state + '\'' +
+                ", stateDate=" + stateDate +
+                ", description='" + description + '\'' +
                 '}';
     }
 }

@@ -34,7 +34,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	public LockData get(String key, boolean like) {
 		try {
             return getJdbcTemplate().queryForObject(
-					"SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key " + (like ? "like ?" : "= ?"),
+					"SELECT key, user_id, date_before, date_lock, description, state, state_date FROM lock_data WHERE key " + (like ? "like ?" : "= ?"),
 					new Object[] {like ? "%" + key + "%" : key},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
@@ -50,7 +50,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ? and date_lock = ?",
+                    "SELECT key, user_id, date_before, date_lock, description, state, state_date FROM lock_data WHERE key = ? and date_lock = ?",
                     new Object[] {key, lockDate},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
@@ -63,13 +63,16 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-	public void createLock(String key, int userId, Date dateBefore) {
+	public void createLock(String key, int userId, Date dateBefore, String description, String state) {
 		try {
-            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before) VALUES (?,?,?)",
+            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before, description, state, state_date) VALUES (?,?,?,?,?,sysdate)",
 					new Object[] {key,
 							userId,
-							dateBefore},
-					new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP});
+							dateBefore,
+                            description,
+                            state
+                    },
+					new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR});
 		} catch (DataAccessException e) {
 			throw new LockException("Ошибка при создании блокировки (%s, %s, %s). %s", key, userId, dateBefore, e.getMessage());
         }
@@ -180,7 +183,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             params.put("start", startIndex + 1);
             params.put("count", startIndex + countOfRecords);
             params.put("filter", "%" + filter.toLowerCase() + "%");
-            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, u.login, rownum as rn FROM lock_data ld "
+            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, u.login, rownum as rn FROM lock_data ld "
                     + "join sec_user u on u.id = ld.user_id "
                     + (filter != null && !filter.isEmpty() ? "where lower(key) like :filter or lower(login) like :filter " : "")
                     + "order by " + searchOrdering + (ascSorting ? " asc" : " desc")+ ") ";
@@ -207,6 +210,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     }
 
+    @Override
+    public void updateState(String key, Date lockDate, String state) {
+        getJdbcTemplate().update("update lock_data set state = ?, state_date = sysdate where key = ? and date_lock = ?",
+                new Object[] {state, key, lockDate},
+                new int[] {Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
+    }
+
     private static final class LockDataMapper implements RowMapper<LockData> {
 		@Override
         public LockData mapRow(ResultSet rs, int index) throws SQLException {
@@ -215,6 +225,9 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 			result.setUserId(rs.getInt("user_id"));
 			result.setDateBefore(rs.getTimestamp("date_before"));
             result.setDateLock(rs.getTimestamp("date_lock"));
+            result.setState(rs.getString("state"));
+            result.setStateDate(result.getState() != null ? rs.getTimestamp("state_date") : null);
+            result.setDescription(rs.getString("description"));
 			return result;
 		}
 	}

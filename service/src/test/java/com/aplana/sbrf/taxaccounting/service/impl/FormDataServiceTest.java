@@ -189,7 +189,7 @@ public class FormDataServiceTest {
                 map.put((String) arguments[0], new LockData((String) arguments[0], (Integer) arguments[1], new Date()));
                 return null;
             }
-        }).when(lockDataService).lock(anyString(), anyInt(), anyInt());
+        }).when(lockDataService).lock(anyString(), anyInt(), "", "", anyInt());
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {

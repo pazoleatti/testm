@@ -193,4 +193,12 @@ public interface DeclarationDataService {
     void deleteReport(long declarationDataId, boolean isLock);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
+
+    /**
+     * Возвращает полное название декларации с указанием подразделения, периода и прочего
+     * @param declarationId идентификатор декларации
+     * @param reportType тип отчета. Может быть null
+     * @return название
+     */
+    String getDeclarationFullName(long declarationId, String reportType);
 }

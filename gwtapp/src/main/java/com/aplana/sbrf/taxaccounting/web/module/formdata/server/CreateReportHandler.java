@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -46,6 +47,9 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private FormDataService formDataService;
+
     public CreateReportHandler() {
         super(CreateReportAction.class);
     }
@@ -65,6 +69,8 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         Logger logger = new Logger();
         LockData lockData;
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                formDataService.getFormDataFullName(action.getFormDataId(), null, action.getType().getName()),
+                LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA))) == null) {
             try {
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());

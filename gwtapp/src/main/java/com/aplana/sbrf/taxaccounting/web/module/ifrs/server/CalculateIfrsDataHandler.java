@@ -60,9 +60,12 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
             return result;
         }
         TAUserInfo userInfo = securityService.currentUserInfo();
+        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
         Logger logger = new Logger();
         String key = ifrsDataService.generateTaskKey(action.getReportPeriodId());
         LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                LockData.State.IN_QUEUE.getText(),
+                String.format(LockData.DescriptionTemplate.IFRS.getText(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear()),
                 lockDataService.getLockTimeout(LockData.LockObjects.IFRS));
         if (lockData == null) {
             try {
@@ -102,7 +105,6 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
             }
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
             logger.info("Архив с отчетностью для МСФО за %s %s поставлен в очередь на формирование", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
         } else {
             result.setError(true);

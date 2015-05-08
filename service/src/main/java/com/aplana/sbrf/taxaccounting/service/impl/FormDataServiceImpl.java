@@ -753,7 +753,7 @@ public class FormDataServiceImpl implements FormDataService {
             List<String> lockedObjects = new ArrayList<String>();
             int userId = userInfo.getUser().getId();
             checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
-            LockData lockData = lockService.lock(lockKey, userId,
+            LockData lockData = lockService.lock(lockKey, userId, getFormDataFullName(formData.getId(), null, null),
                     lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
             if (lockData == null) {
                 try {
@@ -768,6 +768,7 @@ public class FormDataServiceImpl implements FormDataService {
                                 String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
                                 if (!lockedObjects.contains(referenceLockKey)) {
                                     LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                            String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
                                             lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                                     if (referenceLockData == null) {
                                         //Блокировка установлена
@@ -1064,7 +1065,7 @@ public class FormDataServiceImpl implements FormDataService {
         List<String> lockedForms = new ArrayList<String>();
         String lockCurrentKey = LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId();
         LockData lockDataCurrent = lockService.lock(lockCurrentKey,
-                userInfo.getUser().getId(),
+                userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
         if (lockDataCurrent != null) {
             logger.error(
@@ -1099,7 +1100,7 @@ public class FormDataServiceImpl implements FormDataService {
                 lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + sourceDFT.getId();
                 LockData lockData = lockService.lock(
                         lockKey,
-                        userInfo.getUser().getId(),
+                        userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
                         lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
 
                 if (lockData != null) {
@@ -1168,6 +1169,46 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
+    public String getFormDataFullName(long formDataId, String fileName, String reportType) {
+        //TODO: можно оптимизировать и сделать в 1 запрос
+        FormData formData = formDataDao.get(formDataId, false);
+        Department department = departmentService.getDepartment(formData.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+        String name;
+        if (fileName != null) {
+            name = String.format(LockData.DescriptionTemplate.FORM_DATA_IMPORT.getText(),
+                    fileName,
+                    formData.getFormType().getName(),
+                    formData.getKind().getName(),
+                    department.getName(),
+                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriod.getCorrectionDate() != null
+                            ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            : "");
+        } else if (reportType != null) {
+            name = String.format(LockData.DescriptionTemplate.FORM_DATA_REPORT.getText(),
+                    reportType,
+                    formData.getFormType().getName(),
+                    formData.getKind().getName(),
+                    department.getName(),
+                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriod.getCorrectionDate() != null
+                            ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            : "");
+        } else {
+            name = String.format(LockData.DescriptionTemplate.FORM_DATA.getText(),
+                    formData.getFormType().getName(),
+                    formData.getKind().getName(),
+                    department.getName(),
+                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriod.getCorrectionDate() != null
+                            ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            : "");
+        }
+        return name;
+    }
+
+    @Override
     public FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
         if (periodOrder == null || kind != FormDataKind.PRIMARY && kind != FormDataKind.CONSOLIDATED) {
             // Если форма-источник квартальная или форма-приемник не является первичной или консолидированной, то ищем квартальный экземпляр
@@ -1181,6 +1222,7 @@ public class FormDataServiceImpl implements FormDataService {
 	public void lock(long formDataId, TAUserInfo userInfo) {
         checkLockAnotherUser(lockService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId,
                 userInfo.getUser().getId(),
+                getFormDataFullName(formDataId, null, null),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
 		dataRowDao.rollback(formDataId);
 	}

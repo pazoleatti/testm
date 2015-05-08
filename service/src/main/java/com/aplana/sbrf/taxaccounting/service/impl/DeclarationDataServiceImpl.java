@@ -54,6 +54,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
     private static final int BUFFER = 1024;
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
@@ -759,6 +760,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
         LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(),
+                getDeclarationFullName(declarationDataId, null),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         checkLock(lockData, userInfo.getUser());
         return lockData;
@@ -815,5 +817,29 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     dt.getName(),
                     dd.isAccepted()?"принята":"не принята");
         }
+    }
+
+    @Override
+    public String getDeclarationFullName(long declarationId, String reportType) {
+        DeclarationData declaration = declarationDataDao.get(declarationId);
+        Department department = departmentService.getDepartment(declaration.getDepartmentId());
+        DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        return reportType != null ? String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
+                reportType,
+                declarationTemplate.getType().getName(),
+                department.getName(),
+                reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriod.getCorrectionDate() != null
+                        ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                        : "")
+                :
+                String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
+                declarationTemplate.getType().getName(),
+                department.getName(),
+                reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                reportPeriod.getCorrectionDate() != null
+                        ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                        : "");
     }
 }

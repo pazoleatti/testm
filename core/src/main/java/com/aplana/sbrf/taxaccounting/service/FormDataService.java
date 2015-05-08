@@ -345,4 +345,13 @@ public interface FormDataService {
      * @param logger
      */
     void compose(final FormData formData, TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Получает полное название нф с указанием подразделения, периода и прочего
+     * @param formDataId идентификатор нф
+     * @param fileName название файла из которого выполняется импорт в нф. Может быть null
+     * @param reportType тип отчета. Может быть null
+     * @return название
+     */
+    String getFormDataFullName(long formDataId, String fileName, String reportType);
 }

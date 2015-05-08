@@ -71,6 +71,8 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
                 LockData lockDataReportTask;
                 if ((lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(),
+                        declarationDataService.getDeclarationFullName(action.getDeclarationDataId(), action.getType().getName()),
+                        LockData.State.IN_QUEUE.getText(),
                         lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA))) == null) {
                     try {
                         String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), action.getType());

@@ -123,6 +123,8 @@ public class TestXmlGeneratorAsyncTaskSpring extends AbstractAsyncTask {
         DeclarationData declaration = declarationDataService.get(declarationDataId, userInfo);
         if (declaration.isShowReport()) {
             LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                    "",
+                    LockData.State.IN_QUEUE.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
             if (lockData == null) {
                 Map<String, Object> paramsPdf = new HashMap<String, Object>();

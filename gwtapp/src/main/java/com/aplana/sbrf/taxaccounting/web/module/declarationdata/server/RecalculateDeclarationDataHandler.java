@@ -71,6 +71,8 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
         LockData lockData = lockDataService.lock(key, userId,
+                declarationDataService.getDeclarationFullName(action.getDeclarationId(), null),
+                LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         if (lockData == null) {
             try {
