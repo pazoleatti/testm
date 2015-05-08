@@ -70,17 +70,13 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
             return;
         }
         try {
-            final BlobData blobData = new BlobData();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream output = new ObjectOutputStream(baos);
             output.writeObject(logEntries);
             InputStream is = new ByteArrayInputStream(baos.toByteArray());
 
-            blobData.setInputStream(is);
-            blobData.setUuid(uuid);
-
-            blobDataDao.save(blobData);
+            blobDataDao.save(uuid, is);
         } catch (Exception e) {
             throw new DaoException("Не удалось обновить запись. " + e.getMessage());
         }
