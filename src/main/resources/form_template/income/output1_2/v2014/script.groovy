@@ -239,8 +239,12 @@ void consolidation() {
     def dataRows = []
 
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
-    def prevPeriodStartDate = reportPeriodService.getCalendarStartDate(prevReportPeriod.id).time
-    def prevPeriodEndDate = reportPeriodService.getEndDate(prevReportPeriod.id).time
+    def prevPeriodStartDate
+    def prevPeriodEndDate
+    if(prevReportPeriod != null){
+        prevPeriodStartDate = reportPeriodService.getCalendarStartDate(prevReportPeriod.id).time
+        prevPeriodEndDate = reportPeriodService.getEndDate(prevReportPeriod.id).time
+    }
 
     def lastPeriod = getLastReportPeriod()
     def lastPeriodStartDate = reportPeriodService.getCalendarStartDate(lastPeriod.id).time
@@ -375,8 +379,18 @@ def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def 
     // Графа 29: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8)
     newRow.taxSum = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
 
-    // Графа 30: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит ПРЕДЫДУЩЕМУ отчетному периоду
-    newRow.taxSumFromPeriod = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.withheldDate != null && it.withheldDate.before(prevPeriodEndDate) && it.withheldDate.after(prevPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0 }
+    // Графа 30: Принимает значение:
+    // Если дата по «Графе 28» первичной формы принадлежит предыдущему отчетному периоду, то
+    //       «Графа 30» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
+    // Иначе
+    //       «Графа 30» = значение "0"
+    if (prevPeriodEndDate != null && prevPeriodStartDate != null) {
+        newRow.taxSumFromPeriod = rowList.sum {
+            (it.status == 'RUS' && it.type == 1 && it.withheldDate != null && it.withheldDate.before(prevPeriodEndDate) && it.withheldDate.after(prevPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0
+        }
+    } else {
+        newRow.taxSumFromPeriod = 0
+    }
 
     // Графа 31: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит последнему кварталу отчетного периода
     newRow.taxSumLast = rowList.sum{ (it.status == 'RUS' && it.type == 1 && it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0 }
