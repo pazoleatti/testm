@@ -13,6 +13,13 @@
 	<description>АС "Учёт налогов" - Интерфейсы ядра</description>
 
 	<dependencies>
+        <!-- Асинхронные задачи -->
+        <dependency>
+            <groupId>com.aplana.taxaccounting</groupId>
+            <artifactId>async-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>model</artifactId>

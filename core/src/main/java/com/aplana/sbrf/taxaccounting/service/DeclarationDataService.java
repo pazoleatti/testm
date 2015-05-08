@@ -1,9 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -88,14 +90,7 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
 	 */
 	void setAccepted(Logger logger, long declarationDataId, boolean accepted, TAUserInfo userInfo);
-	/**
-	 * Получить данные декларации в формате законодателя (XML)
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @return строка, содержащая данные декларации в формате законодателя
-	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
-	 */
-	String getXmlData(long declarationDataId, TAUserInfo userInfo);
+
     /**
      * Получить данные декларации в формате законодателя (XML)
      * @param declarationDataId идентификатор декларации
@@ -193,6 +188,8 @@ public interface DeclarationDataService {
     void deleteReport(long declarationDataId, boolean isLock);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
+
+    Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType);
 
     /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего

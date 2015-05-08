@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -17,13 +18,7 @@ import java.util.Map;
  * Проверочный таск
  * @author dloshkarev
  */
-@Local(AsyncTaskLocal.class)
-@Remote(AsyncTaskRemote.class)
-@Stateless
-@Interceptors(AsyncTaskInterceptor.class)
-@TransactionManagement(TransactionManagementType.CONTAINER)
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class TestAsyncTask extends AbstractAsyncTask {
+public abstract class TestAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     TAUserService userService;
@@ -32,9 +27,14 @@ public class TestAsyncTask extends AbstractAsyncTask {
     RefBookFactory refBookFactory;
 
     @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+        return BalancingVariants.SHORT;
+    }
+
+    @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) throws InterruptedException {
         /*while (true) {
-            System.out.println("TestAsyncTask started: " + new Date().getTime());
+            System.out.println("TestAsyncTaskImpl started: " + new Date().getTime());
             Thread.sleep(1000);
         }*/
     }

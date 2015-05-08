@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,9 +24,16 @@ public interface BlobDataService {
      * Создание записи
      * @param file файл
      * @param name имя для базы
+     * @param createDate дата (например, полученная из xml, как в декларациях)
      * @return uuid идентификатор
      */
-    String create(File file, String name);
+    String create(File file, String name, Date createDate);
+
+    /**
+     * Создание записи
+     * @return uuid идентификатор
+     */
+    String create(BlobData data);
 
     /**
      * Удаление записи.
@@ -53,6 +61,13 @@ public interface BlobDataService {
      * @return {@link BlobData}
      */
     BlobData get(String blobId);
+
+    /**
+     * Получение длины данных в blob
+     * @param uuid
+     * @return
+     */
+    long getLength(String uuid);
 
     /**
      * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов

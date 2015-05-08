@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+
 import java.util.Date;
 import java.util.Map;
 
@@ -38,4 +40,13 @@ public interface AsyncTask {
      * @param params входные параметры, переданные при старте задачи. Все они должны поддерживать сериализацию
      */
     void execute(Map<String, Object> params);
+
+    /**
+     * Выполняет проверку возможности выполения задачи,
+     * если выполнение задачи возможно, то возвращает в какой очереди выполнять
+     * иначе
+     * @param params
+     * @return
+     */
+    BalancingVariants checkTaskLimit(Map<String, Object> params);
 }

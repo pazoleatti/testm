@@ -26,18 +26,24 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(InputStream is, String name) {
-        BlobData blobData = initBlob("", is, name);
+        BlobData blobData = initBlob("", is, name, null);
         return blobDataDao.create(blobData);
     }
 
     @Override
-    public String create(File file, String name) {
+    public String create(File file, String name, Date createDate) {
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
-            return create(fileInputStream, name);
+            BlobData data = initBlob("", fileInputStream, name, createDate);
+            return blobDataDao.createWithDate(data);
         } catch (FileNotFoundException e) {
             throw new ServiceException("", e);
         }
+    }
+
+    @Override
+    public String create(BlobData data) {
+        return blobDataDao.create(data);
     }
 
     @Override
@@ -60,7 +66,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public void save(String blobId, InputStream is) {
-        blobDataDao.save(initBlob(blobId, is, ""));
+        blobDataDao.save(blobId, is);
     }
 
     @Override
@@ -68,7 +74,7 @@ public class BlobDataServiceImpl implements BlobDataService {
         return blobDataDao.get(blobId);
     }
 
-    private BlobData initBlob(String blobId, InputStream is, String name){
+    private static BlobData initBlob(String blobId, InputStream is, String name, Date date){
         BlobData blobData = new BlobData();
         blobData.setName(name);
         try {
@@ -77,9 +83,14 @@ public class BlobDataServiceImpl implements BlobDataService {
             throw new ServiceException("Ошибка при получении данных", e);
         }
         blobData.setInputStream(is);
-        blobData.setCreationDate(new Date());
+        blobData.setCreationDate(date);
         blobData.setUuid(blobId.isEmpty() ? UUID.randomUUID().toString().toLowerCase() : blobId);
         return blobData;
+    }
+
+    @Override
+    public long getLength(String uuid) {
+        return blobDataDao.getLength(uuid);
     }
 
     @Override

@@ -189,7 +189,7 @@ public class FormDataServiceTest {
                 map.put((String) arguments[0], new LockData((String) arguments[0], (Integer) arguments[1], new Date()));
                 return null;
             }
-        }).when(lockDataService).lock(anyString(), anyInt(), "", "", anyInt());
+        }).when(lockDataService).lock(anyString(), anyInt(), anyString(), anyString(), anyInt());
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -236,6 +236,7 @@ public class FormDataServiceTest {
         when(formDataDao.find(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
         when(formTypeService.get(dft1.getFormTypeId())).thenReturn(formType1);
         when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType1);
+        when(formDataDao.get(formData.getId(), false)).thenReturn(formData);
 
         formDataService.compose(formData, userInfo, logger);
         // проверяем что источник удален

@@ -180,8 +180,12 @@ public class DeclarationDataServiceImplTest {
 
         BlobData blobData1 = new BlobData();
         blobData1.setInputStream(this.getClass().getClassLoader().getResourceAsStream(TEST_XML_FILE_NAME));
+        Date expectedDate = new Date();
+        blobData1.setCreationDate(expectedDate);
         BlobData blobData2 = new BlobData();
+        String expectedName = "NO_PRIB_7750_7750_7707083893777777777_20141112_D63A8CB3-C93D-483C-BED5-81F4EC69B549";
         blobData2.setInputStream(this.getClass().getClassLoader().getResourceAsStream(TEST_XML_FILE_NAME));
+        blobData2.setName(expectedName);
 
         BlobDataService blobDataService = mock(BlobDataService.class);
         when(blobDataService.get(uuid1)).thenReturn(blobData1);
@@ -195,8 +199,8 @@ public class DeclarationDataServiceImplTest {
         when(reportService.getDec(userInfo, declarationDataId2, ReportType.XML_DEC)).thenReturn(uuid2);
         ReflectionTestUtils.setField(declarationDataService, "reportService", reportService);
 
-        assertEquals(declarationDataService.getXmlDataDocDate(declarationDataId1, userInfo), new GregorianCalendar(2014, Calendar.NOVEMBER, 12).getTime());
-        assertEquals(declarationDataService.getXmlDataFileName(declarationDataId2, userInfo), "NO_PRIB_7750_7750_7707083893777777777_20141112_D63A8CB3-C93D-483C-BED5-81F4EC69B549");
+        assertEquals(expectedDate, declarationDataService.getXmlDataDocDate(declarationDataId1, userInfo));
+        assertEquals(expectedName, declarationDataService.getXmlDataFileName(declarationDataId2, userInfo));
     }
 
     @Test

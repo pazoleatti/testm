@@ -84,7 +84,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
                 /*String uuid = blobDataService.get(userInfo);*/
                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                asyncManager.executeAsync(ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, BalancingVariants.SHORT);
+                asyncManager.executeAsync(ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                 logger.info(String.format("Задание на архивацию журнала аудита (до даты: %s) поставлено в очередь на формирование.", SDF.format(action.getLogSystemFilter().getToSearchDate())));
                 return result;
             } catch (AsyncTaskException e) {

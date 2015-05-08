@@ -47,12 +47,9 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     private static final String TEMPLATE = ClassUtils
             .classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
 
-    private static SAXParserFactory factory = SAXParserFactory.newInstance();
-
     private static final String SUCCESS_FLAG = "SUCCESS";
-    public static final String TAG_FILE = "Файл";
-    public static final String ATTR_FILE_ID = "ИдФайл";
-    public static final Charset WINDOWS_1251 = Charset.forName("windows-1251");
+    public static final String NOT_DELETE_WARN = "Файл %s не был удален";
+    private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -63,15 +60,15 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     @Autowired
     private LockDataService lockDataService;
 
-    private URL url;
-
     private class ProcessRunner implements Runnable{
         private String[] params;
         private Logger logger;
+        private boolean isErrorFatal;
 
-        private ProcessRunner(String[] params, Logger logger) {
+        private ProcessRunner(String[] params, Logger logger, boolean isErrorFatal) {
             this.params = params;
             this.logger = logger;
+            this.isErrorFatal = isErrorFatal;
         }
 
         @Override
@@ -89,7 +86,10 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     } else if(s!=null) {
                         while ((s = reader.readLine()) != null) {
                             if (!s.startsWith("Execution time:")) {
-                                logger.error(s);
+                                if (isErrorFatal)
+                                    logger.error(s);
+                                else
+                                    logger.warn(s);
                             }
                         }
                     }
@@ -108,31 +108,22 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
     }
 
-    private class SAXHandler extends DefaultHandler{
-        String fileName = "";
-
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            if (qName.equals(TAG_FILE)){
-                fileName = attributes.getValue(ATTR_FILE_ID);
-            }
+    @Override
+    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile) {
+        if (xmlFile!=null){
+            return isValid(data, userInfo, logger, isErrorFatal, xmlFile);
+        } else {
+            return isValid(data, userInfo, logger, isErrorFatal);
         }
     }
 
-    public ValidateXMLServiceImpl() {
-        this.url = Thread.currentThread().getContextClassLoader().getResource(TEMPLATE);
-    }
-
-    @Override
-    public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile) {
-        String[] params = new String[4];
-        assert url != null;
+    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile) {
+        String[] params = new String[3];
         DeclarationTemplate template = declarationTemplateService.get(data.getDeclarationTemplateId());
 
         FileOutputStream outputStream;
         InputStream inputStream;
-        File xsdFile = null, xmlFileBD = null, vsax3File = null;
+        File xsdFile = null, vsax3File = null;
         try {
             vsax3File = File.createTempFile("VSAX3",".exe");
             outputStream = new FileOutputStream(vsax3File);
@@ -143,16 +134,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             params[0] = vsax3File.getAbsolutePath();
 
             //Получаем xml
-            if (xmlFile == null) {
-                BlobData xmlBlob = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC));
-                xmlFileBD = File.createTempFile(xmlBlob.getName()!=null? xmlBlob.getName() : "file_for_validate", ".xml");
-                outputStream = new FileOutputStream(xmlFileBD);
-                inputStream = xmlBlob.getInputStream();
-                unzip(outputStream, inputStream);
-                params[1] = xmlFileBD.getAbsolutePath();
-            } else {
-                params[1] = xmlFile.getAbsolutePath();
-            }
+            params[1] = xmlFile.getAbsolutePath();
 
             //Получаем xsd файл
             xsdFile = File.createTempFile("validation_file",".xsd");
@@ -164,25 +146,13 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             outputStream.close();
             params[2] = xsdFile.getAbsolutePath();
 
-            //Имя файла
-            InputSource inputSource;
-            if (xmlFile != null) {
-                inputSource = new InputSource(new InputStreamReader(new FileInputStream(xmlFile), WINDOWS_1251));
-            } else {
-                inputSource = new InputSource(new InputStreamReader(new FileInputStream(xmlFileBD), WINDOWS_1251));
-            }
-            SAXHandler handler = new SAXHandler();
-            factory.newSAXParser().parse(inputSource, handler);
-            params[3] = handler.fileName;
-            log.info("File name: " + handler.fileName);
-
             int timeout = lockDataService.getLockTimeout(LockData.LockObjects.XSD_VALIDATION);
-            ProcessRunner runner = new ProcessRunner(params, logger);
+            ProcessRunner runner = new ProcessRunner(params, logger, isErrorFatal);
             Thread threadRunner = new Thread(runner);
             threadRunner.start();
             try {
                 long startTime = new Date().getTime();
-                while (1==1) {
+                while (true) {
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException e) {
@@ -200,26 +170,40 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
             } finally {
                 logger.info("Проверка выполнена по файлу xsd %s", blobData.getName());
-                fileInfo(logger);
+                fileInfo(logger, vsax3File);
             }
         } catch (IOException e) {
             log.error("", e);
             throw new ServiceException("", e);
-        } catch (SAXException e) {
-            log.error("", e);
-            throw new ServiceException("Ошибка при разборе xml.", e);
-        } catch (ParserConfigurationException e) {
-            log.error("", e);
-            throw new ServiceException("Ошибка при разборе xml.", e);
         } finally {
             if (xsdFile != null && !xsdFile.delete()){
-                log.warn(String.format("Файл %s не был удален", xsdFile.getName()));
-            }
-            if (xmlFile == null && xmlFileBD != null && !xmlFileBD.delete()){
-                log.warn(String.format("Файл %s не был удален", xmlFileBD.getName()));
+                log.warn(String.format(NOT_DELETE_WARN, xsdFile.getName()));
             }
             if (vsax3File != null && !vsax3File.delete()){
-                log.warn(String.format("Файл %s не был удален", vsax3File.getName()));
+                log.warn(String.format(NOT_DELETE_WARN, vsax3File.getName()));
+            }
+        }
+    }
+
+    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal) {
+        BlobData xmlBlob = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC));
+        File xmlFileBD = null, file = null;
+        try {
+            file = File.createTempFile("tmp_file", ".tmp");
+            xmlFileBD = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, xmlBlob.getName(), "xml"));
+            FileOutputStream outputStream = new FileOutputStream(xmlFileBD);
+            InputStream inputStream = xmlBlob.getInputStream();
+            unzip(outputStream, inputStream);
+            return isValid(data, userInfo, logger, isErrorFatal, xmlFileBD);
+        } catch (IOException e) {
+            log.error("", e);
+            throw new ServiceException("", e);
+        } finally {
+            if (xmlFileBD!=null && !xmlFileBD.delete()){
+                log.warn(String.format(NOT_DELETE_WARN, xmlFileBD.getName()));
+            }
+            if (file!=null && !file.delete()){
+                log.warn(String.format(NOT_DELETE_WARN, file.getName()));
             }
         }
     }
@@ -303,49 +287,43 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
     }
 
-    private void fileInfo(Logger logger){
+    private void fileInfo(Logger logger, File fileVSAX){
 
         int dwDummy = 0;
-        try {
-            URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
-            File fileVSAX = new File(uri);
-            int versionlength = Version.INSTANCE.GetFileVersionInfoSizeW(
-                    fileVSAX.getAbsolutePath(), dwDummy);
+        int versionlength = Version.INSTANCE.GetFileVersionInfoSizeW(
+                fileVSAX.getAbsolutePath(), dwDummy);
 
-            byte[] bufferarray = new byte[versionlength];
-            Pointer lpData = new Memory(bufferarray.length);
+        byte[] bufferarray = new byte[versionlength];
+        Pointer lpData = new Memory(bufferarray.length);
 
-            PointerByReference lplpBuffer = new PointerByReference();
-            IntByReference puLen = new IntByReference();
-            boolean fileInfoResult = Version.INSTANCE.GetFileVersionInfoW(
-                    fileVSAX.getAbsolutePath(),
-                    0, versionlength, lpData);
-            if (!fileInfoResult){
-                logger.error("Нет связанной с файлом информации.");
-                return;
-            }
-            int verQueryVal = Version.INSTANCE.VerQueryValueW(lpData,
-                    "\\", lplpBuffer,
-                    puLen);
-            if (verQueryVal == 0){
-                logger.error("Связанная с файлом мета-информация недоступна.");
-                return;
-            }
-
-            VS_FIXEDFILEINFO lplpBufStructure = new VS_FIXEDFILEINFO(lplpBuffer.getValue());
-            lplpBufStructure.read();
-
-            short[] rtnData = new short[4];
-            rtnData[0] = (short) (lplpBufStructure.dwProductVersionLS >> 16);
-            rtnData[1] = (short) (lplpBufStructure.dwProductVersionLS & 0xffff);
-            rtnData[2] = (short) (lplpBufStructure.dwProductVersionMS >> 16);
-            rtnData[3] = (short) (lplpBufStructure.dwProductVersionMS & 0xffff);
-
-            logger.info("Проверка выполнена по библиотеке ФНС версии %d.%d.%d.%d",
-                    rtnData[0], rtnData[1], rtnData[2], rtnData[3]);
-        } catch (URISyntaxException e) {
-            throw new ServiceException("Ошибка при проверке xsd.", e);
+        PointerByReference lplpBuffer = new PointerByReference();
+        IntByReference puLen = new IntByReference();
+        boolean fileInfoResult = Version.INSTANCE.GetFileVersionInfoW(
+                fileVSAX.getAbsolutePath(),
+                0, versionlength, lpData);
+        if (!fileInfoResult){
+            logger.error("Нет связанной с файлом информации.");
+            return;
         }
+        int verQueryVal = Version.INSTANCE.VerQueryValueW(lpData,
+                "\\", lplpBuffer,
+                puLen);
+        if (verQueryVal == 0){
+            logger.error("Связанная с файлом мета-информация недоступна.");
+            return;
+        }
+
+        VS_FIXEDFILEINFO lplpBufStructure = new VS_FIXEDFILEINFO(lplpBuffer.getValue());
+        lplpBufStructure.read();
+
+        short[] rtnData = new short[4];
+        rtnData[0] = (short) (lplpBufStructure.dwProductVersionLS >> 16);
+        rtnData[1] = (short) (lplpBufStructure.dwProductVersionLS & 0xffff);
+        rtnData[2] = (short) (lplpBufStructure.dwProductVersionMS >> 16);
+        rtnData[3] = (short) (lplpBufStructure.dwProductVersionMS & 0xffff);
+
+        logger.info("Проверка выполнена по библиотеке ФНС версии %d.%d.%d.%d",
+                rtnData[0], rtnData[1], rtnData[2], rtnData[3]);
     }
 
     private void unzip(FileOutputStream outFile, InputStream zipXml) throws IOException {
@@ -355,5 +333,6 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
         IOUtils.closeQuietly(zis);
         IOUtils.closeQuietly(outFile);
+        IOUtils.closeQuietly(zipXml);
     }
 }

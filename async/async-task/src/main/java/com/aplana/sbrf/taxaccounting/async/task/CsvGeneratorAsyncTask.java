@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
@@ -17,25 +18,11 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ejb.Local;
-import javax.ejb.Remote;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
-import javax.interceptor.Interceptors;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
-@Local(AsyncTaskLocal.class)
-@Remote(AsyncTaskRemote.class)
-@Stateless
-@Interceptors(AsyncTaskInterceptor.class)
-@TransactionManagement(TransactionManagementType.CONTAINER)
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class CsvGeneratorAsyncTask extends AbstractAsyncTask {
+public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
@@ -59,8 +46,13 @@ public class CsvGeneratorAsyncTask extends AbstractAsyncTask {
     private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+        return BalancingVariants.SHORT;
+    }
+
+    @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("CsvGeneratorAsyncTask has been started");
+        log.debug("CsvGeneratorAsyncTaskImpl has been started");
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -72,7 +64,7 @@ public class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         formDataAccessService.canRead(userInfo, formDataId);
         String uuid = printingService.generateCSV(userInfo, formDataId, manual, isShowChecked, saved);
         reportService.create(formDataId, uuid, ReportType.CSV, isShowChecked, manual, saved);
-        log.debug("CsvGeneratorAsyncTask has been finished");
+        log.debug("CsvGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override

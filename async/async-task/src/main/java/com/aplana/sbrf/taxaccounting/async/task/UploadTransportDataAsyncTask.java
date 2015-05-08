@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
@@ -27,13 +28,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  * Реализация таска "Загрузка ТФ с локального компьютера"
  * @author Lhaziev
  */
-@Local(AsyncTaskLocal.class)
-@Remote(AsyncTaskRemote.class)
-@Stateless
-@Interceptors(AsyncTaskInterceptor.class)
-@TransactionManagement(TransactionManagementType.CONTAINER)
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class UploadTransportDataAsyncTask extends AbstractAsyncTask {
+public abstract class UploadTransportDataAsyncTask extends AbstractAsyncTask {
 
     // private final Log log = LogFactory.getLog(getClass());
 
@@ -57,6 +52,11 @@ public class UploadTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private LoadRefBookDataService loadRefBookDataService;
+
+    @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+        return BalancingVariants.LONG;
+    }
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {

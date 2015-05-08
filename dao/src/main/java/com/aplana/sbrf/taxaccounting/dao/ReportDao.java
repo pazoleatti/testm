@@ -74,6 +74,12 @@ public interface ReportDao {
      */
     void deleteDec(long declarationDataId);
 
+    /**
+     * Удаление отчета по uuid
+     * @param uuid
+     */
+    void deleteDec(String uuid);
+
     void deleteAudit(int userId, ReportType reportType);
 
     void deleteAudit(String blobDataId);

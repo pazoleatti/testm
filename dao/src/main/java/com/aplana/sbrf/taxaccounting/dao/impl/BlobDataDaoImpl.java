@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.io.InputStream;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +28,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
         @Override
         public BlobData mapRow(ResultSet rs, int rowNum) throws SQLException {
             BlobData blobData = new BlobData();
-            blobData.setCreationDate(rs.getTimestamp("creation_date"));
+            blobData.setCreationDate(rs.getDate("creation_date"));
             blobData.setName(rs.getString("name"));
             blobData.setUuid(rs.getString("id"));
             blobData.setInputStream(rs.getBlob("data").getBinaryStream());
@@ -61,6 +62,32 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
+    public String createWithDate(final BlobData blobData) {
+        try{
+            PreparedStatementCreator psc = new PreparedStatementCreator() {
+
+                @Override
+                public PreparedStatement createPreparedStatement(Connection con)
+                        throws SQLException {
+
+                    PreparedStatement ps = con
+                            .prepareStatement(
+                                    "INSERT INTO blob_data (id, name, creation_date, data) VALUES (?,?,?,?)");
+                    ps.setString(1, blobData.getUuid());
+                    ps.setString(2, blobData.getName());
+                    ps.setDate(3, new java.sql.Date(blobData.getCreationDate().getTime()));
+                    ps.setBlob(4, blobData.getInputStream());
+                    return ps;
+                }
+            };
+            getJdbcTemplate().update(psc);
+            return blobData.getUuid();
+        } catch (DataAccessException e) {
+            throw new DaoException("Не удалось создать отчет." + e.toString());
+        }
+    }
+
+    @Override
     public void delete(String uuid) {
         try{
             getJdbcTemplate().update("DELETE FROM blob_data WHERE id = ?",
@@ -84,7 +111,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
     }
 
     @Override
-    public void save(final BlobData blobData) {
+    public void save(final String uuid, final InputStream dataIn) {
         try{
             PreparedStatementCreator psc = new PreparedStatementCreator() {
 
@@ -95,17 +122,17 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     PreparedStatement ps = con
                             .prepareStatement(
                                     "UPDATE blob_data SET data = ? WHERE id = ?");
-                    ps.setBlob(1, blobData.getInputStream());
-                    ps.setString(2, blobData.getUuid());
+                    ps.setBlob(1, dataIn);
+                    ps.setString(2, uuid);
                     return ps;
                 }
             };
             int rowNum = getJdbcTemplate().update(psc);
             if(rowNum == 0)
-                throw new DaoException(String.format("Не существует записи с id = %s", blobData.getUuid()));
+                throw new DaoException(String.format("Не существует записи с id = %s", uuid));
 
         } catch (DataAccessException e){
-            throw new DaoException(String.format("Не удалось обновить данные для id = %s", blobData.getUuid()), e);
+            throw new DaoException(String.format("Не удалось обновить данные для id = %s", uuid), e);
         }
     }
 
@@ -118,6 +145,17 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
                     new BlobDataRowMapper());
         }catch (EmptyResultDataAccessException e){
             return null;
+        }
+    }
+
+    @Override
+    public long getLength(String uuid) {
+        try{
+            return getJdbcTemplate().queryForLong("SELECT dbms_lob.getlength(data) FROM blob_data WHERE id = ?",
+                    new Object[]{uuid},
+                    new int[]{Types.CHAR});
+        }catch (EmptyResultDataAccessException e){
+            return 0;
         }
     }
 

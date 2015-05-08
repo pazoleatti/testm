@@ -34,7 +34,7 @@ public class AsyncManagerMock implements AsyncManager {
     private ApplicationContext applicationContext;
 
     @Override
-    public void executeAsync(long taskTypeId, Map<String, Object> params, BalancingVariants balancingVariant) throws AsyncTaskException {
+    public void executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException {
         try {
             AsyncTaskType asyncTaskType = getJdbcTemplate().queryForObject("select id, name, handler_jndi from async_task_type where id = ?", new RowMapper<AsyncTaskType>() {
                 @Override
@@ -53,7 +53,8 @@ public class AsyncManagerMock implements AsyncManager {
 
             checkParams(params);
             AsyncTask task = applicationContext.getBean(asyncTaskType.getHandlerJndi(), AsyncTask.class);
-            task.execute(params);
+            if (task.checkTaskLimit(params) != null)
+                task.execute(params);
         } catch (EmptyResultDataAccessException e) {
             throw new AsyncTaskPersistenceException("Не найден тип задачи с идентификатором = " + taskTypeId);
         }

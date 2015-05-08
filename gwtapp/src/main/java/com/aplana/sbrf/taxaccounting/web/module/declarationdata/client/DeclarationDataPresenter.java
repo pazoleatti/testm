@@ -48,8 +48,11 @@ public class DeclarationDataPresenter
 	@NameToken(DeclarationDataTokens.declarationData)
     public interface MyProxy extends ProxyPlace<DeclarationDataPresenter>, Place {}
 
-    public static final String DECLARATION_UPDATE_MSG = "Декларация заполнена данными.";
-    public static final String DECLARATION_UPDATE_MSG_D = " Уведомление заполнено данными.";
+    public static final String DECLARATION_TYPE_MSG = "декларации";
+    public static final String DECLARATION_TYPE_MSG_D = "уведомления";
+
+    public static final String DECLARATION_UPDATE_MSG = "Область предварительного просмотра. Расчет декларации выполнен.";
+    public static final String DECLARATION_UPDATE_MSG_D = "Область предварительного просмотра. Расчет уведомления выполнен.";
 
     public static final String DECLARATION_DELETE_Q = "Вы уверены, что хотите удалить декларацию?";
     public static final String DECLARATION_DELETE_Q_D = "Вы уверены, что хотите удалить уведомление?";
@@ -101,6 +104,8 @@ public class DeclarationDataPresenter
         void showState(boolean accepted);
 
         void showNoPdf(String text);
+
+        boolean getVisiblePdfViewer();
     }
 
 	private final DispatchAsync dispatcher;
@@ -226,13 +231,13 @@ public class DeclarationDataPresenter
                                 getView().showNoPdf("Область предварительного просмотра");
                             } else if (ReportType.PDF_DEC.equals(reportType)) {
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
-                                        " Форма предварительного просмотра и печатная форма не могут быть сформированы в связи с превышением максимально допустимого объема декларации");
+                                        " Форма предварительного просмотра не сформирована");
                             }
                             getView().updatePrintReportButtonName(reportType, false);
-                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.ERROR)) {
+                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.LIMIT)) {
                             getView().stopTimerReport(reportType);
                             getView().showNoPdf((!TaxType.DEAL.equals(taxType)?DECLARATION_UPDATE_MSG:DECLARATION_UPDATE_MSG_D) +
-                                    " Форма предварительного просмотра не сформирована");
+                                    "  Форма предварительного просмотра недоступна");
                             getView().updatePrintReportButtonName(reportType, false);
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (ReportType.XML_DEC.equals(reportType)) {
@@ -434,5 +439,53 @@ public class DeclarationDataPresenter
         super.onHide();
         getView().stopTimerReport(ReportType.XML_DEC);
         getView().stopTimerReport(ReportType.EXCEL_DEC);
+    }
+
+    @Override
+    public void viewPdf(Boolean force) {
+        final ReportType reportType = ReportType.EXCEL_DEC;
+        CreatePdfReportAction action = new CreatePdfReportAction();
+        action.setDeclarationDataId(declarationId);
+        action.setForce(force);
+        action.setExistPdf(getView().getVisiblePdfViewer());
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<CreatePdfReportResult>() {
+                    @Override
+                    public void onSuccess(CreatePdfReportResult result) {
+                        LogCleanEvent.fire(DeclarationDataPresenter.this);
+                        LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                        if (result.isExistReport()) {
+                            Dialog.confirmMessage("Для текущего экземпляра " + (!TaxType.DEAL.equals(taxType)?DECLARATION_TYPE_MSG:DECLARATION_TYPE_MSG_D) + " уже сформирована форма предварительного просмотра. Переформировать?", new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    viewPdf(true);
+                                }
+                            });
+                        } else if (result.isExistTask()) {
+                            Dialog.confirmMessage("Для текущего экземпляра " + (!TaxType.DEAL.equals(taxType)?DECLARATION_TYPE_MSG:DECLARATION_TYPE_MSG_D) +" уже выполняется формирование формы предварительного просмотра. Отменить уже выполняющуюся операцию?", new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    viewPdf(true);
+                                }
+
+                                @Override
+                                public void no() {
+                                    viewPdf(false);
+                                }
+                            });
+                        } else {
+                            onTimerReport(ReportType.PDF_DEC, false);
+                        }
+                        getView().updatePrintReportButtonName(reportType, false);
+                        getView().startTimerReport(reportType);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        super.onFailure(caught);
+                        onTimerReport(ReportType.EXCEL_DEC, false);
+                        onTimerReport(ReportType.XML_DEC, false);
+                    }
+                }, this));
     }
 }

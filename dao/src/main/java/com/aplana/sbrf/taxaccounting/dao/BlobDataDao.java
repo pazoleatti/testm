@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -15,6 +16,14 @@ public interface BlobDataDao {
      * @return uuid идентификатор
      */
     String create(BlobData blobData);
+
+    /**
+     * Создание записи в таблице.
+     * Проставляет свою дату, а не дату бд.
+     * @param blobData {@link BlobData}
+     * @return uuid идентификатор
+     */
+    String createWithDate(BlobData blobData);
 
     /**
      * Удаление записи
@@ -31,9 +40,10 @@ public interface BlobDataDao {
     /**
      * Обновление уже существующей записи.
      * Обновляются только само поле с данными файла.
-     * @param blobData {@link BlobData}
+     * @param dataIn данные для сохранения
+     * @param uuid id записи для обновления
      */
-    void save(BlobData blobData);
+    void save(String uuid, InputStream dataIn);
 
     /**
      * Получение записи из таблицы.
@@ -41,6 +51,13 @@ public interface BlobDataDao {
      * @return {@link BlobData}
      */
     BlobData get(String uuid);
+
+    /**
+     * Получение длины данных в blob
+     * @param uuid
+     * @return
+     */
+    long getLength(String uuid);
 
     /**
      * Удаление записей, на которые нет ссылок из других таблиц и которые старше 24 часов
