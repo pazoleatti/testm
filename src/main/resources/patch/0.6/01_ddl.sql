@@ -115,10 +115,12 @@ update ref_book set is_versioned = 0 where id in (30, 93, 207, 95, 74, 103, 94, 
 alter table lock_data add state varchar2(100);
 alter table lock_data add state_date date;
 alter table lock_data add description varchar2(4000);
+alter table lock_data add queue varchar2(100);
 
 comment on column lock_data.state is 'Статус выполнения асинхронной задачи, связанной с блокировкой';
 comment on column lock_data.state_date is 'Дата последнего изменения статуса';
 comment on column lock_data.description is 'Описание блокировки';
+comment on column lock_data.queue is 'Очередь, в которой находится связанная асинхронная задача';
 ---------------------------------------------------------------------------------------------
 
 commit;
