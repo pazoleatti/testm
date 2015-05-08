@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
@@ -370,9 +369,21 @@ public class ImportServiceImpl implements ImportService {
         if (cell == null) {
             return null;
         }
-        String value = null;
         int type = cell.getCellType();
+        return getCellAsString(cell, type, true);
+    }
+
+    /**
+     * Получить значение ячейки.
+     *
+     * @param cell ячейка
+     * @param type тип ячейки
+     * @param useFormulaType проверять тип на формулу (true - для обычной ячейки, false - что бы получить значние формульной ячейки)
+     */
+    private String getCellAsString(Cell cell, int type, boolean useFormulaType) {
+        String value = null;
         if (type == Cell.CELL_TYPE_STRING) {
+            // строка
             value = StringUtils.cleanString(cell.getRichStringCellValue().toString());
         } else if (type == Cell.CELL_TYPE_NUMERIC) {
             if (DateUtil.isCellDateFormatted(cell)) {
@@ -383,32 +394,32 @@ public class ImportServiceImpl implements ImportService {
                 }
             } else {
                 // число
-                BigDecimal tmp1 = BigDecimal.valueOf(cell.getNumericCellValue()).setScale(0, BigDecimal.ROUND_DOWN);
-                BigDecimal tmp2 = BigDecimal.valueOf(cell.getNumericCellValue()).setScale(0, BigDecimal.ROUND_UP);
-                // если число без дроби, то отбросить часть числа "*.0", иначе не надо отбрасывать дробные значения
-                if (tmp1.equals(tmp2)) {
-                    value = tmp1.toPlainString();
-                } else {
-                    value = BigDecimal.valueOf(cell.getNumericCellValue()).toPlainString();
-                }
-                if (value != null) {
-                    // поменять запятую на точку и убрать пробелы
-                    value = value.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
-                }
+                value = getNumberAsString(cell.getNumericCellValue());
             }
-        } else if (type == Cell.CELL_TYPE_FORMULA) {
-            FormulaEvaluator evaluator;
-            if (cell instanceof HSSFCell) {
-                evaluator = new HSSFFormulaEvaluator((HSSFWorkbook)cell.getSheet().getWorkbook());
-            } else {
-                evaluator = new XSSFFormulaEvaluator((XSSFWorkbook)cell.getSheet().getWorkbook());
-            }
-            value = getCellValue(evaluator.evaluateInCell(cell));
-
-        } else if (type == Cell.CELL_TYPE_BLANK) {
-            value = null;
+        } else if (useFormulaType && type == Cell.CELL_TYPE_FORMULA) {
+            // формула - результат формулы может быть числовым, строковым..
+            value = getCellAsString(cell, cell.getCachedFormulaResultType(), false);
         }
         return value;
+    }
+
+    /** Получить число в строковом виде. */
+    private String getNumberAsString(double value) {
+        String result;
+        // число
+        BigDecimal tmp1 = BigDecimal.valueOf(value).setScale(0, BigDecimal.ROUND_DOWN);
+        BigDecimal tmp2 = BigDecimal.valueOf(value).setScale(0, BigDecimal.ROUND_UP);
+        // если число без дроби, то отбросить часть числа "*.0", иначе не надо отбрасывать дробные значения
+        if (tmp1.equals(tmp2)) {
+            result = tmp1.toPlainString();
+        } else {
+            result = BigDecimal.valueOf(value).toPlainString();
+        }
+        if (result != null) {
+            // поменять запятую на точку и убрать пробелы
+            result = result.replaceAll(",", ".").replaceAll("[^\\d.,-]+", "");
+        }
+        return result;
     }
 
     /**

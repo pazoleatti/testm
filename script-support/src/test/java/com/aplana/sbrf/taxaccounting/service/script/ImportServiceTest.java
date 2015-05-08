@@ -17,8 +17,8 @@ public class ImportServiceTest {
     /**
      * Получить данные xls.
      */
-    private InputStream getInputStream() {
-        String fileName = getClass().getResource("rnu25ImportTest.xls").getFile();
+    private InputStream getInputStream(String name) {
+        String fileName = getClass().getResource(name).getFile();
         File file = new File(fileName);
         if (!file.exists()) {
             return null;
@@ -32,12 +32,17 @@ public class ImportServiceTest {
 
     @Test
     public void getAllData() throws IOException {
-        assertTrue(service.getData(getInputStream(), "fileName.xls") != null);
+        assertTrue(service.getData(getInputStream("rnu25ImportTest.xls"), "fileName.xls") != null);
     }
 
     @Test
     public void getTableData() throws IOException {
-        assertTrue(service.getData(getInputStream(), "fileName.xls", "windows-1251",
+        assertTrue(service.getData(getInputStream("rnu25ImportTest.xls"), "fileName.xls", "windows-1251",
                 "Государственный регистрационный номер", "Общий итог") != null);
+    }
+
+    @Test
+    public void getAllDataWithBadCellFormula() throws IOException {
+        assertTrue(service.getData(getInputStream("937_1withBadCellFormula.xls"), "fileName.xls") != null);
     }
 }
