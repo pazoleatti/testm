@@ -1328,6 +1328,7 @@ boolean isGroupClass2(def matrixRow, def srcRow, def typeMap) {
             class2ext = srcRow.transactionDeliveryDate == null
             break
         case 386: // 11
+        case 388: // 13
         case 389: // 14
         case 390: // 15
         case 391: // 16
@@ -1336,9 +1337,6 @@ boolean isGroupClass2(def matrixRow, def srcRow, def typeMap) {
         case 401: // 24
         case 403: // 25
             class2ext = srcRow.dealNumber == null && srcRow.dealDate == null
-            break
-        case 388: // 13
-            class2ext = srcRow.dealNumber == null && srcRow.transactionDeliveryDate == null
             break
     }
     return class2ext || (matrixRow.contractDate != null && matrixRow.contractNum != null)
