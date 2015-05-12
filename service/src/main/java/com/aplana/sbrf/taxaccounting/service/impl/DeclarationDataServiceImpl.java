@@ -223,6 +223,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
+        checkSources(declarationData, logger);
 
         //2. проверяет состояние XML отчета экземпляра декларации
         setDeclarationBlobs(logger, declarationData, docDate, userInfo);
@@ -265,39 +266,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     "Найдены ошибки при выполнении проверки декларации",
                     logEntryService.save(logger.getEntries()));
         } else {
-            ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
-            List<DepartmentFormType> sourceDDs = departmentFormTypeDao.getDeclarationSources(
-                    dd.getDepartmentId(),
-                    declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getId(),
-                    rp.getStartDate(),
-                    rp.getEndDate());
-            for (DepartmentFormType sourceDFT : sourceDDs){
-                FormData sourceFD =
-                        formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), dd.getDepartmentReportPeriodId(), null);
-                if (sourceFD==null){
-                    DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
-                    logger.warn(
-                            NOT_EXIST_SOURCE_DECLARATION_WARNING,
-                            departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
-                            formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                            sourceDFT.getKind().getName(),
-                            rp.getName(),
-                            rp.getTaxPeriod().getYear(),
-                            drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                    formatter.format(drp.getCorrectionDate())) : "");
-                } else if (!sourceService.isDeclarationSourceConsolidated(id, sourceFD.getId())){
-                    DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
-                    logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
-                            departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
-                            sourceFD.getFormType().getName(),
-                            sourceFD.getKind().getName(),
-                            rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
-                            rp.getTaxPeriod().getYear(),
-                            sourceDRP.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                    formatter.format(sourceDRP.getCorrectionDate())) : "",
-                            sourceFD.getState().getName());
-                }
-            }
+            checkSources(dd, logger);
             logger.info("Проверка завершена, ошибок не обнаружено");
         }
     }
@@ -352,9 +321,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (lock(id, userInfo) == null) {
             try {
                 // TODO (sgoryachkin) Это 2 метода должо быть
-                if (accepted) {
-                    DeclarationData declarationData = declarationDataDao.get(id);
+                DeclarationData declarationData = declarationDataDao.get(id);
+                checkSources(declarationData, logger);
 
+                if (accepted) {
                     Map<String, Object> exchangeParams = new HashMap<String, Object>();
                     declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
@@ -370,7 +340,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else {
                     declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
 
-                    DeclarationData declarationData = declarationDataDao.get(id);
                     declarationData.setAccepted(false);
 
                     Map<String, Object> exchangeParams = new HashMap<String, Object>();
@@ -513,7 +482,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     fileWriter = new FileWriter(xmlFile);
                     fileWriter.write(XML_HEADER);
                 } catch (IOException e) {
-                    new ServiceException("Ошибка при формировании временного файла для XML", e);
+                    throw new ServiceException("Ошибка при формировании временного файла для XML", e);
                 }
                 log.info(String.format("Закончено создание временного файла для декларации %s", declarationData.getId()));
                 exchangeParams.put(DeclarationDataScriptParams.XML, fileWriter);
@@ -858,5 +827,41 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
         }
         throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+    }
+
+    private void checkSources(DeclarationData dd, Logger logger){
+        ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
+        List<DepartmentFormType> sourceDDs = departmentFormTypeDao.getDeclarationSources(
+                dd.getDepartmentId(),
+                declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getId(),
+                rp.getStartDate(),
+                rp.getEndDate());
+        for (DepartmentFormType sourceDFT : sourceDDs){
+            FormData sourceFD =
+                    formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), dd.getDepartmentReportPeriodId(), null);
+            if (sourceFD==null){
+                DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
+                logger.warn(
+                        NOT_EXIST_SOURCE_DECLARATION_WARNING,
+                        departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
+                        formTypeService.get(sourceDFT.getFormTypeId()).getName(),
+                        sourceDFT.getKind().getName(),
+                        rp.getName(),
+                        rp.getTaxPeriod().getYear(),
+                        drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                formatter.format(drp.getCorrectionDate())) : "");
+            } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
+                DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
+                logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
+                        departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
+                        sourceFD.getFormType().getName(),
+                        sourceFD.getKind().getName(),
+                        rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
+                        rp.getTaxPeriod().getYear(),
+                        sourceDRP.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                formatter.format(sourceDRP.getCorrectionDate())) : "",
+                        sourceFD.getState().getName());
+            }
+        }
     }
 }
