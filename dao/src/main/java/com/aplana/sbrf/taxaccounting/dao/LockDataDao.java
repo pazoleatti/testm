@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 import java.util.Date;
@@ -93,12 +93,10 @@ public interface LockDataDao {
     /**
      * Получает список всех блокировок
      * @return все блокировки
-     * @param startIndex с
-     * @param countOfRecords по
-     * @param searchOrdering поле по которому выполняется сортировка
-     * @param ascSorting порядок сортировки
+     * @param filter ограничение по имени пользователя или ключу
+     * @param pagingParams параметры пэйджинга
      */
-    PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords, LockSearchOrdering searchOrdering, boolean ascSorting);
+    PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки

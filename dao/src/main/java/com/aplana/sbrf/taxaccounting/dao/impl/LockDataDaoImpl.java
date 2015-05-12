@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.aplana.sbrf.taxaccounting.model.LockData;
@@ -177,16 +177,18 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords, LockSearchOrdering searchOrdering, boolean ascSorting) {
+    public PagingResult<LockData> getLocks(String filter, PagingParams pagingParams) {
         try {
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("start", startIndex + 1);
-            params.put("count", startIndex + countOfRecords);
+            params.put("start", pagingParams.getStartIndex() + 1);
+            params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("filter", "%" + filter.toLowerCase() + "%");
-            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, u.login, rownum as rn FROM lock_data ld "
+            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, u.login, row_number() over (order by queue, date_lock) as rn FROM lock_data ld "
                     + "join sec_user u on u.id = ld.user_id "
-                    + (filter != null && !filter.isEmpty() ? "where lower(key) like :filter or lower(login) like :filter " : "")
-                    + "order by " + searchOrdering + (ascSorting ? " asc" : " desc")+ ") ";
+                    + (filter != null && !filter.isEmpty() ?
+                    "where lower(key) like :filter or lower(description) like :filter or lower(login) like :filter "
+                    : "")
+                    + ") ";
 
             String fullSql = "select * from" + sql + "where rn between :start and :count order by rn";
             String countSql = "select count(*) from" + sql;

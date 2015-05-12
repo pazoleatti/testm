@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
 import java.util.List;
@@ -173,12 +170,9 @@ public interface LockDataService {
      * Получает список всех блокировок
      * @return все блокировки
      * @param filter ограничение по имени пользователя или ключу
-     * @param startIndex с
-     * @param countOfRecords по
-     * @param searchOrdering поле по которому выполняется сортировка
-     * @param ascSorting порядок сортировки
+     * @param pagingParams параметры пэйджинга
      */
-    PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords, LockSearchOrdering searchOrdering, boolean ascSorting);
+    PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки

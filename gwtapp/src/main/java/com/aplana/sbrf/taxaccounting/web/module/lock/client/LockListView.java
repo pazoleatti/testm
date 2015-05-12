@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.lock.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.LockDataItem;
-import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -74,27 +72,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
             }
     );
 
-    private AsyncDataProviderWithSortableTable dataProvider;
-    private LockSearchOrdering sortByColumn;
-
-    @Override
-    public boolean isAscSorting() {
-        return dataProvider.isAscSorting();
-    }
-
-    @Override
-    public void setSortByColumn(String sortByColumn) {
-        this.sortByColumn = LockSearchOrdering.valueOf(sortByColumn);
-    }
-
-    @Override
-    public LockSearchOrdering getSearchOrdering() {
-        if (sortByColumn == null) {
-            sortByColumn = LockSearchOrdering.KEY;
-        }
-        return sortByColumn;
-    }
-
     @Inject
     @UiConstructor
     public LockListView(final Binder uiBinder) {
@@ -114,7 +91,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getDescription();
             }
         };
-        descriptionColumn.setDataStoreName(LockSearchOrdering.DESCRIPTION.name());
 
         TextColumn<LockDataItem> queueColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -122,7 +98,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getQueue();
             }
         };
-        descriptionColumn.setDataStoreName(LockSearchOrdering.QUEUE.name());
 
         TextColumn<LockDataItem> keyColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -130,7 +105,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getKey();
             }
         };
-        keyColumn.setDataStoreName(LockSearchOrdering.KEY.name());
 
         TextColumn<LockDataItem> userColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -138,7 +112,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getUserLogin();
             }
         };
-        userColumn.setDataStoreName(LockSearchOrdering.LOGIN.name());
 
         TextColumn<LockDataItem> stateColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -146,7 +119,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getState();
             }
         };
-        stateColumn.setDataStoreName(LockSearchOrdering.STATE.name());
 
         TextColumn<LockDataItem> stateDateColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -154,7 +126,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getDateLock();
             }
         };
-        stateDateColumn.setDataStoreName(LockSearchOrdering.STATE_DATE.name());
         stateDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<LockDataItem> dateLockColumn = new TextColumn<LockDataItem>() {
@@ -163,7 +134,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getDateLock();
             }
         };
-        dateLockColumn.setDataStoreName(LockSearchOrdering.DATE_LOCK.name());
         dateLockColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<LockDataItem> dateBeforeColumn = new TextColumn<LockDataItem>() {
@@ -172,7 +142,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getDateBefore();
             }
         };
-        dateBeforeColumn.setDataStoreName(LockSearchOrdering.DATE_BEFORE.name());
         dateBeforeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         lockDataTable.setColumnWidth(checkColumn, 40, Style.Unit.PX);
@@ -204,12 +173,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
             }
         });
 
-        dataProvider = new AsyncDataProviderWithSortableTable<LockDataItem, LockListUiHandlers, LockListView>(lockDataTable, this) {
-            @Override
-            public LockListUiHandlers getViewUiHandlers() {
-                return getUiHandlers();
-            }
-        };
         lockDataTable.setPageSize(pager.getPageSize());
         pager.setDisplay(lockDataTable);
 
@@ -241,6 +204,17 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     @Override
     public String getFilter() {
         return filterText.getValue();
+    }
+
+    @Override
+    public int getPageSize() {
+        return pager.getPageSize();
+    }
+
+    @Override
+    public void assignDataProvider(int pageSize, AbstractDataProvider<LockDataItem> data) {
+        lockDataTable.setPageSize(pageSize);
+        data.addDataDisplay(lockDataTable);
     }
 
     @UiHandler("extendButton")
@@ -301,9 +275,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
 
     @Override
     public void updateData(int pageNumber) {
-        if (pageNumber == 0) {
-            lockDataTable.getColumnSortList().clear();
-        }
         if (pager.getPage() == pageNumber) {
             lockDataTable.setVisibleRangeAndClearData(lockDataTable.getVisibleRange(), true);
         } else {

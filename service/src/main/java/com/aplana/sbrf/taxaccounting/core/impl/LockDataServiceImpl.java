@@ -270,9 +270,8 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords,
-                                           LockSearchOrdering searchOrdering, boolean ascSorting) {
-        return dao.getLocks(filter, startIndex, countOfRecords, searchOrdering, ascSorting);
+    public PagingResult<LockData> getLocks(String filter, PagingParams pagingParams) {
+        return dao.getLocks(filter, pagingParams);
     }
 
     @Override
