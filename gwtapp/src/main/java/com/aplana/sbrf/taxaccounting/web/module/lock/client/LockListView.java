@@ -17,6 +17,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.*;
@@ -38,9 +39,13 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     }
 
     public static final String KEY_TITLE = "Ключ блокировки";
+    public static final String QUEUE_TITLE = "Очередь";
+    public static final String DESCRIPTION_TITLE = "Описание";
     public static final String USER_TITLE = "Пользователь";
-    public static final String DATE_LOCK_BEFORE = "Дата истечения блокировки";
-    public static final String DATE_LOCK = "Дата установки блокировки";
+    public static final String STATE_TITLE = "Состояние задачи";
+    public static final String STATE_DATE_TITLE = "Дата изменения";
+    public static final String DATE_LOCK_BEFORE = "Дата истечения";
+    public static final String DATE_LOCK = "Дата установки";
 
     @UiField
     Button extendButton;
@@ -103,6 +108,22 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 }
             };
 
+        TextColumn<LockDataItem> descriptionColumn = new TextColumn<LockDataItem>() {
+            @Override
+            public String getValue(LockDataItem taskItem) {
+                return taskItem.getDescription();
+            }
+        };
+        descriptionColumn.setDataStoreName(LockSearchOrdering.DESCRIPTION.name());
+
+        TextColumn<LockDataItem> queueColumn = new TextColumn<LockDataItem>() {
+            @Override
+            public String getValue(LockDataItem taskItem) {
+                return taskItem.getQueue();
+            }
+        };
+        descriptionColumn.setDataStoreName(LockSearchOrdering.QUEUE.name());
+
         TextColumn<LockDataItem> keyColumn = new TextColumn<LockDataItem>() {
             @Override
             public String getValue(LockDataItem taskItem) {
@@ -119,6 +140,23 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         };
         userColumn.setDataStoreName(LockSearchOrdering.LOGIN.name());
 
+        TextColumn<LockDataItem> stateColumn = new TextColumn<LockDataItem>() {
+            @Override
+            public String getValue(LockDataItem taskItem) {
+                return taskItem.getState();
+            }
+        };
+        stateColumn.setDataStoreName(LockSearchOrdering.STATE.name());
+
+        TextColumn<LockDataItem> stateDateColumn = new TextColumn<LockDataItem>() {
+            @Override
+            public String getValue(LockDataItem taskItem) {
+                return taskItem.getDateLock();
+            }
+        };
+        stateDateColumn.setDataStoreName(LockSearchOrdering.STATE_DATE.name());
+        stateDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
         TextColumn<LockDataItem> dateLockColumn = new TextColumn<LockDataItem>() {
             @Override
             public String getValue(LockDataItem taskItem) {
@@ -126,6 +164,7 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
             }
         };
         dateLockColumn.setDataStoreName(LockSearchOrdering.DATE_LOCK.name());
+        dateLockColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<LockDataItem> dateBeforeColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -134,11 +173,24 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
             }
         };
         dateBeforeColumn.setDataStoreName(LockSearchOrdering.DATE_BEFORE.name());
+        dateBeforeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
+        lockDataTable.setColumnWidth(checkColumn, 40, Style.Unit.PX);
+        lockDataTable.setColumnWidth(dateLockColumn, 120, Style.Unit.PX);
+        lockDataTable.setColumnWidth(dateBeforeColumn, 120, Style.Unit.PX);
+        lockDataTable.setColumnWidth(userColumn, 100, Style.Unit.PX);
+        lockDataTable.setColumnWidth(stateColumn, 300, Style.Unit.PX);
+        lockDataTable.setColumnWidth(stateDateColumn, 120, Style.Unit.PX);
+        lockDataTable.setColumnWidth(keyColumn, 200, Style.Unit.PX);
+        lockDataTable.setColumnWidth(queueColumn, 200, Style.Unit.PX);
 
         lockDataTable.addColumn(checkColumn);
-        lockDataTable.setColumnWidth(checkColumn, 40, Style.Unit.PX);
         lockDataTable.addColumn(keyColumn, KEY_TITLE);
         lockDataTable.addColumn(userColumn, USER_TITLE);
+        lockDataTable.addColumn(descriptionColumn, DESCRIPTION_TITLE);
+        lockDataTable.addColumn(stateColumn, STATE_TITLE);
+        lockDataTable.addColumn(stateDateColumn, STATE_DATE_TITLE);
+        lockDataTable.addColumn(queueColumn, QUEUE_TITLE);
         lockDataTable.addResizableColumn(dateLockColumn, DATE_LOCK);
         lockDataTable.addResizableColumn(dateBeforeColumn, DATE_LOCK_BEFORE);
 

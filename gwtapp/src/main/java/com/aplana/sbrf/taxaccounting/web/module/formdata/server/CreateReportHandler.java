@@ -73,11 +73,13 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                 LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA))) == null) {
             try {
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                lockData = lockDataService.getLock(key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), action.isSaved());
                 if (uuid == null) {
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    BalancingVariants balancingVariant = asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                     logger.info(String.format("%s отчет текущей налоговой формы (%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
                 } else {
                     result.setExistReport(true);

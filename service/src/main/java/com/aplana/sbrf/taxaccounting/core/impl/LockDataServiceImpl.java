@@ -308,6 +308,29 @@ public class LockDataServiceImpl implements LockDataService {
         });
     }
 
+    @Override
+    public void updateQueue(final String key, final Date lockDate, final String queue) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public void execute() {
+                try {
+                    synchronized (LockDataServiceImpl.class) {
+                        dao.updateQueue(key, lockDate, queue);
+                    }
+                } catch (ServiceException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new ServiceException("Не удалось обновить статус блокировки объекта", e);
+                }
+            }
+
+            @Override
+            public Object executeWithReturn() {
+                return null;
+            }
+        });
+    }
+
     /**
 	 * Проверяет блокировку. Если срок ее действия вышел, то она удаляется
 	 */

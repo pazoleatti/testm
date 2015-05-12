@@ -94,6 +94,8 @@ public final class LockData {
     private Date stateDate;
     /* Описание блокировки */
     private String description;
+    /* Очередь, в которой находится связанная асинхронная задача */
+    private String queue;
 
 	public LockData(){
 	}
@@ -160,6 +162,14 @@ public final class LockData {
         this.description = description;
     }
 
+    public String getQueue() {
+        return queue;
+    }
+
+    public void setQueue(String queue) {
+        this.queue = queue;
+    }
+
     @Override
     public String toString() {
         return "LockData{" +
@@ -170,6 +180,7 @@ public final class LockData {
                 ", state='" + state + '\'' +
                 ", stateDate=" + stateDate +
                 ", description='" + description + '\'' +
+                ", queue='" + queue + '\'' +
                 '}';
     }
 }

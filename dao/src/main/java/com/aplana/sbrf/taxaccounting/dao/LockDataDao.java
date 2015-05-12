@@ -120,4 +120,12 @@ public interface LockDataDao {
      * @param state новый статус
      */
     void updateState(String key, Date lockDate, String state);
+
+    /**
+     * Обновляет очередь, к которой относится асинхронная задача, связанная с указанной блокировкой
+     * @param key код блокировки
+     * @param lockDate дата начала действия блокировки
+     * @param queue очередь
+     */
+    void updateQueue(String key, Date lockDate, String queue);
 }

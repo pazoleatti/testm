@@ -33,7 +33,7 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP')")
 public class GetLockListHandler extends AbstractActionHandler<GetLockListAction, GetLockListResult> {
 
-    private static final String DATE_FORMAT = "dd-MM-yyyy HH:mm";
+    private static final String DATE_FORMAT = "dd-MM-yyyy HH:mm:ss";
 
     @Autowired
     LockDataService lockService;
@@ -56,9 +56,13 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
         for (LockData lockData : records) {
             LockDataItem lock = new LockDataItem();
             lock.setKey(lockData.getKey());
+            lock.setDescription(lockData.getDescription());
             lock.setUserLogin(userService.getUser(lockData.getUserId()).getLogin());
             lock.setDateBefore(df.format(lockData.getDateBefore()));
             lock.setDateLock(df.format(lockData.getDateLock()));
+            lock.setState(lockData.getState());
+            lock.setStateDate(lockData.getStateDate() != null ? df.format(lockData.getStateDate()) : null);
+            lock.setQueue(lockData.getQueue());
             locks.add(lock);
         }
 

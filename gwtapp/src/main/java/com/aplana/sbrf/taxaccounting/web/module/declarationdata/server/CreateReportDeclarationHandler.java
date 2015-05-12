@@ -77,9 +77,11 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                     try {
                         String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), action.getType());
                         if (uuid == null) {
-                            params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                            lockData = lockDataService.getLock(key);
+                            params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                             lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                            asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                            BalancingVariants balancingVariant = asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                            lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                             logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", action.getType().getName()));
                         } else {
                             result.setExistReport(true);

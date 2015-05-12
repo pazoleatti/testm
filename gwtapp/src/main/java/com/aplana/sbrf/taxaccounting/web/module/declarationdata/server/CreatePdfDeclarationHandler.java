@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -97,9 +98,11 @@ public class CreatePdfDeclarationHandler extends AbstractActionHandler<CreatePdf
                                 reportService.deleteDec(uuid);
                             }
 
-                            params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                            lockData = lockDataService.getLock(key);
+                            params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                             lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                            asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                            BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                            lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                             logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", ReportType.PDF_DEC.getName()));
                         } else {
                             result.setExistReport(true);
