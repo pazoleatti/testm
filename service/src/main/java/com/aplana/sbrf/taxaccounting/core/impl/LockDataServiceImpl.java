@@ -286,8 +286,26 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void updateState(String key, Date lockDate, String state) {
-        dao.updateState(key, lockDate, state);
+    public void updateState(final String key, final Date lockDate, final String state) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public void execute() {
+                try {
+                    synchronized (LockDataServiceImpl.class) {
+                        dao.updateState(key, lockDate, state);
+                    }
+                } catch (ServiceException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new ServiceException("Не удалось обновить статус блокировки объекта", e);
+                }
+            }
+
+            @Override
+            public Object executeWithReturn() {
+                return null;
+            }
+        });
     }
 
     /**
