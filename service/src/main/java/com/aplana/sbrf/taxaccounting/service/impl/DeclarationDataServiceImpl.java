@@ -528,8 +528,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 }
             }
 
-            declarationDataDao.setShowReport(declarationData.getId(), params.isShowReport());
-
             //Получение имени файла записанного в xml
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
