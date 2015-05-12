@@ -441,7 +441,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	void onCancelButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
 			getUiHandlers().onCancelClicked();
-            consolidationButton.setVisible(true);
 		}
 	}
 
@@ -496,7 +495,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     void onEditButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
             getUiHandlers().onEditClicked(false);
-            consolidationButton.setVisible(false);
         }
     }
 

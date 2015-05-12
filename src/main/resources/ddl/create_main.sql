@@ -409,8 +409,7 @@ create table declaration_data (
   tax_organ_code          varchar2(4),
   kpp                     varchar2(9),
   is_accepted             number(1) not null,
-  department_report_period_id number(18) not null,
-  is_show_report number(1) default 1 not null
+  department_report_period_id number(18) not null
 );
 
 comment on table declaration_data is 'Налоговые декларации';
@@ -420,7 +419,6 @@ comment on column declaration_data.tax_organ_code is 'Налоговый орг�
 comment on column declaration_data.kpp is 'КПП';
 comment on column declaration_data.is_accepted is 'Признак того, что декларация принята';
 comment on column declaration_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
-comment on column declaration_data.is_show_report is 'Признак возможности формирования pdf и xlsx';
 
 create sequence seq_declaration_data start with 10000;
 ------------------------------------------------------------------------------------------------------------------------------------------

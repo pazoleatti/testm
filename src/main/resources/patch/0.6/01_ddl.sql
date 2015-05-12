@@ -61,14 +61,6 @@ alter table declaration_type add constraint declaration_type_fk_taxtype foreign 
 alter table tax_period add constraint tax_period_fk_taxtype foreign key (tax_type) references tax_type(id);
 
 ---------------------------------------------------------------------------------------------
---http://jira.aplana.com/browse/SBRFACCTAX-10763: Добавление признака возможности формирования pdf и xlsx в таблицу declaration_data
-
-alter table declaration_data add is_show_report number(1) default 1 not null;
-comment on column declaration_data.is_show_report is 'Признак возможности формирования pdf и xlsx';
-
-alter table declaration_data add constraint declaration_data_chk_isshowrep check (is_show_report in (0,1));
-
----------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-10451: Таблицы для консолидации
 
 create table form_data_consolidation
