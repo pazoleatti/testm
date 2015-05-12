@@ -13,12 +13,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -33,8 +31,6 @@ public class BlobDataDaoTest {
     @Autowired
     BlobDataDao blobDataDao;
 
-    BlobData blobData;
-
     File file;
 
     @Before
@@ -42,35 +38,46 @@ public class BlobDataDaoTest {
         URL url = Thread.currentThread().getContextClassLoader().getResource(ClassUtils.classPackageAsResourcePath(BlobDataDaoTest.class));
         assert url != null;
         file = new File(url.getPath() + "/BlobDataDaoTest.xml");
-
-        blobData = new BlobData();
-        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
-        blobData.setName("hello.xls");
-        blobData.setInputStream(new FileInputStream(file));
     }
 
     @Test
     public void createGetTest() throws IOException {
+        BlobData blobData = new BlobData();
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        blobData.setName("hello.xls");
+        blobData.setInputStream(new FileInputStream(file));
         Assert.assertEquals(file.length(), blobData.getInputStream().available());
         blobDataDao.create(blobData);
-        Assert.assertEquals(blobData.getName(),blobDataDao.get(blobData.getUuid()).getName());
+        Assert.assertEquals(blobData.getName(), blobDataDao.get(blobData.getUuid()).getName());
     }
 
     @Test
-    public void saveTest(){
+    public void saveTest() throws FileNotFoundException {
+        BlobData blobData = new BlobData();
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        blobData.setName("hello.xls");
+        blobData.setInputStream(new FileInputStream(file));
         blobDataDao.create(blobData);
-        blobDataDao.save(blobData);
+        blobDataDao.save(blobData.getUuid(), new FileInputStream(file));
     }
 
     @Test
-    public void deleteTest(){
+    public void deleteTest() throws FileNotFoundException {
+        BlobData blobData = new BlobData();
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        blobData.setName("hello.xls");
+        blobData.setInputStream(new FileInputStream(file));
         blobDataDao.create(blobData);
         blobDataDao.delete(blobData.getUuid());
         Assert.assertNull(blobDataDao.get(blobData.getUuid()));
     }
 
     @Test
-    public void deleteListTest(){
+    public void deleteListTest() throws FileNotFoundException {
+        BlobData blobData = new BlobData();
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        blobData.setName("hello.xls");
+        blobData.setInputStream(new FileInputStream(file));
         ArrayList<String> strings = new ArrayList<String>();
         strings.add(blobDataDao.create(blobData));
         blobDataDao.delete(strings);
@@ -117,5 +124,20 @@ public class BlobDataDaoTest {
         Assert.assertNull(bd4);
         Assert.assertNotNull(bd5);
         Assert.assertNotNull(bd6);
+    }
+
+    @Test
+    public void createWithCustomDateTest() throws IOException {
+        BlobData blobData = new BlobData();
+        blobData.setUuid(UUID.randomUUID().toString().toLowerCase());
+        blobData.setName("hello.xls");
+        blobData.setInputStream(new FileInputStream(file));
+        blobData.setCreationDate(new Date());
+
+        blobDataDao.createWithDate(blobData);
+        File file1 = new File(System.getProperty("java.io.tmpdir")+ File.separator +"1.xml");
+        FileWriter fileWriter = new FileWriter(file1);
+        fileWriter.write('d');
+        fileWriter.close();
     }
 }

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
@@ -84,14 +83,14 @@ public class DeclarationDataController {
     public void xml(@PathVariable int id, HttpServletResponse response)
             throws IOException {
 
-        Reader xmlReader = new InputStreamReader(declarationService.getXmlDataAsStream(id, securityService.currentUserInfo()), "windows-1251");
-        String fileName = URLEncoder.encode(getFileName(id, securityService.currentUserInfo(), "xml"), ENCODING);
+        InputStream xmlDataIn = declarationService.getXmlDataAsStream(id, securityService.currentUserInfo());
+        String fileName = URLEncoder.encode(declarationService.getXmlDataFileName(id, securityService.currentUserInfo()), ENCODING);
 
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
-        IOUtils.copy(xmlReader, response.getOutputStream(), "windows-1251");
-        response.flushBuffer();
+        IOUtils.copy(xmlDataIn, response.getOutputStream());
+        IOUtils.closeQuietly(xmlDataIn);
     }
 
     private String getFileName(long id, TAUserInfo userInfo, String fileExtension) {

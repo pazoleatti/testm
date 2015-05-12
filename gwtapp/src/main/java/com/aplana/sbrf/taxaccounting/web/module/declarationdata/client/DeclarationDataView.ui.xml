@@ -177,7 +177,7 @@
                                               title="Отобразить историю налоговой формы"/>
                             <style:LinkButton ui:field="sources" text="Источники и приемники" img="resources/img/source-target.png"
                                               title="Источники"/>
-                            <style:LinkAnchor text="Выгрузить в xml" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
+                            <style:LinkAnchor text="Выгрузить в XML" ui:field="downloadXmlButton" img="resources/img/download-xml-16.png"
                                               title="Скачать декларацию в формате законодателя"/>
                             <style:LinkAnchor text="Выгрузить в xlsx" ui:field="downloadExcelButton" img="resources/img/download-xls-16.png"
                                               title="Скачать декларацию в формате Excel-документа" visible="false"/>

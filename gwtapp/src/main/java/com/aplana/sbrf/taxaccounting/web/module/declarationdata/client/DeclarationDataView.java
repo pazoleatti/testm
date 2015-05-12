@@ -322,7 +322,6 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             if (isLoad) {
                 viewPdf.setVisible(true);
                 downloadXmlButton.setVisible(true);
-                downloadXmlButton.setText("Выгрузить в XML");
                 timerXML.cancel();
             } else {
                 viewPdf.setVisible(false);

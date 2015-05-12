@@ -90,14 +90,7 @@ public interface DeclarationDataService {
 	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
 	 */
 	void setAccepted(Logger logger, long declarationDataId, boolean accepted, TAUserInfo userInfo);
-	/**
-	 * Получить данные декларации в формате законодателя (XML)
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @return строка, содержащая данные декларации в формате законодателя
-	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
-	 */
-	String getXmlData(long declarationDataId, TAUserInfo userInfo);
+
     /**
      * Получить данные декларации в формате законодателя (XML)
      * @param declarationDataId идентификатор декларации
