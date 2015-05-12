@@ -36,13 +36,6 @@ public interface DeclarationDataDao {
 	 */
 	void setAccepted(long declarationDataId, boolean accepted);
 
-    /**
-     * Установить признак возможности формирования отчета декларации
-     * @param declarationDataId идентификатор декларации
-     * @param showReport признак возможности формирования отчета
-     */
-    void setShowReport(long declarationDataId, boolean showReport);
-	
 	/**
 	 * Удалить декларацию
 	 * @param declarationDataId идентификатор декларации

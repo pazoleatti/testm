@@ -14,7 +14,6 @@ public class DeclarationData extends IdentityObject<Long> {
 	private int reportPeriodId;
 	private int departmentId;
     private Integer departmentReportPeriodId;
-    private boolean isShowReport;
 
 	private boolean accepted;
     private String taxOrganCode;
@@ -74,14 +73,6 @@ public class DeclarationData extends IdentityObject<Long> {
 
     public void setDepartmentReportPeriodId(Integer departmentReportPeriodId) {
         this.departmentReportPeriodId = departmentReportPeriodId;
-    }
-
-    public boolean isShowReport() {
-        return isShowReport;
-    }
-
-    public void setShowReport(boolean isShowReport) {
-        this.isShowReport = isShowReport;
     }
 
     /**

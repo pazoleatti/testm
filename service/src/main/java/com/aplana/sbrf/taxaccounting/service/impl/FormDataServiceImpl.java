@@ -561,7 +561,7 @@ public class FormDataServiceImpl implements FormDataService {
                             sourceFD.getState().getName()
                     );
                 }
-            } else if (!dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
+            } else if (dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
                 logger.info("Консолидация выполнена из всех форм-источников");
             }
             // Ошибка для отката транзакции

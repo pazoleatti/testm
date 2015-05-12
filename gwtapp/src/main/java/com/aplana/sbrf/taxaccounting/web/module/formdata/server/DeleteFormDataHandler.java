@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
@@ -16,8 +16,6 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 /**
  * 
@@ -33,27 +31,6 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 
 	@Autowired
 	private SecurityService securityService;
-
-    @Autowired
-    private SourceService sourceService;
-
-    @Autowired
-    private LogEntryService logEntryService;
-
-    @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
-    private DepartmentReportPeriodService departmentReportPeriodService;
-
-    @Autowired
-    private FormTemplateService formTemplateService;
-
-    @Autowired
-    private PeriodService reportPeriodService;
-
-    @Autowired
-    private FormDataScriptingService scriptingService;
 
     @Autowired
     private LockDataService lockDataService;
@@ -73,15 +50,19 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
         //Проверяем не заблокирована ли нф операцией загрузки в нее
         boolean lockedByImport = lockDataService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT + "_" + action.getFormData().getId(), true);
         if (!locked && !lockedByImport) {
+            FormData formData = action.getFormData();
+            if (formData.getState() != WorkflowState.CREATED){
+                throw new ServiceLoggerException("НФ не может быть удалена, так находится в статусе, отличном от \"Создана\"!", null);
+            }
             // Версия ручного ввода удаляется без проверок
-            if (action.isManual()) {
+            /*if (action.isManual()) {
                 formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), true);
                 return result;
             }
 
             FormData formData = action.getFormData();
 
-            /** Проверяем в скрипте источники-приемники для особенных форм */
+            *//** Проверяем в скрипте источники-приемники для особенных форм *//*
             Map<String, Object> params = new HashMap<String, Object>();
             FormSources sources = new FormSources();
             sources.setSourceList(new ArrayList<FormToFormRelation>());
@@ -89,6 +70,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
             params.put("sources", sources);
             scriptingService.executeScript(securityService.currentUserInfo(), formData, FormDataEvent.GET_SOURCES, logger, params);
 
+            //Система проверяет наличие экземпляров, которые являются источниками НФ и имеют статус "Принята"
             if (sources.isSourcesProcessedByScript()) {
                 //Скрипт возвращает все необходимые источники-приемники
                 if (sources.getSourceList() != null) {
@@ -199,7 +181,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
             if (logger.containsLevel(LogLevel.ERROR)) {
                 result.setUuid(logEntryService.save(logger.getEntries()));
                 return result;
-            }
+            }*/
 
             // Удаление при отсутствии ошибок
             formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), false);
