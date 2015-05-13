@@ -83,8 +83,9 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
             scriptParams.put("needPdf", false);
             scriptParams.put("needXlsx", true);
             scriptingService.executeScript(userInfo, declarationData, FormDataEvent.REPORT, logger, scriptParams);
-            if (!scriptProcessedModel.isProcessedByScript()) {reportService.createDec(declarationDataId,
-                    blobDataService.create(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationDataId, userInfo)), ""), ReportType.EXCEL_DEC);
+            if (!scriptProcessedModel.isProcessedByScript()) {
+                String uuid = blobDataService.create(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationDataId, userInfo)), "");
+                reportService.createDec(declarationDataId, uuid, ReportType.EXCEL_DEC);
             }
         }
     }

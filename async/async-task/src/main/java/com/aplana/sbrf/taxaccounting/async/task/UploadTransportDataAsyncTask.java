@@ -17,11 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 /**
@@ -53,6 +52,9 @@ public abstract class UploadTransportDataAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LoadRefBookDataService loadRefBookDataService;
 
+    @Autowired
+    private LockDataService lockService;
+
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         return BalancingVariants.LONG;
@@ -64,6 +66,8 @@ public abstract class UploadTransportDataAsyncTask extends AbstractAsyncTask {
         String uuidFile = (String)params.get("uuidFile");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         BlobData blobData = blobDataService.get(uuidFile);
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
@@ -79,9 +83,11 @@ public abstract class UploadTransportDataAsyncTask extends AbstractAsyncTask {
             // Загрузка из каталога
             if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
                 // Diasoft
+                lockService.updateState(lock, lockDate, "Импорт справочников \"Diasoft\"");
                 loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger);
             }
             if (!uploadResult.getAvgCostFileNameList().isEmpty()) {
+                lockService.updateState(lock, lockDate, "Импорт справочника \"Средняя стоимость транспортных средств\"");
                 loadRefBookDataService.importRefBookAvgCost(userInfo, uploadResult.getAvgCostFileNameList(), logger);
             }
 
@@ -91,6 +97,7 @@ public abstract class UploadTransportDataAsyncTask extends AbstractAsyncTask {
                 List<Integer> departmentList = new ArrayList(CollectionUtils.intersection(
                         loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
 
+                lockService.updateState(lock, lockDate, "Импорт налоговых форм");
                 loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger);
             }
         } catch (IOException e) {

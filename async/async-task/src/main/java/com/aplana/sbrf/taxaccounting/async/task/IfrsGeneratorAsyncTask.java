@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -13,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
+import java.util.Date;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 public abstract class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
@@ -28,6 +33,9 @@ public abstract class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private PeriodService periodService;
 
+    @Autowired
+    private LockDataService lockService;
+
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         return BalancingVariants.LONG;
@@ -39,8 +47,15 @@ public abstract class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
         Integer reportPeriod = (Integer)params.get("reportPeriodId");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
-        ifrsDataService.calculate(logger, reportPeriod);
+        ifrsDataService.calculate(logger, reportPeriod, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+                lockService.updateState(lock, lockDate, state);
+            }
+        });
     }
 
     @Override

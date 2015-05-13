@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -35,8 +36,9 @@ public interface DeclarationDataService {
      * @param declarationDataId - идентификатор декларации
      * @param userInfo - информация о пользователе, выполняющего операцию
      * @param docDate - дата обновления декларации
+     * @param stateLogger - логгер для обновления статуса асинхронной задачи
      */
-	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate);
+	void calculate(Logger logger, long declarationDataId, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger);
 
     /**
      * Формирование Pdf отчета
@@ -45,7 +47,7 @@ public interface DeclarationDataService {
      * @param userInfo
      */
     void setPdfDataBlobs(Logger logger,
-                         DeclarationData declarationData, TAUserInfo userInfo);
+                         DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
 	/**
 	 * Получить декларацию
 	 * @param declarationDataId идентификатор декларации

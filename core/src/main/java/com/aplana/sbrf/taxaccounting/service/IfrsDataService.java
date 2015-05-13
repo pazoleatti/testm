@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
@@ -28,8 +29,9 @@ public interface IfrsDataService {
     /**
      * Формирование отчетности для МСФО
      * @param reportPeriodId
+     * @param stateLogger
      */
-    void calculate(Logger logger, Integer reportPeriodId);
+    void calculate(Logger logger, Integer reportPeriodId, LockStateLogger stateLogger);
 
     /**
      * Обновление записи об отчетности для МСФО
