@@ -1,8 +1,11 @@
 package form_template.income.rnu14.v2012
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -49,8 +52,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            calc()
+            logicCheck()
+        }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -276,13 +281,17 @@ void addData(def xml, int headRowCount) {
     def rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
     def colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
 
+    ((DataRow<Cell>)dataRows[4]).getCell('normBase').setCheckMode(true)
     // графа 4 строки 5
     if (xml.row[headRowCount + 5] != null) {
         dataRows[4].normBase = parseNumber(xml.row[headRowCount + 5].cell[3].text(), rowOffset + headRowCount + 5, 3 + colOffset, logger, true)
     } else {
         dataRows[4].normBase = null
     }
-    dataRowHelper.update(dataRows)
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.update(dataRows)
+    }
 }
 
 void importTransportData() {
@@ -294,12 +303,15 @@ void addTransportData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    ((DataRow<Cell>)dataRows[4]).getCell('normBase').setCheckMode(true)
     // графа 4 строки 5
     if (xml.row[4] != null) {
         dataRows[4].normBase = parseNumber(xml.row[4].cell[4].text(), 7, 5, logger, true)
     } else {
         dataRows[4].normBase = null
     }
-
-    dataRowHelper.update(dataRows)
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.update(dataRows)
+    }
 }
