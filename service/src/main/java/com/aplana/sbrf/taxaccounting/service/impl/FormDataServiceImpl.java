@@ -1107,7 +1107,7 @@ public class FormDataServiceImpl implements FormDataService {
             //Блокировка текущей формы
             String lockCurrentKey = LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId();
             LockData lockDataCurrent = lockService.lock(lockCurrentKey,
-                    userInfo.getUser().getId(),
+                    userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
                     lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
             if (lockDataCurrent != null) {
                 logger.error(
