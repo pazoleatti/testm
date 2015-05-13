@@ -778,7 +778,8 @@ public class FormDataServiceImpl implements FormDataService {
                     checkReferenceValues(logger, formData);
                     if (workflowMove == WorkflowMove.CREATED_TO_ACCEPTED
                             || workflowMove == WorkflowMove.CREATED_TO_PREPARED
-                            || workflowMove == WorkflowMove.PREPARED_TO_ACCEPTED) {
+                            || workflowMove == WorkflowMove.PREPARED_TO_ACCEPTED
+                            || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED) {
                         //Проверка выполнена ли консолидация из всех принятых источников текущего экземпляра
                         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                         List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
