@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ import java.util.Map;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class CreatePdfDeclarationHandler extends AbstractActionHandler<CreatePdfReportAction, CreatePdfReportResult> {
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     @Autowired
     private SecurityService securityService;
@@ -94,14 +97,18 @@ public class CreatePdfDeclarationHandler extends AbstractActionHandler<CreatePdf
                                 return result;
                             }
                             if (lockDataService.lock(key, userInfo.getUser().getId(),
+                                    declarationDataService.getDeclarationFullName(action.getDeclarationDataId(), "PDF"),
+                                    LockData.State.IN_QUEUE.getText(),
                                     lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
                                 try {
                                     params.put("declarationDataId", action.getDeclarationDataId());
                                     params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                                     params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                                    params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                                    lockData = lockDataService.getLock(key);
+                                    params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                                    asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                                    BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                                     logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", ReportType.PDF_DEC.getName()));
                                 } catch (Exception e) {
                                     lockDataService.unlock(key, userInfo.getUser().getId());

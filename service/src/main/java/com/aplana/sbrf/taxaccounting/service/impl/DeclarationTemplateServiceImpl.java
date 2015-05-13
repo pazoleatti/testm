@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
@@ -41,6 +42,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     private final static String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
     private static final String XSD_NOT_FOUND = "Файл xsd к макету не прикреплен!";
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -285,8 +287,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
     @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
-        LockData objectLock = lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId,
-                userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_TEMPLATE));
+        DeclarationTemplate declarationTemplate = get(declarationTemplateId);
+        LockData objectLock = lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser().getId(),
+                String.format(
+                        LockData.DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
+                        declarationTemplate.getName(),
+                        SDF_DD_MM_YYYY.format(declarationTemplate.getVersion())
+                ),
+                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_TEMPLATE));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
     }
 

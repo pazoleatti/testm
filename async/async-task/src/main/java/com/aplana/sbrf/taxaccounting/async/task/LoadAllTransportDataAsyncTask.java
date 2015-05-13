@@ -56,7 +56,9 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
         userInfo.setUser(userService.getUser(userId));
 
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        lockDataService.lock(key, userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
+        lockDataService.lock(key, userInfo.getUser().getId(),
+                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
+                lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
         try {
             // Diasoft
             loadRefBookDataService.importRefBookDiasoft(userInfo, logger);

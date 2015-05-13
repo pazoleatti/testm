@@ -134,7 +134,7 @@ public class LoadRefBookDataServiceTest {
         ReflectionTestUtils.setField(service, "signService", signService);
 
         LockDataService lockService = mock(LockDataService.class);
-        when(lockService.lock(anyString(), anyInt(), anyLong())).thenReturn(null);
+        when(lockService.lock(anyString(), anyInt(), anyString(), anyString(), anyLong())).thenReturn(null);
         ReflectionTestUtils.setField(service, "lockService", lockService);
 
         RefBookDao refBookDao = mock(RefBookDao.class);

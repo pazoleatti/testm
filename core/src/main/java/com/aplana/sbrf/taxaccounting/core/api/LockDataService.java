@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
 import java.util.List;
@@ -51,10 +48,23 @@ public interface LockDataService {
 	 * Если блокировка уже существовала, то возвращется информация по этой блокировке в виде объекта LockData
      * @param key код блокировки
 	 * @param userId код установившего блокировку пользователя
+     * @param description описание блокировки
 	 * @param age относительное время жизни блокировки в миллисекундах
 	 * @return информация о блокировке
 	 */
-	LockData lock(String key, int userId, long age);
+	LockData lock(String key, int userId, String description, long age);
+
+    /**
+     * Устанавливает новую блокировку до времени = now + age. Если блокировка успешно установилась, то возвращается null.
+     * Если блокировка уже существовала, то возвращется информация по этой блокировке в виде объекта LockData
+     * @param key код блокировки
+     * @param userId код установившего блокировку пользователя
+     * @param description описание блокировки
+     * @param state Статус асинхронной задачи, связанной с блокировкой
+     * @param age относительное время жизни блокировки в миллисекундах
+     * @return информация о блокировке
+     */
+    LockData lock(String key, int userId, String description, String state, long age);
 
     /**
      * Возвращает данные блокировки по ключу
@@ -71,10 +81,11 @@ public interface LockDataService {
 	 * @param key код блокировки
 	 * @param userId код установившего блокировку пользователя
 	 * @param age относительное время жизни блокировки в миллисекундах
+     * @param description описание блокировки
 	 * @param timeout максимальное относительное время ожидания для установки новой блокировки
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если время ожидания timeout истекло
 	 */
-	void lockWait(String key, int userId, long age, long timeout);
+	void lockWait(String key, int userId, long age, String description, long timeout);
 
 	/**
 	 * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.
@@ -159,12 +170,9 @@ public interface LockDataService {
      * Получает список всех блокировок
      * @return все блокировки
      * @param filter ограничение по имени пользователя или ключу
-     * @param startIndex с
-     * @param countOfRecords по
-     * @param searchOrdering поле по которому выполняется сортировка
-     * @param ascSorting порядок сортировки
+     * @param pagingParams параметры пэйджинга
      */
-    PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords, LockSearchOrdering searchOrdering, boolean ascSorting);
+    PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки
@@ -178,4 +186,20 @@ public interface LockDataService {
      * @param hours количество часов, на которое будут продлены блокировки
      */
     void extendAll(List<String> keys, int hours);
+
+    /**
+     * Обновляет статус выполнения асинхронной задачи, связанной с блокировкой
+     * @param key код блокировки
+     * @param lockDate дата начала действия блокировки
+     * @param state новый статус
+     */
+    void updateState(String key, Date lockDate, String state);
+
+    /**
+     * Обновляет очередь, к которой относится асинхронная задача, связанная с указанной блокировкой
+     * @param key код блокировки
+     * @param lockDate дата начала действия блокировки
+     * @param queue очередь
+     */
+    void updateQueue(String key, Date lockDate, String queue);
 }

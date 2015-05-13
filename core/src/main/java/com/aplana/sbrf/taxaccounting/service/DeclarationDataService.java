@@ -190,4 +190,12 @@ public interface DeclarationDataService {
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 
     Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType);
+
+    /**
+     * Возвращает полное название декларации с указанием подразделения, периода и прочего
+     * @param declarationId идентификатор декларации
+     * @param reportType тип отчета. Может быть null
+     * @return название
+     */
+    String getDeclarationFullName(long declarationId, String reportType);
 }

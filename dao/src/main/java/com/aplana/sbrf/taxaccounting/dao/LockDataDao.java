@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
 import java.util.Date;
@@ -32,11 +32,13 @@ public interface LockDataDao {
 
 	/**
 	 * Создает новую блокировку
-	 * @param key код блокировки
-	 * @param userId код пользователя, установившего блокировку
-	 * @param dateBefore срок жизни блокировки
-	 */
-	void createLock(String key, int userId, Date dateBefore);
+     * @param key код блокировки
+     * @param userId код пользователя, установившего блокировку
+     * @param dateBefore срок жизни блокировки
+     * @param description описание блокировки
+     * @param state Статус асинхронной задачи, связанной с блокировкой
+     */
+	void createLock(String key, int userId, Date dateBefore, String description, String state);
 
 	/**
 	 * Обновляет блокировку
@@ -91,12 +93,10 @@ public interface LockDataDao {
     /**
      * Получает список всех блокировок
      * @return все блокировки
-     * @param startIndex с
-     * @param countOfRecords по
-     * @param searchOrdering поле по которому выполняется сортировка
-     * @param ascSorting порядок сортировки
+     * @param filter ограничение по имени пользователя или ключу
+     * @param pagingParams параметры пэйджинга
      */
-    PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords, LockSearchOrdering searchOrdering, boolean ascSorting);
+    PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки
@@ -110,4 +110,20 @@ public interface LockDataDao {
      * @param hours количество часов, на которое будут продлены блокировки
      */
     void extendAll(List<String> keys, int hours);
+
+    /**
+     * Обновляет статус выполнения асинхронной задачи, связанной с блокировкой
+     * @param key код блокировки
+     * @param lockDate дата начала действия блокировки
+     * @param state новый статус
+     */
+    void updateState(String key, Date lockDate, String state);
+
+    /**
+     * Обновляет очередь, к которой относится асинхронная задача, связанная с указанной блокировкой
+     * @param key код блокировки
+     * @param lockDate дата начала действия блокировки
+     * @param queue очередь
+     */
+    void updateQueue(String key, Date lockDate, String queue);
 }

@@ -29,6 +29,7 @@ public abstract class AbstractUserTask implements UserTask {
         String key = LockData.LockObjects.SCHEDULER_TASK + "_" + taskId;
         LockData lockData;
         if ((lockData = lockDataService.lock(key, TAUser.SYSTEM_USER_ID,
+                String.format(LockData.DescriptionTemplate.SCHEDULER_TASK.getText(), getTaskName()),
                 lockDataService.getLockTimeout(LockData.LockObjects.SCHEDULER_TASK))) == null) {
             try {
                 log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");

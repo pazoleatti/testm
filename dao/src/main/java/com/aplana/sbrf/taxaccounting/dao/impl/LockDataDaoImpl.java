@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.LockException;
 import com.aplana.sbrf.taxaccounting.model.LockData;
@@ -34,7 +34,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	public LockData get(String key, boolean like) {
 		try {
             return getJdbcTemplate().queryForObject(
-					"SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key " + (like ? "like ?" : "= ?"),
+					"SELECT key, user_id, date_before, date_lock, description, state, state_date, queue FROM lock_data WHERE key " + (like ? "like ?" : "= ?"),
 					new Object[] {like ? "%" + key + "%" : key},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
@@ -50,7 +50,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_before, date_lock FROM lock_data WHERE key = ? and date_lock = ?",
+                    "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue FROM lock_data WHERE key = ? and date_lock = ?",
                     new Object[] {key, lockDate},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
@@ -63,13 +63,16 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-	public void createLock(String key, int userId, Date dateBefore) {
+	public void createLock(String key, int userId, Date dateBefore, String description, String state) {
 		try {
-            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before) VALUES (?,?,?)",
+            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before, description, state, state_date) VALUES (?,?,?,?,?,sysdate)",
 					new Object[] {key,
 							userId,
-							dateBefore},
-					new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP});
+							dateBefore,
+                            description,
+                            state
+                    },
+					new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR});
 		} catch (DataAccessException e) {
 			throw new LockException("Ошибка при создании блокировки (%s, %s, %s). %s", key, userId, dateBefore, e.getMessage());
         }
@@ -174,16 +177,18 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public PagingResult<LockData> getLocks(String filter, int startIndex, int countOfRecords, LockSearchOrdering searchOrdering, boolean ascSorting) {
+    public PagingResult<LockData> getLocks(String filter, PagingParams pagingParams) {
         try {
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("start", startIndex + 1);
-            params.put("count", startIndex + countOfRecords);
+            params.put("start", pagingParams.getStartIndex() + 1);
+            params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("filter", "%" + filter.toLowerCase() + "%");
-            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, u.login, rownum as rn FROM lock_data ld "
+            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, u.login, row_number() over (order by queue, date_lock) as rn FROM lock_data ld "
                     + "join sec_user u on u.id = ld.user_id "
-                    + (filter != null && !filter.isEmpty() ? "where lower(key) like :filter or lower(login) like :filter " : "")
-                    + "order by " + searchOrdering + (ascSorting ? " asc" : " desc")+ ") ";
+                    + (filter != null && !filter.isEmpty() ?
+                    "where lower(key) like :filter or lower(description) like :filter or lower(login) like :filter "
+                    : "")
+                    + ") ";
 
             String fullSql = "select * from" + sql + "where rn between :start and :count order by rn";
             String countSql = "select count(*) from" + sql;
@@ -207,6 +212,20 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     }
 
+    @Override
+    public void updateState(String key, Date lockDate, String state) {
+        getJdbcTemplate().update("update lock_data set state = ?, state_date = sysdate where key = ? and date_lock = ?",
+                new Object[] {state, key, lockDate},
+                new int[] {Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
+    }
+
+    @Override
+    public void updateQueue(String key, Date lockDate, String queue) {
+        getJdbcTemplate().update("update lock_data set queue = ?, state_date = sysdate where key = ? and date_lock = ?",
+                new Object[] {queue, key, lockDate},
+                new int[] {Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
+    }
+
     private static final class LockDataMapper implements RowMapper<LockData> {
 		@Override
         public LockData mapRow(ResultSet rs, int index) throws SQLException {
@@ -215,6 +234,10 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 			result.setUserId(rs.getInt("user_id"));
 			result.setDateBefore(rs.getTimestamp("date_before"));
             result.setDateLock(rs.getTimestamp("date_lock"));
+            result.setState(rs.getString("state"));
+            result.setStateDate(result.getState() != null ? rs.getTimestamp("state_date") : null);
+            result.setDescription(rs.getString("description"));
+            result.setQueue(rs.getString("queue"));
 			return result;
 		}
 	}

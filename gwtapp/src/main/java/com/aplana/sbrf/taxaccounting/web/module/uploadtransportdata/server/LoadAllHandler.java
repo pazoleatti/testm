@@ -64,16 +64,20 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         int userId = userInfo.getUser().getId();
         String key = LockData.LockObjects.LOAD_TRANSPORT_DATA.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         LockData lockData = lockDataService.lock(key, userId,
+                LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
+                LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.LOAD_TRANSPORT_DATA));
         if (lockData == null) {
             try {
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                lockData = lockDataService.getLock(key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 try {
                     lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);
