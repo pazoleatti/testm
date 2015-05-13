@@ -55,12 +55,11 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
         String uuid = printingService.generateAuditCsv(records);
         reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.CSV_AUDIT);
         records.clear();
-        log.debug("CsvAuditGeneratorAsyncTaskSpring has been finished");
     }
 
     @Override
     protected String getAsyncTaskName() {
-        return "Отчет по журналу аудита";
+        return "Формирование отчета по журналу аудита";
     }
 
     @Override

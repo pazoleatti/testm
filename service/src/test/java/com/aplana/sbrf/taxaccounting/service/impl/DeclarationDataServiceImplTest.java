@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -70,7 +71,12 @@ public class DeclarationDataServiceImplTest {
 			TAUserInfo userInfo = new TAUserInfo();
 			userInfo.setIp("192.168.72.16");
 			userInfo.setUser(mockUser(10,  Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-			declarationDataService.calculate(logger, 1l, userInfo, new Date());
+			declarationDataService.calculate(logger, 1l, userInfo, new Date(), new LockStateLogger() {
+                @Override
+                public void updateState(String state) {
+
+                }
+            });
 		} catch (ServiceException e) {
 			//Nothing
 		}
@@ -85,7 +91,12 @@ public class DeclarationDataServiceImplTest {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp("192.168.72.16");
 		userInfo.setUser(mockUser(10,  2, TARole.ROLE_CONTROL));
-		declarationDataService.calculate(logger, 2l, userInfo, new Date());
+		declarationDataService.calculate(logger, 2l, userInfo, new Date(), new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+
+            }
+        });
 	}
 
     @Test

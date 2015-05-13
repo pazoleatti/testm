@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.Notification;
@@ -54,6 +53,15 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     protected abstract String getAsyncTaskName();
 
     /**
+     * Возвращает описание основной операции, входящей в выполнение бизнес-логики
+     * Используется при смене статуса задачи
+     * @return описание
+     */
+    protected String getBusinessLogicTitle() {
+        return getAsyncTaskName();
+    }
+
+    /**
      * Возвращает текст оповещения, которое будет создано для пользователей, ожидающих выполнение этой задачи
      * @return текст сообщения
      */
@@ -77,7 +85,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 try {
                     if (lockService.isLockExists(lock, lockDate)) {
                         log.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
-                        lockService.updateState(lock, lockDate, LockData.State.BUSINESS_LOGIC.getText());
+                        lockService.updateState(lock, lockDate, getBusinessLogicTitle());
                         final Logger logger = new Logger();
                         //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                         executeBusinessLogic(params, logger);

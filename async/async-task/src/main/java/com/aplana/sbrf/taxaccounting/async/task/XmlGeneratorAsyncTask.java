@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
@@ -39,6 +41,9 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
 
+    @Autowired
+    private LockDataService lockService;
+
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         return BalancingVariants.LONG;
@@ -46,20 +51,25 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("XmlGeneratorAsyncTaskImpl has been started");
         Date docDate = (Date)params.get("docDate");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
-        declarationDataService.calculate(logger, declarationDataId, userInfo, docDate);
-        log.debug("XmlGeneratorAsyncTaskImpl has been finished");
+        declarationDataService.calculate(logger, declarationDataId, userInfo, docDate, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+                lockService.updateState(lock, lockDate, state);
+            }
+        });
     }
 
     @Override
     protected String getAsyncTaskName() {
-        return "Генерация xml-файла";
+        return "Формирование xml-файла";
     }
 
     @Override

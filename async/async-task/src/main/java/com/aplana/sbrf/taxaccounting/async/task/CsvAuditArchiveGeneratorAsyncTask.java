@@ -40,7 +40,6 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("CsvAuditGeneratorAsyncTaskImpl has been started");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
@@ -58,7 +57,6 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
                 records.get(records.size()-1),
                 userInfo);
         /*result.setCountOfRemoveRecords(records.getTotalCount());*/
-        log.debug("CsvAuditGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override

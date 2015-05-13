@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -14,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 /**
@@ -42,6 +46,9 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LoadRefBookDataService loadRefBookDataService;
 
+    @Autowired
+    private LockDataService lockService;
+
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         return BalancingVariants.LONG;
@@ -49,11 +56,11 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("LoadAllTransportDataAsyncTaskSpring has been started!");
-
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         lockDataService.lock(key, userInfo.getUser().getId(),
@@ -61,16 +68,18 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
                 lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
         try {
             // Diasoft
+            lockService.updateState(lock, lockDate, "Импорт справочников \"Diasoft\"");
             loadRefBookDataService.importRefBookDiasoft(userInfo, logger);
 
+            lockService.updateState(lock, lockDate, "Импорт справочника \"Средняя стоимость транспортных средств\"");
             loadRefBookDataService.importRefBookAvgCost(userInfo, logger);
 
             // НФ
+            lockService.updateState(lock, lockDate, "Импорт налоговых форм");
             loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger);
         } finally {
             lockDataService.unlock(key, userInfo.getUser().getId());
         }
-        log.debug("LoadAllTransportDataAsyncTaskSpring has been finished");
     }
 
     @Override
