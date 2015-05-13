@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject;
 import com.aplana.sbrf.taxaccounting.async.entity.AsyncTaskTypeEntity;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskPersistenceException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManagerLocal;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncTaskThread;
 import com.aplana.sbrf.taxaccounting.async.persistence.AsyncTaskPersistenceServiceLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import org.apache.commons.logging.Log;
@@ -56,12 +55,9 @@ public class ShortAsyncMDB implements MessageListener {
                 //Получаем данные задачи
                 AsyncTask task = (AsyncTask) ic.lookup(taskType.getHandlerJndi());
                 Map<String, Object> params = asyncMdbObject.getParams();
-                AsyncTaskThread thread = new AsyncTaskThread(task, params);
-                Thread threadRunner = new Thread(thread);
                 //Сохраняем данные о потоке-исполнителе в менеджере, для того чтобы можно было остановить поток
-                interruptionManager.addTask((String) params.get(LOCKED_OBJECT.name()), threadRunner);
-                //Запускаем класс-исполнитель в отдельном потоке
-                threadRunner.start();
+                interruptionManager.addTask((String) params.get(LOCKED_OBJECT.name()), Thread.currentThread());
+                task.execute(params);
             } else {
                 log.error("Unexpected empty message content. Instance of com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject cannot be null!");
             }
@@ -71,6 +67,8 @@ public class ShortAsyncMDB implements MessageListener {
             log.error("Task parameters with id = " + taskTypeId + " were not found!", e);
         } catch (NamingException e) {
             log.error("Async task handler was not found! JNDI = " + taskType.getHandlerJndi(), e);
+        } catch (Exception e) {
+            log.error("Unexpected MDB exception: ", e);
         }
     }
 }
