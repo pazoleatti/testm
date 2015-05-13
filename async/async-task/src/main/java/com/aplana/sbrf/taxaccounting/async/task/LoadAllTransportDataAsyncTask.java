@@ -49,8 +49,6 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("LoadAllTransportDataAsyncTaskSpring has been started!");
-
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
@@ -70,7 +68,6 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
         } finally {
             lockDataService.unlock(key, userInfo.getUser().getId());
         }
-        log.debug("LoadAllTransportDataAsyncTaskSpring has been finished");
     }
 
     @Override

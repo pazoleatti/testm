@@ -67,7 +67,6 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("PdfGeneratorAsyncTaskImpl has been started");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
@@ -86,12 +85,11 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
                 declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo);
             }
         }
-        log.debug("PdfGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override
     protected String getAsyncTaskName() {
-        return "Генерация pdf-файла";
+        return "Формирование pdf-файла";
     }
 
     @Override

@@ -63,7 +63,6 @@ public final class LockData {
     public enum State {
         IN_QUEUE("В очереди на выполнение"),
         STARTED("Началось выполнение"),
-        BUSINESS_LOGIC("Выполняется бизнес-логика"),
         SAVING_MSGS("Выполняется сохранение уведомлений"),
         SENDING_MSGS("Выполняется рассылка уведомлений"),
         SENDING_ERROR_MSGS("Произошла ошибка. Выполняется рассылка уведомлений"),

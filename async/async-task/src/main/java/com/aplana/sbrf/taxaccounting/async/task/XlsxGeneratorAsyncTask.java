@@ -69,7 +69,6 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("XlsxGeneratorAsyncTaskImpl has been started");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
@@ -88,13 +87,11 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
                     blobDataService.create(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationDataId, userInfo)), ""), ReportType.EXCEL_DEC);
             }
         }
-
-        log.debug("XlsxGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override
     protected String getAsyncTaskName() {
-        return "Генерация xlsx-файла";
+        return "Формирование xlsx-файла";
     }
 
     @Override
