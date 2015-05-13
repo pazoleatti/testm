@@ -271,8 +271,14 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
 	public boolean lock(int formTemplateId, TAUserInfo userInfo){
+        FormTemplate formTemplate = get(formTemplateId);
         LockData objectLock = lockDataService.lock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId,
                 userInfo.getUser().getId(),
+                String.format(
+                        LockData.DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
+                        formTemplate.getName(),
+                        SIMPLE_DATE_FORMAT.format(formTemplate.getVersion())
+                ),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_TEMPLATE));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
 	}

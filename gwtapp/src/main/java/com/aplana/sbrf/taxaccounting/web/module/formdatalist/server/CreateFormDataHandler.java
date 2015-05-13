@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     private static final String ERROR_SELECT_FORM_DATA_TYPE = "Вид налоговой формы не выбран!";
     private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
     private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 
     public CreateFormDataHandler() {
 		super(CreateFormData.class);
@@ -72,25 +74,35 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 		Logger logger = new Logger();
         String key = LockData.LockObjects.FORM_DATA_CREATE.name() + "_" + action.getFormDataTypeId() + "_" + action.getFormDataKindId() + "_" + action.getDepartmentId() + "_" + action.getReportPeriodId() + "_" + action.getMonthId();
 
+        // Подставляется последний отчетный период подразделения
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(),
+                action.getReportPeriodId());
+        if (departmentReportPeriod == null) {
+            throw new ServiceException(ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND);
+        }
+        Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
+        FormDataKind kind = FormDataKind.fromId(action.getFormDataKindId());
+        Integer formDataTypeId = action.getFormDataTypeId();
+        FormType formType = formTypeService.get(formDataTypeId);
+
         if (lockDataService.lock(key, userInfo.getUser().getId(),
+                String.format(LockData.DescriptionTemplate.FORM_DATA_CREATE.getText(),
+                        formType.getName(),
+                        kind.getName(),
+                        department.getName(),
+                        departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        departmentReportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
+                                : ""),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
             //Если блокировка успешно установлена
             try {
-                // Подставляется последний отчетный период подразделения
-                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(),
-                        action.getReportPeriodId());
-
-                if (departmentReportPeriod == null) {
-                    throw new ServiceException(ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND);
-                }
 
                 /**
                  *  Проверка существования назначений источников-приемников
                  */
 
                 // 1. Если форма является приемником данных в указанном периоде, то Система выводит сообщение в панель уведомления предупреждение: "Форма является приемником данных."
-                FormDataKind kind = FormDataKind.fromId(action.getFormDataKindId());
-                Integer formDataTypeId = action.getFormDataTypeId();
                 List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentReportPeriod.getDepartmentId(),
                         formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (!sources.isEmpty()){
@@ -116,8 +128,6 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                         departmentReportPeriod.getReportPeriod().getId(),
                         departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType(), kind);
                 if (departmentReportPeriod.getCorrectionDate() != null && !declarationDestinations.isEmpty() && !manualInputForms.isEmpty()) {
-                    Department department = departmentService.getDepartment(departmentReportPeriod.getDepartmentId());
-                    FormType formType = formTypeService.get(formDataTypeId);
                     logger.info(String.format(MANUAL_USED_MESSAGE, formType.getName(), kind.getName(), department.getName()));
                 }
 

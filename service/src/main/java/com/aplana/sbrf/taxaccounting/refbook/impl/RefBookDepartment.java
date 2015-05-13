@@ -235,6 +235,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
         LockData lockData = lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
                 lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
@@ -248,6 +249,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
                                     lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
@@ -320,6 +322,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
                 lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
@@ -333,6 +336,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
                                     lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
@@ -515,6 +519,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
                 lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
         if (lockData == null) {
             try {
@@ -528,6 +533,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
                                     lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                             if (referenceLockData == null) {
                                 //Блокировка установлена

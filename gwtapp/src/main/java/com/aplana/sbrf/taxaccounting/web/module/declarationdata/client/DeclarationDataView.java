@@ -284,7 +284,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
     @UiHandler("viewPdf")
     public void onViewPdfButton(ClickEvent event){
-        getUiHandlers().viewPdf(null);
+        getUiHandlers().viewPdf(false);
     }
 
 	@UiHandler("downloadExcelButton")
@@ -320,7 +320,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         } else if (ReportType.XML_DEC.equals(reportType)) {
             downloadExcelButton.setVisible(false);
             if (isLoad) {
-                viewPdf.setVisible(true);
+                //viewPdf.setVisible(true);
                 downloadXmlButton.setVisible(true);
                 timerXML.cancel();
             } else {
@@ -329,11 +329,13 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             }
         } else if (ReportType.PDF_DEC.equals(reportType)) {
             if (isLoad) {
+                viewPdf.setVisible(false);
                 downloadExcelButton.setVisible(true);
                 downloadExcelButton.setEnabled(true);
                 getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, false);
                 timerPDF.cancel();
             } else {
+                viewPdf.setVisible(true);
                 downloadExcelButton.setText("Сформировать xlsx");
                 downloadExcelButton.setVisible(true);
                 downloadExcelButton.setEnabled(false);

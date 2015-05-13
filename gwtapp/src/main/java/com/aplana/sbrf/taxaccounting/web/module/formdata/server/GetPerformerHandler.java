@@ -60,7 +60,9 @@ public class GetPerformerHandler extends AbstractActionHandler<GetPerformerActio
             if (lockData == null) {
                 result.setReadOnlyMode(false);
                 result.setCreteLock(true);
-                lockService.lock(key, userInfo.getUser().getId(), lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+                lockService.lock(key, userInfo.getUser().getId(),
+                        formDataService.getFormDataFullName(action.getFormData().getId(), null, null),
+                        lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
             } else if (lockData != null && lockData.getUserId() == userInfo.getUser().getId()) {
                 result.setReadOnlyMode(false);
             } else {

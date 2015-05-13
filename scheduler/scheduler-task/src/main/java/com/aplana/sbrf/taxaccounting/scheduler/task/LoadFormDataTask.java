@@ -82,7 +82,9 @@ public class LoadFormDataTask extends AbstractUserTask {
             departmentsIds.add(departmentId);
         }
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        lockDataService.lock(key, userId, lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+        lockDataService.lock(key, userId,
+                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
+                lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
         try {
             loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger());
         } finally {

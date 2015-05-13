@@ -12,7 +12,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class CreatePdfReportAction extends UnsecuredActionImpl<CreatePdfReportResult> implements ActionName {
 
     private long declarationDataId;
-    private Boolean isForce;
+    private boolean isForce;
     private boolean existPdf;
 
     public long getDeclarationDataId() {
@@ -23,11 +23,11 @@ public class CreatePdfReportAction extends UnsecuredActionImpl<CreatePdfReportRe
         this.declarationDataId = declarationDataId;
     }
 
-    public Boolean isForce() {
+    public boolean isForce() {
         return isForce;
     }
 
-    public void setForce(Boolean isForce) {
+    public void setForce(boolean isForce) {
         this.isForce = isForce;
     }
 

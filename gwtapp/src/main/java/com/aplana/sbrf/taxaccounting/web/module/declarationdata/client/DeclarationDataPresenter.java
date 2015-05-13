@@ -216,6 +216,7 @@ public class DeclarationDataPresenter
                     @Override
                     public void onSuccess(TimerReportResult result) {
                         if (ReportType.PDF_DEC.equals(reportType) && result.getExistXMLReport() != null) {
+                            //перезапуск таймера XML, выполняется если был запущен таймер ожидания PDF при этом нету XML
                             getView().stopTimerReport(reportType);
                             onTimerReport(ReportType.XML_DEC, false);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
@@ -442,8 +443,7 @@ public class DeclarationDataPresenter
     }
 
     @Override
-    public void viewPdf(Boolean force) {
-        final ReportType reportType = ReportType.EXCEL_DEC;
+    public void viewPdf(final Boolean force) {
         CreatePdfReportAction action = new CreatePdfReportAction();
         action.setDeclarationDataId(declarationId);
         action.setForce(force);
@@ -454,30 +454,17 @@ public class DeclarationDataPresenter
                     public void onSuccess(CreatePdfReportResult result) {
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-                        if (result.isExistReport()) {
-                            Dialog.confirmMessage("Для текущего экземпляра " + (!TaxType.DEAL.equals(taxType)?DECLARATION_TYPE_MSG:DECLARATION_TYPE_MSG_D) + " уже сформирована форма предварительного просмотра. Переформировать?", new DialogHandler() {
+                        if (!result.isExistReportXml()) {
+                            Dialog.infoMessage("Для текущего экземпляра " + (!TaxType.DEAL.equals(taxType)?DECLARATION_TYPE_MSG:DECLARATION_TYPE_MSG_D) + " не выполнен расчет. Формирование формы предварительного просмотра невозможно");
+                        } else if (result.isExistTask() && force == false) {
+                            Dialog.confirmMessage("Для текущего экземпляра " + (!TaxType.DEAL.equals(taxType)?DECLARATION_TYPE_MSG:DECLARATION_TYPE_MSG_D) + " уже выполняется формирование формы предварительного просмотра. Отменить уже выполняющуюся операцию?", new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     viewPdf(true);
                                 }
                             });
-                        } else if (result.isExistTask()) {
-                            Dialog.confirmMessage("Для текущего экземпляра " + (!TaxType.DEAL.equals(taxType)?DECLARATION_TYPE_MSG:DECLARATION_TYPE_MSG_D) +" уже выполняется формирование формы предварительного просмотра. Отменить уже выполняющуюся операцию?", new DialogHandler() {
-                                @Override
-                                public void yes() {
-                                    viewPdf(true);
-                                }
-
-                                @Override
-                                public void no() {
-                                    viewPdf(false);
-                                }
-                            });
-                        } else {
-                            onTimerReport(ReportType.PDF_DEC, false);
                         }
-                        getView().updatePrintReportButtonName(reportType, false);
-                        getView().startTimerReport(reportType);
+                        onTimerReport(ReportType.PDF_DEC, false);
                     }
 
                     @Override

@@ -57,12 +57,12 @@ public class LockDataDaoTest {
 
 	@Test (expected = LockException.class)
 	public void createLockTest() {
-		dao.createLock("c", 0, null); // пропущена дата
+		dao.createLock("c", 0, null, "", ""); // пропущена дата
 	}
 
 	@Test (expected = LockException.class)
 	public void createLockTest2() {
-		dao.createLock("a", 0, new Date()); // дубликат
+		dao.createLock("a", 0, new Date(), "", ""); // дубликат
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class LockDataDaoTest {
 		cal.clear();
 		cal.set(2013, 0, 1, 0, 5, 0);
 		Date dateBefore = cal.getTime();
-		dao.createLock("c", 0, dateBefore);
+		dao.createLock("c", 0, dateBefore, "", "");
 		LockData data = dao.get("c", false);
 		Assert.assertEquals("c", data.getKey());
 		Assert.assertEquals(0, data.getUserId());
@@ -79,7 +79,7 @@ public class LockDataDaoTest {
 
 
         Date before = new Date();
-        dao.createLock("abc", 0, before);
+        dao.createLock("abc", 0, before, "", "");
         data = dao.get("abc", before);
         Assert.assertNotNull(data);
 	}
