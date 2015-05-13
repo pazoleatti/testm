@@ -58,7 +58,9 @@ public class UploadDataRowsHandler extends
         TAUserInfo userInfo = securityService.currentUserInfo();
         //Пытаемся установить блокировку на операцию импорта в текущую нф
         String key = LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormData().getId() + "_" + action.getFormData().isManual();
+        BlobData blobData = blobDataService.get(action.getUuid());
         LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                formDataService.getFormDataFullName(action.getFormData().getId(), blobData.getName(), null),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
         Logger logger = new Logger();
         if (lockData == null) {
@@ -67,7 +69,6 @@ public class UploadDataRowsHandler extends
 
                 dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 
-                BlobData blobData = blobDataService.get(action.getUuid());
                 logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
                 //Парсит загруженный в фаловое хранилище xls-файл
                 formDataService.importFormData(logger, userInfo,

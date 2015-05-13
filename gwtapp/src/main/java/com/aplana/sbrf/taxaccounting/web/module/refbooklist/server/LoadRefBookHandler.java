@@ -90,7 +90,9 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
                 logger.info("Получены: %s.", StringUtils.join(catalogStrList.toArray(), ", ", null));
             }                    
             String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-            lockDataService.lock(key, userInfo.getUser().getId(), lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+            lockDataService.lock(key, userInfo.getUser().getId(),
+                    LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
+                    lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
             try {
                 if (loadRefBookDataService.checkPathArchiveError(securityService.currentUserInfo(), logger)){
                     // Импорт справочников из ЦАС НСИ

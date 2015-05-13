@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -46,6 +47,9 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private FormDataService formDataService;
+
     public CreateReportHandler() {
         super(CreateReportAction.class);
     }
@@ -65,13 +69,17 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         Logger logger = new Logger();
         LockData lockData;
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                formDataService.getFormDataFullName(action.getFormDataId(), null, action.getType().getName()),
+                LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA))) == null) {
             try {
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                lockData = lockDataService.getLock(key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 String uuid = reportService.get(userInfo, action.getFormDataId(), action.getType(), action.isShowChecked(), action.isManual(), action.isSaved());
                 if (uuid == null) {
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                    asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    BalancingVariants balancingVariant = asyncManager.executeAsync(action.getType().getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                     logger.info(String.format("%s отчет текущей налоговой формы (%s) поставлен в очередь на формирование.", action.getType().getName(), action.isManual()?"версия ручного ввода":"автоматическая версия"));
                 } else {
                     result.setExistReport(true);

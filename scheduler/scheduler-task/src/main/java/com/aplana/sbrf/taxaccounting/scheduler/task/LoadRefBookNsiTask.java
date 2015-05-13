@@ -47,7 +47,9 @@ public class LoadRefBookNsiTask extends AbstractUserTask {
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
-        lockDataService.lock(key, userId, lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+        lockDataService.lock(key, userId,
+                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
+                lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
         try {
             loadRefBookDataService.importRefBookNsi(userService.getSystemUserInfo(), new Logger());
         } finally {

@@ -42,7 +42,7 @@ public class AsyncManagerBean implements AsyncManager {
     private AsyncTaskPersistenceServiceLocal persistenceService;
 
     @Override
-    public void executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException {
+    public BalancingVariants executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException {
         log.debug("Async task creation has been started");
         ConnectionFactory connectionFactory;
         Queue queue;
@@ -75,6 +75,7 @@ public class AsyncManagerBean implements AsyncManager {
             objectMessage.setObject(asyncMdbObject);
             messageProducer.send(objectMessage);
             log.debug("Async task creation has been finished successfully");
+            return balancingVariant;
         } catch (Exception e) {
             log.error("Async task creation has been failed!", e);
             throw new AsyncTaskException(e);

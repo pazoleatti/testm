@@ -176,6 +176,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 // Блокировка файла
                 LockData fileLock = lockService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
                         userInfo.getUser().getId(),
+                        String.format(LockData.DescriptionTemplate.FILE.getText(), fileName),
                         lockService.getLockTimeout(LockData.LockObjects.FILE));
                 if (fileLock != null) {
                     log(userInfo, LogData.L41, logger, fileName, path);
@@ -247,9 +248,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBookId;
                         int userId = userInfo.getUser().getId();
 
-                        LockData lockData = lockService.lock(lockKey, userId,
-                                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                         RefBook refBook = refBookDao.get(refBookId);
+                        LockData lockData = lockService.lock(lockKey, userId,
+                                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
+                                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                         if (lockData == null) {
                             try {
                                 //Блокировка установлена
@@ -262,6 +264,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
                                         if (!lockedObjects.contains(referenceLockKey)) {
                                             LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
                                                     lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
                                             if (referenceLockData == null) {
                                                 //Блокировка установлена

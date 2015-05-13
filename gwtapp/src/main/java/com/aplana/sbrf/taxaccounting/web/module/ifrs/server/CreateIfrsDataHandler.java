@@ -60,8 +60,11 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
 
         CreateIfrsDataResult result = new CreateIfrsDataResult();
         Logger logger = new Logger();
+        ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
         String key = ifrsDataService.generateTaskKey(action.getReportPeriodId());
         LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                String.format(LockData.DescriptionTemplate.IFRS.getText(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear()),
+                LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.IFRS));
         if (lockData == null) {
             try {
@@ -71,7 +74,8 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
                 params.put("reportPeriodId", action.getReportPeriodId());
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                lockData = lockDataService.getLock(key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
 
                 if (!ifrsDataService.check(logger, action.getReportPeriodId())) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
@@ -86,7 +90,8 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
                     for(Integer userId: userIds) {
                         lockDataService.addUserWaitingForLock(key, userId);
                     }
-                    asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
                     logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");
@@ -103,7 +108,6 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
             }
         }
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            ReportPeriod reportPeriod = periodService.getReportPeriod(action.getReportPeriodId());
             logger.info("Архив с отчетностью для МСФО за %s %s поставлен в очередь на формирование", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
         } else {
             result.setError(true);

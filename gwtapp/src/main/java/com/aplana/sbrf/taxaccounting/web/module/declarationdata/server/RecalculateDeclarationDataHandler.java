@@ -71,6 +71,8 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
         LockData lockData = lockDataService.lock(key, userId,
+                declarationDataService.getDeclarationFullName(action.getDeclarationId(), null),
+                LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         if (lockData == null) {
             try {
@@ -79,7 +81,8 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 params.put("docDate", action.getDocDate());
                 params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
                 params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                lockData = lockDataService.getLock(key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 try {
                     declarationDataService.deleteReport(action.getDeclarationId(), false);
                     // отменяем задания на формирование XLSX и PDF
@@ -93,7 +96,8 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                     lockDataService.unlock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.EXCEL_DEC), 0, true);
                     // ставим задачу в очередь
                     lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(ReportType.XML_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.XML_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);
                     logger.error("Ошибка при постановке в очередь задачи формирования декларации.");

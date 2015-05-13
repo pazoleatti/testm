@@ -1,20 +1,24 @@
 package com.aplana.sbrf.taxaccounting.web.module.lock.client;
 
 import com.aplana.sbrf.taxaccounting.model.LockDataItem;
-import com.aplana.sbrf.taxaccounting.model.LockSearchOrdering;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.ViewWithSortableTable;
 import com.aplana.sbrf.taxaccounting.web.module.lock.shared.*;
+import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
@@ -34,22 +38,21 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
 
     private final DispatchAsync dispatcher;
     private PlaceManager placeManager;
+    private final TableDataProvider dataProvider = new TableDataProvider();
 
     @ProxyCodeSplit
     @NameToken(LockTokens.lockList)
     public interface MyProxy extends ProxyPlace<LockListPresenter>, Place {
     }
 
-    public interface MyView extends ViewWithSortableTable, HasUiHandlers<LockListUiHandlers> {
-        LockSearchOrdering getSearchOrdering();
+    public interface MyView extends View, HasUiHandlers<LockListUiHandlers> {
         List<String> getSelectedItem();
         void updateData(int pageNumber);
-
         void setTableData(int startIndex, long count, List<LockDataItem> itemList);
-
         void clearSelection();
-
         String getFilter();
+        int getPageSize();
+        void assignDataProvider(int pageSize, AbstractDataProvider<LockDataItem> data);
     }
 
     @Inject
@@ -59,6 +62,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         this.dispatcher = dispatcher;
         this.placeManager = placeManager;
         getView().setUiHandlers(this);
+        getView().assignDataProvider(getView().getPageSize(), dataProvider);
     }
 
     @Override
@@ -121,24 +125,31 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         getView().updateData(0);
     }
 
+
+
+    private class TableDataProvider extends AsyncDataProvider<LockDataItem> {
+        @Override
+        protected void onRangeChanged(HasData<LockDataItem> display) {
+            final Range range = display.getVisibleRange();
+            GetLockListAction action = new GetLockListAction();
+            action.setPagingParams(new PagingParams(range.getStart(), range.getLength()));
+            action.setFilter(getView().getFilter());
+            dispatcher.execute(action, CallbackUtils
+                    .defaultCallback(new AbstractCallback<GetLockListResult>() {
+                        @Override
+                        public void onSuccess(GetLockListResult result) {
+                            if (result.getTotalCountOfRecords() == 0)
+                                getView().setTableData(range.getStart(), 0, new ArrayList<LockDataItem>());
+                            else
+                                getView().setTableData(range.getStart(), result.getTotalCountOfRecords(), result.getLocks());
+                        }
+                    }, LockListPresenter.this));
+
+        }
+    }
+
     @Override
     public void onRangeChange(final int start, int length) {
-        GetLockListAction action = new GetLockListAction();
-        action.setStartIndex(start);
-        action.setCountOfRecords(length);
-        action.setAscSorting(getView().isAscSorting());
-        action.setSearchOrdering(getView().getSearchOrdering());
-        action.setFilter(getView().getFilter());
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetLockListResult>() {
-                    @Override
-                    public void onSuccess(GetLockListResult result) {
-                        if (result.getTotalCountOfRecords() == 0)
-                            getView().setTableData(start, 0, new ArrayList<LockDataItem>());
-                        else
-                            getView().setTableData(start, result.getTotalCountOfRecords(), result.getLocks());
-                    }
-                }, LockListPresenter.this));
     }
 
     /**

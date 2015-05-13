@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Service
@@ -26,6 +27,8 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 	public CreateDeclarationHandler() {
 		super(CreateDeclaration.class);
 	}
+
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 
 	@Autowired
     private DeclarationDataService declarationDataService;
@@ -48,6 +51,11 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
     @Autowired
     private LockDataService lockDataService;
 
+    @Autowired
+    private DepartmentService departmentService;
+    @Autowired
+    private PeriodService reportPeriodService;
+
 	@Override
 	public CreateDeclarationResult execute(CreateDeclaration command, ExecutionContext executionContext) throws ActionException {
 
@@ -56,27 +64,38 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
         TAUserInfo userInfo = securityService.currentUserInfo();
         String key = LockData.LockObjects.DECLARATION_CREATE.name() + "_" + command.getDeclarationTypeId() + "_" + command.getTaxType().getName() + "_" + command.getDepartmentId() + "_" + command.getReportPeriodId() + "_" + command.getTaxOrganKpp() + "_" + command.getTaxOrganCode();
 
+        DeclarationType declarationType = declarationTypeService.get(command.getDeclarationTypeId());
+        Department department = departmentService.getDepartment(command.getDepartmentId());
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(command.getReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(command.getDepartmentId(),
+                command.getReportPeriodId());
+        Integer declarationTypeId = command.getDeclarationTypeId();
+
+        if (departmentReportPeriod == null) {
+            throw new ActionException("Не удалось определить налоговый период.");
+        }
+
+        if (command.getTaxType().equals(TaxType.DEAL)) {
+            List<DeclarationType> declarationTypeList = declarationTypeService.getTypes(departmentReportPeriod.getDepartmentId(),
+                    departmentReportPeriod.getReportPeriod().getId(), TaxType.DEAL);
+            if (declarationTypeList.size() == 1) {
+                declarationTypeId = declarationTypeList.get(0).getId();
+            } else {
+                throw new ActionException("Не удалось определить шаблон для уведомления.");
+            }
+        }
+
         if (lockDataService.lock(key, userInfo.getUser().getId(),
+                String.format(LockData.DescriptionTemplate.DECLARATION_CREATE.getText(),
+                        declarationType.getName(),
+                        department.getName(),
+                        reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear(),
+                        departmentReportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
+                                : ""),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_CREATE)) == null) {
             //Если блокировка успешно установлена
             try {
-                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(command.getDepartmentId(),
-                        command.getReportPeriodId());
-                Integer declarationTypeId = command.getDeclarationTypeId();
-
-                if (departmentReportPeriod == null) {
-                    throw new ActionException("Не удалось определить налоговый период.");
-                }
-
-                if (command.getTaxType().equals(TaxType.DEAL)) {
-                    List<DeclarationType> declarationTypeList = declarationTypeService.getTypes(departmentReportPeriod.getDepartmentId(),
-                            departmentReportPeriod.getReportPeriod().getId(), TaxType.DEAL);
-                    if (declarationTypeList.size() == 1) {
-                        declarationTypeId = declarationTypeList.get(0).getId();
-                    } else {
-                        throw new ActionException("Не удалось определить шаблон для уведомления.");
-                    }
-                }
 
                 DeclarationData declarationData = declarationDataService.find(declarationTypeId, departmentReportPeriod.getId(), command.getTaxOrganKpp(), command.getTaxOrganCode());
                 if (declarationData != null) {

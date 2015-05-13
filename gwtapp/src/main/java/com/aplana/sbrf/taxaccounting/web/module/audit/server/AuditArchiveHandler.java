@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import java.util.Map;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveAction, AuditArchiveResult> {
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     @Autowired
     AuditService auditService;
@@ -75,13 +77,17 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
         params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter());
         params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
+                String.format(LockData.DescriptionTemplate.LOG_SYSTEM_BACKUP.getText(), SDF.format(action.getLogSystemFilter().getToSearchDate())),
+                LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_BACKUP))) == null) {
             try {
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
+                lockData = lockDataService.getLock(key);
+                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 /*String uuid = blobDataService.get(userInfo);*/
                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                asyncManager.executeAsync(ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                logger.info(String.format("Задание на архивацию журнала аудита (до даты: <ДД.ММ.ГГГГ ЧЧ:ММ:СС>) поставлено в очередь на формирование."));
+                BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                logger.info(String.format("Задание на архивацию журнала аудита (до даты: %s) поставлено в очередь на формирование.", SDF.format(action.getLogSystemFilter().getToSearchDate())));
                 return result;
             } catch (AsyncTaskException e) {
                 lockDataService.unlock(key, userInfo.getUser().getId());

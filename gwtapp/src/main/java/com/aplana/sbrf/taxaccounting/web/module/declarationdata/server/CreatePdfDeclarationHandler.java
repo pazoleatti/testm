@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ import java.util.Map;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class CreatePdfDeclarationHandler extends AbstractActionHandler<CreatePdfReportAction, CreatePdfReportResult> {
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     @Autowired
     private SecurityService securityService;
@@ -63,62 +66,73 @@ public class CreatePdfDeclarationHandler extends AbstractActionHandler<CreatePdf
         Map<String, Object> params = new HashMap<String, Object>();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        LockData lockData = declarationDataService.lock(action.getDeclarationDataId(), userInfo);
-        if (lockData == null) {
-            try {
-                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), ReportType.PDF_DEC);
-                params.put("declarationDataId", action.getDeclarationDataId());
-                params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
-                params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                LockData lockDataReportTask = lockDataService.getLock(key);
-                if (lockDataReportTask != null && (action.isForce() != null && action.isForce())) {
-                    // Удаляем старую задачу
-                    List<Integer> users = lockDataService.getUsersWaitingForLock(key);
-                    lockDataService.unlock(key, userInfo.getUser().getId(), true);
-                } else if (action.isForce() != null && action.isForce() == false) {
-                    if (lockDataReportTask.getUserId() != userInfo.getUser().getId()) {
+        String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), ReportType.XML_DEC);
+        if (uuidXml != null) {
+            LockData lockData = declarationDataService.lock(action.getDeclarationDataId(), userInfo);
+            if (lockData == null) {
+                try {
+                    result.setExistReportXml(true);
+                    String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ReportType.PDF_DEC);
+                    if (uuid != null) {
+                        return result;
+                    } else {
                         try {
-                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                        } catch (ServiceException e) {
-                        }
-                    }
-                    logger.info("Пользователь подписан на получение оповещений по выполняющейся задаче на формирование формы предварительного просмотра");
-                }
-                lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(),
-                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
-                if (lockDataReportTask == null) {
-                    try {
-                        String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), ReportType.PDF_DEC);
-                        if ((action.isForce() != null && action.isForce()) || uuid == null) { // || !action.isExistPdf()
-                            if (uuid != null) {
-                                reportService.deleteDec(reportService.getDec(userInfo, action.getDeclarationDataId(), ReportType.JASPER_DEC));
-                                reportService.deleteDec(uuid);
+                            String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), ReportType.PDF_DEC);
+                            LockData lockDataReportTask = lockDataService.getLock(key);
+                            if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
+                                if (action.isForce()) {
+                                    // ToDo Оправляем оповещение подписавщимся пользователям, удаляем старую задачу,
+                                    List<Integer> users = lockDataService.getUsersWaitingForLock(key);
+                                    lockDataService.unlock(key, userInfo.getUser().getId(), true);
+                                } else {
+                                    result.setExistTask(true);
+                                    return result;
+                                }
+                            } else {
+                                try {
+                                    lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                                } catch (ServiceException e) {
+                                }
+                                logger.info("Пользователь подписан на получение оповещений по выполняющейся задаче на формирование формы предварительного просмотра");
+                                return result;
                             }
-
-                            params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockDataService.getLock(key).getDateLock());
-                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                            asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                            logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", ReportType.PDF_DEC.getName()));
-                        } else {
-                            result.setExistReport(true);
-                            lockDataService.unlock(key, userInfo.getUser().getId());
-                        }
-                    } catch (Exception e) {
-                        lockDataService.unlock(key, userInfo.getUser().getId());
-                        if (e instanceof ServiceLoggerException) {
-                            throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                        } else {
-                            throw new ActionException(e);
+                            if (lockDataService.lock(key, userInfo.getUser().getId(),
+                                    declarationDataService.getDeclarationFullName(action.getDeclarationDataId(), "PDF"),
+                                    LockData.State.IN_QUEUE.getText(),
+                                    lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
+                                try {
+                                    params.put("declarationDataId", action.getDeclarationDataId());
+                                    params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
+                                    params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                                    lockData = lockDataService.getLock(key);
+                                    params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                                    lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                                    BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.PDF_DEC.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                                    logger.info(String.format("%s отчет текущей декларации поставлен в очередь на формирование.", ReportType.PDF_DEC.getName()));
+                                } catch (Exception e) {
+                                    lockDataService.unlock(key, userInfo.getUser().getId());
+                                    if (e instanceof ServiceLoggerException) {
+                                        throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                                    } else {
+                                        throw new ActionException(e);
+                                    }
+                                }
+                            } else {
+                                throw new ActionException("Не удалось запустить формирование отчета. Попробуйте выполнить операцию позже");
+                            }
+                        } finally {
+                            declarationDataService.unlock(action.getDeclarationDataId(), userInfo);
                         }
                     }
-                } else {
-                    result.setExistTask(true);
+                } finally {
+                    declarationDataService.unlock(action.getDeclarationDataId(), userInfo);
                 }
-            } finally {
-                declarationDataService.unlock(action.getDeclarationDataId(), userInfo);
+            } else {
+                throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
             }
         } else {
-            throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
+            result.setExistReportXml(false);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
