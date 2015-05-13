@@ -1062,6 +1062,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         HashSet<Long> srcAcceptedIds = new HashSet<Long>();
+        //Список для блокировки форм
         ArrayList<FormData> sources = new ArrayList<FormData>(departmentFormTypesSources.size());
         msgPull.clear();
         for (DepartmentFormType sourceDFT : departmentFormTypesSources){
@@ -1076,7 +1077,6 @@ public class FormDataServiceImpl implements FormDataService {
             if (sourceForm == null){
                 continue;
             }
-            sources.add(sourceForm);
             //Запись на будущее, чтобы второго цикла не делать
             //1E.
             if (sourceForm.getState() == WorkflowState.ACCEPTED){
@@ -1091,6 +1091,7 @@ public class FormDataServiceImpl implements FormDataService {
                                 :
                                 "")
                 ));
+                sources.add(sourceForm);
             }
         }
 
