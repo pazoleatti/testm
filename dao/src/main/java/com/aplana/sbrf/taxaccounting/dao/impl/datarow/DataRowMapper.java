@@ -44,66 +44,93 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @return
 	 */
 	public Pair<String, Map<String, Object>> createSql() {
-		String[] prefixes = new String[]{"v", "s", "e", "csi", "rsi"};
-		StringBuilder sql = new StringBuilder("SELECT MAX(idx1) AS idx, sub.id, max(sub.alias) as alias \n");
-		// генерация max(X) X
-		for (Column c : fd.getFormColumns()){
-			for (String prefix : prefixes){
-                sql
-						.append(" , MAX(")
-						.append(prefix)
-						.append(c.getId())
-						.append(") ")
-						.append(prefix)
-						.append(c.getId());
+		if (fd.getFormTemplateId() == 329) {
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("formDataId", fd.getId());
+			params.put("temporary", 0); //TODO исправить
+			params.put("manual", fd.isManual() ? 1 : 0);
+
+			StringBuilder sql = new StringBuilder("SELECT ord, alias");
+			for (Column column : fd.getFormColumns()){
+				String columnId = column.getId();
+				sql.append(",\n");
+				sql.append(columnId).append(", ");
+				sql.append(columnId).append("_style_id, ");
+				sql.append(columnId).append("_editable, ");
+				sql.append(columnId).append("_colspan, ");
+				sql.append(columnId).append("_rowspan");
 			}
-            sql.append("\n ");
-		}
-        sql.append(", sub.id as id2, max(sub.idx2) as idx2 \n");
-        sql.append(", MAX(sub.ord) ord \n");
-        sql.append("FROM (SELECT d.id, d.alias, d.ord, d.idx1, d.idx2");
-
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", fd.getId());
-		params.put("manual", fd.isManual() ? 1 : 0);
-		params.put("types", TypeFlag.rtsToKeys(types));
-
-		// генерация "case when C.COLUMN_ID=18740 then C.STYLE_ID else null end S18740,"
-		for (Column column : fd.getFormColumns()){
-			int columnId = column.getId();
-			char valuePrefix;
-			switch (column.getColumnType()) {
-				case STRING:
-					valuePrefix = 's';
-					break;
-				case DATE:
-					valuePrefix = 'd';
-					break;
-				default:
-					valuePrefix = 'n';
+			sql.append("\nFROM form_data_").append(fd.getFormTemplateId());
+			sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");
+			if (range != null) {
+				sql.append(" AND ord BETWEEN :from AND :to");
+				params.put("from", range.getOffset());
+				params.put("to", range.getOffset() + range.getLimit() - 1);
 			}
-            sql.append(",\n CASE WHEN c.column_id = ").append(columnId).append(" THEN c.").append(valuePrefix).append("value ELSE NULL END v").append(columnId).append(", ")
-					.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.style_id ELSE NULL END s").append(columnId).append(", ")
-					.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.editable ELSE 0 END e").append(columnId).append(", ")
-					.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.colspan ELSE NULL END csi").append(columnId).append(", ")
-					.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.rowspan ELSE NULL END rsi").append(columnId);
-		}
 
-        sql.append("\n FROM (\n");
-        sql.append("  select dr.id, dr.form_data_id, dr.alias, dr.ord, dr.type, dr.manual, dr.idx1, case when idx2_critery = 1 then idx2 else null end idx2 from ( \n");
-        sql.append("   select d.*, row_number() over (order by ord) as idx1, case when (d.alias IS NULL OR d.alias LIKE '%{wan}') then 1 else 0 end as idx2_critery, \n");
-        sql.append("    row_number() over (partition by case when (d.alias IS NULL OR d.alias LIKE '%" + ALIASED_WITH_AUTO_NUMERATION_AFFIX + "') then 1 else 0 end order by ord) idx2 \n");
-        sql.append("    from data_row d  where d.form_data_id = :formDataId and d.manual = :manual and d.type in (:types)) dr \n");
-        if (range != null) {
-            sql.append("  WHERE idx1 BETWEEN :from AND :to \n");
-            params.put("from", range.getOffset());
-            params.put("to", range.getOffset() + range.getLimit() - 1);
-        }
-        sql.append("  ) d \n");
-        sql.append(" LEFT JOIN data_cell c ON d.id = c.row_id ) sub \n");
-        sql.append("GROUP BY sub.id \n");
-        sql.append("ORDER BY ord \n");
-        return new Pair<String, Map<String, Object>>(sql.toString(), params);
+			return new Pair<String, Map<String, Object>>(sql.toString(), params);
+		} else {
+			String[] prefixes = new String[]{"v", "s", "e", "csi", "rsi"};
+			StringBuilder sql = new StringBuilder("SELECT MAX(idx1) AS idx, sub.id, max(sub.alias) as alias \n");
+			// генерация max(X) X
+			for (Column c : fd.getFormColumns()){
+				for (String prefix : prefixes){
+					sql
+							.append(" , MAX(")
+							.append(prefix)
+							.append(c.getId())
+							.append(") ")
+							.append(prefix)
+							.append(c.getId());
+				}
+				sql.append("\n ");
+			}
+			sql.append(", sub.id as id2, max(sub.idx2) as idx2 \n");
+			sql.append(", MAX(sub.ord) ord \n");
+			sql.append("FROM (SELECT d.id, d.alias, d.ord, d.idx1, d.idx2");
+
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("formDataId", fd.getId());
+			params.put("manual", fd.isManual() ? 1 : 0);
+			params.put("types", TypeFlag.rtsToKeys(types));
+
+			// генерация "case when C.COLUMN_ID=18740 then C.STYLE_ID else null end S18740,"
+			for (Column column : fd.getFormColumns()){
+				int columnId = column.getId();
+				char valuePrefix;
+				switch (column.getColumnType()) {
+					case STRING:
+						valuePrefix = 's';
+						break;
+					case DATE:
+						valuePrefix = 'd';
+						break;
+					default:
+						valuePrefix = 'n';
+				}
+				sql.append(",\n CASE WHEN c.column_id = ").append(columnId).append(" THEN c.").append(valuePrefix).append("value ELSE NULL END v").append(columnId).append(", ")
+						.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.style_id ELSE NULL END s").append(columnId).append(", ")
+						.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.editable ELSE 0 END e").append(columnId).append(", ")
+						.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.colspan ELSE NULL END csi").append(columnId).append(", ")
+						.append(" CASE WHEN c.column_id = ").append(columnId).append(" THEN c.rowspan ELSE NULL END rsi").append(columnId);
+			}
+
+			sql.append("\n FROM (\n");
+			sql.append("  select dr.id, dr.form_data_id, dr.alias, dr.ord, dr.type, dr.manual, dr.idx1, case when idx2_critery = 1 then idx2 else null end idx2 from ( \n");
+			sql.append("   select d.*, row_number() over (order by ord) as idx1, case when (d.alias IS NULL OR d.alias LIKE '%{wan}') then 1 else 0 end as idx2_critery, \n");
+			sql.append("    row_number() over (partition by case when (d.alias IS NULL OR d.alias LIKE '%" + ALIASED_WITH_AUTO_NUMERATION_AFFIX + "') then 1 else 0 end order by ord) idx2 \n");
+			sql.append("    from data_row d  where d.form_data_id = :formDataId and d.manual = :manual and d.type in (:types)) dr \n");
+			if (range != null) {
+				sql.append("  WHERE idx1 BETWEEN :from AND :to \n");
+				params.put("from", range.getOffset());
+				params.put("to", range.getOffset() + range.getLimit() - 1);
+			}
+			sql.append("  ) d \n");
+			sql.append(" LEFT JOIN data_cell c ON d.id = c.row_id ) sub \n");
+			sql.append("GROUP BY sub.id \n");
+			sql.append("ORDER BY ord \n");
+			return new Pair<String, Map<String, Object>>(sql.toString(), params);
+		}
 	}
 
 	@Override
