@@ -203,7 +203,7 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateAuditCsv(List<LogSearchResultItem> resultItems) {
+    public String generateAuditZip(List<LogSearchResultItem> resultItems) {
         String reportPath = null;
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);

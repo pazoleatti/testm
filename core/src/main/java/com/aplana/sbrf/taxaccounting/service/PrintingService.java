@@ -31,5 +31,10 @@ public interface PrintingService {
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);
     String generateExcelUsers(List<TAUserView> taUserViewList);
     String generateExcelLogSystem(List<LogSearchResultItem> resultItems);
-    String generateAuditCsv(List<LogSearchResultItem> resultItems);
+
+    /**
+     * Формирует csv-отчет и архивирует его в zip.
+     * @return идентификатор в таблице BLOB_DATA
+     */
+    String generateAuditZip(List<LogSearchResultItem> resultItems);
 }
