@@ -114,6 +114,8 @@ comment on column lock_data.state_date is 'Дата последнего изм�
 comment on column lock_data.description is 'Описание блокировки';
 comment on column lock_data.queue is 'Очередь, в которой находится связанная асинхронная задача';
 ---------------------------------------------------------------------------------------------
+--Оптимизация производительности
+create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 
 commit;
 end;
