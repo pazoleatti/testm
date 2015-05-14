@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import au.com.bytecode.opencsv.CSVReader
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -82,8 +83,10 @@ switch (formDataEvent) {
             importTransportData()
         } else {
             importData()
-            calc()
-            logicCheck()
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                calc()
+                logicCheck()
+            }
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -632,7 +635,7 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
-        def newRow = formData.createDataRow()
+        def newRow = formData.createStoreMessagingDataRow()
         newRow.setIndex(rowIndex++)
         newRow.setImportIndex(xlsIndexRow)
         (getBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
@@ -698,130 +701,101 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
-    dataRowHelper.save(rows)
+
+    showMessages(rows, logger)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.save(rows)
+    }
 }
 
 void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
     int COLUMN_COUNT = 17
-    int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
 
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
-
-    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
-    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
-
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
     String[] rowCells
-    int countEmptyRow = 0	// количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def newRows = []
 
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-        if (isEmptyRow) {
-            if (countEmptyRow > 0) {
-                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
                 // итоговая строка тф
                 rowCells = reader.readNext()
-                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-                totalTF = (isEmptyRow ? null : getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex))
+                if (rowCells != null) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                }
                 break
             }
-            countEmptyRow++
-            continue
+            newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
         }
-
-        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
-        // обычная строка
-        if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
-            break
-        }
-
-        // периодически сбрасываем строки
-        if (newRows.size() > ROW_MAX) {
-            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
-            newRows.clear()
-        }
-    }
-    reader.close()
-
-    if (newRows.size() != 0) {
-        dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+    } finally {
+        reader.close()
     }
 
-    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-    def totalColumnsIndexMap = [
-            'lotSizePrev'           : 6,
-            'lotSizeCurrent'        : 7,
-            'reserveCalcValuePrev'  : 8,
-            'cost'                  : 9,
-            'costOnMarketQuotation' : 14,
-            'reserveCalcValue'      : 15,
-            'reserveCreation'       : 16,
-            'reserveRecovery'       : 17
-    ]
-    // итоговая строка для сверки сумм
-    def totalTmp = formData.createDataRow()
-    totalColumnsIndexMap.keySet().asList().each { alias ->
-        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-    }
-    // добавить в нф итоговую строку
-    def totalRow = getCalcTotalRow(dataRowHelper.allCached)
-    dataRowHelper.insert(totalRow, dataRowHelper.allCached.size() + 1)
+    // подсчет итогов
+    def totalRow = getCalcTotalRow(newRows)
+    newRows.add(totalRow)
+
+    showMessages(newRows, logger)
 
     // сравнение итогов
     if (totalTF) {
-        // подсчет итогов
-        for (def row : dataRowHelper.allCached) {
-            if (row.getAlias()) {
-                continue
-            }
-            totalColumnsIndexMap.keySet().asList().each { alias ->
-                def value1 = totalTmp.getCell(alias).value
-                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                totalTmp.getCell(alias).setValue(value1 + value2, null)
-            }
-        }
-
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [
+                'lotSizePrev'           : 6,
+                'lotSizeCurrent'        : 7,
+                'reserveCalcValuePrev'  : 8,
+                'cost'                  : 9,
+                'costOnMarketQuotation' : 14,
+                'reserveCalcValue'      : 15,
+                'reserveCreation'       : 16,
+                'reserveRecovery'       : 17
+        ]
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
             def v1 = totalTF.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
     }
-}
 
-/** Добавляет строку в текущий буфер строк. */
-boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    if (rowCells == null) {
-        return true
+    // вставляем строки в БД
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(newRows)
     }
-    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
-    if (newRow == null) {
-        return false
-    }
-    rows.add(newRow)
-    return true
 }
 
 /**
@@ -835,7 +809,7 @@ boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, d
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
 def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    def newRow = formData.createDataRow()
+    def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
     (getBalancePeriod() ? (allColumns - ['rowNumber']) : editableColumns).each {
@@ -847,15 +821,14 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     }
 
     if (rowCells.length != columnCount + 2) {
-        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
-        return null
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
+        return newRow
     }
 
     def int colOffset = 1
-    def int colIndex = 0
 
     // графа 2
-    colIndex = 2
+    def colIndex = 2
     newRow.issuer = pure(rowCells[colIndex])
     // графа 3
     colIndex = 3
@@ -908,6 +881,10 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
 String pure(String cell) {
     return StringUtils.cleanString(cell)?.intern()
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }
 
 // обновить индексы строк
@@ -969,7 +946,7 @@ def String getIssueName(def Integer issuer) {
  * @param alias алиас сформированной строки
  */
 def getTotalRow(def dataRows, def value, def alias) {
-    def newRow = formData.createDataRow()
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.setAlias(alias)
     newRow.fix = value
     newRow.getCell('fix').colSpan = 2

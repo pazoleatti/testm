@@ -1,9 +1,12 @@
 package form_template.income.rnu31.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -65,8 +68,10 @@ switch (formDataEvent) {
             importTransportData()
         } else {
             importData()
-            calc()
-            logicCheck()
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                calc()
+                logicCheck()
+            }
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
@@ -252,6 +257,7 @@ def addData(def xml, int headRowCount) {
         def dataRows = dataRowHelper.allCached
         def row = getDataRow(dataRows, 'total')
         row.setImportIndex(xlsIndexRow)
+        row.keySet().each { row.getCell(it).setCheckMode(true) }
 
         // графа 3
         row.ofz = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -274,6 +280,7 @@ def addData(def xml, int headRowCount) {
         // графа 12
         row.corporateBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
 
+        showMessages(dataRows, logger)
         dataRowHelper.save(dataRows)
     }
 }
@@ -289,6 +296,7 @@ void addTransportData(def xml) {
     def int rnuIndexRow = 3
     def int colOffset = 1
     def row = getDataRow(dataRows, 'total')
+    row.keySet().each { row.getCell(it).setCheckMode(true) }
 
     def xmlRow = xml.row[0]
 
@@ -313,8 +321,8 @@ void addTransportData(def xml) {
     // графа 12
     row.corporateBonds = getNumber(xmlRow.cell[12].text(), rnuIndexRow, 12 + colOffset)
 
+    showMessages(dataRows, logger)
     dataRowHelper.save(dataRows)
-
 }
 
 // Получить строку за прошлый месяц

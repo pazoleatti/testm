@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -33,6 +34,8 @@ PreparedStatement dataCellStatement
  *      Не стал добавлять сообещние при нескольких записях с одинаковым кодом.
  * 21.04.2015 - доработки от Марата:
  *      При загрузке тф скрипт напрямую записывает данные в базу.
+ * 13.05.2015 - Bulat Kinzyabulatov:
+ *      Проверки на корректность данных перед сохранением
  *
  * Первичная форма.
  */
@@ -739,11 +742,15 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
-    dataRowHelper.save(rows)
+    showMessages(newRows, logger)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.save(rows)
+    }
 }
 
 def getNewRow() {
-    def newRow = formData.createDataRow()
+    def newRow = formData.createStoreMessagingDataRow()
 
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -832,7 +839,7 @@ void importTransportData() {
             'col_052_3_2'      : 70
     ]
     // итоговая строка для сверки сумм
-    def totalTmp = formData.createDataRow()
+    def totalTmp = formData.createStoreMessagingDataRow()
     totalColumnsIndexMap.keySet().asList().each { alias ->
         totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
     }
@@ -868,7 +875,10 @@ void importTransportData() {
 
             // периодически сбрасываем строки
             if (newRows.size() >= ROW_MAX) {
-                insertRows(formData, newRows, rowIndex)
+                showMessages(newRows, logger)
+                if (!logger.containsLevel(LogLevel.ERROR)) {
+                    insertRows(formData, newRows, rowIndex)
+                }
                 calcTotal(totalTmp, newRows, totalColumnsIndexMap)
                 newRows.clear()
             }
@@ -876,7 +886,10 @@ void importTransportData() {
         reader.close()
 
         if (newRows.size() != 0) {
-            insertRows(formData, newRows, rowIndex)
+            showMessages(newRows, logger)
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                insertRows(formData, newRows, rowIndex)
+            }
             calcTotal(totalTmp, newRows, totalColumnsIndexMap)
         }
     } finally {
@@ -895,6 +908,8 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
     }
 }
 
