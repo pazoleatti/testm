@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -48,7 +47,7 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
         PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(filter);
         if (records.isEmpty())
             throw new ServiceException("Нет записей за указанную дату.");
-        String uuid = printingService.generateAuditCsv(records);
+        String uuid = printingService.generateAuditZip(records);
         reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.CSV_AUDIT);
 
         auditService.removeRecords(

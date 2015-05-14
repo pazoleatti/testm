@@ -169,6 +169,11 @@ public interface SourceDao {
      */
     void addFormDataConsolidationInfo(Long tgtFormDataId, Collection<Long> srcFormDataIds);
 
+    /**
+     * Удаляет данные о консолидации.
+     * Данные удаляются из таблиц FORM_DATA_CONSOLIDATION
+     * @param tgtFormDataIds идентификаторы НФ
+     */
     void deleteFormDataConsolidationInfo(Collection<Long> tgtFormDataIds);
 
     boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId);

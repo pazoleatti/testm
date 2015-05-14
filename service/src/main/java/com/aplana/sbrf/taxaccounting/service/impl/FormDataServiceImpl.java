@@ -519,17 +519,16 @@ public class FormDataServiceImpl implements FormDataService {
             }
             //Система проверяет статус консолидации из форм-источников.
             List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
-                    formData.getId().intValue(),
+                    formData.getDepartmentId(),
                     formData.getFormType().getId(),
                     formData.getKind(),
                     reportPeriod.getCalendarStartDate(),
                     reportPeriod.getEndDate());
-            ArrayList<FormData> formDataIds = new ArrayList<FormData>();
             for (DepartmentFormType dftSource : dftSources){
                 FormData sourceFormData =
                         findFormData(dftSource.getFormTypeId(), dftSource.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 if (sourceFormData == null){
-                    ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
                     logger.warn(
                             NOT_EXIST_SOURCE_FORM_WARNING,
@@ -542,26 +541,21 @@ public class FormDataServiceImpl implements FormDataService {
                                     SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
                     );
                 } else if (!sourceService.isFDSourceConsolidated(formData.getId(), sourceFormData.getId())){
-                    formDataIds.add(sourceFormData);
-                }
-            }
-            if (!formDataIds.isEmpty()){
-                for (FormData sourceFD : formDataIds){
-                    ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
                     logger.warn(
                             NOT_CONSOLIDATE_SOURCE_FORM_WARNING,
-                            departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
-                            sourceFD.getFormType().getName(),
-                            sourceFD.getKind().getName(),
-                            rp.getName() + (sourceFD.getPeriodOrder() != null?" " + Months.fromId(sourceFD.getPeriodOrder()).getTitle():""),
+                            departmentService.getDepartment(sourceFormData.getDepartmentId()).getName(),
+                            sourceFormData.getFormType().getName(),
+                            sourceFormData.getKind().getName(),
+                            rp.getName() + (sourceFormData.getPeriodOrder() != null?" " + Months.fromId(sourceFormData.getPeriodOrder()).getTitle():""),
                             rp.getTaxPeriod().getYear(),
                             drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                                     SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                            sourceFD.getState().getName()
+                            sourceFormData.getState().getName()
                     );
                 }
-            } else if (dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
+            }
+            if (!dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
                 logger.info("Консолидация выполнена из всех форм-источников");
             }
             // Ошибка для отката транзакции
@@ -714,7 +708,6 @@ public class FormDataServiceImpl implements FormDataService {
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                     null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
         }
-        sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
 	}
 
     /**
@@ -785,7 +778,8 @@ public class FormDataServiceImpl implements FormDataService {
                     checkReferenceValues(logger, formData);
                     if (workflowMove == WorkflowMove.CREATED_TO_ACCEPTED
                             || workflowMove == WorkflowMove.CREATED_TO_PREPARED
-                            || workflowMove == WorkflowMove.PREPARED_TO_ACCEPTED) {
+                            || workflowMove == WorkflowMove.PREPARED_TO_ACCEPTED
+                            || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED) {
                         //Проверка выполнена ли консолидация из всех принятых источников текущего экземпляра
                         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                         List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(

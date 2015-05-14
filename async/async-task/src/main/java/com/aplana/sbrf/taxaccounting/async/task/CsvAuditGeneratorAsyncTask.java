@@ -52,7 +52,7 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
         else
             records = auditService.getLogsBusiness(filter, userInfo);
 
-        String uuid = printingService.generateAuditCsv(records);
+        String uuid = printingService.generateAuditZip(records);
         reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.CSV_AUDIT);
         records.clear();
     }
