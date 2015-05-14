@@ -35,10 +35,11 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	public LockData get(String key, boolean like) {
 		try {
             String fullKey = like ? "%" + key + "%" : key;
-            return getJdbcTemplate().queryForObject(
-					"SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position FROM lock_data \n " +
-                            "join (select q_key, queue_position from (select ld.key as q_key, row_number() over (partition by ld.queue order by ld.date_lock) as queue_position from lock_data ld)) q on q.q_key = key \n" +
-                            "WHERE key " + (like ? "like ?" : "= ?"),
+            String sql = "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position FROM lock_data \n " +
+                            "join (select q_key, queue_position from (select ld.key as q_key, " +
+                    (isSupportOver() ? "row_number() over (partition by ld.queue order by ld.date_lock)" : "rownum") + " as queue_position from lock_data ld)) q on q.q_key = key \n" +
+                            "WHERE key " + (like ? "like ?" : "= ?");
+            return getJdbcTemplate().queryForObject(sql,
 					new Object[] {fullKey},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
@@ -55,7 +56,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         try {
             return getJdbcTemplate().queryForObject(
                     "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position FROM lock_data \n" +
-                            "join (select q_key, queue_position from (select ld.key as q_key, row_number() over (partition by ld.queue order by ld.date_lock) as queue_position from lock_data ld)) q on q.q_key = key \n" +
+                            "join (select q_key, queue_position from (select ld.key as q_key, " +
+                            (isSupportOver() ? "row_number() over (partition by ld.queue order by ld.date_lock)" : "rownum") + " as queue_position from lock_data ld)) q on q.q_key = key \n" +
                             "WHERE key = ? and date_lock = ?",
                     new Object[] {key, lockDate},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
