@@ -53,6 +53,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         String getFilter();
         int getPageSize();
         void assignDataProvider(int pageSize, AbstractDataProvider<LockDataItem> data);
+        void setRoleInfo(int currentUserId, boolean hasRoleAdmin);
     }
 
     @Inject
@@ -138,10 +139,12 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
                     .defaultCallback(new AbstractCallback<GetLockListResult>() {
                         @Override
                         public void onSuccess(GetLockListResult result) {
-                            if (result.getTotalCountOfRecords() == 0)
+                            if (result.getTotalCountOfRecords() == 0) {
                                 getView().setTableData(range.getStart(), 0, new ArrayList<LockDataItem>());
-                            else
+                            } else {
                                 getView().setTableData(range.getStart(), result.getTotalCountOfRecords(), result.getLocks());
+                            }
+                            getView().setRoleInfo(result.getCurrentUserId(), result.hasRoleAdmin());
                         }
                     }, LockListPresenter.this));
 

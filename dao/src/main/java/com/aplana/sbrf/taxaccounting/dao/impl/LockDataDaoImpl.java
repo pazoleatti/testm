@@ -33,9 +33,12 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 	@Override
 	public LockData get(String key, boolean like) {
 		try {
+            String fullKey = like ? "%" + key + "%" : key;
             return getJdbcTemplate().queryForObject(
-					"SELECT key, user_id, date_before, date_lock, description, state, state_date, queue FROM lock_data WHERE key " + (like ? "like ?" : "= ?"),
-					new Object[] {like ? "%" + key + "%" : key},
+					"SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position FROM lock_data \n " +
+                            "join (select q_key, queue_position from (select ld.key as q_key, row_number() over (partition by ld.queue order by ld.date_lock) as queue_position from lock_data ld)) q on q.q_key = key \n" +
+                            "WHERE key " + (like ? "like ?" : "= ?"),
+					new Object[] {fullKey},
 					new int[] {Types.VARCHAR},
 					new LockDataMapper()
 			);
@@ -50,7 +53,9 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue FROM lock_data WHERE key = ? and date_lock = ?",
+                    "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position FROM lock_data \n" +
+                            "join (select q_key, queue_position from (select ld.key as q_key, row_number() over (partition by ld.queue order by ld.date_lock) as queue_position from lock_data ld)) q on q.q_key = key \n" +
+                            "WHERE key = ? and date_lock = ?",
                     new Object[] {key, lockDate},
                     new int[] {Types.VARCHAR, Types.TIMESTAMP},
                     new LockDataMapper()
@@ -183,14 +188,16 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             params.put("start", pagingParams.getStartIndex() + 1);
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("filter", "%" + filter.toLowerCase() + "%");
-            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, u.login, row_number() over (order by queue, date_lock) as rn FROM lock_data ld "
-                    + "join sec_user u on u.id = ld.user_id "
+            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, u.login, \n" +
+                    "row_number() over (partition by queue order by date_lock) as queue_position, row_number() over (order by queue, date_lock) as rn \n" +
+                    "FROM lock_data ld \n"
+                    + "join sec_user u on u.id = ld.user_id \n"
                     + (filter != null && !filter.isEmpty() ?
-                    "where lower(key) like :filter or lower(login) like :filter or lower(description) like :filter or lower(state) like :filter "
+                    "where lower(ld.key) like :filter or lower(ld.description) like :filter or lower(ld.state) like :filter or lower(u.login) like :filter or lower(u.name) like :filter "
                     : "")
-                    + ") ";
+                    + "order by queue, queue_position) \n";
 
-            String fullSql = "select * from" + sql + "where rn between :start and :count order by rn";
+            String fullSql = "select * from" + sql + "where rn between :start and :count";
             String countSql = "select count(*) from" + sql;
             List<LockData> records = getNamedParameterJdbcTemplate().query(fullSql, params, new LockDataMapper());
             int count = getNamedParameterJdbcTemplate().queryForInt(countSql, params);
@@ -238,6 +245,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             result.setStateDate(result.getState() != null ? rs.getTimestamp("state_date") : null);
             result.setDescription(rs.getString("description"));
             result.setQueue(rs.getString("queue"));
+            result.setQueuePosition(rs.getInt("queue_position"));
 			return result;
 		}
 	}

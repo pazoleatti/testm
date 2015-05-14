@@ -13,8 +13,10 @@ public class LockDataItem implements Serializable {
     private String key;
     /* Описание блокировки */
     private String description;
+    /* Полное имя пользователя, установившего блокировку*/
+    private String user;
     /* Код пользователя, установившего блокировку*/
-    private String userLogin;
+    private int userId;
     /* Дата истечения блокировки */
     private String dateBefore;
     /* Дата установки блокировки */
@@ -25,6 +27,8 @@ public class LockDataItem implements Serializable {
     private String stateDate;
     /* Очередь, в которой находится связанная асинхронная задача */
     private String queue;
+    /* Положение задачи в очереди */
+    private int queuePosition;
 
     public String getKey() {
         return key;
@@ -32,14 +36,6 @@ public class LockDataItem implements Serializable {
 
     public void setKey(String key) {
         this.key = key;
-    }
-
-    public String getUserLogin() {
-        return userLogin;
-    }
-
-    public void setUserLogin(String userLogin) {
-        this.userLogin = userLogin;
     }
 
     public String getDateBefore() {
@@ -88,5 +84,29 @@ public class LockDataItem implements Serializable {
 
     public void setQueue(String queue) {
         this.queue = queue;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public int getQueuePosition() {
+        return queuePosition;
+    }
+
+    public void setQueuePosition(int queuePosition) {
+        this.queuePosition = queuePosition;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }

@@ -37,13 +37,14 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     }
 
     public static final String KEY_TITLE = "Ключ блокировки";
-    public static final String QUEUE_TITLE = "Очередь";
+    public static final String QUEUE_TITLE = "Тип очереди";
+    public static final String QUEUE_POSITION_TITLE = "Порядок в очереди";
     public static final String DESCRIPTION_TITLE = "Описание";
     public static final String USER_TITLE = "Пользователь";
     public static final String STATE_TITLE = "Состояние задачи";
-    public static final String STATE_DATE_TITLE = "Дата изменения";
-    public static final String DATE_LOCK_BEFORE = "Дата истечения";
-    public static final String DATE_LOCK = "Дата установки";
+    public static final String STATE_DATE_TITLE = "Дата изменения состояния";
+    public static final String DATE_LOCK_BEFORE = "Дата истечения блокировки";
+    public static final String DATE_LOCK = "Дата установки блокировки";
 
     @UiField
     Button extendButton;
@@ -72,6 +73,9 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
             }
     );
 
+    private boolean hasRoleAdmin;
+    private int currentUserId;
+
     @Inject
     @UiConstructor
     public LockListView(final Binder uiBinder) {
@@ -99,6 +103,15 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
             }
         };
 
+        TextColumn<LockDataItem> queuePositionColumn = new TextColumn<LockDataItem>() {
+            @Override
+            public String getValue(LockDataItem taskItem) {
+                return taskItem.getQueuePosition() != -1 ? String.valueOf(taskItem.getQueuePosition()) : "";
+            }
+        };
+        queuePositionColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
+
         TextColumn<LockDataItem> keyColumn = new TextColumn<LockDataItem>() {
             @Override
             public String getValue(LockDataItem taskItem) {
@@ -109,9 +122,10 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         TextColumn<LockDataItem> userColumn = new TextColumn<LockDataItem>() {
             @Override
             public String getValue(LockDataItem taskItem) {
-                return taskItem.getUserLogin();
+                return taskItem.getUser();
             }
         };
+        userColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<LockDataItem> stateColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -145,23 +159,25 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         dateBeforeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         lockDataTable.setColumnWidth(checkColumn, 40, Style.Unit.PX);
-        lockDataTable.setColumnWidth(dateLockColumn, 120, Style.Unit.PX);
-        lockDataTable.setColumnWidth(dateBeforeColumn, 120, Style.Unit.PX);
-        lockDataTable.setColumnWidth(userColumn, 100, Style.Unit.PX);
+        lockDataTable.setColumnWidth(dateLockColumn, 110, Style.Unit.PX);
+        lockDataTable.setColumnWidth(dateBeforeColumn, 110, Style.Unit.PX);
+        lockDataTable.setColumnWidth(userColumn, 120, Style.Unit.PX);
         lockDataTable.setColumnWidth(stateColumn, 300, Style.Unit.PX);
-        lockDataTable.setColumnWidth(stateDateColumn, 120, Style.Unit.PX);
+        lockDataTable.setColumnWidth(stateDateColumn, 110, Style.Unit.PX);
         lockDataTable.setColumnWidth(keyColumn, 200, Style.Unit.PX);
-        lockDataTable.setColumnWidth(queueColumn, 200, Style.Unit.PX);
+        lockDataTable.setColumnWidth(queueColumn, 150, Style.Unit.PX);
+        lockDataTable.setColumnWidth(queuePositionColumn, 65, Style.Unit.PX);
 
         lockDataTable.addColumn(checkColumn);
-        lockDataTable.addColumn(keyColumn, KEY_TITLE);
-        lockDataTable.addColumn(userColumn, USER_TITLE);
-        lockDataTable.addColumn(descriptionColumn, DESCRIPTION_TITLE);
-        lockDataTable.addColumn(stateColumn, STATE_TITLE);
-        lockDataTable.addColumn(stateDateColumn, STATE_DATE_TITLE);
-        lockDataTable.addColumn(queueColumn, QUEUE_TITLE);
         lockDataTable.addResizableColumn(dateLockColumn, DATE_LOCK);
         lockDataTable.addResizableColumn(dateBeforeColumn, DATE_LOCK_BEFORE);
+        lockDataTable.addColumn(keyColumn, KEY_TITLE);
+        lockDataTable.addColumn(descriptionColumn, DESCRIPTION_TITLE);
+        lockDataTable.addColumn(userColumn, USER_TITLE);
+        lockDataTable.addColumn(queueColumn, QUEUE_TITLE);
+        lockDataTable.addColumn(stateColumn, STATE_TITLE);
+        lockDataTable.addColumn(queuePositionColumn, QUEUE_POSITION_TITLE);
+        lockDataTable.addColumn(stateDateColumn, STATE_DATE_TITLE);
 
         lockDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
                 .<LockDataItem>createCheckboxManager());
@@ -184,10 +200,21 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
      * задачами из списка задач
      */
     private void updateButtonsStatuses(){
-        boolean status = !selectionModel.getSelectedSet().isEmpty();
+        boolean selected = !selectionModel.getSelectedSet().isEmpty();
+        boolean hasNoOwnLocks = false;
+        boolean hasNoAsyncLocks = false;
+        for (LockDataItem item : selectionModel.getSelectedSet()) {
+            if (currentUserId != item.getUserId()) {
+                hasNoOwnLocks = true;
+            }
+            if (item.getQueue() == null || item.getQueue().isEmpty()) {
+                hasNoAsyncLocks = true;
+            }
+        }
+        boolean status = selected && (hasRoleAdmin || !hasNoOwnLocks);
         deleteButton.setEnabled(status);
         extendButton.setEnabled(status);
-        stopButton.setEnabled(status);
+        stopButton.setEnabled(status && !hasNoAsyncLocks);
     }
 
     @Override
@@ -215,6 +242,12 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     public void assignDataProvider(int pageSize, AbstractDataProvider<LockDataItem> data) {
         lockDataTable.setPageSize(pageSize);
         data.addDataDisplay(lockDataTable);
+    }
+
+    @Override
+    public void setRoleInfo(int currentUserId, boolean hasRoleAdmin) {
+        this.hasRoleAdmin = hasRoleAdmin;
+        this.currentUserId = currentUserId;
     }
 
     @UiHandler("extendButton")
