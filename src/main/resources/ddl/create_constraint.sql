@@ -293,3 +293,4 @@ create index i_declaration_template_xsd on declaration_template(xsd);
 create index i_declaration_template_jrxml on declaration_template(jrxml);
 create index i_notification_blob_data_id on notification(blob_data_id);
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
+create index i_lock_data_subscr on lock_data_subscribers(lock_key);
