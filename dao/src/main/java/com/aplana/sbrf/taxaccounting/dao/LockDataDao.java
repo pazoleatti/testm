@@ -94,9 +94,10 @@ public interface LockDataDao {
      * Получает список всех блокировок
      * @return все блокировки
      * @param filter ограничение по имени пользователя или ключу
+     * @param queues тип очереди
      * @param pagingParams параметры пэйджинга
      */
-    PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
+    PagingResult<LockData> getLocks(String filter, LockData.LockQueues queues, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки

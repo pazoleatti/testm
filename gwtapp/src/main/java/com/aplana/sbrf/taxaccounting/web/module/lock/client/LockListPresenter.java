@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.lock.client;
 
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.LockDataItem;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -54,6 +55,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         int getPageSize();
         void assignDataProvider(int pageSize, AbstractDataProvider<LockDataItem> data);
         void setRoleInfo(int currentUserId, boolean hasRoleAdmin);
+        LockData.LockQueues getQueues();
     }
 
     @Inject
@@ -126,8 +128,6 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         getView().updateData(0);
     }
 
-
-
     private class TableDataProvider extends AsyncDataProvider<LockDataItem> {
         @Override
         protected void onRangeChanged(HasData<LockDataItem> display) {
@@ -135,6 +135,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
             GetLockListAction action = new GetLockListAction();
             action.setPagingParams(new PagingParams(range.getStart(), range.getLength()));
             action.setFilter(getView().getFilter());
+            action.setQueues(getView().getQueues());
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<GetLockListResult>() {
                         @Override

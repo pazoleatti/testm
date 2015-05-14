@@ -2,29 +2,28 @@ package com.aplana.sbrf.taxaccounting.web.module.lock.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.LockDataItem;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
 
 /**
  * View для формы "Блокировки"
@@ -64,6 +63,9 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     @UiField
     FlexiblePager pager;
 
+    @UiField(provided = true)
+    ValueListBox<LockData.LockQueues> queueList;
+
     final MultiSelectionModel<LockDataItem> selectionModel = new MultiSelectionModel<LockDataItem>(
             new ProvidesKey<LockDataItem>() {
                 @Override
@@ -79,6 +81,19 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     @Inject
     @UiConstructor
     public LockListView(final Binder uiBinder) {
+        queueList = new ValueListBox<LockData.LockQueues>(new AbstractRenderer<LockData.LockQueues>() {
+            @Override
+            public String render(LockData.LockQueues item) {
+                return item.getText();
+            }
+        }, new ProvidesKey<LockData.LockQueues>() {
+            @Override
+            public Object getKey(LockData.LockQueues item) {
+                return item;
+            }
+        });
+        queueList.setValue(LockData.LockQueues.ALL);
+        queueList.setAcceptableValues(Arrays.asList(LockData.LockQueues.values()));
         initWidget(uiBinder.createAndBindUi(this));
 
         Column<LockDataItem, Boolean> checkColumn = new Column<LockDataItem, Boolean>(
@@ -179,8 +194,19 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         lockDataTable.addColumn(queuePositionColumn, QUEUE_POSITION_TITLE);
         lockDataTable.addColumn(stateDateColumn, STATE_DATE_TITLE);
 
-        lockDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
-                .<LockDataItem>createCheckboxManager());
+        DefaultSelectionEventManager<LockDataItem> multiSelectManager = createCustomManager(
+                new DefaultSelectionEventManager.CheckboxEventTranslator<LockDataItem>(0) {
+                    @Override
+                    public boolean clearCurrentSelection(CellPreviewEvent<LockDataItem> event) {
+                        return false;
+                    }
+
+                    @Override
+                    public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<LockDataItem> event) {
+                        return DefaultSelectionEventManager.SelectAction.TOGGLE;
+                    }
+                });
+        lockDataTable.setSelectionModel(selectionModel, multiSelectManager);
 
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
@@ -248,6 +274,11 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     public void setRoleInfo(int currentUserId, boolean hasRoleAdmin) {
         this.hasRoleAdmin = hasRoleAdmin;
         this.currentUserId = currentUserId;
+    }
+
+    @Override
+    public LockData.LockQueues getQueues() {
+        return queueList.getValue();
     }
 
     @UiHandler("extendButton")

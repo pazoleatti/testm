@@ -52,7 +52,7 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
         GetLockListResult result = new GetLockListResult();
         List<LockDataItem> locks = new ArrayList<LockDataItem>();
 
-        PagingResult<LockData> records = lockService.getLocks(action.getFilter(), action.getPagingParams());
+        PagingResult<LockData> records = lockService.getLocks(action.getFilter(), action.getQueues(), action.getPagingParams());
         for (LockData lockData : records) {
             TAUser user = userService.getUser(lockData.getUserId());
             LockDataItem lock = new LockDataItem();

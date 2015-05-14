@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -182,18 +183,33 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public PagingResult<LockData> getLocks(String filter, PagingParams pagingParams) {
+    public PagingResult<LockData> getLocks(String filter,  LockData.LockQueues queues, PagingParams pagingParams) {
         try {
             Map<String, Object> params = new HashMap<String, Object>();
+            String queueSql = "1 = 1";
+            switch (queues) {
+                case SHORT:
+                    queueSql = "queue = :queue";
+                    params.put("queue", BalancingVariants.SHORT.getName());
+                    break;
+                case LONG:
+                    queueSql = "queue = :queue";
+                    params.put("queue", BalancingVariants.LONG.getName());
+                    break;
+                case NONE:
+                    queueSql = "queue is null";
+                    break;
+            }
             params.put("start", pagingParams.getStartIndex() + 1);
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("filter", "%" + filter.toLowerCase() + "%");
             String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, u.login, \n" +
                     "row_number() over (partition by queue order by date_lock) as queue_position, row_number() over (order by queue, date_lock) as rn \n" +
                     "FROM lock_data ld \n"
-                    + "join sec_user u on u.id = ld.user_id \n"
+                    + "join sec_user u on u.id = ld.user_id \n" +
+                    "where " + queueSql + " \n"
                     + (filter != null && !filter.isEmpty() ?
-                    "where lower(ld.key) like :filter or lower(ld.description) like :filter or lower(ld.state) like :filter or lower(u.login) like :filter or lower(u.name) like :filter "
+                    "and lower(ld.key) like :filter or lower(ld.description) like :filter or lower(ld.state) like :filter or lower(u.login) like :filter or lower(u.name) like :filter "
                     : "")
                     + "order by queue, queue_position) \n";
 
