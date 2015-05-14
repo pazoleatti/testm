@@ -163,7 +163,7 @@ public class PrintingServiceImpl implements PrintingService {
 		try {
 			LogEntryReportBuilder builder = new LogEntryReportBuilder(listLogEntries);
             reportPath = builder.createReport();
-            return blobDataService.create(new FileInputStream(reportPath), "Список_ошибок.xlsx");
+            return blobDataService.create(new FileInputStream(reportPath), "errors.csv");
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			throw new ServiceException("Ошибка при создании печатной формы." + LogEntryReportBuilder.class);
@@ -203,7 +203,7 @@ public class PrintingServiceImpl implements PrintingService {
     }
 
     @Override
-    public String generateAuditCsv(List<LogSearchResultItem> resultItems) {
+    public String generateAuditZip(List<LogSearchResultItem> resultItems) {
         String reportPath = null;
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);

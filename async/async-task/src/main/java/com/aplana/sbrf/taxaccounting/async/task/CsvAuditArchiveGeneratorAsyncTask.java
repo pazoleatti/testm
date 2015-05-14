@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -40,7 +39,6 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("CsvAuditGeneratorAsyncTaskImpl has been started");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
@@ -49,7 +47,7 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
         PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(filter);
         if (records.isEmpty())
             throw new ServiceException("Нет записей за указанную дату.");
-        String uuid = printingService.generateAuditCsv(records);
+        String uuid = printingService.generateAuditZip(records);
         reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.CSV_AUDIT);
 
         auditService.removeRecords(
@@ -58,7 +56,6 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
                 records.get(records.size()-1),
                 userInfo);
         /*result.setCountOfRemoveRecords(records.getTotalCount());*/
-        log.debug("CsvAuditGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override

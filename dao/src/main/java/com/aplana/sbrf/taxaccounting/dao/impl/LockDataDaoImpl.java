@@ -186,7 +186,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, u.login, row_number() over (order by queue, date_lock) as rn FROM lock_data ld "
                     + "join sec_user u on u.id = ld.user_id "
                     + (filter != null && !filter.isEmpty() ?
-                    "where lower(key) like :filter or lower(description) like :filter or lower(login) like :filter "
+                    "where lower(key) like :filter or lower(login) like :filter or lower(description) like :filter or lower(state) like :filter "
                     : "")
                     + ") ";
 

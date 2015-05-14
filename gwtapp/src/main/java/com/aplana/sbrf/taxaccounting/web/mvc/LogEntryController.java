@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -14,10 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -60,7 +60,7 @@ public class LogEntryController {
         resp.setCharacterEncoding("UTF-8");
         resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
         //resp.setContentLength((int) file.length());
-        resp.setHeader("Content-Disposition", "attachment; filename=\"messages.xlsx\"");
+        resp.setHeader("Content-Disposition", "attachment; filename=\"messages.csv\"");
 
         OutputStream out = resp.getOutputStream();
         IOUtils.copy(fis, out);

@@ -519,17 +519,16 @@ public class FormDataServiceImpl implements FormDataService {
             }
             //Система проверяет статус консолидации из форм-источников.
             List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
-                    formData.getId().intValue(),
+                    formData.getDepartmentId(),
                     formData.getFormType().getId(),
                     formData.getKind(),
                     reportPeriod.getCalendarStartDate(),
                     reportPeriod.getEndDate());
-            ArrayList<FormData> formDataIds = new ArrayList<FormData>();
             for (DepartmentFormType dftSource : dftSources){
                 FormData sourceFormData =
                         findFormData(dftSource.getFormTypeId(), dftSource.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 if (sourceFormData == null){
-                    ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
                     logger.warn(
                             NOT_EXIST_SOURCE_FORM_WARNING,
@@ -542,26 +541,21 @@ public class FormDataServiceImpl implements FormDataService {
                                     SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
                     );
                 } else if (!sourceService.isFDSourceConsolidated(formData.getId(), sourceFormData.getId())){
-                    formDataIds.add(sourceFormData);
-                }
-            }
-            if (!formDataIds.isEmpty()){
-                for (FormData sourceFD : formDataIds){
-                    ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
                     logger.warn(
                             NOT_CONSOLIDATE_SOURCE_FORM_WARNING,
-                            departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
-                            sourceFD.getFormType().getName(),
-                            sourceFD.getKind().getName(),
-                            rp.getName() + (sourceFD.getPeriodOrder() != null?" " + Months.fromId(sourceFD.getPeriodOrder()).getTitle():""),
+                            departmentService.getDepartment(sourceFormData.getDepartmentId()).getName(),
+                            sourceFormData.getFormType().getName(),
+                            sourceFormData.getKind().getName(),
+                            rp.getName() + (sourceFormData.getPeriodOrder() != null?" " + Months.fromId(sourceFormData.getPeriodOrder()).getTitle():""),
                             rp.getTaxPeriod().getYear(),
                             drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                                     SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                            sourceFD.getState().getName()
+                            sourceFormData.getState().getName()
                     );
                 }
-            } else if (dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
+            }
+            if (!dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
                 logger.info("Консолидация выполнена из всех форм-источников");
             }
             // Ошибка для отката транзакции
@@ -714,7 +708,6 @@ public class FormDataServiceImpl implements FormDataService {
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                     null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
         }
-        sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
 	}
 
     /**
@@ -785,7 +778,8 @@ public class FormDataServiceImpl implements FormDataService {
                     checkReferenceValues(logger, formData);
                     if (workflowMove == WorkflowMove.CREATED_TO_ACCEPTED
                             || workflowMove == WorkflowMove.CREATED_TO_PREPARED
-                            || workflowMove == WorkflowMove.PREPARED_TO_ACCEPTED) {
+                            || workflowMove == WorkflowMove.PREPARED_TO_ACCEPTED
+                            || workflowMove == WorkflowMove.APPROVED_TO_ACCEPTED) {
                         //Проверка выполнена ли консолидация из всех принятых источников текущего экземпляра
                         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                         List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
@@ -1061,62 +1055,26 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
 
-        //Блокировка текущей формы
-        List<String> lockedForms = new ArrayList<String>();
-        String lockCurrentKey = LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId();
-        LockData lockDataCurrent = lockService.lock(lockCurrentKey,
-                userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-        if (lockDataCurrent != null) {
-            logger.error(
-                    String.format(
-                            LOCK_CURRENT, userInfo.getUser().getLogin(),
-                            SDF_HH_MM_DD_MM_YYYY.format(lockDataCurrent.getDateLock()))
-            );
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-        } else {
-            lockedForms.add(lockCurrentKey);
-        }
-
-        //Блокировка всех экземпляров источников
-        try {
-            String lockKey;
-            msgPull.clear();
-            //Переменная для отмечания консолидации в таблице консолидации
-            HashSet<Long> srcIds = new HashSet<Long>(departmentFormTypesSources.size());
-            for (DepartmentFormType sourceDFT : departmentFormTypesSources){
-                // Последний отчетный период подразделения
-                DepartmentReportPeriod sourceDepartmentReportPeriod =
-                        departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
-                if (sourceDepartmentReportPeriod == null) {
-                    continue;
-                }
-                FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                        sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
-                if (sourceForm == null){
-                    continue;
-                }
-                // Проверяем/устанавливаем блокировку для источников
-                lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + sourceDFT.getId();
-                LockData lockData = lockService.lock(
-                        lockKey,
-                        userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
-                        lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-
-                if (lockData != null) {
-                    logger.error(LOCK_SOURCE,
-                            sourceForm.getFormType().getName(),
-                            sourceDFT.getKind().getName(),
-                            sourceDepartmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " " + sourceDepartmentReportPeriod.getReportPeriod().getName(),
-                            departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
-                            userService.getUser(lockData.getUserId()).getName(),
-                            SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
-                } else {
-                    lockedForms.add(lockKey);
-                }
-
-                //Запись на будущее, чтобы второго цикла не делать
-                srcIds.add(sourceForm.getId());
+        HashSet<Long> srcAcceptedIds = new HashSet<Long>();
+        //Список для блокировки форм
+        ArrayList<FormData> sources = new ArrayList<FormData>(departmentFormTypesSources.size());
+        msgPull.clear();
+        for (DepartmentFormType sourceDFT : departmentFormTypesSources){
+            // Последний отчетный период подразделения
+            DepartmentReportPeriod sourceDepartmentReportPeriod =
+                    departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
+            if (sourceDepartmentReportPeriod == null) {
+                continue;
+            }
+            FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
+                    sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+            if (sourceForm == null){
+                continue;
+            }
+            //Запись на будущее, чтобы второго цикла не делать
+            //1E.
+            if (sourceForm.getState() == WorkflowState.ACCEPTED){
+                srcAcceptedIds.add(sourceForm.getId());
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         sourceDFT.getKind().getName(),
@@ -1127,7 +1085,60 @@ public class FormDataServiceImpl implements FormDataService {
                                 :
                                 "")
                 ));
+                sources.add(sourceForm);
             }
+        }
+
+        //1Е.  Система проверяет экземпляр на возможность выполнения консолидации в него. Не существует ни одной принятой формы-источника
+        if (srcAcceptedIds.isEmpty()){
+            logger.error("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
+            throw new ServiceLoggerException("Операция не выполнена", logEntryService.save(logger.getEntries()));
+
+        }
+
+        //Блокировка всех экземпляров источников
+        List<String> lockedForms = new ArrayList<String>();
+        try {
+            //Блокировка текущей формы
+            String lockCurrentKey = LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId();
+            LockData lockDataCurrent = lockService.lock(lockCurrentKey,
+                    userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
+                    lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+            if (lockDataCurrent != null) {
+                logger.error(
+                        String.format(
+                                LOCK_CURRENT, userInfo.getUser().getLogin(),
+                                SDF_HH_MM_DD_MM_YYYY.format(lockDataCurrent.getDateLock()))
+                );
+                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            } else {
+                lockedForms.add(lockCurrentKey);
+            }
+
+            String lockKey;
+            //Переменная для отмечания консолидации в таблице консолидации
+            for (FormData sourceForm : sources){
+                // Проверяем/устанавливаем блокировку для источников
+                lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + sourceForm.getId();
+                LockData lockData = lockService.lock(
+                        lockKey,
+                        userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
+                        lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+
+                if (lockData != null) {
+                    DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
+                    logger.error(LOCK_SOURCE,
+                            sourceForm.getFormType().getName(),
+                            sourceForm.getKind().getName(),
+                            drp.getReportPeriod().getTaxPeriod().getYear() + " " + drp.getReportPeriod().getName(),
+                            departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
+                            userService.getUser(lockData.getUserId()).getName(),
+                            SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
+                } else {
+                    lockedForms.add(lockKey);
+                }
+            }
+
             //2А. Выводим ошибки блокировок
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException("Ошибка при консолидации", logEntryService.save(logger.getEntries()));
@@ -1142,24 +1153,20 @@ public class FormDataServiceImpl implements FormDataService {
                     (formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;*/
             formDataCompositionService.compose(formData, 0, null, formData.getFormType().getId(), formData.getKind());
 
+            //Система выводит сообщение в панель уведомлений
+            logger.info("Выполнена консолидация данных из форм-источников:");
+            for (String s : msgPull){
+                logger.info(s);
+            }
+
             //Удаление отчета НФ
             reportService.delete(formData.getId(), null);
             //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
             updatePreviousRowNumber(formData, logger);
             //Обновление записей о консолидации
             sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
-            sourceService.addFormDataConsolidationInfo(formData.getId(), srcIds);
+            sourceService.addFormDataConsolidationInfo(formData.getId(), srcAcceptedIds);
 
-            //8.Система проверяет экземпляр на наличие записей о консолидации. Записи о консолидации найдены.
-            if (!srcIds.isEmpty()){
-                //9. Система выводит сообщение в панель уведомлений
-                logger.info("Выполнена консолидация данных из форм-источников:");
-                for (String s : msgPull){
-                    logger.info(s);
-                }
-            } else {
-                logger.info("Данные текущей формы очищены. Не существует ни одной формы-источника, статус которой \"Принята\"");
-            }
         } finally {
             //5. Система разблокирует текущий экземпляр и все налоговые формы - источники.
             for (String lockKey : lockedForms) {

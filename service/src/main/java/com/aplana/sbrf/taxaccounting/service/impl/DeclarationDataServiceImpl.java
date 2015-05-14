@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -220,13 +221,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate) {
+    public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
         checkSources(declarationData, logger);
 
         //2. проверяет состояние XML отчета экземпляра декларации
-        setDeclarationBlobs(logger, declarationData, docDate, userInfo);
+        setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
 
         //3. обновляет записи о консолидации
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
@@ -431,8 +432,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void setPdfDataBlobs(Logger logger,
-                                     DeclarationData declarationData, TAUserInfo userInfo) {
+                                     DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         log.info(String.format("Получение данных декларации %s", declarationData.getId()));
+        stateLogger.updateState("Получение данных декларации");
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
         if (zipXml != null) {            
@@ -441,12 +443,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 zipXmlIn.getNextEntry();
                 try {
                     log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+                    stateLogger.updateState("Заполнение Jasper-макета");
                     JasperPrint jasperPrint = fillReport(zipXmlIn,
                             declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
 
                     log.info(String.format("Сохранение PDF в БД для декларации %s", declarationData.getId()));
+                    stateLogger.updateState("Сохранение PDF в БД");
                     reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
                     log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
+                    stateLogger.updateState("Сохранение Jasper в БД");
                     reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
                 } finally {
                     IOUtils.closeQuietly(zipXml);
@@ -462,7 +467,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     // расчет декларации
     private void setDeclarationBlobs(Logger logger,
-                                     DeclarationData declarationData, Date docDate, TAUserInfo userInfo) {
+                                     DeclarationData declarationData, Date docDate, TAUserInfo userInfo, LockStateLogger stateLogger) {
 
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
@@ -476,7 +481,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         try {
             try {
-                log.info(String.format("Запущено создание временного файла для декларации %s", declarationData.getId()));
+                log.info(String.format("Cоздание временного файла для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Cоздание временного файла");
                 try {
                     xmlFile = File.createTempFile("file_for_validate", ".xml");
                     fileWriter = new FileWriter(xmlFile);
@@ -484,11 +490,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } catch (IOException e) {
                     throw new ServiceException("Ошибка при формировании временного файла для XML", e);
                 }
-                log.info(String.format("Закончено создание временного файла для декларации %s", declarationData.getId()));
                 exchangeParams.put(DeclarationDataScriptParams.XML, fileWriter);
-                log.info(String.format("Запущено выполнение скрипта расчета декларации %s", declarationData.getId()));
+                log.info(String.format("Выполнение скрипта расчета декларации %s", declarationData.getId()));
+                stateLogger.updateState("Выполнение скрипта расчета");
                 declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
-                log.info(String.format("Закончено выполнение скрипта расчета декларации %s", declarationData.getId()));
             } finally {
                 try {
                     if (fileWriter != null) fileWriter.close();
@@ -511,7 +516,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Переименоввываем
             File renameToFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "xml"));
             if (xmlFile.renameTo(renameToFile)){
-                validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, renameToFile);
+                validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, renameToFile, stateLogger);
 
                 //Архивирование перед сохраннеием в базу
                 File zipOutFile = null;
@@ -531,10 +536,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         IOUtils.closeQuietly(fileOutputStream);
                     }
 
-                    log.info(String.format("Запущено сохранение в бд для декларации %s", declarationData.getId()));
+                    log.info(String.format("Сохранение в бд для декларации %s", declarationData.getId()));
+                    stateLogger.updateState("Сохранение в БД");
 
                     reportService.createDec(declarationData.getId(), blobDataService.create(zipOutFile, zipOutFile.getName(), decDate), ReportType.XML_DEC);
-                    log.info(String.format("Закончено сохранение в бд для декларации %s", declarationData.getId()));
                 } finally {
                     if (zipOutFile != null && !zipOutFile.delete()) {
                         log.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
@@ -571,7 +576,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
             throw new ServiceException(msg);
         }
-        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null);
+        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+                //TODO передавать из асинхронной задачи, когда будет переделана проверка и принятие на асинки
+            }
+        });
     }
 
     /**
@@ -580,7 +590,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * @param xmlFile файл декларации
      */
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                     FormDataEvent operation, File xmlFile) {
+                                     FormDataEvent operation, File xmlFile, LockStateLogger stateLogger) {
         Locale oldLocale = Locale.getDefault();
         log.info(String.format("Получение данных декларации %s", declarationData.getId()));
         Locale.setDefault(new Locale("ru", "RU"));
@@ -588,17 +598,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
             try {
-                log.info(String.format("Запущена валидация декларации %s", declarationData.getId()));
+                log.info(String.format("Валидация декларации %s", declarationData.getId()));
+                stateLogger.updateState("Валидация");
                 if (!validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile) && logger.containsLevel(LogLevel.ERROR)){
                     throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
                 }
-                log.info(String.format("Закончена валидация декларации %s", declarationData.getId()));
             } catch (Exception e) {
-                log.info(String.format("Запущено сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
+                log.info(String.format("Сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение логов об ошибках валидации");
                 log.error(VALIDATION_ERR_MSG, e);
                 logger.error(e);                
                 String uuid = logEntryService.save(logger.getEntries());
-                log.info(String.format("Закончено сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
                 throw new ServiceLoggerException(VALIDATION_ERR_MSG, uuid);
             } finally {
                 Locale.setDefault(oldLocale);
