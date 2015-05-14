@@ -37,8 +37,11 @@ import java.util.*;
  */
 public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implements Map<String, Object>, Serializable {
 	private static final long serialVersionUID = 1L;
+	// список ячеек с данными
 	private List<C> data;
+	// псевдоним строки
 	private String alias;
+	// индекс строки в рамках экземпляра НФ (1, 2, ... , N)
 	private Integer index;
     private Integer importIndex;
 
@@ -293,8 +296,12 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 
 	@Override
 	public String toString() {
-        return "DataRow [data=" + data + ", alias=" + alias + ", index="
-                + index + ", importIndex=" + importIndex + ", id " + id + "]";
+        return
+			new StringBuilder("DataRow [")
+				.append("alias=").append(alias)
+				.append(", index=").append(index)
+				.append(", importIndex=").append(importIndex)
+				.append(", data=").append(data).append(']').toString();
     }
 
     /**

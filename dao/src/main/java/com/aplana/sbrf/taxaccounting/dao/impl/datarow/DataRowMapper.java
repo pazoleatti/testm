@@ -50,9 +50,15 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			params.put("temporary", 0); //TODO исправить
 			params.put("manual", fd.isManual() ? 1 : 0);
 
-			StringBuilder sql = new StringBuilder("SELECT ord, alias");
+			StringBuilder sql = new StringBuilder("SELECT ord, alias,\n");
+			// автонумерация (считаются все строки где нет алиасов, либо алиас = ALIASED_WITH_AUTO_NUMERATION_AFFIX)
+			sql.append("CASE WHEN (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN\n")
+				.append("ROW_NUMBER() OVER (PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%")
+				.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN 1 ELSE 0 END ORDER BY ord)\n")
+				.append("ELSE NULL END numeration");
+			// значения и стили ячеек
 			for (Column column : fd.getFormColumns()){
-				String columnId = column.getId();
+				Integer columnId = column.getId();
 				sql.append(",\n");
 				sql.append(columnId).append(", ");
 				sql.append(columnId).append("_style_id, ");
@@ -62,11 +68,13 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			}
 			sql.append("\nFROM form_data_").append(fd.getFormTemplateId());
 			sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");
+			// пейджинг
 			if (range != null) {
 				sql.append(" AND ord BETWEEN :from AND :to");
 				params.put("from", range.getOffset());
 				params.put("to", range.getOffset() + range.getLimit() - 1);
 			}
+			sql.append("\nORDER BY ord");
 
 			return new Pair<String, Map<String, Object>>(sql.toString(), params);
 		} else {
@@ -135,42 +143,78 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	@Override
 	public DataRow<Cell> mapRow(ResultSet rs, int rowNum) throws SQLException {
-		List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(),
-				fd.getFormStyles());
-		Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
-        String alias = rs.getString("alias");
-        for (Cell cell : cells) {
-			// Values
-			if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && (alias == null
-                    || alias.contains(ALIASED_WITH_AUTO_NUMERATION_AFFIX))) {
-				if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
-						cell.setValue(SqlUtils.getLong(rs, "IDX2") + previousRowNumber, rowNum);
+		if (fd.getFormTemplateId() == 329) {
+			List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(), fd.getFormStyles());
+			Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
+			String alias = rs.getString("alias");
+			for (Cell cell : cells) {
+				Integer columnId = cell.getColumn().getId();
+				// Values
+				if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) &&
+						(alias == null || alias.contains(ALIASED_WITH_AUTO_NUMERATION_AFFIX))) {
+					Long numeration = SqlUtils.getLong(rs, "numeration");
+					if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
+						cell.setValue(numeration + previousRowNumber, rowNum);
+					} else {
+						cell.setValue(numeration, rowNum);
+					}
 				} else {
-					cell.setValue(SqlUtils.getLong(rs, "IDX2"), rowNum);
+					DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
+					cell.setValue(extr.getValue(rs, String.format("c%s", columnId)), rowNum);
 				}
-			} else {
-				DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
-				cell.setValue(extr.getValue(rs,
-						String.format("V%s", cell.getColumn().getId())), rowNum);
+				// Styles
+				BigDecimal styleId = rs.getBigDecimal(String.format("c%s_style_id", columnId));
+				cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
+				// Editable
+				cell.setEditable(rs.getBoolean(String.format("c%s_editable", columnId)));
+				// Span Info
+				Integer rowSpan = SqlUtils.getInteger(rs, String.format("c%s_colspan", columnId));
+				cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
+				Integer colSpan = SqlUtils.getInteger(rs, String.format("c%s_rowspan", columnId));
+				cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
 			}
-			// Styles
-			BigDecimal styleId = rs.getBigDecimal(String.format("S%s", cell
-					.getColumn().getId()));
-			cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
-			// Editable
-			cell.setEditable(rs.getBoolean(String.format("E%s", cell
-					.getColumn().getId())));
-			// Span Info
-			Integer rowSpan = SqlUtils.getInteger(rs, String.format("RSI%s", cell.getColumn()
-					.getId()));
-			cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
-			Integer colSpan = SqlUtils.getInteger(rs, String.format("CSI%s", cell.getColumn()
-					.getId()));
-			cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
+			DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
+			dataRow.setIndex(SqlUtils.getInteger(rs,"ord"));
+			return dataRow;
 		}
-		DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
-		dataRow.setId(SqlUtils.getLong(rs,"ID"));
-		dataRow.setIndex(SqlUtils.getInteger(rs,"IDX"));
-		return dataRow;
+		else {
+			List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(),
+					fd.getFormStyles());
+			Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
+			String alias = rs.getString("alias");
+			for (Cell cell : cells) {
+				// Values
+				if (ColumnType.AUTO.equals(cell.getColumn().getColumnType()) && (alias == null
+						|| alias.contains(ALIASED_WITH_AUTO_NUMERATION_AFFIX))) {
+					if (NumerationType.CROSS.equals(((AutoNumerationColumn) cell.getColumn()).getNumerationType())) {
+							cell.setValue(SqlUtils.getLong(rs, "IDX2") + previousRowNumber, rowNum);
+					} else {
+						cell.setValue(SqlUtils.getLong(rs, "IDX2"), rowNum);
+					}
+				} else {
+					DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
+					cell.setValue(extr.getValue(rs,
+							String.format("V%s", cell.getColumn().getId())), rowNum);
+				}
+				// Styles
+				BigDecimal styleId = rs.getBigDecimal(String.format("S%s", cell
+						.getColumn().getId()));
+				cell.setStyleId(styleId != null ? styleId.intValueExact() : null);
+				// Editable
+				cell.setEditable(rs.getBoolean(String.format("E%s", cell
+						.getColumn().getId())));
+				// Span Info
+				Integer rowSpan = SqlUtils.getInteger(rs, String.format("RSI%s", cell.getColumn()
+						.getId()));
+				cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
+				Integer colSpan = SqlUtils.getInteger(rs, String.format("CSI%s", cell.getColumn()
+						.getId()));
+				cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
+			}
+			DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
+			dataRow.setId(SqlUtils.getLong(rs,"ID"));
+			dataRow.setIndex(SqlUtils.getInteger(rs,"IDX"));
+			return dataRow;
+		}
 	}
 }
