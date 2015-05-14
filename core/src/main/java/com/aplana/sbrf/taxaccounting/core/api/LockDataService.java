@@ -203,4 +203,12 @@ public interface LockDataService {
      * @param queue очередь
      */
     void updateQueue(String key, Date lockDate, String queue);
+
+    /**
+     * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
+     * отправляет оповещения ожидающим блокирку пользователям
+     * @param lockData
+     * @param userId
+     */
+    void interruptTask(LockData lockData, int userId);
 }

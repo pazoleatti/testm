@@ -11,11 +11,10 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void accept(boolean accepted);
 	void delete();
 	void check();
-	void downloadExcel();
+    void viewReport(Boolean force, ReportType reportType);
 	void downloadXml();
 	void onInfoClicked();
     TaxType getTaxType();
     void onTimerReport(final ReportType reportType, final boolean isTimer);
-    void viewPdf(Boolean force);
     void onOpenSourcesDialog();
 }

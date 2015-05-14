@@ -59,10 +59,14 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         if (checkTaskLimit == null) {
             throw new ServiceException("Декларация не сформирована");
         } else if (checkTaskLimit.getFirst() == null) {
-                Logger logger = new Logger();
-                logger.error("Критерий возможности формирования печатного представления декларации задается в конфигурационных параметрах. За разъяснениями обратитесь к Администратору");
-                throw new ServiceLoggerException("Формирование печатного представления невозможно, т.к. xml файл декларации имеет слишком большой размер(%d байт)!",
-                        logEntryService.save(logger.getEntries()), checkTaskLimit.getSecond());
+            Logger logger = new Logger();
+            DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            logger.error("Критерий возможности формирования печатного представления декларации задается в конфигурационных параметрах. За разъяснениями обратитесь к Администратору");
+            throw new ServiceLoggerException(ReportType.CHECK_TASK,
+                    logEntryService.save(logger.getEntries()),
+                    String.format(ReportType.PDF_DEC.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
+                    String.format("xml файл %s имеет слишком большой размер(%s байт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), checkTaskLimit.getSecond()));
         }
         return checkTaskLimit.getFirst();
     }
