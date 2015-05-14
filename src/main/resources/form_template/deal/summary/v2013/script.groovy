@@ -911,10 +911,10 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         // «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
         // то заполняется значением «0». В ином случае заполняется значением «1».
         def val = getRefBookValue(9, row.organName)
-        row.f121 = val.OFFSHORE.numberValue == 1 ? recNoId : recYesId
+        row.f121 = (val.OFFSHORE.referenceValue == recYesId) ? recNoId : recYesId
 
         // Графа 5 (логика, обратная графе 3)
-        row.f123 = row.f121 == recYesId ? recNoId : recYesId
+        row.f123 = (row.f121 == recYesId) ? recNoId : recYesId
 
         // Графа 7 (та же логика, что у графы 3)
         row.f131 = row.f121
@@ -923,7 +923,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
         // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является
         // резидентом Сколково» = 1, то заполняется значением «1». В ином случае заполняется значением «0».
-        row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : recNoId
+        row.f134 = (val.SKOLKOVO.referenceValue == recYesId) ? recYesId : recNoId
 
         // Графа 49
         // Код страны
