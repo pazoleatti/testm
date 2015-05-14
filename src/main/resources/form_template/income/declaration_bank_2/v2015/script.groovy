@@ -1230,7 +1230,6 @@ void generateXML() {
                     }
 
                     def index = 0
-                    def rowNum = 1
                     for (def row : dataRowsApp2) {
                         //НомерСправ  Справка №
                         def nomerSprav = isCFOApp2 ? (++index) : row.refNum
@@ -1373,8 +1372,6 @@ void generateXML() {
                     }
                 }
                 // Приложение №2 к налоговой декларации - конец
-                if (rowNum >= 10000)
-                    decParams.setShowReport(false)
             }
         }
     }

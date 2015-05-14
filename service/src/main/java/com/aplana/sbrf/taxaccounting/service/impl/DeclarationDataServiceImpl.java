@@ -497,8 +497,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
         StringWriter writer = new StringWriter();
         exchangeParams.put(DeclarationDataScriptParams.XML, writer);
-        DeclarationParams params = new DeclarationParams();
-        exchangeParams.put(DeclarationDataScriptParams.DEC_PARAMS, params);
 
         File xmlFile = null;
         Writer fileWriter = null;
