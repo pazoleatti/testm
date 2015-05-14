@@ -55,18 +55,16 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
     public TimerReportResult execute(TimerReportAction action, ExecutionContext executionContext) throws ActionException {
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        if (ReportType.PDF_DEC.equals(action.getType())) {
-            TimerReportResult.StatusReport statusXML = getStatus(userInfo, action.getDeclarationDataId(), ReportType.XML_DEC);
-            if (TimerReportResult.StatusReport.LOCKED.equals(statusXML) ||
-                    TimerReportResult.StatusReport.NOT_EXIST.equals(statusXML)) {
-                result.setExistXMLReport(statusXML);
-                return result;
-            }
-        }
         TimerReportResult.StatusReport status = getStatus(userInfo, action.getDeclarationDataId(), action.getType());
         result.setExistReport(status);
         if (TimerReportResult.StatusReport.EXIST.equals(status) && ReportType.PDF_DEC.equals(action.getType())) {
             result.setPdf(generatePdfViewerModel(action.getDeclarationDataId(), userInfo));
+        } else if (!TimerReportResult.StatusReport.LOCKED.equals(status) && ReportType.PDF_DEC.equals(action.getType())) {
+            TimerReportResult.StatusReport statusXML = getStatus(userInfo, action.getDeclarationDataId(), ReportType.XML_DEC);
+            if (TimerReportResult.StatusReport.LOCKED.equals(statusXML) ||
+                    TimerReportResult.StatusReport.NOT_EXIST.equals(statusXML)) {
+                result.setExistXMLReport(statusXML);
+            }
         }
         return result;
     }

@@ -416,8 +416,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             DeclarationData declarationData = declarationDataDao.get(id);
             String uuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
-            ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
-            JasperPrint jasperPrint = (JasperPrint)objectInputStream.readObject();
+            JasperPrint jasperPrint;
+            if (uuid != null) {
+                ObjectInputStream objectInputStream = null;
+                try {
+                    objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
+                    jasperPrint = (JasperPrint) objectInputStream.readObject();
+                } finally {
+                    //IOUtils.closeQuietly(objectInputStream);
+                }
+            } else {
+                jasperPrint = createJasperReport(declarationData, userInfo);
+                // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
+            }
             return exportXLSX(jasperPrint);
         } catch (Exception e) {
             throw new ServiceException("Не удалось извлечь объект для печати.", e);
@@ -430,33 +441,46 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return getBytesFromInputstream(reportService.getDec(userInfo, id, ReportType.PDF_DEC));
 	}
 
+    private JasperPrint createJasperReport(DeclarationData declarationData, TAUserInfo userInfo) {
+        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
+        InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
+        if (zipXml != null) {
+            try {
+                ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
+                zipXmlIn.getNextEntry();
+                try {
+                    return fillReport(zipXmlIn,
+                            declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
+                } finally {
+                    IOUtils.closeQuietly(zipXml);
+                    IOUtils.closeQuietly(zipXmlIn);
+                }
+            } catch (IOException e) {
+                throw new ServiceException(e.getLocalizedMessage(), e);
+            }
+        } else {
+            throw new ServiceException("Декларация не сформирована");
+        }
+    }
+    
     @Override
     public void setPdfDataBlobs(Logger logger,
                                      DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         log.info(String.format("Получение данных декларации %s", declarationData.getId()));
         stateLogger.updateState("Получение данных декларации");
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
-        InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
-        if (zipXml != null) {            
+        if (xmlUuid != null) {            
             try {                
-                ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
-                zipXmlIn.getNextEntry();
-                try {
-                    log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
-                    stateLogger.updateState("Заполнение Jasper-макета");
-                    JasperPrint jasperPrint = fillReport(zipXmlIn,
-                            declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
-
-                    log.info(String.format("Сохранение PDF в БД для декларации %s", declarationData.getId()));
-                    stateLogger.updateState("Сохранение PDF в БД");
-                    reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
-                    log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
-                    stateLogger.updateState("Сохранение Jasper в БД");
-                    reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
-                } finally {
-                    IOUtils.closeQuietly(zipXml);
-                    IOUtils.closeQuietly(zipXmlIn);
-                }                
+                log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+                stateLogger.updateState("Заполнение Jasper-макета");
+                JasperPrint jasperPrint = createJasperReport(declarationData, userInfo);
+                
+                log.info(String.format("Сохранение PDF в БД для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение PDF в БД");
+                reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
+                log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение Jasper в БД");
+                reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             }
