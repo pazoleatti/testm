@@ -40,6 +40,28 @@ where svalue is null
 	and editable is null;
 
 -----------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-11238: 0.6 Добавить в бд записи об асинхронном формировании для ЖА
+insert into async_task_type (id, name, handler_jndi) 
+  values (10, 'Генерация архива ЖА', 'ejb/taxaccounting/async-task.jar/CsvAuditArchiveGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+insert into async_task_type (id, name, handler_jndi)
+  values (110, 'Генерация архива ЖА', 'CsvAuditArchiveGeneratorAsyncTaskSpring');
+insert into async_task_type (id, name, handler_jndi)
+  values (11, 'Генерация отчета ЖА', 'ejb/taxaccounting/async-task.jar/CsvAuditGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+insert into async_task_type (id, name, handler_jndi)
+  values (111, 'Генерация отчета ЖА', 'CsvAuditGeneratorAsyncTaskSpring');
+
+-----------------------------------------------------------------------
+-- http://jira.aplana.com/browse/SBRFACCTAX-11235: Обновление данных в ASYNC_TASK_TYPE
+update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/XlsmGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 3;
+update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/CsvGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 4;
+update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/XlsxGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 5;
+update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/XmlGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 6;
+update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/PdfGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 7;
+update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/IfrsGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 9;
+update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/UploadTransportDataAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 12;
+update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/LoadAllTransportDataAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 13;
+
+-----------------------------------------------------------------------
 
 commit;
 exit;
