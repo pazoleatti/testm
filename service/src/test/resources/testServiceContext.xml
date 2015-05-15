@@ -127,4 +127,7 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao"/>
+    </bean>
 </beans>

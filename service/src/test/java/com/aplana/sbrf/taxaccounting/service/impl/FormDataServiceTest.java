@@ -967,6 +967,16 @@ public class FormDataServiceTest {
         drp1.setCorrectionDate(new Date(0));
         when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp1);
 
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setId(1);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        departmentReportPeriod.setDepartmentId(1);
+        departmentReportPeriod.setBalance(false);
+        departmentReportPeriod.setActive(true);
+        formData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+
+        when(departmentReportPeriodService.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
+
         try{
             formDataService.doCheck(logger, userInfo, formData);
         }catch (ServiceLoggerException e){

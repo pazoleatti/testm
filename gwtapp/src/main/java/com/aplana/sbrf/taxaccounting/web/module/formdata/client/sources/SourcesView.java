@@ -44,10 +44,10 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private final PopupPanel widget;
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
-    public static final String TITLE_FORM = "Налоговые формы";
-    public static final String TITLE_DEC = "Декларации";
-    public static final String TITLE_FORM_DEAL = "Формы";
-    public static final String TITLE_DEC_DEAL = "Уведомления";
+    public static final String TITLE_FORM = "Налоговые формы источники / приемники";
+    public static final String TITLE_DEC = "Декларации приемники";
+    public static final String TITLE_FORM_DEAL = "Формы источники / приемники";
+    public static final String TITLE_DEC_DEAL = "Уведомления приемники";
 
     @UiField
     Button close;
@@ -272,7 +272,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
                 table.addColumn(formTypeColumn, "Вид декларации");
             } else {
-                table.addColumn(formTypeColumn, "Вид уведоления");
+                table.addColumn(formTypeColumn, "Вид уведомления");
             }
             table.setColumnWidth(formTypeColumn, 110, Style.Unit.PX);
         }
@@ -329,6 +329,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     public void setTableData(List<FormToFormRelation> result) {
         tableData = result;
         isForm = true;
+        if (result == null)
+            initColumns();
         updateSwitchMode();
         initCheckboxes();
         updateTableData();
