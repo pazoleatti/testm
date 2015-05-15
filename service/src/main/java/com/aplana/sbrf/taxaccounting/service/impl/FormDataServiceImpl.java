@@ -525,8 +525,11 @@ public class FormDataServiceImpl implements FormDataService {
                     reportPeriod.getCalendarStartDate(),
                     reportPeriod.getEndDate());
             for (DepartmentFormType dftSource : dftSources){
+                DepartmentReportPeriod sourceDepartmentReportPeriod =
+                        departmentReportPeriodService.getLast(dftSource.getDepartmentId(), formData.getReportPeriodId());
                 FormData sourceFormData =
-                        findFormData(dftSource.getFormTypeId(), dftSource.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                        findFormData(dftSource.getFormTypeId(), dftSource.getKind(),
+                                sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
                 ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 if (sourceFormData == null){
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
