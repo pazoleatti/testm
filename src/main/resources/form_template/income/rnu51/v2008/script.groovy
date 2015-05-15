@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -76,8 +77,10 @@ switch (formDataEvent) {
         def fileName = UploadFileName?.toLowerCase()
         if (fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm")) {
             importDataXLS()
-            calc()
-            logicCheck()
+            if (!logger.containsLevel(LogLevel.ERROR)) {
+                calc()
+                logicCheck()
+            }
         } else {
             importData()
         }
@@ -780,7 +783,9 @@ void addData(def xml, int headRowCount) {
     def totalTwoRow = getDataRow(dataRows, 'itogo')
     // Обнуление итогов
     totalColumns.each {
+        totalOneRow.getCell(it).setCheckMode(true)
         totalOneRow[it] = 0
+        totalTwoRow.getCell(it).setCheckMode(true)
         totalTwoRow[it] = 0
     }
 
@@ -809,7 +814,7 @@ void addData(def xml, int headRowCount) {
             continue
         }
 
-        def newRow = formData.createDataRow()
+        def newRow = formData.createStoreMessagingDataRow()
         newRow.setIndex(rowIndex++)
         editableColumns.each {
             newRow.getCell(it).editable = true
@@ -912,7 +917,11 @@ void addData(def xml, int headRowCount) {
     }
     rows.add(totalOneRow)
     rows.add(totalTwoRow)
-    dataRowHelper.save(rows)
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        dataRowHelper.save(rows)
+    }
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
