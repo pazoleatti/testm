@@ -731,7 +731,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             val27 = '65.23'
             break
         case 382: // 7
-            val27 = '67.12'
+            val27 = '65.12'
             break
         case 383: // 8
         case 385: // 10
