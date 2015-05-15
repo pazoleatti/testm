@@ -882,49 +882,51 @@ public class FormDataServiceImpl implements FormDataService {
         } else {
             rows = dataRowDao.getRows(formData, null);
         }
-        for (Column column : formData.getFormColumns()) {
-            if (ColumnType.REFBOOK.equals(column.getColumnType())) {
-                Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
-                if (attributeId != null) {
-                    RefBook refBook = refBookDao.getByAttribute(attributeId);
-                    for (DataRow<Cell> row : rows) {
-                        if (row.getCell(column.getAlias()).getNumericValue() != null) {
-                            if (!recordsToCheck.containsKey(refBook.getId())) {
-                                recordsToCheck.put(refBook.getId(), new ArrayList<Long>());
-                            }
-                            //Раскладываем значения ссылок по справочникам, на которые они ссылаются
-                            recordsToCheck.get(refBook.getId()).add(row.getCell(column.getAlias()).getNumericValue().longValue());
+        if (rows.size() > 0) {
+            for (Column column : formData.getFormColumns()) {
+                if (ColumnType.REFBOOK.equals(column.getColumnType())) {
+                    Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
+                    if (attributeId != null) {
+                        RefBook refBook = refBookDao.getByAttribute(attributeId);
+                        for (DataRow<Cell> row : rows) {
+                            if (row.getCell(column.getAlias()).getNumericValue() != null) {
+                                if (!recordsToCheck.containsKey(refBook.getId())) {
+                                    recordsToCheck.put(refBook.getId(), new ArrayList<Long>());
+                                }
+                                //Раскладываем значения ссылок по справочникам, на которые они ссылаются
+                                recordsToCheck.get(refBook.getId()).add(row.getCell(column.getAlias()).getNumericValue().longValue());
 
-                            //Сохраняем информацию о местоположении ссылки
-                            long uniqueRecordId = row.getCell(column.getAlias()).getNumericValue().longValue();
-                            if (!referenceInfoMap.containsKey(uniqueRecordId)) {
-                                referenceInfoMap.put(uniqueRecordId, new ArrayList<ReferenceInfo>());
+                                //Сохраняем информацию о местоположении ссылки
+                                long uniqueRecordId = row.getCell(column.getAlias()).getNumericValue().longValue();
+                                if (!referenceInfoMap.containsKey(uniqueRecordId)) {
+                                    referenceInfoMap.put(uniqueRecordId, new ArrayList<ReferenceInfo>());
+                                }
+                                referenceInfoMap.get(uniqueRecordId).add(new ReferenceInfo(row.getIndex(), column.getName()));
                             }
-                            referenceInfoMap.get(uniqueRecordId).add(new ReferenceInfo(row.getIndex(), column.getName()));
                         }
                     }
                 }
             }
-        }
 
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-        boolean error = false;
-        for (Map.Entry<Long, List<Long>> referencesToCheck : recordsToCheck.entrySet()) {
-            RefBookDataProvider provider = refBookFactory.getDataProvider(referencesToCheck.getKey());
-            List<Long> inactiveRecords = provider.getInactiveRecordsInPeriod(referencesToCheck.getValue(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-            if (!inactiveRecords.isEmpty()) {
-                for (Long inactiveRecord : inactiveRecords) {
-                    for (ReferenceInfo referenceInfo : referenceInfoMap.get(inactiveRecord)) {
-                        logger.error(String.format(REF_BOOK_RECORDS_ERROR, referenceInfo.getRownum(), referenceInfo.getColumnName()));
+            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+            boolean error = false;
+            for (Map.Entry<Long, List<Long>> referencesToCheck : recordsToCheck.entrySet()) {
+                RefBookDataProvider provider = refBookFactory.getDataProvider(referencesToCheck.getKey());
+                List<Long> inactiveRecords = provider.getInactiveRecordsInPeriod(referencesToCheck.getValue(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                if (!inactiveRecords.isEmpty()) {
+                    for (Long inactiveRecord : inactiveRecords) {
+                        for (ReferenceInfo referenceInfo : referenceInfoMap.get(inactiveRecord)) {
+                            logger.error(String.format(REF_BOOK_RECORDS_ERROR, referenceInfo.getRownum(), referenceInfo.getColumnName()));
+                        }
                     }
+                    error = true;
                 }
-                error = true;
             }
-        }
 
-        if (error) {
-            throw new ServiceLoggerException("Произошла ошибка при проверке справочных значений формы",
-                    logEntryService.save(logger.getEntries()));
+            if (error) {
+                throw new ServiceLoggerException("Произошла ошибка при проверке справочных значений формы",
+                        logEntryService.save(logger.getEntries()));
+            }
         }
     }
 
