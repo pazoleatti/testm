@@ -497,8 +497,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
         StringWriter writer = new StringWriter();
         exchangeParams.put(DeclarationDataScriptParams.XML, writer);
-        DeclarationParams params = new DeclarationParams();
-        exchangeParams.put(DeclarationDataScriptParams.DEC_PARAMS, params);
 
         File xmlFile = null;
         Writer fileWriter = null;
@@ -540,7 +538,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             //Переименоввываем
             File renameToFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "xml"));
             if (xmlFile.renameTo(renameToFile)){
-                validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, renameToFile, stateLogger);
+                //validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, renameToFile, stateLogger);
 
                 //Архивирование перед сохраннеием в базу
                 File zipOutFile = null;
@@ -568,7 +566,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     if (zipOutFile != null && !zipOutFile.delete()) {
                         log.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
                     }
-                    if (renameToFile != null && !renameToFile.delete()) {
+                    if (!renameToFile.delete()) {
                         log.warn(String.format(FILE_NOT_DELETE, renameToFile.getAbsolutePath()));
                     }
                 }

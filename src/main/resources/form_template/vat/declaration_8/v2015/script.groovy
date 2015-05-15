@@ -167,13 +167,11 @@ void generateXML() {
                         (code190 != null ? [СумНДСВсКПк: code190] : [:])
                 ) {
                     hasPage = false
-                    def rowNum = 1
                     for (def row : sourceDataRows) {
                         if (row.getAlias() != null) {
                             continue
                         }
                         hasPage = true
-                        rowNum++
                         def code005 = row.rowNum
                         def code010 = row.typeCode
                         def code020 = getNumber(row.invoice)
@@ -266,8 +264,6 @@ void generateXML() {
                             }
                         }
                     }
-                    if (rowNum >= 10000)
-                        decParams.setShowReport(false)
                     if (!hasPage) {
                         КнПокСтр() {}
                     }

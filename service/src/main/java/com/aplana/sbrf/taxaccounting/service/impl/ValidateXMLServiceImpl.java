@@ -22,18 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -187,10 +177,10 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal) {
         BlobData xmlBlob = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC));
-        File xmlFileBD = null, file = null;
+        File xmlFileBD = null;
         try {
-            file = File.createTempFile("tmp_file", ".tmp");
-            xmlFileBD = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, xmlBlob.getName(), "xml"));
+            String fileName = xmlBlob.getName().substring(0, xmlBlob.getName().lastIndexOf('.'));
+            xmlFileBD = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, fileName, "xml"));
             FileOutputStream outputStream = new FileOutputStream(xmlFileBD);
             InputStream inputStream = xmlBlob.getInputStream();
             unzip(outputStream, inputStream);
@@ -201,9 +191,6 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         } finally {
             if (xmlFileBD!=null && !xmlFileBD.delete()){
                 log.warn(String.format(NOT_DELETE_WARN, xmlFileBD.getName()));
-            }
-            if (file!=null && !file.delete()){
-                log.warn(String.format(NOT_DELETE_WARN, file.getName()));
             }
         }
     }
