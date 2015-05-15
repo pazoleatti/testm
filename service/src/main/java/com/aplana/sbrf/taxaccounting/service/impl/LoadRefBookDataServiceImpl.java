@@ -121,7 +121,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
      * @param move                  Признак необходимости перемещения файла после импорта
      * @param loadedFileNameList    Список файлов, если необходимо загружать определенные файлы
      */
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Transactional(propagation = Propagation.SUPPORTS)
     private ImportCounter importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
                                         Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move,
                                         List<String> loadedFileNameList) {
