@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportResult;
+import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.PdfPage;
