@@ -272,7 +272,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
                 table.addColumn(formTypeColumn, "Вид декларации");
             } else {
-                table.addColumn(formTypeColumn, "Вид уведоления");
+                table.addColumn(formTypeColumn, "Вид уведомления");
             }
             table.setColumnWidth(formTypeColumn, 110, Style.Unit.PX);
         }
