@@ -329,6 +329,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     public void setTableData(List<FormToFormRelation> result) {
         tableData = result;
         isForm = true;
+        if (result == null)
+            initColumns();
         updateSwitchMode();
         initCheckboxes();
         updateTableData();
