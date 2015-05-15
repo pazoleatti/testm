@@ -20,6 +20,13 @@
                      jndi-name="ejblocal:${releaseName}/mdb.jar/DataSourceHolderBean#com.aplana.sbrf.taxaccounting.service.DataSourceHolderServiceLocal"
                      business-interface="com.aplana.sbrf.taxaccounting.service.DataSourceHolderService"/>
 
+    <jee:local-slsb
+            id="asyncInterruptionManager"
+            jndi-name="ejblocal:${releaseName}/async-core.jar/AsyncInterruptionManagerSingleton#com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManagerLocal"
+            business-interface="com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager"
+            lookup-home-on-startup="true"
+            />
+
     <bean id="dataSource" class="com.aplana.sbrf.taxaccounting.mdb.ApplicationDataSource" factory-method="getDataSource">
         <constructor-arg ref="dsHolder"/>
     </bean>

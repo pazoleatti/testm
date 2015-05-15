@@ -81,7 +81,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);
-                    logger.error("Ошибка при постановке в очередь задачи формирования декларации.");
+                    logger.error("Ошибка при постановке в очередь задачи загрузки ТФ.");
                 }
             } catch(Exception e) {
                 try {

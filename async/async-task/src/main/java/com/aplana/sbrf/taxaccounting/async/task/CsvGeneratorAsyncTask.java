@@ -67,7 +67,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Формироваиие csv-файла";
+        return "Формирование csv-файла";
     }
 
     @Override

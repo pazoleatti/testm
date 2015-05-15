@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -118,7 +119,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private FormDataService formDataService;
 
     @Autowired
-    FormTypeService formTypeService;
+    private FormTypeService formTypeService;
+
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
 
@@ -854,8 +858,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
             if (uuid != null) {
                 Long size = blobDataService.getLength(uuid);
-                long maxSize = 150 * 1024;
-                long shortSize = 10 * 1024;
+                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                long maxSize = taskTypeData.getTaskLimit();
+                long shortSize = taskTypeData.getShortQueueLimit();
                 if (size > maxSize) {
                     return new Pair<BalancingVariants, Long>(null, size);
                 } else if (size < shortSize) {
@@ -869,8 +874,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
             if (uuid != null) {
                 Long size = blobDataService.getLength(uuid);
-                long maxSize = 150 * 1024;
-                long shortSize = 10 * 1024;
+                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                long maxSize = taskTypeData.getTaskLimit();
+                long shortSize = taskTypeData.getShortQueueLimit();
                 if (size > maxSize) {
                     return new Pair<BalancingVariants, Long>(null, size);
                 } else if (size < shortSize) {
