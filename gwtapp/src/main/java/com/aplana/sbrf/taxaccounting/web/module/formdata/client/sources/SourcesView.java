@@ -44,10 +44,10 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private final PopupPanel widget;
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
-    public static final String TITLE_FORM = "Налоговые формы";
-    public static final String TITLE_DEC = "Декларации";
-    public static final String TITLE_FORM_DEAL = "Формы";
-    public static final String TITLE_DEC_DEAL = "Уведомления";
+    public static final String TITLE_FORM = "Налоговые формы источники / приемники";
+    public static final String TITLE_DEC = "Декларации приемники";
+    public static final String TITLE_FORM_DEAL = "Формы источники / приемники";
+    public static final String TITLE_DEC_DEAL = "Уведомления приемники";
 
     @UiField
     Button close;
