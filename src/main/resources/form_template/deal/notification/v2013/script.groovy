@@ -251,9 +251,9 @@ void generateXML() {
                                 def String okeiCode = row.okeiCode != null ? getRefBookValue(12, row.okeiCode)?.CODE?.stringValue : null
                                 ПерПредСд(
                                         [НаимПредСд: row.dealSubjectName] +
-                                                (dealSubjectCode1 != null ? [ТНВЭД: dealSubjectCode1] : [:]) +
-                                                (dealSubjectCode2 != null ? [ОКП: dealSubjectCode2] : [:]) +
-                                                (dealSubjectCode3 != null ? [ОКВЭД: dealSubjectCode3] : [:]) +
+                                                (dealType == '1' && dealSubjectCode1 != null ? [ТНВЭД: dealSubjectCode1] : [:]) +
+                                                (dealType == '1' && dealSubjectCode2 != null ? [ОКП: dealSubjectCode2] : [:]) +
+                                                (dealType in ['2', '3'] && dealSubjectCode3 != null ? [ОКВЭД: dealSubjectCode3] : [:]) +
                                                 [НомУчСд: row.otherNum] +
                                                 [НомДог: row.contractNum] +
                                                 (row.contractDate != null ? [ДатаДог: row.contractDate.format("dd.MM.yyyy")] : [:]) +
@@ -302,6 +302,10 @@ void generateXML() {
                             }
 
                             // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
+                            // 4. Если ПрОрг = 2 и для "КодНПРег" отсутствует в сводной значение, то "РегНомИн" в XML обязательно включаем.
+                            // 5. Если ПрОрг = 2 и "РегНомИн" в XML не включили, то "КодНПРег" в XML обязательно включаем.
+                            def useOrganRegNum = (organInfo == '2' && taxpayerCode == null)
+                            def useTaxpayerCode = (organInfo == '2' && !useOrganRegNum)
                             СвОргУчаст(
                                     [НомПорСд: rowCounter] +
                                             [ПрОрг: organInfo] +
@@ -309,9 +313,9 @@ void generateXML() {
                                             [НаимОрг: organName] +
                                             (organINN != null ? [ИННЮЛ: organINN] : [:]) +
                                             (organKPP != null ? [КПП: organKPP] : [:]) +
-                                            (organRegNum != null ? [РегНомИн: organRegNum] : [:]) +
-                                            (taxpayerCode != null ? [КодНПРег: taxpayerCode] : [:]) +
-                                            ((address != null && organInfo != '1') ? [АдрИнТекст: address] : [:])
+                                            (useOrganRegNum ? [РегНомИн: (organRegNum ?: '0')] : [:]) +
+                                            (useTaxpayerCode ? [КодНПРег: (taxpayerCode ?: '0')] : [:]) +
+                                            ((address != null && organInfo == '2') ? [АдрИнТекст: address] : [:])
                             )
                         }
                     }
