@@ -60,11 +60,11 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			for (Column column : fd.getFormColumns()){
 				Integer columnId = column.getId();
 				sql.append(",\n");
-				sql.append(columnId).append(", ");
-				sql.append(columnId).append("_style_id, ");
-				sql.append(columnId).append("_editable, ");
-				sql.append(columnId).append("_colspan, ");
-				sql.append(columnId).append("_rowspan");
+				sql.append('c').append(columnId).append(", ");
+				sql.append('c').append(columnId).append("_style_id, ");
+				sql.append('c').append(columnId).append("_editable, ");
+				sql.append('c').append(columnId).append("_colspan, ");
+				sql.append('c').append(columnId).append("_rowspan");
 			}
 			sql.append("\nFROM form_data_").append(fd.getFormTemplateId());
 			sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");
@@ -174,6 +174,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 				cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
 			}
 			DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
+			dataRow.setId(SqlUtils.getLong(rs, "ord")); //TODO удалить
 			dataRow.setIndex(SqlUtils.getInteger(rs,"ord"));
 			return dataRow;
 		}
