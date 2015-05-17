@@ -408,6 +408,8 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 384: // 9
         case 381: // 6
         case 393: // 18
+            val13 = '032'
+            break
         case 394: // 19
             val13 = '015'
             break
@@ -418,6 +420,8 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 386: // 11
         case 388: // 13
         case 402: // 23
+            val13 = '012'
+            break
         case 401: // 24
         case 403: // 25
             val13 = '003'
