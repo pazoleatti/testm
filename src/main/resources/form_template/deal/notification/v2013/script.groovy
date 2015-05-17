@@ -296,10 +296,10 @@ void generateXML() {
                                 organName = map?.NAME?.stringValue
                                 organINN = map?.INN_KIO?.stringValue
                                 organKPP = map?.KPP?.numberValue
-                                organRegNum = map?.REG_NUM?.stringValue
-                                taxpayerCode = map?.TAXPAYER_CODE?.stringValue
-                                address = map?.ADDRESS?.stringValue
                             }
+                            organRegNum = row.organRegNum
+                            taxpayerCode = row.taxpayerCode
+                            address = row.address
 
                             // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
                             СвОргУчаст(
