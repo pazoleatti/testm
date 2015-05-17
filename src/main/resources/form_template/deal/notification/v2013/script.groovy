@@ -307,7 +307,7 @@ void generateXML() {
                             def useOrganRegNum = (organInfo == '2' && taxpayerCode == null)
                             def useTaxpayerCode = (organInfo == '2' && !useOrganRegNum)
                             СвОргУчаст(
-                                    [НомПорСд: rowCounter] +
+                                    [НомПорСд: row.otherNum] +
                                             [ПрОрг: organInfo] +
                                             [ОКСМ: countryCode3] +
                                             [НаимОрг: organName] +
