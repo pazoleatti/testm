@@ -674,14 +674,11 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             val25and26 = srcRow.metalName
             break
     }
-    if (val25and26 != null) {
+    if (val25and26 != null && val23 == 1) {
         metal = getRefBookValue(17, val25and26)
 
         // Графа 25
-        def values25 = getRefBookValue(64, row.dealType)
-        if (values25 != null && values25.CODE.numberValue == 2) {
-            row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
-        }
+        row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
 
         // Графа 26
         def String innerCode = metal.INNER_CODE.stringValue
@@ -701,57 +698,59 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
     }
 
     // Графа 27
-    def String val27 = null
-    switch (formTypeId) {
-        case 376: // 1
-            val27 = '70.20.2'
-            break
-        case 377: // 2
-            val27 = '70.32.2'
-            break
-        case 375: // 3
-            val27 = '72.20'
-            break
-        case 379: // 4
-        case 380: // 5
-            val27 = '74.8'
-            break
-        case 393: // 18
-        case 394: // 19
-            val27 = '65.12'
-            break
-        case 381: // 6
-        case 384: // 9
-        case 386: // 11
-        case 388: // 13
-        case 391: // 16
-        case 392: // 17
-        case 401: // 24
-        case 403: // 25
-            val27 = '65.23'
-            break
-        case 382: // 7
-            val27 = '65.12'
-            break
-        case 383: // 8
-        case 385: // 10
-        case 387: // 12
-        case 389: // 14
-        case 404: // 26
-            val27 = '65.22'
-            break
-        case 390: // 15
-        case 397: // 20
-        case 402: // 23
-            val27 = '65.12'
-            break
-        case 398: // 21
-        case 399: // 22
-            val27 = '74'
-            break
-    }
-    if (val27 != null) {
-        row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27")
+    if (val23 in [2, 3]) {
+        def String val27 = null
+        switch (formTypeId) {
+            case 376: // 1
+                val27 = '70.20.2'
+                break
+            case 377: // 2
+                val27 = '70.32.2'
+                break
+            case 375: // 3
+                val27 = '72.20'
+                break
+            case 379: // 4
+            case 380: // 5
+                val27 = '74.8'
+                break
+            case 393: // 18
+            case 394: // 19
+                val27 = '65.12'
+                break
+            case 381: // 6
+            case 384: // 9
+            case 386: // 11
+            case 388: // 13
+            case 391: // 16
+            case 392: // 17
+            case 401: // 24
+            case 403: // 25
+                val27 = '65.23'
+                break
+            case 382: // 7
+                val27 = '65.12'
+                break
+            case 383: // 8
+            case 385: // 10
+            case 387: // 12
+            case 389: // 14
+            case 404: // 26
+                val27 = '65.22'
+                break
+            case 390: // 15
+            case 397: // 20
+            case 402: // 23
+                val27 = '65.12'
+                break
+            case 398: // 21
+            case 399: // 22
+                val27 = '74'
+                break
+        }
+        if (val27 != null) {
+            row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27")
+        }
     }
 
     // Графа 28
@@ -835,11 +834,12 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
     }
 
     // Графа 40
-    if (formTypeId == 393) {
-        row.deliveryCode = srcRow.conditionCode
-    }
-    if (formTypeId == 394) {
-        row.deliveryCode = srcRow.deliveryCode
+    if (val23 == 1) {
+        if (formTypeId == 393) {
+            row.deliveryCode = srcRow.conditionCode
+        } else if (formTypeId == 394) {
+            row.deliveryCode = srcRow.deliveryCode
+        }
     }
 
     // Графа 41
@@ -928,9 +928,27 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         // Графа 49
         // Код страны
         row.countryCode3 = val.COUNTRY?.referenceValue
+
+        // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
+        def organizationCode = getRefBookValue(70, val.ORGANIZATION?.referenceValue)?.CODE?.value
+        // заполняются только для иностранных организации (код равен 2)
+        if (organizationCode == 2) {
+            // Графа 53
+            row.organRegNum = val?.REG_NUM?.value
+
+            // Графа 54
+            row.taxpayerCode = val?.TAXPAYER_CODE?.value
+
+            // Графа 55
+            row.address = val?.ADDRESS?.value
+
+            if (!row.organRegNum && !row.taxpayerCode) {
+                row.organRegNum = '0'
+            }
+        }
     }
 
-    // Графа 48, 51, 52, 53, 54, 55
+    // Графа 48, 51, 52
     // зависимые в конфигураторе
 
     return row
@@ -1918,6 +1936,16 @@ void addData(def xml, int headRowCount) {
             // 55. п. 090 "Адрес"
             xmlIndexCol = 53
             formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.ADDRESS?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+            // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
+            // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
+            newRow.organRegNum = map.REG_NUM?.stringValue
+
+            // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
+            newRow.taxpayerCode = map.TAXPAYER_CODE?.stringValue
+
+            // 55. п. 090 "Адрес"
+            newRow.address = map.ADDRESS?.stringValue
         }
 
         rows.add(newRow)
