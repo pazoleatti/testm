@@ -756,6 +756,9 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
     // Графа 28
     row.otherNum = 1
 
+    // Графа 48
+    row.dealMemberNum = row.otherNum
+
     // Графа 29
     // заполняется предварительно для каждой строки getPreRow
     row.contractNum = matrixRow.contractNum
@@ -1903,6 +1906,9 @@ void addData(def xml, int headRowCount) {
         // 45. п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
         xmlIndexCol = 43
         newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        // 48. п. 020 "Сведения об организации"
+        xmlIndexCol = 46
+        newRow.dealMemberNum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         // 49. п. 030 "Код страны по классификатору ОКСМ"
         xmlIndexCol = 47
         newRow.countryCode3 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)

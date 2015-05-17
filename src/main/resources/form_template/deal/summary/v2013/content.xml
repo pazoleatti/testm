@@ -522,14 +522,15 @@
         <width>6</width>
         <numerationType>SERIAL</numerationType>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dealMemberNum</alias>
         <checking>false</checking>
-        <columnType>AUTO</columnType>
+        <columnType>NUMBER</columnType>
         <name>п. 015 &quot;Порядковый номер участника сделки (из раздела 1Б)&quot;</name>
         <order>48</order>
         <width>6</width>
-        <numerationType>SERIAL</numerationType>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>organInfo</alias>
