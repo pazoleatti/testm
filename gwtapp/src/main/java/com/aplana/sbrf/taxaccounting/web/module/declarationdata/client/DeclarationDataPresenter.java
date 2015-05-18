@@ -245,8 +245,10 @@ public class DeclarationDataPresenter
                             getView().updatePrintReportButtonName(reportType, false);
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.LIMIT)) {
                             getView().stopTimerReport(reportType);
-                            getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
-                                    "  Форма предварительного просмотра недоступна");
+                            if (ReportType.PDF_DEC.equals(reportType)) {
+                                getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
+                                        "  Форма предварительного просмотра недоступна");
+                            }
                             getView().updatePrintReportButtonName(reportType, false);
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания
                             if (ReportType.XML_DEC.equals(reportType)) {

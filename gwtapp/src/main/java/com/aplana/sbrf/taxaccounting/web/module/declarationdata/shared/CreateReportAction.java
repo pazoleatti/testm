@@ -51,6 +51,6 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     @Override
 	public String getName() {
-		return "Создание задачи для генерации отчетов";
+		return "Формирование отчетов";
 	}
 }
