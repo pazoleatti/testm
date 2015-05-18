@@ -129,9 +129,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                     log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SENDING_ERROR_MSGS.getText());
                                     if (e instanceof ServiceLoggerException) {
-                                        sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                                        sendNotifications(lock, getErrorMsg(params) + (e.getLocalizedMessage().isEmpty()?"":(". Ошибка: " + e.getMessage())), ((ServiceLoggerException) e).getUuid());
                                     } else {
-                                        sendNotifications(lock, getErrorMsg(params) + ". Ошибка: " + e.getMessage(), null);
+                                        sendNotifications(lock, getErrorMsg(params) + (e.getLocalizedMessage().isEmpty()?"":(". Ошибка: " + e.getMessage())), null);
                                     }
                                 }
 
