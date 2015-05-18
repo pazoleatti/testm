@@ -66,11 +66,11 @@ public class FormDataServiceImpl implements FormDataService {
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
-    private static final String FD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s в подразделении %s, состояние - %s";
+    private static final String FD_NOT_IN_RANGE = "Найдена форма: \"%s\" %d \"%s\", \"%s\" в подразделении \"%s\", состояние - \"%s\"";
     private static final String LOCK_CURRENT =
             "Текущая налоговая форма заблокирована пользователем %s в %s. Попробуйте выполнить операцию позже";
     private static final String LOCK_SOURCE =
-            "Налоговая форма-источник «%s» %s, %s, «%s» заблокирована пользователем %s в %s. Попробуйте выполнить операцию позже";
+            "Налоговая форма-источник \"%s\" \"%s\", \"%s\", \"%s\" заблокирована пользователем %s в %s. Попробуйте выполнить операцию позже";
     private static final String SOURCE_MSG_ERROR =
             "Существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
     //Выводит информацию о НФ в определенном формате
@@ -78,9 +78,9 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String NOT_CONSOLIDATE_DESTINATION_FORM_WARNING =
             "Не выполнена консолидация данных в форму %s %s %s %s %d %s";
     private static final String NOT_CONSOLIDATE_SOURCE_FORM_WARNING =
-            "Не выполнена консолидация данных из формы %s %s %s %s %d %s в статусе %s";
+            "Не выполнена консолидация данных из формы \"%s\" \"%s\" \"%s\" %s %d %s в статусе \"%s\"";
     private static final String NOT_EXIST_SOURCE_FORM_WARNING =
-            "Не выполнена консолидация данных из формы %s %s %s %s %d %s - экземпляр формы не создан";
+            "Не выполнена консолидация данных из формы \"%s\" \"%s\" \"%s\" %s %d %s - экземпляр формы не создан";
     private static final String NOT_CONSOLIDATED_SOURCE_FORM_ERR =
             "Не выполнена консолидация данных из форм - источников, которых находятся в статусе \"Принята\":";
     private static final String NOT_CONSOLIDATED_SOURCE_FORM =
@@ -88,7 +88,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String NOT_ACCEPTED_SOURCE_FORM_WARN =
             "Не получены данные из всех назначенных форм-источников:";
     private static final String NOT_ACCEPTED_SOURCE_FORM =
-            "%s %s %s %s %d%s - %s";
+            "\"%s\" \"%s\" \"%s\" %s %d%s - \"%s\"";
 
     @Autowired
 	private FormDataDao formDataDao;
