@@ -194,19 +194,8 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         lockDataTable.addColumn(queuePositionColumn, QUEUE_POSITION_TITLE);
         lockDataTable.addColumn(stateDateColumn, STATE_DATE_TITLE);
 
-        DefaultSelectionEventManager<LockDataItem> multiSelectManager = createCustomManager(
-                new DefaultSelectionEventManager.CheckboxEventTranslator<LockDataItem>(0) {
-                    @Override
-                    public boolean clearCurrentSelection(CellPreviewEvent<LockDataItem> event) {
-                        return false;
-                    }
-
-                    @Override
-                    public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<LockDataItem> event) {
-                        return DefaultSelectionEventManager.SelectAction.TOGGLE;
-                    }
-                });
-        lockDataTable.setSelectionModel(selectionModel, multiSelectManager);
+        lockDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
+                .<LockDataItem>createCheckboxManager());
 
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
