@@ -1109,7 +1109,7 @@ public class FormDataServiceImpl implements FormDataService {
         //1Е.  Система проверяет экземпляр на возможность выполнения консолидации в него. Не существует ни одной принятой формы-источника
         if (srcAcceptedIds.isEmpty()){
             logger.error("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
-            throw new ServiceLoggerException("Операция не выполнена", logEntryService.save(logger.getEntries()));
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
 
         }
 
