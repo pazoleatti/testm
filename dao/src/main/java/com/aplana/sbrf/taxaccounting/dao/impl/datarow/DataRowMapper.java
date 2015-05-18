@@ -168,10 +168,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 				// Editable
 				cell.setEditable(rs.getBoolean(String.format("c%s_editable", columnId)));
 				// Span Info
-				Integer rowSpan = SqlUtils.getInteger(rs, String.format("c%s_colspan", columnId));
-				cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
-				Integer colSpan = SqlUtils.getInteger(rs, String.format("c%s_rowspan", columnId));
+				Integer colSpan = SqlUtils.getInteger(rs, String.format("c%s_colspan", columnId));
 				cell.setColSpan(((colSpan == null) || (colSpan == 0)) ? 1 : colSpan);
+				Integer rowSpan = SqlUtils.getInteger(rs, String.format("c%s_rowspan", columnId));
+				cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
 			}
 			DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
 			dataRow.setId(SqlUtils.getLong(rs, "ord")); //TODO удалить
