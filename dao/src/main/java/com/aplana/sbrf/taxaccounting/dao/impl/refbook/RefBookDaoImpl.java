@@ -1719,7 +1719,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "\t\twhere d.id in (select department_id from forms)\n" +
             "\t\tstart with d.id = 0\n" +
             "\t\tconnect by prior d.id = d.parent_id) d on d.id=f.department_id\n" +
-            "join form_type t on t.id in (select t.type_id from form_template t, forms f where t.id = f.form_template_id)\n" +
+            "join form_template ft on ft.id = f.form_template_id\n" +
+            "join form_type t on t.id = ft.type_id" +
             "join report_period rp on rp.id = f.report_period_id\n" +
             "join tax_period tp on tp.id = rp.tax_period_id";
 
