@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.source;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+
 import java.util.Date;
 
 /**
@@ -8,7 +10,7 @@ import java.util.Date;
  */
 public class ConsolidatedInstance {
     private String type;
-    private String formKind;
+    private FormDataKind formKind;
     private String department;
     private String period;
     private Date correctionDate;
@@ -30,12 +32,12 @@ public class ConsolidatedInstance {
         this.type = type;
     }
 
-    public String getFormKind() {
+    public FormDataKind getFormKind() {
         return formKind;
     }
 
-    public void setFormKind(String formKind) {
-        this.formKind = formKind;
+    public void setFormKind(int formKind) {
+        this.formKind = FormDataKind.fromId(formKind);
     }
 
     public String getDepartment() {
