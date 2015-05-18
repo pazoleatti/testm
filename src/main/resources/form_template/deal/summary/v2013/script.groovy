@@ -639,7 +639,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             row.dealSubjectName = 'Размещение денежных средств корпоративным клиентам - не регулируемые сделки'
             break
         case 388: // 13
-            row.dealSubjectName = 'Выдача гарантий (открытие аккредитивов и инструментов торгового финансирования)'
+            row.dealSubjectName = 'Выдача гарантий'
             break
         case 389: // 14
             row.dealSubjectName = 'Размещение денежных средств в межбанковские кредиты'
