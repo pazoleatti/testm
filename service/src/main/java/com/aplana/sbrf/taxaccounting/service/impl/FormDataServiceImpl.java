@@ -237,7 +237,7 @@ public class FormDataServiceImpl implements FormDataService {
                 check = true;
             }
 
-            FormData fd = formDataDao.get(formDataId, false);
+            FormData fd = formDataDao.get(formDataId, isManual);
 
             if (check) {
                 dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
