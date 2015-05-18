@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -42,6 +43,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 	public void exportDeclarationTemplate(TAUserInfo userInfo, Integer id, OutputStream os) {
 		try {
 			ZipOutputStream zos = new ZipOutputStream(os);
+            DeclarationTemplate dt = declarationTemplateService.get(id);
 			
 			// Version
 			ZipEntry ze = new ZipEntry(VERSION_FILE);
@@ -52,17 +54,26 @@ public class DeclarationTemplateImpexServiceImpl implements
 			// Script
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
-            String dtScript = declarationTemplateService.getDeclarationTemplateScript(id);
+            String dtScript = dt.getCreateScript();
             if (dtScript != null)
 			    zos.write(dtScript.getBytes(ENCODING));
 			zos.closeEntry();
 			
 			// JasperTemplate
-            String jrxml = declarationTemplateService.getJrxml(id);
+            BlobData jrxml = blobDataService.get(dt.getJrxmlBlobId());
             if (jrxml != null) {
                 ze = new ZipEntry(REPORT_FILE);
                 zos.putNextEntry(ze);
-                zos.write(jrxml.getBytes(ENCODING));
+                IOUtils.copy(jrxml.getInputStream(), zos);
+                zos.closeEntry();
+            }
+
+            //Xsd
+            BlobData xsd = blobDataService.get(dt.getXsdId());
+            if (xsd!=null){
+                ze = new ZipEntry(xsd.getName());
+                zos.putNextEntry(ze);
+                IOUtils.copy(xsd.getInputStream(), zos);
                 zos.closeEntry();
             }
 
