@@ -415,7 +415,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public byte[] getXlsxData(long id, TAUserInfo userInfo) {
+    public byte[] getXlsxData(long id, TAUserInfo userInfo, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         try {
             DeclarationData declarationData = declarationDataDao.get(id);
@@ -430,9 +430,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     //IOUtils.closeQuietly(objectInputStream);
                 }
             } else {
+                log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+                stateLogger.updateState("Заполнение Jasper-макета");
                 jasperPrint = createJasperReport(declarationData, userInfo);
                 // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
             }
+            log.info(String.format("Заполнение XLSX-отчета декларации %s", declarationData.getId()));
+            stateLogger.updateState("Заполнение XLSX-отчета");
             return exportXLSX(jasperPrint);
         } catch (Exception e) {
             throw new ServiceException("Не удалось извлечь объект для печати.", e);
@@ -485,11 +489,31 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение Jasper в БД");
                 reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
+            } catch (ServiceException e) {
+                logger.error(e.getLocalizedMessage());
+                if (e instanceof ServiceLoggerException)
+                    throw new ServiceLoggerException("", logEntryService.update(logger.getEntries(), ((ServiceLoggerException) e).getUuid()));
+                else
+                    throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             }
         } else {
-            throw new ServiceException("Декларация не сформирована");
+            logger.error("Декларация не сформирована");
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+        }
+    }
+
+    @Override
+    public void setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        try {
+            byte[] xlsxData = getXlsxData(declarationData.getId(), userInfo, stateLogger);
+            log.info(String.format("Сохранение XLSX в БД для декларации %s", declarationData.getId()));
+            stateLogger.updateState("Сохранение XLSX в БД");
+            reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xlsxData), ""), ReportType.EXCEL_DEC);
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
 
@@ -507,8 +531,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         try {
             try {
-                log.info(String.format("Cоздание временного файла для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Cоздание временного файла");
+                log.info(String.format("Создание временного файла для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Создание временного файла");
                 try {
                     xmlFile = File.createTempFile("file_for_validate", ".xml");
                     fileWriter = new FileWriter(xmlFile);
