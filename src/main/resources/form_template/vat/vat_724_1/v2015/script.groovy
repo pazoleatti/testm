@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -460,140 +461,6 @@ def calc7(def row, def section) {
     return tmp
 }
 
-// Получение импортируемых данных
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null, 9, 4)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 9, 4)
-
-    def headerMapping = [
-            (xml.row[1].cell[2]): 'Налоговая база',
-            (xml.row[1].cell[5]): 'НДС',
-            (xml.row[1].cell[7]): 'Ставка НДС',
-            (xml.row[1].cell[8]): 'Сумма НДС по книге продаж',
-            (xml.row[2].cell[2]): 'Наименование балансового счета',
-            (xml.row[2].cell[3]): 'Номер балансового счета',
-            (xml.row[2].cell[4]): 'Сумма',
-            (xml.row[2].cell[5]): 'Номер балансового счета',
-            (xml.row[2].cell[6]): 'Сумма',
-            (xml.row[2].cell[7]): 'Ставка НДС',
-            (xml.row[2].cell[8]): 'Сумма НДС по книге продаж',
-            (xml.row[2].cell[9]): 'Сумма НДС по книге покупок'
-    ]
-    (2..9).each { index ->
-        headerMapping.put((xml.row[3].cell[index]), index.toString())
-    }
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 4)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def title = null
-    def isFirstSection = true
-    def isSection7 = false
-
-    // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def templateRows = formTemplate.rows
-    def rowHead7 = getDataRow(templateRows, 'head_7')
-
-    def aliasR = [
-            '1. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 18%': [getDataRow(templateRows, 'head_1')],
-            'total_1': [getDataRow(templateRows, 'total_1')],
-            '2. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 10%': [getDataRow(templateRows, 'head_2')],
-            'total_2': [getDataRow(templateRows, 'total_2')],
-            '3. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_3')],
-            'total_3': [getDataRow(templateRows, 'total_3')],
-            '4. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 10/110': [getDataRow(templateRows, 'head_4')],
-            'total_4': [getDataRow(templateRows, 'total_4')],
-            '5. Суммы полученной оплаты (частичной оплаты) в счёт предстоящего оказания услуг по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_5')],
-            'total_5': [getDataRow(templateRows, 'total_5')],
-            '6. Суммы, полученные в виде штрафов, пени, неустоек по расчётной ставке исчисления налога от общей суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_6')],
-            'total_6': [getDataRow(templateRows, 'total_6')],
-            'total': [getDataRow(templateRows, 'total')],
-            '7. Сумма налога, подлежащая вычету у продавца, по которой отгрузка соответствующих товаров осуществлена в текущем отчетном периоде': [rowHead7],
-            'total_7': [getDataRow(templateRows, 'total_7')]
-    ]
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапок
-        if (xmlIndexRow < headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // Пропуск итоговых строк
-        if (!(row.cell[1].text() == null || row.cell[1].text() == "")) {
-            title = row.cell[1].text()
-            if (isFirstSection && title == 'Итого') {
-                isFirstSection = false
-            }
-            isSection7 = (title == rowHead7.fix)
-            continue
-        }
-
-        def newRow = getNewRow(isSection7)
-        newRow.setImportIndex(xlsIndexRow)
-
-        // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
-        record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
-        newRow.baseAccNum = record?.record_id?.value
-
-        // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
-        if (record != null) {
-            def value1 = row.cell[2].text()
-            def value2 = record?.ACCOUNT_NAME?.value?.toString()
-            formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, false)
-        }
-
-        // Графа 4
-        newRow.baseSum = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
-
-        // Графа 5
-        newRow.ndsNum = row.cell[5].text()
-
-        // Графа 6
-        newRow.ndsSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
-
-        // Графа 7
-        newRow.ndsRate = row.cell[7].text()
-
-        // Графа 8
-        newRow.ndsBookSum = parseNumber(row.cell[8].text(), xlsIndexRow, 8 + colOffset, logger, true)
-
-        // Графа 9
-        newRow.ndsDealSum = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
-
-        if (aliasR[title] == null) {
-            logger.error("Строка %d: Структура файла не соответствует макету налоговой формы", xlsIndexRow)
-        } else {
-            aliasR[title].add(newRow)
-        }
-    }
-
-    aliasR.each { k, v ->
-        rows.addAll(v)
-    }
-
-    showMessages(rows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
-    }
-}
-
 def getFirstRowAlias(def section) {
     return 'head_' + section
 }
@@ -855,4 +722,191 @@ String pure(String cell) {
 
 boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 9
+    int HEADER_ROW_COUNT = 4
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 0
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def title = null
+    def isFirstSection = true
+    def isSection7 = false
+
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    def rowHead7 = getDataRow(templateRows, 'head_7')
+
+    def aliasR = [
+            '1. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 18%': [getDataRow(templateRows, 'head_1')],
+            'total_1': [getDataRow(templateRows, 'total_1')],
+            '2. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 10%': [getDataRow(templateRows, 'head_2')],
+            'total_2': [getDataRow(templateRows, 'total_2')],
+            '3. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_3')],
+            'total_3': [getDataRow(templateRows, 'total_3')],
+            '4. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 10/110': [getDataRow(templateRows, 'head_4')],
+            'total_4': [getDataRow(templateRows, 'total_4')],
+            '5. Суммы полученной оплаты (частичной оплаты) в счёт предстоящего оказания услуг по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_5')],
+            'total_5': [getDataRow(templateRows, 'total_5')],
+            '6. Суммы, полученные в виде штрафов, пени, неустоек по расчётной ставке исчисления налога от общей суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_6')],
+            'total_6': [getDataRow(templateRows, 'total_6')],
+            'total': [getDataRow(templateRows, 'total')],
+            '7. Сумма налога, подлежащая вычету у продавца, по которой отгрузка соответствующих товаров осуществлена в текущем отчетном периоде': [rowHead7],
+            'total_7': [getDataRow(templateRows, 'total_7')]
+    ]
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // Пропуск итоговых строк
+        if (!rowValues[INDEX_FOR_SKIP]) {
+            title = rowValues[1]
+            if (isFirstSection && title == 'Итого') {
+                isFirstSection = false
+            }
+            isSection7 = (title == rowHead7.fix)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
+        if (aliasR[title] == null) {
+            logger.error("Строка %d: Структура файла не соответствует макету налоговой формы", fileRowIndex)
+        } else {
+            // простая строка
+            rowIndex++
+            def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, isSection7)
+            aliasR[title].add(newRow)
+        }
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    aliasR.each { k, v ->
+        rows.addAll(v)
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow временная вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[1][2]): 'Налоговая база',
+            (headerRows[1][5]): 'НДС',
+            (headerRows[1][7]): 'Ставка НДС',
+            (headerRows[1][8]): 'Сумма НДС по книге продаж',
+            (headerRows[2][2]): 'Наименование балансового счета',
+            (headerRows[2][3]): 'Номер балансового счета',
+            (headerRows[2][4]): 'Сумма',
+            (headerRows[2][5]): 'Номер балансового счета',
+            (headerRows[2][6]): 'Сумма',
+            (headerRows[2][7]): 'Ставка НДС',
+            (headerRows[2][8]): 'Сумма НДС по книге продаж',
+            (headerRows[2][9]): 'Сумма НДС по книге покупок'
+    ]
+    (2..9).each { index ->
+        headerMapping.put((headerRows[3][index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isSection7 признак что строка для раздела 7
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isSection7) {
+    def newRow = getNewRow(isSection7)
+    newRow.setImportIndex(fileRowIndex)
+
+    // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
+    def colIndex = 3
+    record = getRecordImport(101, 'ACCOUNT', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.baseAccNum = record?.record_id?.value
+
+    // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
+    if (record != null) {
+        colIndex = 2
+        def value1 = values[colIndex]
+        def value2 = record?.ACCOUNT_NAME?.value?.toString()
+        formDataService.checkReferenceValue(101, value1, value2, fileRowIndex, colIndex + colOffset, logger, false)
+    }
+
+    // Графа 4
+    colIndex = 4
+    newRow.baseSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // Графа 5
+    colIndex = 5
+    newRow.ndsNum = values[colIndex]
+
+    // Графа 6
+    colIndex = 6
+    newRow.ndsSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // Графа 7
+    colIndex = 7
+    newRow.ndsRate = values[colIndex]
+
+    // Графа 8
+    colIndex = 8
+    newRow.ndsBookSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // Графа 9
+    colIndex = 9
+    newRow.ndsDealSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
 }
