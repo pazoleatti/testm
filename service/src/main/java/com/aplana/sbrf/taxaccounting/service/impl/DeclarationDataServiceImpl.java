@@ -260,19 +260,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void check(Logger logger, long id, TAUserInfo userInfo) {
-        declarationDataScriptingService.executeScript(userInfo,
-                declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-        DeclarationData dd = declarationDataDao.get(id);
-        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK);
-        // Проверяем ошибки при пересчете
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Найдены ошибки при выполнении проверки декларации",
-                    logEntryService.save(logger.getEntries()));
-        } else {
-            checkSources(dd, logger);
-            logger.info("Проверка завершена, ошибок не обнаружено");
+    public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
+        try{
+            log.info(String.format("Скриптовые проверки для декларации %s", id));
+            lockStateLogger.updateState("Скриптовые проверки");
+            declarationDataScriptingService.executeScript(userInfo,
+                    declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
+            DeclarationData dd = declarationDataDao.get(id);
+            validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
+            // Проверяем ошибки при пересчете
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceLoggerException(
+                        "Найдены ошибки при выполнении проверки декларации",
+                        logEntryService.save(logger.getEntries()));
+            } else {
+                checkSources(dd, logger);
+                logger.info("Проверка завершена, ошибок не обнаружено");
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
 
@@ -333,7 +340,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Map<String, Object> exchangeParams = new HashMap<String, Object>();
                     declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, new LockStateLogger() {
+                        @Override
+                        public void updateState(String state) {
+                            //ToDo передавать из асинхронной задачи, когда будет переделана проверка и принятие на асинки
+                        }
+                    });
                     declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
                     declarationData.setAccepted(true);
@@ -617,7 +629,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                     FormDataEvent operation) {
+                                     FormDataEvent operation, LockStateLogger lockStateLogger) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid == null) {
             TaxType taxType = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
@@ -626,12 +638,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
             throw new ServiceException(msg);
         }
-        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, new LockStateLogger() {
-            @Override
-            public void updateState(String state) {
-                //TODO передавать из асинхронной задачи, когда будет переделана проверка и принятие на асинки
-            }
-        });
+        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, lockStateLogger);
     }
 
     /**
@@ -651,13 +658,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 log.info(String.format("Валидация декларации %s", declarationData.getId()));
                 stateLogger.updateState("Валидация");
                 if (!validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile) && logger.containsLevel(LogLevel.ERROR)){
-                    throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                    throw new ServiceException();
                 }
             } catch (Exception e) {
                 log.info(String.format("Сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение логов об ошибках валидации");
                 log.error(VALIDATION_ERR_MSG, e);
-                logger.error(e);                
+                if (!(e instanceof ServiceException))
+                    logger.error(e);
                 String uuid = logEntryService.save(logger.getEntries());
                 throw new ServiceLoggerException(VALIDATION_ERR_MSG, uuid);
             } finally {
@@ -825,9 +833,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void deleteReport(long declarationDataId, boolean isLock) {
         if (isLock) {
-            ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.EXCEL_DEC};
+            ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC};
             for (ReportType reportType : reportTypes) {
-                lockDataService.unlock(generateAsyncTaskKey(declarationDataId, reportType), 0, true);
+                LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
+                if (lock != null)
+                    lockDataService.interruptTask(lock, 0, true);
             }
         }
         reportService.deleteDec(declarationDataId);
@@ -853,27 +863,39 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String getDeclarationFullName(long declarationId, String reportType) {
+    public String getDeclarationFullName(long declarationId, ReportType reportType) {
         DeclarationData declaration = declarationDataDao.get(declarationId);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        return reportType != null ? String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
-                reportType,
-                declarationTemplate.getType().getName(),
-                department.getName(),
-                reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getCorrectionDate() != null
-                        ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                        : "")
-                :
-                String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
-                declarationTemplate.getType().getName(),
-                department.getName(),
-                reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getCorrectionDate() != null
-                        ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                        : "");
+        switch (reportType) {
+            case EXCEL_DEC:
+            case PDF_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
+                        reportType.getName(),
+                        declarationTemplate.getType().getName(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+            case CHECK_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_CHECK.getText(),
+                        declarationTemplate.getType().getName(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+            default:
+                return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
+                        declarationTemplate.getType().getName(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+        }
     }
 
     @Override

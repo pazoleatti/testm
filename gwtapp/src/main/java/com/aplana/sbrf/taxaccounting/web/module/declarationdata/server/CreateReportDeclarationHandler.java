@@ -79,8 +79,8 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                         LockData lockDataReportTask = lockDataService.getLock(key);
                         if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
                             if (action.isForce()) {
-                                // Оправляем оповещение подписавщимся пользователям, удаляем старую задачу
-                                lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId());
+                                // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
+                                lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId(), false);
                             } else {
                                 result.setStatus(CreateReportResult.StatusCreateReport.LOCKED);
                                 return result;
@@ -96,7 +96,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                             return result;
                         }
                         if (lockDataService.lock(key, userInfo.getUser().getId(),
-                                declarationDataService.getDeclarationFullName(action.getDeclarationDataId(), reportType.getName()),
+                                declarationDataService.getDeclarationFullName(action.getDeclarationDataId(), reportType),
                                 LockData.State.IN_QUEUE.getText(),
                                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
                             try {

@@ -10,8 +10,8 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
 	void onRecalculateClicked(Date docDate);
 	void accept(boolean accepted);
 	void delete();
-	void check();
-    void viewReport(Boolean force, ReportType reportType);
+	void check(boolean force);
+    void viewReport(boolean force, ReportType reportType);
 	void downloadXml();
 	void onInfoClicked();
     TaxType getTaxType();
