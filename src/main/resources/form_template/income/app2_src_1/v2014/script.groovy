@@ -8,8 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
-import org.springframework.jndi.JndiTemplate
-import javax.sql.DataSource
 import java.sql.Statement
 import java.sql.PreparedStatement
 
@@ -845,8 +843,6 @@ void importTransportData() {
     }
 
     // подключение к базе
-    def template = new JndiTemplate()
-    def DataSource dataSource = template.lookup('java:comp/env/jdbc/TaxAccDS')
     def connection = dataSource.connection
     try {
         createStatements(connection)
