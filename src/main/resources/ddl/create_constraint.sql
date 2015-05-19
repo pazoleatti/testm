@@ -247,7 +247,7 @@ alter table form_data_report add constraint form_data_rep_chk_absolute check (ab
 
 alter table declaration_report add constraint decl_report_pk primary key (declaration_data_id, type);
 alter table declaration_report add constraint decl_report_fk_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
-alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id);
+alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id) on delete cascade;
 alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3));
 
 alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id);
@@ -267,7 +267,7 @@ alter table declaration_data_consolidation add constraint decl_data_consolidatio
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id);
 
-alter table log_system_report add constraint log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id);
+alter table log_system_report add constraint log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
 alter table log_system_report add constraint log_system_report_fk_sec_user foreign key (sec_user_id) references sec_user (id) on delete cascade;
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
 
