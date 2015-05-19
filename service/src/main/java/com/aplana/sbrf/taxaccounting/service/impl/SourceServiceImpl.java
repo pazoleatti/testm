@@ -421,7 +421,7 @@ public class SourceServiceImpl implements SourceService {
                         }
                         logger.warn(String.format(FORM_INSTANCE_MSG,
                                         consolidatedInstance.getType(),
-                                        consolidatedInstance.getFormKind(),
+                                        consolidatedInstance.getFormKind().getName(),
                                         consolidatedInstance.getDepartment(),
                                         consolidatedInstance.getPeriod(),
                                         consolidatedInstance.getCorrectionDate() != null

@@ -48,6 +48,14 @@ public interface DeclarationDataService {
      */
     void setPdfDataBlobs(Logger logger,
                          DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
+    /**
+     * Формирование Xlsx отчета
+     * @param logger
+     * @param declarationData
+     * @param userInfo
+     */
+    void setXlsxDataBlobs(Logger logger,
+                         DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
 	/**
 	 * Получить декларацию
 	 * @param declarationDataId идентификатор декларации
@@ -109,7 +117,7 @@ public interface DeclarationDataService {
 	 * @return файл Xlsx в виде байтового массива
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	byte[] getXlsxData(long declarationDataId, TAUserInfo userInfo);
+	byte[] getXlsxData(long declarationDataId, TAUserInfo userInfo, LockStateLogger stateLogger);
 	/**
 	 * Получить печатное представление данных декларации в PDF формате
 	 * @param declarationId идентификатор декларации

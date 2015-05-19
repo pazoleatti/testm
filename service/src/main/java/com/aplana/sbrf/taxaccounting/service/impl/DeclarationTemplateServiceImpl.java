@@ -41,7 +41,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
     private final static String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
-    private static final String XSD_NOT_FOUND = "Файл xsd к макету не прикреплен!";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 
 	@Autowired
@@ -101,18 +100,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	}
 
-	@Override
-	public void setJrxml(int declarationTemplateId, InputStream jrxmlIO) {
-        DeclarationTemplate declarationTemplate = this.get(declarationTemplateId);
-        String jrxmBlobIdOld = declarationTemplate.getJrxmlBlobId();
-        String jrxmBlobId = blobDataService.create(
-                jrxmlIO,
-                declarationTemplate.getType().getName() +"_jrxml");
-
-        declarationTemplateDao.setJrxml(declarationTemplateId, jrxmBlobId);
-        if (jrxmBlobIdOld != null && !jrxmBlobIdOld.isEmpty())
-            blobDataService.delete(jrxmBlobIdOld);
-	}
 
 	@Override
 	public String getJrxml(int declarationTemplateId) {
@@ -121,6 +108,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             return null;
         }
         try {
+            //TODO: Лучше все через потоки делать
             StringWriter writer = new StringWriter();
             IOUtils.copy(jrxmlBlobData.getInputStream(), writer, ENCODING);
             return writer.toString();
@@ -129,23 +117,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             throw new ServiceException(JRXML_NOT_FOUND);
         }
 	}
-
-    @Override
-    public String getXsd(int declarationTemplateId) {
-        DeclarationTemplate dt = this.get(declarationTemplateId);
-        if (dt.getXsdId()==null){
-            throw new ServiceException(XSD_NOT_FOUND);
-        }
-        BlobData xsdBlob = blobDataService.get(dt.getXsdId());
-        try {
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(xsdBlob.getInputStream(), writer, ENCODING);
-            return writer.toString();
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            throw new ServiceException(e.toString());
-        }
-    }
 
     @Override
 	public InputStream getJasper(int declarationTemplateId) {

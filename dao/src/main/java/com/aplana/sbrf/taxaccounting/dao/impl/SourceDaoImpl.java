@@ -367,7 +367,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         });
     }
 
-    private static final String FINC_CONSOLIDATED_FORMS = "select tfd.kind as kind, tfmt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate \n" +
+    private static final String FINC_CONSOLIDATED_FORMS =
+            "select tfd.kind as kind, tfmt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate \n" +
             "from department_form_type dft\n" +
             "join form_template ft on ft.type_id = dft.form_type_id\n" +
             "join department_report_period drp on drp.department_id = dft.department_id\n" +
@@ -385,7 +386,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
             ")";
 
-    private static final String FINC_CONSOLIDATED_DECLARATIONS = "select dt.name as kind, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate \n" +
+    private static final String FINC_CONSOLIDATED_DECLARATIONS =
+            "select dt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate \n" +
             "from department_form_type dft\n" +
             "join form_template ft on ft.type_id = dft.form_type_id\n" +
             "join department_report_period drp on drp.department_id = dft.department_id\n" +
@@ -416,7 +418,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             @Override
             public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
                 ConsolidatedInstance form = new ConsolidatedInstance();
-                form.setFormKind(rs.getString("kind"));
+                form.setFormKind(rs.getInt("kind"));
                 form.setType(rs.getString("type"));
                 form.setDepartment(rs.getString("department"));
                 form.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
@@ -430,7 +432,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             @Override
             public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
                 ConsolidatedInstance declaration = new ConsolidatedInstance();
-                declaration.setFormKind(rs.getString("kind"));
+                declaration.setType(rs.getString("type"));
                 declaration.setDepartment(rs.getString("department"));
                 declaration.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
                 declaration.setCorrectionDate(rs.getDate("correctionDate"));
