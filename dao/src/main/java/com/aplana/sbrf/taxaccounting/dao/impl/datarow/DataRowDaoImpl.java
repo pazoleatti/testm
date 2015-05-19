@@ -43,22 +43,22 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowRange range) {
-		return physicalGetRows(fd, new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME}, range);
+		return physicalGetRows(fd, DataRowType.STABLE, fd.isManual() ? DataRowType.MANUAL : DataRowType.AUTO, range);
 	}
 
 	@Override
 	public int getSavedSize(FormData fd) {
-		return physicalGetSize(fd, new TypeFlag[]{TypeFlag.DEL, TypeFlag.SAME});
+		return physicalGetSize(fd, DataRowType.STABLE, fd.isManual() ? DataRowType.MANUAL : DataRowType.AUTO);
 	}
 
 	@Override
 	public List<DataRow<Cell>> getRows(FormData fd, DataRowRange range) {
-		return physicalGetRows(fd, new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}, range);
+		return physicalGetRows(fd, DataRowType.TEMP, fd.isManual() ? DataRowType.MANUAL : DataRowType.AUTO, range);
 	}
 
 	@Override
 	public int getSize(FormData fd) {
-		return physicalGetSize(fd, new TypeFlag[]{TypeFlag.ADD, TypeFlag.SAME});
+		return physicalGetSize(fd, DataRowType.STABLE, fd.isManual() ? DataRowType.MANUAL : DataRowType.AUTO);
 	}
 
     @Override
@@ -69,41 +69,46 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
     @Override
 	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
-		// Если строка помечена как ADD, необходимо обновление
-		// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
-		// тем же значением ORD
-		List<DataRow<Cell>> forUpdate = new ArrayList<DataRow<Cell>>();
-		List<DataRow<Cell>> forCreate = new ArrayList<DataRow<Cell>>();
-		List<Long> forCreateOrder = new ArrayList<Long>();
+		if (fd.getFormTemplateId() == 329 ) {
 
-		List<Long> dataRowIds = new ArrayList<Long>(rows.size());
-		for (DataRow<Cell> dataRow : rows) {
-			dataRowIds.add(dataRow.getId());
-		}
-		Map<Long, Pair<Integer, Long>> typeAndOrds = getTypeAndOrdById(fd.getId(), dataRowIds);
+		} else {
+			// Если строка помечена как ADD, необходимо обновление
+			// Если строка помечена как SAME, то помечаем её как DEL создаем новую с
+			// тем же значением ORD
+			List<DataRow<Cell>> forUpdate = new ArrayList<DataRow<Cell>>();
+			List<DataRow<Cell>> forCreate = new ArrayList<DataRow<Cell>>();
+			List<Long> forCreateOrder = new ArrayList<Long>();
 
-		for (DataRow<Cell> dataRow : rows) {
-			Pair<Integer, Long> typeAndOrd = typeAndOrds.get(dataRow.getId());
-			if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
-				forUpdate.add(dataRow);
-			} else {
-				forCreate.add(dataRow);
-				forCreateOrder.add(typeAndOrd.getSecond());
+			List<Long> dataRowIds = new ArrayList<Long>(rows.size());
+			for (DataRow<Cell> dataRow : rows) {
+				dataRowIds.add(dataRow.getId());
 			}
-		}
-		// удаляем старые ячейки
-		batchRemoveCells(forUpdate);
-		// создаем новые ячейки
-		batchInsertCells(forUpdate);
-		// помечаем старые строки на удаление, так как обновление = удаление(type=-1) + создание(type=1)
-		physicalUpdateRowsType(forCreate, TypeFlag.DEL);
-		// создает новые строки с указанием порядка forCreateOrder
-		physicalInsertRows(fd, forCreate, null, null, forCreateOrder);
+			Map<Long, Pair<Integer, Long>> typeAndOrds = getTypeAndOrdById(fd.getId(), dataRowIds);
 
+			for (DataRow<Cell> dataRow : rows) {
+				Pair<Integer, Long> typeAndOrd = typeAndOrds.get(dataRow.getId());
+				if (TypeFlag.ADD.getKey() == typeAndOrd.getFirst()) {
+					forUpdate.add(dataRow);
+				} else {
+					forCreate.add(dataRow);
+					forCreateOrder.add(typeAndOrd.getSecond());
+				}
+			}
+			// удаляем старые ячейки
+			batchRemoveCells(forUpdate);
+			// создаем новые ячейки
+			batchInsertCells(forUpdate);
+			// помечаем старые строки на удаление, так как обновление = удаление(type=-1) + создание(type=1)
+			physicalUpdateRowsType(forCreate, TypeFlag.DEL);
+			// создает новые строки с указанием порядка forCreateOrder
+			physicalInsertRows(fd, forCreate, null, null, forCreateOrder);
+		}
 	}
 
 	@Override
 	public void removeRows(FormData fd, final List<DataRow<Cell>> rows) {
+		//TODO удалять по новому способу, вызывая shiftRows
+
 		// Если строка помечена как ADD, то физическое удаление
 		// Если строка помесена как DELETE, то ничего не делаем
 		// Если строка помечена как SAME, то помечаем как DELETE
@@ -148,54 +153,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 					}
 				});
 
-	}
-
-	@Override
-	public void removeRows(final FormData formData, final int idxFrom, final int idxTo) {
-		checkIndexesRange(formData, false, false, idxFrom, idxTo);
-		if (idxTo < idxFrom) {
-			throw new IllegalArgumentException(
-					"Индекс начального элемента меньше индекса конечного");
-		}
-		// Если строка помечена как ADD, то физическое удаление
-		// Если строка помесена как DELETE, то ничего не делаем
-		// Если строка помечена как SAME, то помечаем как DELETE
-		String idsSQL = "select ID from (select row_number() over (order by ORD) as IDX, ID, TYPE from DATA_ROW where TYPE in (:types) and FORM_DATA_ID=:formDataId) RR where IDX between :from and :to";
-        if (!isSupportOver()){
-            idsSQL = idsSQL.replaceFirst("over \\(order by ORD\\)", "over ()");
-        }
-
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("types", TypeFlag.rtsToKeys(new TypeFlag[] { TypeFlag.ADD,
-				TypeFlag.SAME }));
-		params.put("formDataId", formData.getId());
-		params.put("from", idxFrom);
-		params.put("to", idxTo);
-		params.put("remType", TypeFlag.ADD.getKey());
-		params.put("updType", TypeFlag.SAME.getKey());
-		params.put("setType", TypeFlag.DEL.getKey());
-
-		getNamedParameterJdbcTemplate().update(
-				"delete from DATA_ROW where ID in (" + idsSQL
-						+ ") and TYPE=:remType", params);
-		getNamedParameterJdbcTemplate().update(
-				"update DATA_ROW set TYPE=:setType where ID in (" + idsSQL
-						+ ") and TYPE=:updType", params);
-
-	}
-
-	@Override
-	public void removeRows(FormData formData) {
-		// Если строка помечена как ADD, то физическое удаление
-		// Если строка помесена как DELETE, то ничего не делаем
-		// Если строка помечена как SAME, то помечаем как DELETE
-		getJdbcTemplate().update(
-				"DELETE FROM data_row WHERE form_data_id=? AND type=? AND manual = ?",
-				new Object[] { formData.getId(), TypeFlag.ADD.getKey(), formData.isManual() ? 1 : 0 });
-		getJdbcTemplate().update(
-                "UPDATE data_row SET type=? WHERE form_data_id=? AND type=? AND manual = ?",
-                new Object[]{TypeFlag.DEL.getKey(), formData.getId(),
-                        TypeFlag.SAME.getKey(), formData.isManual() ? 1 : 0});
 	}
 
 	@Override
@@ -254,7 +211,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			/*Реализация перепаковки поля ORD. Слишком маленькие значения ORD. В промежуток нельзя вставить
 			такое количество строк*/
             long diff = 5 * rows.size(); //minimal diff between rows
-            int endIndex = physicalGetSize(formData, new TypeFlag[]{TypeFlag.DEL, TypeFlag.ADD, TypeFlag.SAME});
+            int endIndex = physicalGetSize(formData, DataRowType.TEMP);
             /* Делаем так, чтобы пересортировать строки в один запрос. Для этого сначала выбираем временную таблицу с индексами (RR)
              *  затем выбираем индексы начиная с того после которого надо вставить и до самого конца.
              *  Прибавляем ровно ту разницу, которая необходима для вставки строк.
@@ -316,20 +273,24 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 	}
 
-	private List<DataRow<Cell>> physicalGetRows(FormData formData, TypeFlag[] types, DataRowRange range) {
-		DataRowMapper dataRowMapper = new DataRowMapper(formData, types, range);
-		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql();
-
+	/**
+	 *
+	 * @param formData НФ для которой требуется получить строки
+	 * @param range параметры пейджинга, может быть null
+	 * @param isTemporary признак временного среза или постоянного (DataRowType.STABLE - постоянный, DataRowType.TEMP - временный)
+	 * @param isManual признак ручного ввода (DataRowType.AUTO - автоматическая версия, DataRowType.MANUAL - версия ручного ввода)
+	 * @return список строк, != null
+	 */
+	private List<DataRow<Cell>> physicalGetRows(FormData formData, DataRowType isTemporary, DataRowType isManual, DataRowRange range) {
+		checkArgumentType(isTemporary, isManual);
+		DataRowMapper dataRowMapper = new DataRowMapper(formData);
+		Pair<String, Map<String, Object>> sql = dataRowMapper.createSql(range, isTemporary, isManual);
         if(!isSupportOver()){
             sql.setFirst(sql.getFirst().replaceAll("over \\(order by ord\\)", "over ()"));
             sql.setFirst(sql.getFirst().replaceAll("over \\(partition by.{0,}order by ord\\)", "over ()"));
-
+			sql.setFirst(sql.getFirst().replaceAll("OVER \\(PARTITION BY.{0,}ORDER BY ord\\)", "OVER ()"));
         }
-
-		List<DataRow<Cell>> dataRows = getNamedParameterJdbcTemplate().query(
-				sql.getFirst(), sql.getSecond(), dataRowMapper);
-
-		return dataRows;
+		return getNamedParameterJdbcTemplate().query(sql.getFirst(), sql.getSecond(), dataRowMapper);
 	}
 
 	/**
@@ -338,14 +299,31 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param types
 	 * @return
 	 */
-	private int physicalGetSize(FormData formData, TypeFlag[] types) {
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
-		params.put("types", TypeFlag.rtsToKeys(types));
-        params.put("manual", formData.isManual() ? 1 : 0);
-		return getNamedParameterJdbcTemplate().queryForInt(
-				"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual",
-				params);
+	private int physicalGetSize(FormData formData, DataRowType isTemporary, DataRowType isManual) {
+		checkArgumentType(isTemporary, isManual);
+		if (fd.getFormTemplateId() == 329) {
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("formDataId", formData.getId());
+			params.put("temporary", isTemporary.getCode());
+			params.put("manual", isManual.getCode());
+
+			String sql = String.format("SELECT COUNT(*) FROM form_data_%s WHERE temporary = :temporary AND " +
+					"manual = :manual", formData.getFormTemplateId());
+
+			return getNamedParameterJdbcTemplate().queryForInt(sql, params);
+		} else {
+			TypeFlag[] types = isTemporary == DataRowType.TEMP ?
+					new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}:
+					new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME};
+
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("formDataId", formData.getId());
+			params.put("types", TypeFlag.rtsToKeys(types));
+			params.put("manual", formData.isManual() ? 1 : 0);
+			return getNamedParameterJdbcTemplate().queryForInt(
+					"SELECT COUNT(id) FROM data_row WHERE form_data_id = :formDataId AND type IN (:types) AND manual = :manual",
+					params);
+		}
 	}
 
     /**
@@ -586,7 +564,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		if (count != 0) {
 			String dataQuery = "SELECT * FROM (" + query + ") WHERE IDX BETWEEN :from AND :to";
 			params.put("from", range.getOffset());
-			params.put("to", range.getLimit() + range.getLimit() - 1);
+			params.put("to", range.getCount() * 2 - 1);
 
 			dataRows = getNamedParameterJdbcTemplate().query(dataQuery, params, new RowMapper<FormDataSearchResult>() {
 				@Override
@@ -760,4 +738,71 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
             }
         });
     }
+
+	//  ###################################### НОВАЯ СТРУКТУРА ХРАНЕНИЯ ######################################
+
+	@Override
+	public int removeRows(FormData formData) {
+		if (formData.getFormTemplateId() == 329) {
+			String sql = String.format("DELETE FROM form_data_%s WHERE temporary = :temporary AND " +
+					"manual = :manual", formData.getFormTemplateId());
+
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("formDataId", formData.getId());
+			params.put("temporary", DataRowType.TEMP.getCode());
+			params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+
+			return getNamedParameterJdbcTemplate().update(sql, params);
+		} else {
+			// Если строка помечена как ADD, то физическое удаление
+			// Если строка помесена как DELETE, то ничего не делаем
+			// Если строка помечена как SAME, то помечаем как DELETE
+			getJdbcTemplate().update(
+					"DELETE FROM data_row WHERE form_data_id=? AND type=? AND manual = ?",
+					new Object[] { formData.getId(), TypeFlag.ADD.getKey(), formData.isManual() ? 1 : 0 });
+			return getJdbcTemplate().update(
+					"UPDATE data_row SET type=? WHERE form_data_id=? AND type=? AND manual = ?",
+					new Object[]{TypeFlag.DEL.getKey(), formData.getId(),
+							TypeFlag.SAME.getKey(), formData.isManual() ? 1 : 0});
+		}
+	}
+
+	@Override
+	public int removeRows(FormData formData, DataRowRange range) {
+		checkArgumentType(isTemporary, isManual);
+
+		String sql = String.format("DELETE FROM form_data_%s WHERE temporary = :temporary AND " +
+				"manual = :manual AND ord BETWEEN :indexFrom AND :indexTo", formData.getFormTemplateId());
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("formDataId", formData.getId());
+		params.put("temporary", DataRowType.TEMP.getCode());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+		params.put("indexFrom", range.getOffset());
+		params.put("indexTo", range.getOffset() + range.getCount() - 1);
+
+		int count = getNamedParameterJdbcTemplate().update(sql, params);
+		shiftRows(formData, isTemporary, isManual, new DataRowRange(range.getOffset() + range.getCount(), -range.getCount()));
+		return count;
+	}
+
+	/**
+	 * Сдвигает строки на "range.count" позиций начиная с позиции "range.offset"
+	 * @param formData экземпляр НФ для строк которых осуществляется сдвиг
+	 * @param range диапазон для указания с какого индекса и на сколько осуществляем сдвиг
+	 * @return количество смещенных строк
+	 */
+	private int shiftRows(FormData formData, DataRowRange range) {
+		String sql = String.format("UPDATE form_data_%s SET ord = ord + :shift WHERE temporary = :temporary AND " +
+				"manual = :manual AND ord >= :offset", formData.getFormTemplateId());
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("formDataId", formData.getId());
+		params.put("temporary", DataRowType.TEMP.getCode());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+		params.put("offset", range.getOffset());
+		params.put("shift", range.getCount());
+
+		return getNamedParameterJdbcTemplate().update(sql, params);
+	}
 }

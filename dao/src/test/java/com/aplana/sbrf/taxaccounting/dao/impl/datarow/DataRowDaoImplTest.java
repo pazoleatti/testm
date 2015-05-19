@@ -759,4 +759,71 @@ public class DataRowDaoImplTest extends Assert {
             }
         }
     }
+
+	//  ###################################### НОВАЯ СТРУКТУРА ХРАНЕНИЯ ######################################
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTemporaryManualValidation1() {
+		FormData fd = formDataDao.get(329, false);
+		dataRowDao.getRows(fd, DataRowType.AUTO, DataRowType.AUTO, null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTemporaryManualValidation2() {
+		FormData fd = formDataDao.get(329, false);
+		dataRowDao.getRows(fd, DataRowType.MANUAL, DataRowType.AUTO, null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTemporaryManualValidation3() {
+		FormData fd = formDataDao.get(329, false);
+		dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.STABLE, null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testTemporaryManualValidation4() {
+		FormData fd = formDataDao.get(329, false);
+		dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.TEMP, null);
+	}
+
+	@Test
+	public void getRowsNew() {
+		FormData fd = formDataDao.get(329, false);
+
+		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.AUTO, null);
+		Assert.assertEquals(2, rows.size());
+
+		rows = dataRowDao.getRows(fd, DataRowType.TEMP, DataRowType.AUTO, null);
+		Assert.assertEquals(3, rows.size());
+
+		fd.setManual(true);
+		rows = dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.MANUAL, null);
+		Assert.assertEquals(1, rows.size());
+		Assert.assertEquals(1000.0, ((BigDecimal) rows.get(0).get("numericColumn")).doubleValue(), 1e-2);
+	}
+
+	@Test
+	public void removeRowsNew() {
+		FormData fd = formDataDao.get(329, false);
+		// удаляем строки из одного из срезов
+		int count = dataRowDao.removeRows(fd, DataRowType.STABLE, DataRowType.AUTO);
+		Assert.assertEquals(2, count);
+		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.AUTO, null);
+		Assert.assertTrue(rows.isEmpty());
+		// проверяем, что другие срезы не пострадали в ходе удаления
+		rows = dataRowDao.getRows(fd, DataRowType.TEMP, DataRowType.AUTO, null);
+		Assert.assertEquals(3, rows.size());
+
+		fd.setManual(true);
+		rows = dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.MANUAL, null);
+		Assert.assertEquals(1, rows.size());
+		Assert.assertEquals(1000.0, ((BigDecimal) rows.get(0).get("numericColumn")).doubleValue(), 1e-2);
+		// проверяем удаление диапазона
+		count = dataRowDao.removeRows(fd, DataRowType.TEMP, DataRowType.AUTO, new DataRowRange(2, 1));
+		Assert.assertEquals(1, count);
+		rows = dataRowDao.getRows(fd, DataRowType.TEMP, DataRowType.AUTO, null);
+		Assert.assertEquals(2, rows.size());
+		Assert.assertEquals(1, rows.get(0).getIndex().intValue());
+		Assert.assertEquals(2, rows.get(1).getIndex().intValue());
+	}
 }

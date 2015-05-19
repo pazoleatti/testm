@@ -66,7 +66,7 @@ public class GetRowsDataHandler extends
                 dataRowRange = new DataRowRange(1, dataRowService.getRowCount(action.getFormDataId(),
                         action.isReadOnly() || action.isCorrectionDiff(), action.isManual()));
             } else {
-                dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
+                dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getCount());
             }
 
             // Порция строк, режим отображения различий для корр. периода также как и режим редактирования работат со

@@ -30,6 +30,7 @@ public interface DataRowDao {
 	 * Метод получает строки сохранненого среза строк НФ.
 	 * 
 	 */
+	@Deprecated
 	List<DataRow<Cell>> getSavedRows(FormData formData, DataRowRange range);
 	
 	/**
@@ -45,6 +46,7 @@ public interface DataRowDao {
 	 * Метод получает строки редактируемого в данный момент среза строк НФ.
 	 * 
 	 */
+	@Deprecated
 	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
 
 	/**
@@ -72,26 +74,6 @@ public interface DataRowDao {
 	 */
 	void removeRows(FormData formData, List<DataRow<Cell>> rows);
 
-	/**
-	 * Удаляет строки в диапазоне индексов. (Индексы от 1)
-	 * Действие применяется к временному срезу строк
-	 * 
-	 * @param formData
-	 * @param indexFrom
-	 * @param indexTo
-	 */
-	void removeRows(FormData formData, int indexFrom, int indexTo);
-	
-	
-	/**
-	 * Удаляем все строки
-	 * Действие применяется к временному срезу строк
-	 * 
-	 * @param formData
-	 */
-	void removeRows(FormData formData);
-	
-	
 	/**
 	 * Сохраняет все строки во временном срезе формы, при этом сохраняется порядок, и 
 	 * удаляются все существующие строки. Фактически метод ведет себя как старый способ сохранения формы.
@@ -173,4 +155,23 @@ public interface DataRowDao {
      * Сохранить отсортированные строки без учета остальных изменении. Обновятся только значения атрибута DATA_ROW.ORD
      */
     void saveSortRows(List<DataRow<Cell>> dataRows, FormData formData);
+
+//  ###################################### НОВАЯ СТРУКТУРА ХРАНЕНИЯ ######################################
+
+	/**
+	 * Удаляет строки из временного среза в диапазоне индексов.
+	 * *
+	 * @param formData экземпляр НФ для которой выполняется удаление строк
+	 * @param range диапазон удаляемых строк, индекс начинается с 1
+	 * @return количество удаленных строк
+	 */
+	int removeRows(FormData formData, DataRowRange range);
+
+	/**
+	 * Удаляем все строки из временного среза.
+	 *
+	 * @param formData экземпляр НФ для которой выполняется удаление строк
+	 * @return количество удаленных строк
+	 */
+	int removeRows(FormData formData);
 }

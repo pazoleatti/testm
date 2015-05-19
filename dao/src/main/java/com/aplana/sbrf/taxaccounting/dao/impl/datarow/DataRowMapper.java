@@ -30,25 +30,26 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
     public final static String ALIASED_WITH_AUTO_NUMERATION_AFFIX = "{wan}";
 
 	private FormData fd;
-	private DataRowRange range;
-	private TypeFlag[] types;
 
-	public DataRowMapper(FormData fd, TypeFlag[] types, DataRowRange range) {
+	public DataRowMapper(FormData fd) {
 		this.fd = fd;
-		this.types = types;
-		this.range = range;
 	}
 
 	/**
-	 * improved createSql function
-	 * @return
+	 * Формирует sql-запрос для извлечения данных НФ
+	 *
+	 * @param types (аргумент будет удален)
+	 * @param range параметры пейджинга, может быть null
+	 * @param isTemporary временный срез?
+	 * @param isManual версия ручного ввода?
+	 * @return пара "sql-запрос"-"параметры" для извлечения данных НФ
 	 */
-	public Pair<String, Map<String, Object>> createSql() {
+	public Pair<String, Map<String, Object>> createSql(DataRowRange range, DataRowType isTemporary, DataRowType isManual) {
 		if (fd.getFormTemplateId() == 329) {
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("formDataId", fd.getId());
-			params.put("temporary", 0); //TODO исправить
-			params.put("manual", fd.isManual() ? 1 : 0);
+			params.put("temporary", isTemporary.getCode());
+			params.put("manual", isManual.getCode());
 
 			StringBuilder sql = new StringBuilder("SELECT ord, alias,\n");
 			// автонумерация (считаются все строки где нет алиасов, либо алиас = ALIASED_WITH_AUTO_NUMERATION_AFFIX)
@@ -72,12 +73,15 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			if (range != null) {
 				sql.append(" AND ord BETWEEN :from AND :to");
 				params.put("from", range.getOffset());
-				params.put("to", range.getOffset() + range.getLimit() - 1);
+				params.put("to", range.getOffset() + range.getCount() - 1);
 			}
 			sql.append("\nORDER BY ord");
 
 			return new Pair<String, Map<String, Object>>(sql.toString(), params);
 		} else {
+			TypeFlag[] types = isTemporary == DataRowType.TEMP ?
+					new TypeFlag[] {TypeFlag.ADD, TypeFlag.SAME}:
+					new TypeFlag[] {TypeFlag.DEL, TypeFlag.SAME};
 			String[] prefixes = new String[]{"v", "s", "e", "csi", "rsi"};
 			StringBuilder sql = new StringBuilder("SELECT MAX(idx1) AS idx, sub.id, max(sub.alias) as alias \n");
 			// генерация max(X) X
@@ -131,7 +135,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			if (range != null) {
 				sql.append("  WHERE idx1 BETWEEN :from AND :to \n");
 				params.put("from", range.getOffset());
-				params.put("to", range.getOffset() + range.getLimit() - 1);
+				params.put("to", range.getOffset() + range.getCount() - 1);
 			}
 			sql.append("  ) d \n");
 			sql.append(" LEFT JOIN data_cell c ON d.id = c.row_id ) sub \n");
@@ -179,8 +183,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			return dataRow;
 		}
 		else {
-			List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(),
-					fd.getFormStyles());
+			List<Cell> cells = FormDataUtils.createCells(fd.getFormColumns(), fd.getFormStyles());
 			Integer previousRowNumber = fd.getPreviousRowNumber() != null ? fd.getPreviousRowNumber() : 0;
 			String alias = rs.getString("alias");
 			for (Cell cell : cells) {
