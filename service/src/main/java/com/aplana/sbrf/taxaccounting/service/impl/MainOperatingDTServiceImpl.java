@@ -150,8 +150,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                     String.format(HAVE_DDT_MESSAGE,
                             departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
-        declarationTypeService.delete(typeId);
         auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, declarationTypeService.get(typeId).getName(), null, null, null, null);
+        declarationTypeService.delete(typeId);
     }
 
     @Override

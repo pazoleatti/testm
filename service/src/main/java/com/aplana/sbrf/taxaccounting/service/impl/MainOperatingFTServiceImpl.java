@@ -194,8 +194,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                     String.format(HAVE_DFT_MESSAGE,
                             departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
-        formTypeService.delete(typeId);
         auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, null, formTypeService.get(typeId).getName(), null, null, null);
+        formTypeService.delete(typeId);
     }
 
     @Override
