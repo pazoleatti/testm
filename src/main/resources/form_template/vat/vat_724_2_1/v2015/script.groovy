@@ -369,13 +369,14 @@ void importData() {
     headerValues.clear()
     headerValues = null
 
-    def rowIndex = 0
-    def rows = []
-    def allValuesCount = allValues.size()
     def fileRowIndex = paramsMap.rowOffset
     def colOffset = paramsMap.colOffset
     paramsMap.clear()
     paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
 
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -448,8 +449,6 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param fileRowIndex номер строки в тф
  * @param rowIndex номер строки в нф
  * @param colOffset отступ по столбцам
- *
- * @return вернет true или false, если количество значений в строке тф меньше
  */
 def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
     dataRow.setImportIndex(fileRowIndex)

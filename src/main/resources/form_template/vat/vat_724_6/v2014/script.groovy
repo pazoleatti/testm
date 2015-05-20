@@ -209,104 +209,6 @@ def getFixedRow(String title, String alias, boolean isOuter) {
     return total
 }
 
-// Получение импортируемых данных
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Дата операции',
-            (xml.row[0].cell[3]): 'Контрагент',
-            (xml.row[0].cell[4]): 'Доход контрагента',
-            (xml.row[0].cell[6]): 'НДС',
-            (xml.row[0].cell[8]): 'Счёт-фактура',
-            (xml.row[1].cell[4]): 'Вид',
-            (xml.row[1].cell[5]): 'Сумма',
-            (xml.row[1].cell[6]): 'Номер мемориального ордера',
-            (xml.row[1].cell[7]): 'Сумма',
-            (xml.row[1].cell[8]): 'Дата',
-            (xml.row[1].cell[9]): 'Номер',
-            (xml.row[2].cell[0]): '1'
-    ]
-    (2..9).each { index ->
-        headerMapping.put((xml.row[2].cell[index]), index.toString())
-    }
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1  // Строки НФ, от 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // Пропуск итоговых строк
-        if (row.cell[1].text() != null && row.cell[1].text() != "") {
-            continue
-        }
-
-        def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-
-        // графа 2
-        newRow.operDate = parseDate(row.cell[2].text(), "dd.MM.yyyy", xlsIndexRow, 2 + colOffset, logger, true)
-
-        // графа 3
-        newRow.contragent =  row.cell[3].text()
-
-        // графа 4
-        newRow.type = row.cell[4].text()
-
-        // графа 5
-        newRow.sum = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
-
-        // графа 6
-        newRow.number = row.cell[6].text()
-
-        // графа 7
-        newRow.sum2 = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
-
-        // графа 8
-        newRow.date = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, true)
-
-        // графа 9
-        newRow.number2 = row.cell[9].text()
-
-        rows.add(newRow)
-    }
-
-    // Добавляем итоговые строки
-    def totalRow = getFixedRow('Итого', 'total', true)
-    calcTotalSum(rows, totalRow, totalColumns)
-    rows.add(totalRow)
-
-    showMessages(rows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
-    }
-}
-
 def getNewRow() {
     def newRow = formData.createStoreMessagingDataRow()
     editableColumns.each {
@@ -506,4 +408,152 @@ String pure(String cell) {
 
 boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 9
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 0
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // Пропуск итоговых строк
+        if (!rowValues[INDEX_FOR_SKIP]) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    // итоговая строка
+    def totalRow = getDataRow(templateRows, 'total')
+    calcTotalSum(rows, totalRow, totalColumns)
+    rows.add(totalRow)
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow временная вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]): '№ пп',
+            (headerRows[0][2]): 'Дата операции',
+            (headerRows[0][3]): 'Контрагент',
+            (headerRows[0][4]): 'Доход контрагента',
+            (headerRows[0][6]): 'НДС',
+            (headerRows[0][8]): 'Счёт-фактура',
+            (headerRows[1][4]): 'Вид',
+            (headerRows[1][5]): 'Сумма',
+            (headerRows[1][6]): 'Номер мемориального ордера',
+            (headerRows[1][7]): 'Сумма',
+            (headerRows[1][8]): 'Дата',
+            (headerRows[1][9]): 'Номер',
+            (headerRows[2][0]): '1'
+    ]
+    (2..9).each { index ->
+        headerMapping.put((headerRows[2][index]), index.toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 2
+    def colIndex = 2
+    newRow.operDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 3
+    colIndex++
+    newRow.contragent = values[colIndex]
+
+    // графа 4
+    colIndex++
+    newRow.type = values[colIndex]
+
+    // графа 5
+    colIndex++
+    newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 6
+    colIndex++
+    newRow.number = values[colIndex]
+
+    // графа 7
+    colIndex++
+    newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 8
+    colIndex++
+    newRow.date = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 9
+    colIndex++
+    newRow.number2 = values[colIndex]
+
+    return newRow
 }

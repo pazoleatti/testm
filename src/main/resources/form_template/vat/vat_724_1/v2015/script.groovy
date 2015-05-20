@@ -771,13 +771,14 @@ void importData() {
             'total_7': [getDataRow(templateRows, 'total_7')]
     ]
 
-    def rowIndex = 0
-    def rows = []
-    def allValuesCount = allValues.size()
     def fileRowIndex = paramsMap.rowOffset
     def colOffset = paramsMap.colOffset
     paramsMap.clear()
     paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -864,11 +865,10 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
  * @param isSection7 признак что строка для раздела 7
- *
- * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
 def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isSection7) {
     def newRow = getNewRow(isSection7)
+    newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
     // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»

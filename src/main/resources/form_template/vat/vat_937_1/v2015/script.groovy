@@ -516,13 +516,14 @@ void importData() {
     headerValues.clear()
     headerValues = null
 
-    def rowIndex = 0
-    def rows = []
-    def allValuesCount = allValues.size()
     def fileRowIndex = paramsMap.rowOffset
     def colOffset = paramsMap.colOffset
     paramsMap.clear()
     paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -608,8 +609,6 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
- *
- * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
 def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
     def newRow = getNewRow()
