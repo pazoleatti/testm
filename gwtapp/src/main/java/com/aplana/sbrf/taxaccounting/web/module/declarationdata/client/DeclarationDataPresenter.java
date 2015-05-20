@@ -266,13 +266,14 @@ public class DeclarationDataPresenter
 	}
 
 	@Override
-	public void onRecalculateClicked(Date docDate) {
+	public void onRecalculateClicked(final Date docDate, final boolean force) {
 		LogCleanEvent.fire(this);
         getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);
         action.setTaxType(taxType);
+        action.setForce(force);
 		dispatcher
 				.execute(
 						action,
@@ -282,6 +283,14 @@ public class DeclarationDataPresenter
 									public void onSuccess(
 											RecalculateDeclarationDataResult result) {
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                                        if (RecalculateDeclarationDataResult.StatusRecalculateDeclaration.LOCKED.equals(result.getStatus()) && force == false) {
+                                            Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.XML_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                                                @Override
+                                                public void yes() {
+                                                    onRecalculateClicked(docDate, true);
+                                                }
+                                            });
+                                        }
                                         onTimerReport(ReportType.XML_DEC, false);
 									}
 
@@ -375,9 +384,9 @@ public class DeclarationDataPresenter
 					public void onSuccess(CheckDeclarationDataResult result) {
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-                        if (CreateReportResult.StatusCreateReport.NOT_EXIST_XML.equals(result.getStatus())) {
+                        if (CheckDeclarationDataResult.StatusCheckDeclaration.NOT_EXIST_XML.equals(result.getStatus())) {
                             Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
-                        } else if (CreateReportResult.StatusCreateReport.LOCKED.equals(result.getStatus()) && force == false) {
+                        } else if (CheckDeclarationDataResult.StatusCheckDeclaration.LOCKED.equals(result.getStatus()) && force == false) {
                             Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
                                 @Override
                                 public void yes() {

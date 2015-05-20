@@ -795,13 +795,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String generateAsyncTaskKey(long declarationDataId, ReportType reportType) {
+        if (reportType == null) {
+            return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId;
+        }
         return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + reportType.getName();
     }
 
     @Override
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
-        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(),
+        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId(),
                 getDeclarationFullName(declarationDataId, null),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         checkLock(lockData, userInfo.getUser());
@@ -811,7 +814,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void unlock(final long declarationDataId, final TAUserInfo userInfo) {
-        lockDataService.unlock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId());
+        lockDataService.unlock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId());
     }
 
     @Override
@@ -868,11 +871,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
+        if (reportType == null)
+            return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
+                    declarationTemplate.getType().getName(),
+                    department.getName(),
+                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriod.getCorrectionDate() != null
+                            ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            : "");
+
         switch (reportType) {
             case EXCEL_DEC:
             case PDF_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
                         reportType.getName(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+            case XML_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_CALCULATE.getText(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                         declarationTemplate.getType().getName(),
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
@@ -881,6 +903,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "");
             case CHECK_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_CHECK.getText(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                         declarationTemplate.getType().getName(),
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),

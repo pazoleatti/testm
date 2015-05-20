@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
@@ -54,7 +55,9 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
 
     @Override
     public RecalculateDeclarationDataResult execute(RecalculateDeclarationDataAction action, ExecutionContext context) throws ActionException {
+        final ReportType reportType = ReportType.XML_DEC;
         TAUserInfo userInfo = securityService.currentUserInfo();
+        Map<String, Object> params = new HashMap<String, Object>();
         Logger logger = new Logger();
         try {
             declarationDataService.preCalculationCheck(logger, action.getDeclarationId(), userInfo);
@@ -69,13 +72,63 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
         }
         int userId = userInfo.getUser().getId();
         RecalculateDeclarationDataResult result = new RecalculateDeclarationDataResult();
-        String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC);
-        LockData lockData = lockDataService.lock(key, userId,
-                declarationDataService.getDeclarationFullName(action.getDeclarationId(), null),
-                LockData.State.IN_QUEUE.getText(),
-                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
+        LockData lockData = null;//declarationDataService.lock(action.getDeclarationId(), userInfo);
         if (lockData == null) {
             try {
+                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
+                LockData lockDataReportTask = lockDataService.getLock(key);
+                if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
+                    if (action.isForce()) {
+                        // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
+                        lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId(), false);
+                    } else {
+                        result.setStatus(RecalculateDeclarationDataResult.StatusRecalculateDeclaration.LOCKED);
+                        return result;
+                    }
+                } else if (lockDataReportTask != null) {
+                    try {
+                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                    } catch (ServiceException e) {
+                    }
+                    result.setStatus(RecalculateDeclarationDataResult.StatusRecalculateDeclaration.CREATE);
+                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
+                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    return result;
+                }
+                if (lockDataService.lock(key, userInfo.getUser().getId(),
+                        declarationDataService.getDeclarationFullName(action.getDeclarationId(), ReportType.XML_DEC),
+                        LockData.State.IN_QUEUE.getText(),
+                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
+                    try {
+                        declarationDataService.deleteReport(action.getDeclarationId(), false);
+                        params.put("declarationDataId", action.getDeclarationId());
+                        params.put("docDate", action.getDocDate());
+                        params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);
+                        params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                        lockData = lockDataService.getLock(key);
+                        params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                        BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                        lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
+                        result.setStatus(RecalculateDeclarationDataResult.StatusRecalculateDeclaration.CREATE);
+                    } catch (Exception e) {
+                        lockDataService.unlock(key, userInfo.getUser().getId());
+                        if (e instanceof ServiceLoggerException) {
+                            throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                        } else {
+                            throw new ActionException(e);
+                        }
+                    }
+                } else {
+                    throw new ActionException("Не удалось запустить формирование отчета. Попробуйте выполнить операцию позже");
+                }
+
+/*
+                lockDataService.lock(key, userId,
+                        declarationDataService.getDeclarationFullName(action.getDeclarationId(), null),
+                        LockData.State.IN_QUEUE.getText(),
+                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("declarationDataId", action.getDeclarationId());
                 params.put("docDate", action.getDocDate());
@@ -105,24 +158,14 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 if (!logger.containsLevel(LogLevel.ERROR)) {
                     logger.info("%s в очередь на формирование.", !TaxType.DEAL.equals(action.getTaxType())?"Декларация поставлена":"Уведомление поставлено");
                 }
-                result.setUuid(logEntryService.save(logger.getEntries()));
-            } catch(Exception e) {
-                try {
-                    lockDataService.unlock(key, userId);
-                } catch (ServiceException e2) {
-                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
-                        throw new ActionException(e2);
-                    }
-                }
-                if (e instanceof ServiceLoggerException) {
-                    throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                } else {
-                    throw new ActionException(e);
-                }
+                result.setUuid(logEntryService.save(logger.getEntries()));*/
+            } finally {
+                declarationDataService.unlock(action.getDeclarationId(), userInfo);
             }
         } else {
             throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
         }
+        result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
 
