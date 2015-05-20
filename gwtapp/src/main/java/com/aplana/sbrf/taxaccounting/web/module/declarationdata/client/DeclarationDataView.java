@@ -257,7 +257,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             Dialog.warningMessage("Введите дату.");
         } else {
             if (getUiHandlers() != null) {
-                getUiHandlers().onRecalculateClicked(dateBox.getValue());
+                getUiHandlers().onRecalculateClicked(dateBox.getValue(), false);
             }
         }
     }

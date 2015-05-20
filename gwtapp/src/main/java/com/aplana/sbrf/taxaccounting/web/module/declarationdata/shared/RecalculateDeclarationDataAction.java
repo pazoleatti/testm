@@ -10,6 +10,7 @@ public class RecalculateDeclarationDataAction extends UnsecuredActionImpl<Recalc
 	private long declarationId;
 	private Date docDate;
     private TaxType taxType;
+    private boolean isForce;
 
 	public long getDeclarationId() {
 		return declarationId;
@@ -33,6 +34,14 @@ public class RecalculateDeclarationDataAction extends UnsecuredActionImpl<Recalc
 
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
+    }
+
+    public boolean isForce() {
+        return isForce;
+    }
+
+    public void setForce(boolean isForce) {
+        this.isForce = isForce;
     }
 
     @Override
