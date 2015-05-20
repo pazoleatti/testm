@@ -96,7 +96,7 @@ public class FormTemplateController {
         ServletFileUpload upload = new ServletFileUpload(factory);
         List<FileItem> items = upload.parseRequest(req);
         FormTemplate formTemplate = formTemplateImpexService.importFormTemplate(formTemplateId, items.get(0).getInputStream());
-        mainOperatingService.edit(formTemplate, endDate, logger, securityService.currentUserInfo().getUser());
+        mainOperatingService.edit(formTemplate, endDate, logger, securityService.currentUserInfo());
 
 		IOUtils.closeQuietly(items.get(0).getInputStream());
         resp.setContentType("text/plain");

@@ -45,7 +45,7 @@ public class CreateNewDTVersionHandler extends AbstractActionHandler<CreateNewDT
         makeDates(action);
 
         int dtId = mainOperatingService.createNewTemplateVersion(action.getDeclarationTemplateExt().getDeclarationTemplate(),
-                action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo().getUser());
+                action.getDeclarationTemplateExt().getEndDate(), logger, securityService.currentUserInfo());
 
         if (!logger.getEntries().isEmpty())
             result.setLogUuid(logEntryService.save(logger.getEntries()));

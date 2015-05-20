@@ -54,7 +54,7 @@ public class CreateNewVersionHandler extends AbstractActionHandler<CreateNewVers
         if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceLoggerException("Ошибки при валидации.", logEntryService.save(logger.getEntries()));
         }
-        int formTemplateId = mainOperatingService.createNewTemplateVersion(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
+        int formTemplateId = mainOperatingService.createNewTemplateVersion(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo());
         result.setFormTemplateId(formTemplateId);
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));

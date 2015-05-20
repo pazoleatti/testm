@@ -47,7 +47,7 @@ public class DTDeleteHandler extends AbstractActionHandler<DTDeleteAction, DTDel
         declarationTemplateService.lock(action.getDtTypeId(), userInfo);
         DTDeleteResult result = new DTDeleteResult();
         Logger logger = new Logger();
-        mainOperatingService.deleteTemplate(action.getDtTypeId(), logger, securityService.currentUserInfo().getUser());
+        mainOperatingService.deleteTemplate(action.getDtTypeId(), logger, securityService.currentUserInfo());
         if (!logger.getEntries().isEmpty())
             result.setLogEntriesUuid(logEntryService.save(logger.getEntries()));
         return result;

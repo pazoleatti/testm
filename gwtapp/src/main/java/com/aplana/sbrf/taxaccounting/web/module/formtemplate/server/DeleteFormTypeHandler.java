@@ -47,7 +47,7 @@ public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeA
         formTemplateService.lock(action.getFormTypeId(), userInfo);
         DeleteFormTypeResult result = new DeleteFormTypeResult();
         Logger logger = new Logger();
-        mainOperatingService.deleteTemplate(action.getFormTypeId(), logger, securityService.currentUserInfo().getUser());
+        mainOperatingService.deleteTemplate(action.getFormTypeId(), logger, securityService.currentUserInfo());
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

@@ -41,8 +41,14 @@ public class AuditServiceImpl implements AuditService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-	public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
-                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId, final Integer formTypeId) {
+	public void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
+                    String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId, Integer formTypeId) {
+        add(event, userInfo, departmentId, reportPeriodId, declarationTypeName, formTypeName, formKindId, note, blobDataId);
+	}
+
+    @Override
+    public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
@@ -61,7 +67,13 @@ public class AuditServiceImpl implements AuditService {
                 }
                 log.setRoles(roles.toString());
 
-                String departmentName = departmentId == null ? "" : (departmentId == 0 ? departmentService.getDepartment(departmentId).getName() : departmentService.getParentsHierarchy(departmentId));
+                String departmentName = departmentId == null ?
+                        departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId())
+                        :
+                        (
+                                departmentId == 0 ? departmentService.getDepartment(departmentId).getName() :
+                                departmentService.getParentsHierarchy(departmentId)
+                        );
                 log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
                 log.setFormDepartmentId(departmentId);
 
@@ -78,9 +90,7 @@ public class AuditServiceImpl implements AuditService {
                 int userDepId = userInfo.getUser().getDepartmentId();
                 String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
                 log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
-
                 log.setBlobDataId(blobDataId);
-                log.setFormTypeId(formTypeId);
 
                 auditDao.add(log);
             }
@@ -90,7 +100,7 @@ public class AuditServiceImpl implements AuditService {
                 return null;
             }
         });
-	}
+    }
 
     @Override
     @Transactional(readOnly = false)

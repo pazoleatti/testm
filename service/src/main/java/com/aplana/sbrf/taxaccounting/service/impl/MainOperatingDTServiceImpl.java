@@ -30,17 +30,13 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
-
     @Autowired
     private DeclarationTypeService declarationTypeService;
-
     @Autowired
     @Qualifier("declarationTemplateOperatingService")
     private VersionOperatingService versionOperatingService;
-
     @Autowired
     private TemplateChangesService templateChangesService;
     @Autowired
@@ -49,9 +45,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
     private DepartmentService departmentService;
     @Autowired
     private DeclarationDataService declarationDataService;
+    @Autowired
+    private AuditService auditService;
 
     @Override
-    public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
+    public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         Date dbVersionBeginDate = declarationTemplateService.get(declarationTemplate.getId()).getVersion();
         Date dbVersionEndDate = declarationTemplateService.getDTEndDate(declarationTemplate.getId());
@@ -94,12 +92,13 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         int id = declarationTemplateService.save(declarationTemplate);
 
-        logging(id, FormDataEvent.TEMPLATE_MODIFIED, user);
+        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
+        //logging(id, FormDataEvent.TEMPLATE_MODIFIED, user);
         return id;
     }
 
     @Override
-    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUser user) {
+    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         DeclarationType type = declarationTemplate.getType();
         type.setStatus(VersionedObjectStatus.NORMAL);
@@ -111,12 +110,13 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         int id = declarationTemplateService.save(declarationTemplate);
 
-        logging(id, FormDataEvent.TEMPLATE_CREATED, user);
+        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
+        //logging(id, FormDataEvent.TEMPLATE_CREATED, user);
         return id;
     }
 
     @Override
-    public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUser user) {
+    public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         DeclarationTemplate declarationTemplate = (DeclarationTemplate)template;
         checkError(logger, SAVE_MESSAGE);
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
@@ -125,12 +125,13 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
         int id = declarationTemplateService.save(declarationTemplate);
 
-        logging(id, FormDataEvent.TEMPLATE_CREATED, user);
+        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
+        //logging(id, FormDataEvent.TEMPLATE_CREATED, user);
         return id;
     }
 
     @Override
-    public void deleteTemplate(int typeId, Logger logger, TAUser user) {
+    public void deleteTemplate(int typeId, Logger logger, TAUserInfo user) {
         List<DeclarationTemplate> templates = declarationTemplateService.getDecTemplateVersionsByStatus(typeId,
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         if (templates != null && !templates.isEmpty()){
@@ -150,10 +151,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                             departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
         declarationTypeService.delete(typeId);
+        auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, declarationTypeService.get(typeId).getName(), null, null, null, null);
     }
 
     @Override
-    public boolean deleteVersionTemplate(int templateId, Logger logger, TAUser user) {
+    public boolean deleteVersionTemplate(int templateId, Logger logger, TAUserInfo user) {
         boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
         DeclarationTemplate template = declarationTemplateService.get(templateId);
         Date dateEndActualize = declarationTemplateService.getDTEndDate(templateId);
@@ -184,12 +186,13 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;
         }
-        logging(templateId, FormDataEvent.TEMPLATE_DELETED, user);
+        auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, template.getType().getName(), null, null, null, null);
+        //logging(templateId, FormDataEvent.TEMPLATE_DELETED, user);
         return isDeleteAll;
     }
 
     @Override
-    public boolean setStatusTemplate(int templateId, Logger logger, TAUser user, boolean force) {
+    public boolean setStatusTemplate(int templateId, Logger logger, TAUserInfo user, boolean force) {
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(templateId);
 
         if (declarationTemplate.getStatus() == VersionedObjectStatus.NORMAL){
@@ -198,11 +201,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
             declarationTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
-            logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user);
+            //logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user);
         } else {
             declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
             declarationTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
-            logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user);
+            //logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user);
         }
         return true;
     }
