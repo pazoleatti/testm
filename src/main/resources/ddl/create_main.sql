@@ -934,3 +934,21 @@ comment on column tax_type.id is 'Символьный идентификато�
 comment on column tax_type.name is 'Тип налога';
 
 --------------------------------------------------------------------------------------------------------
+
+create table configuration_async
+(
+id number(9) not null,
+type varchar2(400) not null,
+limit_kind varchar2(400) not null,
+limit number(9),
+short_limit number(9)
+);
+
+comment on table configuration_async is 'Настройки асинхронных задач';
+comment on column configuration_async.id is 'Идентификатор записи';
+comment on column configuration_async.type is 'Тип задания';
+comment on column configuration_async.limit_kind is 'Вид ограничения';
+comment on column configuration_async.limit is 'Ограничение на выполнение задания';
+comment on column configuration_async.short_limit is 'Ограничение на выполнение задания в очереди быстрых заданий';
+
+--------------------------------------------------------------------------------------------------------
