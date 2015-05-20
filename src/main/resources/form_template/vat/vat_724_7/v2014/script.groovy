@@ -474,11 +474,8 @@ void importData() {
         rowValues.clear()
     }
 
-    // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def templateRows = formTemplate.rows
-    // итоговая строка
-    def totalRow = getDataRow(templateRows, 'total')
+    // Добавляем итоговые строки
+    def totalRow = getFixedRow('Итого', 'total', true)
     calcTotalSum(rows, totalRow, totalColumns)
     rows.add(totalRow)
 
