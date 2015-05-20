@@ -117,5 +117,13 @@ comment on column lock_data.queue is 'Очередь, в которой нахо
 --Оптимизация производительности
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 
+---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-11292: Каскадное удаление blob для таблиц отчетов
+alter table log_system_report 	drop constraint 	log_system_report_fk_blob_data;
+alter table log_system_report 	add constraint 		log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
+
+alter table declaration_report	drop constraint decl_report_fk_blob_data;
+alter table declaration_report 	add constraint decl_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
+
 commit;
 end;

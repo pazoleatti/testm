@@ -209,6 +209,7 @@ public interface LockDataService {
      * отправляет оповещения ожидающим блокировку пользователям
      * @param lockData
      * @param userId
+     * @param force
      */
-    void interruptTask(LockData lockData, int userId);
+    void interruptTask(LockData lockData, int userId, boolean force);
 }

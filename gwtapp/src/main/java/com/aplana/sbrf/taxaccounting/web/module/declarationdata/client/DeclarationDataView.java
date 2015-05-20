@@ -279,7 +279,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiHandler("checkButton")
 	public void onCheck(ClickEvent event){
-		getUiHandlers().check();
+		getUiHandlers().check(false);
 	}
 
     @UiHandler("viewPdf")

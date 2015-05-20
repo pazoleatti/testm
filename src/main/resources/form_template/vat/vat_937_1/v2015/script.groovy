@@ -298,106 +298,6 @@ def getFixedRow(String title, String alias) {
     return total
 }
 
-void importData() {
-    def tmpRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 16, 3)
-
-    def headerMapping = [
-            (xml.row[0].cell[0])  : getColumnName(tmpRow, 'rowNum'),
-            (xml.row[0].cell[1])  : getColumnName(tmpRow, 'typeCode'),
-            (xml.row[0].cell[2])  : getColumnName(tmpRow, 'invoice'),
-            (xml.row[0].cell[3])  : getColumnName(tmpRow, 'invoiceCorrecting'),
-            (xml.row[0].cell[4])  : getColumnName(tmpRow, 'invoiceCorrection'),
-            (xml.row[0].cell[5])  : getColumnName(tmpRow, 'invoiceCorrectingCorrection'),
-            (xml.row[0].cell[6])  : getColumnName(tmpRow, 'documentPay'),
-            (xml.row[0].cell[7])  : getColumnName(tmpRow, 'dateRegistration'),
-            (xml.row[0].cell[8])  : getColumnName(tmpRow, 'salesman'),
-            (xml.row[0].cell[9])  : getColumnName(tmpRow, 'salesmanInnKpp'),
-            (xml.row[0].cell[10]) : 'Сведения о посреднике (комиссионере, агенте)',
-            (xml.row[0].cell[12]) : getColumnName(tmpRow, 'declarationNum'),
-            (xml.row[0].cell[13]) : getColumnName(tmpRow, 'currency'),
-            (xml.row[0].cell[14]) : getColumnName(tmpRow, 'cost'),
-            (xml.row[0].cell[15]) : getColumnName(tmpRow, 'nds'),
-
-            (xml.row[1].cell[10]) : 'Наименование посредника',
-            (xml.row[1].cell[11]) : 'ИНН/КПП посредника',
-    ]
-    (0..15).each { index ->
-        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-void addData(def xml, int headRowCount) {
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def xmlIndexRow = -1
-    def int rowIndex = 1
-    def rows = []
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        /* Пропуск строк шапок */
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // Пропуск итоговых строк
-        if ((row.cell[0].text() == null || row.cell[0].text() == "") &&
-                (row.cell[1].text() == null || row.cell[1].text() == "")) {
-            continue
-        }
-
-        def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-
-        // графа 2..7
-        def xmlIndexCol = 0
-        ['typeCode', 'invoice', 'invoiceCorrecting', 'invoiceCorrection', 'invoiceCorrectingCorrection', 'documentPay'].each { alias ->
-            xmlIndexCol++
-            newRow[alias] = row.cell[xmlIndexCol].text()
-        }
-
-        // графа 8
-        xmlIndexCol++
-        newRow.dateRegistration = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // графа 9..14
-        ['salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency'].each { alias ->
-            xmlIndexCol++
-            newRow[alias] = row.cell[xmlIndexCol].text()
-        }
-
-        // графа 15, 16
-        ['cost', 'nds'].each { alias ->
-            xmlIndexCol++
-            newRow[alias] = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-
-        changeDateFormat(newRow)
-        rows.add(newRow)
-    }
-    showMessages(rows, logger)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
-    }
-    rows.add(getFixedRow('Всего', 'total'))
-    formDataService.getDataRowHelper(formData).save(rows)
-}
-
 /** Получить новую строку с заданными стилями. */
 def getNewRow() {
     def newRow = formData.createStoreMessagingDataRow()
@@ -594,4 +494,151 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
 static String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 16
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // Пропуск итоговых строк
+        if (!rowValues[INDEX_FOR_SKIP]) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    // итоговая строка
+    rows.add(getDataRow(templateRows, 'total'))
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow временная вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+
+    // для проверки шапки
+    def headerMapping = [
+            (headerRows[0][0])  : getColumnName(tmpRow, 'rowNum'),
+            (headerRows[0][1])  : getColumnName(tmpRow, 'typeCode'),
+            (headerRows[0][2])  : getColumnName(tmpRow, 'invoice'),
+            (headerRows[0][3])  : getColumnName(tmpRow, 'invoiceCorrecting'),
+            (headerRows[0][4])  : getColumnName(tmpRow, 'invoiceCorrection'),
+            (headerRows[0][5])  : getColumnName(tmpRow, 'invoiceCorrectingCorrection'),
+            (headerRows[0][6])  : getColumnName(tmpRow, 'documentPay'),
+            (headerRows[0][7])  : getColumnName(tmpRow, 'dateRegistration'),
+            (headerRows[0][8])  : getColumnName(tmpRow, 'salesman'),
+            (headerRows[0][9])  : getColumnName(tmpRow, 'salesmanInnKpp'),
+            (headerRows[0][10]) : 'Сведения о посреднике (комиссионере, агенте)',
+            (headerRows[0][12]) : getColumnName(tmpRow, 'declarationNum'),
+            (headerRows[0][13]) : getColumnName(tmpRow, 'currency'),
+            (headerRows[0][14]) : getColumnName(tmpRow, 'cost'),
+            (headerRows[0][15]) : getColumnName(tmpRow, 'nds'),
+
+            (headerRows[1][10]) : 'Наименование посредника',
+            (headerRows[1][11]) : 'ИНН/КПП посредника',
+    ]
+
+    (0..15).each { index ->
+        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+    }
+
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 2..7
+    def colIndex = 0
+    ['typeCode', 'invoice', 'invoiceCorrecting', 'invoiceCorrection', 'invoiceCorrectingCorrection', 'documentPay'].each { alias ->
+        colIndex++
+        newRow[alias] = values[colIndex]
+    }
+
+    // графа 8
+    colIndex++
+    newRow.dateRegistration = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 9..14
+    ['salesman', 'salesmanInnKpp', 'agentName', 'agentInnKpp', 'declarationNum', 'currency'].each { alias ->
+        colIndex++
+        newRow[alias] = values[colIndex]
+    }
+
+    // графа 15, 16
+    ['cost', 'nds'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    changeDateFormat(newRow)
+    return newRow
 }

@@ -80,7 +80,7 @@ public interface DeclarationDataService {
 	 * @param logger - объект журнала
 	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
 	 */
-	void check(Logger logger, long declarationDataId, TAUserInfo userInfo);
+	void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
     /**
      * метод запускает скрипты с событием предрасчетные проверки
@@ -207,5 +207,5 @@ public interface DeclarationDataService {
      * @param reportType тип отчета. Может быть null
      * @return название
      */
-    String getDeclarationFullName(long declarationId, String reportType);
+    String getDeclarationFullName(long declarationId, ReportType reportType);
 }
