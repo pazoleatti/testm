@@ -146,9 +146,6 @@ def isCorrectionPeriodMap = [:]
 @Field
 def reportPeriod = null
 
-@Field
-def formTypeName = null
-
 def getReportPeriodStartDate() {
     if (startDate == null) {
         startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
@@ -195,6 +192,7 @@ void logicCheck() {
 
     def index1 = getPrevLastIndex(true)
     def index2 = getPrevLastIndex(false)
+    def needRecalc = false
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -302,14 +300,10 @@ void logicCheck() {
         }
 
         // 6. Проверка значения «Графы 1»
-        if (row.rowNumber != (isFirstSection ? ++index1 : ++index2)) {
+        if (!needRecalc && row.rowNumber != (isFirstSection ? ++index1 : ++index2)) {
+            needRecalc = true
             def name = getColumnName(row, 'rowNumber')
-            def formTypeName = getFormTypeName()
-            def periodName = getReportPeriod().name
-            def year = getReportPeriod().taxPeriod.year
-            loggerError(row, "Строка $index: Графа «$name» заполнена неверно (в первичной налоговой форме «$formTypeName» " +
-                    "текущего подразделения за $periodName $year изменено количество строк). " +
-                    "Для обновления значения графы необходимо нажать на «Рассчитать».")
+            loggerError(row, "Графа «$name» заполнена неверно. Для обновления значения необходимо нажать на «Рассчитать».")
         }
     }
 
@@ -596,7 +590,7 @@ def getPrevDataRows() {
         // поиск формы предыдущего периода в статусе отличной от "создана"
         for (def report : reportPeriods) {
             def formDataTmp = formDataService.getLast(formData.formType.id, formData.kind,  formDataDepartment.id, report.id, null)
-            // форма подходил если: она существует, она не в состоянии "создана" и не в корректирующем периоде
+            // форма подходит если: она существует, она не в состоянии "создана" и не в корректирующем периоде
             if (formDataTmp != null && !isCorrectionPeriod(formDataTmp.departmentReportPeriodId)
                     && formDataTmp.state != WorkflowState.CREATED) {
                 prevDataRows = formDataService.getDataRowHelper(formDataTmp)?.getAllSaved()
@@ -620,13 +614,6 @@ def getReportPeriod() {
         reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     }
     return reportPeriod
-}
-
-def getFormTypeName() {
-    if (formTypeName == null) {
-        formTypeName = formTypeService.get(formData.formType.id).name
-    }
-    return formTypeName
 }
 
 void importTransportData() {
