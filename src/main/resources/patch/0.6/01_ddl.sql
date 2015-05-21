@@ -85,20 +85,11 @@ comment on column declaration_data_consolidation.target_declaration_data_id is '
 
 alter table form_data_consolidation add constraint form_data_consolidation_pk primary key (source_form_data_id, target_form_data_id);
 alter table form_data_consolidation add constraint form_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
-alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id) on delete cascade;
+alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id);
 
 alter table declaration_data_consolidation add constraint decl_data_consolidation_pk primary key (source_form_data_id, target_declaration_data_id);
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
-alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id) on delete cascade;
-
--- http://jira.aplana.com/browse/SBRFACCTAX-11263: Статус консолидации
-alter table form_data_consolidation add status number(1) default 1 not null;
-comment on column form_data_consolidation.status is 'Статус консолидации: 0-неактульная, 1-актуальная консолидация';
-alter table form_data_consolidation add constraint form_data_consolidation_chk_st check (status in (0, 1));
-
-alter table declaration_data_consolidation add status number(1) default 1 not null;
-comment on column declaration_data_consolidation.status is 'Статус консолидации: 0-неактульная, 1-актуальная консолидация';
-alter table declaration_data_consolidation add constraint decl_data_consolidation_chk_st check (status in (0, 1));
+alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id);
 
 ---------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-10729: FORM_DATA_PERFORMER:NAME сделать поле необязательным для заполнения
