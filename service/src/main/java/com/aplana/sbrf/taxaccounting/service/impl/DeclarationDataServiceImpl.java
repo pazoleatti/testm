@@ -261,25 +261,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
-        try{
-            log.info(String.format("Скриптовые проверки для декларации %s", id));
-            lockStateLogger.updateState("Скриптовые проверки");
-            declarationDataScriptingService.executeScript(userInfo,
-                    declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
-            DeclarationData dd = declarationDataDao.get(id);
-            validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
-            // Проверяем ошибки при пересчете
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException(
-                        "Найдены ошибки при выполнении проверки декларации",
-                        logEntryService.save(logger.getEntries()));
-            } else {
-                checkSources(dd, logger);
-                logger.info("Проверка завершена, ошибок не обнаружено");
-            }
-        } catch (Exception e) {
-            logger.error(e);
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+        log.info(String.format("Скриптовые проверки для декларации %s", id));
+        lockStateLogger.updateState("Скриптовые проверки");
+        declarationDataScriptingService.executeScript(userInfo,
+                declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
+        DeclarationData dd = declarationDataDao.get(id);
+        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
+        // Проверяем ошибки при пересчете
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Найдены ошибки при выполнении проверки декларации",
+                    logEntryService.save(logger.getEntries()));
+        } else {
+            checkSources(dd, logger);
+            logger.info("Проверка завершена, ошибок не обнаружено");
         }
     }
 
@@ -501,18 +496,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение Jasper в БД");
                 reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
-            } catch (ServiceException e) {
-                logger.error(e.getLocalizedMessage());
-                if (e instanceof ServiceLoggerException)
-                    throw new ServiceLoggerException("", logEntryService.update(logger.getEntries(), ((ServiceLoggerException) e).getUuid()));
-                else
-                    throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             }
         } else {
-            logger.error("Декларация не сформирована");
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            throw new ServiceException("Декларация не сформирована");
         }
     }
 
@@ -524,8 +512,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             stateLogger.updateState("Сохранение XLSX в БД");
             reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xlsxData), ""), ReportType.EXCEL_DEC);
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            log.error(e.getMessage(), e);
+            throw new ServiceException(e.getMessage());
         }
     }
 
@@ -574,6 +562,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             saxParser.parse(xmlFile, handler);
             String decName = handler.getValues().get(TAG_FILE);
             Date decDate = getFormattedDate(handler.getValues().get(TAG_DOCUMENT));
+            if (decDate == null)
+                decDate = docDate;
 
             //Переименоввываем
             File renameToFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "xml"));
@@ -737,6 +727,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private static Date getFormattedDate(String stringToDate) {
+        if (stringToDate == null)
+            return null;
         // Преобразуем строку вида "dd.mm.yyyy" в Date
         try {
             return formatter.parse(stringToDate);
