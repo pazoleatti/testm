@@ -66,11 +66,11 @@ public enum FormDataEvent implements Serializable {
 
     SEND_EMAIL(650, "Отправка email"),
 
-    TEMPLATE_CREATED(701, "Версия создана"),
-    TEMPLATE_MODIFIED(702, "Версия изменена"),
-    TEMPLATE_ACTIVATED(703, "Версия введена в действие"),
-    TEMPLATE_DEACTIVATED(704, "Версия выведена из действия"),
-    TEMPLATE_DELETED(705, "Версия удалена"),
+    TEMPLATE_CREATED(701, "Версия макета создана"),
+    TEMPLATE_MODIFIED(702, "Версия макета изменена"),
+    TEMPLATE_ACTIVATED(703, "Версия макета введена в действие"),
+    TEMPLATE_DEACTIVATED(704, "Версия макета выведена из действия"),
+    TEMPLATE_DELETED(705, "Версия макета удалена"),
 
     GAR_UPLOAD_CONTRACTS(810, "Гарантии: Загрузка данных о договорах обеспечения"),
     GAR_UPLOAD_CUSTOMER_DATA(811, "Гарантии: Загрузка данных о клиентах"),

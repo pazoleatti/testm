@@ -163,6 +163,7 @@ void consolidation() {
 
     // «Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)»
     def sourceFormType03 = 10070
+    def sourceFormType03Alt = 419
     // «Сведения о уплаченных суммах налога по операциям с ГЦБ»
     def sourceFormTypeGCB = 420
     // «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
@@ -177,6 +178,7 @@ void consolidation() {
             def newDataRows = []
             switch (it.formTypeId) {
                 case sourceFormType03:
+                case sourceFormType03Alt:
                     newDataRows = formNewRows03(sourceDataRows)
                     break
                 case sourceFormTypeGCB:

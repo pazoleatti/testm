@@ -44,9 +44,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private final PopupPanel widget;
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
-    public static final String TITLE_FORM = "Налоговые формы источники / приемники";
+    public static final String TITLE_FORM = "Формы источники/приемники";
     public static final String TITLE_DEC = "Декларации приемники";
-    public static final String TITLE_FORM_DEAL = "Формы источники / приемники";
     public static final String TITLE_DEC_DEAL = "Уведомления приемники";
 
     @UiField
@@ -315,14 +314,13 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         boolean isTaxTypeDeal = TaxType.DEAL.equals(getUiHandlers().getTaxType());
         formDecAnchor.setText(isForm ?
                 (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+                (isTaxTypeDeal ? TITLE_FORM : TITLE_FORM));
 
         formDecLabel.setText(!isForm ?
                 (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+                (isTaxTypeDeal ? TITLE_FORM : TITLE_FORM));
 
         source.setVisible(isForm);
-        destination.setVisible(isForm);
     }
 
     @Override
@@ -342,8 +340,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             boolean src = source.getValue();
             boolean dst = destination.getValue();
             boolean uncr = uncreated.getValue();
-            if (!isForm)
-                dst = true;
 
             for (FormToFormRelation formToFormRelation : tableData) {
                 boolean fSrc = formToFormRelation.isSource();

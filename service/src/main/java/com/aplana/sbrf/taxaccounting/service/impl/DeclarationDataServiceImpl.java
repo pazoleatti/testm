@@ -260,11 +260,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void check(Logger logger, long id, TAUserInfo userInfo) {
+    public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
+        log.info(String.format("Скриптовые проверки для декларации %s", id));
+        lockStateLogger.updateState("Скриптовые проверки");
         declarationDataScriptingService.executeScript(userInfo,
                 declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
         DeclarationData dd = declarationDataDao.get(id);
-        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK);
+        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
@@ -333,7 +335,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Map<String, Object> exchangeParams = new HashMap<String, Object>();
                     declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, new LockStateLogger() {
+                        @Override
+                        public void updateState(String state) {
+                            //ToDo передавать из асинхронной задачи, когда будет переделана проверка и принятие на асинки
+                        }
+                    });
                     declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
                     declarationData.setAccepted(true);
@@ -489,18 +496,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение Jasper в БД");
                 reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
-            } catch (ServiceException e) {
-                logger.error(e.getLocalizedMessage());
-                if (e instanceof ServiceLoggerException)
-                    throw new ServiceLoggerException("", logEntryService.update(logger.getEntries(), ((ServiceLoggerException) e).getUuid()));
-                else
-                    throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             }
         } else {
-            logger.error("Декларация не сформирована");
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            throw new ServiceException("Декларация не сформирована");
         }
     }
 
@@ -512,8 +512,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             stateLogger.updateState("Сохранение XLSX в БД");
             reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xlsxData), ""), ReportType.EXCEL_DEC);
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            log.error(e.getMessage(), e);
+            throw new ServiceException(e.getMessage());
         }
     }
 
@@ -562,6 +562,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             saxParser.parse(xmlFile, handler);
             String decName = handler.getValues().get(TAG_FILE);
             Date decDate = getFormattedDate(handler.getValues().get(TAG_DOCUMENT));
+            if (decDate == null)
+                decDate = docDate;
 
             //Переименоввываем
             File renameToFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "xml"));
@@ -617,7 +619,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                     FormDataEvent operation) {
+                                     FormDataEvent operation, LockStateLogger lockStateLogger) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid == null) {
             TaxType taxType = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
@@ -626,12 +628,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
             throw new ServiceException(msg);
         }
-        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, new LockStateLogger() {
-            @Override
-            public void updateState(String state) {
-                //TODO передавать из асинхронной задачи, когда будет переделана проверка и принятие на асинки
-            }
-        });
+        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, lockStateLogger);
     }
 
     /**
@@ -651,13 +648,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 log.info(String.format("Валидация декларации %s", declarationData.getId()));
                 stateLogger.updateState("Валидация");
                 if (!validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile) && logger.containsLevel(LogLevel.ERROR)){
-                    throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                    throw new ServiceException();
                 }
             } catch (Exception e) {
                 log.info(String.format("Сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение логов об ошибках валидации");
                 log.error(VALIDATION_ERR_MSG, e);
-                logger.error(e);                
+                if (!(e instanceof ServiceException))
+                    logger.error(e);
                 String uuid = logEntryService.save(logger.getEntries());
                 throw new ServiceLoggerException(VALIDATION_ERR_MSG, uuid);
             } finally {
@@ -729,6 +727,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private static Date getFormattedDate(String stringToDate) {
+        if (stringToDate == null)
+            return null;
         // Преобразуем строку вида "dd.mm.yyyy" в Date
         try {
             return formatter.parse(stringToDate);
@@ -787,13 +787,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String generateAsyncTaskKey(long declarationDataId, ReportType reportType) {
+        if (reportType == null) {
+            return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId;
+        }
         return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + reportType.getName();
     }
 
     @Override
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
-        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(),
+        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId(),
                 getDeclarationFullName(declarationDataId, null),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         checkLock(lockData, userInfo.getUser());
@@ -803,7 +806,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void unlock(final long declarationDataId, final TAUserInfo userInfo) {
-        lockDataService.unlock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId());
+        lockDataService.unlock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId());
     }
 
     @Override
@@ -825,9 +828,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void deleteReport(long declarationDataId, boolean isLock) {
         if (isLock) {
-            ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.EXCEL_DEC};
+            ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC};
             for (ReportType reportType : reportTypes) {
-                lockDataService.unlock(generateAsyncTaskKey(declarationDataId, reportType), 0, true);
+                LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
+                if (lock != null)
+                    lockDataService.interruptTask(lock, 0, true);
             }
         }
         reportService.deleteDec(declarationDataId);
@@ -853,27 +858,59 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String getDeclarationFullName(long declarationId, String reportType) {
+    public String getDeclarationFullName(long declarationId, ReportType reportType) {
         DeclarationData declaration = declarationDataDao.get(declarationId);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        return reportType != null ? String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
-                reportType,
-                declarationTemplate.getType().getName(),
-                department.getName(),
-                reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getCorrectionDate() != null
-                        ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                        : "")
-                :
-                String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
-                declarationTemplate.getType().getName(),
-                department.getName(),
-                reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getCorrectionDate() != null
-                        ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                        : "");
+        if (reportType == null)
+            return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
+                    declarationTemplate.getType().getName(),
+                    department.getName(),
+                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriod.getCorrectionDate() != null
+                            ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            : "");
+
+        switch (reportType) {
+            case EXCEL_DEC:
+            case PDF_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
+                        reportType.getName(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+            case XML_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_CALCULATE.getText(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+            case CHECK_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_CHECK.getText(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+            default:
+                return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
+                        declarationTemplate.getType().getName(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+        }
     }
 
     @Override

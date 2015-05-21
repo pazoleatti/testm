@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
     @Override
     protected String flush() throws IOException {
         File file = File.createTempFile(FILE_NAME, ".csv");
-        CSVWriter csvWriter = new CSVWriter(new FileWriter(file), ';');
+        CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new FileWriter(file)), ';');
 
         List<String> headersNames = new ArrayList<String>();
         for (Column column : data.getFormColumns()) {

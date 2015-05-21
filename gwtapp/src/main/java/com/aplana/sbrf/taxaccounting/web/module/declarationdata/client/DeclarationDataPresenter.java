@@ -48,16 +48,6 @@ public class DeclarationDataPresenter
 	@NameToken(DeclarationDataTokens.declarationData)
     public interface MyProxy extends ProxyPlace<DeclarationDataPresenter>, Place {}
 
-    public static final String DECLARATION_TASK_NAME_PDF = "Формирование формы предварительного просмотра декларации";
-    public static final String DECLARATION_TASK_NAME_PDF_D = "Формирование формы предварительного просмотра уведомления";
-    public static final String DECLARATION_TASK_NAME_EXCEL = "Формирование печатного представления декларации";
-    public static final String DECLARATION_TASK_NAME_EXCEL_D = "Формирование печатного представления уведомления";
-    public static final String DECLARATION_TASK_NAME_XML = "Расчет декларации";
-    public static final String DECLARATION_TASK_NAME_XML_D = "Расчет декларация";
-
-    public static final String DECLARATION_TYPE_MSG = "декларации";
-    public static final String DECLARATION_TYPE_MSG_D = "уведомления";
-
     public static final String DECLARATION_UPDATE_MSG = "Область предварительного просмотра. Расчет декларации выполнен.";
     public static final String DECLARATION_UPDATE_MSG_D = "Область предварительного просмотра. Расчет уведомления выполнен.";
 
@@ -276,13 +266,14 @@ public class DeclarationDataPresenter
 	}
 
 	@Override
-	public void onRecalculateClicked(Date docDate) {
+	public void onRecalculateClicked(final Date docDate, final boolean force) {
 		LogCleanEvent.fire(this);
         getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
 		action.setDeclarationId(declarationId);
 		action.setDocDate(docDate);
         action.setTaxType(taxType);
+        action.setForce(force);
 		dispatcher
 				.execute(
 						action,
@@ -292,6 +283,14 @@ public class DeclarationDataPresenter
 									public void onSuccess(
 											RecalculateDeclarationDataResult result) {
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                                        if (RecalculateDeclarationDataResult.StatusRecalculateDeclaration.LOCKED.equals(result.getStatus()) && force == false) {
+                                            Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.XML_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                                                @Override
+                                                public void yes() {
+                                                    onRecalculateClicked(docDate, true);
+                                                }
+                                            });
+                                        }
                                         onTimerReport(ReportType.XML_DEC, false);
 									}
 
@@ -373,15 +372,28 @@ public class DeclarationDataPresenter
 	}
 
 	@Override
-	public void check() {
+	public void check(final boolean force) {
 		LogCleanEvent.fire(this);
 		CheckDeclarationDataAction checkAction = new CheckDeclarationDataAction();
 		checkAction.setDeclarationId(declarationId);
+        checkAction.setTaxType(taxType);
+        checkAction.setForce(force);
 		dispatcher.execute(checkAction, CallbackUtils
 				.defaultCallback(new AbstractCallback<CheckDeclarationDataResult>() {
 					@Override
 					public void onSuccess(CheckDeclarationDataResult result) {
+                        LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
+                        if (CheckDeclarationDataResult.StatusCheckDeclaration.NOT_EXIST_XML.equals(result.getStatus())) {
+                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
+                        } else if (CheckDeclarationDataResult.StatusCheckDeclaration.LOCKED.equals(result.getStatus()) && force == false) {
+                            Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    check(true);
+                                }
+                            });
+                        }
 					}
 				}, this));
 	}
@@ -423,7 +435,7 @@ public class DeclarationDataPresenter
     }
 
     @Override
-    public void viewReport(final Boolean force, final ReportType reportType) {
+    public void viewReport(final boolean force, final ReportType reportType) {
         CreateReportAction action = new CreateReportAction();
         action.setDeclarationDataId(declarationId);
         action.setForce(force);

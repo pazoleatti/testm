@@ -54,7 +54,7 @@ public class CreateNewTypeHandler extends AbstractActionHandler<CreateNewTypeAct
         if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceLoggerException("Ошибки при валидации.", logEntryService.save(logger.getEntries()));
         }
-        int formTemplateId = mainOperatingService.createNewType(formTemplate, action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
+        int formTemplateId = mainOperatingService.createNewType(formTemplate, action.getVersionEndDate(), logger, securityService.currentUserInfo());
         result.setFormTemplateId(formTemplateId);
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));

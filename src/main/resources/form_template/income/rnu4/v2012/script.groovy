@@ -450,7 +450,10 @@ void importTransportData() {
                 }
                 break
             }
-            newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
+            if (newRow) {
+                newRows.add(newRow)
+            }
         }
     } finally {
         reader.close()
@@ -486,19 +489,6 @@ void importTransportData() {
     if (!logger.containsLevel(LogLevel.ERROR)) {
         formDataService.getDataRowHelper(formData).save(newRows)
     }
-}
-
-/** Добавляет строку в текущий буфер строк. */
-boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    if (rowCells == null) {
-        return true
-    }
-    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
-    if (newRow == null) {
-        return false
-    }
-    rows.add(newRow)
-    return true
 }
 
 /**

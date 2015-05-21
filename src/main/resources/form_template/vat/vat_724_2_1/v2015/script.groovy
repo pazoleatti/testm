@@ -193,93 +193,6 @@ def roundValue(def value, int precision = 2) {
     }
 }
 
-// Получение импортируемых данных
-void importData() {
-    def tmpRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): getColumnName(tmpRow, 'rowNum'),
-            (xml.row[0].cell[1]): getColumnName(tmpRow, 'code'),
-            (xml.row[0].cell[2]): getColumnName(tmpRow, 'name'),
-            (xml.row[0].cell[3]): getColumnName(tmpRow, 'realizeCost'),
-            (xml.row[0].cell[4]): getColumnName(tmpRow, 'obtainCost')
-    ]
-
-    (1..5).each { index ->
-        headerMapping.put((xml.row[1].cell[index - 1]), index.toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-    def indexRow = 0
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount - 1) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // Пропуск итоговых строк
-        if (row.cell[2].text() == 'Итого') {
-            break
-        }
-
-        def dataRow = dataRows.get(indexRow)
-        dataRow.setImportIndex(xlsIndexRow)
-        indexRow++
-
-        def xmlIndexCol = -1
-
-        def values = [:]
-        xmlIndexCol++
-        values.rowNum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        values.code = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-        values.name = row.cell[xmlIndexCol].text()
-
-        // Проверить фиксированные значения (графа 1..3)
-        ['rowNum', 'code', 'name'].each { alias ->
-            def value = StringUtils.cleanString(values[alias]?.toString())
-            def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
-            checkFixedValue(dataRow, value, valueExpected, indexRow, alias, logger, true)
-        }
-
-        // графа 4
-        xmlIndexCol++
-        dataRow.realizeCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // графа 5
-        xmlIndexCol++
-        dataRow.obtainCost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-    }
-    showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        dataRowHelper.save(dataRows)
-    }
-}
-
 void importTransportData() {
     checkBeforeGetXml(ImportInputStream, UploadFileName)
     if (!UploadFileName.endsWith(".rnu")) {
@@ -434,4 +347,134 @@ String pure(String cell) {
 
 boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 5
+    int HEADER_ROW_COUNT = 2
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 2
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP] == 'Итого') {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // простая строка
+        rowIndex++
+        if (rowIndex > dataRows.size()) {
+            break
+        }
+        // найти нужную строку нф
+        def dataRow = dataRows.get(rowIndex - 1)
+        // заполнить строку нф значениями из эксель
+        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(dataRows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow временная вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    // для проверки шапки
+    def headerMapping = [
+            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
+            (headerRows[0][1]): getColumnName(tmpRow, 'code'),
+            (headerRows[0][2]): getColumnName(tmpRow, 'name'),
+            (headerRows[0][3]): getColumnName(tmpRow, 'realizeCost'),
+            (headerRows[0][4]): getColumnName(tmpRow, 'obtainCost')
+    ]
+    (1..5).each { index ->
+        headerMapping.put((headerRows[1][index - 1]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Заполняет заданную строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+    def colIndex = -1
+
+    def tmpValues = [:]
+    colIndex++
+    tmpValues.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+    tmpValues.code = values[colIndex]
+    colIndex++
+    tmpValues.name = values[colIndex]
+
+    // Проверить фиксированные значения (графа 1..3)
+    ['rowNum', 'code', 'name'].each { alias ->
+        def value = StringUtils.cleanString(tmpValues[alias]?.toString())
+        def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
+        checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
+    }
+
+    // графа 4
+    colIndex++
+    dataRow.realizeCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 5
+    colIndex++
+    dataRow.obtainCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 }

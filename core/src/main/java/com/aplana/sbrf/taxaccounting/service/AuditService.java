@@ -22,20 +22,37 @@ public interface AuditService {
 	PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter logSystemFilter);
 
 	/**
-	 * Добавить информацию об логировании
+	 * Добавить информацию об логировании.
+     * Устаревший по причине того, что параметр formTypeId является излишним
      * @param event событие {@link FormDataEvent} (обязательное)
      * @param userInfo информация о пользователе, который совершает событие (обязательное)
      * @param departmentId подразделение НФ/декларации (необязательное)
      * @param reportPeriodId отчетный период (необязательное)
-     * @param declarationType наименование типа декларации (необязательное)
-     * @param formType наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
+     * @param declarationTypeName наименование типа декларации (необязательное)
+     * @param formTypeName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
      * @param formKindId вид НФ (необязательное)
      * @param note пояснение (необязательное)
      * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
      * @param formTypeId идентификатор вид налоговой формы (в бд протсо как число, не ссылка на FORM_TYPE, заполнение согласно http://conf.aplana.com/pages/viewpage.action?pageId=9580637)
 	 */
+    @Deprecated
 	void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
-             String declarationType, String formType, Integer formKindId, String note, String blobDataId, Integer formTypeId);
+             String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId, Integer formTypeId);
+
+    /**
+     * Добавить информацию об логировании
+     * @param event событие {@link FormDataEvent} (обязательное)
+     * @param userInfo информация о пользователе, который совершает событие (обязательное)
+     * @param departmentId подразделение НФ/декларации (необязательное)
+     * @param reportPeriodId отчетный период (необязательное)
+     * @param declarationTypeName наименование типа декларации (необязательное)
+     * @param formTypeName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
+     * @param formKindId вид НФ (необязательное)
+     * @param note пояснение (необязательное)
+     * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
+     */
+    void add(FormDataEvent event, TAUserInfo userInfo, Integer departmentId, Integer reportPeriodId,
+             String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId);
 
     /**
      * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.

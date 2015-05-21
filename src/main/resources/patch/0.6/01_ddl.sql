@@ -117,5 +117,61 @@ comment on column lock_data.queue is 'Очередь, в которой нахо
 --Оптимизация производительности
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 
+---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-11292: Каскадное удаление blob для таблиц отчетов
+alter table log_system_report 	drop constraint 	log_system_report_fk_blob_data;
+alter table log_system_report 	add constraint 		log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
+
+alter table declaration_report	drop constraint decl_report_fk_blob_data;
+alter table declaration_report 	add constraint decl_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
+
+
+---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-11339: Таблица для конфигов асинхронных задач
+create table configuration_async
+(
+id number(9) not null,
+type varchar2(400) not null,
+limit_kind varchar2(400) not null,
+limit number(9),
+short_limit number(9)
+);
+
+alter table configuration_async add constraint configuration_async_pk primary key(id);
+
+comment on table configuration_async is 'Настройки асинхронных задач';
+comment on column configuration_async.id is 'Идентификатор записи';
+comment on column configuration_async.type is 'Тип задания';
+comment on column configuration_async.limit_kind is 'Вид ограничения';
+comment on column configuration_async.limit is 'Ограничение на выполнение задания';
+comment on column configuration_async.short_limit is 'Ограничение на выполнение задания в очереди быстрых заданий';
+
+insert all
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (1, 'Формирование XLSM-файла налоговой формы', 'Количество ячеек таблицы формы = Количество строк * Количество граф', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (2, 'Формирование CSV-файла налоговой формы', 'Количество ячеек таблицы формы = Количество строк * Количество граф', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (3, 'Загрузка ТФ налоговой формы с локального компьютера', 'Размер ТФ (Мбайт)', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (4, 'Загрузка ТФ налоговой формы из каталога загрузки', 'Размер ТФ (Мбайт)', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (5, 'Загрузка XLS-файла с формы экземпляра налоговой формы', 'Размер xls/xlsm/xlsx-файла (Мбайт)', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (6, 'Загрузка ТФ с формы экземпляра налоговой формы (РНУ 25, 26, 27, 31)', 'Размер ТФ (Мбайт)', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (7, 'Расчет налоговой формы', 'Количество ячеек таблицы формы = Количество строк * Количество граф', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (8, 'Проверка налоговой формы', 'Количество ячеек таблицы формы = Количество строк * Количество граф', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (9, 'Консолидация налоговой формы', 'Сумма количества ячеек таблицы формы по всем формам источникам. Количество ячеек таблицы формы источника = Количество строк * Количество граф', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (10, 'Формирование XLSX-файла декларации/уведомления', 'Размер XML-файла декларации/уведомления (Мбайт)', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (11, 'Расчет декларации/уведомления (формирование XML-файла)', 'Размер XML-файла декларации/уведомления (Мбайт)', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (12, 'Формирование PDF-файла декларации/уведомления', 'Размер XML-файла декларации/уведомления (Мбайт)', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (13, 'Проверка декларации/уведомления', 'Размер XML-файла декларации/уведомления (Мбайт)', 0, 0)
+      into configuration_async (id, type, limit_kind, limit, short_limit) values (14, 'Формирование отчетности для МСФО', 'Общий размер файлов форм МСФО (налоговая форма - XLSM, декларация/уведомление - XLSX', 0, 0)
+select * from dual;  
+
+--
+
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name) VALUES (401, 'Настройки асинхронных задач', 1, 0, 0, null, 'CONFIGURATION_ASYNC');
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4100,401,'№','ID', 2,0,null,null,1,0,10,1,1,1,null,1,9);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4101,401,'Тип задания','TYPE',1,1,null,null,1,null,30,0,0,null,null,1,200);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4102,401,'Вид ограничения','LIMIT_KIND',1,2,null,null,1,null,30,0,0,null,null,0,200);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4103,401,'Ограничение на выполнение задания','LIMIT',2,3,null,null,1,0,10,0,0,null,null,1,9);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4104,401,'Ограничение на выполнение задания в очереди быстрых заданий','SHORT_LIMIT',2,4,null,null,1,0,10,0,0,null,null,1,9);
+
+---------------------------------------------------------------------------------------------
 commit;
 end;

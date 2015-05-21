@@ -257,7 +257,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             Dialog.warningMessage("Введите дату.");
         } else {
             if (getUiHandlers() != null) {
-                getUiHandlers().onRecalculateClicked(dateBox.getValue());
+                getUiHandlers().onRecalculateClicked(dateBox.getValue(), false);
             }
         }
     }
@@ -279,7 +279,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiHandler("checkButton")
 	public void onCheck(ClickEvent event){
-		getUiHandlers().check();
+		getUiHandlers().check(false);
 	}
 
     @UiHandler("viewPdf")

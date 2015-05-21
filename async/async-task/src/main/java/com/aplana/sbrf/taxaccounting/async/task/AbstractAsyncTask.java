@@ -77,6 +77,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     public void execute(final Map<String, Object> params) {
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
+        final Logger logger = new Logger();
         log.info(String.format("Запущена асинхронная задача с ключом %s и датой начала %s (%s)", lock, sdf.format(lockDate), lockDate.getTime()));
         lockService.updateState(lock, lockDate, LockData.State.STARTED.getText());
         transactionHelper.executeInNewTransaction(new TransactionLogic() {
@@ -86,7 +87,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     if (lockService.isLockExists(lock, lockDate)) {
                         log.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
                         lockService.updateState(lock, lockDate, getBusinessLogicTitle());
-                        final Logger logger = new Logger();
                         //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                         executeBusinessLogic(params, logger);
                         if (!lockService.isLockExists(lock, lockDate)) {
@@ -128,10 +128,13 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 public void execute() {
                                     log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SENDING_ERROR_MSGS.getText());
-                                    if (e instanceof ServiceLoggerException) {
-                                        sendNotifications(lock, getErrorMsg(params) + (e.getLocalizedMessage().isEmpty()?"":(". Ошибка: " + e.getMessage())), ((ServiceLoggerException) e).getUuid());
+                                    if (e instanceof ServiceLoggerException && ((ServiceLoggerException) e).getUuid() != null) {
+                                        Logger logger1 = new Logger();
+                                        logger1.error(e);
+                                        sendNotifications(lock, getErrorMsg(params), logEntryService.update(logger1.getEntries(), ((ServiceLoggerException) e).getUuid()));
                                     } else {
-                                        sendNotifications(lock, getErrorMsg(params) + (e.getLocalizedMessage().isEmpty()?"":(". Ошибка: " + e.getMessage())), null);
+                                        logger.error(e);
+                                        sendNotifications(lock, getErrorMsg(params), logEntryService.save(logger.getEntries()));
                                     }
                                 }
 

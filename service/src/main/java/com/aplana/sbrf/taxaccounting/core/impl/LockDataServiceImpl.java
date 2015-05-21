@@ -363,16 +363,17 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
     @Override
-    public void interruptTask(final LockData lockData, final int userId) {
+    public void interruptTask(final LockData lockData, final int userId, final boolean force) {
         tx.executeInNewTransaction(new TransactionLogic() {
                @Override
                public void execute() {
                    try {
                        List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
                        asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
-                       unlock(lockData.getKey(), userId);
+                       unlock(lockData.getKey(), userId, force);
                        String msg = String.format(ReportType.CANCEL_TASK, lockData.getDescription());
                        List<Notification> notifications = new ArrayList<Notification>();
+                       //Создаем оповещение для каждого пользователя из списка
                        for (Integer waitingUser : waitingUsers) {
                            Notification notification = new Notification();
                            notification.setUserId(waitingUser);
@@ -380,8 +381,6 @@ public class LockDataServiceImpl implements LockDataService {
                            notification.setText(msg);
                            notifications.add(notification);
                        }
-                       //Создаем оповещение для каждого пользователя из списка
-
                        notificationService.saveList(notifications);
                    } catch (Exception e) {
                        throw new ServiceException("Не удалось прервать задачу", e);

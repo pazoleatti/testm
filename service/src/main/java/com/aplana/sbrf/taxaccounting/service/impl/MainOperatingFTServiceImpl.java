@@ -48,9 +48,11 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     private ColumnDao columnDao;
     @Autowired
     private FormDataService formDataService;
+    @Autowired
+    private AuditService auditService;
 
     @Override
-    public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUser user) {
+    public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         FormTemplate formTemplate = (FormTemplate)template;
         FormTemplate oldFormTemplate = formTemplateService.get(formTemplate.getId());
         Date dbVersionBeginDate = oldFormTemplate.getVersion();
@@ -99,7 +101,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         cleanData(oldFormTemplate, formTemplate);
         int id = formTemplateService.save(formTemplate);
 
-        logging(id, FormDataEvent.TEMPLATE_MODIFIED, user);
+        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, null, null, null, formTemplate.getType().getName(), null, null, null);
+        //logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
         return id;
     }
 
@@ -140,7 +143,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     }
 
     @Override
-    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUser user) {
+    public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         FormTemplate formTemplate = (FormTemplate)template;
         FormType type = formTemplate.getType();
         type.setStatus(VersionedObjectStatus.NORMAL);
@@ -153,24 +156,26 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
         int id = formTemplateService.save(formTemplate);
 
-        logging(id, FormDataEvent.TEMPLATE_CREATED, user);
+        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, null, formTemplate.getType().getName(), null, null, null);
+        //logging(id, FormDataEvent.TEMPLATE_CREATED, user);
         return id;
     }
 
     @Override
-    public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUser user) {
+    public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         FormTemplate formTemplate = (FormTemplate)template;
         versionOperatingService.isIntersectionVersion(0, formTemplate.getType().getId(), VersionedObjectStatus.DRAFT,
                 formTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger, SAVE_MESSAGE);
         int id = formTemplateService.save(formTemplate);
 
-        logging(id, FormDataEvent.TEMPLATE_CREATED, user);
+        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, null, formTemplate.getType().getName(), null, null, null);
+        //logging(id, FormDataEvent.TEMPLATE_CREATED, user);
         return id;
     }
 
     @Override
-    public void deleteTemplate(int typeId, Logger logger, TAUser user) {
+    public void deleteTemplate(int typeId, Logger logger, TAUserInfo user) {
         List<FormTemplate> formTemplates = formTemplateService.getFormTemplateVersionsByStatus(typeId,
                 VersionedObjectStatus.NORMAL, VersionedObjectStatus.DRAFT);
         //Проверка использования
@@ -189,11 +194,12 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                     String.format(HAVE_DFT_MESSAGE,
                             departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
+        auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, null, formTypeService.get(typeId).getName(), null, null, null);
         formTypeService.delete(typeId);
     }
 
     @Override
-    public boolean deleteVersionTemplate(int templateId, Logger logger, TAUser user) {
+    public boolean deleteVersionTemplate(int templateId, Logger logger, TAUserInfo user) {
         boolean isDeleteAll = false;//переменная определяющая, удалена ли все версии макета
         FormTemplate template = formTemplateService.get(templateId);
         Date dateEndActualize = formTemplateService.getFTEndDate(templateId);
@@ -223,12 +229,13 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;
         }
-        logging(templateId, FormDataEvent.TEMPLATE_DELETED, user);
+        //logging(templateId, FormDataEvent.TEMPLATE_DELETED, user);
+        auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, null, template.getType().getName(), null, null, null);
         return isDeleteAll;
     }
 
     @Override
-    public boolean setStatusTemplate(int templateId, Logger logger, TAUser user, boolean force) {
+    public boolean setStatusTemplate(int templateId, Logger logger, TAUserInfo user, boolean force) {
         FormTemplate template = formTemplateService.get(templateId);
 
         if (template.getStatus() == VersionedObjectStatus.NORMAL){
@@ -236,10 +243,10 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                     template.getVersion(), null, logger);
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
-            logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user);
+            //logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user);
         } else {
             formTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
-            logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user);
+            //logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user);
         }
         return true;
     }

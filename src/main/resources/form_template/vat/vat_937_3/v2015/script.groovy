@@ -3,6 +3,7 @@ package form_template.vat.vat_937_3.v2015
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 
 import java.text.SimpleDateFormat
@@ -326,199 +327,6 @@ void logicCheck() {
             }
         }
     }
-}
-
-void importData() {
-    def tmpRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNumber'), null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 20, 3)
-
-    def headerMapping = [
-            (xml.row[0].cell[0])  : getColumnName(tmpRow, 'rowNumber'),
-            // вторая ячейка скрытая
-            (xml.row[0].cell[2])  : getColumnName(tmpRow, 'date'),
-            (xml.row[0].cell[3])  : getColumnName(tmpRow, 'opTypeCode'),
-            (xml.row[0].cell[4])  : getColumnName(tmpRow, 'invoiceNumDate'),
-            (xml.row[0].cell[5])  : getColumnName(tmpRow, 'invoiceCorrNumDate'),
-            (xml.row[0].cell[6])  : getColumnName(tmpRow, 'corrInvoiceNumDate'),
-            (xml.row[0].cell[7])  : getColumnName(tmpRow, 'corrInvCorrNumDate'),
-            (xml.row[0].cell[8])  : getColumnName(tmpRow, 'buyerName'),
-            (xml.row[0].cell[9])  : getColumnName(tmpRow, 'buyerInnKpp'),
-
-            (xml.row[0].cell[10]) : 'Сведения о посреднической деятельности, указываемые комиссионером (агентом), застройщиком или техническим заказчиком',
-            (xml.row[1].cell[10]) : 'наименование продавца (из графы 8 части 2)/ субкомиссионера (субагента)',
-            (xml.row[1].cell[11]) : 'ИНН/КПП продавца (из графы 9 части 2)/ субкомиссионера (субагента)',
-            (xml.row[1].cell[12]) : 'номер и дата счета-фактуры, полученного от продавца (из графы 4 части 2)/ код вида сделки',
-
-            (xml.row[0].cell[13]) : getColumnName(tmpRow, 'currNameCode'),
-            (xml.row[0].cell[14]) : getColumnName(tmpRow, 'cost'),
-            (xml.row[0].cell[15]) : getColumnName(tmpRow, 'vatSum'),
-
-            (xml.row[0].cell[16]) : 'Разница стоимости с учетом НДС по корректировочному счету-фактуре',
-            (xml.row[1].cell[16]) : 'уменьшение',
-            (xml.row[1].cell[17]) : 'увеличение',
-
-            (xml.row[0].cell[18]) : 'Разница НДС по корректировочному счету-фактуре',
-            (xml.row[1].cell[18]) : 'уменьшение',
-            (xml.row[1].cell[19]) : 'увеличение',
-
-            (xml.row[2].cell[0]) : '1',
-    ]
-    (2..19).each { index ->
-        headerMapping.put(xml.row[2].cell[index], index.toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-void addData(def xml, int headRowCount) {
-    // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def templateRows = formTemplate.rows
-
-    def firstRow = getDataRow(templateRows, 'part_1')
-    def lastRow = getDataRow(templateRows, 'part_2')
-
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def xmlIndexRow = -1
-    def int rowIndex = 1
-
-    def sectionIndex = null
-    def mapRows = [:]
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        /* Пропуск строк шапок */
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
-        def firstValue = row.cell[1].text()
-
-        if (firstValue != null && firstValue != '' && (firstValue == firstRow.fix || firstValue == lastRow.fix)) {
-            def isFirstSection = (firstValue == firstRow.fix)
-            sectionIndex = (isFirstSection ? firstRow : lastRow).getAlias()
-            mapRows.put(sectionIndex, [])
-            continue
-        } else if (firstValue == 'Всего') {
-            continue
-        }
-
-        def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-
-        // Графа 1
-        def xmlIndexCol = 0
-        newRow.rowNumber = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 2
-        xmlIndexCol = 2
-        newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 3
-        xmlIndexCol++
-        newRow.opTypeCode = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 4
-        xmlIndexCol++
-        newRow.invoiceNumDate = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 5
-        xmlIndexCol++
-        newRow.invoiceCorrNumDate = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 6
-        xmlIndexCol++
-        newRow.corrInvoiceNumDate = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 7
-        xmlIndexCol++
-        newRow.corrInvCorrNumDate = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 8
-        xmlIndexCol++
-        newRow.buyerName = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 9
-        xmlIndexCol++
-        newRow.buyerInnKpp = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 10
-        xmlIndexCol++
-        newRow.mediatorName = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 11
-        xmlIndexCol++
-        newRow.mediatorInnKpp = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 12
-        xmlIndexCol++
-        newRow.mediatorNumDate = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 13
-        xmlIndexCol++
-        newRow.currNameCode = row.cell[xmlIndexCol].text() ?: null
-
-        // Графа 14
-        xmlIndexCol++
-        newRow.cost = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 15
-        xmlIndexCol++
-        newRow.vatSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 16
-        xmlIndexCol++
-        newRow.diffDec = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 17
-        xmlIndexCol++
-        newRow.diffInc = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 18
-        xmlIndexCol++
-        newRow.diffVatDec = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // Графа 19
-        xmlIndexCol++
-        newRow.diffVatInc = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        mapRows[sectionIndex].add(newRow)
-    }
-
-    def newRows = []
-    // заполнение строк + расчет итогов
-    for (def section : sections) {
-        def row1 = getDataRow(templateRows, "part_$section")
-        def row2 = getDataRow(templateRows, "total_$section")
-        def rows = mapRows["part_$section"]
-
-        newRows.add(row1)
-        newRows.addAll(rows)
-        newRows.add(row2)
-    }
-
-    showMessages(newRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
-    }
-
-    // вставляем строки в БД
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.save(newRows)
 }
 
 /** Получить новую строку с заданными стилями. */
@@ -929,7 +737,7 @@ void importTransportData() {
         def lastRow = getDataRow(templateRows, "total_$section")
 
         // посчитать итоги по разделам
-        def rows = mapRows[section]
+        def rows = (mapRows[section] ?: [])
         calcTotalSum(rows, lastRow, totalSumColumns)
 
         newRows.add(firstRow)
@@ -965,7 +773,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def newRow = getNewRow()
     if (rowCells.length != columnCount + 2) {
         rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
-        return null
+        return newRow
     }
 
     newRow.setIndex(rowIndex)
@@ -1005,4 +813,181 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
 String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 19
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def allValuesCount = allValues.size()
+    def mapRows = [:]
+    def sectionIndex = null
+
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    def firstRow = getDataRow(templateRows, 'part_1')
+    def lastRow = getDataRow(templateRows, 'part_2')
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+
+        // Пропуск итоговых строк
+        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
+        def firstValue = rowValues[INDEX_FOR_SKIP]
+        if (firstValue != null && firstValue != '' && (firstValue == firstRow.fix || firstValue == lastRow.fix)) {
+            def isFirstSection = (firstValue == firstRow.fix)
+            sectionIndex = (isFirstSection ? firstRow : lastRow).getAlias()
+            mapRows.put(sectionIndex, [])
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (firstValue == 'Всего') {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        mapRows[sectionIndex].add(newRow)
+
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    def newRows = []
+    // заполнение строк + расчет итогов
+    for (def section : sections) {
+        def row1 = getDataRow(templateRows, "part_$section")
+        def row2 = getDataRow(templateRows, "total_$section")
+        def rows = mapRows["part_$section"]
+
+        newRows.add(row1)
+        newRows.addAll(rows)
+        newRows.add(row2)
+    }
+
+    showMessages(newRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow временная вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0])  : getColumnName(tmpRow, 'rowNumber'),
+            // вторая ячейка скрытая
+            (headerRows[0][2])  : getColumnName(tmpRow, 'date'),
+            (headerRows[0][3])  : getColumnName(tmpRow, 'opTypeCode'),
+            (headerRows[0][4])  : getColumnName(tmpRow, 'invoiceNumDate'),
+            (headerRows[0][5])  : getColumnName(tmpRow, 'invoiceCorrNumDate'),
+            (headerRows[0][6])  : getColumnName(tmpRow, 'corrInvoiceNumDate'),
+            (headerRows[0][7])  : getColumnName(tmpRow, 'corrInvCorrNumDate'),
+            (headerRows[0][8])  : getColumnName(tmpRow, 'buyerName'),
+            (headerRows[0][9])  : getColumnName(tmpRow, 'buyerInnKpp'),
+
+            (headerRows[0][10]) : 'Сведения о посреднической деятельности, указываемые комиссионером (агентом), застройщиком или техническим заказчиком',
+            (headerRows[1][10]) : 'наименование продавца (из графы 8 части 2)/ субкомиссионера (субагента)',
+            (headerRows[1][11]) : 'ИНН/КПП продавца (из графы 9 части 2)/ субкомиссионера (субагента)',
+            (headerRows[1][12]) : 'номер и дата счета-фактуры, полученного от продавца (из графы 4 части 2)/ код вида сделки',
+
+            (headerRows[0][13]) : getColumnName(tmpRow, 'currNameCode'),
+            (headerRows[0][14]) : getColumnName(tmpRow, 'cost'),
+            (headerRows[0][15]) : getColumnName(tmpRow, 'vatSum'),
+
+            (headerRows[0][16]) : 'Разница стоимости с учетом НДС по корректировочному счету-фактуре',
+            (headerRows[1][16]) : 'уменьшение',
+            (headerRows[1][17]) : 'увеличение',
+
+            (headerRows[0][18]) : 'Разница НДС по корректировочному счету-фактуре',
+            (headerRows[1][18]) : 'уменьшение',
+            (headerRows[1][19]) : 'увеличение',
+
+            (headerRows[2][0]) : '1',
+    ]
+    (2..19).each { index ->
+        headerMapping.put(headerRows[2][index], index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 1
+    def colIndex = 0
+    newRow.rowNumber = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 2
+    colIndex = 2
+    newRow.date = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 3..13
+    ['opTypeCode', 'invoiceNumDate', 'invoiceCorrNumDate', 'corrInvoiceNumDate', 'corrInvCorrNumDate', 'buyerName',
+            'buyerInnKpp', 'mediatorName', 'mediatorInnKpp', 'mediatorNumDate', 'currNameCode'].each { alias ->
+        colIndex++
+        newRow[alias] = values[colIndex] ?: null
+    }
+
+    // графа 14..19
+    ['cost', 'vatSum', 'diffDec', 'diffInc', 'diffVatDec', 'diffVatInc'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
 }
