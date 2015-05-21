@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
@@ -111,7 +112,15 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public FormTemplate getFormTemplate(int formTypeId, int reportPeriodId) {
         int formTemplateId = formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
-        return formTemplateDao.get(formTemplateId);
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        if(formTemplate.getRows().isEmpty()){
+            formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
+        }
+        if (formTemplate.getHeaders().isEmpty()){
+            formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
+            FormDataUtils.setValueOwners(formTemplate.getHeaders());
+        }
+        return formTemplate;
     }
 
     @Override
