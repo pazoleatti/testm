@@ -1,16 +1,11 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.EmailService;
+import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.sun.mail.util.MailSSLSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,7 +15,6 @@ import org.springframework.stereotype.Service;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -32,20 +26,19 @@ public class EmailServiceImpl implements EmailService {
 	static final Log Log = LogFactory.getLog(EmailServiceImpl.class);
 
     @Autowired
-    private RefBookFactory refBookFactory;
+    private ConfigurationService configurationService;
 
     @Override
     public void send(List<String> destinations, String subject, String text) {
-        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
-        PagingResult<Map<String, RefBookValue>> params = provider.getRecords(new Date(), null, null, null);
+        List<Map<String, String>> params = configurationService.getEmailConfig();
         Properties props = new Properties();
         String login = null;
         String password = null;
         String host = null;
         String port = null;
-        for (Map<String, RefBookValue> param : params) {
-            String key = param.get("NAME").getStringValue();
-            String value = param.get("VALUE").getStringValue();
+        for (Map<String, String> param : params) {
+            String key = param.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE);
+            String value = param.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE);
             if (value != null && !value.isEmpty()) {
                 if (key.equals("mail.smtp.user")) {
                     login = value;
@@ -97,16 +90,15 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public boolean testAuth(Logger logger) {
         try {
-            RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
-            PagingResult<Map<String, RefBookValue>> params = provider.getRecords(new Date(), null, null, null);
+            List<Map<String, String>> params = configurationService.getEmailConfig();
             Properties props = new Properties();
             String login = null;
             String password = null;
             String host = null;
             String port = null;
-            for (Map<String, RefBookValue> param : params) {
-                String key = param.get("NAME").getStringValue();
-                String value = param.get("VALUE").getStringValue();
+            for (Map<String, String> param : params) {
+                String key = param.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE);
+                String value = param.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE);
                 if (value != null && !value.isEmpty()) {
                     if (key.equals("mail.smtp.user")) {
                         login = value;

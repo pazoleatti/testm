@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-
 import java.io.Serializable;
 import java.util.*;
 
@@ -14,21 +12,16 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, Map<Inte
     // Хранилище значений
     private Map<ConfigurationParam, Map<Integer, List<String>>> map = new HashMap<ConfigurationParam, Map<Integer, List<String>>>();
 
-    private List<Map<String, String>> emailParams;
-
     public static final String EMAIL_NAME_ATTRIBUTE = "NAME";
     public static final String EMAIL_VALUE_ATTRIBUTE = "VALUE";
     public static final String EMAIL_DESCRIPTION_ATTRIBUTE = "DESCRIPTION";
 
+    public static final String ASYNC_TYPE = "TYPE";
+    public static final String ASYNC_LIMIT_KIND = "LIMIT_KIND";
+    public static final String ASYNC_LIMIT = "LIMIT";
+    public static final String ASYNC_SHORT_LIMIT = "SHORT_LIMIT";
+
     private final static String SPLITTER = "\n";
-
-    public List<Map<String, String>> getEmailParams() {
-        return emailParams;
-    }
-
-    public void setEmailParams(List<Map<String, String>> emailParams) {
-        this.emailParams = emailParams;
-    }
 
     /**
      * Получение объединенных значений из списка

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.RefBookEmailConfigDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -29,9 +30,9 @@ public class RefBookEmailConfigDaoImpl  extends AbstractDao implements RefBookEm
             @Override
             public Map<String, RefBookValue> mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, rs.getString("NAME")));
-                map.put("VALUE", new RefBookValue(RefBookAttributeType.STRING, rs.getString("VALUE")));
-                map.put("DESCRIPTION", new RefBookValue(RefBookAttributeType.STRING, rs.getString("DESCRIPTION")));
+                map.put(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE)));
+                map.put(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE)));
+                map.put(ConfigurationParamModel.EMAIL_DESCRIPTION_ATTRIBUTE, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.EMAIL_DESCRIPTION_ATTRIBUTE)));
                 return map;
             }
         });
@@ -44,8 +45,8 @@ public class RefBookEmailConfigDaoImpl  extends AbstractDao implements RefBookEm
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Map<String, RefBookValue> record = records.get(i);
-                ps.setString(1, record.get("VALUE").getStringValue());
-                ps.setString(2, record.get("NAME").getStringValue());
+                ps.setString(1, record.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE).getStringValue());
+                ps.setString(2, record.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE).getStringValue());
             }
 
             @Override
