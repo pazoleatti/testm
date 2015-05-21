@@ -407,7 +407,7 @@ void importTransportData() {
             }
 
             def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
-            if (rowCells.length < 8) {
+            if (rowCells.length < 8 || newRow == null) {
                 continue
             }
             // определить раздел по техническому полю и добавить строку в нужный раздел
@@ -422,7 +422,7 @@ void importTransportData() {
         reader.close()
     }
 
-    def newRows = mapRows.values().sum { it }
+    def newRows = (mapRows.values().sum { it } ?: [])
     showMessages(newRows, logger)
     if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
         return
@@ -488,26 +488,6 @@ void importTransportData() {
     }
     formDataService.getDataRowHelper(formData).save(rows)
     updateIndexes(rows)
-}
-
-/** Добавляет строку в текущий буфер строк. */
-boolean addRow(def mapRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    if (rowCells == null) {
-        return true
-    }
-    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
-    if (newRow == null) {
-        return false
-    }
-
-    // определить раздел по техническому полю и добавить строку в нужный раздел
-    sectionIndex = pure(rowCells[8])
-    if (mapRows[sectionIndex] == null) {
-        mapRows[sectionIndex] = []
-    }
-    mapRows[sectionIndex].add(newRow)
-
-    return true
 }
 
 /**
@@ -640,7 +620,7 @@ void importData() {
         rowValues.clear()
     }
 
-    def newRows = mapRows.values().sum { it }
+    def newRows = (mapRows.values().sum { it } ?: [])
     showMessages(newRows, logger)
     if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
         return
