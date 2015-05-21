@@ -737,7 +737,7 @@ void importTransportData() {
         def lastRow = getDataRow(templateRows, "total_$section")
 
         // посчитать итоги по разделам
-        def rows = mapRows[section]
+        def rows = (mapRows[section] ?: [])
         calcTotalSum(rows, lastRow, totalSumColumns)
 
         newRows.add(firstRow)
@@ -773,7 +773,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def newRow = getNewRow()
     if (rowCells.length != columnCount + 2) {
         rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
-        return null
+        return newRow
     }
 
     newRow.setIndex(rowIndex)
