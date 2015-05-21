@@ -25,6 +25,7 @@ public interface ConfigurationUiHandlers extends UiHandlers{
     /**
      * Проверка достуности путей, указанных в выделенной строке
      */
-    void onCheckAccess(ConfigurationParamGroup group, DataRow<Cell> selRow);
+    void onCheckAccess(ConfigurationParamGroup group, DataRow<Cell> selRow, boolean needSaveAfter);
+
 
 }

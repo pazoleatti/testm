@@ -26,10 +26,10 @@ public class EmailServiceImplTest {
     private final static ConfigurationParamModel model = new ConfigurationParamModel();
 
     static {
-        model.setFullStringValue(ConfigurationParam.EMAIL_LOGIN, 0, "email_login_test");
+        /*model.setFullStringValue(ConfigurationParam.EMAIL_LOGIN, 0, "email_login_test");
         model.setFullStringValue(ConfigurationParam.EMAIL_PASSWORD, 0, "email_password_test");
         model.setFullStringValue(ConfigurationParam.EMAIL_SERVER, 0, "localhost");
-        model.setFullStringValue(ConfigurationParam.EMAIL_PORT, 0, "25");
+        model.setFullStringValue(ConfigurationParam.EMAIL_PORT, 0, "25");*/
     }
 
     @Before

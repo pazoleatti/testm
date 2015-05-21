@@ -21,12 +21,7 @@ public enum ConfigurationParam {
     // Загрузка НФ
     FORM_UPLOAD_DIRECTORY("Путь к каталогу загрузки", ConfigurationParamGroup.FORM, true, true, 2),
     FORM_ARCHIVE_DIRECTORY("Путь к каталогу архива", ConfigurationParamGroup.FORM, true, true, 2),
-    FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", ConfigurationParamGroup.FORM, true, true, 2),
-    // Электронная почта
-    EMAIL_LOGIN("Имя пользователя", ConfigurationParamGroup.EMAIL, true, false, 0),
-    EMAIL_PASSWORD("Пароль", ConfigurationParamGroup.EMAIL, true, false, 0),
-    EMAIL_SERVER("Адрес сервера исходящей почты", ConfigurationParamGroup.EMAIL, true, false, 0),
-    EMAIL_PORT("Порт сервера исходящей почты", ConfigurationParamGroup.EMAIL, true, false, 0);
+    FORM_ERROR_DIRECTORY("Путь к каталогу ошибок", ConfigurationParamGroup.FORM, true, true, 2);
 
     private String caption;
     private ConfigurationParamGroup group;

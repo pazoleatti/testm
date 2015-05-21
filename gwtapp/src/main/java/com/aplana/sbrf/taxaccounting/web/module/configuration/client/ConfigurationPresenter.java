@@ -58,6 +58,14 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 
         StringColumn getEmailDescriptionColumn();
 
+        StringColumn getAsyncTypeColumn();
+
+        StringColumn getAsyncLimitKindColumn();
+
+        StringColumn getAsyncLimitColumn();
+
+        StringColumn getAsyncShortLimitColumn();
+
         List<DataRow<Cell>> getRowsData(ConfigurationParamGroup group);
 
         void clearSelection();
@@ -89,7 +97,8 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                                 getView().setConfigData(ConfigurationParamGroup.COMMON, getCommonRowsData(result.getModel()), true);
                                 getView().setConfigData(ConfigurationParamGroup.FORM, getFormRowsData(result.getModel(),
                                         result.getDereferenceDepartmentNameMap()), true);
-                                getView().setConfigData(ConfigurationParamGroup.EMAIL, getEmailRowsData(result.getModel()), false);
+                                getView().setConfigData(ConfigurationParamGroup.EMAIL, getEmailRowsData(result.getEmailConfigs()), false);
+                                getView().setConfigData(ConfigurationParamGroup.ASYNC, getAsyncRowsData(result.getAsyncConfigs()), true);
                             }
                         }, this).addCallback(TaManualRevealCallback.create(this, placeManager)));
     }
@@ -168,16 +177,36 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 
     /**
      * Преобразование данных с серверной стороны в строки таблицы параметров электронной почты
+     * @param params
      */
-    private List<DataRow<Cell>> getEmailRowsData(ConfigurationParamModel model) {
+    private List<DataRow<Cell>> getEmailRowsData(List<Map<String, String>> params) {
         List<DataRow<Cell>> rowsData = new LinkedList<DataRow<Cell>>();
 
-        for (Map<String, String> emailRecord : model.getEmailParams()) {
+        for (Map<String, String> record : params) {
             DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.EMAIL);
             // Значения
-            dataRow.getCell(getView().getEmailNameColumn().getAlias()).setStringValue(emailRecord.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE));
-            dataRow.getCell(getView().getEmailValueColumn().getAlias()).setStringValue(emailRecord.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE));
-            dataRow.getCell(getView().getEmailDescriptionColumn().getAlias()).setStringValue(emailRecord.get(ConfigurationParamModel.EMAIL_DESCRIPTION_ATTRIBUTE));
+            dataRow.getCell(getView().getEmailNameColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE));
+            dataRow.getCell(getView().getEmailValueColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE));
+            dataRow.getCell(getView().getEmailDescriptionColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.EMAIL_DESCRIPTION_ATTRIBUTE));
+            rowsData.add(dataRow);
+        }
+        return rowsData;
+    }
+
+    /**
+     * Преобразование данных с серверной стороны в строки таблицы параметров электронной почты
+     * @param params
+     */
+    private List<DataRow<Cell>> getAsyncRowsData(List<Map<String, String>> params) {
+        List<DataRow<Cell>> rowsData = new LinkedList<DataRow<Cell>>();
+
+        for (Map<String, String> record : params) {
+            DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.ASYNC);
+            // Значения
+            dataRow.getCell(getView().getAsyncTypeColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.ASYNC_TYPE));
+            dataRow.getCell(getView().getAsyncLimitKindColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.ASYNC_LIMIT_KIND));
+            dataRow.getCell(getView().getAsyncLimitColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.ASYNC_LIMIT));
+            dataRow.getCell(getView().getAsyncShortLimitColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.ASYNC_SHORT_LIMIT));
             rowsData.add(dataRow);
         }
         return rowsData;
@@ -206,7 +235,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
      * Заполнение модели конфигурационных параметров
      */
     private void fillModel(ConfigurationParamModel model, List<DataRow<Cell>> commonRowsData,
-                           List<DataRow<Cell>> formRowsData, List<DataRow<Cell>> emailRowsData,
+                           List<DataRow<Cell>> formRowsData,
                            Set<Integer> duplicateDepartmentIdSet, Map<Integer, Set<String>> notSetFields) {
         // Общие параметры
         Map<ConfigurationParam, List<String>> commonMap = new HashMap<ConfigurationParam, List<String>>();
@@ -280,6 +309,21 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                     duplicateDepartmentIdSet.add(departmentId.intValue());
             }
         }
+    }
+
+    @Override
+    public void onSave() {
+        LogCleanEvent.fire(this);
+        ConfigurationParamModel model = new ConfigurationParamModel();
+        SaveConfigurationAction action = new SaveConfigurationAction();
+        action.setModel(model);
+        // Преобразование данных таблиц в ConfigurationParamModel
+        List<DataRow<Cell>> commonRowsData = getView().getRowsData(ConfigurationParamGroup.COMMON);
+        List<DataRow<Cell>> formRowsData = getView().getRowsData(ConfigurationParamGroup.FORM);
+        List<DataRow<Cell>> emailRowsData = getView().getRowsData(ConfigurationParamGroup.EMAIL);
+        List<DataRow<Cell>> asyncRowsData = getView().getRowsData(ConfigurationParamGroup.ASYNC);
+
+        fillModel(model, commonRowsData, formRowsData, action.getDublicateDepartmentIdSet(), action.getNotSetFields());
 
         // Параметры электронной почты
         List<Map<String, String>> emailParams = new ArrayList<Map<String, String>>();
@@ -293,21 +337,24 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                     dataRow.getCell(getView().getEmailDescriptionColumn().getAlias()).getStringValue());
             emailParams.add(param);
         }
-        model.setEmailParams(emailParams);
-    }
+        action.setEmailParams(emailParams);
 
-    @Override
-    public void onSave() {
-        LogCleanEvent.fire(this);
-        ConfigurationParamModel model = new ConfigurationParamModel();
-        SaveConfigurationAction action = new SaveConfigurationAction();
-        action.setModel(model);
-        // Преобразование данных таблиц в ConfigurationParamModel
-        List<DataRow<Cell>> commonRowsData = getView().getRowsData(ConfigurationParamGroup.COMMON);
-        List<DataRow<Cell>> formRowsData = getView().getRowsData(ConfigurationParamGroup.FORM);
-        List<DataRow<Cell>> emailRowsData = getView().getRowsData(ConfigurationParamGroup.EMAIL);
+        // Параметры асинхронных задач
+        List<Map<String, String>> asyncParams = new ArrayList<Map<String, String>>();
+        for (DataRow<Cell> dataRow : asyncRowsData) {
+            Map<String, String> param = new HashMap<String, String>();
+            param.put(ConfigurationParamModel.ASYNC_TYPE,
+                    dataRow.getCell(getView().getAsyncTypeColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.ASYNC_LIMIT_KIND,
+                    dataRow.getCell(getView().getAsyncLimitKindColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.ASYNC_LIMIT,
+                    dataRow.getCell(getView().getAsyncLimitColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.ASYNC_SHORT_LIMIT,
+                    dataRow.getCell(getView().getAsyncShortLimitColumn().getAlias()).getStringValue());
+            asyncParams.add(param);
+        }
 
-        fillModel(model, commonRowsData, formRowsData, emailRowsData, action.getDublicateDepartmentIdSet(), action.getNotSetFields());
+        action.setAsyncParams(asyncParams);
 
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SaveConfigurationResult>() {
             @Override
@@ -373,6 +420,24 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             descriptionCell.setEditable(false);
 
             dataRow.setFormColumns(asList(nameCell, valueCell, descriptionCell));
+        } else if (group.equals(ConfigurationParamGroup.ASYNC)) {
+            Cell typeCell = new Cell();
+            typeCell.setColumn(getView().getAsyncTypeColumn());
+            typeCell.setEditable(false);
+
+            Cell limitKindCell = new Cell();
+            limitKindCell.setColumn(getView().getAsyncLimitKindColumn());
+            limitKindCell.setEditable(false);
+
+            Cell limitCell = new Cell();
+            limitCell.setColumn(getView().getAsyncLimitColumn());
+            limitCell.setEditable(true);
+
+            Cell shortLimitCell = new Cell();
+            shortLimitCell.setColumn(getView().getAsyncShortLimitColumn());
+            shortLimitCell.setEditable(true);
+
+            dataRow.setFormColumns(asList(typeCell, limitKindCell, limitCell, shortLimitCell));
         }
 
         return dataRow;
@@ -389,7 +454,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     }
 
     @Override
-    public void onCheckAccess(ConfigurationParamGroup group, DataRow<Cell> selRow) {
+    public void onCheckAccess(ConfigurationParamGroup group, DataRow<Cell> selRow, final boolean needSaveAfter) {
         LogCleanEvent.fire(this);
         ConfigurationParamModel model = new ConfigurationParamModel();
         final CheckAccessAction action = new CheckAccessAction();
@@ -399,15 +464,48 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         List<DataRow<Cell>> commonRowsData = new ArrayList<DataRow<Cell>>();
         List<DataRow<Cell>> formRowsData = new ArrayList<DataRow<Cell>>();
         List<DataRow<Cell>> emailRowsData = new ArrayList<DataRow<Cell>>();
+        List<DataRow<Cell>> asyncRowsData = new ArrayList<DataRow<Cell>>();
         if (group.equals(ConfigurationParamGroup.COMMON)) {
             commonRowsData.add(selRow);
         } else if (group.equals(ConfigurationParamGroup.FORM)) {
             formRowsData.add(selRow);
         }  else if (group.equals(ConfigurationParamGroup.EMAIL)) {
             emailRowsData.addAll(getView().getRowsData(group));
+        } else if (group.equals(ConfigurationParamGroup.ASYNC)) {
+            asyncRowsData = getView().getRowsData(ConfigurationParamGroup.ASYNC);
+        }
+        fillModel(model, commonRowsData, formRowsData, null, null);
+
+        // Параметры электронной почты
+        List<Map<String, String>> emailParams = new ArrayList<Map<String, String>>();
+        for (DataRow<Cell> dataRow : emailRowsData) {
+            Map<String, String> param = new HashMap<String, String>();
+            param.put(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE,
+                    dataRow.getCell(getView().getEmailNameColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE,
+                    dataRow.getCell(getView().getEmailValueColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.EMAIL_DESCRIPTION_ATTRIBUTE,
+                    dataRow.getCell(getView().getEmailDescriptionColumn().getAlias()).getStringValue());
+            emailParams.add(param);
+        }
+        action.setEmailParams(emailParams);
+
+        // Параметры асинхронных задач
+        List<Map<String, String>> asyncParams = new ArrayList<Map<String, String>>();
+        for (DataRow<Cell> dataRow : asyncRowsData) {
+            Map<String, String> param = new HashMap<String, String>();
+            param.put(ConfigurationParamModel.ASYNC_TYPE,
+                    dataRow.getCell(getView().getAsyncTypeColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.ASYNC_LIMIT_KIND,
+                    dataRow.getCell(getView().getAsyncLimitKindColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.ASYNC_LIMIT,
+                    dataRow.getCell(getView().getAsyncLimitColumn().getAlias()).getStringValue());
+            param.put(ConfigurationParamModel.ASYNC_SHORT_LIMIT,
+                    dataRow.getCell(getView().getAsyncShortLimitColumn().getAlias()).getStringValue());
+            asyncParams.add(param);
         }
 
-        fillModel(model, commonRowsData, formRowsData, emailRowsData, null, null);
+        action.setAsyncParams(asyncParams);
 
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckAccessResult>() {
             @Override
@@ -415,8 +513,11 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                 if (result.getUuid() != null) {
                     LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
                     LogShowEvent.fire(ConfigurationPresenter.this, true);
+                } else if (needSaveAfter) {
+                    onSave();
+                } else {
+                    getView().clearSelection();
                 }
-                getView().clearSelection();
             }
         }, this));
     }
