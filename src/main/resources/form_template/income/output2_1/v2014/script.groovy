@@ -100,6 +100,9 @@ def nonEmptyColumns = ['rowNumber', 'emitent', 'decreeNumber', 'title', 'subdivi
 def sourceFormType = 10070
 
 @Field
+def sourceFormTypeAlt = 419
+
+@Field
 def startDate = null
 
 @Field
@@ -178,7 +181,7 @@ void consolidation() {
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        if (it.formTypeId == sourceFormType) {
+        if (it.formTypeId == sourceFormType || it.formTypeId == sourceFormTypeAlt) {
             def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
