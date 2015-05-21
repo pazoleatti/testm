@@ -891,23 +891,27 @@ comment on column configuration_lock.timeout is 'Таймаут блокиров
 create table form_data_consolidation
 (
 source_form_data_id number(9) not null,
-target_form_data_id number(9) not null
+target_form_data_id number(9) not null,
+status number(1) default 1 not null
 );
 
 comment on table form_data_consolidation is 'Сведения о консолидации налоговых форм в налоговые формы';
 comment on column form_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
 comment on column form_data_consolidation.target_form_data_id is 'Идентификатор НФ приемника';
+comment on column form_data_consolidation.status is 'Статус консолидации: 0-неактульная, 1-актуальная консолидация';
 --------------------------------------------------------------------------------------------------------
 
 create table declaration_data_consolidation
 (
 source_form_data_id number(9) not null,
-target_declaration_data_id number(9) not null
+target_declaration_data_id number(9) not null,
+status number(1) default 1 not null
 );
 
 comment on table declaration_data_consolidation is 'Сведения о консолидации налоговых форм в декларации';
 comment on column declaration_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
 comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор декларации приемника';
+comment on column declaration_data_consolidation.status is 'Статус консолидации: 0-неактульная, 1-актуальная консолидация';
 
 --------------------------------------------------------------------------------------------------------
 create table log_system_report
