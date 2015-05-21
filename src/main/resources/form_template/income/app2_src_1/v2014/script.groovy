@@ -1236,8 +1236,17 @@ def getFormColumnTypes(def formTemplateId) {
     return result
 }
 
+long getStyleId(def styleAlias, def formTemplateId) {
+    def rs = selectQuery("select id from form_style where alias = \'$styleAlias\' and form_template_id = $formTemplateId")
+    while (rs.next()) {
+        return rs.getLong(1)
+    }
+}
+
 def insertRows(def formData, def rows, def totalCount) {
     def columns = getFormColumnTypes(formData.formTemplateId)
+    def styleAlias = 'Редактируемая'
+    long editableStyleId = getStyleId(styleAlias, formData.formTemplateId)
     int startOrd = totalCount - rows.size() + 1;
     def ids = getNextIds(rows.size(), 'seq_data_row')
 
@@ -1271,6 +1280,13 @@ def insertRows(def formData, def rows, def totalCount) {
                         case 'D': dataCellStatement.setDate(5, new java.sql.Date(value.getTime()))
                             break;
                     }
+                    if (editableColumns.contains(alias)) {
+                        dataCellStatement.setLong(6, editableStyleId)
+                        dataCellStatement.setLong(7, 1)
+                    } else {
+                        dataCellStatement.setNull(6, java.sql.Types.INTEGER)
+                        dataCellStatement.setNull(7, java.sql.Types.INTEGER)
+                    }
                     dataCellStatement.addBatch()
                 }
             }
@@ -1295,7 +1311,7 @@ def getNextIds(def count, def sequenceName) {
 def createStatements(def connection) {
     stmt = connection.createStatement()
     dataRowStatement = connection.prepareStatement("insert into data_row (id, form_data_id, ord, type) values (?, ?, ?, ?)")
-    dataCellStatement = connection.prepareStatement("insert into data_cell (row_id, column_id, svalue, nvalue, dvalue) values (?, ?, ?, ?, ?)")
+    dataCellStatement = connection.prepareStatement("insert into data_cell (row_id, column_id, svalue, nvalue, dvalue, style_id, editable) values (?, ?, ?, ?, ?, ?, ?)")
 }
 
 def updateQuery(def sql) {
