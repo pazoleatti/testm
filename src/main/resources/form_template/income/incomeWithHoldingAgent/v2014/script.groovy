@@ -171,298 +171,6 @@ def roundValue(BigDecimal value, def int precision) {
     value?.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Раздел 1', null, 42, 9)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 42, 9)
-
-    def headerMapping = [
-            // раздел 1
-            (xml.row[0].cell[0]) : 'Раздел 1',
-            (xml.row[1].cell[0]) : '№ п/п',
-            (xml.row[1].cell[1]) : 'Эмитент',
-            (xml.row[2].cell[1]) : 'Наименование',
-            (xml.row[2].cell[2]) : 'ИНН',
-
-            // раздел 2
-            (xml.row[0].cell[3]) : 'Раздел 2',
-            (xml.row[1].cell[3]) : 'Дивиденды полученные ОАО "Сбербанк России"',
-            (xml.row[2].cell[3]) : 'всего',
-            (xml.row[2].cell[4]) : 'по ставке 0%',
-            (xml.row[1].cell[5]) : 'Сумма дивидендов Эмитента, распределяемая в пользу всех получателей, уменьшенная на сумму дивидендов, полученных самим Эмитентом',
-
-            // раздел 3
-            (xml.row[0].cell[6]) : 'Раздел 3',
-            (xml.row[1].cell[6]) : 'Дивиденды выплаченные',
-
-            (xml.row[2].cell[6]) : 'Решение о распределении дивидендов',
-            (xml.row[3].cell[6]) : 'номер',
-            (xml.row[3].cell[7]) : 'дата',
-
-            (xml.row[2].cell[8]) : 'Отчетный год',
-            (xml.row[3].cell[8]) : 'Год',
-            (xml.row[3].cell[9]) : 'Период распределения',
-            (xml.row[4].cell[9]) : 'первый месяц',
-            (xml.row[4].cell[10]): 'последний месяц',
-
-            (xml.row[2].cell[11]): 'Сумма дивидендов',
-            (xml.row[2].cell[26]): 'Сумма удержанного налога',
-            (xml.row[3].cell[11]): 'Всего',
-            (xml.row[3].cell[12]): 'Выплачиваемая через ОАО "Сбербанк России"',
-
-            (xml.row[4].cell[12]): 'Получатель',
-            (xml.row[5].cell[12]): 'Наименование (ЮЛ) или ФИО (ФЛ)',
-            (xml.row[5].cell[13]): 'ИНН',
-            (xml.row[5].cell[14]): 'КПП',
-            (xml.row[5].cell[15]): 'тип',
-            (xml.row[5].cell[16]): 'статус',
-            (xml.row[5].cell[17]): 'Физическое лицо',
-            (xml.row[6].cell[17]): 'дата рождения',
-            (xml.row[6].cell[18]): 'гражданство',
-            (xml.row[6].cell[19]): 'документ',
-            (xml.row[7].cell[19]): 'вид',
-            (xml.row[7].cell[20]): 'серия и номер',
-
-            (xml.row[4].cell[21]): 'Ставка',
-            (xml.row[4].cell[22]): 'Дивиденды начисленные',
-            (xml.row[4].cell[23]): 'Платёжное поручение',
-            (xml.row[5].cell[23]): 'сумма',
-            (xml.row[5].cell[24]): 'дата',
-            (xml.row[5].cell[25]): 'номер',
-            (xml.row[4].cell[26]): 'Платёжное поручение',
-            (xml.row[5].cell[26]): 'сумма',
-            (xml.row[5].cell[27]): 'дата',
-            (xml.row[5].cell[28]): 'номер',
-
-            // раздел 4
-            (xml.row[0].cell[29]): 'Раздел 4',
-
-            (xml.row[2].cell[29]): 'Место нахождения (адрес) получателя',
-            (xml.row[3].cell[29]): 'Индекс',
-            (xml.row[3].cell[30]): 'Код региона',
-            (xml.row[3].cell[31]): 'Район',
-            (xml.row[3].cell[32]): 'Город',
-            (xml.row[3].cell[33]): 'Населённый пункт (село, посёлок и т.п.)',
-            (xml.row[3].cell[34]): 'Улица (проспект, переулок и т.д.)',
-            (xml.row[3].cell[35]): 'Номер',
-            (xml.row[4].cell[35]): 'дома (владения)',
-            (xml.row[4].cell[36]): 'корпуса (строения)',
-            (xml.row[4].cell[37]): 'офиса (квартиры)',
-
-            (xml.row[2].cell[38]): 'Руководитель организации – получателя',
-            (xml.row[3].cell[38]): 'Фамилия',
-            (xml.row[3].cell[39]): 'Имя',
-            (xml.row[3].cell[40]): 'Отчество',
-            (xml.row[2].cell[41]): 'Контактный телефон',
-    ]
-    (0..41).each { index ->
-        headerMapping.put((xml.row[8].cell[index]), (index + 1).toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    // добавить данные в форму
-    addData(xml, 9)
-}
-
-void addData(def xml, headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1
-    def required = true
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow < headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def newRow = getNewRow()
-        newRow.setIndex(rowIndex++)
-
-        def xmlIndexCol
-
-        // графа 2
-        xmlIndexCol = 1
-        newRow.emitentName = row.cell[xmlIndexCol].text()
-
-        // графа 3
-        xmlIndexCol++
-        newRow.emitentInn = row.cell[xmlIndexCol].text()
-
-        // графа 4
-        xmlIndexCol++
-        newRow.all = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 5
-        xmlIndexCol++
-        newRow.rateZero = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 6
-        xmlIndexCol++
-        newRow.distributionSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 7
-        xmlIndexCol++
-        newRow.decisionNumber = row.cell[xmlIndexCol].text()
-
-        // графа 8
-        xmlIndexCol++
-        newRow.decisionDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 9
-        xmlIndexCol++
-        newRow.year = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 10
-        xmlIndexCol++
-        newRow.firstMonth = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 11
-        xmlIndexCol++
-        newRow.lastMonth = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 12
-        xmlIndexCol++
-        newRow.allSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 13
-        xmlIndexCol++
-        newRow.addresseeName = row.cell[xmlIndexCol].text()
-
-        // графа 14
-        xmlIndexCol++
-        newRow.inn = row.cell[xmlIndexCol].text()
-
-        // графа 15
-        xmlIndexCol++
-        newRow.kpp = row.cell[xmlIndexCol].text()
-
-        // графа 16
-        xmlIndexCol++
-        newRow.type = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 17
-        xmlIndexCol++
-        newRow.status = row.cell[xmlIndexCol].text()
-
-        // графа 18
-        xmlIndexCol++
-        newRow.birthday = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 19 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
-        xmlIndexCol++
-        newRow.citizenship = getRecordIdImport(10L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
-
-        // графа 20 - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
-        xmlIndexCol++
-        newRow.kind = getRecordIdImport(360L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
-
-        // графа 21
-        xmlIndexCol++
-        newRow.series = row.cell[xmlIndexCol].text()
-
-        // графа 22
-        xmlIndexCol++
-        newRow.rate = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 23
-        xmlIndexCol++
-        newRow.dividends = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 24
-        xmlIndexCol++
-        newRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 25
-        xmlIndexCol++
-        newRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 26
-        xmlIndexCol++
-        newRow.number = row.cell[xmlIndexCol].text()
-
-        // графа 27
-        xmlIndexCol++
-        newRow.withheldSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 28
-        xmlIndexCol++
-        newRow.withheldDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, required)
-
-        // графа 29
-        xmlIndexCol++
-        newRow.withheldNumber = row.cell[xmlIndexCol].text()
-
-        // графа 30
-        xmlIndexCol++
-        newRow.postcode = row.cell[xmlIndexCol].text()
-
-        // графа 31 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
-        xmlIndexCol++
-        newRow.region = getRecordIdImport(4L, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, false)
-
-        // графа 32
-        xmlIndexCol++
-        newRow.district = row.cell[xmlIndexCol].text()
-
-        // графа 33
-        xmlIndexCol++
-        newRow.city = row.cell[xmlIndexCol].text()
-
-        // графа 34
-        xmlIndexCol++
-        newRow.locality = row.cell[xmlIndexCol].text()
-
-        // графа 35
-        xmlIndexCol++
-        newRow.street = row.cell[xmlIndexCol].text()
-
-        // графа 36
-        xmlIndexCol++
-        newRow.house = row.cell[xmlIndexCol].text()
-
-        // графа 37
-        xmlIndexCol++
-        newRow.housing = row.cell[xmlIndexCol].text()
-
-        // графа 38
-        xmlIndexCol++
-        newRow.apartment = row.cell[xmlIndexCol].text()
-
-        // графа 39
-        xmlIndexCol++
-        newRow.surname = row.cell[xmlIndexCol].text()
-
-        // графа 40
-        xmlIndexCol++
-        newRow.name = row.cell[xmlIndexCol].text()
-
-        // графа 41
-        xmlIndexCol++
-        newRow.patronymic = row.cell[xmlIndexCol].text()
-
-        // графа 42
-        xmlIndexCol++
-        newRow.phone = row.cell[xmlIndexCol].text()
-
-        rows.add(newRow)
-    }
-    dataRowHelper.save(rows)
-}
-
 void importTransportData() {
     checkBeforeGetXml(ImportInputStream, UploadFileName)
     if (!UploadFileName.endsWith(".rnu")) {
@@ -764,4 +472,297 @@ def getNewRow() {
 
 boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
+}
+
+void importData() {
+    int COLUMN_COUNT = 42
+    int HEADER_ROW_COUNT = 9
+    String TABLE_START_VALUE = 'Раздел 1'
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount) {
+    if (headerRows.isEmpty() || headerRows.size < rowCount) {
+        logger.error("Заголовок таблицы не соответствует требуемой структуре.")
+        return
+    }
+    checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            // раздел 1
+            (headerRows[0][0]) : 'Раздел 1',
+            (headerRows[1][0]) : '№ п/п',
+            (headerRows[1][1]) : 'Эмитент',
+            (headerRows[2][1]) : 'Наименование',
+            (headerRows[2][2]) : 'ИНН',
+
+            // раздел 2
+            (headerRows[0][3]) : 'Раздел 2',
+            (headerRows[1][3]) : 'Дивиденды полученные ОАО "Сбербанк России"',
+            (headerRows[2][3]) : 'всего',
+            (headerRows[2][4]) : 'по ставке 0%',
+            (headerRows[1][5]) : 'Сумма дивидендов Эмитента, распределяемая в пользу всех получателей, уменьшенная на сумму дивидендов, полученных самим Эмитентом',
+
+            // раздел 3
+            (headerRows[0][6]) : 'Раздел 3',
+            (headerRows[1][6]) : 'Дивиденды выплаченные',
+
+            (headerRows[2][6]) : 'Решение о распределении дивидендов',
+            (headerRows[3][6]) : 'номер',
+            (headerRows[3][7]) : 'дата',
+
+            (headerRows[2][8]) : 'Отчетный год',
+            (headerRows[3][8]) : 'Год',
+            (headerRows[3][9]) : 'Период распределения',
+            (headerRows[4][9]) : 'первый месяц',
+            (headerRows[4][10]): 'последний месяц',
+
+            (headerRows[2][11]): 'Сумма дивидендов',
+            (headerRows[2][26]): 'Сумма удержанного налога',
+            (headerRows[3][11]): 'Всего',
+            (headerRows[3][12]): 'Выплачиваемая через ОАО "Сбербанк России"',
+
+            (headerRows[4][12]): 'Получатель',
+            (headerRows[5][12]): 'Наименование (ЮЛ) или ФИО (ФЛ)',
+            (headerRows[5][13]): 'ИНН',
+            (headerRows[5][14]): 'КПП',
+            (headerRows[5][15]): 'тип',
+            (headerRows[5][16]): 'статус',
+            (headerRows[5][17]): 'Физическое лицо',
+            (headerRows[6][17]): 'дата рождения',
+            (headerRows[6][18]): 'гражданство',
+            (headerRows[6][19]): 'документ',
+            (headerRows[7][19]): 'вид',
+            (headerRows[7][20]): 'серия и номер',
+
+            (headerRows[4][21]): 'Ставка',
+            (headerRows[4][22]): 'Дивиденды начисленные',
+            (headerRows[4][23]): 'Платёжное поручение',
+            (headerRows[5][23]): 'сумма',
+            (headerRows[5][24]): 'дата',
+            (headerRows[5][25]): 'номер',
+            (headerRows[4][26]): 'Платёжное поручение',
+            (headerRows[5][26]): 'сумма',
+            (headerRows[5][27]): 'дата',
+            (headerRows[5][28]): 'номер',
+
+            // раздел 4
+            (headerRows[0][29]): 'Раздел 4',
+
+            (headerRows[2][29]): 'Место нахождения (адрес) получателя',
+            (headerRows[3][29]): 'Индекс',
+            (headerRows[3][30]): 'Код региона',
+            (headerRows[3][31]): 'Район',
+            (headerRows[3][32]): 'Город',
+            (headerRows[3][33]): 'Населённый пункт (село, посёлок и т.п.)',
+            (headerRows[3][34]): 'Улица (проспект, переулок и т.д.)',
+            (headerRows[3][35]): 'Номер',
+            (headerRows[4][35]): 'дома (владения)',
+            (headerRows[4][36]): 'корпуса (строения)',
+            (headerRows[4][37]): 'офиса (квартиры)',
+
+            (headerRows[2][38]): 'Руководитель организации – получателя',
+            (headerRows[3][38]): 'Фамилия',
+            (headerRows[3][39]): 'Имя',
+            (headerRows[3][40]): 'Отчество',
+            (headerRows[2][41]): 'Контактный телефон',
+    ]
+    (0..41).each { index ->
+        headerMapping.put((headerRows[8][index]), (index + 1).toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    def required = true
+
+    // графа 2
+    def colIndex = 1
+    newRow.emitentName = values[colIndex]
+
+    // графа 3
+    colIndex++
+    newRow.emitentInn = values[colIndex]
+
+    // графа 4
+    colIndex++
+    newRow.all = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 5
+    colIndex++
+    newRow.rateZero = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 6
+    colIndex++
+    newRow.distributionSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 7
+    colIndex++
+    newRow.decisionNumber = values[colIndex]
+
+    // графа 8
+    colIndex++
+    newRow.decisionDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 9
+    colIndex++
+    newRow.year = parseDate(values[colIndex], "yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 10
+    colIndex++
+    newRow.firstMonth = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 11
+    colIndex++
+    newRow.lastMonth = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 12
+    colIndex++
+    newRow.allSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 13
+    colIndex++
+    newRow.addresseeName = values[colIndex]
+
+    // графа 14
+    colIndex++
+    newRow.inn = values[colIndex]
+
+    // графа 15
+    colIndex++
+    newRow.kpp = values[colIndex]
+
+    // графа 16
+    colIndex++
+    newRow.type = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 17
+    colIndex++
+    newRow.status = values[colIndex]
+
+    // графа 18
+    colIndex++
+    newRow.birthday = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 19 - атрибут 50 - CODE - «Код», справочник 10 «Общероссийский классификатор стран мира»
+    colIndex++
+    newRow.citizenship = getRecordIdImport(10L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+
+    // графа 20 - атрибут 3601 - CODE - «Код», справочник 360 «Коды документов»
+    colIndex++
+    newRow.kind = getRecordIdImport(360L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+
+    // графа 21
+    colIndex++
+    newRow.series = values[colIndex]
+
+    // графа 22
+    colIndex++
+    newRow.rate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 23
+    colIndex++
+    newRow.dividends = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 24
+    colIndex++
+    newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 25
+    colIndex++
+    newRow.date = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 26
+    colIndex++
+    newRow.number = values[colIndex]
+
+    // графа 27
+    colIndex++
+    newRow.withheldSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 28
+    colIndex++
+    newRow.withheldDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, required)
+
+    // графа 29
+    colIndex++
+    newRow.withheldNumber = values[colIndex]
+
+    // графа 30
+    colIndex++
+    newRow.postcode = values[colIndex]
+
+    // графа 31 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
+    colIndex++
+    newRow.region = getRecordIdImport(4L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+
+    // графа 32..42
+    ['district', 'city', 'locality', 'street', 'house', 'housing', 'apartment', 'surname', 'name', 'patronymic', 'phone'].each { alias ->
+        colIndex++
+        newRow[alias] = values[colIndex]
+    }
+
+    return newRow
 }
