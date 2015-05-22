@@ -611,9 +611,13 @@ void importData() {
  * @param headerRows строки шапки
  * @param colCount количество колонок в таблице
  * @param rowCount количество строк в таблице
- * @param tmpRow временная вспомогательная строка для получения названии графов
+ * @param tmpRow вспомогательная строка для получения названии графов
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        logger.error("Заголовок таблицы не соответствует требуемой структуре.")
+        return
+    }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
             (headerRows[0][0])  : getColumnName(tmpRow, 'rowNumber'),
