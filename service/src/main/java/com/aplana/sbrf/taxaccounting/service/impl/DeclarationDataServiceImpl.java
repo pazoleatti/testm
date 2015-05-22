@@ -424,30 +424,28 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public byte[] getXlsxData(long id, TAUserInfo userInfo, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
-        try {
-            DeclarationData declarationData = declarationDataDao.get(id);
-            String uuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
-            JasperPrint jasperPrint;
-            if (uuid != null) {
-                ObjectInputStream objectInputStream = null;
-                try {
-                    objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
-                    jasperPrint = (JasperPrint) objectInputStream.readObject();
-                } finally {
-                    //IOUtils.closeQuietly(objectInputStream);
-                }
-            } else {
-                log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
-                stateLogger.updateState("Заполнение Jasper-макета");
-                jasperPrint = createJasperReport(declarationData, userInfo);
-                // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
+        DeclarationData declarationData = declarationDataDao.get(id);
+        String uuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
+        JasperPrint jasperPrint;
+        if (uuid != null) {
+            ObjectInputStream objectInputStream = null;
+            try {
+                objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
+                jasperPrint = (JasperPrint) objectInputStream.readObject();
+            } catch (IOException e) {
+                throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
+            } catch (ClassNotFoundException e) {
+                throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
             }
-            log.info(String.format("Заполнение XLSX-отчета декларации %s", declarationData.getId()));
-            stateLogger.updateState("Заполнение XLSX-отчета");
-            return exportXLSX(jasperPrint);
-        } catch (Exception e) {
-            throw new ServiceException("Не удалось извлечь объект для печати.", e);
+        } else {
+            log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+            stateLogger.updateState("Заполнение Jasper-макета");
+            jasperPrint = createJasperReport(declarationData, userInfo);
+            // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
         }
+        log.info(String.format("Заполнение XLSX-отчета декларации %s", declarationData.getId()));
+        stateLogger.updateState("Заполнение XLSX-отчета");
+        return exportXLSX(jasperPrint);
     }
 
 	@Override
