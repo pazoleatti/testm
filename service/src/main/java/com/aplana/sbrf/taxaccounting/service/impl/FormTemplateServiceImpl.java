@@ -275,7 +275,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         LockData objectLock = lockDataService.lock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId,
                 userInfo.getUser().getId(),
                 String.format(
-                        LockData.DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
+                        LockData.DescriptionTemplate.FORM_TEMPLATE.getText(),
                         formTemplate.getName(),
                         SIMPLE_DATE_FORMAT.format(formTemplate.getVersion())
                 ),
