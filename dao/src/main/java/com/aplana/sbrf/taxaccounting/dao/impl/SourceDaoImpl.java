@@ -503,7 +503,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId) {
         try {
-            getJdbcTemplate().queryForInt("select 1 from DECLARATION_DATA_CONSOLIDATION where target_declaration_data_id = ? and source_form_data_id = ?", declarationId, sourceFormDataId);
+            getJdbcTemplate().queryForInt(
+                    "select 1 from DECLARATION_DATA_CONSOLIDATION where target_declaration_data_id = ? and source_form_data_id = ?",
+                    declarationId, sourceFormDataId);
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
@@ -565,5 +567,33 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
+    }
+
+    @Override
+    public int updateFDConsolidationInfo(long sourceFormId) {
+        return getJdbcTemplate().update(
+                "update FORM_DATA_CONSOLIDATION set source_form_data_id = null where source_form_data_id = ?",
+                sourceFormId);
+    }
+
+    @Override
+    public int updateDDConsolidationInfo(long sourceFormId) {
+        return getJdbcTemplate().update(
+                "update DECLARATION_DATA_CONSOLIDATION set source_form_data_id = null where source_form_data_id = ?",
+                sourceFormId);
+    }
+
+    @Override
+    public boolean isFDConsolidationTopical(long fdTargetId) {
+        return getJdbcTemplate().queryForInt(
+                "select count(*) from form_data_consolidation where TARGET_FORM_DATA_ID = ? and SOURCE_FORM_DATA_ID is null",
+                fdTargetId) > 0;
+    }
+
+    @Override
+    public boolean isDDConsolidationTopical(long ddTargetId) {
+        return getJdbcTemplate().queryForInt(
+                "select count(*) from DECLARATION_DATA_CONSOLIDATION where TARGET_DECLARATION_DATA_ID = ? and SOURCE_FORM_DATA_ID is null",
+                ddTargetId) > 0;
     }
 }

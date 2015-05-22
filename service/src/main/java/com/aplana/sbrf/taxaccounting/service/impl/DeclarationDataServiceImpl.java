@@ -62,6 +62,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
 
+    private static final String CALCULATION_NOT_TOPICAL = "Декларация / Уведомление содержит неактуальные консолидированные данные  " +
+            "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
+            "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
+
     @Autowired
     private DeclarationDataDao declarationDataDao;
 
@@ -304,9 +308,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             try {
                 declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
                 DeclarationData declarationData = declarationDataDao.get(id);
-
-                // удаляем записи о консолидации для текущего экземпляра
-                sourceService.deleteDeclarationConsolidateInfo(id);
 
                 declarationDataDao.delete(id);
 
@@ -954,6 +955,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void checkSources(DeclarationData dd, Logger logger){
+        //Проверка на неактуальные консолидированные данные
+        if (sourceService.isDDConsolidationTopical(dd.getId())){
+            logger.error(CALCULATION_NOT_TOPICAL);
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+        }
         ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
         List<DepartmentFormType> sourceDDs = departmentFormTypeDao.getDeclarationSources(
                 dd.getDepartmentId(),

@@ -177,4 +177,31 @@ public interface SourceDao {
     void deleteFormDataConsolidationInfo(Collection<Long> tgtFormDataIds);
 
     boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId);
+
+    /**
+     * Проставление признака неактуальности данных в НФ-приёмнике
+     * @param sourceFormId идентификатор источника
+     * @return колличество обновленных строк
+     */
+    int updateFDConsolidationInfo(long sourceFormId);
+
+    /**
+     * Проставление признака неактуальности данных в НФ/декларации-приёмнике
+     * @param sourceFormId идентификатор источника
+     */
+    int updateDDConsolidationInfo(long sourceFormId);
+
+    /**
+     * Проверяет не изменились ли данные консолидации для НФ
+     * @param fdTargetId идентификатор нф-приемника для проверки
+     * @return true если есть хоть одна строка где поле status=0
+     */
+    boolean isFDConsolidationTopical(long fdTargetId);
+
+    /**
+     * Проверяет не изменились ли данные консолидации для декларации
+     * @param ddTargetId идентификатор декларации-приемника для проверки
+     * @return true если есть хоть одна строка где поле status=0
+     */
+    boolean isDDConsolidationTopical(long ddTargetId);
 }
