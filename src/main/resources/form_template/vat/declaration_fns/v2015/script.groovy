@@ -677,11 +677,7 @@ def Map<Long, Expando> getParts() {
             result.accepted = (declarationData?.accepted)
 
             if (result.exist) {
-                def String xmlString = declarationService.getXmlData(declarationData.id)
-                xmlString = xmlString?.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-                if (xmlString) {
-                    result.fileName = new XmlSlurper().parseText(xmlString).@ИдФайл
-                }
+                result.fileName = declarationService.getXmlDataFileName(declarationData.id)
             }
             declarationParts[id] = result
         }

@@ -25,9 +25,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipInputStream;
 
 /*
  * author auldanov
@@ -59,6 +61,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
+
+	@Autowired
+	private DeclarationDataService declarationDataService;
 
 	@Autowired
     private DeclarationTypeDao declarationTypeDao;
@@ -252,10 +257,18 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             return null;
         }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            IOUtils.copy(blobData.getInputStream(), byteArrayOutputStream);
-        } catch (IOException e) {
-            throw new ServiceException("Не удалось извлечь xml для скрипта.", e);
+        InputStream zipXml = blobData.getInputStream();
+        if (zipXml != null) {
+            ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
+            try {
+                zipXmlIn.getNextEntry();
+                IOUtils.copy(zipXmlIn, byteArrayOutputStream);
+            } catch (IOException e) {
+                throw new ServiceException("Не удалось извлечь xml для скрипта.", e);
+            } finally {
+                IOUtils.closeQuietly(zipXml);
+                IOUtils.closeQuietly(zipXmlIn);
+            }
         }
         return new String(byteArrayOutputStream.toByteArray());
     }
@@ -300,5 +313,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String getXmlDataFileName(long declarationDataId) {
+        return declarationDataService.getXmlDataFileName(declarationDataId, taUserService.getSystemUserInfo());
     }
 }
