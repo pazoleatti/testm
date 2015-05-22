@@ -22,10 +22,11 @@ public class RefBookAsyncConfigDaoImpl extends AbstractDao implements RefBookAsy
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords() {
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query("select type, limit_kind, limit, short_limit from configuration_async order by type ", new RowMapper<Map<String, RefBookValue>>() {
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query("select ID, NAME, LIMIT_KIND, TASK_LIMIT, SHORT_QUEUE_LIMIT from async_task_type where dev_mode = 0 order by NAME ", new RowMapper<Map<String, RefBookValue>>() {
             @Override
             public Map<String, RefBookValue> mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                map.put(ConfigurationParamModel.ASYNC_TYPE_ID, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.ASYNC_TYPE_ID)));
                 map.put(ConfigurationParamModel.ASYNC_TYPE, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.ASYNC_TYPE)));
                 map.put(ConfigurationParamModel.ASYNC_LIMIT_KIND, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.ASYNC_LIMIT_KIND)));
                 map.put(ConfigurationParamModel.ASYNC_LIMIT, new RefBookValue(RefBookAttributeType.NUMBER, rs.getBigDecimal(ConfigurationParamModel.ASYNC_LIMIT).setScale(0, BigDecimal.ROUND_HALF_UP)));
@@ -38,13 +39,13 @@ public class RefBookAsyncConfigDaoImpl extends AbstractDao implements RefBookAsy
 
     @Override
     public void updateRecords(final List<Map<String, RefBookValue>> records) {
-        getJdbcTemplate().batchUpdate("update configuration_async set limit = ?, short_limit = ? where type = ?", new BatchPreparedStatementSetter() {
+        getJdbcTemplate().batchUpdate("update async_task_type set TASK_LIMIT = ?, SHORT_QUEUE_LIMIT = ? where ID = ?", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Map<String, RefBookValue> record = records.get(i);
                 ps.setString(1, record.get(ConfigurationParamModel.ASYNC_LIMIT).getStringValue());
                 ps.setString(2, record.get(ConfigurationParamModel.ASYNC_SHORT_LIMIT).getStringValue());
-                ps.setString(3, record.get(ConfigurationParamModel.ASYNC_TYPE).getStringValue());
+                ps.setInt(3, Integer.parseInt(record.get(ConfigurationParamModel.ASYNC_TYPE_ID).getStringValue()));
             }
 
             @Override

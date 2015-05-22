@@ -69,6 +69,8 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         List<DataRow<Cell>> getRowsData(ConfigurationParamGroup group);
 
         void clearSelection();
+
+        StringColumn getAsyncTypeIdColumn();
     }
 
     private final DispatchAsync dispatcher;
@@ -203,6 +205,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         for (Map<String, String> record : params) {
             DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.ASYNC);
             // Значения
+            dataRow.getCell(getView().getAsyncTypeIdColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.ASYNC_TYPE_ID));
             dataRow.getCell(getView().getAsyncTypeColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.ASYNC_TYPE));
             dataRow.getCell(getView().getAsyncLimitKindColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.ASYNC_LIMIT_KIND));
             dataRow.getCell(getView().getAsyncLimitColumn().getAlias()).setStringValue(record.get(ConfigurationParamModel.ASYNC_LIMIT));
@@ -343,6 +346,8 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         List<Map<String, String>> asyncParams = new ArrayList<Map<String, String>>();
         for (DataRow<Cell> dataRow : asyncRowsData) {
             Map<String, String> param = new HashMap<String, String>();
+            param.put(ConfigurationParamModel.ASYNC_TYPE_ID,
+                    dataRow.getCell(getView().getAsyncTypeIdColumn().getAlias()).getStringValue());
             param.put(ConfigurationParamModel.ASYNC_TYPE,
                     dataRow.getCell(getView().getAsyncTypeColumn().getAlias()).getStringValue());
             param.put(ConfigurationParamModel.ASYNC_LIMIT_KIND,
@@ -421,6 +426,10 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 
             dataRow.setFormColumns(asList(nameCell, valueCell, descriptionCell));
         } else if (group.equals(ConfigurationParamGroup.ASYNC)) {
+            Cell typeIdCell = new Cell();
+            typeIdCell.setColumn(getView().getAsyncTypeIdColumn());
+            typeIdCell.setEditable(false);
+
             Cell typeCell = new Cell();
             typeCell.setColumn(getView().getAsyncTypeColumn());
             typeCell.setEditable(false);
@@ -437,7 +446,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             shortLimitCell.setColumn(getView().getAsyncShortLimitColumn());
             shortLimitCell.setEditable(true);
 
-            dataRow.setFormColumns(asList(typeCell, limitKindCell, limitCell, shortLimitCell));
+            dataRow.setFormColumns(asList(typeIdCell, typeCell, limitKindCell, limitCell, shortLimitCell));
         }
 
         return dataRow;

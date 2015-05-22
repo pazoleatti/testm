@@ -64,6 +64,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     private StringColumn emailValueColumn = new StringColumn();
     private StringColumn emailDescriptionColumn = new StringColumn();
 
+    private StringColumn asyncTypeIdColumn = new StringColumn();
     private StringColumn asyncTypeColumn = new StringColumn();
     private StringColumn asyncLimitKindColumn = new StringColumn();
     private StringColumn asyncLimitColumn = new StringColumn();
@@ -231,9 +232,15 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
      * Подготовка таблицы параметров электронной почты
      */
     private void initAsyncTable() {
+        asyncTypeIdColumn.setAlias("asyncTypeIdColumn");
+        asyncTypeIdColumn.setName("");
+        Column<DataRow<Cell>, ?> asyncParamColumnUI = factory.createTableColumn(asyncTypeIdColumn, asyncTable);
+        asyncTable.setColumnWidth(asyncParamColumnUI, 0, Style.Unit.EM);
+        asyncTable.addColumn(asyncParamColumnUI, asyncTypeIdColumn.getName());
+
         asyncTypeColumn.setAlias("asyncTypeColumn");
         asyncTypeColumn.setName("Тип задания");
-        Column<DataRow<Cell>, ?> asyncParamColumnUI = factory.createTableColumn(asyncTypeColumn, asyncTable);
+        asyncParamColumnUI = factory.createTableColumn(asyncTypeColumn, asyncTable);
         asyncTable.setColumnWidth(asyncParamColumnUI, 20, Style.Unit.EM);
         asyncTable.addColumn(asyncParamColumnUI, asyncTypeColumn.getName());
 
@@ -528,5 +535,10 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         for (DataGrid<DataRow<Cell>> table : tableMap.values()) {
             ((SingleSelectionModel) table.getSelectionModel()).clear();
         }
+    }
+
+    @Override
+    public StringColumn getAsyncTypeIdColumn() {
+        return asyncTypeIdColumn;
     }
 }

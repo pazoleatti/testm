@@ -16,10 +16,11 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, Map<Inte
     public static final String EMAIL_VALUE_ATTRIBUTE = "VALUE";
     public static final String EMAIL_DESCRIPTION_ATTRIBUTE = "DESCRIPTION";
 
-    public static final String ASYNC_TYPE = "TYPE";
+    public static final String ASYNC_TYPE_ID = "ID";
+    public static final String ASYNC_TYPE = "NAME";
     public static final String ASYNC_LIMIT_KIND = "LIMIT_KIND";
-    public static final String ASYNC_LIMIT = "LIMIT";
-    public static final String ASYNC_SHORT_LIMIT = "SHORT_LIMIT";
+    public static final String ASYNC_LIMIT = "TASK_LIMIT";
+    public static final String ASYNC_SHORT_LIMIT = "SHORT_QUEUE_LIMIT";
 
     private final static String SPLITTER = "\n";
 
