@@ -28,7 +28,7 @@ public enum ReportType {
 
     public static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
     public static final String CHECK_TASK = "Выполнение операции \"%s\" невозможно, т.к. %s";
-    public static final String CANCEL_TASK = "Операция \"%s\" отменена"; // ToDo поменять текс когда добавят в постановке http://conf.aplana.com/pages/viewpage.action?pageId=19661926
+    public static final String CANCEL_TASK = "Пользователем \"%s\" отменена задача \"%s\"";
 
     private int id;
     private String name;

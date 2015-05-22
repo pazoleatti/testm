@@ -368,10 +368,11 @@ public class LockDataServiceImpl implements LockDataService {
                @Override
                public void execute() {
                    try {
+                       TAUser user = userDao.getUser(userId);
                        List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
                        asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
                        unlock(lockData.getKey(), userId, force);
-                       String msg = String.format(ReportType.CANCEL_TASK, lockData.getDescription());
+                       String msg = String.format(ReportType.CANCEL_TASK, user.getName(), lockData.getDescription());
                        List<Notification> notifications = new ArrayList<Notification>();
                        //Создаем оповещение для каждого пользователя из списка
                        for (Integer waitingUser : waitingUsers) {
