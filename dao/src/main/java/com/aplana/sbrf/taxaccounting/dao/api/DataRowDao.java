@@ -60,8 +60,7 @@ public interface DataRowDao {
     int getSizeWithoutTotal(FormData formData);
 
 	/**
-	 * Обновляет строки НФ. Строки остаются приаттаченными к текущему срезу НФ
-	 * При этом поле id у DataRow может быть обновлено.
+	 * Обновляет строки НФ во временном срезе
 	 */
 	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
 
@@ -174,4 +173,11 @@ public interface DataRowDao {
 	 * @return количество удаленных строк
 	 */
 	int removeRows(FormData formData);
+
+	/**
+	 * Актуализирует список ссылок НФ на элементы справочника. Ссылки выставляются только для строк постоянного среза
+	 * (автоматическая или версия ручного ввода)
+	 * @param formData экземпляр НФ, ссылки которого требуется актуализировать
+	 */
+	void refreshRefBookLinks(FormData formData);
 }
