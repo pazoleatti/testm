@@ -325,7 +325,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo) {
+    public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         if (lock(id, userInfo) == null) {
             try {
                 // TODO (sgoryachkin) Это 2 метода должо быть
@@ -336,12 +336,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Map<String, Object> exchangeParams = new HashMap<String, Object>();
                     declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, new LockStateLogger() {
-                        @Override
-                        public void updateState(String state) {
-                            //ToDo передавать из асинхронной задачи, когда будет переделана проверка и принятие на асинки
-                        }
-                    });
+                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, lockStateLogger);
                     declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
                     declarationData.setAccepted(true);
@@ -826,9 +821,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      */
     @Override
     public void deleteReport(long declarationDataId, boolean isLock) {
-        if (isLock) {
-            ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC};
-            for (ReportType reportType : reportTypes) {
+        ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC};
+        for (ReportType reportType : reportTypes) {
+            if (!isLock || isLock && !ReportType.XML_DEC.equals(reportType)) {
                 LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
                 if (lock != null)
                     lockDataService.interruptTask(lock, 0, true);
@@ -900,6 +895,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 : "");
             case CHECK_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_CHECK.getText(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        declaration.getKpp(),
+                        declaration.getTaxOrganCode(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "");
+            case ACCEPT_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_ACCEPT.getText(),
                         declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                         declarationTemplate.getType().getName(),
                         declaration.getKpp(),
