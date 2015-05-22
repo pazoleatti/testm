@@ -78,6 +78,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
                         @Override
                         public void onSuccess(ExtendLockResult result) {
                             getView().updateData(0);
+                            MessageEvent.fire(LockListPresenter.this, "Операция \"Продлить на 1 час\" выполнена успешно");
                         }
                     }, LockListPresenter.this));
         }
@@ -94,6 +95,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
                         public void onSuccess(DeleteLockResult result) {
                             getView().updateData(0);
                             getView().clearSelection();
+                            MessageEvent.fire(LockListPresenter.this, "Операция \"Удалить блокировку\" выполнена успешно");
                         }
                     }, LockListPresenter.this));
         }
@@ -115,6 +117,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
                         public void onSuccess(StopAsyncResult result) {
                             getView().updateData(0);
                             getView().clearSelection();
+                            MessageEvent.fire(LockListPresenter.this, "Операция \"Остановить задачу\" выполнена успешно");
                         }
                     }, LockListPresenter.this));
         }
