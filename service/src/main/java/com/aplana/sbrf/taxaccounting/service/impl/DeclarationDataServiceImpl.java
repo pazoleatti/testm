@@ -62,6 +62,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
 
+    private static final String CALCULATION_NOT_TOPICAL = "Декларация / Уведомление содержит неактуальные консолидированные данные  " +
+            "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
+            "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
+
     @Autowired
     private DeclarationDataDao declarationDataDao;
 
@@ -124,7 +128,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
 
-    private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
+    private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
     public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
@@ -135,9 +139,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"";
     private static final String NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING =
-            "Не выполнена консолидация данных из формы %s %s %s %s %d %s в статусе %s";
+            "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" в статусе \"%s\"";
     private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
-            "Не выполнена консолидация данных из формы %s %s %s %s %d %s - экземпляр формы не создан";
+            "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" - экземпляр формы не создан";
     private static final String FILE_NOT_DELETE = "Временный файл %s не удален";
 
     private static final Date MAX_DATE;
@@ -304,9 +308,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             try {
                 declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
                 DeclarationData declarationData = declarationDataDao.get(id);
-
-                // удаляем записи о консолидации для текущего экземпляра
-                sourceService.deleteDeclarationConsolidateInfo(id);
 
                 declarationDataDao.delete(id);
 
@@ -952,6 +953,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void checkSources(DeclarationData dd, Logger logger){
+        //Проверка на неактуальные консолидированные данные
+        if (sourceService.isDDConsolidationTopical(dd.getId())){
+            logger.error(CALCULATION_NOT_TOPICAL);
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+        }
         ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
         List<DepartmentFormType> sourceDDs = departmentFormTypeDao.getDeclarationSources(
                 dd.getDepartmentId(),
@@ -970,7 +976,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         sourceDFT.getKind().getName(),
                         rp.getName(),
                         rp.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                 formatter.format(drp.getCorrectionDate())) : "");
             } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
                 DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
@@ -980,7 +986,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         sourceFD.getKind().getName(),
                         rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
                         rp.getTaxPeriod().getYear(),
-                        sourceDRP.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                        sourceDRP.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                 formatter.format(sourceDRP.getCorrectionDate())) : "",
                         sourceFD.getState().getName());
             }
