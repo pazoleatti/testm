@@ -1,12 +1,11 @@
 package form_template.income.rnu31.v2014
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -204,87 +203,6 @@ void consolidation() {
     dataRowHelper.save(dataRows)
 }
 
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[1]): 'Ставка налога на прибыль',
-            (xml.row[0].cell[2]): '15%',
-            (xml.row[0].cell[6]): '9%',
-            (xml.row[0].cell[8]): '0%',
-            (xml.row[0].cell[9]): '20%',
-            (xml.row[1].cell[1]): 'Вид ценных бумаг',
-            (xml.row[1].cell[2]): 'ОФЗ',
-            (xml.row[1].cell[3]): 'Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет',
-            (xml.row[1].cell[4]): 'Государственные облигации Республики Беларусь',
-            (xml.row[1].cell[5]): 'Ипотечные облигации, выпущенные после 1 января 2007 года',
-            (xml.row[1].cell[6]): 'Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет',
-            (xml.row[1].cell[7]): 'Ипотечные облигации, выпущенные до 1 января 2007 года',
-            (xml.row[1].cell[8]): 'ОВГВЗ',
-            (xml.row[1].cell[9]): 'Еврооблигации РФ',
-            (xml.row[1].cell[10]): 'Прочие еврооблигации',
-            (xml.row[1].cell[11]): 'Корпоративные облигации',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8',
-            (xml.row[2].cell[8]): '9',
-            (xml.row[2].cell[9]): '10',
-            (xml.row[2].cell[10]): '11',
-            (xml.row[2].cell[11]): '12'
-    ]
-
-    checkHeaderEquals(headerMapping)
-    addData(xml, 3)
-}
-
-// Заполнить форму данными
-def addData(def xml, int headRowCount) {
-    if (xml.row.size() > 0) {
-        def xmlRow = xml.row[headRowCount]
-        def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-        def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-        def xmlIndexCol = 2
-        def int xlsIndexRow = 1 + rowOffset
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.allCached
-        def row = getDataRow(dataRows, 'total')
-        row.setImportIndex(xlsIndexRow)
-        row.keySet().each { row.getCell(it).setCheckMode(true) }
-
-        // графа 3
-        row.ofz = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 4
-        row.municipalBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 5
-        row.governmentBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 6
-        row.mortgageBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 7
-        row.municipalBondsBefore = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 8
-        row.rtgageBondsBefore = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 9
-        row.ovgvz = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 10
-        row.eurobondsRF = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 11
-        row.itherEurobonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // графа 12
-        row.corporateBonds = getNumber(xmlRow.cell[xmlIndexCol++].text(), xlsIndexRow, xmlIndexCol + colOffset)
-
-        showMessages(dataRows, logger)
-        dataRowHelper.save(dataRows)
-    }
-}
-
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 12, 0)
     addTransportData(xml)
@@ -344,5 +262,132 @@ void prevPeriodCheck() {
     // т.е. проверка отчёта за январь не осуществляется
     if (formData.periodOrder != 1 && formData.kind == FormDataKind.PRIMARY) {
         formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
+    }
+}
+
+void importData() {
+    int COLUMN_COUNT = 12
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = '№ пп'
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // простая строка
+        rowIndex++
+        if (rowIndex > dataRows.size()) {
+            break
+        }
+        // найти нужную строку нф
+        def dataRow = dataRows.get(rowIndex - 1)
+        // заполнить строку нф значениями из эксель
+        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(dataRows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount) {
+    if (headerRows.isEmpty() || headerRows.size() < 3) {
+        logger.error("Заголовок таблицы не соответствует требуемой структуре.")
+        return
+    }
+    // размер заголовка проверяется по последней строке (нумерация столбцов) потому что в первых строках есть объединения
+    checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]) : '№ пп',
+            (headerRows[0][1]) : 'Ставка налога на прибыль',
+            (headerRows[0][2]) : '15%',
+            (headerRows[0][6]) : '9%',
+            (headerRows[0][8]) : '0%',
+            (headerRows[0][9]) : '20%',
+            (headerRows[1][1]) : 'Вид ценных бумаг',
+            (headerRows[1][2]) : 'ОФЗ',
+            (headerRows[1][3]) : 'Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет',
+            (headerRows[1][4]) : 'Государственные облигации Республики Беларусь',
+            (headerRows[1][5]) : 'Ипотечные облигации, выпущенные после 1 января 2007 года',
+            (headerRows[1][6]) : 'Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет',
+            (headerRows[1][7]) : 'Ипотечные облигации, выпущенные до 1 января 2007 года',
+            (headerRows[1][8]) : 'ОВГВЗ',
+            (headerRows[1][9]) : 'Еврооблигации РФ',
+            (headerRows[1][10]): 'Прочие еврооблигации',
+            (headerRows[1][11]): 'Корпоративные облигации',
+    ]
+    (1..12).each { index ->
+        headerMapping.put((headerRows[2][index - 1]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Заполняет заданную строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+    dataRow.keySet().each { dataRow.getCell(it).setCheckMode(true) }
+
+    // Проверить фиксированные значения (графа 2)
+    def value = StringUtils.cleanString(values[1])
+    def valueExpected = StringUtils.cleanString(dataRow.securitiesType)
+    checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), 'securitiesType', logger, true)
+
+    // графа 3..12
+    def colIndex = 1
+    ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds', 'municipalBondsBefore',
+            'rtgageBondsBefore', 'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds'].each { alias ->
+        colIndex++
+        dataRow[alias] = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
     }
 }

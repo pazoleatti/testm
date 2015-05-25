@@ -602,98 +602,6 @@ def BigDecimal calc13(def row) {
     return roundTo2(tmp < 0 ? -tmp : 0)
 }
 
-
-// Получение импортируемых данных
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 13, 1)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Государственный регистрационный номер',
-            (xml.row[0].cell[3]): 'Номер сделки',
-            (xml.row[0].cell[4]): 'Размер лота на предыдущую отчетную дату, шт.',
-            (xml.row[0].cell[5]): 'Размер лота на текущую отчетную дату, шт.',
-            (xml.row[0].cell[6]): 'Расчётная величина резерва на предыдущую отчётную дату, руб.коп.',
-            (xml.row[0].cell[7]): 'Стоимость по цене приобретения, руб.коп.',
-            (xml.row[0].cell[8]): 'Признак ценной бумаги на текущую отчётную дату',
-            (xml.row[0].cell[9]): 'Рыночная котировка одной облигации, руб.коп.',
-            (xml.row[0].cell[10]): 'Стоимость по рыночной котировке, руб.коп.',
-            (xml.row[0].cell[11]): 'Расчётная величина резерва на текущую отчётную дату, руб.коп.',
-            (xml.row[0].cell[12]): 'Создание резерва, руб.коп.',
-            (xml.row[0].cell[13]): 'Восстановление резерва, руб.коп.',
-            (xml.row[1].cell[0]): '1'
-    ]
-    (2..13).each { index ->
-        headerMapping.put((xml.row[1].cell[index]), index.toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 1)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        /* Пропуск строк шапок */
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // Пропуск итоговых строк
-        if (row.cell[0].text() == null || row.cell[0].text() == "") {
-            continue
-        }
-
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
-        columns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-
-        // Графа 2
-        newRow.regNumber = row.cell[2].text()
-        // Графа 3
-        newRow.tradeNumber = row.cell[3].text()
-        // Графа 4
-        newRow.lotSizePrev = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
-        // Графа 5
-        newRow.lotSizeCurrent = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
-        // Графа 7
-        newRow.cost = parseNumber(row.cell[7].text(), xlsIndexRow, 7 + colOffset, logger, true)
-        // Графа 8
-        newRow.signSecurity = getRecordIdImport(62, 'CODE', row.cell[8].text(), xlsIndexRow, 8 + colOffset)
-        // Графа 9        newRow.marketQuotation = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
-
-        rows.add(newRow)
-    }
-
-    showMessages(rows, logger)
-
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
-    }
-}
-
 /** Получить признак ценной бумаги. */
 def getSign(def row) {
     return getRefBookValue(62, row.signSecurity)?.CODE?.value
@@ -909,4 +817,139 @@ def getReportPeriodEndDate() {
 
 boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 13
+    int HEADER_ROW_COUNT = 2
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP]) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        logger.error("Заголовок таблицы не соответствует требуемой структуре.")
+        return
+    }
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
+            (headerRows[0][2]) : getColumnName(tmpRow, 'regNumber'),
+            (headerRows[0][3]) : getColumnName(tmpRow, 'tradeNumber'),
+            (headerRows[0][4]) : getColumnName(tmpRow, 'lotSizePrev'),
+            (headerRows[0][5]) : getColumnName(tmpRow, 'lotSizeCurrent'),
+            (headerRows[0][6]) : getColumnName(tmpRow, 'reserve'),
+            (headerRows[0][7]) : getColumnName(tmpRow, 'cost'),
+            (headerRows[0][8]) : getColumnName(tmpRow, 'signSecurity'),
+            (headerRows[0][9]) : getColumnName(tmpRow, 'marketQuotation'),
+            (headerRows[0][10]): getColumnName(tmpRow, 'costOnMarketQuotation'),
+            (headerRows[0][11]): getColumnName(tmpRow, 'reserveCalcValue'),
+            (headerRows[0][12]): getColumnName(tmpRow, 'reserveCreation'),
+            (headerRows[0][13]): getColumnName(tmpRow, 'reserveRecovery'),
+            (headerRows[1][0]) : '1'
+    ]
+    (2..13).each { index ->
+        headerMapping.put((headerRows[1][index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    def colIndex = 1
+
+    // графа 2, 3
+    ['regNumber', 'tradeNumber'].each { alias ->
+        colIndex++
+        newRow[alias] = values[colIndex]
+    }
+
+    // графа 4..7
+    ['lotSizePrev', 'lotSizeCurrent', 'reserve', 'cost'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    // графа 8
+    colIndex = 8
+    newRow.signSecurity = getRecordIdImport(62, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 9..13
+    ['marketQuotation', 'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'reserveRecovery'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
 }
