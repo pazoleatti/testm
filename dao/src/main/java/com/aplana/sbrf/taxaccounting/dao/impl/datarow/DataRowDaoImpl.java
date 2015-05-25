@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
@@ -35,6 +37,8 @@ import java.util.*;
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
+	private static final Logger log = LogFactory.getLog(DataRowDaoImpl.class);
+
     @Autowired
 	private BDUtils dbUtils;
 
@@ -46,39 +50,55 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	public static final String ERROR_MSG_INDEX = "Индекс %s не входит в допустимый диапазон 1..%s";
 
-    @Override
-	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
-		//TODO обновить строки во временном срезе, вызывая shiftRows
-	}
-
-	@Override
-	public void removeRows(FormData fd, final List<DataRow<Cell>> rows) {
-		//TODO удалять по новому способу, вызывая shiftRows
-	}
-
-	@Override
-	public void saveRows(final FormData formData, final List<DataRow<Cell>> dataRows) {
-		//TODO обновить строки во временном срезе, вызывая shiftRows
-	}
-
 	@Override
 	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
-		//TODO
-	}
+		// сдвигаем строки
+		shiftRows(formData, new DataRowRange(index, rows.size()));
+		// вставляем новые в образовавшийся промежуток
+		Map<Integer, String[]) columnNames = DataRowMapper.getColumnNames(formData);
 
-	@Override
-	public void insertRows(FormData formData, DataRow<Cell> afterRow, List<DataRow<Cell>> rows) {
-		//TODO
-	}
+		StringBuilder sql = new StringBuilder("INSERT INTO form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" (id, form_data_id, temporary, manual, ord, alias");
+		for (Column column : formData.getFormColumns()){
+			sql.append('\n');
+			for(String name : columnNames.get(column.getId())) {
+				sql.append(", ").append(name);
+			}
+		}
+		sql.append(")\n VALUES (seq_form_data_nnn.nextval, :form_data_id, :temporary, :manual, :ord, :alias");
+		for (Column column : formData.getFormColumns()){
+			sql.append('\n');
+			for(String name : columnNames.get(column.getId())) {
+				sql.append(", :").append(name);
+			}
+		}
+		sql.append(')');
+		// формируем список параметров для батча
+		int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
+		List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
 
-	@Override
-	public void commit(long formDataId) {
-		//TODO
-	}
+		for (int i=1; i<=rows.size(); i++) {
+			DataRow<Cell> row = rows.get(i);
+			Map<String, Object> values = new HashMap<String, Object>();
+			values.put("form_data_id", formData.getId());
+			values.put("temporary", DataRowType.TEMP.getCode());
+			values.put("manual", manual);
+			values.put("ord", i);
+			values.put("alias", row.getAlias());
+			for (Column column : formData.getFormColumns()) {
+				String[] names = columnNames.get(column.getId());
+				Cell cell = row.getCell(column.getAlias());
+				values.put(names[0], cell.getValue());
+				values.put(names[1], cell.getStyle() == null ? null : cell.getStyle().getId();
+				values.put(names[2], cell.isEditable() ? 1 : 0);
+				values.put(names[3], cell.getColSpan());
+				values.put(names[4], cell.getRowSpan());
+			}
+			params.add(values);
+		}
+		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params);
 
-	@Override
-	public void rollback(long formDataId) {
-		//TODO
 	}
 
 	@Override
@@ -263,6 +283,137 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	//  ###################################### НОВАЯ СТРУКТУРА ХРАНЕНИЯ ######################################
 	@Override
+	public void saveRows(final FormData formData, final List<DataRow<Cell>> dataRows) {
+		// удаляем полностью строки из временного среза
+		removeRows(formData);
+		// вставляем новый набор данных
+		insertRows(formData, 1, dataRows);
+	}
+
+	@Override
+	public void updateRows(FormData fd, Collection<DataRow<Cell>> rows) {
+		StringBuilder sql = new StringBuilder("UPDATE form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" SET alias = :alias");
+
+		Map<Integer, String[]) columnNames = DataRowMapper.getColumnNames(formData);
+		for (Column column : formData.getFormColumns()){
+			sql.append('\n');
+			for(String name : columnNames.get(column.getId())) {
+				sql.append(", ").append(name).append(" = :").append(name);
+			}
+		}
+		sql.append(" WHERE id = :id");
+		if (log.isDebugEnabled()) {
+			log.debug("updateRows: " + sql.toString().intern());
+		}
+		// формируем список параметров для батча
+		int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
+		List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
+		for (DataRow<Cell> row : rows) {
+			Map<String, Object> values = new HashMap<String, Object>();
+			values.put("id", row.getId());
+			values.put("alias", row.getAlias());
+			for (Column column : formData.getFormColumns()) {
+				String[] names = columnNames.get(column.getId());
+				Cell cell = row.getCell(column.getAlias());
+				values.put(names[0], cell.getValue());
+				values.put(names[1], cell.getStyle() == null ? null : cell.getStyle().getId();
+				values.put(names[2], cell.isEditable() ? 1 : 0);
+				values.put(names[3], cell.getColSpan());
+				values.put(names[4], cell.getRowSpan());
+			}
+			params.add(values);
+		}
+		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params);
+	}
+
+	@Override
+	public void removeRows(FormData formData, final List<DataRow<Cell>> rows) {
+		// примечание: строки надо удалять так, чтобы не нарушалась последовательность ORD = 1, 2, 3, ...
+		StringBuilder sql = new StringBuilder("DELETE FROM form_data_);
+				sql.append(formData.getFormTemplateId());
+		sql.append(" WHERE id = :id");
+
+		// формируем список параметров для батча
+		int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
+		List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
+		for (DataRow<Cell> row : rows) {
+			Map<String, Object> values = new HashMap<String, Object>();
+			values.put("id", row.getId());
+		}
+		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params);
+		reorderRows(formData);
+	}
+
+	/**
+	 * Переупорядочивает строки, восстанавливает последовательность ORD = 1, 2, 3, ...
+	 * @param formData
+	 */
+	private void reorderRows(FormData formData) {
+		StringBuilder sql = new StringBuilder("MERGE INTO form_data_);
+				sql.append(formData.getFormTemplateId());
+		sql.append(" USING\n(SELECT id, ROW_NUMBER() OVER (ORDER BY ord) AS neword FROM form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append("\nWHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual) s");
+		sql.append("\nON (t.id = s.id) WHEN MATCHED THEN UPDATE SET t.ord = s.neword");
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("formDataId", formData.getId());
+		params.put("temporary", DataRowType.TEMP.getCode());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+
+		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
+	}
+
+	@Override
+	public void commit(FormData formData) {
+		// удаляем постоянный срез
+		removeRowsInternal(formData, DataRowType.STABLE);
+		// переносим данные из временного среза
+		StringBuilder sql = new StringBuilder("UPDATE form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" SET temporary = :temporary WHERE form_data_id = :form_data_id AND manual = :manual");
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("formDataId", formData.getId());
+		params.put("temporary", DataRowType.STABLE.getCode());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+
+		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
+
+		refreshRefBookLinks(formData);
+	}
+
+	@Override
+	public void rollback(FormData formData) {
+		// удаляем временный срез
+		removeRows(formData);
+	}
+
+	@Override
+	public void createTemporary(FormData formData) {
+		// удаляет данные временного среза
+		removeRows(formData);
+		// формируем запрос на копирование среза
+		StringBuilder sql = new StringBuilder("INSERT INTO form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" (form_data_id, temporary, manual, ord, alias");
+		DataRowMapper.getColumnNamesString(formData, sql);
+		sql.append(") \nSELECT form_data_id, 1, manual, ord, alias");
+		DataRowMapper.getColumnNamesString(formData, sql);
+		sql.append("FROM form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" WHERE form_data_id = :form_data_id AND manual = :manual");
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("formDataId", formData.getId());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+
+		getNamedParameterJdbcTemplate().update(sql, params);
+	}
+
+	@Override
 	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowRange range) {
 		return physicalGetRows(fd, DataRowType.STABLE, range);
 	}
@@ -343,33 +494,45 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public int removeRows(FormData formData) {
+	public void removeRows(FormData formData) {
+		removeRowsInternal(formData, DataRowType.TEMP);
+	}
+
+	/**
+	 * Удаляет строки из временноо\постоянного срезов
+	 * @param formData НФ
+	 * @param stableOrTemporary признак из какого среза удалить строки
+	 */
+	private void removeRowsInternal(FormData formData, DataRowType stableOrTemporary) {
+		if (stableOrTemporary != DataRowType.TEMP && stableOrTemporary != DataRowType.STABLE) {
+			throw new IllegalArgumentException("Value of argument 'isTemporary' is incorrect");
+		}
 		String sql = String.format("DELETE FROM form_data_%s WHERE temporary = :temporary AND " +
 				"manual = :manual", formData.getFormTemplateId());
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formData.getId());
-		params.put("temporary", DataRowType.TEMP.getCode());
+		params.put("temporary", stableOrTemporary.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		return getNamedParameterJdbcTemplate().update(sql, params);
+		getNamedParameterJdbcTemplate().update(sql, params);
 	}
 
 	@Override
-	public int removeRows(FormData formData, DataRowRange range) {
-		String sql = String.format("DELETE FROM form_data_%s WHERE temporary = :temporary AND " +
-				"manual = :manual AND ord BETWEEN :indexFrom AND :indexTo", formData.getFormTemplateId());
+	public void removeRows(FormData formData, DataRowRange range) {
+		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" WHERE form_data_id = :form_data_id temporary = :temporary AND manual = :manual AND ord BETWEEN :indexFrom AND :indexTo");
 
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
+		params.put("form_data_id", formData.getId());
 		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 		params.put("indexFrom", range.getOffset());
 		params.put("indexTo", range.getOffset() + range.getCount() - 1);
 
-		int count = getNamedParameterJdbcTemplate().update(sql, params);
+		getNamedParameterJdbcTemplate().update(sql, params);
 		shiftRows(formData, new DataRowRange(range.getOffset() + range.getCount(), -range.getCount()));
-		return count;
 	}
 
 	/**
@@ -379,8 +542,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @return количество смещенных строк
 	 */
 	private int shiftRows(FormData formData, DataRowRange range) {
-		String sql = String.format("UPDATE form_data_%s SET ord = ord + :shift WHERE temporary = :temporary AND " +
-				"manual = :manual AND ord >= :offset", formData.getFormTemplateId());
+		StringBuilder sql = new StringBuilder("UPDATE form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" SET ord = ord + :shift WHERE temporary = :temporary AND manual = :manual AND ord >= :offset");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formData.getId());
@@ -389,7 +553,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("offset", range.getOffset());
 		params.put("shift", range.getCount());
 
-		return getNamedParameterJdbcTemplate().update(sql, params);
+		return getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
 
 	@Override
@@ -418,7 +582,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		for (int i=1; i<names.size(); i++) {
 			withSql.append(" UNION \n SELECT DISTINCT '").append(names.get(0)).append("' AS column_name, ").append(names.get(0)).append(" AS value FROM TAB");
 		}
-		withSql.append(")\nSELECT rba.ref_book_id, data.value AS record_id FROM data\n");
+		withSql.append(")\nSELECT DISTINCT rba.ref_book_id, data.value AS record_id FROM data\n");
 		withSql.append("JOIN form_column fc ON('c'||fc.id = data.column_name AND fc.parent_column_id IS NULL)\n");
 		withSql.append("JOIN ref_book_attribute rba ON rba.id = fc.attribute_id\n");
 		withSql.append("WHERE data.value IS NOT NULL)");

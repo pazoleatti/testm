@@ -65,7 +65,7 @@ public class FormDataCacheDaoTest {
         dataRow.put("referenceColumn2", 4L);
         rows.add(dataRow);
         dataRowDao.saveRows(formData, rows);
-        dataRowDao.commit(formData.getId());
+        dataRowDao.commit(formData);
 
         Map<String, Map<String, RefBookValue>> map = dao.getRefBookMap(1L);
 

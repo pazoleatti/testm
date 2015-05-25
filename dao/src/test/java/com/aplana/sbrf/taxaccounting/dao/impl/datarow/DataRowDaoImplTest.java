@@ -94,7 +94,7 @@ public class DataRowDaoImplTest extends Assert {
 		dataRows.add(dr);
 
 		dataRowDao.saveRows(fd, dataRows);
-		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd);
 
 	}
 
@@ -127,11 +127,11 @@ public class DataRowDaoImplTest extends Assert {
 		Assert.assertEquals(5, dataRowDao.getSize(fd));
 		dataRowDao.removeRows(fd, 2, 2);
 		Assert.assertEquals(4, dataRowDao.getSize(fd));
-		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd);
 		Assert.assertEquals(4, dataRowDao.getSize(fd));
 		dataRowDao.removeRows(fd);
 		Assert.assertEquals(0, dataRowDao.getSize(fd));
-		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd);
 		Assert.assertEquals(0, dataRowDao.getSize(fd));
 	}
 
@@ -141,11 +141,11 @@ public class DataRowDaoImplTest extends Assert {
 		Assert.assertEquals(5, dataRowDao.getSavedSize(fd));
 		dataRowDao.removeRows(fd, 2, 2);
 		Assert.assertEquals(5, dataRowDao.getSavedSize(fd));
-		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd);
 		Assert.assertEquals(4, dataRowDao.getSavedSize(fd));
 		dataRowDao.removeRows(fd);
 		Assert.assertEquals(4, dataRowDao.getSavedSize(fd));
-		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd));
 		Assert.assertEquals(0, dataRowDao.getSavedSize(fd));
 	}
 
@@ -210,7 +210,7 @@ public class DataRowDaoImplTest extends Assert {
 		}
 		dataRowDao.insertRows(fd, 1, dataRows);
 		dataRowDao.updateRows(fd, dataRows);
-		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd);
 		dataRows = dataRowDao.getRows(fd, null);
 		Assert.assertEquals(dataRowsOld.size() + count, dataRows.size());
 	}
@@ -532,7 +532,7 @@ public class DataRowDaoImplTest extends Assert {
         Assert.assertEquals(DEFAULT_ORDER_STEP_TEST + sizeAfterRem, dataRowDao.getRows(fd, null).size());
 
         //We check after rollback that second element become first(it could be second)
-        dataRowDao.rollback(fd.getId());
+        dataRowDao.rollback(fd);
         Assert.assertEquals(sizeBefore, dataRowDao.getSize(fd));
         List<Long> rowIdsAfterRollback = new ArrayList<Long>();
         for (DataRow<Cell> row : dataRowDao.getRows(fd,null)) {
@@ -674,7 +674,7 @@ public class DataRowDaoImplTest extends Assert {
         rows.add(row);
 
         dataRowDao.saveRows(fd1, rows);
-        dataRowDao.commit(fd1.getId());
+        dataRowDao.commit(fd1);
 
         // Копирование
         dataRowDao.copyRows(fd1.getId(), fd2.getId());
@@ -693,7 +693,7 @@ public class DataRowDaoImplTest extends Assert {
         Assert.assertEquals(BigDecimal.valueOf(1.33d), rows2t.get(0).getCell("numericColumn").getValue());
 
         // Перенос в постоянный срез
-        dataRowDao.commit(fd2.getId());
+        dataRowDao.commit(fd2);
 
         // Копирование
         dataRowDao.copyRows(fd1.getId(), fd2.getId());

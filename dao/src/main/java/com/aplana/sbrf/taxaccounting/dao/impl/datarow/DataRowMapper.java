@@ -49,22 +49,13 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		params.put("temporary", isTemporary.getCode());
 		params.put("manual", isManual.getCode());
 
-		StringBuilder sql = new StringBuilder("SELECT ord, alias,\n");
+		StringBuilder sql = new StringBuilder("SELECT id, ord, alias,\n");
 		// автонумерация (считаются все строки где нет алиасов, либо алиас = ALIASED_WITH_AUTO_NUMERATION_AFFIX)
 		sql.append("CASE WHEN (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN\n")
 			.append("ROW_NUMBER() OVER (PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%")
 			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN 1 ELSE 0 END ORDER BY ord)\n")
 			.append("ELSE NULL END numeration");
-		// значения и стили ячеек
-		for (Column column : formData.getFormColumns()){
-			Integer columnId = column.getId();
-			sql.append(",\n");
-			sql.append('c').append(columnId).append(", ");
-			sql.append('c').append(columnId).append("_style_id, ");
-			sql.append('c').append(columnId).append("_editable, ");
-			sql.append('c').append(columnId).append("_colspan, ");
-			sql.append('c').append(columnId).append("_rowspan");
-		}
+		getColumnNames(formData, sql);
 		sql.append("\nFROM form_data_").append(formData.getFormTemplateId());
 		sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");
 		// пейджинг
@@ -76,6 +67,35 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		sql.append("\nORDER BY ord");
 
 		return new Pair<String, Map<String, Object>>(sql.toString(), params);
+	}
+
+	/**
+	 * Добавляет в sql запрос список столбцов по всем графам по шаблону <b>", cXXX, cXXX_style_id, ..., cXXX_rowspan"</b>
+	 * @param formData НФ
+	 * @param sql запрос, куда следует добавить перечень столбцов.
+	 */
+	static void getColumnNamesString(FormData formData, StringBuilder sql) {
+		Map<Integer, String[]) columnNames = getColumnNames(formData);
+		for (Column column : formData.getFormColumns()){
+			sql.append('\n');
+			for(String name : columnNames.get(column.getId())) {
+				sql.append(", ").append(name);
+			}
+		}
+	}
+
+	static Map<Integer, String[]) getColumnNames(FormData formData) {
+		Map<Integer, String[]) columnNames = new HashMap<Integer, String[]>();
+		for (Column column : formData.getFormColumns()){
+			String id = ('c' + column.getId().toString()).intern();
+			columnNames.put(id, new String[]{
+					id,
+					(id + "_style_id").intern(),
+					(id + "_editable").intern(),
+					(id + "_colspan").intern(),
+					(id + "_rowspan").intern()});
+		}
+		return columnNames;
 	}
 
 	@Override
@@ -110,7 +130,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			cell.setRowSpan(((rowSpan == null) || (rowSpan == 0)) ? 1 : rowSpan);
 		}
 		DataRow<Cell> dataRow = new DataRow<Cell>(alias, cells);
-		dataRow.setId(SqlUtils.getLong(rs, "ord")); //TODO удалить
+		dataRow.setId(SqlUtils.getLong(rs, "id"));
 		dataRow.setIndex(SqlUtils.getInteger(rs,"ord"));
 		return dataRow;
 	}

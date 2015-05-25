@@ -157,7 +157,7 @@ public class FormDataServiceImpl implements FormDataService {
         List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
         formData.setManual(true);
         dataRowDao.saveRows(formData, rows);
-        dataRowDao.commit(formData.getId());
+        dataRowDao.commit(formData);
 
         logger.info("Для налоговой формы успешно создана версия ручного ввода");
     }
@@ -348,7 +348,7 @@ public class FormDataServiceImpl implements FormDataService {
 			}
 		}
 
-		dataRowDao.commit(formData.getId());
+		dataRowDao.commit(formData);
 
         updatePreviousRowNumber(formData);
         return formData.getId();
@@ -476,7 +476,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Временный срез формы должен быть в актуальном состоянии
 		// Если не заблокировано то откат среза на всякий случай
 		if (getObjectLock(formData.getId(), userInfo)==null){
-			dataRowDao.rollback(formData.getId());
+			dataRowDao.rollback(formData);
 		}
 
 		formDataAccessService.canRead(userInfo, formData.getId());
@@ -642,7 +642,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         formDataDao.save(formData);
 
-		dataRowDao.commit(formData.getId());
+		dataRowDao.commit(formData);
 
         deleteReport(formData.getId(), formData.isManual());
 
@@ -729,8 +729,10 @@ public class FormDataServiceImpl implements FormDataService {
         // Форма не должна быть заблокирована даже текущим пользователем
         String lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + formDataId;
         checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
+
         // Временный срез формы должен быть в актуальном состоянии
-        dataRowDao.rollback(formDataId);
+		FormData formData = formDataDao.get(formDataId, manual);
+		dataRowDao.rollback(formData);
 
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
@@ -741,8 +743,6 @@ public class FormDataServiceImpl implements FormDataService {
                             + "\" из текущего состояния невозможен, или у пользователя " +
                             "не хватает полномочий для его осуществления");
         }
-
-        FormData formData = formDataDao.get(formDataId, manual);
 
         if (workflowMove == WorkflowMove.CREATED_TO_PREPARED
                 || workflowMove == WorkflowMove.PREPARED_TO_APPROVED
@@ -959,7 +959,7 @@ public class FormDataServiceImpl implements FormDataService {
             }
         }
 
-        dataRowDao.commit(formData.getId());
+        dataRowDao.commit(formData);
 
         logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
 
@@ -1224,17 +1224,19 @@ public class FormDataServiceImpl implements FormDataService {
                 userInfo.getUser().getId(),
                 getFormDataFullName(formDataId, null, null),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
-		dataRowDao.rollback(formDataId);
+		FormData formData = formDataDao.get(formDataId, false); //TODO manual выставить!!!
+		dataRowDao.rollback(formData);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void unlock(final long formDataId, final TAUserInfo userInfo) {
+		final FormData formData = formDataDao.get(formDataId, false); //TODO manual выставить!!!
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
                 lockService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId());
-                dataRowDao.rollback(formDataId);
+                dataRowDao.rollback(formData);
             }
 
             @Override

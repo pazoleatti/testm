@@ -60,14 +60,13 @@ public interface DataRowDao {
     int getSizeWithoutTotal(FormData formData);
 
 	/**
-	 * Обновляет строки НФ во временном срезе
+	 * Обновляет существующие строки НФ во временном срезе.
 	 */
 	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
 
 	/**
-	 * Удалет строки. При этом используется иденитфикатор DataRow.id 
-	 * Действие применяется к временному срезу строк
-	 * 
+	 * Удаляет строки во временном срезе.
+	 *
 	 * @param formData
 	 * @param rows
 	 */
@@ -84,14 +83,12 @@ public interface DataRowDao {
 	void saveRows(FormData formData, List<DataRow<Cell>> rows);
 
 	/**
-	 * Вставляем строки начания с указанного индекса
-	 * @param formData
-	 * @param index
-	 * @param rows
+	 * Вставляет строки начиная с указанного индекса
+	 * @param formData куда вставляем
+	 * @param index начальный индекс
+	 * @param rows список новых строк
 	 */
 	void insertRows(FormData formData, int index, List<DataRow<Cell>> rows);
-
-	void insertRows(FormData formData, DataRow<Cell> afterRow, List<DataRow<Cell>> rows);
 
 	/*
 	 * Сохранение/отмена
@@ -102,14 +99,14 @@ public interface DataRowDao {
 	 * 
 	 * @param formDataId
 	 */
-	void commit(long formDataId);
+	void commit(FormData formData);
 
 	/**
 	 * Откатывает временный срез формы к постоянному.
 	 * 
 	 * @param formDataId
 	 */
-	void rollback(long formDataId);
+	void rollback(FormData formData);
 
 
     /**
@@ -158,21 +155,26 @@ public interface DataRowDao {
 //  ###################################### НОВАЯ СТРУКТУРА ХРАНЕНИЯ ######################################
 
 	/**
+	 * Создает временный срез, предварительно удалив из него старые данные. Работает как с обычной, так и с версией
+	 * ручного ввода.
+	 * @param formData
+	 */
+	void createTemporary(FormData formData);
+
+	/**
 	 * Удаляет строки из временного среза в диапазоне индексов.
 	 * *
 	 * @param formData экземпляр НФ для которой выполняется удаление строк
 	 * @param range диапазон удаляемых строк, индекс начинается с 1
-	 * @return количество удаленных строк
 	 */
-	int removeRows(FormData formData, DataRowRange range);
+	void removeRows(FormData formData, DataRowRange range);
 
 	/**
-	 * Удаляем все строки из временного среза.
+	 * Удаляем все строки из временного
 	 *
 	 * @param formData экземпляр НФ для которой выполняется удаление строк
-	 * @return количество удаленных строк
 	 */
-	int removeRows(FormData formData);
+	void removeRows(FormData formData);
 
 	/**
 	 * Актуализирует список ссылок НФ на элементы справочника. Ссылки выставляются только для строк постоянного среза

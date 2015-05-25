@@ -108,7 +108,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 
             formDataDao.save(formData);
 			// Коммитим строки после отработки скрипта. http://jira.aplana.com/browse/SBRFACCTAX-3637
-			dataRowDao.commit(formData.getId());
+			dataRowDao.commit(formData);
             formDataService.deleteReport(formData.getId(), formData.isManual());
             logBusinessService.add(formData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE,
                     "Событие инициировано Системой");
