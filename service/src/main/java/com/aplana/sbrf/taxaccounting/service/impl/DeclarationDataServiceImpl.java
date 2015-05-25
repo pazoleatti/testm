@@ -823,7 +823,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void deleteReport(long declarationDataId, boolean isLock) {
         ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC};
         for (ReportType reportType : reportTypes) {
-            if (!isLock || isLock && !ReportType.XML_DEC.equals(reportType)) {
+            if (isLock || !isLock && !ReportType.XML_DEC.equals(reportType)) {
                 LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
                 if (lock != null)
                     lockDataService.interruptTask(lock, 0, true);

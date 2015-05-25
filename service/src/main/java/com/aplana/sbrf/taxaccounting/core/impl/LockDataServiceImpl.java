@@ -382,7 +382,7 @@ public class LockDataServiceImpl implements LockDataService {
                            notification.setText(msg);
                            notifications.add(notification);
                        }
-                       notificationService.saveList(notifications);
+                       if (!notifications.isEmpty()) notificationService.saveList(notifications);
                    } catch (Exception e) {
                        throw new ServiceException("Не удалось прервать задачу", e);
                    }

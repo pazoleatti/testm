@@ -126,7 +126,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 }
 
             } finally {
-                declarationDataService.unlock(action.getDeclarationId(), userInfo);
+                //declarationDataService.unlock(action.getDeclarationId(), userInfo);
             }
         } else {
             throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
