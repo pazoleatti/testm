@@ -68,7 +68,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
         Logger logger = new Logger();
         String uuidXml = reportService.getDec(userInfo, action.getDeclarationDataId(), ReportType.XML_DEC);
         if (uuidXml != null) {
-            LockData lockData = declarationDataService.lock(action.getDeclarationDataId(), userInfo);
+            LockData lockData = null;//declarationDataService.lock(action.getDeclarationDataId(), userInfo);
             if (lockData == null) {
                 try {
                     String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), reportType);
@@ -124,7 +124,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                         }
                     }
                 } finally {
-                    declarationDataService.unlock(action.getDeclarationDataId(), userInfo);
+                    //declarationDataService.unlock(action.getDeclarationDataId(), userInfo);
                 }
             } else {
                 throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");

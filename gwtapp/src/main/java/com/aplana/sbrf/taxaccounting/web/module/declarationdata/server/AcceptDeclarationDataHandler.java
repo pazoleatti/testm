@@ -18,7 +18,6 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -30,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -94,6 +94,16 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                             LockData.State.IN_QUEUE.getText(),
                             lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
                         try {
+                            String keyCheck = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.CHECK_DEC);
+                            LockData lockDataCheck = lockDataService.getLock(keyCheck);
+                            if (lockDataCheck != null) {
+                                List<Integer> waitingUsers = lockDataService.getUsersWaitingForLock(keyCheck);
+                                lockDataService.interruptTask(lockDataCheck, userInfo.getUser().getId(), true);
+                                for(Integer userId: waitingUsers) {
+                                    if (userId != userInfo.getUser().getId())
+                                        lockDataService.addUserWaitingForLock(key, userId);
+                                }
+                            }
                             params.put("declarationDataId", action.getDeclarationId());
                             params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                             params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
@@ -113,7 +123,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                             }
                         }
                     } else {
-                        throw new ActionException("Не удалось запустить принятии. Попробуйте выполнить операцию позже");
+                        throw new ActionException("Не удалось запустить принятие. Попробуйте выполнить операцию позже");
                     }
                 } else {
                     result.setStatus(CreateAsyncTaskStatus.EXIST);
@@ -122,12 +132,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                 result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             }
         } else {
-            declarationDataService.setAccepted(logger, action.getDeclarationId(), action.isAccepted(),
-                    securityService.currentUserInfo(), new LockStateLogger() {
-                        @Override
-                        public void updateState(String state) {
-                        }
-                    });
+            declarationDataService.cancel(logger, action.getDeclarationId(), securityService.currentUserInfo());
             result.setStatus(CreateAsyncTaskStatus.EXIST);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

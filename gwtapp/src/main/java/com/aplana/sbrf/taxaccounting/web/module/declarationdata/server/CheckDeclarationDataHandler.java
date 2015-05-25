@@ -17,7 +17,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
-import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
@@ -63,7 +62,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
         Logger logger = new Logger();
         String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
         if (uuidXml != null) {
-            if (lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC)) == null) {
+            if (lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.ACCEPT_DEC)) == null) {
                 String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
                 LockData lockDataReportTask = lockDataService.getLock(key);
                 if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
@@ -111,7 +110,8 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                     throw new ActionException("Не удалось запустить проверку. Попробуйте выполнить операцию позже");
                 }
             } else {
-                throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
+                logger.error("Идет принятие %s, невозможно выполнить проверку.", action.getTaxType().getDeclarationShortName());
+                throw new ServiceLoggerException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже", logEntryService.save(logger.getEntries()));
             }
         } else {
             result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);

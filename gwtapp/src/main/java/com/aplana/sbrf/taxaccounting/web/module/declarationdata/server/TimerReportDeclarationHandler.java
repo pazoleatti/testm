@@ -73,7 +73,9 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
     private TimerReportResult.StatusReport getStatus(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
         String key = declarationDataService.generateAsyncTaskKey(declarationDataId, reportType);
         if (!lockDataService.isLockExists(key, false)) {
-            if (reportService.getDec(userInfo, declarationDataId, reportType) == null) {
+            if (ReportType.ACCEPT_DEC.equals(reportType)) {
+                return TimerReportResult.StatusReport.EXIST;
+            } else if (reportService.getDec(userInfo, declarationDataId, reportType) == null) {
                 Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, reportType);
                 if (checkTaskLimit != null && checkTaskLimit.getFirst() == null) {
                     return TimerReportResult.StatusReport.LIMIT;
