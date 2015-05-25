@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.lock.server;
 
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.lock.shared.StopAsyncAction;
 import com.aplana.sbrf.taxaccounting.web.module.lock.shared.StopAsyncResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -20,10 +21,10 @@ import org.springframework.stereotype.Service;
 public class StopAsyncHandler extends AbstractActionHandler<StopAsyncAction, StopAsyncResult> {
 
     @Autowired
-    AsyncInterruptionManager asyncInterruptionManager;
+    LockDataService lockService;
 
     @Autowired
-    LockDataService lockService;
+    SecurityService securityService;
 
     public StopAsyncHandler() {
         super(StopAsyncAction.class);
@@ -31,8 +32,8 @@ public class StopAsyncHandler extends AbstractActionHandler<StopAsyncAction, Sto
 
     @Override
     public StopAsyncResult execute(StopAsyncAction action, ExecutionContext context) throws ActionException {
-        asyncInterruptionManager.interruptAll(action.getKeys());
-        lockService.unlockAll(action.getKeys());
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        lockService.interuptAllTasks(action.getKeys(), userInfo.getUser().getId());
         return new StopAsyncResult();
     }
 

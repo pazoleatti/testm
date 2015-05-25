@@ -370,8 +370,8 @@ public class LockDataServiceImpl implements LockDataService {
                    try {
                        TAUser user = userDao.getUser(userId);
                        List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
-                       asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
                        unlock(lockData.getKey(), userId, force);
+                       asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
                        String msg = String.format(ReportType.CANCEL_TASK, user.getName(), lockData.getDescription());
                        List<Notification> notifications = new ArrayList<Notification>();
                        //Создаем оповещение для каждого пользователя из списка
@@ -394,5 +394,12 @@ public class LockDataServiceImpl implements LockDataService {
                }
            }
         );
+    }
+
+    @Override
+    public void interuptAllTasks(List<String> lockKeys, int userId) {
+        for (String key : lockKeys) {
+            interruptTask(getLock(key), userId, true);
+        }
     }
 }

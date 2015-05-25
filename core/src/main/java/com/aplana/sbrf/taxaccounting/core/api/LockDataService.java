@@ -207,9 +207,17 @@ public interface LockDataService {
     /**
      * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
      * отправляет оповещения ожидающим блокировку пользователям
-     * @param lockData
-     * @param userId
-     * @param force
+     * @param lockData блокировка
+     * @param userId идентификатор пользователя, отменяющего блокировку
+     * @param force признак принудительного снятия блокировки
      */
     void interruptTask(LockData lockData, int userId, boolean force);
+
+    /**
+     * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
+     * отправляет оповещения ожидающим блокировку пользователям
+     * @param lockKeys ключи блокировок на удаление
+     * @param userId идентификатор пользователя, отменяющего блокировку
+     */
+    void interuptAllTasks(List<String> lockKeys, int userId);
 }
