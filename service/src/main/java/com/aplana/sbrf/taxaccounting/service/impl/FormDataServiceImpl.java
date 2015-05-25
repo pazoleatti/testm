@@ -401,6 +401,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void addRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        //Проверяем не заблокирована ли нф операцией загрузки в нее
+        checkLockedByImport(formData.getId(), logger);
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
@@ -425,6 +427,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        //Проверяем не заблокирована ли нф операцией загрузки в нее
+        checkLockedByImport(formData.getId(), logger);
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
@@ -459,6 +463,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        //Проверяем не заблокирована ли нф операцией загрузки в нее
+        checkLockedByImport(formData.getId(), logger);
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
@@ -701,6 +707,8 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
         checkLockAnotherUser(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId),
                 logger,  userInfo.getUser());
+        //Проверяем не заблокирована ли нф операцией загрузки в нее
+        checkLockedByImport(formDataId, logger);
 
         if (manual) {
             formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
@@ -731,6 +739,8 @@ public class FormDataServiceImpl implements FormDataService {
         // Форма не должна быть заблокирована даже текущим пользователем
         String lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + formDataId;
         checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
+        //Проверяем не заблокирована ли нф операцией загрузки в нее
+        checkLockedByImport(formDataId, logger);
         // Временный срез формы должен быть в актуальном состоянии
         dataRowDao.rollback(formDataId);
 
@@ -1565,6 +1575,14 @@ public class FormDataServiceImpl implements FormDataService {
         if (lockData != null && lockData.getUserId() != user.getId())
             throw new ServiceLoggerException(LOCK_MESSAGE,
                     logEntryService.save(logger.getEntries()));
+    }
+
+    private void checkLockedByImport(long formDataId, Logger logger) {
+        boolean lockedByImport = lockService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT + "_" + formDataId, true);
+        if (lockedByImport) {
+            throw new ServiceLoggerException(LOCK_MESSAGE,
+                    logEntryService.save(logger.getEntries()));
+        }
     }
 
     void checkLockedMe(LockData lockData, TAUser user){
