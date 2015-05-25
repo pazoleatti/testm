@@ -35,6 +35,9 @@ switch (formDataEvent) {
         checkDepartmentParams(LogLevel.ERROR)
         logicCheck()
         break
+    case FormDataEvent.PRE_CALCULATION_CHECK:
+        checkDepartmentParams(LogLevel.WARNING)
+        break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
         generateXML()
@@ -236,9 +239,9 @@ void generateXML() {
     def sign11 = isDeclarationExist(declarations().declaration11[0])
     def sign12 = 0
 
-    def nameDecl8 = has8 ? getDeclarationFileName(declarations().declaration8[0]) : getDeclarationFileName(declarations().declaration8n[0])
+    def nameDecl8 =  getDeclarationFileName(has8 ? declarations().declaration8[0] : declarations().declaration8n[0])
     def nameDecl81 = getDeclarationFileName(declarations().declaration81[0])
-    def nameDecl9 =  has9 ? getDeclarationFileName(declarations().declaration9[0]) : getDeclarationFileName(declarations().declaration9n[0])
+    def nameDecl9 =  getDeclarationFileName(has9 ? declarations().declaration9[0] : declarations().declaration9n[0])
     def nameDecl91 = getDeclarationFileName(declarations().declaration91[0])
     def nameDecl10 = getDeclarationFileName(declarations().declaration10[0])
     def nameDecl11 = getDeclarationFileName(declarations().declaration11[0])
