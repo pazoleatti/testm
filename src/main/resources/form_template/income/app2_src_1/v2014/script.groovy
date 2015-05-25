@@ -11,8 +11,6 @@ import groovy.transform.Field
 import java.sql.Statement
 import java.sql.PreparedStatement
 
-import java.text.SimpleDateFormat
-
 @Field
 Statement stmt
 
@@ -867,7 +865,7 @@ def getId(def refBookId, def code, def rowIndex, def colIndex) {
     if (result == null) {
         def rb = refBookFactory.get(refBookId)
         def attribute = rb.getAttribute('CODE').getName()
-        def date = (new SimpleDateFormat("dd.MM.yyyy")).format(getReportPeriodEndDate())
+        def date = getReportPeriodEndDate()?.format("dd.MM.yyyy")
         def msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR, rowIndex, getXLSColumnName(colIndex), rb.getName(), attribute, code, date)
         logger.warn(msg)
     }

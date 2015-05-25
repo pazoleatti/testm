@@ -9,8 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
-import java.text.SimpleDateFormat
-
 /**
  * Сводная форма "Доходы, учитываемые в простых РНУ (доходы простые)"
  * formTypeId=301
@@ -108,11 +106,6 @@ def rows8 = ((2..52) + (55..155))
 
 @Field
 def chRows = ['R118', 'R119', 'R140', 'R141', 'R141_1']
-
-@Field
-def formatY = new SimpleDateFormat('yyyy')
-@Field
-def format = new SimpleDateFormat('dd.MM.yyyy')
 
 @Field
 def editableStyle = 'Редактируемая'
@@ -459,7 +452,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                                     sum6 += rowRNU6.ruble ?: 0
                                     //графа 7
                                     if (rowRNU6.ruble != null && rowRNU6.ruble != 0) {
-                                        def dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(rowRNU6.date)) - 3))
+                                        def dateFrom = Date.parse('dd.MM.yyyy', '01.01.' + (Integer.valueOf(rowRNU6.date?.format('yyyy')) - 3))
                                         def reportPeriodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, rowRNU6.date)
                                         reportPeriodList.each { period ->
                                             def primaryRNU6 = formDataService.getLast(child.formType.id, FormDataKind.PRIMARY, child.departmentId, period.getId(), null) // TODO не реализовано получение по всем подразделениям.

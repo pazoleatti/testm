@@ -7,8 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import groovy.transform.Field
 
-import java.text.SimpleDateFormat
-
 /**
  * Сведения для расчёта налога с доходов в виде дивидендов (03/А)
  * formTemplateId=1411
@@ -130,12 +128,6 @@ def startDate = null
 
 @Field
 def endDate = null
-
-@Field
-def format = new SimpleDateFormat('dd.MM.yyyy')
-
-@Field
-def formatY = new SimpleDateFormat('yyyy')
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
