@@ -375,14 +375,16 @@ public class LockDataServiceImpl implements LockDataService {
                        String msg = String.format(ReportType.CANCEL_TASK, user.getName(), lockData.getDescription());
                        List<Notification> notifications = new ArrayList<Notification>();
                        //Создаем оповещение для каждого пользователя из списка
-                       for (Integer waitingUser : waitingUsers) {
-                           Notification notification = new Notification();
-                           notification.setUserId(waitingUser);
-                           notification.setCreateDate(new Date());
-                           notification.setText(msg);
-                           notifications.add(notification);
+                       if (!waitingUsers.isEmpty()) {
+                           for (Integer waitingUser : waitingUsers) {
+                               Notification notification = new Notification();
+                               notification.setUserId(waitingUser);
+                               notification.setCreateDate(new Date());
+                               notification.setText(msg);
+                               notifications.add(notification);
+                           }
+                           notificationService.saveList(notifications);
                        }
-                       if (!notifications.isEmpty()) notificationService.saveList(notifications);
                    } catch (Exception e) {
                        throw new ServiceException("Не удалось прервать задачу", e);
                    }

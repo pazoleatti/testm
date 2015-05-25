@@ -88,7 +88,7 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     @UiField
     LinkButton sources;
 
-    private Timer timerExcel, timerXML, timerPDF;
+    private Timer timerExcel, timerXML, timerPDF, timerAccept;
 
 	@Inject
 	@UiConstructor
@@ -126,9 +126,20 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             }
         };
 
+        timerAccept = new Timer() {
+            @Override
+            public void run() {
+                try {
+                    getUiHandlers().onTimerReport(ReportType.ACCEPT_DEC, true);
+                } catch (Exception e) {
+                }
+            }
+        };
+
         timerExcel.cancel();
         timerXML.cancel();
         timerPDF.cancel();
+        timerAccept.cancel();
 	}
 
     @Override
@@ -264,12 +275,12 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
 
 	@UiHandler("acceptButton")
 	public void onAccept(ClickEvent event){
-		getUiHandlers().accept(true);
+		getUiHandlers().accept(true, false);
 	}
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		getUiHandlers().accept(false);
+		getUiHandlers().accept(false, false);
 	}
 
 	@UiHandler("deleteButton")
@@ -333,10 +344,16 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         } else if (ReportType.PDF_DEC.equals(reportType)) {
             if (isLoad) {
                 viewPdf.setVisible(false);
-//                getUiHandlers().onTimerReport(ReportType.EXCEL_DEC, false);
                 timerPDF.cancel();
             } else {
                 viewPdf.setVisible(true);
+            }
+        } else if (ReportType.ACCEPT_DEC.equals(reportType)) {
+            if (isLoad) {
+                getUiHandlers().revealPlaceRequest();
+                timerAccept.cancel();
+            } else {
+
             }
         }
     }
@@ -352,6 +369,9 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
         } else if (ReportType.PDF_DEC.equals(reportType)) {
             timerPDF.scheduleRepeating(10000);
             timerPDF.run();
+        } else if (ReportType.ACCEPT_DEC.equals(reportType)) {
+            timerAccept.scheduleRepeating(10000);
+            timerAccept.run();
         }
     }
 
@@ -363,6 +383,8 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             timerXML.cancel();
         } else if (ReportType.PDF_DEC.equals(reportType)) {
             timerPDF.cancel();
+        } else if (ReportType.ACCEPT_DEC.equals(reportType)) {
+            timerAccept.cancel();
         }
     }
 

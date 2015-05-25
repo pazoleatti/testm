@@ -303,81 +303,80 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void delete(long id, TAUserInfo userInfo) {
-        LockData lockData = lock(id, userInfo);
-        if (lockData == null) {
-            try {
-                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
-                DeclarationData declarationData = declarationDataDao.get(id);
+        LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, ReportType.XML_DEC));
+        LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, ReportType.ACCEPT_DEC));
+        if (lockData == null && lockDataAccept == null) {
+            declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
+            DeclarationData declarationData = declarationDataDao.get(id);
 
-                declarationDataDao.delete(id);
+            declarationDataDao.delete(id);
 
-                auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
-                        declarationData.getReportPeriodId(),
-                        declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                        null, null, "Декларация удалена", null, null);
-            } finally {
-                unlock(id, userInfo);
-            }
+            auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
+                    declarationData.getReportPeriodId(),
+                    declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+                    null, null, "Декларация удалена", null, null);
         } else {
-            throw new ServiceException(String.format(LockDataService.LOCK_DATA, taUserService.getUser(lockData.getUserId()).getName(), lockData.getUserId()));
+            if (lockData == null) lockData = lockDataAccept;
+            Logger logger = new Logger();
+            logger.error("Невозможно выполнить удаление, т.к. выполянется \"%\"", lockData.getDescription());
+            throw new ServiceLoggerException(String.format(LockDataService.LOCK_DATA, taUserService.getUser(lockData.getUserId()).getName(), lockData.getUserId()), logEntryService.save(logger.getEntries()));
         }
     }
 
     @Override
     @Transactional(readOnly = false)
-    public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
-        if (lock(id, userInfo) == null) {
-            try {
-                // TODO (sgoryachkin) Это 2 метода должо быть
-                DeclarationData declarationData = declarationDataDao.get(id);
-                checkSources(declarationData, logger);
+    public void accept(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
+        DeclarationData declarationData = declarationDataDao.get(id);
+        checkSources(declarationData, logger);
 
-                if (accepted) {
-                    Map<String, Object> exchangeParams = new HashMap<String, Object>();
-                    declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, lockStateLogger);
-                    declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+        validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, lockStateLogger);
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
-                    declarationData.setAccepted(true);
+        declarationData.setAccepted(true);
 
-                    String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
-                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-                    auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData.getDepartmentId(),
-                            declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null, null);
-                } else {
-                    declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+        String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
+        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
+        auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData.getDepartmentId(),
+                declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null, null);
 
-                    declarationData.setAccepted(false);
-
-                    Map<String, Object> exchangeParams = new HashMap<String, Object>();
-                    declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
-
-                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                    if (declarationTemplate.getType().getIsIfrs() &&
-                            departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
-                        IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
-                        if (ifrsData != null && ifrsData.getBlobDataId() != null) {
-                            ifrsDataService.deleteReport(declarationData, userInfo);
-                        } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
-                            ifrsDataService.cancelTask(declarationData, userInfo);
-                        }
-                    }
-
-                    String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
-                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
-                    auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData.getDepartmentId(),
-                            declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null, null);
-
-                }
-                declarationDataDao.setAccepted(id, accepted);
-            } finally {
-                unlock(id, userInfo);
-            }
-        } else {
-            throw new ServiceException("Декларация заблокирована и не может быть принята. Попробуйте выполнить операцию позже");
-        }
+        declarationDataDao.setAccepted(id, true);
     }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void cancel(Logger logger, long id, TAUserInfo userInfo) {
+        DeclarationData declarationData = declarationDataDao.get(id);
+        checkSources(declarationData, logger);
+
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+
+        declarationData.setAccepted(false);
+
+        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        if (declarationTemplate.getType().getIsIfrs() &&
+                departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
+            IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
+            if (ifrsData != null && ifrsData.getBlobDataId() != null) {
+                ifrsDataService.deleteReport(declarationData, userInfo);
+            } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
+                ifrsDataService.cancelTask(declarationData, userInfo);
+            }
+        }
+
+        String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
+        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
+        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData.getDepartmentId(),
+                declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null, null);
+
+        declarationDataDao.setAccepted(id, false);
+    }
+
 
     @Override
     public InputStream getXmlDataAsStream(long declarationId, TAUserInfo userInfo) {
@@ -820,10 +819,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      */
     @Override
-    public void deleteReport(long declarationDataId, boolean isLock) {
-        ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC};
+    public void deleteReport(long declarationDataId, boolean isCalc) {
+        ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC, ReportType.ACCEPT_DEC};
         for (ReportType reportType : reportTypes) {
-            if (isLock || !isLock && !ReportType.XML_DEC.equals(reportType)) {
+            if (!isCalc || isCalc && !ReportType.XML_DEC.equals(reportType)) {
                 LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
                 if (lock != null)
                     lockDataService.interruptTask(lock, 0, true);

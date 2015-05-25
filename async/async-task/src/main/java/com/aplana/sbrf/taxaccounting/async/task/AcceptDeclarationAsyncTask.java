@@ -72,7 +72,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
-            declarationDataService.setAccepted(logger, declarationDataId, true, userInfo, new LockStateLogger() {
+            declarationDataService.accept(logger, declarationDataId, userInfo, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
                     lockService.updateState(lock, lockDate, state);

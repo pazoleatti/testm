@@ -92,14 +92,23 @@ public interface DeclarationDataService {
     void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo);
 
 	/**
-	 * Установить в декларации флаг принятия
+	 * Принятие декларации
 	 * @param logger - объект журнала
 	 * @param declarationDataId идентификатор декларации
-	 * @param accepted значение флага
 	 * @param userInfo информация о пользователе, выполняющего действие
 	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
 	 */
-	void setAccepted(Logger logger, long declarationDataId, boolean accepted, TAUserInfo userInfo, LockStateLogger lockStateLogger);
+    void accept(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
+
+
+    /**
+     * Отмена принятия декларации
+     * @param logger - объект журнала
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
+     */
+    void cancel(Logger logger, long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML)
@@ -195,7 +204,7 @@ public interface DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      * @param declarationDataId
      */
-    void deleteReport(long declarationDataId, boolean isLock);
+    void deleteReport(long declarationDataId, boolean isCalc);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 

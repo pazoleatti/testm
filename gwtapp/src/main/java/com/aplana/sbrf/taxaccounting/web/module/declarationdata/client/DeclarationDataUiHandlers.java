@@ -8,7 +8,7 @@ import java.util.Date;
 
 public interface DeclarationDataUiHandlers extends UiHandlers {
 	void onRecalculateClicked(Date docDate, boolean force);
-	void accept(boolean accepted);
+	void accept(boolean accepted, final boolean force);
 	void delete();
 	void check(boolean force);
     void viewReport(boolean force, ReportType reportType);
@@ -17,4 +17,5 @@ public interface DeclarationDataUiHandlers extends UiHandlers {
     TaxType getTaxType();
     void onTimerReport(final ReportType reportType, final boolean isTimer);
     void onOpenSourcesDialog();
+    void revealPlaceRequest();
 }

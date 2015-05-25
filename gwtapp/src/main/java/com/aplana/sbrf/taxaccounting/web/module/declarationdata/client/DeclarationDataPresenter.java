@@ -304,13 +304,13 @@ public class DeclarationDataPresenter
 	}
 
 	@Override
-	public void accept(boolean accepted) {
+	public void accept(boolean accepted, final boolean force) {
 		if (accepted) {
 			LogCleanEvent.fire(this);
 			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
 			action.setAccepted(true);
 			action.setDeclarationId(declarationId);
-            action.setForce(false);
+            action.setForce(force);
             action.setTaxType(taxType);
 			dispatcher
 					.execute(
@@ -321,7 +321,17 @@ public class DeclarationDataPresenter
 										public void onSuccess(
 												AcceptDeclarationDataResult result) {
                                             LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-											revealPlaceRequest();
+                                            if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
+                                                Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.ACCEPT_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
+                                            } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
+                                                Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.ACCEPT_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                                                    @Override
+                                                    public void yes() {
+                                                        accept(true, true);
+                                                    }
+                                                });
+                                            }
+                                            onTimerReport(ReportType.ACCEPT_DEC, false);
 										}
 									}, DeclarationDataPresenter.this));
 		} else {
@@ -412,7 +422,8 @@ public class DeclarationDataPresenter
 		addToPopupSlot(historyPresenter);
 	}
 
-	private void revealPlaceRequest() {
+    @Override
+    public void revealPlaceRequest() {
 		placeManager.revealPlace(new PlaceRequest(
 				DeclarationDataTokens.declarationData).with(
 				DeclarationDataTokens.declarationId,
