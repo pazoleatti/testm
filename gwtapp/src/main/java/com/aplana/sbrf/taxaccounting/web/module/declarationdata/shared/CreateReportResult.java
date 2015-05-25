@@ -5,21 +5,14 @@ import com.gwtplatform.dispatch.shared.Result;
 public class CreateReportResult implements Result {
     private static final long serialVersionUID = 7832261980997033051L;
 
-    public static enum StatusCreateReport {
-        NOT_EXIST_XML, //не существует XML
-        EXIST, //существует
-        LOCKED, //есть блокировка
-        CREATE //создана новая задача
-    }
-
-    private StatusCreateReport status;
+    private CreateAsyncTaskStatus status;
     private String uuid;
 
-    public StatusCreateReport getStatus() {
+    public CreateAsyncTaskStatus getStatus() {
         return status;
     }
 
-    public void setStatus(StatusCreateReport status) {
+    public void setStatus(CreateAsyncTaskStatus status) {
         this.status = status;
     }
 

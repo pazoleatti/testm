@@ -283,7 +283,7 @@ public class DeclarationDataPresenter
 									public void onSuccess(
 											RecalculateDeclarationDataResult result) {
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-                                        if (RecalculateDeclarationDataResult.StatusRecalculateDeclaration.LOCKED.equals(result.getStatus()) && force == false) {
+                                        if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
                                             Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.XML_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
                                                 @Override
                                                 public void yes() {
@@ -310,6 +310,8 @@ public class DeclarationDataPresenter
 			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
 			action.setAccepted(true);
 			action.setDeclarationId(declarationId);
+            action.setForce(false);
+            action.setTaxType(taxType);
 			dispatcher
 					.execute(
 							action,
@@ -384,9 +386,9 @@ public class DeclarationDataPresenter
 					public void onSuccess(CheckDeclarationDataResult result) {
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-                        if (CheckDeclarationDataResult.StatusCheckDeclaration.NOT_EXIST_XML.equals(result.getStatus())) {
+                        if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
                             Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
-                        } else if (CheckDeclarationDataResult.StatusCheckDeclaration.LOCKED.equals(result.getStatus()) && force == false) {
+                        } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
                             Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
                                 @Override
                                 public void yes() {
@@ -447,16 +449,16 @@ public class DeclarationDataPresenter
                     public void onSuccess(CreateReportResult result) {
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-                        if (CreateReportResult.StatusCreateReport.NOT_EXIST_XML.equals(result.getStatus())) {
+                        if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
                             Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.PDF_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
-                        } else if (CreateReportResult.StatusCreateReport.LOCKED.equals(result.getStatus()) && force == false) {
+                        } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
                             Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.PDF_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     viewReport(true, reportType);
                                 }
                             });
-                        } else if (CreateReportResult.StatusCreateReport.EXIST.equals(result.getStatus()) &&
+                        } else if (CreateAsyncTaskStatus.EXIST.equals(result.getStatus()) &&
                                 ReportType.EXCEL_DEC.equals(reportType)) {
                             DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/declarationData/xlsx/"
                                     + declarationId);

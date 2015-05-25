@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
@@ -72,7 +73,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                 try {
                     String uuid = reportService.getDec(userInfo, action.getDeclarationDataId(), reportType);
                     if (uuid != null) {
-                        result.setStatus(CreateReportResult.StatusCreateReport.EXIST);
+                        result.setStatus(CreateAsyncTaskStatus.EXIST);
                         return result;
                     } else {
                         String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationDataId(), reportType);
@@ -82,7 +83,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                                 // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
                                 lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId(), false);
                             } else {
-                                result.setStatus(CreateReportResult.StatusCreateReport.LOCKED);
+                                result.setStatus(CreateAsyncTaskStatus.LOCKED);
                                 return result;
                             }
                         } else if (lockDataReportTask != null) {
@@ -90,7 +91,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                             } catch (ServiceException e) {
                             }
-                            result.setStatus(CreateReportResult.StatusCreateReport.CREATE);
+                            result.setStatus(CreateAsyncTaskStatus.CREATE);
                             logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
                             result.setUuid(logEntryService.save(logger.getEntries()));
                             return result;
@@ -109,7 +110,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                                 BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                                 lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
                                 logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
-                                result.setStatus(CreateReportResult.StatusCreateReport.CREATE);
+                                result.setStatus(CreateAsyncTaskStatus.CREATE);
                             } catch (Exception e) {
                                 lockDataService.unlock(key, userInfo.getUser().getId());
                                 if (e instanceof ServiceLoggerException) {
@@ -129,7 +130,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                 throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
             }
         } else {
-            result.setStatus(CreateReportResult.StatusCreateReport.NOT_EXIST_XML);
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

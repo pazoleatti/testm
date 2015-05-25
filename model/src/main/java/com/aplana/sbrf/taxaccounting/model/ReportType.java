@@ -16,6 +16,7 @@ public enum ReportType {
     JASPER_DEC(3, "JASPER", "", 8L, 108L),
 
     CHECK_DEC(0, "CHECK_DECLARATION", "Проверка %s", 14L, 114L),
+    ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие %s", 15L, 115L),
 
     ZIP_IFRS(0, "Zip", "", 9L, 109L),
 

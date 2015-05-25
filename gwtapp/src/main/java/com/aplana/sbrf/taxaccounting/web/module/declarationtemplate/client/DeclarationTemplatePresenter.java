@@ -360,7 +360,9 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()){
-                    Dialog.errorMessage("Не удалось макет");
+                    Dialog.errorMessage("Не удалось импортировать макет");
+                } else if (event.getUuid() == null || event.getUuid().isEmpty()){// TODO проверить условие
+                    Dialog.infoMessage("Макет успешно обновлен");
                 }
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
             }

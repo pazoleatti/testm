@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 import java.math.RoundingMode
-import java.text.SimpleDateFormat
 
 /**
  * Скрипт для РНУ-46 (rnu46.groovy).
@@ -132,11 +131,9 @@ def dataRowHelperPrev = null // DataRowHelper формы предыдущего 
 @Field
 def isBalance = null
 @Field
-def format = new SimpleDateFormat('dd.MM.yyyy')
+def check17 = Date.parse('dd.MM.yyyy', '01.01.2006')
 @Field
-def check17 = format.parse('01.01.2006')
-@Field
-def lastDay2001 = format.parse('31.12.2001')
+def lastDay2001 = Date.parse('dd.MM.yyyy', '31.12.2001')
 // Дата начала отчетного периода
 @Field
 def startDate = null

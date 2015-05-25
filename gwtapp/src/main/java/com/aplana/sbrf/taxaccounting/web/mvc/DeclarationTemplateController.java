@@ -105,7 +105,7 @@ public class DeclarationTemplateController {
             mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo());
             IOUtils.closeQuietly(items.get(0).getInputStream());
 
-            deleteBlobs(customLog, jrxmBlobIdOld, xsdUuidOld);
+            deleteBlobs(customLog, jrxmBlobIdOld);// xsd удаляется при сохранении
             checkErrors(customLog, resp);
         } finally {
             declarationTemplateService.unlock(declarationTemplateId, userInfo);
@@ -250,7 +250,7 @@ public class DeclarationTemplateController {
                     blobDataService.delete(uuid);
                 } catch (ServiceException e){
                     //Если вдруг не удалось удалить старую запись
-                    log.warn(e.toString());
+                    log.warn(e.getMessage());
                 }
             }
         }

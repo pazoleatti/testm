@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
-import java.text.SimpleDateFormat
 
 /**
  * Форма "Расходы, учитываемые в простых РНУ (расходы простые)"
@@ -93,12 +92,6 @@ def formTypeId_RNU7 = 311
 
 @Field
 def formTypeId_RNU5 = 317
-
-@Field
-def formatY = new SimpleDateFormat('yyyy')
-
-@Field
-def format = new SimpleDateFormat('dd.MM.yyyy')
 
 @Field
 def row50001alias = 'R108'
@@ -559,7 +552,7 @@ def getSumForColumn7(def form, def dataRows, def value1, def value2) {
         if (row.getAlias() == null) {
             if (value1 == row.code && isEqualNum(value2, row.code) && row.ruble != null && row.ruble != 0) {
                 // получить (дату - 3 года)
-                def Date dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(row.docDate)) - 3))
+                def Date dateFrom = Date.parse('dd.MM.yyyy','01.01.' + (Integer.valueOf(row.docDate?.format('yyyy')) - 3))
                 // получить отчетные периоды за найденый промежуток времени [(дата - 3года)..дата]
                 def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, row.docDate)
                 reportPeriods.each { reportPeriod ->

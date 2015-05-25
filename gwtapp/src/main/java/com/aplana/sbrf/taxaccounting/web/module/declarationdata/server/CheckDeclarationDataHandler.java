@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CheckDeclarationDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -48,6 +49,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
 
     @Autowired
     private LockDataService lockDataService;
+
     public CheckDeclarationDataHandler() {
         super(CheckDeclarationDataAction.class);
     }
@@ -61,63 +63,58 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
         Logger logger = new Logger();
         String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
         if (uuidXml != null) {
-            LockData lockData = null;//declarationDataService.lock(action.getDeclarationId(), userInfo);
-            if (lockData == null) {
-                try {
-                    String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
-                    LockData lockDataReportTask = lockDataService.getLock(key);
-                    if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
-                        if (action.isForce()) {
-                            // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
-                            lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId(), false);
-                        } else {
-                            result.setStatus(CheckDeclarationDataResult.StatusCheckDeclaration.LOCKED);
-                            return result;
-                        }
-                    } else if (lockDataReportTask != null) {
-                        try {
-                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                        } catch (ServiceException e) {
-                        }
-                        result.setStatus(CheckDeclarationDataResult.StatusCheckDeclaration.CREATE);
-                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
-                        result.setUuid(logEntryService.save(logger.getEntries()));
+            if (lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC)) == null) {
+                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
+                LockData lockDataReportTask = lockDataService.getLock(key);
+                if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
+                    if (action.isForce()) {
+                        // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
+                        lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId(), false);
+                    } else {
+                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
                         return result;
                     }
-                    if (lockDataService.lock(key, userInfo.getUser().getId(),
-                            declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
-                            LockData.State.IN_QUEUE.getText(),
-                            lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
-                        try {
-                            params.put("declarationDataId", action.getDeclarationId());
-                            params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
-                            params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                            lockData = lockDataService.getLock(key);
-                            params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
-                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                            BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                            lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
-                            logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
-                            result.setStatus(CheckDeclarationDataResult.StatusCheckDeclaration.CREATE);
-                        } catch (Exception e) {
-                            lockDataService.unlock(key, userInfo.getUser().getId());
-                            if (e instanceof ServiceLoggerException) {
-                                throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                            } else {
-                                throw new ActionException(e);
-                            }
-                        }
-                    } else {
-                        throw new ActionException("Не удалось запустить формирование отчета. Попробуйте выполнить операцию позже");
+                } else if (lockDataReportTask != null) {
+                    try {
+                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                    } catch (ServiceException e) {
                     }
-                } finally {
-                    //declarationDataService.unlock(action.getDeclarationId(), userInfo);
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
+                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    return result;
+                }
+                if (lockDataService.lock(key, userInfo.getUser().getId(),
+                        declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
+                        LockData.State.IN_QUEUE.getText(),
+                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
+                    try {
+                        params.put("declarationDataId", action.getDeclarationId());
+                        params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
+                        params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                        LockData lockData = lockDataService.getLock(key);
+                        params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                        BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                        lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
+                        result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    } catch (Exception e) {
+                        lockDataService.unlock(key, userInfo.getUser().getId());
+                        if (e instanceof ServiceLoggerException) {
+                            throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                        } else {
+                            throw new ActionException(e);
+                        }
+                    }
+                } else {
+                    throw new ActionException("Не удалось запустить проверку. Попробуйте выполнить операцию позже");
                 }
             } else {
                 throw new ActionException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже");
             }
         } else {
-            result.setStatus(CheckDeclarationDataResult.StatusCheckDeclaration.NOT_EXIST_XML);
+            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
 	    return result;

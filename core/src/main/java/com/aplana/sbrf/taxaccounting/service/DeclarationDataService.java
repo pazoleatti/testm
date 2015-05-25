@@ -99,7 +99,7 @@ public interface DeclarationDataService {
 	 * @param userInfo информация о пользователе, выполняющего действие
 	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
 	 */
-	void setAccepted(Logger logger, long declarationDataId, boolean accepted, TAUserInfo userInfo);
+	void setAccepted(Logger logger, long declarationDataId, boolean accepted, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
     /**
      * Получить данные декларации в формате законодателя (XML)
