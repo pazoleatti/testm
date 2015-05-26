@@ -558,4 +558,24 @@ public class ScriptUtilsTest {
 
         return list;
     }
+
+    @Test
+    public void updateIndexesTest() {
+        List<DataRow<Cell>> dataRows = getTestSimpleRows();
+        ScriptUtils.updateIndexes(dataRows);
+        int i = 1;
+        for (DataRow<Cell> row : dataRows) {
+            Assert.assertEquals(i++, row.getIndex().intValue());
+        }
+
+        for (DataRow<Cell> row : dataRows) {
+            row.setIndex(null);
+        }
+        ScriptUtils.updateIndexes(dataRows);
+        i = 1;
+        for (DataRow<Cell> row : dataRows) {
+            Assert.assertEquals(i++, row.getIndex().intValue());
+        }
+    }
+
 }

@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -216,7 +217,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             }
         }
 
-        dataRowHelper.save(rows);
+        dataRowHelper.setAllCached(rows);
     }
 
     @Override
@@ -660,5 +661,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void saveCachedDataRows(FormData formData, Logger logger) {
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            DataRowHelper dataRowHelper = getDataRowHelper(formData);
+            dataRowHelper.save(dataRowHelper.getAllCached());
+        }
     }
 }
