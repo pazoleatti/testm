@@ -195,71 +195,72 @@ public class GetMainMenuActionHandler extends
         }
 
         // АДМИНИСТРИРОВАНИЕ
-        if (currentUser.hasRole(TARole.ROLE_OPER) || currentUser.hasRole(TARole.ROLE_CONTROL)) {
+        if (!currentUser.hasRole(TARole.ROLE_GARANT)) {
             MenuItem adminMenuItem = new MenuItem("Администрирование");
-            adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
-            menuItems.add(adminMenuItem);
-        }
+            adminMenuItem.getSubMenu().add(new MenuItem("Блокировки", NUMBER_SIGN
+                    + LockTokens.lockList));
 
-        if (currentUser.hasRole(TARole.ROLE_ADMIN)
-                || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
-                || currentUser.hasRole(TARole.ROLE_CONF)) {
-
-            MenuItem adminMenuItem = new MenuItem("Администрирование");
+            if (currentUser.hasRole(TARole.ROLE_OPER) || currentUser.hasRole(TARole.ROLE_CONTROL)) {
+                adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+                menuItems.add(adminMenuItem);
+            }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                // добавить "Журнал аудита"
-                if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
-                    adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
-                }
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
+                    || currentUser.hasRole(TARole.ROLE_CONF)) {
+
+                if (currentUser.hasRole(TARole.ROLE_ADMIN)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                    // добавить "Журнал аудита"
+                    if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
+                        adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+                    }
                 /*
                 Если пользователю назначено несколько ролей, включая роль Администратор,
                 то права доступа должны браться как для Администратора
                 http://jira.aplana.com/browse/SBRFACCTAX-5687
                  */
-                if ((currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                        || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))
-                        && !currentUser.hasRole(TARole.ROLE_ADMIN)){
-                    adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+                    if ((currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))
+                            && !currentUser.hasRole(TARole.ROLE_ADMIN)){
+                        adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
+                    }
+                    adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
+                            + MembersTokens.MEMBERS));
                 }
-                adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
-                        + MembersTokens.MEMBERS));
-                adminMenuItem.getSubMenu().add(new MenuItem("Блокировки", NUMBER_SIGN
-                        + LockTokens.lockList));
-            }
 
-            if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
-                adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
-                        + ConfigurationPresenter.TOKEN));
-                adminMenuItem.getSubMenu().add(new MenuItem("Миграция данных", NUMBER_SIGN
-                        + MigrationTokens.migration));
-                adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
-                        + SchedulerTokens.taskList));
-            }
+                if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
+                    adminMenuItem.getSubMenu().add(new MenuItem("Конфигурационные параметры", NUMBER_SIGN
+                            + ConfigurationPresenter.TOKEN));
+                    adminMenuItem.getSubMenu().add(new MenuItem("Миграция данных", NUMBER_SIGN
+                            + MigrationTokens.migration));
+                    adminMenuItem.getSubMenu().add(new MenuItem("Планировщик задач", NUMBER_SIGN
+                            + SchedulerTokens.taskList));
+                }
 
-            if (currentUser.hasRole(TARole.ROLE_CONF)) {
-                MenuItem templateMenu = new MenuItem("Настройки", "", null);
-                adminMenuItem.getSubMenu().add(templateMenu);
-                templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", NUMBER_SIGN
-                        + AdminConstants.NameTokens.adminPage));
-                templateMenu.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
-                        + DeclarationTemplateTokens.declarationTemplateList));
-                templateMenu.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN
-                        + RefBookListTokens.REFBOOK_LIST_ADMIN));
-                templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK, "", "_blank"));
-                templateMenu.getSubMenu().add(new MenuItem("Экспорт макетов", DOWNLOAD_ALL_TEMPLATES));
-            }
+                if (currentUser.hasRole(TARole.ROLE_CONF)) {
+                    MenuItem templateMenu = new MenuItem("Настройки", "", null);
+                    adminMenuItem.getSubMenu().add(templateMenu);
+                    templateMenu.getSubMenu().add(new MenuItem("Макеты налоговых форм", NUMBER_SIGN
+                            + AdminConstants.NameTokens.adminPage));
+                    templateMenu.getSubMenu().add(new MenuItem("Макеты деклараций", NUMBER_SIGN
+                            + DeclarationTemplateTokens.declarationTemplateList));
+                    templateMenu.getSubMenu().add(new MenuItem("Справочники", NUMBER_SIGN
+                            + RefBookListTokens.REFBOOK_LIST_ADMIN));
+                    templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK, "", "_blank"));
+                    templateMenu.getSubMenu().add(new MenuItem("Экспорт макетов", DOWNLOAD_ALL_TEMPLATES));
+                }
 
-            // в банке все равно такого пользователя не будет, если надо убрать скажите мне aivanov
-            if("god".equals(currentUser.getLogin())){
-                adminMenuItem.getSubMenu().add(new MenuItem("Тестовая страница", NUMBER_SIGN
-                        + TestPageTokens.TEST_PAGE));
-            }
+                // в банке все равно такого пользователя не будет, если надо убрать скажите мне aivanov
+                if("god".equals(currentUser.getLogin())){
+                    adminMenuItem.getSubMenu().add(new MenuItem("Тестовая страница", NUMBER_SIGN
+                            + TestPageTokens.TEST_PAGE));
+                }
 
-            menuItems.add(adminMenuItem);
+                menuItems.add(adminMenuItem);
+            }
         }
 
 		GetMainMenuResult result = new GetMainMenuResult();
