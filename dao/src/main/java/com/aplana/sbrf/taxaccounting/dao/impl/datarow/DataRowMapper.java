@@ -55,7 +55,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			.append("ROW_NUMBER() OVER (PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%")
 			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN 1 ELSE 0 END ORDER BY ord)\n")
 			.append("ELSE NULL END numeration");
-		getColumnNames(formData, sql);
+		getColumnNamesString(formData, sql);
 		sql.append("\nFROM form_data_").append(formData.getFormTemplateId());
 		sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");
 		// пейджинг
@@ -75,7 +75,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @param sql запрос, куда следует добавить перечень столбцов.
 	 */
 	static void getColumnNamesString(FormData formData, StringBuilder sql) {
-		Map<Integer, String[]) columnNames = getColumnNames(formData);
+		Map<Integer, String[]> columnNames = getColumnNames(formData);
 		for (Column column : formData.getFormColumns()){
 			sql.append('\n');
 			for(String name : columnNames.get(column.getId())) {
@@ -84,11 +84,11 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		}
 	}
 
-	static Map<Integer, String[]) getColumnNames(FormData formData) {
-		Map<Integer, String[]) columnNames = new HashMap<Integer, String[]>();
+	static Map<Integer, String[]> getColumnNames(FormData formData) {
+		Map<Integer, String[]> columnNames = new HashMap<Integer, String[]>();
 		for (Column column : formData.getFormColumns()){
 			String id = ('c' + column.getId().toString()).intern();
-			columnNames.put(id, new String[]{
+			columnNames.put(column.getId(), new String[]{
 					id,
 					(id + "_style_id").intern(),
 					(id + "_editable").intern(),

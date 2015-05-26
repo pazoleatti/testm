@@ -1224,19 +1224,23 @@ public class FormDataServiceImpl implements FormDataService {
                 userInfo.getUser().getId(),
                 getFormDataFullName(formDataId, null, null),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
-		FormData formData = formDataDao.get(formDataId, false); //TODO manual выставить!!!
+		FormData formData = formDataDao.get(formDataId, false); //TODO SBRFACCTAX-11205 manual выставить!!!
 		dataRowDao.rollback(formData);
+		formData.setManual(true); //TODO удалить
+		dataRowDao.rollback(formData); //TODO удалить
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void unlock(final long formDataId, final TAUserInfo userInfo) {
-		final FormData formData = formDataDao.get(formDataId, false); //TODO manual выставить!!!
+		final FormData formData = formDataDao.get(formDataId, false); //TODO SBRFACCTAX-11205 manual выставить!!!
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
                 lockService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId());
                 dataRowDao.rollback(formData);
+				formData.setManual(true); //TODO удалить
+				dataRowDao.rollback(formData); //TODO удалить
             }
 
             @Override
@@ -1362,7 +1366,7 @@ public class FormDataServiceImpl implements FormDataService {
     void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         if (!formData.isManual() && beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
-                && dataRowDao.isDataRowsCountChanged(formData.getId())) {
+                && dataRowDao.isDataRowsCountChanged(formData)) {
             updatePreviousRowNumber(formData, logger);
         }
     }
@@ -1488,7 +1492,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     /**
-     * Экземпляры в статусе "Создана" не участвуют в сквозной нумерации
+     * Экземпляры в статусе "Создана" или в корр. периоде не участвуют в сквозной нумерации.
      * @param formState Состояние НФ
      * @param departmentReportPeriod Отчетный период подразделения НФ
      * @return true - участвует, false - не участвует

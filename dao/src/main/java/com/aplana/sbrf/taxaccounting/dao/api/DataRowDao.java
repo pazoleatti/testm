@@ -22,32 +22,52 @@ import java.util.List;
  */
 public interface DataRowDao {
 
-	/*
-	 * Методы для работы с сохраненным срезом формы
+	/**
+	 * Удаление значений неактуальных граф. Метод используется настройщиком при смене типов граф
+	 * @param columnIdList Список Id измененных/удаленных граф
 	 */
+	void cleanValue(Collection<Integer> columnIdList);
 
 	/**
-	 * Метод получает строки сохранненого среза строк НФ.
-	 * 
+	 * Делает временный срез строк формы постоянным.
+	 *
+	 * @param formData
 	 */
-	@Deprecated
+	void commit(FormData formData);
+
+	/**
+	 * Копирование строк из сохраненного среза НФ-источника во временный срез НФ-приемника.
+	 * Временный срез приемника предварительно очищается.Не копирует версию ручного ввода! Макеты источника и приемника
+	 * должны быть одинаковыми
+	 *
+	 * @param formDataSourceId НФ источник
+	 * @param formDataDestinationId НФ приемник
+	 */
+	void copyRows(long formDataSourceId, long formDataDestinationId);
+
+	/**
+	 * Создает временный срез, предварительно удалив из него старые данные. Работает как с обычной, так и с версией
+	 * ручного ввода.
+	 * @param formData
+	 */
+	void createTemporary(FormData formData);
+
+	/**
+	 * Метод получает строки редактируемого в данный момент среза строк НФ.
+	 *
+	 */
+	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
+
+	/**
+	 * Метод получает строки сохраненного среза строк НФ.
+	 *
+	 */
 	List<DataRow<Cell>> getSavedRows(FormData formData, DataRowRange range);
-	
+
 	/**
 	 * Метод получает количество строк сохранненого среза
 	 */
 	int getSavedSize(FormData formData);
-
-	/*
-	 * Методы для работы с редактируемым срезом формы
-	 */
-
-	/**
-	 * Метод получает строки редактируемого в данный момент среза строк НФ.
-	 * 
-	 */
-	@Deprecated
-	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
 
 	/**
 	 * Метод получает количество строк редактируемого среза
@@ -60,9 +80,43 @@ public interface DataRowDao {
     int getSizeWithoutTotal(FormData formData);
 
 	/**
-	 * Обновляет существующие строки НФ во временном срезе.
+	 * Вставляет строки начиная с указанного индекса
+	 * @param formData куда вставляем
+	 * @param index начальный индекс
+	 * @param rows список новых строк
 	 */
-	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
+	void insertRows(FormData formData, int index, List<DataRow<Cell>> rows);
+
+	/**
+	 * Изменилось ли количество строк в табличной части до и после редактирования (до сохранения НФ).
+	 * Только для автоматической версии (не ручного ввода)
+	 *
+	 * @param formData экземпляр НФ
+	 * @return true - изменилось, false - не изменилось
+	 */
+	boolean isDataRowsCountChanged(FormData formData);
+
+	/**
+	 * Актуализирует список ссылок НФ на элементы справочника. Ссылки выставляются только для строк постоянного среза
+	 * (автоматическая или версия ручного ввода)
+	 * @param formData экземпляр НФ, ссылки которого требуется актуализировать
+	 */
+	void refreshRefBookLinks(FormData formData);
+
+	/**
+	 * Удаляем все строки из временного среза
+	 *
+	 * @param formData экземпляр НФ для которой выполняется удаление строк
+	 */
+	void removeRows(FormData formData);
+
+	/**
+	 * Удаляет строки из временного среза в диапазоне индексов.
+	 * *
+	 * @param formData экземпляр НФ для которой выполняется удаление строк
+	 * @param range диапазон удаляемых строк, индекс начинается с 1
+	 */
+	void removeRows(FormData formData, DataRowRange range);
 
 	/**
 	 * Удаляет строки во временном срезе.
@@ -73,41 +127,27 @@ public interface DataRowDao {
 	void removeRows(FormData formData, List<DataRow<Cell>> rows);
 
 	/**
-	 * Сохраняет все строки во временном срезе формы, при этом сохраняется порядок, и 
-	 * удаляются все существующие строки. Фактически метод ведет себя как старый способ сохранения формы.
-	 * Поля DataRow.index и DataRow.id не принимаются во внимание. 
+	 * Сохранить отсортированные строки без учета остальных изменений. Обновятся только значения атрибута ORD.
+	 * Порядок задается последовательностью элементов в rows
+	 */
+	void reorderRows(FormData formData, List<DataRow<Cell>> rows);
+
+	/**
+	 * Откатывает временный срез формы к постоянному.
+	 *
+	 * @param formData
+	 */
+	void rollback(FormData formData);
+
+	/**
+	 * Сохраняет все строки во временном срезе формы, при этом удаляются все существующие строки.
+	 * Поля DataRow.index и DataRow.id не принимаются во внимание. Порядок следования выставляется согласно
+	 * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_nnn"
 	 * 
 	 * @param formData
 	 * @param rows
 	 */
 	void saveRows(FormData formData, List<DataRow<Cell>> rows);
-
-	/**
-	 * Вставляет строки начиная с указанного индекса
-	 * @param formData куда вставляем
-	 * @param index начальный индекс
-	 * @param rows список новых строк
-	 */
-	void insertRows(FormData formData, int index, List<DataRow<Cell>> rows);
-
-	/*
-	 * Сохранение/отмена
-	 */
-
-	/**
-	 * Делает временный срез строк формы постоянным.
-	 * 
-	 * @param formDataId
-	 */
-	void commit(FormData formData);
-
-	/**
-	 * Откатывает временный срез формы к постоянному.
-	 * 
-	 * @param formDataId
-	 */
-	void rollback(FormData formData);
-
 
     /**
      * Поиск по налоговой форме,
@@ -123,63 +163,9 @@ public interface DataRowDao {
      */
     PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive);
 
-    /**
-     * Изменилось ли количество строк в табличной части до и после редактирования (до сохранения НФ)
-     *
-     * @param formId идентификатор экземпляра НФ
-     * @return true - изменилось, false - не изменилось
-     */
-    boolean isDataRowsCountChanged(long formId);
-
-    /**
-     * Удаление значений неактуальных граф
-     * @param columnIdList Список Id измененных/удаленных граф
-     */
-    void cleanValue(Collection<Integer> columnIdList);
-
-    /**
-     * Копирование строк из сохраненного среза НФ-источника во временный срез НФ-приемника.
-     * Временный срез приемника предварительно очищается.
-     * Не копирует версию ручного ввода!
-     *
-     * @param formDataSourceId НФ источник
-     * @param formDataDestinationId НФ приемник
-     */
-    void copyRows(long formDataSourceId, long formDataDestinationId);
-
-    /**
-     * Сохранить отсортированные строки без учета остальных изменении. Обновятся только значения атрибута DATA_ROW.ORD
-     */
-    void saveSortRows(List<DataRow<Cell>> dataRows, FormData formData);
-
-//  ###################################### НОВАЯ СТРУКТУРА ХРАНЕНИЯ ######################################
-
 	/**
-	 * Создает временный срез, предварительно удалив из него старые данные. Работает как с обычной, так и с версией
-	 * ручного ввода.
-	 * @param formData
+	 * Обновляет существующие строки НФ во временном срезе.
 	 */
-	void createTemporary(FormData formData);
+	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
 
-	/**
-	 * Удаляет строки из временного среза в диапазоне индексов.
-	 * *
-	 * @param formData экземпляр НФ для которой выполняется удаление строк
-	 * @param range диапазон удаляемых строк, индекс начинается с 1
-	 */
-	void removeRows(FormData formData, DataRowRange range);
-
-	/**
-	 * Удаляем все строки из временного
-	 *
-	 * @param formData экземпляр НФ для которой выполняется удаление строк
-	 */
-	void removeRows(FormData formData);
-
-	/**
-	 * Актуализирует список ссылок НФ на элементы справочника. Ссылки выставляются только для строк постоянного среза
-	 * (автоматическая или версия ручного ввода)
-	 * @param formData экземпляр НФ, ссылки которого требуется актуализировать
-	 */
-	void refreshRefBookLinks(FormData formData);
 }
