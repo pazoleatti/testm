@@ -834,8 +834,7 @@ void importDataXLS() {
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     if (headerRows.isEmpty() || headerRows.size() < rowCount) {
-        logger.error("Заголовок таблицы не соответствует требуемой структуре.")
-        return
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     // размер заголовка проверяется по последней строке (нумерация столбцов) потому что в первых строках есть объединения
     checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)

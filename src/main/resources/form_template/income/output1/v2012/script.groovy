@@ -1,6 +1,7 @@
 package form_template.income.output1.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
@@ -324,8 +325,7 @@ void importData() {
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount) {
     if (headerRows.isEmpty() || headerRows.size() < rowCount) {
-        logger.error("Заголовок таблицы не соответствует требуемой структуре.")
-        return
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [

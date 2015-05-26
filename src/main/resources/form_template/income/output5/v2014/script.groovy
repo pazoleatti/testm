@@ -147,7 +147,7 @@ void importData() {
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     if (headerRows.isEmpty() || headerRows.size() < rowCount) {
-        throw new ServiceException('Заголовок таблицы не соответствует требуемой структуре.')
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
