@@ -1812,4 +1812,17 @@ public final class ScriptUtils {
             return value;
         }
     }
+
+    /**
+     * Проставление индексов у набора строк
+     *
+     * @param dataRows
+     */
+    @SuppressWarnings("unused")
+    public static void updateIndexes(List<DataRow<Cell>> dataRows) {
+        int index = 1;
+        for(DataRow<Cell> row: dataRows) {
+            row.setIndex(index++);
+        }
+    }
 }

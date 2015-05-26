@@ -150,6 +150,11 @@ public class DataRowHelperStub implements DataRowHelper {
     }
 
     @Override
+    public void setAllCached(List<DataRow<Cell>> dataRows) {
+        rowList = dataRows;
+    }
+
+    @Override
     public void dropCache() {
         // Не требуется
     }
