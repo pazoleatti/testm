@@ -154,7 +154,7 @@ public class FormDataServiceImpl implements FormDataService {
         FormData formData = formDataDao.get(formDataId, false);
         formDataAccessService.canCreateManual(logger, userInfo, formDataId);
 
-        List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
+        List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
         formData.setManual(true);
         dataRowDao.saveRows(formData, rows);
         dataRowDao.commit(formData);

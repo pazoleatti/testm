@@ -8,26 +8,22 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 
 public enum DataRowType {
+	/** Временный срез */
+	TEMP (1),
+	/** Постоянный срез */
+	SAVED (0),
+	/** Версия ручного ввода */
+	MANUAL (1),
+	/** Автоматическая версия */
+	AUTO (0);
 
-	TEMP ("Временный срез", 1),
-	STABLE ("Постоянный срез", 0),
-	MANUAL ("Версия ручного ввода", 1),
-	AUTO ("Автоматическая версия", 0);
-
-	private String title;
 	private int code;
 
-	DataRowType(String title, int code) {
-		this.title = title;
+	DataRowType(int code) {
 		this.code = code;
-	}
-
-	public String getTitle() {
-		return title;
 	}
 
 	public int getCode() {
 		return code;
 	}
-
 }

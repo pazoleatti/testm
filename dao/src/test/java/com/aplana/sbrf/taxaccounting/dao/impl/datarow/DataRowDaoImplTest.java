@@ -5,17 +5,13 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.test.BDUtilsMock;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -38,14 +34,105 @@ public class DataRowDaoImplTest extends Assert {
 	@Autowired
 	DataRowDao dataRowDao;
 
-	@Before
+	@Test
+	public void commit() {
+		FormData formData = formDataDao.get(329, false);
+		dataRowDao.commit(formData);
+		List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
+		Assert.assertTrue(rows.isEmpty());
+		rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(3, rows.size());
+		// проверям, что изменения не затронули другие НФ
+		formData = formDataDao.get(3291, false);
+		rows = dataRowDao.getTempRows(formData, null);
+		Assert.assertEquals(3, rows.size());
+	}
+
+	@Test
+	public void copyRows() {
+		dataRowDao.copyRows(329, 3291);
+		FormData formData = formDataDao.get(3291, false);
+		List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
+		Assert.assertEquals(2, rows.size()); // вместо трех строк должно стать две
+		Assert.assertEquals("some string", rows.get(1).get("stringColumn"));
+		rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(0, rows.size()); // постоянный срез не меняется
+	}
+
+	@Test
+	public void rollback() {
+		FormData formData = formDataDao.get(329, false);
+		dataRowDao.rollback(formData);
+		List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
+		Assert.assertTrue(rows.isEmpty());
+		rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(2, rows.size());
+		// проверям, что изменения не затронули другие НФ
+		formData = formDataDao.get(3291, false);
+		rows = dataRowDao.getTempRows(formData, null);
+		Assert.assertEquals(3, rows.size());
+	}
+	
+	
+	@Test
+	public void getTempRows() {
+		FormData formData = formDataDao.get(329, false);
+		List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
+		Assert.assertEquals(3, rows.size());
+	}
+
+	@Test
+	public void getSavedRows() {
+		FormData formData = formDataDao.get(329, false);
+
+		List<DataRow<Cell>> rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(2, rows.size());
+
+		formData.setManual(true);
+		rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(1, rows.size());
+		Assert.assertEquals(1000.0, ((BigDecimal) rows.get(0).get("numericColumn")).doubleValue(), 1e-2);
+	}
+
+	@Test
+	public void removeRows() {
+		FormData formData = formDataDao.get(329, false);
+		// удаляем строки из временного среза
+		dataRowDao.removeRows(formData);
+		List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
+		Assert.assertTrue(rows.isEmpty());
+		// проверяем, что другие срезы не пострадали в ходе удаления
+		rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(2, rows.size());
+
+		formData.setManual(true);
+		rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(1, rows.size());
+		Assert.assertEquals(1000.0, ((BigDecimal) rows.get(0).get("numericColumn")).doubleValue(), 1e-2);
+		// проверяем удаление диапазона
+		formData = formDataDao.get(3291, false);
+		dataRowDao.removeRows(formData, new DataRowRange(2, 1));
+		rows = dataRowDao.getTempRows(formData, null);
+		// проверяем размернсть и правильные значения ORD
+		Assert.assertEquals(2, rows.size());
+		Assert.assertEquals(1, rows.get(0).getIndex().intValue());
+		Assert.assertEquals(2, rows.get(1).getIndex().intValue());
+		// сохраняем временный срез в постоянный
+		dataRowDao.commit(formData);
+		rows = dataRowDao.getTempRows(formData, null);
+		Assert.assertTrue(rows.isEmpty());
+		rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(2, rows.size());
+	}
+
+	/*@Before
 	public void cleanDataRow() {
         ReflectionTestUtils.setField(dataRowDao, "dbUtils", BDUtilsMock.getBDUtils());
 
-		FormData fd = formDataDao.get(1, false);
+		FormData formData = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		DataRow<Cell> dr = fd.createDataRow();
+		DataRow<Cell> dr = formData.createDataRow();
 		dr.put("stringColumn", "1");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
@@ -55,7 +142,7 @@ public class DataRowDaoImplTest extends Assert {
 		dr.getCell("stringColumn").setEditable(true);
 		dr.getCell("numericColumn").setEditable(false);
 
-		dr = fd.createDataRow();
+		dr = formData.createDataRow();
 		dr.setAlias("newAlias0");
 		dr.put("stringColumn", "2");
 		dr.put("numericColumn", 2.02);
@@ -66,7 +153,7 @@ public class DataRowDaoImplTest extends Assert {
 		dr.getCell("stringColumn").setColSpan(2);
 		dr.getCell("numericColumn").setRowSpan(2);
 
-		dr = fd.createDataRow();
+		dr = formData.createDataRow();
 		dr.setAlias("newAlias1");
 		dr.put("stringColumn", "3");
 		dr.put("numericColumn", 2.02);
@@ -75,9 +162,9 @@ public class DataRowDaoImplTest extends Assert {
 		dataRows.add(dr);
 		// Style
 		dr.getCell("stringColumn").setStyleAlias(
-				fd.getFormStyles().get(0).getAlias());
+				formData.getFormStyles().get(0).getAlias());
 
-		dr = fd.createDataRow();
+		dr = formData.createDataRow();
 		dr.setAlias("newAlias2");
 		dr.put("stringColumn", "4");
 		dr.put("numericColumn", 2.02);
@@ -85,7 +172,7 @@ public class DataRowDaoImplTest extends Assert {
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dr = fd.createDataRow();
+		dr = formData.createDataRow();
 		dr.setAlias("newAlias3");
 		dr.put("stringColumn", "5");
 		dr.put("numericColumn", 2.02);
@@ -93,12 +180,11 @@ public class DataRowDaoImplTest extends Assert {
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dataRowDao.saveRows(fd, dataRows);
-		dataRowDao.commit(fd);
+		dataRowDao.saveRows(formData, dataRows);
+		dataRowDao.commit(formData);
+	}*/
 
-	}
-
-	private int[] dataRowsToStringColumnValues(List<DataRow<Cell>> dataRows) {
+	/*private int[] dataRowsToStringColumnValues(List<DataRow<Cell>> dataRows) {
 		int[] result = new int[dataRows.size()];
 		int i = 0;
 		for (DataRow<Cell> dataRow : dataRows) {
@@ -123,63 +209,63 @@ public class DataRowDaoImplTest extends Assert {
 
 	@Test
 	public void getSizeSuccess() {
-		FormData fd = formDataDao.get(1, false);
-		Assert.assertEquals(5, dataRowDao.getSize(fd));
-		dataRowDao.removeRows(fd, 2, 2);
-		Assert.assertEquals(4, dataRowDao.getSize(fd));
-		dataRowDao.commit(fd);
-		Assert.assertEquals(4, dataRowDao.getSize(fd));
-		dataRowDao.removeRows(fd);
-		Assert.assertEquals(0, dataRowDao.getSize(fd));
-		dataRowDao.commit(fd);
-		Assert.assertEquals(0, dataRowDao.getSize(fd));
+		FormData formData = formDataDao.get(1, false);
+		Assert.assertEquals(5, dataRowDao.getSize(formData));
+		dataRowDao.removeRows(formData, 2, 2);
+		Assert.assertEquals(4, dataRowDao.getSize(formData));
+		dataRowDao.commit(formData);
+		Assert.assertEquals(4, dataRowDao.getSize(formData));
+		dataRowDao.removeRows(formData);
+		Assert.assertEquals(0, dataRowDao.getSize(formData));
+		dataRowDao.commit(formData);
+		Assert.assertEquals(0, dataRowDao.getSize(formData));
 	}
 
 	@Test
 	public void getSavedSizeSuccess() {
-		FormData fd = formDataDao.get(1, false);
-		Assert.assertEquals(5, dataRowDao.getSavedSize(fd));
-		dataRowDao.removeRows(fd, 2, 2);
-		Assert.assertEquals(5, dataRowDao.getSavedSize(fd));
-		dataRowDao.commit(fd);
-		Assert.assertEquals(4, dataRowDao.getSavedSize(fd));
-		dataRowDao.removeRows(fd);
-		Assert.assertEquals(4, dataRowDao.getSavedSize(fd));
-		dataRowDao.commit(fd));
-		Assert.assertEquals(0, dataRowDao.getSavedSize(fd));
+		FormData formData = formDataDao.get(1, false);
+		Assert.assertEquals(5, dataRowDao.getSavedSize(formData));
+		dataRowDao.removeRows(formData, 2, 2);
+		Assert.assertEquals(5, dataRowDao.getSavedSize(formData));
+		dataRowDao.commit(formData);
+		Assert.assertEquals(4, dataRowDao.getSavedSize(formData));
+		dataRowDao.removeRows(formData);
+		Assert.assertEquals(4, dataRowDao.getSavedSize(formData));
+		dataRowDao.commit(formData));
+		Assert.assertEquals(0, dataRowDao.getSavedSize(formData));
 	}
 
 	@Test
 	public void saveRowsSuccess() {
 
-		FormData fd = formDataDao.get(1, false);
+		FormData formData = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		DataRow<Cell> dr = fd.createDataRow();
+		DataRow<Cell> dr = formData.createDataRow();
 		dr.put("stringColumn", "100");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dr = fd.createDataRow();
+		dr = formData.createDataRow();
 		dr.setAlias("newAlias0");
 		dr.put("numericColumn", 2.02);
 		date = getDate(2013, 0, 1);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dataRowDao.saveRows(fd, dataRows);
+		dataRowDao.saveRows(formData, dataRows);
 		Assert.assertArrayEquals(
 				new int[] { 100, 0 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null)));
 	}
 
 	@Test(expected=DaoException.class)
 	public void updateRowsErrorDataRowId() {
 
-		FormData fd = formDataDao.get(1, false);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null);
+		FormData formData = formDataDao.get(1, false);
+		List<DataRow<Cell>> dataRows = dataRowDao.getTempRows(formData, null);
 		List<DataRow<Cell>> dataRowsForUpdate = new ArrayList<DataRow<Cell>>();
 
 		DataRow<Cell> dr = dataRows.get(0);
@@ -192,36 +278,36 @@ public class DataRowDaoImplTest extends Assert {
 		dataRowsForUpdate.add(dr);
 
 
-		dataRowDao.updateRows(fd, dataRowsForUpdate);
+		dataRowDao.updateRows(formData, dataRowsForUpdate);
 	}
 
-	/**
+	*//**
 	 * Добавляем к существующим строкам еще несколько и проверяем итоговое количество
-	 */
+	 *//*
 	@Test
 	public void updateRowsTest() {
 		final int count = 10;
-		FormData fd = formDataDao.get(1000, false);
-		List<DataRow<Cell>> dataRowsOld = dataRowDao.getRows(fd, null);
+		FormData formData = formDataDao.get(1000, false);
+		List<DataRow<Cell>> dataRowsOld = dataRowDao.getTempRows(formData, null);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		for (int i = 0; i < count; i++) {
-			DataRow<Cell> dataRow = fd.createDataRow();
+			DataRow<Cell> dataRow = formData.createDataRow();
 			dataRows.add(dataRow);
 		}
-		dataRowDao.insertRows(fd, 1, dataRows);
-		dataRowDao.updateRows(fd, dataRows);
-		dataRowDao.commit(fd);
-		dataRows = dataRowDao.getRows(fd, null);
+		dataRowDao.insertRows(formData, 1, dataRows);
+		dataRowDao.updateRows(formData, dataRows);
+		dataRowDao.commit(formData);
+		dataRows = dataRowDao.getTempRows(formData, null);
 		Assert.assertEquals(dataRowsOld.size() + count, dataRows.size());
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void maodifyAndSaveErrorDublicat() {
 
-		FormData fd = formDataDao.get(1, false);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null);
+		FormData formData = formDataDao.get(1, false);
+		List<DataRow<Cell>> dataRows = dataRowDao.getTempRows(formData, null);
 
-		DataRow<Cell> dr = fd.createDataRow();
+		DataRow<Cell> dr = formData.createDataRow();
 		dr.put("stringColumn", "21");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
@@ -229,23 +315,23 @@ public class DataRowDaoImplTest extends Assert {
 
 		dataRows.add(1, dr);
 		dataRows.add(2, dr);
-		dataRowDao.saveRows(fd, dataRows);
+		dataRowDao.saveRows(formData, dataRows);
 	}
 
 	@Test
 	public void insertRowsByIndexFirstSuccess() {
 
-		FormData fd = formDataDao.get(1, false);
+		FormData formData = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		DataRow<Cell> dr = fd.createDataRow();
+		DataRow<Cell> dr = formData.createDataRow();
 		dr.put("stringColumn", "-2");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dr = fd.createDataRow();
+		dr = formData.createDataRow();
 		dr.setAlias("newAlias0");
 		dr.put("stringColumn", "-1");
 		dr.put("numericColumn", 2.02);
@@ -253,37 +339,37 @@ public class DataRowDaoImplTest extends Assert {
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dataRowDao.insertRows(fd, 1, dataRows);
+		dataRowDao.insertRows(formData, 1, dataRows);
 		Assert.assertArrayEquals(
 				new int[] { -2, -1, 1, 2, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null)));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void insertRowsByIndexError() {
 
-		FormData fd = formDataDao.get(1, false);
+		FormData formData = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		DataRow<Cell> dr = fd.createDataRow();
+		DataRow<Cell> dr = formData.createDataRow();
 		dataRows.add(dr);
 
-		dataRowDao.insertRows(fd, 7, dataRows);
+		dataRowDao.insertRows(formData, 7, dataRows);
 	}
 
 	@Test
 	public void insertRowsAfterFirstSuccess() {
-		FormData fd = formDataDao.get(1, false);
+		FormData formData = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		DataRow<Cell> dr = fd.createDataRow();
+		DataRow<Cell> dr = formData.createDataRow();
 		dr.put("stringColumn", "11");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dr = fd.createDataRow();
+		dr = formData.createDataRow();
 		dr.setAlias("newAlias0");
 		dr.put("stringColumn", "12");
 		dr.put("numericColumn", 2.02);
@@ -291,45 +377,45 @@ public class DataRowDaoImplTest extends Assert {
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dataRowDao.insertRows(fd,
-				dataRowDao.getRows(fd, new DataRowRange(1, 1)).get(0),
+		dataRowDao.insertRows(formData,
+				dataRowDao.getTempRows(formData, new DataRowRange(1, 1)).get(0),
 				dataRows);
 		Assert.assertArrayEquals(
 				new int[] { 1, 11, 12, 2, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null)));
 	}
 
 	@Test(expected=DaoException.class)
 	public void insertRowsAfterErrorRowId() {
-		FormData fd = formDataDao.get(1, false);
+		FormData formData = formDataDao.get(1, false);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		DataRow<Cell> dr = fd.createDataRow();
+		DataRow<Cell> dr = formData.createDataRow();
 		dr.put("stringColumn", "11");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		DataRow<Cell> drAfter = dataRowDao.getRows(fd, new DataRowRange(1, 1)).get(0);
+		DataRow<Cell> drAfter = dataRowDao.getTempRows(formData, new DataRowRange(1, 1)).get(0);
 		drAfter.setId(null);
-		dataRowDao.insertRows(fd, drAfter, dataRows);
-	}
+		dataRowDao.insertRows(formData, drAfter, dataRows);
+	}*/
 
 /*
 	@Test
 	public void insertRowsAfterLastSuccess() {
-		FormData fd = formDataDao.get(1);
+		FormData formData = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 
-		DataRow<Cell> dr = fd.createDataRow();
+		DataRow<Cell> dr = formData.createDataRow();
 		dr.put("stringColumn", "51");
 		dr.put("numericColumn", 1.01);
 		Date date = getDate(2012, 11, 31);
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dr = fd.createDataRow();
+		dr = formData.createDataRow();
 		dr.setAlias("newAlias0");
 		dr.put("stringColumn", "52");
 		dr.put("numericColumn", 2.02);
@@ -337,118 +423,118 @@ public class DataRowDaoImplTest extends Assert {
 		dr.put("dateColumn", date);
 		dataRows.add(dr);
 
-		dataRowDao.insertRows(fd,
-				dataRowDao.getRows(fd, null, new DataRowRange(5, 1)).get(0),
+		dataRowDao.insertRows(formData,
+				dataRowDao.getTempRows(formData, null, new DataRowRange(5, 1)).get(0),
 				dataRows);
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5, 51, 52 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null, null)));
 	}
 */
 
 /*
 	@Test
 	public void insertRowsAfterEmptySuccess() {
-		FormData fd = formDataDao.get(1);
+		FormData formData = formDataDao.get(1);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-		dataRowDao.insertRows(fd,
-				dataRowDao.getRows(fd, null, new DataRowRange(5, 1)).get(0),
+		dataRowDao.insertRows(formData,
+				dataRowDao.getTempRows(formData, null, new DataRowRange(5, 1)).get(0),
 				dataRows);
-		dataRows = dataRowDao.getRows(fd, null, null);
+		dataRows = dataRowDao.getTempRows(formData, null, null);
 		checkIndexCorrect(dataRows);
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null, null)));
 
 	}
 */
 
-	@Test
+	/*@Test
 	public void removeRowsByIndexes1Success() {
-		FormData fd = formDataDao.get(1, false);
-		dataRowDao.removeRows(fd, 2, 4);
+		FormData formData = formDataDao.get(1, false);
+		dataRowDao.removeRows(formData, 2, 4);
 		Assert.assertArrayEquals(
 				new int[] { 1, 5 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null)));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void removeRowsByIndexesError1() {
-		FormData fd = formDataDao.get(1, false);
-		dataRowDao.removeRows(fd, 0, 4);
+		FormData formData = formDataDao.get(1, false);
+		dataRowDao.removeRows(formData, 0, 4);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void removeRowsByIndexes1Error2() {
-		FormData fd = formDataDao.get(1, false);
-		dataRowDao.removeRows(fd, 1, 6);
+		FormData formData = formDataDao.get(1, false);
+		dataRowDao.removeRows(formData, 1, 6);
 	}
 
 	@Test
 	public void removeRowsByIndexes2Success() {
-		FormData fd = formDataDao.get(1, false);
-		dataRowDao.removeRows(fd, 2, 5);
+		FormData formData = formDataDao.get(1, false);
+		dataRowDao.removeRows(formData, 2, 5);
 		Assert.assertArrayEquals(
 				new int[] { 1 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null)));
 	}
 
 	@Test
 	public void removeRowsByIndexes3Success() {
-		FormData fd = formDataDao.get(1, false);
-		dataRowDao.removeRows(fd, 1, 5);
+		FormData formData = formDataDao.get(1, false);
+		dataRowDao.removeRows(formData, 1, 5);
 		Assert.assertArrayEquals(
 				new int[] {},
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null)));
 	}
 
 	@Test
 	public void removeRowsAll() {
-		FormData fd = formDataDao.get(1, false);
-		dataRowDao.removeRows(fd);
+		FormData formData = formDataDao.get(1, false);
+		dataRowDao.removeRows(formData);
 		Assert.assertArrayEquals(
 				new int[] {},
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null)));
 	}
 
-/*	@Test
+*//*	@Test
 	public void removeRowsByDataRows() {
-		FormData fd = formDataDao.get(1);
+		FormData formData = formDataDao.get(1);
 		DataRowRange range = new DataRowRange(2, 3);
-		List<DataRow<Cell>> dataRows = dataRowDao.getRows(fd, null, range);
-		dataRowDao.removeRows(fd, dataRows);
+		List<DataRow<Cell>> dataRows = dataRowDao.getTempRows(formData, null, range);
+		dataRowDao.removeRows(formData, dataRows);
 		Assert.assertArrayEquals(
 				new int[] { 1, 5 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null, null)));
-	}*/
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null, null)));
+	}*//*
 
 	@Test
 	public void getRowsSuccess() {
-		FormData fd = formDataDao.get(1, false);
+		FormData formData = formDataDao.get(1, false);
 		Assert.assertArrayEquals(
 				new int[] { 1, 2, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRowDao.getRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getTempRows(formData, null)));
 	}
 
 	@Test
 	public void getSavedRowsSuccess() {
-		FormData fd = formDataDao.get(1, false);
+		FormData formData = formDataDao.get(1, false);
 		Assert.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 },
-				dataRowsToStringColumnValues(dataRowDao.getSavedRows(fd, null)));
+				dataRowsToStringColumnValues(dataRowDao.getSavedRows(formData, null)));
 	}
 
 	@Test
 	public void repackORDSuccessFirst() {
-		FormData fd = formDataDao.get(1, false);
-        int sizeBefore = dataRowDao.getSize(fd);
+		FormData formData = formDataDao.get(1, false);
+        int sizeBefore = dataRowDao.getSize(formData);
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		for (int i = 0; i < DEFAULT_ORDER_STEP_TEST; i++) {
-			DataRow<Cell> dr = fd.createDataRow();
+			DataRow<Cell> dr = formData.createDataRow();
 			dataRows.add(dr);
 		}
-        List<DataRow<Cell>> addedDataRowsBefore = dataRowDao.getRows(fd, null);
-		dataRowDao.insertRows(fd, 1, dataRows);
-        List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null);
+        List<DataRow<Cell>> addedDataRowsBefore = dataRowDao.getTempRows(formData, null);
+		dataRowDao.insertRows(formData, 1, dataRows);
+        List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getTempRows(formData, null);
         Assert.assertNotEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
 		Assert.assertEquals(sizeBefore + DEFAULT_ORDER_STEP_TEST, addedDataRowsAfter.size());
@@ -456,9 +542,9 @@ public class DataRowDaoImplTest extends Assert {
         for (int i  =0; i< sizeBefore; i++){
             Assert.assertEquals(addedDataRowsBefore.get(i).getId(), addedDataRowsAfter.get((int) (DEFAULT_ORDER_STEP_TEST + i)).getId());
         }
-	}
+	}*/
 
-	private List<DataRow<Cell>> createDataRows(FormData formData, long count) {
+	/*private List<DataRow<Cell>> createDataRows(FormData formData, long count) {
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
 
 
@@ -484,12 +570,12 @@ public class DataRowDaoImplTest extends Assert {
 
 	@Test
 	public void repackORDSuccessCenter() {
-		FormData fd = formDataDao.get(1, false);
-        //int sizeBefore = dataRowDao.getSize(fd,null);
-		List<DataRow<Cell>> dataRows = createDataRows(fd, DEFAULT_ORDER_STEP_TEST);
-        List<DataRow<Cell>> addedDataRowsBefore = dataRowDao.getRows(fd, null);
-		dataRowDao.insertRows(fd, 5, dataRows);
-        List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null);
+		FormData formData = formDataDao.get(1, false);
+        //int sizeBefore = dataRowDao.getSize(formData,null);
+		List<DataRow<Cell>> dataRows = createDataRows(formData, DEFAULT_ORDER_STEP_TEST);
+        List<DataRow<Cell>> addedDataRowsBefore = dataRowDao.getTempRows(formData, null);
+		dataRowDao.insertRows(formData, 5, dataRows);
+        List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getTempRows(formData, null);
         Assert.assertEquals(addedDataRowsAfter.get(0).getId(), addedDataRowsBefore.get(0).getId());
         Assert.assertNotEquals(addedDataRowsAfter.size(), addedDataRowsBefore.size());
         //проверка сдвига, id записи должны быть равны(т.е. со сдвигом в данном случае на 100000)
@@ -498,12 +584,12 @@ public class DataRowDaoImplTest extends Assert {
 
 	@Test
 	public void repackORDSuccessLast() {
-		FormData fd = formDataDao.get(1, false);
-        int sizeBefore = dataRowDao.getSize(fd);
-		List<DataRow<Cell>> dataRows = createDataRows(fd, DEFAULT_ORDER_STEP_TEST);
-        List<DataRow<Cell>> addedDataRowsBefore = dataRowDao.getRows(fd, null);
-		dataRowDao.insertRows(fd, 6, dataRows);
-        List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getRows(fd, null);
+		FormData formData = formDataDao.get(1, false);
+        int sizeBefore = dataRowDao.getSize(formData);
+		List<DataRow<Cell>> dataRows = createDataRows(formData, DEFAULT_ORDER_STEP_TEST);
+        List<DataRow<Cell>> addedDataRowsBefore = dataRowDao.getTempRows(formData, null);
+		dataRowDao.insertRows(formData, 6, dataRows);
+        List<DataRow<Cell>> addedDataRowsAfter = dataRowDao.getTempRows(formData, null);
 
         //проверка сдвига, id записи должны быть равны(т.е. без сдвига в данном случае)
         for (int i  =0; i< sizeBefore; i++){
@@ -515,68 +601,68 @@ public class DataRowDaoImplTest extends Assert {
     @Test
     public void repackORDWithRemoveRows(){
         //Prepare
-        FormData fd = formDataDao.get(1, false);
-        List<DataRow<Cell>> rowsBefore = dataRowDao.getRows(fd, null);
+        FormData formData = formDataDao.get(1, false);
+        List<DataRow<Cell>> rowsBefore = dataRowDao.getTempRows(formData, null);
         List<Long> rowIdsBefore = new ArrayList<Long>();
         for (DataRow<Cell> row : rowsBefore){
             rowIdsBefore.add(row.getId());
         }
         int sizeBefore = rowsBefore.size();
-        dataRowDao.removeRows(fd,3,3);
-        Assert.assertEquals(sizeBefore - 1, dataRowDao.getSize(fd));
+        dataRowDao.removeRows(formData,3,3);
+        Assert.assertEquals(sizeBefore - 1, dataRowDao.getSize(formData));
 
         //Execute
-        int sizeAfterRem = dataRowDao.getSize(fd);
-		List<DataRow<Cell>> dataRows = createDataRows(fd, DEFAULT_ORDER_STEP_TEST);
-        dataRowDao.insertRows(fd, 1, dataRows);
-        Assert.assertEquals(DEFAULT_ORDER_STEP_TEST + sizeAfterRem, dataRowDao.getRows(fd, null).size());
+        int sizeAfterRem = dataRowDao.getSize(formData);
+		List<DataRow<Cell>> dataRows = createDataRows(formData, DEFAULT_ORDER_STEP_TEST);
+        dataRowDao.insertRows(formData, 1, dataRows);
+        Assert.assertEquals(DEFAULT_ORDER_STEP_TEST + sizeAfterRem, dataRowDao.getTempRows(formData, null).size());
 
         //We check after rollback that second element become first(it could be second)
-        dataRowDao.rollback(fd);
-        Assert.assertEquals(sizeBefore, dataRowDao.getSize(fd));
+        dataRowDao.rollback(formData);
+        Assert.assertEquals(sizeBefore, dataRowDao.getSize(formData));
         List<Long> rowIdsAfterRollback = new ArrayList<Long>();
-        for (DataRow<Cell> row : dataRowDao.getRows(fd,null)) {
+        for (DataRow<Cell> row : dataRowDao.getTempRows(formData,null)) {
             rowIdsAfterRollback.add(row.getId());
         }
         //Must following with same order
         Assert.assertArrayEquals(rowIdsBefore.toArray(), rowIdsAfterRollback.toArray());
     }
 
-    /**
+    *//**
      * Система для текущего экземпляра НФ выполняет сравнение количества строк в табличной части до и после
      * редактирования. Количество строк в табличной части не изменено.
-     */
+     *//*
     @Test
     public void testIsDataRowsCountChangedNotChanged() {
-        FormData fd = formDataDao.get(1000L, false);
+        FormData formData = formDataDao.get(1000L, false);
 
-        dataRowDao.removeRows(fd, 1, 1);
+        dataRowDao.removeRows(formData, 1, 1);
 
         List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
-        DataRow<Cell> dataRow = fd.createDataRow();
+        DataRow<Cell> dataRow = formData.createDataRow();
         rows.add(dataRow);
-        dataRowDao.insertRows(fd, 1, rows);
+        dataRowDao.insertRows(formData, 1, rows);
 
         boolean isCountChanged = dataRowDao.isDataRowsCountChanged(1000L);
         assertFalse("Количество строк не должно было измениться", isCountChanged);
     }
 
-    /**
+    *//**
      * Система для текущего экземпляра НФ выполняет сравнение количества строк в табличной части до и после
      * редактирования. Количество строк в табличной части изменено.
-     */
+     *//*
     @Test
     public void testIsDataRowsCountChangedChanged() {
-        FormData fd = formDataDao.get(1000L, false);
+        FormData formData = formDataDao.get(1000L, false);
 
-        dataRowDao.removeRows(fd, 1, 1);
+        dataRowDao.removeRows(formData, 1, 1);
 
         List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
         for (int i = 0; i < 5; i++) {
-            DataRow<Cell> dataRow = fd.createDataRow();
+            DataRow<Cell> dataRow = formData.createDataRow();
             rows.add(dataRow);
         }
-        dataRowDao.insertRows(fd, 1, rows);
+        dataRowDao.insertRows(formData, 1, rows);
 
         boolean isCountChanged = dataRowDao.isDataRowsCountChanged(1000L);
         assertTrue("Количество строк должно было измениться", isCountChanged);
@@ -603,13 +689,13 @@ public class DataRowDaoImplTest extends Assert {
 
         dataRowDao.saveRows(formData, dataRows);
 
-        dataRows = dataRowDao.getRows(formData, null);
+        dataRows = dataRowDao.getTempRows(formData, null);
         Assert.assertEquals(2, dataRows.size());
 
         // Пустое удаление
         dataRowDao.cleanValue(null);
         dataRowDao.cleanValue(new ArrayList<Integer>(0));
-        dataRows = dataRowDao.getRows(formData, null);
+        dataRows = dataRowDao.getTempRows(formData, null);
         Assert.assertEquals(2, dataRows.size());
         Assert.assertNotNull(dataRows.get(0).get("stringColumn"));
         Assert.assertNotNull(dataRows.get(0).get("numericColumn"));
@@ -619,7 +705,7 @@ public class DataRowDaoImplTest extends Assert {
         Assert.assertNotNull(dataRows.get(1).get("dateColumn"));
         // Удаление несуществующих ID
         dataRowDao.cleanValue(Arrays.asList(-1, 0));
-        dataRows = dataRowDao.getRows(formData, null);
+        dataRows = dataRowDao.getTempRows(formData, null);
         Assert.assertEquals(2, dataRows.size());
         Assert.assertNotNull(dataRows.get(0).get("stringColumn"));
         Assert.assertNotNull(dataRows.get(0).get("numericColumn"));
@@ -629,7 +715,7 @@ public class DataRowDaoImplTest extends Assert {
         Assert.assertNotNull(dataRows.get(1).get("dateColumn"));
         // Удаление одного значения
         dataRowDao.cleanValue(Arrays.asList(1));
-        dataRows = dataRowDao.getRows(formData, null);
+        dataRows = dataRowDao.getTempRows(formData, null);
         Assert.assertEquals(2, dataRows.size());
         Assert.assertNull(dataRows.get(0).get("stringColumn"));
         Assert.assertNotNull(dataRows.get(0).get("numericColumn"));
@@ -639,7 +725,7 @@ public class DataRowDaoImplTest extends Assert {
         Assert.assertNotNull(dataRows.get(1).get("dateColumn"));
         // Удаление еще одного значения
         dataRowDao.cleanValue(Arrays.asList(1, 3));
-        dataRows = dataRowDao.getRows(formData, null);
+        dataRows = dataRowDao.getTempRows(formData, null);
         Assert.assertEquals(2, dataRows.size());
         Assert.assertNull(dataRows.get(0).get("stringColumn"));
         Assert.assertNotNull(dataRows.get(0).get("numericColumn"));
@@ -655,9 +741,9 @@ public class DataRowDaoImplTest extends Assert {
         FormData fd2 = formDataDao.get(12, false);
 
         List<DataRow<Cell>> rows1s = dataRowDao.getSavedRows(fd1, null);
-        List<DataRow<Cell>> rows1t = dataRowDao.getRows(fd1, null);
+        List<DataRow<Cell>> rows1t = dataRowDao.getTempRows(fd1, null);
         List<DataRow<Cell>> rows2s = dataRowDao.getSavedRows(fd2, null);
-        List<DataRow<Cell>> rows2t = dataRowDao.getRows(fd2, null);
+        List<DataRow<Cell>> rows2t = dataRowDao.getTempRows(fd2, null);
 
         // Изначально временные срезы и постоянные срезы НФ должны быть пустыми
         Assert.assertEquals(0, rows1s.size());
@@ -680,9 +766,9 @@ public class DataRowDaoImplTest extends Assert {
         dataRowDao.copyRows(fd1.getId(), fd2.getId());
 
         rows1s = dataRowDao.getSavedRows(fd1, null);
-        rows1t = dataRowDao.getRows(fd1, null);
+        rows1t = dataRowDao.getTempRows(fd1, null);
         rows2s = dataRowDao.getSavedRows(fd2, null);
-        rows2t = dataRowDao.getRows(fd2, null);
+        rows2t = dataRowDao.getTempRows(fd2, null);
 
         Assert.assertEquals(1, rows1s.size());
         Assert.assertEquals(1, rows1t.size());
@@ -699,9 +785,9 @@ public class DataRowDaoImplTest extends Assert {
         dataRowDao.copyRows(fd1.getId(), fd2.getId());
 
         rows1s = dataRowDao.getSavedRows(fd1, null);
-        rows1t = dataRowDao.getRows(fd1, null);
+        rows1t = dataRowDao.getTempRows(fd1, null);
         rows2s = dataRowDao.getSavedRows(fd2, null);
-        rows2t = dataRowDao.getRows(fd2, null);
+        rows2t = dataRowDao.getTempRows(fd2, null);
 
         Assert.assertEquals(1, rows1s.size());
         Assert.assertEquals(1, rows1t.size());
@@ -714,24 +800,24 @@ public class DataRowDaoImplTest extends Assert {
 
     @Test
     public void saveSortRowsWithTmpInsertRows() {
-        FormData fd = formDataDao.get(1000, false);
+        FormData formData = formDataDao.get(1000, false);
         // получить 5 строк из временного среза
-        List<DataRow<Cell>> dataRows1 = dataRowDao.getRows(fd, null);
+        List<DataRow<Cell>> dataRows1 = dataRowDao.getTempRows(formData, null);
 
         // удаленные
         List<DataRow<Cell>> deleteRows = new ArrayList<DataRow<Cell>>();
         deleteRows.add(dataRows1.get(0));
         deleteRows.add(dataRows1.get(1));
-        dataRowDao.removeRows(fd, deleteRows);
+        dataRowDao.removeRows(formData, deleteRows);
 
         // добавленные
         List<DataRow<Cell>> insertRows = new ArrayList<DataRow<Cell>>();
-        insertRows.add(fd.createDataRow());
-        insertRows.add(fd.createDataRow());
-        dataRowDao.insertRows(fd, 3, insertRows);
+        insertRows.add(formData.createDataRow());
+        insertRows.add(formData.createDataRow());
+        dataRowDao.insertRows(formData, 3, insertRows);
 
         // получить временный срез после изменении
-        dataRows1 = dataRowDao.getRows(fd, null);
+        dataRows1 = dataRowDao.getTempRows(formData, null);
 
         // изменить сортировку
         Collections.sort(dataRows1, new Comparator<DataRow<Cell>>() {
@@ -742,10 +828,10 @@ public class DataRowDaoImplTest extends Assert {
         });
 
         // сохранить сортировку
-        dataRowDao.reorderRows(fd, dataRows1);
+        dataRowDao.reorderRows(formData, dataRows1);
 
         // получить строки из временного среза
-        List<DataRow<Cell>> dataRows2 = dataRowDao.getRows(fd, null);
+        List<DataRow<Cell>> dataRows2 = dataRowDao.getTempRows(formData, null);
 
         // проверка - после удаления стало на одну строку меньше
         Assert.assertEquals(dataRows1.size(), dataRows2.size());
@@ -758,72 +844,6 @@ public class DataRowDaoImplTest extends Assert {
                 Assert.assertEquals(id1, id2);
             }
         }
-    }
+    }*/
 
-	//  ###################################### НОВАЯ СТРУКТУРА ХРАНЕНИЯ ######################################
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testTemporaryManualValidation1() {
-		FormData fd = formDataDao.get(329, false);
-		dataRowDao.getRows(fd, DataRowType.AUTO, DataRowType.AUTO, null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testTemporaryManualValidation2() {
-		FormData fd = formDataDao.get(329, false);
-		dataRowDao.getRows(fd, DataRowType.MANUAL, DataRowType.AUTO, null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testTemporaryManualValidation3() {
-		FormData fd = formDataDao.get(329, false);
-		dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.STABLE, null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testTemporaryManualValidation4() {
-		FormData fd = formDataDao.get(329, false);
-		dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.TEMP, null);
-	}
-
-	@Test
-	public void getRowsNew() {
-		FormData fd = formDataDao.get(329, false);
-
-		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.AUTO, null);
-		Assert.assertEquals(2, rows.size());
-
-		rows = dataRowDao.getRows(fd, DataRowType.TEMP, DataRowType.AUTO, null);
-		Assert.assertEquals(3, rows.size());
-
-		fd.setManual(true);
-		rows = dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.MANUAL, null);
-		Assert.assertEquals(1, rows.size());
-		Assert.assertEquals(1000.0, ((BigDecimal) rows.get(0).get("numericColumn")).doubleValue(), 1e-2);
-	}
-
-	@Test
-	public void removeRowsNew() {
-		FormData fd = formDataDao.get(329, false);
-		// удаляем строки из одного из срезов
-		int count = dataRowDao.removeRows(fd, DataRowType.STABLE, DataRowType.AUTO);
-		Assert.assertEquals(2, count);
-		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.AUTO, null);
-		Assert.assertTrue(rows.isEmpty());
-		// проверяем, что другие срезы не пострадали в ходе удаления
-		rows = dataRowDao.getRows(fd, DataRowType.TEMP, DataRowType.AUTO, null);
-		Assert.assertEquals(3, rows.size());
-
-		fd.setManual(true);
-		rows = dataRowDao.getRows(fd, DataRowType.STABLE, DataRowType.MANUAL, null);
-		Assert.assertEquals(1, rows.size());
-		Assert.assertEquals(1000.0, ((BigDecimal) rows.get(0).get("numericColumn")).doubleValue(), 1e-2);
-		// проверяем удаление диапазона
-		count = dataRowDao.removeRows(fd, DataRowType.TEMP, DataRowType.AUTO, new DataRowRange(2, 1));
-		Assert.assertEquals(1, count);
-		rows = dataRowDao.getRows(fd, DataRowType.TEMP, DataRowType.AUTO, null);
-		Assert.assertEquals(2, rows.size());
-		Assert.assertEquals(1, rows.get(0).getIndex().intValue());
-		Assert.assertEquals(2, rows.get(1).getIndex().intValue());
-	}
 }

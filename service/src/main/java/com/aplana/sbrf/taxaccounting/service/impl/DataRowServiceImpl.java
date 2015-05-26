@@ -30,7 +30,7 @@ public class DataRowServiceImpl implements DataRowService {
 	public PagingResult<DataRow<Cell>> getDataRows(long formDataId, DataRowRange range, boolean saved, boolean manual) {
 		PagingResult<DataRow<Cell>> result = new PagingResult<DataRow<Cell>>();
 		FormData formData = formDataDao.get(formDataId, manual);
-        result.addAll(saved ? dataRowDao.getSavedRows(formData, range) : dataRowDao.getRows(formData, range));
+        result.addAll(saved ? dataRowDao.getSavedRows(formData, range) : dataRowDao.getTempRows(formData, range));
         result.setTotalCount(saved ? dataRowDao.getSavedSize(formData) : dataRowDao.getSize(formData));
 		return result;
 	}

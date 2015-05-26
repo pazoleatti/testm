@@ -60,7 +60,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public List<DataRow<Cell>> getAll() {
-		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
+		List<DataRow<Cell>> rows = dataRowDao.getTempRows(fd, null);
 		FormDataUtils.setValueOwners(rows);
 		return rows;
 	}

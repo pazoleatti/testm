@@ -56,7 +56,7 @@ public interface DataRowDao {
 	 * Метод получает строки редактируемого в данный момент среза строк НФ.
 	 *
 	 */
-	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
+	List<DataRow<Cell>> getTempRows(FormData formData, DataRowRange range);
 
 	/**
 	 * Метод получает строки сохраненного среза строк НФ.

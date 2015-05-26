@@ -172,30 +172,30 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				sql.append(", ").append(name);
 			}
 		}
-		sql.append(")\n SELECT seq_form_data_nnn.nextval, :form_data_id, temporary, manual, ord, alias");
+		sql.append(")\nSELECT seq_form_data_nnn.nextval, :form_data_id, :temporary, manual, ord, alias");
 		for (Column column : formData.getFormColumns()) {
 			sql.append('\n');
 			for (String name : columnNames.get(column.getId())) {
 				sql.append(", ").append(name);
 			}
 		}
-		sql.append(" FROM form_data_");
+		sql.append("\nFROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_source_id AND temporary = :temporary AND manual = :manual");
+		sql.append("\nWHERE form_data_id = :form_data_source_id AND temporary = :temporary_source AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
+		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("form_data_source_id", formDataSource.getId());
-		params.put("temporary", DataRowType.STABLE.getCode());
+		params.put("temporary_source", DataRowType.SAVED.getCode());
 		params.put("manual", DataRowType.AUTO.getCode());
 
 		if (log.isDebugEnabled()) {
-			log.debug(sql.toString());
-		}
-		if (log.isDebugEnabled()) {
 			log.debug(params);
 			log.debug(sql.toString());
-		}
+        }
+		System.out.println(params);
+		System.out.println(sql.toString());
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
 
@@ -394,7 +394,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		sql.append("\nON (t.id = s.id) WHEN MATCHED THEN UPDATE SET t.ord = s.neword");
 
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
+		params.put("form_data_id", formData.getId());
 		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
@@ -408,15 +408,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	@Override
 	public void commit(FormData formData) {
 		// удаляем постоянный срез
-		removeRowsInternal(formData, DataRowType.STABLE);
+		removeRowsInternal(formData, DataRowType.SAVED);
 		// переносим данные из временного среза
 		StringBuilder sql = new StringBuilder("UPDATE form_data_");
 		sql.append(formData.getFormTemplateId());
 		sql.append(" SET temporary = :temporary WHERE form_data_id = :form_data_id AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
-		params.put("temporary", DataRowType.STABLE.getCode());
+		params.put("form_data_id", formData.getId());
+		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
 		if (log.isDebugEnabled()) {
@@ -450,7 +450,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		sql.append(" WHERE form_data_id = :form_data_id AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
+		params.put("form_data_id", formData.getId());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
 		if (log.isDebugEnabled()) {
@@ -462,37 +462,37 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowRange range) {
-		return physicalGetRows(fd, DataRowType.STABLE, range);
+		return getRowsInternal(fd, DataRowType.SAVED, range);
 	}
 
 	@Override
 	public int getSavedSize(FormData formData) {
-		return physicalGetSize(formData, DataRowType.STABLE);
+		return getSizeInternal(formData, DataRowType.SAVED);
 	}
 
 	@Override
-	public List<DataRow<Cell>> getRows(FormData fd, DataRowRange range) {
-		return physicalGetRows(fd, DataRowType.TEMP, range);
+	public List<DataRow<Cell>> getTempRows(FormData fd, DataRowRange range) {
+		return getRowsInternal(fd, DataRowType.TEMP, range);
 	}
 
 	@Override
 	public int getSize(FormData formData) {
-		return physicalGetSize(formData, DataRowType.TEMP);
+		return getSizeInternal(formData, DataRowType.TEMP);
 	}
 
 	@Override
 	public int getSizeWithoutTotal(FormData formData) {
-		return physicalGetSizeWithoutTotal(formData, DataRowType.TEMP);
+		return getSizeWithoutTotalInternal(formData, DataRowType.TEMP);
 	}
 
 	/**
 	 * @param formData    НФ для которой требуется получить строки
-	 * @param isTemporary признак временного среза или постоянного (DataRowType.STABLE - постоянный, DataRowType.TEMP - временный)
+	 * @param isTemporary признак временного среза или постоянного (DataRowType.SAVED - постоянный, DataRowType.TEMP - временный)
 	 * @param range       параметры пейджинга, может быть null
 	 * @return список строк, != null
 	 */
-	private List<DataRow<Cell>> physicalGetRows(FormData formData, DataRowType isTemporary, DataRowRange range) {
-		if (isTemporary != DataRowType.STABLE && isTemporary != DataRowType.TEMP) {
+	private List<DataRow<Cell>> getRowsInternal(FormData formData, DataRowType isTemporary, DataRowRange range) {
+		if (isTemporary != DataRowType.SAVED && isTemporary != DataRowType.TEMP) {
 			throw new IllegalArgumentException("Wrong type of 'isTemporary' argument");
 		}
 		DataRowMapper dataRowMapper = new DataRowMapper(formData);
@@ -511,18 +511,18 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * Возвращает количество строк в налоговой форме, включая итоговые (alias != null)
 	 *
 	 * @param formData
-	 * @param isTemporary признак временного среза или постоянного (DataRowType.STABLE - постоянный, DataRowType.TEMP - временный)
+	 * @param isTemporary признак временного среза или постоянного (DataRowType.SAVED - постоянный, DataRowType.TEMP - временный)
 	 * @return
 	 */
-	private int physicalGetSize(FormData formData, DataRowType isTemporary) {
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
-		params.put("temporary", isTemporary.getCode());
-		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
-
+	private int getSizeInternal(FormData formData, DataRowType isTemporary) {
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE temporary = :temporary AND manual = :manual");
+		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual");
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("form_data_id", formData.getId());
+		params.put("temporary", isTemporary.getCode());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
 		if (log.isDebugEnabled()) {
 			log.debug(params);
@@ -535,18 +535,18 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * Получить количество строк без учета итоговых (alias != null)
 	 *
 	 * @param formData
-	 * @param isTemporary признак временного среза или постоянного (DataRowType.STABLE - постоянный, DataRowType.TEMP - временный)
+	 * @param isTemporary признак временного среза или постоянного (DataRowType.SAVED - постоянный, DataRowType.TEMP - временный)
 	 * @return
 	 */
-	private int physicalGetSizeWithoutTotal(FormData formData, DataRowType isTemporary) {
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
-		params.put("temporary", isTemporary.getCode());
-		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
-
+	private int getSizeWithoutTotalInternal(FormData formData, DataRowType isTemporary) {
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE temporary = :temporary AND manual = :manual AND alias IS NULL");
+		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND alias IS NULL");
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("form_data_id", formData.getId());
+		params.put("temporary", isTemporary.getCode());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
 		if (log.isDebugEnabled()) {
 			log.debug(params);
@@ -567,13 +567,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 * @param stableOrTemporary признак из какого среза удалить строки
 	 */
 	private void removeRowsInternal(FormData formData, DataRowType stableOrTemporary) {
-		if (stableOrTemporary != DataRowType.TEMP && stableOrTemporary != DataRowType.STABLE) {
+		if (stableOrTemporary != DataRowType.TEMP && stableOrTemporary != DataRowType.SAVED) {
 			throw new IllegalArgumentException("Value of argument 'isTemporary' is incorrect");
 		}
 
 		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id temporary = :temporary AND manual = :manual");
+		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
@@ -591,7 +591,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public void removeRows(FormData formData, DataRowRange range) {
 		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id temporary = :temporary AND manual = :manual AND ord BETWEEN :indexFrom AND :indexTo");
+		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord BETWEEN :indexFrom AND :indexTo");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
@@ -618,10 +618,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private int shiftRows(FormData formData, DataRowRange range) {
 		StringBuilder sql = new StringBuilder("UPDATE form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" SET ord = ord + :shift WHERE temporary = :temporary AND manual = :manual AND ord >= :offset");
+		sql.append(" SET ord = ord + :shift WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND ord >= :offset");
 
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("formDataId", formData.getId());
+		params.put("form_data_id", formData.getId());
 		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 		params.put("offset", range.getOffset());
@@ -676,7 +676,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
-		params.put("temporary", DataRowType.STABLE.getCode());
+		params.put("temporary", DataRowType.SAVED.getCode());
 
 		if (log.isDebugEnabled()) {
 			log.debug(params);

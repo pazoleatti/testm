@@ -16,10 +16,11 @@ INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, ita
 
 --создать таблицу
 CREATE TABLE form_data_329 (
+  id NUMBER(18) NOT NULL,
 	form_data_id NUMBER(18) NOT NULL,
-	ord NUMBER(14) NOT NULL,
 	temporary NUMBER(1) NOT NULL,
 	manual NUMBER(1) NOT NULL,
+	ord NUMBER(14) NOT NULL,
 	alias VARCHAR2(20),
 
   c3291 VARCHAR2(2000),
@@ -47,16 +48,23 @@ CREATE TABLE form_data_329 (
 	c3294_rowspan NUMBER(3)
 );
 
-ALTER TABLE form_data_329 ADD CONSTRAINT form_data_329_pk PRIMARY KEY (form_data_id, temporary, manual, ord);
+ALTER TABLE form_data_329 ADD CONSTRAINT form_data_329_pk PRIMARY KEY (id);
+CREATE UNIQUE INDEX i_form_data_329_id ON form_data_329 (form_data_id, temporary, manual, ord);
+CREATE SEQUENCE SEQ_FORM_DATA_NNN START WITH 10000;
 
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (329, 329, 101, 1, 3, 0);
+INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (3291, 329, 101, 1, 3, 0);
 
-INSERT INTO form_data_329(form_data_id, ord, temporary, manual, alias, c3291, c3292, c3293, c3294)
-  SELECT 329, 1, 0, 0, 'row_alias №1', 'number', 636, null, null FROM DUAL UNION
-  SELECT 329, 2, 0, 0, null, 'some string', null, null, null FROM DUAL UNION
+INSERT INTO form_data_329(id, form_data_id, temporary, manual, ord, alias, c3291, c3292, c3293, c3294)
+  SELECT 1, 329, 0, 0, 1, 'row_alias №1', 'number', 636, null, null FROM DUAL UNION
+  SELECT 2, 329, 0, 0, 2, null, 'some string', null, null, null FROM DUAL UNION
 
-  SELECT 329, 1, 1, 0, null, null, 666, null, null FROM DUAL UNION
-  SELECT 329, 2, 1, 0, null, 'qwerty', null, null, null FROM DUAL UNION
-  SELECT 329, 3, 1, 0, 'total', 'sum', 50, null, null FROM DUAL UNION
+  SELECT 3, 329, 1, 0, 1, null, null, 666, null, null FROM DUAL UNION
+  SELECT 4, 329, 1, 0, 2, null, 'qwerty', null, null, null FROM DUAL UNION
+  SELECT 5, 329, 1, 0, 3, 'total', 'sum', 50, null, null FROM DUAL UNION
 
-  SELECT 329, 3, 0, 1, null, null, 1000, null, null FROM DUAL;
+  SELECT 6, 329, 0, 1, 1, null, null, 1000, null, null FROM DUAL UNION
+
+  SELECT 7, 3291, 1, 0, 1, null, null, 666, null, null FROM DUAL UNION
+  SELECT 8, 3291, 1, 0, 2, null, 'qwerty', null, null, null FROM DUAL UNION
+  SELECT 9, 3291, 1, 0, 3, 'total', 'sum', 50, null, null FROM DUAL;

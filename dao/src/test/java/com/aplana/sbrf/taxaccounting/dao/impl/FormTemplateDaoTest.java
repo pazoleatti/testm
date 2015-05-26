@@ -114,7 +114,7 @@ public class FormTemplateDaoTest {
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
 		Assert.assertEquals("header_3", formTemplate.getHeader());
 		/*Assert.assertEquals("test_script", formTemplate.getScript());*/
-		/*Assert.assertEquals(1, formTemplate.getRows().size());*/
+		/*Assert.assertEquals(1, formTemplate.getTempRows().size());*/
 		/*Assert.assertEquals(2, formTemplate.getHeaders().size());*/
 		
 	}
