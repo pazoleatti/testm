@@ -1,12 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.lock.server;
 
-import com.aplana.sbrf.taxaccounting.common.model.UserInfo;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskData;
-import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskState;
-import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
-import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.lock.shared.GetLockListAction;
@@ -20,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,7 +22,6 @@ import java.util.List;
  * @author dloshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP')")
 public class GetLockListHandler extends AbstractActionHandler<GetLockListAction, GetLockListResult> {
 
     private static final String DATE_FORMAT = "dd-MM-yyyy HH:mm:ss";

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
  * @author dloshkarev
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP')")
 public class ExtendLockHandler extends AbstractActionHandler<ExtendLockAction, ExtendLockResult> {
 
     @Autowired
