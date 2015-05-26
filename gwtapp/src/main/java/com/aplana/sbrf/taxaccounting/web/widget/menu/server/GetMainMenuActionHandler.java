@@ -195,7 +195,13 @@ public class GetMainMenuActionHandler extends
         }
 
         // АДМИНИСТРИРОВАНИЕ
-        if (!currentUser.hasRole(TARole.ROLE_GARANT)) {
+        if (currentUser.hasRole(TARole.ROLE_OPER)
+                || currentUser.hasRole(TARole.ROLE_CONTROL)
+                || currentUser.hasRole(TARole.ROLE_ADMIN)
+                || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
+                || currentUser.hasRole(TARole.ROLE_CONF)) {
+
             MenuItem adminMenuItem = new MenuItem("Администрирование");
             adminMenuItem.getSubMenu().add(new MenuItem("Блокировки", NUMBER_SIGN
                     + LockTokens.lockList));
