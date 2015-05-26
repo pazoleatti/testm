@@ -43,9 +43,6 @@ public class SourceServiceImpl implements SourceService {
     private static final String FORM_INSTANCE_MSG = "\"%s\", \"%s\", подразделение \"%s\", период \"%s%s%s\"";
     private static final String RECALCULATE_DECLARATION_MSG = "Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\" в декларациях: ";
     private static final String DECLARATION_INSTANCE_MSG = "\"%s\", подразделение \"%s\", период \"%s%s\"%s%s";
-    private static final String DELETE_FATAL_ERROR_BEGIN = "Найдены экземпляры в статусе \"Принята\":";
-    private static final String DELETE_FATAL_ERROR_MID = "\"%s\" для подразделения \"%s\" в периодах: \"%s\"";
-    private static final String DELETE_FATAL_ERROR_END = "Для удаления их назначения в качестве источника необходимо выполнить их возврат из статуса \"Принята\"";
     private static final String EMPTY_LIST_MSG = "Список назначений пуст!";
 
     private enum LOG_LEVEL {

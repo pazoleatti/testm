@@ -870,7 +870,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     department.getName(),
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriod.getCorrectionDate() != null
-                            ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            : "",
+                    declaration.getTaxOrganCode() != null
+                            ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                            : "",
+                    declaration.getKpp() != null
+                            ? ", КПП \"" + declaration.getKpp() + "\""
                             : "");
 
         switch (reportType) {
@@ -885,7 +891,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
-                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
                                 : "");
             case XML_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_CALCULATE.getText(),
@@ -896,7 +908,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
-                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
                                 : "");
             case CHECK_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_CHECK.getText(),
@@ -907,7 +925,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
-                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
                                 : "");
             case ACCEPT_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_ACCEPT.getText(),
@@ -918,7 +942,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
-                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
                                 : "");
             default:
                 return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
@@ -928,7 +958,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
-                                ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
                                 : "");
         }
     }
