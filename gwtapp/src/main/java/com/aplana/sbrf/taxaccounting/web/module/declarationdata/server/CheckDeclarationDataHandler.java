@@ -60,9 +60,10 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
         Map<String, Object> params = new HashMap<String, Object>();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
-        if (uuidXml != null) {
-            if (lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.ACCEPT_DEC)) == null) {
+        String keyAccept = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.ACCEPT_DEC);
+        if (lockDataService.getLock(keyAccept) == null) {
+            String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
+            if (uuidXml != null) {
                 String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
                 LockData lockDataReportTask = lockDataService.getLock(key);
                 if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
@@ -110,11 +111,15 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                     throw new ActionException("Не удалось запустить проверку. Попробуйте выполнить операцию позже");
                 }
             } else {
-                logger.error("Идет принятие %s, невозможно выполнить проверку.", action.getTaxType().getDeclarationShortName());
-                throw new ServiceLoggerException("Декларация заблокирована и не может быть изменена. Попробуйте выполнить операцию позже", logEntryService.save(logger.getEntries()));
+                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             }
         } else {
-            result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+            try{
+                lockDataService.addUserWaitingForLock(keyAccept, userInfo.getUser().getId());
+            } catch (Exception e) {
+            }
+            logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
+            result.setStatus(CreateAsyncTaskStatus.CREATE);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
 	    return result;
