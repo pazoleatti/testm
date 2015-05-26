@@ -469,8 +469,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 userInfo.getUser().getId(),
                 formDataService.getFormDataFullName(formData.getId(), null, null),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-        // Ззащита от перехода в режим редактирования для импортируемой нф
-        lockDataService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId() + "_import",
+        // Защита от перехода в режим редактирования для импортируемой нф
+        lockDataService.lock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formData.getId(),
                 userInfo.getUser().getId(),
                 formDataService.getFormDataFullName(formData.getId(), currentFile.getName(), null),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
@@ -523,7 +523,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         } finally {
             // Снимаем блокировку
             lockDataService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(), userInfo.getUser().getId());
-            lockDataService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId() + "_import", userInfo.getUser().getId());
+            lockDataService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formData.getId(), userInfo.getUser().getId());
         }
 
         // 20 Загрузка формы завершена
