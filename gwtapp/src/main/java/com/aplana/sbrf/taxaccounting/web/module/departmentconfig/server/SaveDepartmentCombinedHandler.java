@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 
@@ -34,15 +36,9 @@ import static java.util.Arrays.asList;
 public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDepartmentCombinedAction,
         SaveDepartmentCombinedResult> {
 
-    private static final String FORM_WARN = "В налоговой форме \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
-    private static final String FORM_WARN_S = "В форме \"%s\" в подразделении \"%s\" периоде \"%s\" используется старая версия настроек.";
-
     private static final String SUCCESS_INFO = "Настройки для \"%s\" в периоде с %s по %s успешно сохранены.";
 
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
-    @Autowired
-    private TAUserService userService;
 
     @Autowired
     private PeriodService reportService;
@@ -160,6 +156,21 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             record.setValues(paramsMap);
             record.setRecordId(depCombined.getRecordId());
 
+            // Проверка значения атрибута на соответствие паттерну
+            Pattern innPattern = Pattern.compile(RefBookUtils.INN_PATTERN);
+            Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
+            Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
+
+            if (checkPattern(logger, "ИНН", depCombined.getInn(), innPattern)){
+                checkSumInn(logger, "ИНН", depCombined.getInn());
+            }
+            if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern)){
+                checkSumInn(logger, "ИНН реорганизованной организации", depCombined.getReorgInn());
+            }
+            checkPattern(logger, "КПП", depCombined.getKpp(), kppPattern);
+            checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern);
+            checkPattern(logger, "Код налогового органа", depCombined.getTaxOrganCode(), taxOrganPattern);
+
             // Проверка необходимости редактирования
             boolean needEdit = false;
 
@@ -231,5 +242,19 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
     private Long getFirstLong(List<Long> list) {
         return (list != null && !list.isEmpty() ? list.get(0) : null);
+    }
+
+    private boolean checkPattern(Logger logger, String name, String value, Pattern pattern) {
+        if (value != null && !pattern.matcher(value).matches()){
+            logger.error("Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", name, value, pattern.pattern());
+            return false;
+        }
+        return true;
+    }
+
+    private void checkSumInn(Logger logger, String name, String value) {
+        if (value != null && !RefBookUtils.checkControlSumInn(value)){
+            logger.error("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", name, value);
+        }
     }
 }

@@ -7,7 +7,8 @@ public class SaveDepartmentRefBookValuesResult implements Result {
     public enum ERROR_TYPE {
         NONE,
         HAS_DUPLICATES,
-        INCORRECT_FIELDS
+        INCORRECT_FIELDS,
+        COMMON_ERROR
     }
 
     private String uuid;
