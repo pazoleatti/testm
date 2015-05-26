@@ -2,6 +2,7 @@ package form_template.income.incomeWithHoldingAgent.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import au.com.bytecode.opencsv.CSVReader
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
@@ -535,8 +536,7 @@ void importData() {
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount) {
     if (headerRows.isEmpty() || headerRows.size < rowCount) {
-        logger.error("Заголовок таблицы не соответствует требуемой структуре.")
-        return
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
