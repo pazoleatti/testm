@@ -43,7 +43,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rnu6Field10Sum</alias>
         <checking>false</checking>
-        <name>РНУ-6 (графа 10) cумма</name>
+        <name>РНУ-6 (графа 10) сумма</name>
         <order>5</order>
         <width>10</width>
         <maxLength>17</maxLength>

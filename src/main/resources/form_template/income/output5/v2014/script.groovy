@@ -1,6 +1,9 @@
 package form_template.income.output5.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -73,96 +76,137 @@ void calc() {
     // сортировки нет, все строки фиксированные
 }
 
-// Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null)
+    int COLUMN_COUNT = 4
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 4, 1)
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
 
-    def headerMapping = [
-            (xml.row[0].cell[0]): getColumnName(tmpRow, 'rowNum'),
-            (xml.row[0].cell[1]): getColumnName(tmpRow, 'name'),
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
-            (xml.row[0].cell[2]): 'Отчётный квартал',
-            (xml.row[1].cell[2]): 'дата',
-            (xml.row[1].cell[3]): 'сумма',
-    ]
-    (0..3).each { index ->
-        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
-    }
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
 
-    checkHeaderEquals(headerMapping)
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
 
-    addData(xml, 3)
-}
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
 
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-    def int rowIndex = 0
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-
-        // Пропуск строк шапки
-        if (xmlIndexRow < headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
             break
         }
-
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        def dataRow = dataRows.get(rowIndex)
-        dataRow.setImportIndex(xlsIndexRow)
+        // простая строка
         rowIndex++
-
-        def xmlIndexCol = -1
-
-        def values = [:]
-        // графа 1
-        xmlIndexCol++
-        values.rowNum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        // графа 2
-        xmlIndexCol++
-        values.name = row.cell[xmlIndexCol].text()
-
-        // Проверить фиксированные значения (графа 1..2)
-        ['rowNum', 'name'].each { alias ->
-            def value = values[alias]?.toString()
-            def valueExpected = dataRow.getCell(alias).value?.toString()
-            checkFixedValue(dataRow, value, valueExpected, rowIndex, alias, logger, true)
+        if (rowIndex > dataRows.size()) {
+            break
         }
+        // найти нужную строку нф
+        def dataRow = dataRows.get(rowIndex - 1)
+        // заполнить строку нф значениями из эксель
+        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
 
-        // графа 3
-        xmlIndexCol++
-        if(rowIndex != 1 && rowIndex != 2){
-            dataRow.getCell('date').setCheckMode(true)
-            dataRow.date = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }else{
-            dataRow.date = null
-        }
-
-        // графа 4
-        xmlIndexCol++
-        if(rowIndex != 2) {
-            dataRow.getCell('sum').setCheckMode(true)
-            dataRow.sum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        } else {
-            dataRow.sum = null
-        }
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
     }
-
     showMessages(dataRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        dataRowHelper.save(dataRows)
+        formDataService.getDataRowHelper(formData).save(dataRows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty() || headerRows.size() < rowCount) {
+        throw new ServiceException('Заголовок таблицы не соответствует требуемой структуре.')
+    }
+    checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
+            (headerRows[0][1]): getColumnName(tmpRow, 'name'),
+            (headerRows[0][2]): 'Отчётный квартал',
+            (headerRows[1][2]): 'дата',
+            (headerRows[1][3]): 'сумма',
+    ]
+    (1..4).each { index ->
+        headerMapping.put((headerRows[2][index - 1]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Заполняет заданную строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+    def colIndex = -1
+    def tmpValues = [:]
+
+    // графа 1
+    colIndex++
+    tmpValues.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 2
+    colIndex++
+    tmpValues.name = values[colIndex]
+
+    // Проверить фиксированные значения (графа 1, 2)
+    ['rowNum', 'name'].each { alias ->
+        def value = StringUtils.cleanString(tmpValues[alias]?.toString())
+        def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
+        checkFixedValue(dataRow, value, valueExpected, rowIndex, alias, logger, true)
+    }
+
+    // графа 3
+    colIndex++
+    if(rowIndex != 1 && rowIndex != 2){
+        dataRow.getCell('date').setCheckMode(true)
+        dataRow.date = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    }else{
+        dataRow.date = null
+    }
+
+    // графа 4
+    colIndex++
+    if(rowIndex != 2) {
+        dataRow.getCell('sum').setCheckMode(true)
+        dataRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    } else {
+        dataRow.sum = null
     }
 }
