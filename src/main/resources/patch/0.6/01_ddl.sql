@@ -18,6 +18,17 @@ alter table log_system_report add constraint log_system_report_chk_type check (t
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 
 ---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-11292: Каскадное удаление blob для таблиц отчетов
+alter table log_system_report 	drop constraint 	log_system_report_fk_blob_data;
+alter table log_system_report 	add constraint 		log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
+
+alter table declaration_report	drop constraint decl_report_fk_blob_data;
+alter table declaration_report 	add constraint decl_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
+
+--http://jira.aplana.com/browse/SBRFACCTAX-11294: Ограничение уникальности на log_system_report.seq_user_id
+alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
+
+---------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-10492: Удаление временной таблицы
 drop table data_row_temp;
 
@@ -119,15 +130,6 @@ comment on column lock_data.queue is 'Очередь, в которой нахо
 create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 
 ---------------------------------------------------------------------------------------------
---http://jira.aplana.com/browse/SBRFACCTAX-11292: Каскадное удаление blob для таблиц отчетов
-alter table log_system_report 	drop constraint 	log_system_report_fk_blob_data;
-alter table log_system_report 	add constraint 		log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
-
-alter table declaration_report	drop constraint decl_report_fk_blob_data;
-alter table declaration_report 	add constraint decl_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
-
-
----------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-11339: Таблица для конфигов асинхронных задач
 --совместно с http://jira.aplana.com/browse/SBRFACCTAX-11160
 alter table async_task_type add short_queue_limit number(18) default 0 not null;
@@ -150,5 +152,6 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 
 
 ---------------------------------------------------------------------------------------------
+
 commit;
 end;
