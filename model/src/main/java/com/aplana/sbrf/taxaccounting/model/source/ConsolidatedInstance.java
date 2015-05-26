@@ -13,8 +13,11 @@ public class ConsolidatedInstance {
     private FormDataKind formKind;
     private String department;
     private String period;
+    private Integer month;
     private Date correctionDate;
     private boolean declaration;
+    private String taxOrganCode;
+    private String kpp;
 
     public boolean isDeclaration() {
         return declaration;
@@ -62,5 +65,29 @@ public class ConsolidatedInstance {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public void setMonth(Integer month) {
+        this.month = month;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
     }
 }

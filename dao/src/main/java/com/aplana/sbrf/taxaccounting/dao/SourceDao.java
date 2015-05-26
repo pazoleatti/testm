@@ -104,15 +104,6 @@ public interface SourceDao {
     List<SourceObject> getEmptyPeriods(SourcePair sourcePair, Date newPeriodStart, Date newPeriodEnd);
 
     /**
-     * Получает список отчетных периодов, в которых существуют принятые экземпляры нф и которые находятся внутри указанного диапазона дат
-     * @param source идентификатор назначения-источника
-     * @param periodStart начало диапазона
-     * @param periodEnd окончание диапазона
-     * @return информация о периодах в которых существуют принятые источники
-     */
-    List<AcceptedFormData> findAcceptedInstances(Long source, Date periodStart, Date periodEnd);
-
-    /**
      * Получает список нф/деклараций для которых указанная нф является источником при консолидаци и которые находятся внутри указанного диапазона дат
      * @param source идентификатор назначения-источника
      * @param periodStart начало диапазона
