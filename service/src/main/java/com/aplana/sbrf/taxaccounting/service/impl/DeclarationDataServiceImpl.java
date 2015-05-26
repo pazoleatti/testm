@@ -60,6 +60,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat SDF_DD_MM_YYYY_HH_MM_SS = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
 
     private static final String CALCULATION_NOT_TOPICAL = "Декларация / Уведомление содержит неактуальные консолидированные данные  " +
@@ -305,10 +307,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void delete(long id, TAUserInfo userInfo) {
         LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, ReportType.XML_DEC));
         LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, ReportType.ACCEPT_DEC));
-        if (lockData == null && lockDataAccept == null) {
+        LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, ReportType.CHECK_DEC));
+        if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             DeclarationData declarationData = declarationDataDao.get(id);
 
+            deleteReport(id, false);
             declarationDataDao.delete(id);
 
             auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
@@ -317,9 +321,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     null, null, "Декларация удалена", null, null);
         } else {
             if (lockData == null) lockData = lockDataAccept;
+            if (lockData == null) lockData = lockDataCheck;
             Logger logger = new Logger();
-            logger.error("Невозможно выполнить удаление, т.к. выполянется \"%\"", lockData.getDescription());
-            throw new ServiceLoggerException(String.format(LockDataService.LOCK_DATA, taUserService.getUser(lockData.getUserId()).getName(), lockData.getUserId()), logEntryService.save(logger.getEntries()));
+            TAUser blocker = taUserService.getUser(lockData.getUserId());
+            logger.error("Текущая декларация не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.format(lockData.getDateLock()), lockData.getDescription());
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
 
