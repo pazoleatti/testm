@@ -270,8 +270,7 @@ alter table declaration_data_consolidation add constraint decl_data_consolidatio
 alter table log_system_report add constraint log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
 alter table log_system_report add constraint log_system_report_fk_sec_user foreign key (sec_user_id) references sec_user (id) on delete cascade;
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
-
-alter table configuration_async add constraint configuration_async_pk primary key(id);
+alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);

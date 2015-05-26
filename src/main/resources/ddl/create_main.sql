@@ -800,13 +800,19 @@ create table async_task_type
 (
 id number(18) not null,
 name varchar2(100) not null,
-handler_jndi varchar2(500) not null
+handler_jndi varchar2(500) not null,
+short_queue_limit number(18) default 0 not null,
+task_limit number(18) default 0 not null,
+limit_kind varchar2(400)
 );
 
 comment on table async_task_type is 'Типы асинхронных задач';
 comment on column async_task_type.id is 'Идентификатор строки';
 comment on column async_task_type.name is 'Название типа задачи';
 comment on column async_task_type.handler_jndi is 'JNDI имя класса-обработчика';
+comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
+comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
+comment on column async_task_type.limit_kind is 'Вид ограничения';
 
 --------------------------------------------------------------------------------------------------------
 create table form_data_report 
@@ -932,23 +938,5 @@ name varchar2(256) not null
 comment on table tax_type is 'Справочник типов налогов';
 comment on column tax_type.id is 'Символьный идентификатор типа налога';
 comment on column tax_type.name is 'Тип налога';
-
---------------------------------------------------------------------------------------------------------
-
-create table configuration_async
-(
-id number(9) not null,
-type varchar2(400) not null,
-limit_kind varchar2(400) not null,
-limit number(9),
-short_limit number(9)
-);
-
-comment on table configuration_async is 'Настройки асинхронных задач';
-comment on column configuration_async.id is 'Идентификатор записи';
-comment on column configuration_async.type is 'Тип задания';
-comment on column configuration_async.limit_kind is 'Вид ограничения';
-comment on column configuration_async.limit is 'Ограничение на выполнение задания';
-comment on column configuration_async.short_limit is 'Ограничение на выполнение задания в очереди быстрых заданий';
 
 --------------------------------------------------------------------------------------------------------
