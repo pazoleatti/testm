@@ -22,7 +22,7 @@ public class RefBookAsyncConfigDaoImpl extends AbstractDao implements RefBookAsy
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords() {
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query("select ID, NAME, LIMIT_KIND, TASK_LIMIT, SHORT_QUEUE_LIMIT from async_task_type where dev_mode = 0 and no_limit != 1 order by NAME ", new RowMapper<Map<String, RefBookValue>>() {
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query("select ID, NAME, LIMIT_KIND, TASK_LIMIT, SHORT_QUEUE_LIMIT from async_task_type where SHORT_QUEUE_LIMIT != 0 and TASK_LIMIT != 0 order by NAME ", new RowMapper<Map<String, RefBookValue>>() {
             @Override
             public Map<String, RefBookValue> mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
