@@ -155,6 +155,11 @@ public class RefBookUtils extends AbstractDao {
         }
     }
 
+    /**
+     * Проверка контрольной суммы ИНН
+     * @param inn ИНН в виде строки
+     * @return результат проверки (успешная или нет)
+     */
     public static boolean checkControlSumInn(String inn) {
         if (inn == null || inn.length() != 10) {
             return false;

@@ -1827,6 +1827,11 @@ public final class ScriptUtils {
         }
     }
 
+    /**
+     * Проверка контрольной суммы ИНН
+     * @param inn ИНН в виде строки
+     * @return результат проверки (успешная или нет)
+     */
     public static boolean checkControlSumInn(String inn) {
         return RefBookUtils.checkControlSumInn(inn);
     }
