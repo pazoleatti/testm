@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskPersistenceExcepti
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.async.persistence.AsyncTaskPersistenceServiceLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,6 +76,7 @@ public class AsyncManagerBean implements AsyncManager {
             ObjectMessage objectMessage = session.createObjectMessage();
             objectMessage.setObject(asyncMdbObject);
             messageProducer.send(objectMessage);
+            log.info(String.format("Задача с ключом %s помещена в очередь", params.get(AsyncTask.RequiredParams.LOCKED_OBJECT)));
             log.debug("Async task creation has been finished successfully");
             return balancingVariant;
         } catch (ServiceLoggerException e) {
