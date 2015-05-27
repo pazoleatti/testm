@@ -251,26 +251,27 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public String getXmlData(long declarationDataId) {
-        BlobData blobData = blobDataService.get(reportService.getDec(taUserService.getSystemUserInfo(), declarationDataId, ReportType.XML_DEC));
-        if(blobData == null){
-            //если декларация еще не заполнена
-            return null;
-        }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        InputStream zipXml = blobData.getInputStream();
-        if (zipXml != null) {
-            ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
+        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId);
+        if (zipXmlIn != null) {
             try {
                 zipXmlIn.getNextEntry();
                 IOUtils.copy(zipXmlIn, byteArrayOutputStream);
             } catch (IOException e) {
                 throw new ServiceException("Не удалось извлечь xml для скрипта.", e);
             } finally {
-                IOUtils.closeQuietly(zipXml);
                 IOUtils.closeQuietly(zipXmlIn);
             }
         }
         return new String(byteArrayOutputStream.toByteArray());
+    }
+
+    private ZipInputStream getZipInputStream(long declarationDataId) {
+        InputStream zipXml = declarationDataService.getXmlDataAsStream(declarationDataId, taUserService.getSystemUserInfo());
+        if (zipXml != null) {
+            return new ZipInputStream(zipXml);
+        }
+        return null;
     }
 
     @Override
@@ -317,6 +318,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public String getXmlDataFileName(long declarationDataId) {
-        return declarationDataService.getXmlDataFileName(declarationDataId, taUserService.getSystemUserInfo());
+        String fileName = declarationDataService.getXmlDataFileName(declarationDataId, taUserService.getSystemUserInfo());
+        if (fileName != null) {
+            return fileName.replace(".zip", ".xml");
+        }
+        return null;
     }
 }
