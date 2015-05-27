@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,9 @@ import java.util.Map;
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	private static final Log log = LogFactory.getLog(DataRowDaoImpl.class);
+
+	@Autowired
+	private BDUtils bdUtils;
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -190,12 +194,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary_source", DataRowType.SAVED.getCode());
 		params.put("manual", DataRowType.AUTO.getCode());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
         }
-		System.out.println(params);
-		System.out.println(sql.toString());
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
 
@@ -221,8 +223,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			values.put("id", row.getId());
 			params.add(values);
 		}
-		if (log.isDebugEnabled()) {
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 	}
@@ -241,9 +243,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		int difference = getNamedParameterJdbcTemplate().queryForInt(sql.toString().intern(), params);
 		return difference != 0;
@@ -260,6 +262,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
+		int tempSize = getTempSize(formData);
+		if (index < 1 || index > tempSize + 1) {
+			throw new IllegalArgumentException(String.format("Вставка записей допустима только в диапазоне индексов [1; %s]. index = %s", tempSize + 1, index));
+		}
 		// сдвигаем строки
 		shiftRows(formData, new DataRowRange(index, rows.size()));
 		// вставляем новые в образовавшийся промежуток
@@ -274,7 +280,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				sql.append(", ").append(name);
 			}
 		}
-		sql.append(")\n VALUES (seq_form_data_nnn.nextval, :form_data_id, :temporary, :manual, :ord, :alias");
+		sql.append(")\n VALUES (:id, :form_data_id, :temporary, :manual, :ord, :alias");
 		for (Column column : formData.getFormColumns()) {
 			sql.append('\n');
 			for (String name : columnNames.get(column.getId())) {
@@ -283,15 +289,20 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 		sql.append(')');
 		// формируем список параметров для батча
+		List<Long> ids = bdUtils.getNextDataRowIds(Long.valueOf(rows.size())); // нужно получить отдельным запросом, чтобы актуализировать rows
 		int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
 		List<Map<String, Object>> params = new ArrayList<Map<String, Object>>(rows.size());
-		int i = index;
+		int i = 0;
 		for (DataRow<Cell> row : rows) {
+			row.setId(ids.get(i));
+			row.setIndex(index + i++);
+
 			Map<String, Object> values = new HashMap<String, Object>();
+			values.put("id", row.getId());
 			values.put("form_data_id", formData.getId());
 			values.put("temporary", DataRowType.TEMP.getCode());
 			values.put("manual", manual);
-			values.put("ord", i++);
+			values.put("ord", row.getIndex());
 			values.put("alias", row.getAlias());
 			for (Column column : formData.getFormColumns()) {
 				String[] names = columnNames.get(column.getId());
@@ -304,8 +315,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			}
 			params.add(values);
 		}
-		if (log.isDebugEnabled()) {
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 	}
@@ -332,8 +343,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			}
 		}
 		sql.append(" WHERE id = :id");
-		if (log.isDebugEnabled()) {
-			log.debug("updateRows: " + sql.toString().intern());
+		if (log.isTraceEnabled()) {
+			log.trace("updateRows: " + sql.toString().intern());
 		}
 		// формируем список параметров для батча
 		int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
@@ -353,8 +364,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			}
 			params.add(values);
 		}
-		if (log.isDebugEnabled()) {
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 	}
@@ -373,8 +384,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			values.put("id", row.getId());
 			params.add(values);
 		}
-		if (log.isDebugEnabled()) {
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 		reorderRows(formData);
@@ -388,7 +399,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private void reorderRows(FormData formData) {
 		StringBuilder sql = new StringBuilder("MERGE INTO form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" USING\n(SELECT id, ROW_NUMBER() OVER (ORDER BY ord) AS neword FROM form_data_");
+		sql.append(" t USING\n(SELECT id, ROW_NUMBER() ");
+		if (isSupportOver()) {
+			sql.append("OVER (ORDER BY ord)");
+		} else {
+			sql.append("OVER ()");
+		}
+		sql.append(" AS neword FROM form_data_");
 		sql.append(formData.getFormTemplateId());
 		sql.append("\nWHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual) s");
 		sql.append("\nON (t.id = s.id) WHEN MATCHED THEN UPDATE SET t.ord = s.neword");
@@ -398,9 +415,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -419,9 +436,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 
@@ -445,17 +462,17 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		DataRowMapper.getColumnNamesString(formData, sql);
 		sql.append(") \nSELECT seq_form_data_nnn.nextval, form_data_id, 1, manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
-		sql.append("FROM form_data_");
+		sql.append("\nFROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id AND manual = :manual");
+		sql.append("\nWHERE form_data_id = :form_data_id AND manual = :manual");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -476,12 +493,12 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public int getSize(FormData formData) {
+	public int getTempSize(FormData formData) {
 		return getSizeInternal(formData, DataRowType.TEMP);
 	}
 
 	@Override
-	public int getSizeWithoutTotal(FormData formData) {
+	public int getTempSizeWithoutTotal(FormData formData) {
 		return getSizeWithoutTotalInternal(formData, DataRowType.TEMP);
 	}
 
@@ -500,9 +517,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		if (!isSupportOver()) {
 			sql.setFirst(sql.getFirst().replaceAll("OVER \\(PARTITION BY.{0,}ORDER BY ord\\)", "OVER ()"));
 		}
-		if (log.isDebugEnabled()) {
-			log.debug(sql.getSecond());
-			log.debug(sql.getFirst());
+		if (log.isTraceEnabled()) {
+			log.trace(sql.getSecond());
+			log.trace(sql.getFirst());
 		}
 		return getNamedParameterJdbcTemplate().query(sql.getFirst(), sql.getSecond(), dataRowMapper);
 	}
@@ -524,9 +541,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", isTemporary.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		return getNamedParameterJdbcTemplate().queryForInt(sql.toString().intern(), params);
 	}
@@ -548,9 +565,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", isTemporary.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		return getNamedParameterJdbcTemplate().queryForInt(sql.toString().intern(), params);
 	}
@@ -580,9 +597,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", stableOrTemporary.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -600,9 +617,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("indexFrom", range.getOffset());
 		params.put("indexTo", range.getOffset() + range.getCount() - 1);
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 		shiftRows(formData, new DataRowRange(range.getOffset() + range.getCount(), -range.getCount()));
@@ -627,15 +644,19 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("offset", range.getOffset());
 		params.put("shift", range.getCount());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(sql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
 		}
 		return getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
 
-	@Override
-	public void refreshRefBookLinks(FormData formData) {
+	/**
+	 * Актуализирует список ссылок НФ на элементы справочника. Ссылки выставляются только для строк постоянного среза
+	 * (автоматическая или версия ручного ввода)
+	 * @param formData экземпляр НФ, ссылки которого требуется актуализировать
+	 */
+	private void refreshRefBookLinks(FormData formData) {
 		// составляем список справочных граф
 		List<String> names = new ArrayList<String>();
 		for (Column column : formData.getFormColumns()) {
@@ -678,10 +699,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("form_data_id", formData.getId());
 		params.put("temporary", DataRowType.SAVED.getCode());
 
-		if (log.isDebugEnabled()) {
-			log.debug(params);
-			log.debug(deleteSql.toString());
-			log.debug(insertSql.toString());
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(deleteSql.toString());
+			log.trace(insertSql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(deleteSql.toString(), params);
 		getNamedParameterJdbcTemplate().update(insertSql.toString(), params);

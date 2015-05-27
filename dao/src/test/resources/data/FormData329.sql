@@ -56,15 +56,15 @@ INSERT INTO form_data(id, form_template_id, department_report_period_id, state, 
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (3291, 329, 101, 1, 3, 0);
 
 INSERT INTO form_data_329(id, form_data_id, temporary, manual, ord, alias, c3291, c3292, c3293, c3294)
-  SELECT 1, 329, 0, 0, 1, 'row_alias №1', 'number', 636, null, null FROM DUAL UNION
-  SELECT 2, 329, 0, 0, 2, null, 'some string', null, null, null FROM DUAL UNION
+  SELECT 1, 329, 0, 0, 1, trim('row_alias №1'), trim('number'), 636, null, null FROM DUAL UNION
+  SELECT 2, 329, 0, 0, 2, null, trim('some string'), null, null, null FROM DUAL UNION
 
   SELECT 3, 329, 1, 0, 1, null, null, 666, null, null FROM DUAL UNION
-  SELECT 4, 329, 1, 0, 2, null, 'qwerty', null, null, null FROM DUAL UNION
-  SELECT 5, 329, 1, 0, 3, 'total', 'sum', 50, null, null FROM DUAL UNION
+  SELECT 4, 329, 1, 0, 2, null, trim('qwerty'), null, null, null FROM DUAL UNION
+  SELECT 5, 329, 1, 0, 3, trim('total'), trim('sum'), 50, null, null FROM DUAL UNION
 
   SELECT 6, 329, 0, 1, 1, null, null, 1000, null, null FROM DUAL UNION
 
-  SELECT 7, 3291, 1, 0, 1, null, null, 666, null, null FROM DUAL UNION
-  SELECT 8, 3291, 1, 0, 2, null, 'qwerty', null, null, null FROM DUAL UNION
-  SELECT 9, 3291, 1, 0, 3, 'total', 'sum', 50, null, null FROM DUAL;
+  SELECT 7, 3291, 1, 0, 1, null, trim('qwerty'), 666, null, null FROM DUAL UNION
+  SELECT 8, 3291, 1, 0, 2, trim('some alias'), null, null, null, null FROM DUAL UNION
+  SELECT 9, 3291, 1, 0, 3, trim('total'), trim('sum'), 50, null, null FROM DUAL;

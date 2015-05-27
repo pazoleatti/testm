@@ -72,17 +72,18 @@ public interface DataRowDao {
 	/**
 	 * Метод получает количество строк редактируемого среза
 	 */
-	int getSize(FormData formData);
+	int getTempSize(FormData formData);
 
     /**
      * Метод получает количество строк редактируемого среза без учета итоговых
      */
-    int getSizeWithoutTotal(FormData formData);
+    int getTempSizeWithoutTotal(FormData formData);
 
 	/**
-	 * Вставляет строки начиная с указанного индекса
+	 * Вставляет строки начиная с указанного индекса. Выставленные в rows значения id и index игнорируются и
+	 * перезаписываются.
 	 * @param formData куда вставляем
-	 * @param index начальный индекс
+	 * @param index начальный индекс, начиная с 1
 	 * @param rows список новых строк
 	 */
 	void insertRows(FormData formData, int index, List<DataRow<Cell>> rows);
@@ -95,13 +96,6 @@ public interface DataRowDao {
 	 * @return true - изменилось, false - не изменилось
 	 */
 	boolean isDataRowsCountChanged(FormData formData);
-
-	/**
-	 * Актуализирует список ссылок НФ на элементы справочника. Ссылки выставляются только для строк постоянного среза
-	 * (автоматическая или версия ручного ввода)
-	 * @param formData экземпляр НФ, ссылки которого требуется актуализировать
-	 */
-	void refreshRefBookLinks(FormData formData);
 
 	/**
 	 * Удаляем все строки из временного среза

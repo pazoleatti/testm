@@ -67,7 +67,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public int getCount() {
-		return dataRowDao.getSize(fd);
+		return dataRowDao.getTempSize(fd);
 	}
 
     /**

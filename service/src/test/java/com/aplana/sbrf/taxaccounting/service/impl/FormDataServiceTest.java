@@ -381,8 +381,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getSizeWithoutTotal(formData)).thenReturn(3);
-        when(dataRowDao.getSizeWithoutTotal(formData1)).thenReturn(5);
+        when(dataRowDao.getTempSizeWithoutTotal(formData)).thenReturn(3);
+        when(dataRowDao.getTempSizeWithoutTotal(formData1)).thenReturn(5);
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
@@ -429,8 +429,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getSizeWithoutTotal(formData)).thenReturn(3);
-        when(dataRowDao.getSizeWithoutTotal(formData1)).thenReturn(5);
+        when(dataRowDao.getTempSizeWithoutTotal(formData)).thenReturn(3);
+        when(dataRowDao.getTempSizeWithoutTotal(formData1)).thenReturn(5);
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();

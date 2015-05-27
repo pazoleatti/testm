@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.math.BigDecimal;
@@ -24,10 +26,12 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowDaoImplUtils
  */
 class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
-    /**
-     * Признак участия фиксированной строки в автонумерации
-     */
-    public final static String ALIASED_WITH_AUTO_NUMERATION_AFFIX = "{wan}";
+	private static final Log log = LogFactory.getLog(DataRowMapper.class);
+
+			/**
+			 * Признак участия фиксированной строки в автонумерации
+			 */
+	public final static String ALIASED_WITH_AUTO_NUMERATION_AFFIX = "{wan}";
 
 	private FormData formData;
 
