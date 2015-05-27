@@ -3,6 +3,8 @@ package form_template.income.output1_2.v2014
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -468,127 +470,6 @@ def calcPeriod(def firstMonth, def lastMonth) {
     }
 }
 
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Категория налогового агента', null, 31, 5)
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 31, 5)
-    def headerMapping = [
-            (xml.row[0].cell[0]): 'Категория налогового агента',
-            (xml.row[0].cell[1]): 'Эмитент',
-            (xml.row[0].cell[2]): 'ИНН организации – эмитента ценных бумаг',
-            (xml.row[0].cell[3]): 'Номер решения о распределении доходов от долевого участия',
-            (xml.row[0].cell[4]): 'Вид дивидендов',
-            (xml.row[0].cell[5]): 'Отчетный год',
-            (xml.row[0].cell[6]): 'Налоговый (отчетный) период (код)',
-            (xml.row[0].cell[7]): 'Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)',
-            (xml.row[0].cell[8]): 'Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде',
-            (xml.row[0].cell[22]): 'Дивиденды, перечисленные лицам, не являющимся получателями дохода',
-            (xml.row[0].cell[23]): 'Дивиденды, полученные',
-            (xml.row[0].cell[25]): 'Сумма дивидендов, распределяемых в пользу всех получателей, уменьшенная на показатель строки 081 (Д1-Д2)',
-            (xml.row[0].cell[26]): 'Сумма дивидендов, используемая для исчисления налога, по российским организациям:',
-            (xml.row[0].cell[28]): 'Исчисленная сумма налога, подлежащая уплате в бюджет',
-            (xml.row[0].cell[29]): 'Сумма налога, начисленная с дивидендов, выплаченных в предыдущие отчетные (налоговые) периоды',
-            (xml.row[0].cell[30]): 'Сумма налога, начисленная с дивидендов, выплаченных в последнем квартале (месяце) отчетного (налогового) периода - всего',
-
-            (xml.row[1].cell[8]): 'всего',
-            (xml.row[1].cell[9]): 'Дивиденды, начисленные получателям дохода – российским организациям',
-            (xml.row[1].cell[14]): 'Дивиденды, начисленные получателям дохода - физическим лицам, являющимся налоговыми резидентами России',
-            (xml.row[1].cell[15]): 'Дивиденды, начисленные получателям дохода – иностранным организациям и физическим лицам, не являющимся резидентами России',
-            (xml.row[1].cell[21]): 'Дивиденды, начисленные получателям дохода – организациям и физическим лицам, налоговый статус которых не установлен',
-            (xml.row[1].cell[23]): 'всего',
-            (xml.row[1].cell[24]): 'в т.ч. без учета полученных дивидендов, налог с которых исчислен по ставке 0%',
-            (xml.row[1].cell[26]): 'налоговая ставка 9%',
-            (xml.row[1].cell[27]): 'налоговая ставка 0%',
-
-            (xml.row[2].cell[9]): 'всего',
-            (xml.row[2].cell[10]): 'налоговая ставка 0%',
-            (xml.row[2].cell[11]): 'налоговая ставка 9%',
-            (xml.row[2].cell[12]): 'по иной ставке',
-            (xml.row[2].cell[13]): 'распределяемые в пользу акционеров (участников), не являющихся налогоплательщиками',
-            (xml.row[2].cell[15]): 'организациям',
-            (xml.row[2].cell[16]): 'физическим лицам',
-            (xml.row[2].cell[17]): 'Из них налоги, с которых исчислены по ставке:',
-
-            (xml.row[3].cell[17]): '0%',
-            (xml.row[3].cell[18]): 'до 5% включительно',
-            (xml.row[3].cell[19]): 'свыше 5% до 10 % включительно',
-            (xml.row[3].cell[20]): 'свыше 10%'
-    ]
-    (1..31).each { index ->
-        headerMapping.put((xml.row[4].cell[index - 1]), index.toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 4)
-}
-
-void addData(def xml, def headRowCount) {
-    def xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-                                                   /* Пропуск строк шапок */
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-
-        def int xmlIndexCol = 0
-
-        // графа 1
-        newRow.taCategory = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графs 2-5
-        for (alias in ['emitent', 'inn', 'decreeNumber', 'dividendType']) {
-            newRow[alias] = row.cell[xmlIndexCol].text()
-            xmlIndexCol++
-        }
-
-        // графа 6
-        newRow.financialYear = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 7
-        newRow.taxPeriod = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графы 8-31
-        for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
-                       'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
-                       'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
-                       'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
-                       'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
-                       'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']) {
-            newRow[alias] = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            xmlIndexCol++
-        }
-        rows.add(newRow)
-    }
-
-    showMessages(rows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
-    }
-}
-
 void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -602,4 +483,167 @@ def roundValue(def value, int precision = 0) {
     } else {
         return null
     }
+}
+
+void importData() {
+    int COLUMN_COUNT = 31
+    int HEADER_ROW_COUNT = 5
+    String TABLE_START_VALUE = 'Категория налогового агента'
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(rows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount) {
+    if (headerRows.isEmpty() || headerRows.size() < rowCount) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]) : 'Категория налогового агента',
+            (headerRows[0][1]) : 'Эмитент',
+            (headerRows[0][2]) : 'ИНН организации – эмитента ценных бумаг',
+            (headerRows[0][3]) : 'Номер решения о распределении доходов от долевого участия',
+            (headerRows[0][4]) : 'Вид дивидендов',
+            (headerRows[0][5]) : 'Отчетный год',
+            (headerRows[0][6]) : 'Налоговый (отчетный) период (код)',
+            (headerRows[0][7]) : 'Общая сумма дивидендов, подлежащая распределению российской организацией в пользу своих получателей (Д1)',
+            (headerRows[0][8]) : 'Сумма дивидендов, подлежащих выплате акционерам (участникам) в текущем налоговом периоде',
+            (headerRows[0][22]): 'Дивиденды, перечисленные лицам, не являющимся получателями дохода',
+            (headerRows[0][23]): 'Дивиденды, полученные',
+            (headerRows[0][25]): 'Сумма дивидендов, распределяемых в пользу всех получателей, уменьшенная на показатель строки 081 (Д1-Д2)',
+            (headerRows[0][26]): 'Сумма дивидендов, используемая для исчисления налога, по российским организациям:',
+            (headerRows[0][28]): 'Исчисленная сумма налога, подлежащая уплате в бюджет',
+            (headerRows[0][29]): 'Сумма налога, начисленная с дивидендов, выплаченных в предыдущие отчетные (налоговые) периоды',
+            (headerRows[0][30]): 'Сумма налога, начисленная с дивидендов, выплаченных в последнем квартале (месяце) отчетного (налогового) периода - всего',
+
+            (headerRows[1][8]) : 'всего',
+            (headerRows[1][9]) : 'Дивиденды, начисленные получателям дохода – российским организациям',
+            (headerRows[1][14]): 'Дивиденды, начисленные получателям дохода - физическим лицам, являющимся налоговыми резидентами России',
+            (headerRows[1][15]): 'Дивиденды, начисленные получателям дохода – иностранным организациям и физическим лицам, не являющимся резидентами России',
+            (headerRows[1][21]): 'Дивиденды, начисленные получателям дохода – организациям и физическим лицам, налоговый статус которых не установлен',
+            (headerRows[1][23]): 'всего',
+            (headerRows[1][24]): 'в т.ч. без учета полученных дивидендов, налог с которых исчислен по ставке 0%',
+            (headerRows[1][26]): 'налоговая ставка 9%',
+            (headerRows[1][27]): 'налоговая ставка 0%',
+
+            (headerRows[2][9]) : 'всего',
+            (headerRows[2][10]): 'налоговая ставка 0%',
+            (headerRows[2][11]): 'налоговая ставка 9%',
+            (headerRows[2][12]): 'по иной ставке',
+            (headerRows[2][13]): 'распределяемые в пользу акционеров (участников), не являющихся налогоплательщиками',
+            (headerRows[2][15]): 'организациям',
+            (headerRows[2][16]): 'физическим лицам',
+            (headerRows[2][17]): 'Из них налоги, с которых исчислены по ставке:',
+
+            (headerRows[3][17]): '0%',
+            (headerRows[3][18]): 'до 5% включительно',
+            (headerRows[3][19]): 'свыше 5% до 10 % включительно',
+            (headerRows[3][20]): 'свыше 10%'
+    ]
+    (1..31).each { index ->
+        headerMapping.put((headerRows[4][index - 1]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+
+    // графа 1
+    def int colIndex = 0
+    newRow.taCategory = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графs 2-5
+    for (alias in ['emitent', 'inn', 'decreeNumber', 'dividendType']) {
+        colIndex++
+        newRow[alias] = values[colIndex]
+    }
+
+    // графа 6
+    colIndex++
+    newRow.financialYear = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 7
+    colIndex++
+    newRow.taxPeriod = values[colIndex]
+
+    // графы 8..31
+    for (alias in ['totalDividend', 'dividendSumRaspredPeriod', 'dividendRussianTotal', 'dividendRussianStavka0',
+            'dividendRussianStavka6', 'dividendRussianStavka9', 'dividendRussianTaxFree',
+            'dividendRussianPersonal', 'dividendForgeinOrgAll', 'dividendForgeinPersonalAll', 'dividendStavka0',
+            'dividendStavkaLess5', 'dividendStavkaMore5', 'dividendStavkaMore10', 'dividendTaxUnknown',
+            'dividendNonIncome', 'dividendAgentAll', 'dividendAgentWithStavka0', 'dividendD1D2',
+            'dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast']) {
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
 }
