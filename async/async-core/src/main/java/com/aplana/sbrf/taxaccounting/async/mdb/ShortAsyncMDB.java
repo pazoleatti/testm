@@ -22,7 +22,8 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  */
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/shortAsyncQueue")})
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/shortAsyncQueue"),
+        @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge")})
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ShortAsyncMDB implements MessageListener {
 
@@ -67,8 +68,6 @@ public class ShortAsyncMDB implements MessageListener {
             log.error("Task parameters with id = " + taskTypeId + " were not found!", e);
         } catch (NamingException e) {
             log.error("Async task handler was not found! JNDI = " + taskType.getHandlerJndi(), e);
-        } catch (Exception e) {
-            log.error("Unexpected MDB exception: ", e);
         }
     }
 }
