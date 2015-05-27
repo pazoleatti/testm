@@ -76,18 +76,22 @@ void importFromXML() {
                         && reader.name.equals(fieldQN)) {
                     // Атрибуты записи
                     def name = reader.getAttributeValue(null, 'name')
+                    def attributeValue = reader.getAttributeValue(null, 'value')
                     if ('NAME1'.equals(name)) {
-                        def refBookValue = new RefBookValue(RefBookAttributeType.STRING,
-                                replaceQuotes(reader.getAttributeValue(null, 'value')))
+                        def refBookValue = new RefBookValue(RefBookAttributeType.STRING, replaceQuotes(attributeValue))
                         recordValueMap.NAME = refBookValue
                     } else if ('KOD'.equals(name)) {
-                        def refBookValue = new RefBookValue(RefBookAttributeType.STRING,
-                                reader.getAttributeValue(null, 'value'))
-                        recordValueMap.OKATO = refBookValue
+                        def pattern = /[0-9]{11}/
+                        if (attributeValue ==~ pattern){
+                            def refBookValue = new RefBookValue(RefBookAttributeType.STRING, attributeValue)
+                            recordValueMap.OKATO = refBookValue
+                        } else {
+                            logger.error("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", "Код ОКАТО", attributeValue, pattern)
+                        }
                     } else if ('TYPEAKT'.equals(name)) {
-                        typeAkt = reader.getAttributeValue(null, 'value')
+                        typeAkt = attributeValue
                     } else if ('DATAKT'.equals(name)) {
-                        datAkt = sdf.parse(reader.getAttributeValue(null, 'value'))
+                        datAkt = sdf.parse(attributeValue)
                     }
                 } else if (reader.name.equals(recordQN)) {
                     isRecordStart = true

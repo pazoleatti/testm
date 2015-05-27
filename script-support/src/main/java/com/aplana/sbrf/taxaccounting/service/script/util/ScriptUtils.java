@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -1824,5 +1825,9 @@ public final class ScriptUtils {
         for(DataRow<Cell> row: dataRows) {
             row.setIndex(index++);
         }
+    }
+
+    public static boolean checkControlSumInn(String inn) {
+        return RefBookUtils.checkControlSumInn(inn);
     }
 }
