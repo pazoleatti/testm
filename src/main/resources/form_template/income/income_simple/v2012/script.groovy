@@ -576,12 +576,9 @@ void checkTotalSum(totalRow, needRow) {
 }
 
 void importData() {
-    def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 14
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'incomeTypeId')
+    String TABLE_START_VALUE = 'КНУ'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 2
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -590,7 +587,7 @@ void importData() {
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
     // проверка шапки
-    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    checkHeaderXls(headerValues)
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -614,10 +611,6 @@ void importData() {
         // все строки пустые - выход
         if (!rowValues) {
             break
-        }
-        // Пропуск итоговых строк и заголовков
-        if (!rowValues[INDEX_FOR_SKIP]) {
-            continue
         }
         // прервать по загрузке нужных строк
         if (rowIndex > dataRows.size()) {
@@ -652,34 +645,24 @@ void importData() {
  * Проверить шапку таблицы
  *
  * @param headerRows строки шапки
- * @param colCount количество колонок в таблице
- * @param rowCount количество строк в таблице
- * @param tmpRow вспомогательная строка для получения названии графов
  */
-void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+void checkHeaderXls(def headerRows) {
     if (headerRows.isEmpty()) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
-    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), 8, 3)
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'incomeTypeId'),
-            (headerRows[0][1]) : getColumnName(tmpRow, 'incomeGroup'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'incomeTypeByOperation'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'accountNo'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'rnu6Field10Sum'),
-            (headerRows[0][5]) : 'РНУ-6 (графа 12)',
-            (headerRows[1][5]) : 'сумма',
-            (headerRows[1][6]) : 'в т.ч. учтено в предыдущих налоговых периодах по графе 10',
-            (headerRows[0][7]) : getColumnName(tmpRow, 'rnu4Field5Accepted'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'logicalCheck'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'accountingRecords'),
-            (headerRows[0][10]): 'Сумма по бухгалтерскому учёту',
-            (headerRows[1][10]): 'в Приложении №5',
-            (headerRows[1][11]): 'в Таблице "Д"',
-            (headerRows[1][12]): 'в бухгалтерской отчётности',
-            (headerRows[0][13]): getColumnName(tmpRow, 'difference'),
+            (headerRows[0][0]): 'КНУ',
+            (headerRows[0][1]): 'Группа дохода',
+            (headerRows[0][2]): 'Вид дохода по операциям',
+            (headerRows[0][3]): 'Балансовый счёт по учёту дохода',
+            (headerRows[0][4]): 'РНУ-6 (графа 10) сумма',
+            (headerRows[0][5]): 'РНУ-6 (графа 12)',
+            (headerRows[0][7]): 'РНУ-4 (графа 5) сумма',
+            (headerRows[1][5]): 'сумма',
+            (headerRows[1][6]): 'в т.ч. учтено в предыдущих налоговых периодах по графе 10'
     ]
-    (0..13).each { index ->
+    (0..7).each { index ->
         headerMapping.put((headerRows[2][index]), (index + 1).toString())
     }
     checkHeaderEquals(headerMapping)

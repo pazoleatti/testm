@@ -3,6 +3,7 @@ package form_template.income.income_complex.v2012
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -765,131 +766,156 @@ def getRow(def dataRows, def knu) {
     }
 }
 
-// Получение импортируемых данных
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'КНУ', null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): 'КНУ',
-            (xml.row[0].cell[1]): 'Группа дохода',
-            (xml.row[0].cell[2]): 'Вид дохода по операциям',
-            (xml.row[0].cell[3]): 'Доход по данным бухгалтерского учёта',
-            (xml.row[0].cell[7]): 'Доход по данным налогового учёта',
-            (xml.row[1].cell[3]): 'балансовый счёт по учёту дохода',
-            (xml.row[1].cell[4]): 'источник информации в РНУ',
-            (xml.row[1].cell[5]): 'сумма',
-            (xml.row[1].cell[6]): 'в т.ч. учтено в предыдущих налоговых периодах',
-            (xml.row[1].cell[7]): 'источник информации в РНУ',
-            (xml.row[1].cell[8]): 'сумма',
-            (xml.row[1].cell[9]): 'форма РНУ'
-    ]
-    (0..9).each { index ->
-        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
-    }
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    def xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-    def int maxRow = 91
-
-    def rows = dataRowHelper.allCached
-    def int rowIndex = 1
-    def knu
-    def group
-    def type
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // пропустить шапку таблицы
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-        // прервать по загрузке нужных строк
-        if (rowIndex > maxRow) {
-            break
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def curRow = getDataRow(rows, "R" + rowIndex)
-        curRow.setImportIndex(xlsIndexRow)
-
-        //очищаем столбцы
-        resetColumns.each {
-            curRow[it] = null
-        }
-
-        knu = normalize(getOwnerValue(curRow, 'incomeTypeId'))
-        group = normalize(getOwnerValue(curRow, 'incomeGroup'))
-        type = normalize(getOwnerValue(curRow, 'incomeTypeByOperation'))
-
-        def xmlIndexCol = 0
-
-        def knuImport = normalize(row.cell[xmlIndexCol].text())
-        xmlIndexCol++
-
-        def groupImport = normalize(row.cell[xmlIndexCol].text())
-        xmlIndexCol++
-
-        def typeImport = normalize(row.cell[xmlIndexCol].text())
-
-        //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
-        //то продолжаем обработку строки иначе пропускаем строку
-        if ((!knu.isEmpty() && knuImport.isEmpty()) || !((knu == knuImport && group == groupImport && type == typeImport) ||
-                ((!knuImport.isEmpty() || !groupImport.isEmpty() || !typeImport.isEmpty()) &&
-                        knu.contains(knuImport) && group.contains(groupImport) && type.contains(typeImport)))) {
-            continue
-        }
-        rowIndex++
-
-        xmlIndexCol = 5
-
-        // графа 6
-        if (curRow.getCell('incomeBuhSumAccepted').isEditable()) {
-            curRow.incomeBuhSumAccepted = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-        xmlIndexCol++
-
-        // графа 7
-        if (curRow.getCell('incomeBuhSumPrevTaxPeriod').isEditable()) {
-            curRow.incomeBuhSumPrevTaxPeriod = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-        xmlIndexCol++
-
-        // графа 8
-        xmlIndexCol++
-
-        // графа 9
-        if (curRow.getCell('incomeTaxSumS').isEditable()) {
-            curRow.incomeTaxSumS = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-
-    }
-    if (rowIndex < maxRow) {
-        logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu. ")
-    }
-
-    showMessages(rows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        dataRowHelper.update(rows)
-    }
-}
-
 void checkTotalSum(totalRow, sum){
     if (totalRow[totalColumn] != sum) {
         logger.error("Итоговое значение в строке ${totalRow.getIndex()} рассчитано неверно в графе \"" + getColumnName(totalRow, totalColumn) + "\"")
+    }
+}
+
+void importData() {
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = 'КНУ'
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def allValuesCount = allValues.size()
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[i]
+        fileRowIndex++
+        rowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            break
+        }
+        // прервать по загрузке нужных строк
+        if (rowIndex > dataRows.size()) {
+            break
+        }
+
+        // найти нужную строку нф
+        def dataRow = getDataRow(dataRows, "R" + rowIndex)
+        // заполнить строку нф значениями из эксель
+        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+    }
+    if (rowIndex < dataRows.size()) {
+        logger.error("Структура файла не соответствует макету налоговой формы.")
+    }
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(dataRows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ */
+void checkHeaderXls(def headerRows) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), 10, 3)
+    def headerMapping = [
+            (headerRows[0][0]): 'КНУ',
+            (headerRows[0][1]): 'Группа дохода',
+            (headerRows[0][2]): 'Вид дохода по операциям',
+            (headerRows[0][3]): 'Доход по данным бухгалтерского учёта',
+            (headerRows[0][7]): 'Доход по данным налогового учёта',
+            (headerRows[1][3]): 'балансовый счёт по учёту дохода',
+            (headerRows[1][4]): 'источник информации в РНУ',
+            (headerRows[1][5]): 'сумма',
+            (headerRows[1][6]): 'в т.ч. учтено в предыдущих налоговых периодах',
+            (headerRows[1][7]): 'источник информации в РНУ',
+            (headerRows[1][8]): 'сумма',
+            (headerRows[1][9]): 'форма РНУ'
+    ]
+    (0..9).each { index ->
+        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Заполняет заданную строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+
+    //очищаем столбцы
+    resetColumns.each { alias ->
+        dataRow[alias] = null
+    }
+
+    def knu = normalize(getOwnerValue(dataRow, 'incomeTypeId'))
+    def group = normalize(getOwnerValue(dataRow, 'incomeGroup'))
+    def type = normalize(getOwnerValue(dataRow, 'incomeTypeByOperation'))
+
+    def colIndex = 0
+    def knuImport = normalize(values[colIndex])
+
+    colIndex++
+    def groupImport = normalize(values[colIndex])
+
+    colIndex++
+    def typeImport = normalize(values[colIndex])
+
+    //если совпадают или хотя бы один из атрибутов не пустой и значения строк в файлах входят в значения строк в шаблоне,
+    //то продолжаем обработку строки иначе пропускаем строку
+    if ((!knu.isEmpty() && knuImport.isEmpty()) || !((knu == knuImport && group == groupImport && type == typeImport) ||
+            ((!knuImport.isEmpty() || !groupImport.isEmpty() || !typeImport.isEmpty()) &&
+                    knu.contains(knuImport) && group.contains(groupImport) && type.contains(typeImport)))) {
+        logger.error("Структура файла не соответствует макету налоговой формы в строке с КНУ = $knu.")
+        return
+    }
+
+    // графа 6
+    colIndex = 5
+    if (dataRow.getCell('incomeBuhSumAccepted').isEditable()) {
+        dataRow.incomeBuhSumAccepted = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    // графа 7
+    colIndex++
+    if (dataRow.getCell('incomeBuhSumPrevTaxPeriod').isEditable()) {
+        dataRow.incomeBuhSumPrevTaxPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    // графа 8
+    colIndex++
+
+    // графа 9
+    colIndex++
+    if (dataRow.getCell('incomeTaxSumS').isEditable()) {
+        dataRow.incomeTaxSumS = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 }
