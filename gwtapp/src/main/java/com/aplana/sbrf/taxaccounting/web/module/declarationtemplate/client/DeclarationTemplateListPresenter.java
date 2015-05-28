@@ -196,7 +196,7 @@ public class DeclarationTemplateListPresenter
 
     @Override
     public void onUpdateTable(UpdateTableEvent event) {
-        updateDeclarationData();
+        updateDeclarationData(getView().getSelectedElementId());
         if (event.getUuid() != null)
             LogAddEvent.fire(this, event.getUuid());
     }
