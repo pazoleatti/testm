@@ -93,7 +93,7 @@ void generateXML() {
 
     // Заполнение кэша
     if (!matrixRecords.isEmpty()) {
-        formDataService.fillRefBookCache(matrixRecords.get(0).getId(), refBookCache)
+        formDataService.fillRefBookCache(matrixRecords.get(0), refBookCache)
     }
 
     builder.Файл(

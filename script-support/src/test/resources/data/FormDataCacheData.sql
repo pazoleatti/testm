@@ -101,52 +101,60 @@ insert into form_template (id, type_id, data_rows, version, fixed_rows, name, fu
   values (1, 1, null, date '2013-01-01', 1, 'name_1', 'fullname_1', 'header_1');
 
 INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (1, 'alias1', 1, 3, 2, 1, 0);
-
 INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (2, 'alias2', 1, 2, 3, 0, 1);
-
 INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (3, 'alias3', 1, 1, 1, 1, 1);
 
-insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (1, 1, 1, 1, 0);
-
--- FormData
-INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (1, 1, 1, 1, 3, 0);
+INSERT INTO department_report_period(id, department_id, report_period_id, is_active, is_balance_period) VALUES (1, 1, 1, 1, 0);
 
 -- FormColumn
 INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
 	values (1, 'Строковый столбец', 1, 1, 'stringColumn', 'S', 10, NULL, 500, 1);
-
 INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking)
 	values (2, 'Числовой столбец', 1, 2, 'numericColumn', 'N', 10, 2, 15, 0);
-
 INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id)
 	values (3, 'Справочный столбец 1', 1, 2, 'referenceColumn1', 'R', 10, NULL, NULL, 0, 1);
-
 INSERT INTO form_column (id, name, form_template_id, ord, alias, type, width, precision, max_length, checking, attribute_id)
 	values (4, 'Справочный столбец 2', 1, 2, 'referenceColumn2', 'R', 10, NULL, NULL, 0, 2);
 
--- Строки
-INSERT INTO data_row(id, form_data_id, alias, ord, type) VALUES (1, 1, 'testAlias', 1, 0);
-INSERT INTO data_row(id, form_data_id, alias, ord, type) VALUES (2, 1, NULL, 2, 0);
-INSERT INTO data_row(id, form_data_id, alias, ord, type) VALUES (3, 1, 'alias 3', 3, 0);
-INSERT INTO data_row(id, form_data_id, alias, ord, type) VALUES (4, 1, 'alias 4', 4, 0);
+--создать таблицу
+CREATE TABLE form_data_1 (
+  id NUMBER(18) NOT NULL,
+	form_data_id NUMBER(18) NOT NULL,
+	temporary NUMBER(1) NOT NULL,
+	manual NUMBER(1) NOT NULL,
+	ord NUMBER(14) NOT NULL,
+	alias VARCHAR2(20),
 
--- Значения
-INSERT INTO data_cell (row_id, column_id, svalue) VALUES (1, 1, 'string cell 1');
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (1, 2, 111);
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (1, 3, 1);
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (1, 4, 2);
+  c1 VARCHAR2(2000),
+	c1_style_id NUMBER(9),
+	c1_editable NUMBER(1) DEFAULT 0,
+	c1_colspan NUMBER(3),
+	c1_rowspan NUMBER(3),
 
-INSERT INTO data_cell (row_id, column_id, svalue) VALUES (2, 1, 'string cell 2');
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (2, 2, 222);
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (2, 3, 3);
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (2, 4, 4);
+	c2 DECIMAL(27, 10),
+	c2_style_id NUMBER(9),
+	c2_editable NUMBER(1) DEFAULT 0,
+	c2_colspan NUMBER(3),
+	c2_rowspan NUMBER(3),
 
-INSERT INTO data_cell (row_id, column_id, svalue) VALUES (3, 1, 'string cell 3');
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (3, 2, 333);
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (3, 3, 5);
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (3, 4, 6);
+	c3 DECIMAL(18),
+	c3_style_id NUMBER(9),
+	c3_editable NUMBER(1) DEFAULT 0,
+	c3_colspan NUMBER(3),
+	c3_rowspan NUMBER(3),
 
-INSERT INTO data_cell (row_id, column_id, svalue) VALUES (4, 1, 'string cell 4');
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (4, 2, 444);
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (4, 3, 7);
-INSERT INTO data_cell (row_id, column_id, nvalue) VALUES (4, 4, 7);
+	c4 DECIMAL(18),
+	c4_style_id NUMBER(9),
+	c4_editable NUMBER(1) DEFAULT 0,
+	c4_colspan NUMBER(3),
+	c4_rowspan NUMBER(3)
+);
+
+-- FormData
+INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (1, 1, 1, 1, 3, 0);
+
+INSERT INTO form_data_1(id, form_data_id, temporary, manual, ord, alias, c1, c2, c3, c4)
+  SELECT 1, 1, 0, 0, 1, trim('testAlias'), trim('string cell 1'), 111, 1, 2 FROM DUAL UNION
+  SELECT 2, 1, 0, 0, 2, null,              trim('string cell 2'), 222, 3, 4 FROM DUAL UNION
+  SELECT 3, 1, 0, 0, 3, trim('alias 3'),   trim('string cell 3'), 333, 5, 6 FROM DUAL UNION
+  SELECT 4, 1, 0, 0, 4, trim('alias 4'),   trim('string cell 4'), 444, 7, 8 FROM DUAL;

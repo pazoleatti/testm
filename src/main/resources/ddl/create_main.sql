@@ -934,3 +934,13 @@ comment on column tax_type.id is 'Символьный идентификато�
 comment on column tax_type.name is 'Тип налога';
 
 --------------------------------------------------------------------------------------------------------
+create table form_data_ref_book
+(
+  form_data_id number(18) not null,
+  ref_book_id number(18) not null,
+  record_id number(18) not null
+);
+
+alter table form_data_ref_book add constraint form_data_ref_book_pk primary key (form_data_id, ref_book_id, record_id);
+--------------------------------------------------------------------------------------------------------
+CREATE SEQUENCE SEQ_FORM_DATA_NNN START WITH 10000;
