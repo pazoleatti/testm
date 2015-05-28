@@ -14,5 +14,10 @@ on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)
 when matched then
      update set tgt.reference_value = src.reference_value;
 
+--http://jira.aplana.com/browse/SBRFACCTAX-11406: КПП в справочнике Организации-участники контролируемых сделок
+update ref_book_attribute set type = 1, precision = null  where id = 38;
+update ref_book_value set string_value = number_value, number_value = null where attribute_id = 38 and number_value is not null;	 
+	 
 COMMIT;
 EXIT;
+
