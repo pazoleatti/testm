@@ -312,7 +312,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             DeclarationData declarationData = declarationDataDao.get(id);
 
-            deleteReport(id, false);
+            deleteReport(id, userInfo.getUser().getId(), false);
             declarationDataDao.delete(id);
 
             auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
@@ -825,13 +825,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      */
     @Override
-    public void deleteReport(long declarationDataId, boolean isCalc) {
+    public void deleteReport(long declarationDataId, int userId, boolean isCalc) {
         ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC, ReportType.ACCEPT_DEC};
         for (ReportType reportType : reportTypes) {
             if (!isCalc || isCalc && !ReportType.XML_DEC.equals(reportType)) {
                 LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
                 if (lock != null)
-                    lockDataService.interruptTask(lock, 0, true);
+                    lockDataService.interruptTask(lock, userId, true);
             }
         }
         reportService.deleteDec(declarationDataId);
