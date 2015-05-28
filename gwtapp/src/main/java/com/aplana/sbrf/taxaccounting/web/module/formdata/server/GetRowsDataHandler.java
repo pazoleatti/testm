@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -32,6 +33,8 @@ public class GetRowsDataHandler extends
 	SecurityService securityService;
 	@Autowired
 	FormTemplateService formTemplateService;
+    @Autowired
+    FormDataService formDataService;
 
     @Autowired
     RefBookHelper refBookHelper;
@@ -45,9 +48,13 @@ public class GetRowsDataHandler extends
 
 	@Override
 	public GetRowsDataResult execute(GetRowsDataAction action, ExecutionContext context) throws ActionException {
+        Logger logger = new Logger();
         // Режим «Корректировки» не работает с ручным вводом
         if (action.isCorrectionDiff()) {
             action.setManual(false);
+        }
+        if (action.isReadOnly()){
+            dataRowService.createTemporary(formDataService.getFormData(securityService.currentUserInfo(), action.getFormDataId(), action.isManual(), logger));
         }
 		GetRowsDataResult result = new GetRowsDataResult();
 
@@ -85,8 +92,6 @@ public class GetRowsDataHandler extends
             result.setDataRows(new PagingResult<DataRow<Cell>>());
         }
 
-
-        Logger logger = new Logger();
         refBookHelper.dataRowsDereference(logger, result.getDataRows(),
                 formTemplate.getColumns());
         if (action.getInnerLogUuid() != null && !action.getInnerLogUuid().isEmpty()) {

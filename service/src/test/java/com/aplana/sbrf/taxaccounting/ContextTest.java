@@ -1,23 +1,19 @@
 package com.aplana.sbrf.taxaccounting;
 
 import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * @author Vitalii Samolovskikh
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({"/testServiceContext.xml", "service.xml"})
+/*@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration({"/testServiceContext.xml", "service.xml"})*/
 public class ContextTest implements ApplicationContextAware {
 	private ApplicationContext applicationContext;
 
-	@Test
+	//@Test
 	public void testContext(){
 		Assert.assertNotNull(applicationContext);
 	}
