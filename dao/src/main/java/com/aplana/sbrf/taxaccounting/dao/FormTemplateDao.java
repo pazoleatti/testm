@@ -1,6 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.util.Collection;
@@ -167,4 +172,13 @@ public interface FormTemplateDao {
      * @return
      */
     boolean existFormTemplate(int formTypeId, int reportPeriodId);
+
+	/**
+	 * Проверяет, есть ли в списке строковых значений, строка с длиной больше maxLength
+	 * @param formTemplateId по данному макету осуществляется поиск
+	 * @param columnId среди данных этого столбца
+	 * @param maxLength с данным значением сравниваем длину строк
+	 * @return true - есть длинные строки, false - нет
+	 */
+	boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength);
 }

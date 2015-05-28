@@ -1,9 +1,15 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.junit.Assert;
@@ -20,7 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -222,7 +233,7 @@ public class FormTemplateDaoTest {
 
     @Test
     public void testDeleteList(){
-        formTemplateDao.delete(Arrays.asList(1,2));
+        formTemplateDao.delete(Arrays.asList(2,2));
     }
 
     @Test
@@ -300,4 +311,12 @@ public class FormTemplateDaoTest {
     public void getActiveDeclarationTemplateIdTest() {
         assertEquals(2, formTemplateDao.getActiveFormTemplateId(2, 4));
     }
+
+	@Test
+	public void checkExistLargeStringTest() {
+		Assert.assertTrue(formTemplateDao.checkExistLargeString(1, 1, 3));
+		Assert.assertTrue(formTemplateDao.checkExistLargeString(1, 1, 5));
+		Assert.assertFalse(formTemplateDao.checkExistLargeString(1, 1, 6));
+		Assert.assertFalse(formTemplateDao.checkExistLargeString(1, 1, 7));
+	}
 }

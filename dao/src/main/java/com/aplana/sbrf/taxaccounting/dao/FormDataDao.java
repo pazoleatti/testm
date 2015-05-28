@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 
 import java.util.Date;
 import java.util.List;
@@ -114,13 +118,6 @@ public interface FormDataDao {
     List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate);
 
     /**
-     * Проверяет существование версии ручного ввода для указанной нф
-     * @param formDataId идентификатор налоговой формы
-     * @return версия ручного ввода существует?
-     */
-    boolean existManual(Long formDataId);
-
-    /**
      * Получить список id форм типа/вида/подразделения без привязки к периоду
      * @param formTypeId тип формы
      * @param kind вид формы
@@ -139,17 +136,9 @@ public interface FormDataDao {
 
     /**
      * Удаляет версию ручного ввода
-     * @param formDataId идентификатор нф
+     * @param formData нф
      */
-    void deleteManual(long formDataId);
-
-    /**
-     * Получить список строк
-     * @param columnId идентификатор столбца
-     * @param formTemplateTypeId идентификатор макета НФ
-     * @return
-     */
-    List<String> getStringList(Integer columnId, Integer formTemplateTypeId);
+    void deleteManual(FormData formData);
 
     /**
      * Обноляет имя подразделения(если у подразделения тип "ТБ")

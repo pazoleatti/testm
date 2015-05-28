@@ -3,9 +3,10 @@ package com.aplana.sbrf.taxaccounting.dao.impl.datarow;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +17,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "DataRowDaoImplTest.xml" })
@@ -215,6 +218,10 @@ public class DataRowDaoImplTest extends Assert {
 		rows = dataRowDao.getSavedRows(formData, null);
 		Assert.assertEquals(1, rows.size());
 		Assert.assertEquals(1000.0, ((BigDecimal) rows.get(0).get("numericColumn")).doubleValue(), 1e-2);
+
+		dataRowDao.removeAllManualRows(formData);
+		rows = dataRowDao.getSavedRows(formData, null);
+		Assert.assertEquals(0, rows.size());
 		// проверяем удаление диапазона
 		formData = formDataDao.get(3291, false);
 		dataRowDao.removeRows(formData, new DataRowRange(2, 1));

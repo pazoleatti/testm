@@ -50,7 +50,6 @@ CREATE TABLE form_data_329 (
 
 ALTER TABLE form_data_329 ADD CONSTRAINT form_data_329_pk PRIMARY KEY (id);
 CREATE UNIQUE INDEX i_form_data_329_id ON form_data_329 (form_data_id, temporary, manual, ord);
-CREATE SEQUENCE SEQ_FORM_DATA_NNN START WITH 10000;
 
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (329, 329, 101, 1, 3, 0);
 INSERT INTO form_data(id, form_template_id, department_report_period_id, state, kind, return_sign) VALUES (3291, 329, 101, 1, 3, 0);

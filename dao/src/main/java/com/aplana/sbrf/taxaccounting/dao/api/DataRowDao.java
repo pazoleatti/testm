@@ -109,6 +109,13 @@ public interface DataRowDao {
 	void removeRows(FormData formData);
 
 	/**
+	 * Удаляем все строки ручной версии как из постоянного, так и из временного срезов
+	 *
+	 * @param formData экземпляр НФ для которой выполняется удаление строк
+	 */
+	void removeAllManualRows(FormData formData);
+
+	/**
 	 * Удаляет строки из временного среза в диапазоне индексов.
 	 * *
 	 * @param formData экземпляр НФ для которой выполняется удаление строк

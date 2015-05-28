@@ -577,6 +577,23 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		removeRowsInternal(formData, DataRowType.TEMP);
 	}
 
+	@Override
+	public void removeAllManualRows(FormData formData) {
+		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" WHERE form_data_id = :form_data_id AND manual = :manual");
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("form_data_id", formData.getId());
+		params.put("manual", DataRowType.MANUAL.getCode());
+
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
+		}
+		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
+	}
+
 	/**
 	 * Удаляет все строки из временноо\постоянного срезов
 	 *

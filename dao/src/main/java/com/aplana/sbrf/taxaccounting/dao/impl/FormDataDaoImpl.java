@@ -1,11 +1,23 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.*;
+import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataSignerDao;
+import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -16,12 +28,15 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Реализация DAO для работы с данными налоговых форм
@@ -47,8 +62,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     private ReportPeriodDao reportPeriodDao;
     @Autowired
     private TaxPeriodDao taxPeriodDao;
+	@Autowired
+	private DataRowDao dataRowDao;
 
-    // Общий маппер
+	// Общий маппер
     private void mapCommon(FormData formData, ResultSet rs) throws SQLException {
         formData.setId(SqlUtils.getLong(rs, "id"));
         formData.setFormTemplateId(SqlUtils.getInteger(rs, "form_template_id"));
@@ -93,9 +110,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         try {
             return getJdbcTemplate().queryForObject(
                     "select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, fd.number_previous_row, " +
-                            "r.manual, fd.department_report_period_id, drp.report_period_id, drp.department_id from form_data fd " +
-                            "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
-                            "on (r.form_data_id = fd.id and (? is null or r.manual = ?)), " +
+                            "CASE WHEN ? IS NULL THEN fd.manual ELSE ? END manual, " +
+							"fd.department_report_period_id, drp.report_period_id, drp.department_id from form_data fd, " +
                             "department_report_period drp where fd.id = ? and fd.department_report_period_id = drp.id",
                     new Object[]{
                             manual == null ? null : manual ? 1 : 0,
@@ -253,12 +269,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
         try {
             return getJdbcTemplate().queryForObject("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
-                    "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
+                    "fd.return_sign, fd.period_order, fd.manual, fd.number_previous_row, fd.department_report_period_id, " +
                     "drp.report_period_id, drp.department_id, " +
                     "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
                     "from department_report_period drp, form_data fd " +
-                    "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
-                    "on r.form_data_id = fd.id " +
                     "where drp.id = fd.department_report_period_id " +
                     "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
                     "and fd.kind = ? and drp.id = ? and (? is null or fd.period_order = ?) ",
@@ -279,10 +293,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         HashMap<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("rp", reportPeriodId);
         return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, fd.form_template_id, " +
-                "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
+                "fd.return_sign, fd.period_order, fd.manual, fd.number_previous_row, fd.department_report_period_id, " +
                 "drp.report_period_id, drp.department_id, ft.type_id as type_id " +
                 "from form_data fd \n" +
-                "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r on r.form_data_id = fd.id \n" +
                 "join department_report_period drp on drp.id = fd.department_report_period_id \n" +
                 "join form_template ft on ft.id = fd.form_template_id \n" +
                 "join form_type t on t.id = ft.type_id \n" +
@@ -296,10 +309,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         HashMap<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("rp", reportPeriodId);
         return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, fd.form_template_id, " +
-                "fd.return_sign, fd.period_order, r.manual, fd.number_previous_row, fd.department_report_period_id, " +
+                "fd.return_sign, fd.period_order, fd.manual, fd.number_previous_row, fd.department_report_period_id, " +
                 "drp.report_period_id, drp.department_id, ft.type_id as type_id " +
                 "from form_data fd \n" +
-                "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r on r.form_data_id = fd.id \n" +
                 "join department_report_period drp on drp.id = fd.department_report_period_id \n" +
                 "join form_template ft on ft.id = fd.form_template_id \n" +
                 "join form_type t on t.id = ft.type_id \n" +
@@ -312,11 +324,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         try {
             return getJdbcTemplate().queryForObject(
                     "SELECT fd.id, drp.department_id, fd.state, fd.kind, drp.report_period_id, fd.return_sign, fd.form_template_id, " +
-                            "fd.period_order, r.manual, fd.department_report_period_id, " +
+                            "fd.period_order, fd.manual, fd.department_report_period_id, " +
                             "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
-                            "FROM form_data fd " +
-                            "left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
-                            "on r.form_data_id = fd.id, " +
+                            "FROM form_data fd, " +
                             "department_report_period drp " +
                             "WHERE fd.id = ? and drp.id = fd.department_report_period_id",
                     new Object[]{id}, new int[]{Types.NUMERIC},
@@ -343,7 +353,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate) {
         try {
-            return getJdbcTemplate().queryForList("SELECT fd.id FROM form_data fd , department_report_period drp " +
+            return getJdbcTemplate().queryForList("SELECT fd.id FROM form_data fd, department_report_period drp " +
                     "WHERE drp.id = fd.department_report_period_id and fd.form_template_id = ? AND drp.report_period_id " +
                     "IN (SELECT id FROM report_period WHERE calendar_start_date >= ?)",
                     new Object[]{templateId, startDate},
@@ -354,12 +364,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             logger.error("Ошибка при поиске используемых версий", e);
             throw new DaoException("Ошибка при поиске используемых версий", e);
         }
-    }
-
-    @Override
-    public boolean existManual(Long formDataId) {
-        return getJdbcTemplate()
-                .queryForInt("select count(*) from data_row where form_data_id = ? and manual = 1", formDataId) > 0;
     }
 
     @Override
@@ -415,27 +419,16 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     @Override
-    public void deleteManual(long formDataId) {
-        getJdbcTemplate().update("delete from data_row where manual = 1 and form_data_id = ?", formDataId);
+    public void deleteManual(FormData formData) {
+		dataRowDao.removeAllManualRows(formData);
+		getJdbcTemplate().update("UPDATE form_data SET manual = 0 WHERE id = ?", formData.getId());
     }
 
-	@Override
-	public List<String> getStringList(Integer columnId, Integer formTemplateTypeId) {
-		return getJdbcTemplate().queryForList("SELECT sv.svalue FROM form_column fc\n" +
-				"LEFT JOIN form_data fd ON fc.form_template_id = fd.form_template_id\n" +
-				"LEFT JOIN data_row dr ON dr.form_data_id = fd.id\n" +
-				"LEFT JOIN data_cell sv ON sv.row_id = dr.id AND sv.column_id = fc.id\n" +
-				"WHERE fc.id = ? AND fd.form_template_id = ?",
-				new Object[]{columnId, formTemplateTypeId},
-				String.class);
-	}
-
     private static final String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT ROWNUM as row_number, sorted.* from " +
-            "(SELECT fd.id, drp.department_id, fd.state, fd.return_sign, fd.kind, drp.report_period_id, fd.period_order, fd.number_previous_row, fd.form_template_id, manual, " +
+            "(SELECT fd.id, drp.department_id, fd.state, fd.return_sign, fd.kind, drp.report_period_id, fd.period_order, fd.number_previous_row, fd.form_template_id, fd.manual, " +
             "fd.department_report_period_id " +
             "FROM form_data fd " +
             "JOIN department_report_period drp ON drp.id = fd.department_report_period_id " +
-            "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id " +
             "JOIN report_period rp ON drp.report_period_id = rp.id " +
             "JOIN tax_period tp ON tp.id = rp.tax_period_id " +
             "WHERE tp.year = :year AND tp.tax_type = :taxType AND drp.department_id = :departmentId AND fd.kind = :kind AND fd.form_template_id = :templateId " +
@@ -480,13 +473,13 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         getJdbcTemplate().update("UPDATE form_data SET number_previous_row =? WHERE id=?", previousRowNumber, formDataId);
     }
 
-    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id, 1 as manual from form_data fd \n" +
+    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id, fd.manual from form_data fd \n" +
             "join department_form_type dft on dft.kind = fd.kind \n" +
             "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id \n" +
             "join form_type t on t.id = ft.type_id \n" +
             "join declaration_source ds on ds.src_department_form_type_id = dft.id \n" +
             "join department_report_period drp on drp.id = fd.department_report_period_id \n" +
-            "where %s and drp.report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and exists (select 1 from data_row where form_data_id = fd.id and manual = 1) \n" +
+            "where %s and drp.report_period_id = :reportPeriodId and t.tax_type = :taxType and dft.kind = :kind and fd.manual = 1 \n" +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
@@ -506,8 +499,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         try {
             return getJdbcTemplate().query(
                     "SELECT fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, fd.number_previous_row, " +
-                            "r.manual, fd.department_report_period_id, drp.report_period_id, drp.department_id FROM FORM_DATA fd " +
-                            "LEFT JOIN (SELECT MAX(manual) AS manual, form_data_id FROM data_row WHERE manual = 0 GROUP BY form_data_id) r ON r.form_data_id = fd.id, " +
+                            "fd.manual, fd.department_report_period_id, drp.report_period_id, drp.department_id FROM FORM_DATA fd, " +
                             "department_report_period drp " +
                             "WHERE drp.id = fd.department_report_period_id and fd.form_template_id = ?",
                     new Object[]{formTemplateId},
@@ -528,9 +520,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return getJdbcTemplate().queryForObject(
                     "select * from " +
                             "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, " +
-                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id, r.manual " +
-                            "from form_data fd left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
-                            "on r.form_data_id = fd.id, department_report_period drp, form_template ft " +
+                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id, fd.manual " +
+                            "from form_data fd, department_report_period drp, form_template ft " +
                             "where drp.id = fd.department_report_period_id " +
                             "and ft.id = fd.form_template_id " +
                             "and drp.department_id = ? " +
@@ -557,9 +548,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return getJdbcTemplate().query(
                     "select * from " +
                             "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, " +
-                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id, r.manual " +
-                            "from form_data fd left join (select max(manual) as manual, form_data_id from data_row group by form_data_id) r " +
-                            "on r.form_data_id = fd.id, department_report_period drp, form_template ft " +
+                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id, fd.manual " +
+                            "from form_data fd, department_report_period drp, form_template ft " +
                             "where drp.id = fd.department_report_period_id " +
                             "and ft.id = fd.form_template_id " +
                             "and drp.department_id = ? " +

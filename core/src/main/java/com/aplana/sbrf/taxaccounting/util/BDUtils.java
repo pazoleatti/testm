@@ -29,7 +29,7 @@ public interface BDUtils {
     }
 
     /**
-     * Метод возвращает список зарезервированных id для таблицы data_row
+     * Метод возвращает список зарезервированных id для таблицы form_data_nnn
      */
     List<Long> getNextDataRowIds(Long count);
 
