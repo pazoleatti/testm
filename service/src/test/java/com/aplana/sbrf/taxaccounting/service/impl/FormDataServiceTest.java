@@ -4,12 +4,36 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
+import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.Months;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.FormTypeService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
@@ -27,11 +51,34 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyCollectionOf;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("FormDataServiceTest.xml")
@@ -453,7 +500,7 @@ public class FormDataServiceTest {
         FormDataServiceImpl dataService = spy(formDataService);
 
         doReturn(false).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
-        doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
 
         dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
         verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
@@ -470,7 +517,7 @@ public class FormDataServiceTest {
         FormDataServiceImpl dataService = spy(formDataService);
 
         doReturn(true).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
-        doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
         doReturn(1L).when(formData).getId();
 
         dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
@@ -487,7 +534,7 @@ public class FormDataServiceTest {
         FormData formData = mock(FormData.class);
         FormDataServiceImpl dataService = spy(formDataService);
         doReturn(true).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
-        doReturn(true).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(true).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
         doReturn(1L).when(formData).getId();
         doReturn(WorkflowState.CREATED).when(formData).getState();
 
