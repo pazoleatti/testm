@@ -54,4 +54,11 @@ public interface DataRowService {
      * @param formDataDestinationId НФ приемник
      */
     void copyRows(long formDataSourceId, long formDataDestinationId);
+
+    /**
+     * Создает временный срез, предварительно удалив из него старые данные. Работает как с обычной, так и с версией
+     * ручного ввода.
+     * @param formData
+     */
+    void createTemporary(FormData formData);
 }
