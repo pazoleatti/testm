@@ -102,10 +102,10 @@ public class DeclarationTemplateController {
                     (securityService.currentUserInfo(), declarationTemplateId, items.get(0).getInputStream());
             Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
             Logger customLog = new Logger();
-            mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
+            mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo());
             IOUtils.closeQuietly(items.get(0).getInputStream());
 
-            deleteBlobs(customLog, jrxmBlobIdOld, xsdUuidOld);
+            deleteBlobs(customLog, jrxmBlobIdOld);// xsd удаляется при сохранении
             checkErrors(customLog, resp);
         } finally {
             declarationTemplateService.unlock(declarationTemplateId, userInfo);
@@ -145,7 +145,7 @@ public class DeclarationTemplateController {
             resultUuid.put(UuidEnum.UUID.toString(), jrxmBlobId);
             declarationTemplate.setJrxmlBlobId(jrxmBlobId);
             declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
-            mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo().getUser());
+            mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo());
 
             deleteBlobs(customLog, jrxmBlobIdOld);
             checkErrors(customLog, resp);
@@ -250,7 +250,7 @@ public class DeclarationTemplateController {
                     blobDataService.delete(uuid);
                 } catch (ServiceException e){
                     //Если вдруг не удалось удалить старую запись
-                    log.warn(e.toString());
+                    log.warn(e.getMessage());
                 }
             }
         }

@@ -5,6 +5,7 @@ import com.gwtplatform.dispatch.shared.Result;
 public class RecalculateDeclarationDataResult implements Result {
 
     private String uuid;
+    private CreateAsyncTaskStatus status;
 
     public String getUuid() {
         return uuid;
@@ -12,5 +13,13 @@ public class RecalculateDeclarationDataResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public CreateAsyncTaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CreateAsyncTaskStatus status) {
+        this.status = status;
     }
 }

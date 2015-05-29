@@ -91,8 +91,11 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                         kind.getName(),
                         department.getName(),
                         departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        departmentReportPeriod.getReportPeriod().getOrder() != 0
+                                ? " " + Formats.getRussianMonthNameWithTier(departmentReportPeriod.getReportPeriod().getOrder())
+                                : "",
                         departmentReportPeriod.getCorrectionDate() != null
-                                ? " " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
                                 : ""),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
             //Если блокировка успешно установлена

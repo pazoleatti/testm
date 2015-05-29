@@ -49,28 +49,13 @@ public interface DeclarationTemplateService {
 	 * 	или если обнаружено несколько действуюшие описаний по данному виду декларации
 	 */
 	int getActiveDeclarationTemplateId(int declarationTypeId, int reportPeriodId);
-	/**
-	 * Задать шаблон Jrxml-файла
-	 * Метод компилирует jrxml-файл и записиывает в БД, как сам jrxml-файл, так и его откомпилированную версию (jasper-файл).
-	 * @param declarationTemplateId идентификатор шаблона декларации 
-	 * @param jrxml jrxml в виде строки
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав на изменение шаблона декларации
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если при компиляции jrxml произошла ошибка
-	 */
-	void setJrxml(int declarationTemplateId, InputStream jrxml);
+
 	/**
 	 * Получить шаблон Jrxml-файла
 	 * @param declarationTemplateId идентификатор вида декларации
 	 * @return jrxml-файл в виде строки
 	 */
 	String getJrxml(int declarationTemplateId);
-
-    /**
-     * Получить шаблон Jrxml-файла
-     * @param declarationTemplateId идентификатор вида декларации
-     * @return jrxml-файл в виде строки
-     */
-    String getXsd(int declarationTemplateId);
 	
 	/**
 	 * Получить jasper-файл

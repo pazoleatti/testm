@@ -42,6 +42,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
 
         this.driver = driver;
         this.driver.initialize(this);
+        driver.edit(new DeclarationType());
 
         isIfrs.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override

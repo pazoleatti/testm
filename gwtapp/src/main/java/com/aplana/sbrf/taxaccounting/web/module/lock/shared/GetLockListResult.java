@@ -16,6 +16,8 @@ public class GetLockListResult implements Result {
      */
     private List<LockDataItem> locks;
     private long totalCountOfRecords;
+    private int currentUserId;
+    private boolean hasRoleAdmin;
 
     public List<LockDataItem> getLocks() {
         return locks;
@@ -31,5 +33,21 @@ public class GetLockListResult implements Result {
 
     public void setTotalCountOfRecords(long totalCountOfRecords) {
         this.totalCountOfRecords = totalCountOfRecords;
+    }
+
+    public boolean hasRoleAdmin() {
+        return hasRoleAdmin;
+    }
+
+    public void setHasRoleAdmin(boolean hasRoleAdmin) {
+        this.hasRoleAdmin = hasRoleAdmin;
+    }
+
+    public int getCurrentUserId() {
+        return currentUserId;
+    }
+
+    public void setCurrentUserId(int currentUserId) {
+        this.currentUserId = currentUserId;
     }
 }

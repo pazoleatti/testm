@@ -136,13 +136,14 @@ public class Cell extends AbstractCell {
 				return getValue();
 			}
 			case DATE: {
-                if (((Date) value).before(DATE_1900)) { // Сделано из-за ограничений Excel при работе с датами SBRFACCTAX-9982
+                Date date = (Date) value;
+                if (date.before(DATE_1900)) { // Сделано из-за ограничений Excel при работе с датами SBRFACCTAX-9982
                     return showError(msg + "Не может быть указана более ранняя дата, чем 01.01.1900!");
                 }
-                if (((Date) value).after(DATE_9999)) {
-                    return showError(msg + "Не может быть указана более поздняя дата, чем 31.12.9999");
+                if (date.after(DATE_9999)) {
+                    return showError(msg + "Не может быть указана более поздняя дата, чем 31.12.9999!");
                 }
-				dateValue = (Date) value;
+				dateValue = date;
 				return getValue();
 			}
 			case REFERENCE: {

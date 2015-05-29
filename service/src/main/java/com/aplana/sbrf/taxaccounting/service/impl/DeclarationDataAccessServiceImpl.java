@@ -187,6 +187,7 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
 			throw new AccessDeniedException("Декларация принята");
 		}
 
+
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
 
         // Нельзя обновить декларацию в закрытом периоде

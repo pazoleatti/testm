@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject;
 import com.aplana.sbrf.taxaccounting.async.entity.AsyncTaskTypeEntity;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskPersistenceException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManagerLocal;
-import com.aplana.sbrf.taxaccounting.async.manager.AsyncTaskThread;
 import com.aplana.sbrf.taxaccounting.async.persistence.AsyncTaskPersistenceServiceLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import org.apache.commons.logging.Log;
@@ -23,7 +22,8 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  */
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/longAsyncQueue")})
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/longAsyncQueue"),
+        @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge")})
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class LongAsyncMDB implements MessageListener {
 
@@ -56,12 +56,9 @@ public class LongAsyncMDB implements MessageListener {
                 //Получаем данные задачи
                 AsyncTask task = (AsyncTask) ic.lookup(taskType.getHandlerJndi());
                 Map<String, Object> params = asyncMdbObject.getParams();
-                AsyncTaskThread thread = new AsyncTaskThread(task, params);
-                Thread threadRunner = new Thread(thread);
                 //Сохраняем данные о потоке-исполнителе в менеджере, для того чтобы можно было остановить поток
-                interruptionManager.addTask((String) params.get(LOCKED_OBJECT.name()), threadRunner);
-                //Запускаем класс-исполнитель в отдельном потоке
-                threadRunner.start();
+                interruptionManager.addTask((String) params.get(LOCKED_OBJECT.name()), Thread.currentThread());
+                task.execute(params);
             } else {
                 log.error("Unexpected empty message content. Instance of com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject cannot be null!");
             }

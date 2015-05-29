@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -32,9 +30,6 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
 	@Autowired
 	private SecurityService securityService;
 
-    @Autowired
-    private LockDataService lockDataService;
-
 	public DeleteFormDataHandler() {
 		super(DeleteFormDataAction.class);
 	}
@@ -44,151 +39,20 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
         // Нажатие на кнопку "Удалить" http://conf.aplana.com/pages/viewpage.action?pageId=11384485
         DeleteFormDataResult result = new DeleteFormDataResult();
         Logger logger = new Logger();
+        FormData formData = action.getFormData();
 
-        //Проверяем не заблокирована ли нф какой либо операцией по ее изменению - редактирование, формирование отчетов
-        boolean locked = lockDataService.isLockExists(LockData.LockObjects.FORM_DATA + "_" + action.getFormData().getId(), true);
-        //Проверяем не заблокирована ли нф операцией загрузки в нее
-        boolean lockedByImport = lockDataService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT + "_" + action.getFormData().getId(), true);
-        if (!locked && !lockedByImport) {
-            FormData formData = action.getFormData();
-            if (formData.getState() != WorkflowState.CREATED){
-                throw new ServiceLoggerException("НФ не может быть удалена, так находится в статусе, отличном от \"Создана\"!", null);
-            }
-            // Версия ручного ввода удаляется без проверок
-            /*if (action.isManual()) {
-                formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), true);
-                return result;
-            }
-
-            FormData formData = action.getFormData();
-
-            *//** Проверяем в скрипте источники-приемники для особенных форм *//*
-            Map<String, Object> params = new HashMap<String, Object>();
-            FormSources sources = new FormSources();
-            sources.setSourceList(new ArrayList<FormToFormRelation>());
-            sources.setSourcesProcessedByScript(false);
-            params.put("sources", sources);
-            scriptingService.executeScript(securityService.currentUserInfo(), formData, FormDataEvent.GET_SOURCES, logger, params);
-
-            //Система проверяет наличие экземпляров, которые являются источниками НФ и имеют статус "Принята"
-            if (sources.isSourcesProcessedByScript()) {
-                //Скрипт возвращает все необходимые источники-приемники
-                if (sources.getSourceList() != null) {
-                    for (FormToFormRelation source : sources.getSourceList()) {
-                        if (source.getState() == WorkflowState.ACCEPTED) {
-                            if (source.getMonth() != null && !source.getMonth().isEmpty()) {
-                                logger.error("Найдена форма-источник «%s» «%s» в текущем периоде в месяце «%s», которая имеет статус \"Принята\"!",
-                                        source.getFormType().getName(), source.getFullDepartmentName(), source.getMonth());
-                            } else {
-                                logger.error("Найдена форма-источник «%s» «%s» в текущем периоде, которая имеет статус \"Принята\"!",
-                                        source.getFormType().getName(), source.getFullDepartmentName());
-                            }
-                        }
-                    }
-                }
-            } else {
-                // Отчетный период подразделения НФ
-                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(
-                        formData.getDepartmentReportPeriodId());
-
-                // Назначения источников
-                List<DepartmentFormType> sourceList = sourceService.getDFTSourcesByDFT(
-                        departmentReportPeriod.getDepartmentId().intValue(), formData.getFormType().getId(), formData.getKind(),
-                        departmentReportPeriod.getReportPeriod().getCalendarStartDate(),
-                        departmentReportPeriod.getReportPeriod().getEndDate());
-
-                // По назначениям
-                for (DepartmentFormType departmentFormType : sourceList) {
-                    if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), formData.getReportPeriodId())) {
-                        //не проверяем формы с неактивными макетами(или с макетами у которых изменили период актуальноси)
-                        continue;
-                    }
-                    DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-                    filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
-                    filter.setReportPeriodIdList(Arrays.asList(formData.getReportPeriodId()));
-                    filter.setIsCorrection(departmentReportPeriod.getCorrectionDate() != null);
-                    filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
-
-                    List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
-                    if (departmentReportPeriodList == null || departmentReportPeriodList.isEmpty()) {
-                        // Подходящий отчетный период подразделения не найден
-                        continue;
-                    }
-
-                    if (departmentReportPeriodList.size() != 1) {
-                        throw new ServiceException("Найдено более одного отчетного периода подразделения!");
-                    }
-
-                    // Отчетный период подразделения НФ-источника
-                    DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodList.get(0);
-
-                    Integer formTemplateId = formTemplateService.getActiveFormTemplateId(departmentFormType.getFormTypeId(), sourceDepartmentReportPeriod.getReportPeriod().getId());
-
-                    if (!formTemplateService.isMonthly(formTemplateId)) {
-                        // Экземпляр НФ-источника
-                        FormData sourceFormData = formDataService.findFormData(departmentFormType.getFormTypeId(),
-                                departmentFormType.getKind(), sourceDepartmentReportPeriod.getId(),
-                                action.getFormData().getPeriodOrder());
-
-                        if (sourceFormData == null) {
-                            // Экземпляр НФ не найден
-                            continue;
-                        }
-
-                        // Полное наименование подразделения
-                        String departmentName = departmentService.getParentsHierarchy(departmentFormType.getDepartmentId());
-
-                        if (sourceFormData.getState() == WorkflowState.ACCEPTED) {
-                            logger.error("Найдена форма-источник «%s» «%s» в текущем периоде, которая имеет статус \"Принята\"!",
-                                    sourceFormData.getFormType().getName(), departmentName);
-                        }
-                    } else {
-                        List<Months> availableMonthList;
-                        if (action.getFormData().getPeriodOrder() == null) {
-                            availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
-                        } else {
-                            availableMonthList = new ArrayList<Months>();
-                            availableMonthList.add(Months.fromId(action.getFormData().getPeriodOrder()));
-                        }
-
-                        for (Months months: availableMonthList) {
-                            if (months == null)
-                                continue;
-
-                            // Экземпляр НФ-источника
-                            FormData sourceFormData = formDataService.findFormData(departmentFormType.getFormTypeId(),
-                                    departmentFormType.getKind(), sourceDepartmentReportPeriod.getId(),
-                                    months.getId());
-
-                            if (sourceFormData == null) {
-                                // Экземпляр НФ не найден
-                                continue;
-                            }
-
-                            // Полное наименование подразделения
-                            String departmentName = departmentService.getParentsHierarchy(departmentFormType.getDepartmentId());
-
-                            if (sourceFormData.getState() == WorkflowState.ACCEPTED) {
-                                // Есть принятый источник
-                                logger.error("Найдена форма-источник «%s» «%s» в текущем периоде в месяце «%s», которая имеет статус \"Принята\"!",
-                                        sourceFormData.getFormType().getName(), departmentName, months.getTitle());
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                result.setUuid(logEntryService.save(logger.getEntries()));
-                return result;
-            }*/
-
-            // Удаление при отсутствии ошибок
-            formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), false);
+        // Версия ручного ввода удаляется без проверок
+        if (action.isManual()) {
+            formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), true);
             return result;
-        } else {
-            throw new ActionException("Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.");
         }
+
+        // Удаление автоматической версии
+        if (formData.getState() != WorkflowState.CREATED){
+            throw new ServiceLoggerException("НФ не может быть удалена, так находится в статусе, отличном от \"Создана\"!", null);
+        }
+        formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), false);
+        return result;
     }
 
 	@Override

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
@@ -527,4 +528,27 @@ public interface SourceService {
      * @return true если консолидация сделана
      */
     boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId);
+
+    /**
+     * Проставление признака неактуальности данных в НФ/декларации-приёмнике
+     * http://conf.aplana.com/pages/viewpage.action?pageId=19662408
+     * @param sourceFormId идентификатор источника
+     */
+    void updateFDDDConsolidation(long sourceFormId);
+
+    List<ConsolidatedInstance> getFormInstances(long sourceId, Date newPeriodStart, Date newPeriodEnd);
+
+    /**
+     * Проверяет не изменились ли данные консолидации для НФ
+     * @param fdTargetId идентификатор нф-приемника для проверки
+     * @return
+     */
+    boolean isFDConsolidationTopical(long fdTargetId);
+
+    /**
+     * Проверяет не изменились ли данные консолидации для декларации
+     * @param ddTargetId идентификатор декларации-приемника для проверки
+     * @return true - если данные не актульны
+     */
+    boolean isDDConsolidationTopical(long ddTargetId);
 }

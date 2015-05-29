@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declar
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -69,7 +68,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 		List<Integer> getSelectedDepartments();
 	    List<Integer> getSelectedDeclarationTypes();
 	    void setDepartments(List<Department> departments, Set<Integer> availableValues);
-	    void setDeclarationTypes(List<DeclarationType> declarationTypes);
+        void setDeclarationTypeFilter(TaxType taxType);
         // обновлели надписей в зависимости от вида налога
         void updateLabel(TaxType taxType);
 
@@ -90,6 +89,7 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
         slotForMe.addToPopupSlot(DeclarationDestinationsPresenter.this);
         getView().updateLabel(taxType);
         getView().updateCreateButtonStatus();
+        getView().setDeclarationTypeFilter(taxType);
 
 	    GetDeclarationPopUpFilterAction action = new GetDeclarationPopUpFilterAction();
 	    action.setTaxType(taxType);
@@ -99,7 +99,6 @@ public class DeclarationDestinationsPresenter extends PresenterWidget<Declaratio
 						    @Override
 						    public void onSuccess(GetDeclarationPopUpFilterResult result) {
 								getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
-							    getView().setDeclarationTypes(result.getDeclarationTypes());
 						    }
 					    }, this));
 

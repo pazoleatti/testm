@@ -7,7 +7,10 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +18,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.ejb.*;
-import javax.interceptor.Interceptors;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -31,11 +32,11 @@ import java.util.Map;
  *
  * @author Dmitriy Levykin
  */
-@MessageDriven(activationConfig = {
+/*@MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/rateQueue")})
 @Interceptors(TransportInterceptor.class)
-@TransactionManagement(TransactionManagementType.CONTAINER)
+@TransactionManagement(TransactionManagementType.CONTAINER)*/
 public class RateMDB implements MessageListener {
 
     private static final Log logger = LogFactory.getLog(RateMDB.class);
@@ -67,13 +68,13 @@ public class RateMDB implements MessageListener {
     private LogEntryService logEntryService;
 
     // Маппинг атрибута "OperName" из файла -> Id справочника
-    private static Map<String, Long> rateMapping = new HashMap() {{
+    private static final Map<String, Long> rateMapping = new HashMap<String, Long>() {{
         put("Currency", 22L);
         put("Metal", 90L);
     }};
 
     // Маппинг Id справочника → Название
-    private static Map<Long, String> refBookNameMapping = new HashMap() {{
+    private static final Map<Long, String> refBookNameMapping = new HashMap<Long, String>() {{
         put(22L, "Курсы Валют");
         put(90L, "Курсы драгоценных металлов");
     }};

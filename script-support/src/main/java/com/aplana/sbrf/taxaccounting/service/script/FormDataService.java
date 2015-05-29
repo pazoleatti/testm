@@ -76,12 +76,14 @@ public interface FormDataService {
     /**
      * Консолидация формы
      * Поиск источников и простое объединение строк
+     * Без записи в бд (только сохранение в кэш DataRowHelper)
      */
     @SuppressWarnings("unused")
     void consolidationSimple(FormData formData, Logger logger);
 
     /**
      * Консолидация формы с итоговыми строками
+     * Без записи в бд (только сохранение в кэш DataRowHelper)
      */
     @SuppressWarnings("unused")
     void consolidationTotal(FormData formData, Logger logger, List<String> totalAliases);
@@ -246,4 +248,10 @@ public interface FormDataService {
      */
     @SuppressWarnings("unused")
     boolean checkUnique(FormData formData, Logger logger);
+
+    /**
+     * Сохранение данных из кэша в бд при отстутствии критических ошибкок в логере
+     */
+    @SuppressWarnings("unused")
+    void saveCachedDataRows(FormData formData, Logger logger);
 }

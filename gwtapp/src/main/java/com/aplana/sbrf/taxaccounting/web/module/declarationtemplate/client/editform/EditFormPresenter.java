@@ -51,8 +51,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         dispatchAsync.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationTypeResult>() {
             @Override
             public void onSuccess(GetDeclarationTypeResult result) {
-                initDeclarationType = result.getDeclarationType();
-                getView().edit(initDeclarationType);
+                changeItem(result.getDeclarationType());
             }
         }, this));
     }
@@ -66,6 +65,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                     @Override
                     public void onSuccess(EditDeclarationTypeNameResult result) {
                         initDeclarationType = getView().getDecTypeData();
+                        getView().edit(initDeclarationType);
                         UpdateTableEvent.fire(EditFormPresenter.this);
                     }
                 }, this));
@@ -84,5 +84,25 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 getView().edit(initDeclarationType);
             }
         });
+    }
+
+    private void changeItem(final DeclarationType type) {
+        if (getView().isChangeFilter()) {
+            Dialog.confirmMessage("Редактирование макета", "Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    onSave();
+                    getView().edit(type);
+                }
+
+                @Override
+                public void no() {
+                    initDeclarationType = type;
+                    getView().edit(type);
+                }
+            });
+        } else {
+            getView().edit(type);
+        }
     }
 }

@@ -1,10 +1,12 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
+import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +38,12 @@ public class LockDataServiceImpl implements LockDataService {
 
 	@Autowired
 	private TAUserDao userDao;
+
+    @Autowired
+    AsyncInterruptionManager asyncInterruptionManager;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private TransactionHelper tx;
@@ -270,8 +280,8 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public PagingResult<LockData> getLocks(String filter, PagingParams pagingParams) {
-        return dao.getLocks(filter, pagingParams);
+    public PagingResult<LockData> getLocks(String filter, LockData.LockQueues queues, PagingParams pagingParams) {
+        return dao.getLocks(filter, queues, pagingParams);
     }
 
     @Override
@@ -351,4 +361,47 @@ public class LockDataServiceImpl implements LockDataService {
 		Date dateBefore = new Date();
 		dao.createLock(key, userId, new Date(dateBefore.getTime() + age), description, state);
 	}
+
+    @Override
+    public void interruptTask(final LockData lockData, final int userId, final boolean force) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+               @Override
+               public void execute() {
+                   try {
+                       TAUser user = userDao.getUser(userId);
+                       List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
+                       unlock(lockData.getKey(), userId, force);
+                       asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
+                       String msg = String.format(ReportType.CANCEL_TASK, user.getName(), lockData.getDescription());
+                       List<Notification> notifications = new ArrayList<Notification>();
+                       //Создаем оповещение для каждого пользователя из списка
+                       if (!waitingUsers.isEmpty()) {
+                           for (Integer waitingUser : waitingUsers) {
+                               Notification notification = new Notification();
+                               notification.setUserId(waitingUser);
+                               notification.setCreateDate(new Date());
+                               notification.setText(msg);
+                               notifications.add(notification);
+                           }
+                           notificationService.saveList(notifications);
+                       }
+                   } catch (Exception e) {
+                       throw new ServiceException("Не удалось прервать задачу", e);
+                   }
+               }
+
+               @Override
+               public Object executeWithReturn() {
+                   return null;
+               }
+           }
+        );
+    }
+
+    @Override
+    public void interuptAllTasks(List<String> lockKeys, int userId) {
+        for (String key : lockKeys) {
+            interruptTask(getLock(key), userId, true);
+        }
+    }
 }

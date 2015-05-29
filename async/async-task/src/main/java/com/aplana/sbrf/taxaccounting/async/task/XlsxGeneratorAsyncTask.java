@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -13,10 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
-import java.io.ByteArrayInputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
@@ -26,12 +30,6 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private DeclarationDataService declarationDataService;
-
-    @Autowired
-    private BlobDataService blobDataService;
-
-    @Autowired
-    private ReportService reportService;
 
     @Autowired
     private DepartmentService departmentService;
@@ -48,6 +46,9 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private LockDataService lockService;
+
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         long declarationDataId = (Long)params.get("declarationDataId");
@@ -59,21 +60,26 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         if (checkTaskLimit == null) {
             throw new ServiceException("Декларация не сформирована");
         } else if (checkTaskLimit.getFirst() == null) {
-                Logger logger = new Logger();
-                logger.error("Критерий возможности формирования печатного представления декларации задается в конфигурационных параметрах. За разъяснениями обратитесь к Администратору");
-                throw new ServiceLoggerException("Формирование печатного представления невозможно, т.к. xml файл декларации имеет слишком большой размер(%d байт)!",
-                        logEntryService.save(logger.getEntries()), checkTaskLimit.getSecond());
+            Logger logger = new Logger();
+            DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            logger.error("Критерий возможности формирования печатного представления декларации задается в конфигурационных параметрах. За разъяснениями обратитесь к Администратору");
+            throw new ServiceLoggerException(ReportType.CHECK_TASK,
+                    logEntryService.save(logger.getEntries()),
+                    String.format(ReportType.PDF_DEC.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
+                    String.format("xml файл %s имеет слишком большой размер(%s байт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), checkTaskLimit.getSecond()));
         }
         return checkTaskLimit.getFirst();
     }
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        log.debug("XlsxGeneratorAsyncTaskImpl has been started");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
@@ -84,17 +90,20 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
             scriptParams.put("needPdf", false);
             scriptParams.put("needXlsx", true);
             scriptingService.executeScript(userInfo, declarationData, FormDataEvent.REPORT, logger, scriptParams);
-            if (!scriptProcessedModel.isProcessedByScript()) {reportService.createDec(declarationDataId,
-                    blobDataService.create(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationDataId, userInfo)), ""), ReportType.EXCEL_DEC);
+            if (!scriptProcessedModel.isProcessedByScript()) {
+                declarationDataService.setXlsxDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
+                    @Override
+                    public void updateState(String state) {
+                        lockService.updateState(lock, lockDate, state);
+                    }
+                });
             }
         }
-
-        log.debug("XlsxGeneratorAsyncTaskImpl has been finished");
     }
 
     @Override
     protected String getAsyncTaskName() {
-        return "Генерация xlsx-файла";
+        return "Формирование xlsx-файла";
     }
 
     @Override

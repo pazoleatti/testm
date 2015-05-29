@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.source.AcceptedFormData;
 import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
 import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
@@ -338,36 +337,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         });
     }
 
-    private static final String FIND_ACCEPTED_INSTANCES = "select rp.name, tp.year, drp.report_period_id, dft.form_type_id from report_period rp\n" +
-            "join tax_period tp on tp.id = rp.tax_period_id\n" +
-            "join department_report_period drp on drp.report_period_id = rp.id\n" +
-            "join form_data fd on fd.department_report_period_id = drp.id\n" +
-            "join department_form_type dft on (dft.kind = fd.kind and dft.department_id = drp.department_id)\n" +
-            "join form_template ft on (ft.id = fd.form_template_id and ft.type_id = dft.form_type_id)\n" +
-            "where dft.id = :source and fd.state = 4 and (\n" +
-            "  (:periodStart <= rp.calendar_start_date and (:periodEnd is null or :periodEnd >= rp.calendar_start_date)) or\n" +
-            "  (:periodStart >= rp.calendar_start_date and :periodStart <= rp.end_date)\n" +
-            ")";
-
-    @Override
-    public List<AcceptedFormData> findAcceptedInstances(Long source, Date periodStart, Date periodEnd) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("source", source);
-        params.put("periodStart", periodStart);
-        params.put("periodEnd", periodEnd);
-        return getNamedParameterJdbcTemplate().query(FIND_ACCEPTED_INSTANCES, params, new RowMapper<AcceptedFormData>() {
-            @Override
-            public AcceptedFormData mapRow(ResultSet rs, int rowNum) throws SQLException {
-                AcceptedFormData acceptedFormData = new AcceptedFormData();
-                acceptedFormData.setPeriodInfo(rs.getString("name") + " " + rs.getString("year"));
-                acceptedFormData.setFormTypeId(rs.getInt("form_type_id"));
-                acceptedFormData.setReportPeriodId(rs.getInt("report_period_id"));
-                return acceptedFormData;
-            }
-        });
-    }
-
-    private static final String FINC_CONSOLIDATED_FORMS = "select tfd.kind as kind, tfmt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate \n" +
+    private static final String FIND_CONSOLIDATED_FORMS =
+            "select tfd.kind as kind, tfmt.name as type, td.name as department, trp.name as period, ttp.year as year, tfd.period_order as month, tdrp.correction_date as correctionDate \n" +
             "from department_form_type dft\n" +
             "join form_template ft on ft.type_id = dft.form_type_id\n" +
             "join department_report_period drp on drp.department_id = dft.department_id\n" +
@@ -385,7 +356,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
             ")";
 
-    private static final String FINC_CONSOLIDATED_DECLARATIONS = "select dt.name as kind, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate \n" +
+    private static final String FIND_CONSOLIDATED_DECLARATIONS =
+            "select dt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate, tdd.tax_organ_code as taxOrganCode, tdd.kpp as kpp \n" +
             "from department_form_type dft\n" +
             "join form_template ft on ft.type_id = dft.form_type_id\n" +
             "join department_report_period drp on drp.department_id = dft.department_id\n" +
@@ -412,29 +384,32 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         List<ConsolidatedInstance> formsAndDeclarations = new ArrayList<ConsolidatedInstance>();
 
         /** Получаем формы, которые консолидируются из указанного источника */
-        formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FINC_CONSOLIDATED_FORMS, params, new RowMapper<ConsolidatedInstance>() {
+        formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FIND_CONSOLIDATED_FORMS, params, new RowMapper<ConsolidatedInstance>() {
             @Override
             public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
                 ConsolidatedInstance form = new ConsolidatedInstance();
-                form.setFormKind(rs.getString("kind"));
+                form.setFormKind(rs.getInt("kind"));
                 form.setType(rs.getString("type"));
                 form.setDepartment(rs.getString("department"));
                 form.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
                 form.setCorrectionDate(rs.getDate("correctionDate"));
+                form.setMonth(SqlUtils.getInteger(rs, "month"));
                 return form;
             }
         }));
 
         /** Получаем декларации, которые консолидируются из указанного источника */
-        formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FINC_CONSOLIDATED_DECLARATIONS, params, new RowMapper<ConsolidatedInstance>() {
+        formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FIND_CONSOLIDATED_DECLARATIONS, params, new RowMapper<ConsolidatedInstance>() {
             @Override
             public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
                 ConsolidatedInstance declaration = new ConsolidatedInstance();
-                declaration.setFormKind(rs.getString("kind"));
+                declaration.setType(rs.getString("type"));
                 declaration.setDepartment(rs.getString("department"));
                 declaration.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
                 declaration.setCorrectionDate(rs.getDate("correctionDate"));
                 declaration.setDeclaration(true);
+                declaration.setTaxOrganCode(rs.getString("taxOrganCode"));
+                declaration.setKpp(rs.getString("kpp"));
                 return declaration;
             }
         }));
@@ -501,7 +476,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId) {
         try {
-            getJdbcTemplate().queryForInt("select 1 from DECLARATION_DATA_CONSOLIDATION where target_declaration_data_id = ? and source_form_data_id = ?", declarationId, sourceFormDataId);
+            getJdbcTemplate().queryForInt(
+                    "select 1 from DECLARATION_DATA_CONSOLIDATION where target_declaration_data_id = ? and source_form_data_id = ?",
+                    declarationId, sourceFormDataId);
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
@@ -563,5 +540,33 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
+    }
+
+    @Override
+    public int updateFDConsolidationInfo(long sourceFormId) {
+        return getJdbcTemplate().update(
+                "update FORM_DATA_CONSOLIDATION set source_form_data_id = null where source_form_data_id = ?",
+                sourceFormId);
+    }
+
+    @Override
+    public int updateDDConsolidationInfo(long sourceFormId) {
+        return getJdbcTemplate().update(
+                "update DECLARATION_DATA_CONSOLIDATION set source_form_data_id = null where source_form_data_id = ?",
+                sourceFormId);
+    }
+
+    @Override
+    public boolean isFDConsolidationTopical(long fdTargetId) {
+        return getJdbcTemplate().queryForInt(
+                "select count(*) from form_data_consolidation where TARGET_FORM_DATA_ID = ? and SOURCE_FORM_DATA_ID is null",
+                fdTargetId) > 0;
+    }
+
+    @Override
+    public boolean isDDConsolidationTopical(long ddTargetId) {
+        return getJdbcTemplate().queryForInt(
+                "select count(*) from DECLARATION_DATA_CONSOLIDATION where TARGET_DECLARATION_DATA_ID = ? and SOURCE_FORM_DATA_ID is null",
+                ddTargetId) > 0;
     }
 }

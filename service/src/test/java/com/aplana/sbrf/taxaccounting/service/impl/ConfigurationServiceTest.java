@@ -55,6 +55,7 @@ public class ConfigurationServiceTest {
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
         RefBookDataProvider provider = mock(RefBookDataProvider.class);
         when(refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG)).thenReturn(provider);
+        when(refBookFactory.getDataProvider(RefBook.ASYNC_CONFIG)).thenReturn(provider);
         ReflectionTestUtils.setField(service, "refBookFactory", refBookFactory);
     }
 
@@ -68,7 +69,7 @@ public class ConfigurationServiceTest {
         role.setAlias(TARole.ROLE_CONF);
         user.setRoles(asList(role));
         Logger logger = new Logger();
-        service.saveAllConfig(userInfo, new ConfigurationParamModel(), logger);
+        service.saveAllConfig(userInfo, new ConfigurationParamModel(), new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
     }
 
     // Сохранение без ошибок
@@ -117,11 +118,10 @@ public class ConfigurationServiceTest {
         //model.put(ConfigurationParam.EMAIL_LOGIN, 0, asList("login"));
         //model.put(ConfigurationParam.EMAIL_PASSWORD, 0, asList("password"));
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
-        model.setEmailParams(params);
 
         model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
 
-        service.saveAllConfig(getUser(), model, logger);
+        service.saveAllConfig(getUser(), model, params, new ArrayList<Map<String, String>>(), logger);
 
         file.delete();
         commonFolder.delete();
@@ -167,7 +167,7 @@ public class ConfigurationServiceTest {
 
         model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
 
-        service.saveAllConfig(getUser(), model, logger);
+        service.saveAllConfig(getUser(), model, new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
 
         file.delete();
         commonFolder.delete();
@@ -215,7 +215,7 @@ public class ConfigurationServiceTest {
 
         model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
 
-        service.saveAllConfig(getUser(), model, logger);
+        service.saveAllConfig(getUser(), model, new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
 
         file.delete();
         commonFolder.delete();
@@ -239,7 +239,7 @@ public class ConfigurationServiceTest {
         }
 
         model.put(ConfigurationParam.KEY_FILE, 0, Arrays.asList(sb.toString(), sb.toString(), ""));
-        service.saveAllConfig(getUser(), model, logger);
+        service.saveAllConfig(getUser(), model, new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
 
         // необязательно указывать все общие параметры, поэтому будет 6 ошибок (из них 4 у параметров отправки почты)
         // на превышение длины выше 500 символов

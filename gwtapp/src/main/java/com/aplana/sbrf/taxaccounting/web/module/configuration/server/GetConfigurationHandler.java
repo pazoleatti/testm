@@ -45,6 +45,8 @@ public class GetConfigurationHandler extends
         GetConfigurationResult result = new GetConfigurationResult();
         // Параметры
         result.setModel(configurationService.getAllConfig(securityService.currentUserInfo()));
+        result.setEmailConfigs(configurationService.getEmailConfig());
+        result.setAsyncConfigs(configurationService.getAsyncConfig());
         // Разыменование подразделений
         Set<Integer> needIds = new HashSet<Integer>();
         ConfigurationParamModel configurationParamModel = result.getModel();

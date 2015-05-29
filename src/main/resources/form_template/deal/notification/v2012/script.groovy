@@ -276,7 +276,7 @@ void generateXML() {
                                 def map = getRefBookValue(9, row.organName)
                                 organName = map.NAME.stringValue
                                 organINN = map.INN_KIO.stringValue
-                                organKPP = map.KPP.numberValue
+                                organKPP = map.KPP.stringValue
                                 organRegNum = map.REG_NUM.stringValue
                                 taxpayerCode = map.TAXPAYER_CODE.stringValue
                                 address = map.ADDRESS.stringValue

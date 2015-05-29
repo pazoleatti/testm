@@ -730,7 +730,7 @@ create table lock_data
   user_id number(9) not null,
   date_before date not null,
   date_lock date default current_date not null,
-  state varchar2(100),
+  state varchar2(500),
   state_date date,
   description varchar2(4000),
   queue varchar2(100)
@@ -761,13 +761,19 @@ create table async_task_type
 (
 id number(18) not null,
 name varchar2(100) not null,
-handler_jndi varchar2(500) not null
+handler_jndi varchar2(500) not null,
+short_queue_limit number(18) default 0 not null,
+task_limit number(18) default 0 not null,
+limit_kind varchar2(400)
 );
 
 comment on table async_task_type is 'Типы асинхронных задач';
 comment on column async_task_type.id is 'Идентификатор строки';
 comment on column async_task_type.name is 'Название типа задачи';
 comment on column async_task_type.handler_jndi is 'JNDI имя класса-обработчика';
+comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
+comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
+comment on column async_task_type.limit_kind is 'Вид ограничения';
 
 --------------------------------------------------------------------------------------------------------
 create table form_data_report 
@@ -851,7 +857,7 @@ comment on column configuration_lock.timeout is 'Таймаут блокиров
 --------------------------------------------------------------------------------------------------------
 create table form_data_consolidation
 (
-source_form_data_id number(9) not null,
+source_form_data_id number(9),
 target_form_data_id number(9) not null
 );
 
@@ -862,7 +868,7 @@ comment on column form_data_consolidation.target_form_data_id is 'Идентиф
 
 create table declaration_data_consolidation
 (
-source_form_data_id number(9) not null,
+source_form_data_id number(9),
 target_declaration_data_id number(9) not null
 );
 

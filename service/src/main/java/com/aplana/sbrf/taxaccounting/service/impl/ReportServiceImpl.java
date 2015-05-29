@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
@@ -51,6 +52,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void createAudit(int userId, String blobDataId, ReportType type) {
+        if (reportDao.getAudit(userId, type)!=null){
+            throw new ServiceException("Для этого пользователя уже есть отчет по ЖА, проверьте выгрузку.");
+        }
         reportDao.createAudit(userId, blobDataId, type);
     }
 
@@ -73,7 +77,6 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void deleteDec(String blobDataId) {
         reportDao.deleteDec(blobDataId);
-        blobDataService.delete(blobDataId);
     }
 
     @Override
@@ -84,6 +87,5 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void deleteAudit(String blobDataId) {
         reportDao.deleteAudit(blobDataId);
-        blobDataService.delete(blobDataId);
     }
 }

@@ -27,16 +27,16 @@ import java.util.*;
 
 public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandlers> implements MyView {
     @UiField
-    DataGrid<DataRow<Cell>> commonTable, formTable, emailTable;
+    DataGrid<DataRow<Cell>> commonTable, formTable, emailTable, asyncTable;
 
     @UiField
     Label titleLabel;
 
     @UiField
-    LinkAnchor commonLink, formLink, emailLink;
+    LinkAnchor commonLink, formLink, emailLink, asyncLink;
 
     @UiField
-    Widget commonPanel, formPanel, emailPanel;
+    Widget commonPanel, formPanel, emailPanel, asyncPanel;
 
     @UiField
     LinkAnchor addLink;
@@ -50,6 +50,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     List<DataRow<Cell>> formRowsData = new ArrayList<DataRow<Cell>>();
     List<DataRow<Cell>> commonRowsData = new ArrayList<DataRow<Cell>>();
     List<DataRow<Cell>> emailRowsData = new ArrayList<DataRow<Cell>>();
+    List<DataRow<Cell>> asyncRowsData = new ArrayList<DataRow<Cell>>();
 
     private RefBookColumn paramColumn = new RefBookColumn();
     private StringColumn valueColumn = new StringColumn();
@@ -62,6 +63,12 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     private StringColumn emailNameColumn = new StringColumn();
     private StringColumn emailValueColumn = new StringColumn();
     private StringColumn emailDescriptionColumn = new StringColumn();
+
+    private StringColumn asyncTypeIdColumn = new StringColumn();
+    private StringColumn asyncTypeColumn = new StringColumn();
+    private StringColumn asyncLimitKindColumn = new StringColumn();
+    private StringColumn asyncLimitColumn = new StringColumn();
+    private StringColumn asyncShortLimitColumn = new StringColumn();
 
     private ConfigurationParamGroup activeGroup = ConfigurationParamGroup.COMMON;
 
@@ -80,6 +87,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         initCommonTable();
         initFormTable();
         initEmailTable();
+        initAsyncTable();
 
         initMaps();
     }
@@ -88,13 +96,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         tableMap.put(ConfigurationParamGroup.COMMON, commonTable);
         tableMap.put(ConfigurationParamGroup.FORM, formTable);
         tableMap.put(ConfigurationParamGroup.EMAIL, emailTable);
+        tableMap.put(ConfigurationParamGroup.ASYNC, asyncTable);
 
         rowsDataMap.put(ConfigurationParamGroup.COMMON, commonRowsData);
         rowsDataMap.put(ConfigurationParamGroup.FORM, formRowsData);
         rowsDataMap.put(ConfigurationParamGroup.EMAIL, emailRowsData);
+        rowsDataMap.put(ConfigurationParamGroup.ASYNC, asyncRowsData);
 
         comparatorMap.put(ConfigurationParamGroup.COMMON, commonComparator);
         comparatorMap.put(ConfigurationParamGroup.FORM, formComparator);
+        comparatorMap.put(ConfigurationParamGroup.ASYNC, asyncComparator);
     }
 
     /**
@@ -217,6 +228,58 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         });
     }
 
+    /**
+     * Подготовка таблицы параметров электронной почты
+     */
+    private void initAsyncTable() {
+        asyncTypeIdColumn.setAlias("asyncTypeIdColumn");
+        asyncTypeIdColumn.setName("");
+        Column<DataRow<Cell>, ?> asyncParamColumnUI = factory.createTableColumn(asyncTypeIdColumn, asyncTable);
+        asyncTable.setColumnWidth(asyncParamColumnUI, 0, Style.Unit.EM);
+        asyncTable.addColumn(asyncParamColumnUI, asyncTypeIdColumn.getName());
+
+        asyncTypeColumn.setAlias("asyncTypeColumn");
+        asyncTypeColumn.setName("Тип задания");
+        asyncParamColumnUI = factory.createTableColumn(asyncTypeColumn, asyncTable);
+        asyncTable.setColumnWidth(asyncParamColumnUI, 20, Style.Unit.EM);
+        asyncTable.addColumn(asyncParamColumnUI, asyncTypeColumn.getName());
+
+        asyncLimitKindColumn.setAlias("asyncLimitKindColumn");
+        asyncLimitKindColumn.setName("Вид ограничения");
+        asyncParamColumnUI = factory.createTableColumn(asyncLimitKindColumn, asyncTable);
+        asyncTable.setColumnWidth(asyncParamColumnUI, 20, Style.Unit.EM);
+        asyncTable.addColumn(asyncParamColumnUI, asyncLimitKindColumn.getName());
+
+        asyncLimitColumn.setAlias("asyncLimitColumn");
+        asyncLimitColumn.setName("Значение параметра \"Ограничение на выполнение задания\"");
+        asyncParamColumnUI = factory.createTableColumn(asyncLimitColumn, asyncTable);
+        asyncTable.setColumnWidth(asyncParamColumnUI, 20, Style.Unit.EM);
+        asyncTable.addColumn(asyncParamColumnUI, asyncLimitColumn.getName());
+
+        asyncShortLimitColumn.setAlias("asyncShortLimitColumn");
+        asyncShortLimitColumn.setName("Значение параметра \"Ограничение на выполнение задания в очереди быстрых заданий\"");
+        asyncParamColumnUI = factory.createTableColumn(asyncShortLimitColumn, asyncTable);
+        asyncTable.setColumnWidth(asyncParamColumnUI, 20, Style.Unit.EM);
+        asyncTable.addColumn(asyncParamColumnUI, asyncShortLimitColumn.getName());
+
+        asyncTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
+        asyncTable.setMinimumTableWidth(20, Style.Unit.EM);
+
+        asyncTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
+        SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        asyncTable.setSelectionModel(singleSelectionModel);
+
+        // Обновляем таблицу после обновления модели
+        ((DataRowColumn<?>) asyncParamColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
+            @Override
+            public void onCellModified(CellModifiedEvent event, boolean withReference) {
+                if (getUiHandlers() != null) {
+                    asyncTable.redraw();
+                }
+            }
+        });
+    }
+
     // Допустимые значения для справочника конф. параметров
     private String getConfParamFilter(ConfigurationParamGroup group) {
         StringBuilder filter = new StringBuilder("");
@@ -243,8 +306,11 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         emailLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL));
         emailPanel.setVisible(activeGroup.equals(ConfigurationParamGroup.EMAIL));
 
-        addLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL));
-        delLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL));
+        asyncLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.ASYNC));
+        asyncPanel.setVisible(activeGroup.equals(ConfigurationParamGroup.ASYNC));
+
+        addLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL) && !activeGroup.equals(ConfigurationParamGroup.ASYNC));
+        delLink.setVisible(!activeGroup.equals(ConfigurationParamGroup.EMAIL) && !activeGroup.equals(ConfigurationParamGroup.ASYNC));
 
         for (DataGrid<DataRow<Cell>> table : tableMap.values()) {
             table.redraw();
@@ -302,19 +368,28 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         showTab(ConfigurationParamGroup.EMAIL);
     }
 
+    @UiHandler("asyncLink")
+    void onAsyncLinkClick(ClickEvent event) {
+        showTab(ConfigurationParamGroup.ASYNC);
+    }
+
     @UiHandler("checkButton")
     void onCheckButtonClick(ClickEvent event) {
         DataGrid<DataRow<Cell>> table = getTable(activeGroup);
         DataRow<Cell> selRow = ((SingleSelectionModel<DataRow<Cell>>) table.getSelectionModel()).getSelectedObject();
-        if (selRow == null && !activeGroup.equals(ConfigurationParamGroup.EMAIL)) {
+        if (selRow == null && !(activeGroup.equals(ConfigurationParamGroup.EMAIL) || activeGroup.equals(ConfigurationParamGroup.ASYNC))) {
             return;
         }
-        getUiHandlers().onCheckAccess(activeGroup, selRow);
+        getUiHandlers().onCheckAccess(activeGroup, selRow, false);
     }
 
     @UiHandler("saveButton")
     void onSaveButtonClick(ClickEvent event) {
-        getUiHandlers().onSave();
+        if (activeGroup.equals(ConfigurationParamGroup.ASYNC)) {
+            getUiHandlers().onCheckAccess(activeGroup, null, true);
+        } else {
+            getUiHandlers().onSave();
+        }
     }
 
     @UiHandler("cancelButton")
@@ -355,6 +430,24 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
                 return -1;
             }
             return name1.compareTo(name2);
+        }
+    };
+
+    private static final Comparator<DataRow<Cell>> asyncComparator = new Comparator<DataRow<Cell>>() {
+        @Override
+        public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+            String type1 = o1.getCell("asyncTypeColumn").getStringValue();
+            String type2 = o2.getCell("asyncTypeColumn").getStringValue();
+            if (type1 == null && type2 == null) {
+                return 0;
+            }
+            if (type1 == null) {
+                return 1;
+            }
+            if (type2 == null) {
+                return -1;
+            }
+            return type1.compareTo(type2);
         }
     };
 
@@ -418,9 +511,34 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     }
 
     @Override
+    public StringColumn getAsyncTypeColumn() {
+        return asyncTypeColumn;
+    }
+
+    @Override
+    public StringColumn getAsyncLimitKindColumn() {
+        return asyncLimitKindColumn;
+    }
+
+    @Override
+    public StringColumn getAsyncLimitColumn() {
+        return asyncLimitColumn;
+    }
+
+    @Override
+    public StringColumn getAsyncShortLimitColumn() {
+        return asyncShortLimitColumn;
+    }
+
+    @Override
     public void clearSelection() {
         for (DataGrid<DataRow<Cell>> table : tableMap.values()) {
             ((SingleSelectionModel) table.getSelectionModel()).clear();
         }
+    }
+
+    @Override
+    public StringColumn getAsyncTypeIdColumn() {
+        return asyncTypeIdColumn;
     }
 }

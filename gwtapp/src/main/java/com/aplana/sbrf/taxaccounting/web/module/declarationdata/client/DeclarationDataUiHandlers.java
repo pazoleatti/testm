@@ -7,15 +7,15 @@ import com.gwtplatform.mvp.client.UiHandlers;
 import java.util.Date;
 
 public interface DeclarationDataUiHandlers extends UiHandlers {
-	void onRecalculateClicked(Date docDate);
-	void accept(boolean accepted);
+	void onRecalculateClicked(Date docDate, boolean force);
+	void accept(boolean accepted, final boolean force);
 	void delete();
-	void check();
-	void downloadExcel();
+	void check(boolean force);
+    void viewReport(boolean force, ReportType reportType);
 	void downloadXml();
 	void onInfoClicked();
     TaxType getTaxType();
     void onTimerReport(final ReportType reportType, final boolean isTimer);
-    void viewPdf(Boolean force);
     void onOpenSourcesDialog();
+    void revealPlaceRequest();
 }

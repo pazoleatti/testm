@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.TimerReportResult;
+import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.server.PDFImageUtils;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.Pdf;
 import com.aplana.sbrf.taxaccounting.web.widget.pdfviewer.shared.PdfPage;
@@ -55,18 +56,16 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
     public TimerReportResult execute(TimerReportAction action, ExecutionContext executionContext) throws ActionException {
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        if (ReportType.PDF_DEC.equals(action.getType())) {
-            TimerReportResult.StatusReport statusXML = getStatus(userInfo, action.getDeclarationDataId(), ReportType.XML_DEC);
-            if (TimerReportResult.StatusReport.LOCKED.equals(statusXML) ||
-                    TimerReportResult.StatusReport.NOT_EXIST.equals(statusXML)) {
-                result.setExistXMLReport(statusXML);
-                return result;
-            }
-        }
         TimerReportResult.StatusReport status = getStatus(userInfo, action.getDeclarationDataId(), action.getType());
         result.setExistReport(status);
         if (TimerReportResult.StatusReport.EXIST.equals(status) && ReportType.PDF_DEC.equals(action.getType())) {
             result.setPdf(generatePdfViewerModel(action.getDeclarationDataId(), userInfo));
+        } else if (!TimerReportResult.StatusReport.LOCKED.equals(status) && ReportType.PDF_DEC.equals(action.getType())) {
+            TimerReportResult.StatusReport statusXML = getStatus(userInfo, action.getDeclarationDataId(), ReportType.XML_DEC);
+            if (TimerReportResult.StatusReport.LOCKED.equals(statusXML) ||
+                    TimerReportResult.StatusReport.NOT_EXIST.equals(statusXML)) {
+                result.setExistXMLReport(statusXML);
+            }
         }
         return result;
     }
@@ -74,7 +73,9 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
     private TimerReportResult.StatusReport getStatus(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
         String key = declarationDataService.generateAsyncTaskKey(declarationDataId, reportType);
         if (!lockDataService.isLockExists(key, false)) {
-            if (reportService.getDec(userInfo, declarationDataId, reportType) == null) {
+            if (ReportType.ACCEPT_DEC.equals(reportType)) {
+                return TimerReportResult.StatusReport.EXIST;
+            } else if (reportService.getDec(userInfo, declarationDataId, reportType) == null) {
                 Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, reportType);
                 if (checkTaskLimit != null && checkTaskLimit.getFirst() == null) {
                     return TimerReportResult.StatusReport.LIMIT;

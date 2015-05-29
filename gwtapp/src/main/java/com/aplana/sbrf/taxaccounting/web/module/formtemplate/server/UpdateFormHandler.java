@@ -58,7 +58,8 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
         if (logger.containsLevel(LogLevel.ERROR)){
             throw new ServiceLoggerException("Ошибки при валидации.", logEntryService.save(logger.getEntries()));
         }
-        int formTemplateId = mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo().getUser());
+        int formTemplateId =
+                mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo());
 
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));

@@ -108,7 +108,7 @@ public class LogEntryServiceImpl implements LogEntryService {
         }
         List<LogEntry> list = getAll(uuid);
         list.addAll(logEntries);
-        logEntryDao.update(logEntries, uuid);
+        logEntryDao.update(list, uuid);
         return uuid;
     }
 }

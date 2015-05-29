@@ -18,6 +18,17 @@ alter table log_system_report add constraint log_system_report_chk_type check (t
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
 
 ---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-11292: Каскадное удаление blob для таблиц отчетов
+alter table log_system_report 	drop constraint 	log_system_report_fk_blob_data;
+alter table log_system_report 	add constraint 		log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
+
+alter table declaration_report	drop constraint decl_report_fk_blob_data;
+alter table declaration_report 	add constraint decl_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
+
+--http://jira.aplana.com/browse/SBRFACCTAX-11294: Ограничение уникальности на log_system_report.seq_user_id
+alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
+
+---------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-10492: Удаление временной таблицы
 drop table data_row_temp;
 
@@ -83,13 +94,14 @@ comment on table declaration_data_consolidation is 'Сведения о конс
 comment on column declaration_data_consolidation.source_form_data_id is 'Идентификатор НФ источника';
 comment on column declaration_data_consolidation.target_declaration_data_id is 'Идентификатор декларации приемника';
 
-alter table form_data_consolidation add constraint form_data_consolidation_pk primary key (source_form_data_id, target_form_data_id);
 alter table form_data_consolidation add constraint form_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
-alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id);
+alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id) on delete cascade;
+create unique index i_form_data_consolidation_unq on form_data_consolidation (case when source_form_data_id is not null then target_form_data_id end, source_form_data_id);
 
-alter table declaration_data_consolidation add constraint decl_data_consolidation_pk primary key (source_form_data_id, target_declaration_data_id);
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
-alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id);
+alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id) on delete cascade;
+create unique index i_decl_data_consolidation_unq on declaration_data_consolidation (case when source_form_data_id is not null then target_declaration_data_id end, source_form_data_id);
+
 
 ---------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-10729: FORM_DATA_PERFORMER:NAME сделать поле необязательным для заполнения
@@ -104,7 +116,7 @@ alter table ref_book add constraint ref_book_chk_versioned check (is_versioned i
 update ref_book set is_versioned = 0 where id in (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 204, 205, 400);
 ---------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-11209: Расширение полей LOCK_DATA
-alter table lock_data add state varchar2(100);
+alter table lock_data add state varchar2(500);
 alter table lock_data add state_date date;
 alter table lock_data add description varchar2(4000);
 alter table lock_data add queue varchar2(100);
@@ -113,6 +125,32 @@ comment on column lock_data.state is 'Статус выполнения асин
 comment on column lock_data.state_date is 'Дата последнего изменения статуса';
 comment on column lock_data.description is 'Описание блокировки';
 comment on column lock_data.queue is 'Очередь, в которой находится связанная асинхронная задача';
+---------------------------------------------------------------------------------------------
+--Оптимизация производительности
+create index i_lock_data_subscr on lock_data_subscribers(lock_key);
+
+---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-11339: Таблица для конфигов асинхронных задач
+--совместно с http://jira.aplana.com/browse/SBRFACCTAX-11160
+alter table async_task_type add short_queue_limit number(18) default 0 not null;
+comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
+
+alter table async_task_type add task_limit number(18) default 0 not null;
+comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
+
+alter table async_task_type add limit_kind varchar2(400);
+comment on column async_task_type.limit_kind is 'Вид ограничения';
+
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (401, 'Настройки асинхронных задач', 0, 0, 0, null, 'ASYNC_TASK_TYPE', 0);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4101, 401, '№', 'ID', 2, 1, null, null, 1, 0, 10, 1, 1, 1, null, 0, 18);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4102, 401, 'Название типа задачи', 'NAME', 1, 2, null, null, 1, null, 10, 1, 0, null, null, 0, 100);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4103, 401, 'JNDI имя класса-обработчика', 'HANDLER_JNDI', 1, 3, null, null, 1, null, 10, 1, 0, null, null, 0, 500);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4104, 401, 'Ограничение на выполнение задачи в очереди быстрых задач', 'SHORT_QUEUE_LIMIT', 2, 4, null, null, 1, 0, 10, 1, 0, null, null, 0, 18);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4105, 401, 'Ограничение на выполнение задачи', 'TASK_LIMIT', 2, 5, null, null, 1, 0, 10, 1, 0, null, null, 0, 18);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4106, 401, 'Вид ограничения', 'LIMIT_KIND', 1, 6, null, null, 1, null, 10, 0, 0, null, null, 0, 400);
+
+
 ---------------------------------------------------------------------------------------------
 
 commit;

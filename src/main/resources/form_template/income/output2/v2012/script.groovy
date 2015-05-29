@@ -1,7 +1,8 @@
 package form_template.income.output2.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -128,176 +129,58 @@ void logicCheck() {
     }
 }
 
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп.', null, 23, 3)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 23, 3)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]) : '№ пп.',
-            (xml.row[0].cell[1]) : 'Получатель',
-            (xml.row[0].cell[2]) : 'Место нахождения (адрес)',
-            (xml.row[0].cell[11]): 'Руководитель организации',
-            (xml.row[0].cell[14]): 'Контактный телефон',
-            (xml.row[0].cell[15]): 'Сумма начисленных дивидендов',
-            (xml.row[0].cell[16]): 'Перечисление дивидендов',
-            (xml.row[0].cell[19]): 'Перечисление налога',
-            (xml.row[0].cell[22]): 'Отчётный год',
-            (xml.row[1].cell[2]) : 'Индекс',
-            (xml.row[1].cell[3]) : 'Код региона',
-            (xml.row[1].cell[4]) : 'Район',
-            (xml.row[1].cell[5]) : 'Город',
-            (xml.row[1].cell[6]) : 'Населённый пункт (село, посёлок и т.п.)',
-            (xml.row[1].cell[7]) : 'Улица (проспект, переулок и т.д.)',
-            (xml.row[1].cell[8]) : 'Номер дома (владения)',
-            (xml.row[1].cell[9]) : 'Номер корпуса (строения)',
-            (xml.row[1].cell[10]): 'Номер офиса (квартиры)',
-            (xml.row[1].cell[11]): 'Фамилия',
-            (xml.row[1].cell[12]): 'Имя',
-            (xml.row[1].cell[13]): 'Отчество',
-            (xml.row[1].cell[16]): 'Дата',
-            (xml.row[1].cell[17]): 'Номер платёжного поручения',
-            (xml.row[1].cell[18]): 'Сумма',
-            (xml.row[1].cell[19]): 'Дата',
-            (xml.row[1].cell[20]): 'Номер платёжного поручения',
-            (xml.row[1].cell[21]): 'Сумма'
-    ]
-    (0..22).each { index ->
-        headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    // добавить данные в форму
-    addData(xml, 3)
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    dataRowHelper.saveSort()
 }
 
-void addData(def xml, headRowCount) {
+void importData() {
+    int COLUMN_COUNT = 23
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = '№ пп.'
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    // количество графов в таблице
-    def columnCount = 23
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount - 1) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
             break
         }
-
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-
-        def xmlIndexCol = 0
-
-        // графа 1
-        xmlIndexCol++
-
-        // графа 2
-        newRow.title = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 3
-        newRow.zipCode = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 4 - справочник "Коды субъектов Российской Федерации"
-        newRow.subdivisionRF = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        xmlIndexCol++
-
-        // графа 5
-        newRow.area = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 6
-        newRow.city = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 7
-        newRow.region = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 8
-        newRow.street = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 9
-        newRow.homeNumber = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 10
-        newRow.corpNumber = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 11
-        newRow.apartment = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 12
-        newRow.surname = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 13
-        newRow.name = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 14
-        newRow.patronymic = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 15
-        newRow.phone = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 16
-        newRow.sumDividend = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 17
-        newRow.dividendDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 18
-        newRow.dividendNum = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 19
-        newRow.dividendSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 20
-        newRow.taxDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 21
-        newRow.taxNum = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 22
-        newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 23
-        newRow.reportYear = parseDate(row.cell[xmlIndexCol].text(), "yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
     }
 
     showMessages(rows, logger)
@@ -306,9 +189,120 @@ void addData(def xml, headRowCount) {
     }
 }
 
-void sortFormDataRows() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, null, null)
-    dataRowHelper.saveSort()
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount) {
+    if (headerRows.isEmpty() || headerRows.size() < rowCount) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]) : '№ пп.',
+            (headerRows[0][1]) : 'Получатель',
+            (headerRows[0][2]) : 'Место нахождения (адрес)',
+            (headerRows[0][11]): 'Руководитель организации',
+            (headerRows[0][14]): 'Контактный телефон',
+            (headerRows[0][15]): 'Сумма начисленных дивидендов',
+            (headerRows[0][16]): 'Перечисление дивидендов',
+            (headerRows[0][19]): 'Перечисление налога',
+            (headerRows[0][22]): 'Отчётный год',
+            (headerRows[1][2]) : 'Индекс',
+            (headerRows[1][3]) : 'Код региона',
+            (headerRows[1][4]) : 'Район',
+            (headerRows[1][5]) : 'Город',
+            (headerRows[1][6]) : 'Населённый пункт (село, посёлок и т.п.)',
+            (headerRows[1][7]) : 'Улица (проспект, переулок и т.д.)',
+            (headerRows[1][8]) : 'Номер дома (владения)',
+            (headerRows[1][9]) : 'Номер корпуса (строения)',
+            (headerRows[1][10]): 'Номер офиса (квартиры)',
+            (headerRows[1][11]): 'Фамилия',
+            (headerRows[1][12]): 'Имя',
+            (headerRows[1][13]): 'Отчество',
+            (headerRows[1][16]): 'Дата',
+            (headerRows[1][17]): 'Номер платёжного поручения',
+            (headerRows[1][18]): 'Сумма',
+            (headerRows[1][19]): 'Дата',
+            (headerRows[1][20]): 'Номер платёжного поручения',
+            (headerRows[1][21]): 'Сумма'
+    ]
+    (0..22).each { index ->
+        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    // графа 2
+    def colIndex = 1
+    newRow.title = values[colIndex]
+
+    // графа 3
+    colIndex++
+    newRow.zipCode = values[colIndex]
+
+    // графа 4 - справочник "Коды субъектов Российской Федерации"
+    colIndex++
+    newRow.subdivisionRF = getRecordIdImport(4, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 5..15
+    ['area', 'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment', 'surname',
+            'name', 'patronymic', 'phone'].each { alias ->
+        colIndex++
+        newRow[alias] = values[colIndex]
+    }
+
+    // графа 16
+    colIndex++
+    newRow.sumDividend = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 17
+    colIndex++
+    newRow.dividendDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 18
+    colIndex++
+    newRow.dividendNum = values[colIndex]
+
+    // графа 19
+    colIndex++
+    newRow.dividendSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 20
+    colIndex++
+    newRow.taxDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 21
+    colIndex++
+    newRow.taxNum = values[colIndex]
+
+    // графа 22
+    colIndex++
+    newRow.sumTax = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 23
+    colIndex++
+    newRow.reportYear = parseDate(values[colIndex], "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
 }

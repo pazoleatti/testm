@@ -211,8 +211,8 @@ alter table template_changes add constraint template_changes_fk_event foreign ke
 alter table template_changes add constraint template_changes_chk_template check ((form_template_id is not null and declaration_template_id is null) or (form_template_id is null and declaration_template_id is not null));
 
 alter table log_system add constraint log_system_fk_event_id foreign key (event_id) references event(id);
-alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
-alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860) or report_period_name is not null);
+alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
+alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705) or report_period_name is not null);
 alter table log_system add constraint log_system_fk_kind foreign key (form_kind_id) references form_kind(id);
 alter table log_system add constraint log_system_fk_user_login foreign key (user_login) references sec_user(login);
 alter table log_system add constraint log_system_fk_blob_data foreign key (blob_data_id) references blob_data(id) on delete set null;
@@ -236,7 +236,7 @@ alter table form_data_report add constraint form_data_rep_chk_absolute check (ab
 
 alter table declaration_report add constraint decl_report_pk primary key (declaration_data_id, type);
 alter table declaration_report add constraint decl_report_fk_decl_data foreign key(declaration_data_id) references declaration_data(id) on delete cascade;
-alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id);
+alter table declaration_report add constraint decl_report_fk_blob_data foreign key(blob_data_id) references blob_data(id) on delete cascade;
 alter table declaration_report add constraint decl_report_chk_type check (type in (0, 1, 2, 3));
 
 alter table ifrs_data add constraint ifrs_data_pk primary key (report_period_id);
@@ -248,17 +248,18 @@ alter table configuration_email add constraint configuration_email_unqname uniqu
 
 alter table configuration_lock add constraint configuration_lock_pk primary key (key);
 
-alter table form_data_consolidation add constraint form_data_consolidation_pk primary key (source_form_data_id, target_form_data_id);
 alter table form_data_consolidation add constraint form_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
-alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id);
+alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id) on delete cascade;
+--create unique index i_form_data_consolidation_unq on form_data_consolidation (case when source_form_data_id is not null then target_form_data_id end, source_form_data_id);
 
-alter table declaration_data_consolidation add constraint decl_data_consolidation_pk primary key (source_form_data_id, target_declaration_data_id);
 alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
-alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id);
+alter table declaration_data_consolidation add constraint decl_data_consolidation_fk_tgt foreign key (target_declaration_data_id) references declaration_data(id)  on delete cascade;
+--create unique index i_decl_data_consolidation_unq on declaration_data_consolidation (case when source_form_data_id is not null then target_declaration_data_id end, source_form_data_id);
 
-alter table log_system_report add constraint log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id);
+alter table log_system_report add constraint log_system_report_fk_blob_data foreign key (blob_data_id) references blob_data (id) on delete cascade;
 alter table log_system_report add constraint log_system_report_fk_sec_user foreign key (sec_user_id) references sec_user (id) on delete cascade;
 alter table log_system_report add constraint log_system_report_chk_type check (type in (0, 1));
+alter table log_system_report add constraint log_system_report_unq_sec_user unique(sec_user_id);
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
@@ -280,3 +281,4 @@ create index i_declaration_template_xsd on declaration_template(xsd);
 create index i_declaration_template_jrxml on declaration_template(jrxml);
 create index i_notification_blob_data_id on notification(blob_data_id);
 create index i_log_system_rep_blob_data_id on log_system_report(blob_data_id);
+create index i_lock_data_subscr on lock_data_subscribers(lock_key);

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -70,7 +71,12 @@ public class DeclarationDataServiceImplTest {
 			TAUserInfo userInfo = new TAUserInfo();
 			userInfo.setIp("192.168.72.16");
 			userInfo.setUser(mockUser(10,  Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
-			declarationDataService.calculate(logger, 1l, userInfo, new Date());
+			declarationDataService.calculate(logger, 1l, userInfo, new Date(), new LockStateLogger() {
+                @Override
+                public void updateState(String state) {
+
+                }
+            });
 		} catch (ServiceException e) {
 			//Nothing
 		}
@@ -85,7 +91,12 @@ public class DeclarationDataServiceImplTest {
 		TAUserInfo userInfo = new TAUserInfo();
 		userInfo.setIp("192.168.72.16");
 		userInfo.setUser(mockUser(10,  2, TARole.ROLE_CONTROL));
-		declarationDataService.calculate(logger, 2l, userInfo, new Date());
+		declarationDataService.calculate(logger, 2l, userInfo, new Date(), new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+
+            }
+        });
 	}
 
     @Test
@@ -291,14 +302,18 @@ public class DeclarationDataServiceImplTest {
 
         when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
 
-        declarationDataService.check(logger, 1l, userInfo);
+        declarationDataService.check(logger, 1l, userInfo, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+            }
+        });
 
         assertEquals(
-                "Не выполнена консолидация данных из формы Тестовое подразделение Тестовый макет Первичная 1 квартал 2015 с датой сдачи корректировки 01.01.1970 в статусе Принята",
+                "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Первичная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" в статусе \"Принята\"",
                 logger.getEntries().get(0).getMessage()
         );
         assertEquals(
-                "Не выполнена консолидация данных из формы Тестовое подразделение Тестовый макет Консолидированная 1 квартал 2015 с датой сдачи корректировки 01.01.1970 - экземпляр формы не создан",
+                "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Консолидированная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" - экземпляр формы не создан",
                 logger.getEntries().get(1).getMessage()
         );
     }

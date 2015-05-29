@@ -188,7 +188,13 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
         return dataRows;
     }
 
-   @Override
+    @Override
+    public void setAllCached(List<DataRow<Cell>> dataRows) {
+        this.dataRows = new ArrayList<DataRow<Cell>>();
+        getAllCached().addAll(dataRows);
+    }
+
+    @Override
     public int getDataRowIndex(List<DataRow<Cell>> dataRows, String rowAlias) {
         if (rowAlias == null) {
             throw new NullPointerException("Row alias cannot be null");

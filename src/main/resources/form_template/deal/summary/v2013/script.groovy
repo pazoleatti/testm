@@ -1907,8 +1907,7 @@ void addData(def xml, int headRowCount) {
 
             // 52. п. 060 "КПП организации"
             xmlIndexCol = 50
-            def number = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-            formDataService.checkReferenceValue(9, number?.toString(), map.KPP?.numberValue?.toString(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.KPP?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
 
             // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
             xmlIndexCol = 51
