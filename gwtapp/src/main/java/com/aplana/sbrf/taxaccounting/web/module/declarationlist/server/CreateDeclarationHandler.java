@@ -87,11 +87,20 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 
         if (lockDataService.lock(key, userInfo.getUser().getId(),
                 String.format(LockData.DescriptionTemplate.DECLARATION_CREATE.getText(),
+                        declarationType.getTaxType().getDeclarationShortName(),
                         declarationType.getName(),
+                        command.getTaxOrganKpp(),
+                        command.getTaxOrganCode(),
                         department.getName(),
                         reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear(),
                         departmentReportPeriod.getCorrectionDate() != null
-                                ? " " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
+                                : "",
+                        command.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + command.getTaxOrganCode() + "\""
+                                : "",
+                        command.getTaxOrganKpp() != null
+                                ? ", КПП \"" + command.getTaxOrganKpp() + "\""
                                 : ""),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_CREATE)) == null) {
             //Если блокировка успешно установлена

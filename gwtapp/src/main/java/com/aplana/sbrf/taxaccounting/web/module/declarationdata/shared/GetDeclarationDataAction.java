@@ -16,6 +16,6 @@ public class GetDeclarationDataAction extends UnsecuredActionImpl<GetDeclaration
 
     @Override
     public String getName() {
-        return "Принять";
+        return "Получение данных декларации";
     }
 }

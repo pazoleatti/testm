@@ -10,6 +10,24 @@ import java.util.Date;
  */
 
 public final class LockData {
+	/* Идентификатор блокировки */
+	private String key;
+	/* Код пользователя, установившего блокировку*/
+	private int userId;
+	/* Дата истечения блокировки */
+	private Date dateBefore;
+    /* Дата установки блокировки */
+    private Date dateLock;
+    /* Cтатус выполнения асинхронной задачи, связанной с блокировкой */
+    private String state;
+    /* Дата последнего изменения статуса */
+    private Date stateDate;
+    /* Описание блокировки */
+    private String description;
+    /* Очередь, в которой находится связанная асинхронная задача */
+    private String queue;
+    /* Положение задачи в очереди */
+    private int queuePosition;
 
     public enum LockObjects {
         REF_BOOK,
@@ -32,13 +50,16 @@ public final class LockData {
 
     public enum DescriptionTemplate {
         REF_BOOK("Справочник \"%s\""),
-        FORM_DATA("Налоговая форма \"%s\", \"%s\", подразделение \"%s\", период \"%s%s\""),
-        FORM_DATA_REPORT("Отчет в формате %s для налоговой формы \"%s\", \"%s\", подразделение \"%s\", период \"%s%s\""),
-        FORM_DATA_IMPORT("Импорт файла %s в налоговую форму \"%s\", \"%s\", подразделение \"%s\", период \"%s%s\""),
-        FORM_DATA_CREATE("Создание налоговой формы \"%s\", \"%s\", подразделение \"%s\", период \"%s%s\""),
-        DECLARATION("Декларация \"%s\", подразделение \"%s\", период \"%s%s\""),
-        DECLARATION_REPORT("Отчет в формате %s для декларации \"%s\", подразделение \"%s\", период \"%s%s\""),
-        DECLARATION_CREATE("Создание декларации \"%s\", подразделение \"%s\", период \"%s%s\""),
+        FORM_DATA("Налоговая форма \"%s\", \"%s\", подразделение \"%s\", период \"%s%s%s\""),
+        FORM_DATA_REPORT("Отчет в формате %s для налоговой формы \"%s\", \"%s\", подразделение \"%s\", период \"%s%s%s\""),
+        FORM_DATA_IMPORT("Импорт файла %s в налоговую форму \"%s\", \"%s\", подразделение \"%s\", период \"%s%s%s\""),
+        FORM_DATA_CREATE("Создание налоговой формы \"%s\", \"%s\", подразделение \"%s\", период \"%s%s%s\""),
+        DECLARATION("Декларация \"%s\", КПП \"%s\", налоговый орган \"%s\", подразделение \"%s\", период \"%s%s\"%s%s"),
+        DECLARATION_REPORT("Формирование отчета в формате %s для %s \"%s\", КПП \"%s\", налоговый орган \"%s\", подразделение \"%s\", период \"%s%s\"%s%s"),
+        DECLARATION_CREATE("Создание %s \"%s\", КПП \"%s\", налоговый орган \"%s\", подразделение \"%s\", период \"%s%s\"%s%s"),
+        DECLARATION_CALCULATE("Расчет %s \"%s\", КПП \"%s\", налоговый орган \"%s\", подразделение \"%s\", период \"%s%s\"%s%s"),
+        DECLARATION_CHECK("Проверка %s \"%s\", КПП \"%s\", налоговый орган \"%s\", подразделение \"%s\", период \"%s%s\"%s%s"),
+        DECLARATION_ACCEPT("Принятии %s \"%s\", КПП \"%s\", налоговый орган \"%s\", подразделение \"%s\", период \"%s%s\"%s%s"),
         FILE("Файл \"%s\""),
         DECLARATION_TEMPLATE("Шаблон декларации \"%s\" на дату %s"),
         FORM_TEMPLATE("Шаблон налоговой формы \"%s\" на дату %s"),
@@ -58,7 +79,7 @@ public final class LockData {
         public String getText() {
             return text;
         }
-        }
+    }
 
     public enum State {
         IN_QUEUE("В очереди на выполнение"),
@@ -66,7 +87,7 @@ public final class LockData {
         SAVING_MSGS("Выполняется сохранение уведомлений"),
         SENDING_MSGS("Выполняется рассылка уведомлений"),
         SENDING_ERROR_MSGS("Произошла ошибка. Выполняется рассылка уведомлений"),
-        POST_LOGIC("Выполненяется пост-обработка");
+        POST_LOGIC("Выполняется пост-обработка");
 
         private String text;
 
@@ -79,22 +100,22 @@ public final class LockData {
         }
     }
 
-	/* Идентификатор блокировки */
-	private String key;
-	/* Код пользователя, установившего блокировку*/
-	private int userId;
-	/* Дата истечения блокировки */
-	private Date dateBefore;
-    /* Дата установки блокировки */
-    private Date dateLock;
-    /* Cтатус выполнения асинхронной задачи, связанной с блокировкой */
-    private String state;
-    /* Дата последнего изменения статуса */
-    private Date stateDate;
-    /* Описание блокировки */
-    private String description;
-    /* Очередь, в которой находится связанная асинхронная задача */
-    private String queue;
+    public enum LockQueues {
+        ALL("Все блокировки"),
+        LONG("Очередь длительных задач"),
+        SHORT("Очередь кратковременных задач"),
+        NONE("Без очереди");
+
+        private String text;
+
+        LockQueues(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
 
 	public LockData(){
 	}
@@ -169,6 +190,14 @@ public final class LockData {
         this.queue = queue;
     }
 
+    public int getQueuePosition() {
+        return queuePosition;
+    }
+
+    public void setQueuePosition(int queuePosition) {
+        this.queuePosition = queuePosition;
+    }
+
     @Override
     public String toString() {
         return "LockData{" +
@@ -180,6 +209,7 @@ public final class LockData {
                 ", stateDate=" + stateDate +
                 ", description='" + description + '\'' +
                 ", queue='" + queue + '\'' +
+                ", queuePosition=" + queuePosition +
                 '}';
     }
 }

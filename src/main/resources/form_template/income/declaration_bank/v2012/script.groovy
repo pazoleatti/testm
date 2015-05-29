@@ -6,8 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
-import java.text.SimpleDateFormat
-
 /**
  * Декларация по налогу на прибыль (Банк)
  * Формирование XML для декларации налога на прибыль.
@@ -1912,7 +1910,7 @@ def getDepartmentParamTable(def departmentParamId) {
 def generateXmlFileId(String taxOrganCode) {
     def departmentParam = getDepartmentParam()
     if (departmentParam) {
-        def date = (new SimpleDateFormat("yyyyMMdd")).format(Calendar.getInstance().getTime())
+        def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
         def fileId = TaxType.INCOME.declarationPrefix + '_' +
                 taxOrganCode + '_' +
                 taxOrganCode + '_' +

@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 import java.math.RoundingMode
-import java.text.SimpleDateFormat
 
 /**
  * (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию
@@ -154,7 +153,7 @@ def arithmeticCheckAlias = ['marketPriceInPerc', 'marketPriceInRub', 'costAcquis
         'interestIncomeCurrency', 'interestIncomeInRub', 'realizationResult', 'excessSellingPrice']
 
 @Field
-def fixedDate = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.2010')
+def fixedDate = Date.parse('dd.MM.yyyy','01.01.2010')
 
 @Field
 def startDate = null

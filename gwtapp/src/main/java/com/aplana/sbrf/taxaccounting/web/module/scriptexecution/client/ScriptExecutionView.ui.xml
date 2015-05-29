@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
              xmlns:fm="urn:import:com.aplana.gwt.client.form"
-             xmlns:fileupload='urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload'>
+        >
     <ui:style>
 
         .btnPanel {
@@ -44,10 +44,6 @@
                 <g:HorizontalPanel verticalAlignment="middle" spacing="2" addStyleNames="{style.btnPanel}">
                     <g:cell horizontalAlignment="left">
                         <g:Button ui:field="execButton" addStyleNames="{style.btnMargin}" text="Выполнить"/>
-                    </g:cell>
-                    <g:cell horizontalAlignment="left">
-                        <fileupload:FileUploadWidget simpleButton = "true" text="Обзор"
-                                ui:field="uploadScript"/>
                     </g:cell>
                 </g:HorizontalPanel>
                 <cm:CodeMirror ui:field="script" addStyleNames="{style.table}"/>

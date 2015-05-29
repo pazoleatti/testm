@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.lock.client;
 
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.LockDataItem;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
@@ -53,6 +54,8 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         String getFilter();
         int getPageSize();
         void assignDataProvider(int pageSize, AbstractDataProvider<LockDataItem> data);
+        void setRoleInfo(int currentUserId, boolean hasRoleAdmin);
+        LockData.LockQueues getQueues();
     }
 
     @Inject
@@ -75,6 +78,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
                         @Override
                         public void onSuccess(ExtendLockResult result) {
                             getView().updateData(0);
+                            MessageEvent.fire(LockListPresenter.this, "Операция \"Продлить на 1 час\" выполнена успешно");
                         }
                     }, LockListPresenter.this));
         }
@@ -91,6 +95,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
                         public void onSuccess(DeleteLockResult result) {
                             getView().updateData(0);
                             getView().clearSelection();
+                            MessageEvent.fire(LockListPresenter.this, "Операция \"Удалить блокировку\" выполнена успешно");
                         }
                     }, LockListPresenter.this));
         }
@@ -112,6 +117,7 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
                         public void onSuccess(StopAsyncResult result) {
                             getView().updateData(0);
                             getView().clearSelection();
+                            MessageEvent.fire(LockListPresenter.this, "Операция \"Остановить задачу\" выполнена успешно");
                         }
                     }, LockListPresenter.this));
         }
@@ -125,8 +131,6 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         getView().updateData(0);
     }
 
-
-
     private class TableDataProvider extends AsyncDataProvider<LockDataItem> {
         @Override
         protected void onRangeChanged(HasData<LockDataItem> display) {
@@ -134,14 +138,17 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
             GetLockListAction action = new GetLockListAction();
             action.setPagingParams(new PagingParams(range.getStart(), range.getLength()));
             action.setFilter(getView().getFilter());
+            action.setQueues(getView().getQueues());
             dispatcher.execute(action, CallbackUtils
                     .defaultCallback(new AbstractCallback<GetLockListResult>() {
                         @Override
                         public void onSuccess(GetLockListResult result) {
-                            if (result.getTotalCountOfRecords() == 0)
+                            if (result.getTotalCountOfRecords() == 0) {
                                 getView().setTableData(range.getStart(), 0, new ArrayList<LockDataItem>());
-                            else
+                            } else {
                                 getView().setTableData(range.getStart(), result.getTotalCountOfRecords(), result.getLocks());
+                            }
+                            getView().setRoleInfo(result.getCurrentUserId(), result.hasRoleAdmin());
                         }
                     }, LockListPresenter.this));
 

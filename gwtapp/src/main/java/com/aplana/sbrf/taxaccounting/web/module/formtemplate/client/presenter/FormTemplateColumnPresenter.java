@@ -1,7 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
@@ -167,5 +170,56 @@ public class FormTemplateColumnPresenter
     @Override
     public int getNextGeneratedColumnId() {
         return generatedColumnId--;
+    }
+
+    @Override
+    public void changeColumnType(int position, Column oldColumn, Column newColumn) {
+        // собрать значения ячеек данных
+        List<Integer> colSpansRows = new ArrayList<Integer>(formTemplate.getRows().size());
+        List<Integer> rowSpansRows = new ArrayList<Integer>(formTemplate.getRows().size());
+        List<String> styleAliasRows = new ArrayList<String>(formTemplate.getRows().size());
+        List<Boolean> editableRows = new ArrayList<Boolean>(formTemplate.getRows().size());
+        for (DataRow<Cell> row : formTemplate.getRows()) {
+            Cell cell = row.getCell(oldColumn.getAlias());
+            colSpansRows.add(cell.getColSpan());
+            rowSpansRows.add(cell.getRowSpan());
+            styleAliasRows.add(cell.getStyleAlias());
+            editableRows.add(cell.isEditable());
+        }
+        // собрать значения ячеек шапки
+        List<Integer> colSpansHeaders = new ArrayList<Integer>(formTemplate.getHeaders().size());
+        List<Integer> rowSpansHeaders = new ArrayList<Integer>(formTemplate.getHeaders().size());
+        List<Object> valuesHeaders = new ArrayList<Object>(formTemplate.getHeaders().size());
+        for (DataRow<HeaderCell> headerRow : formTemplate.getHeaders()) {
+            HeaderCell cell = headerRow.getCell(oldColumn.getAlias());
+            colSpansHeaders.add(cell.getColSpan());
+            rowSpansHeaders.add(cell.getRowSpan());
+            valuesHeaders.add(cell.getValue());
+        }
+
+        // удалить колонку со старым типов и добавить новую
+        formTemplate.removeColumn(oldColumn);
+        fixAlias(newColumn);
+        formTemplate.addColumn(position, newColumn);
+
+        // задать старые значения ячейкам данных
+        int i = 0;
+        for (DataRow<Cell> row : formTemplate.getRows()) {
+            Cell cell = row.getCell(oldColumn.getAlias());
+            cell.setColSpan(colSpansRows.get(i));
+            cell.setRowSpan(rowSpansRows.get(i));
+            cell.setStyleAlias(styleAliasRows.get(i));
+            cell.setEditable(editableRows.get(i));
+            i++;
+        }
+        // задать старые значения ячейкам шапки
+        i = 0;
+        for (DataRow<HeaderCell> headerRow : formTemplate.getHeaders()) {
+            HeaderCell cell = headerRow.getCell(oldColumn.getAlias());
+            cell.setColSpan(colSpansHeaders.get(i));
+            cell.setRowSpan(rowSpansHeaders.get(i));
+            cell.setValue(valuesHeaders.get(i), null);
+            i++;
+        }
     }
 }

@@ -1,7 +1,8 @@
 package form_template.income.output3.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -13,6 +14,13 @@ import groovy.transform.Field
  *
  * @author Stanislav Yasinskiy
  */
+
+// графа 1 - paymentType
+// графа 2 - okatoCode
+// графа 3 - budgetClassificationCode
+// графа 4 - dateOfPayment
+// графа 5 - sumTax
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -119,83 +127,60 @@ def logicCheck() {
     }
 }
 
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Вид платежа', null, 5, 2)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]) : 'Вид платежа',
-            (xml.row[0].cell[1]) : 'Код по ОКТМО',
-            (xml.row[0].cell[2]) : 'Код бюджетной классификации',
-            (xml.row[0].cell[3]) : 'Срок уплаты',
-            (xml.row[0].cell[4]) : 'Сумма налога, подлежащая уплате',
-    ]
-    (0..4).each { index ->
-        headerMapping.put((xml.row[1].cell[index]), (index + 1).toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    // добавить данные в форму
-    addData(xml, 2)
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, null, null)
+    dataRowHelper.saveSort()
 }
 
-void addData(def xml, headRowCount) {
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 5
+    int HEADER_ROW_COUNT = 2
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'paymentType')
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def columnCount = 5
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount - 1) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
             break
         }
-
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-
-        def xmlIndexCol = 0
-
-        // графа 1
-        newRow.paymentType = getRecordIdImport(24, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        xmlIndexCol++
-
-        // графа 2
-        newRow.okatoCode = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 3
-        newRow.budgetClassificationCode = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 4
-        newRow.dateOfPayment = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 5
-        newRow.sumTax = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
     }
 
     showMessages(rows, logger)
@@ -204,10 +189,68 @@ void addData(def xml, headRowCount) {
     }
 }
 
-// Сортировка групп и строк
-void sortFormDataRows() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, null, null)
-    dataRowHelper.saveSort()
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]) : getColumnName(tmpRow, 'paymentType'),
+            (headerRows[0][1]) : getColumnName(tmpRow, 'okatoCode'),
+            (headerRows[0][2]) : getColumnName(tmpRow, 'budgetClassificationCode'),
+            (headerRows[0][3]) : getColumnName(tmpRow, 'dateOfPayment'),
+            (headerRows[0][4]) : getColumnName(tmpRow, 'sumTax'),
+    ]
+    (0..4).each { index ->
+        headerMapping.put((headerRows[1][index]), (index + 1).toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    // графа 1
+    def colIndex = 0
+    newRow.paymentType = getRecordIdImport(24, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 2
+    colIndex++
+    newRow.okatoCode = values[colIndex]
+
+    // графа 3
+    colIndex++
+    newRow.budgetClassificationCode = values[colIndex]
+
+    // графа 4
+    colIndex++
+    newRow.dateOfPayment = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 5
+    colIndex++
+    newRow.sumTax = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
 }

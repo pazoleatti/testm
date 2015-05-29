@@ -21,6 +21,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -44,11 +45,13 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -272,11 +275,8 @@ void calc() {
         }, groupColumns)
     }
 
-    // Если нет сортировки и подитогов, то dataRowHelper.update(dataRows)
-    dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    dataRowHelper.allCached = dataRows
+    sortFormDataRows(false)
 }
 
 // Расчет подитогового значения
@@ -479,15 +479,20 @@ void addData(def xml, int headRowCount) {
 
         rows.add(newRow)
     }
-    dataRowHelper.save(rows)
+
+    dataRowHelper.allCached = rows
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), null, true)
-    dataRowHelper.saveSort()
+    if(saveInDB){
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 // Получение подитоговых строк

@@ -79,7 +79,8 @@ public class SaveConfigurationHandler extends
             }
 
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                configurationService.saveAllConfig(securityService.currentUserInfo(), action.getModel(), logger);
+                configurationService.saveAllConfig(securityService.currentUserInfo(), action.getModel(),
+                        action.getEmailParams(), action.getAsyncParams(), logger);
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {

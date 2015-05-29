@@ -384,6 +384,9 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                         case INCORRECT_FIELDS:
                                                             Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
                                                             break;
+                                                        case COMMON_ERROR:
+                                                            Dialog.errorMessage("Операция не выполнена. Запись не сохранена, обнаружены фатальные ошибки!");
+                                                            break;
                                                     }
 
                                                     LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());

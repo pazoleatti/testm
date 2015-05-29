@@ -126,7 +126,7 @@ def formTemplatesExcludeRowMap = [
         320  : Exclude.FIX,		      // (РНУ-8) Простой регистр налогового учёта «Требования»
         362  : Exclude.SECTION_TOTAL,  // (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
         416  : Exclude.FIX,           // Сведения о дивидендах (доходах от долевого участия в других организациях, созданных на территории Российской Федерации), выплаченных в отчетном квартале
-        419  : Exclude.FIX,           // Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)
+        419  : Exclude.FIX,           // (у банка 10070) Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)
         // транспорт
         202  : Exclude.NO,            // Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
         204  : Exclude.SECTION_TOTAL, // Сведения о транспортных средствах, по которым уплачивается транспортный налог (new)
@@ -348,6 +348,7 @@ def getAllDataRows() {
     }
     def kind1 = FormDataKind.PRIMARY
     def kind2 = FormDataKind.ADDITIONAL
+    def kind3 = FormDataKind.UNP
     def dataRowsMap = [:]
 
     formTemplates.each { FormTemplate formTemplate ->
@@ -355,6 +356,9 @@ def getAllDataRows() {
         def formData = formDataService.getLast(formTemplate.type.id, kind1, departmentId, reportPeriodId, monthOrder)
         if (formData == null) {
             formData = formDataService.getLast(formTemplate.type.id, kind2, departmentId, reportPeriodId, monthOrder)
+        }
+        if (formData == null) {
+            formData = formDataService.getLast(formTemplate.type.id, kind3, departmentId, reportPeriodId, monthOrder)
         }
         if (formData != null) {
             formDataMap[formTemplate.id] = formData

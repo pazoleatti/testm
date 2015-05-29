@@ -170,9 +170,10 @@ public interface LockDataService {
      * Получает список всех блокировок
      * @return все блокировки
      * @param filter ограничение по имени пользователя или ключу
+     * @param queues тип очереди
      * @param pagingParams параметры пэйджинга
      */
-    PagingResult<LockData> getLocks(String filter, PagingParams pagingParams);
+    PagingResult<LockData> getLocks(String filter, LockData.LockQueues queues, PagingParams pagingParams);
 
     /**
      * Удаляет все указанные блокировки
@@ -202,4 +203,21 @@ public interface LockDataService {
      * @param queue очередь
      */
     void updateQueue(String key, Date lockDate, String queue);
+
+    /**
+     * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
+     * отправляет оповещения ожидающим блокировку пользователям
+     * @param lockData блокировка
+     * @param userId идентификатор пользователя, отменяющего блокировку
+     * @param force признак принудительного снятия блокировки
+     */
+    void interruptTask(LockData lockData, int userId, boolean force);
+
+    /**
+     * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
+     * отправляет оповещения ожидающим блокировку пользователям
+     * @param lockKeys ключи блокировок на удаление
+     * @param userId идентификатор пользователя, отменяющего блокировку
+     */
+    void interuptAllTasks(List<String> lockKeys, int userId);
 }

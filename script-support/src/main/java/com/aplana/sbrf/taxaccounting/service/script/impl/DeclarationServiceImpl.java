@@ -25,9 +25,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipInputStream;
 
 /*
  * author auldanov
@@ -59,6 +61,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
+
+	@Autowired
+	private DeclarationDataService declarationDataService;
 
 	@Autowired
     private DeclarationTypeDao declarationTypeDao;
@@ -246,18 +251,27 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public String getXmlData(long declarationDataId) {
-        BlobData blobData = blobDataService.get(reportService.getDec(taUserService.getSystemUserInfo(), declarationDataId, ReportType.XML_DEC));
-        if(blobData == null){
-            //если декларация еще не заполнена
-            return null;
-        }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            IOUtils.copy(blobData.getInputStream(), byteArrayOutputStream);
-        } catch (IOException e) {
-            throw new ServiceException("Не удалось извлечь xml для скрипта.", e);
+        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId);
+        if (zipXmlIn != null) {
+            try {
+                zipXmlIn.getNextEntry();
+                IOUtils.copy(zipXmlIn, byteArrayOutputStream);
+            } catch (IOException e) {
+                throw new ServiceException("Не удалось извлечь xml для скрипта.", e);
+            } finally {
+                IOUtils.closeQuietly(zipXmlIn);
+            }
         }
         return new String(byteArrayOutputStream.toByteArray());
+    }
+
+    private ZipInputStream getZipInputStream(long declarationDataId) {
+        InputStream zipXml = declarationDataService.getXmlDataAsStream(declarationDataId, taUserService.getSystemUserInfo());
+        if (zipXml != null) {
+            return new ZipInputStream(zipXml);
+        }
+        return null;
     }
 
     @Override
@@ -300,5 +314,14 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String getXmlDataFileName(long declarationDataId) {
+        String fileName = declarationDataService.getXmlDataFileName(declarationDataId, taUserService.getSystemUserInfo());
+        if (fileName != null) {
+            return fileName.replace(".zip", ".xml");
+        }
+        return null;
     }
 }

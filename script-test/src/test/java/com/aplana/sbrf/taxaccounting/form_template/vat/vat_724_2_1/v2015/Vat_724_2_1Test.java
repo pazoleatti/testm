@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -53,6 +54,11 @@ public class Vat_724_2_1Test extends ScriptTestBase {
     @Override
     protected ScriptTestMockHelper getMockHelper() {
         return getDefaultScriptTestMockHelper(Vat_724_2_1Test.class);
+    }
+
+    @Before
+    public void mockFormDataService() {
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @After

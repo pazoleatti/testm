@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -241,59 +242,6 @@ def getFormDataSimple() {
     return formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
 }
 
-// Получение импортируемых данных
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'КНУ', null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 2)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): 'КНУ',
-            (xml.row[0].cell[1]): 'Вид нормируемых расходов',
-            (xml.row[0].cell[2]): 'Сумма расходов по данным налогового учёта',
-            (xml.row[0].cell[3]): 'Норматив, установленный законодателем',
-            (xml.row[0].cell[5]): 'Предельная сумма расходов, учитываемая для целей налогообложения',
-            (xml.row[0].cell[6]): 'Сумма расхода, рассчитанная по установленным нормам',
-            (xml.row[1].cell[3]): 'База для расчёта нормы расходов',
-            (xml.row[1].cell[4]): 'коэффициент',
-            (xml.row[1].cell[6]): 'в пределах утверждённых норм',
-            (xml.row[1].cell[7]): 'сверх утверждённых норм',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[1]): '2',
-            (xml.row[2].cell[2]): '3',
-            (xml.row[2].cell[3]): '4',
-            (xml.row[2].cell[4]): '5',
-            (xml.row[2].cell[5]): '6',
-            (xml.row[2].cell[6]): '7',
-            (xml.row[2].cell[7]): '8'
-    ]
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    def rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    ((DataRow<Cell>)dataRows[4]).getCell('normBase').setCheckMode(true)
-    // графа 4 строки 5
-    if (xml.row[headRowCount + 5] != null) {
-        dataRows[4].normBase = parseNumber(xml.row[headRowCount + 5].cell[3].text(), rowOffset + headRowCount + 5, 3 + colOffset, logger, true)
-    } else {
-        dataRows[4].normBase = null
-    }
-    showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        dataRowHelper.update(dataRows)
-    }
-}
-
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 8, 0)
     addTransportData(xml)
@@ -313,5 +261,129 @@ void addTransportData(def xml) {
     showMessages(dataRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         dataRowHelper.update(dataRows)
+    }
+}
+
+void importData() {
+    int COLUMN_COUNT = 8
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = 'КНУ'
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // простая строка
+        if (rowIndex > dataRows.size()) {
+            break
+        }
+        // найти нужную строку нф
+        def dataRow = dataRows.get(rowIndex)
+        // заполнить строку нф значениями из эксель
+        fillRowFromXls(dataRow, rowValues, fileRowIndex, colOffset)
+        rowIndex++
+
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).save(dataRows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount) {
+    if (headerRows.isEmpty() || headerRows.size() < rowCount) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[2].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]): 'КНУ',
+            (headerRows[0][1]): 'Вид нормируемых расходов',
+            (headerRows[0][2]): 'Сумма расходов по данным налогового учёта',
+            (headerRows[0][3]): 'Норматив, установленный законодателем',
+            (headerRows[0][5]): 'Предельная сумма расходов, учитываемая для целей налогообложения',
+            (headerRows[0][6]): 'Сумма расхода, рассчитанная по установленным нормам',
+            (headerRows[1][3]): 'База для расчёта нормы расходов',
+            (headerRows[1][4]): 'коэффициент',
+            (headerRows[1][6]): 'в пределах утверждённых норм',
+            (headerRows[1][7]): 'сверх утверждённых норм',
+    ]
+    (0..7).each { index ->
+        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Заполняет заданную строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param colOffset отступ по столбцам
+ */
+def fillRowFromXls(def dataRow, def values, int fileRowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+
+    def tmpValues = [:]
+    // графа 1
+    tmpValues.knu = values[0]
+    // графа 2
+    tmpValues.mode = values[1]
+    // графа 5
+    tmpValues.normCoef = values[4]
+
+    // Проверить фиксированные значения (графа 1, 2, 5)
+    tmpValues.keySet().toArray().each { alias ->
+        def value = StringUtils.cleanString(tmpValues[alias]?.toString())
+        def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
+        checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
+    }
+
+    // графа 4 строки 5
+    if (dataRow.getIndex() == 5) {
+        dataRow.getCell('normBase').setCheckMode(true)
+        def colIndex = 3
+        dataRow.normBase = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 }

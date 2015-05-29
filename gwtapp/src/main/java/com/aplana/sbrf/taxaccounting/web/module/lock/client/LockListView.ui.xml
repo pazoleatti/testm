@@ -64,7 +64,7 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-                <g:HorizontalPanel spacing="5" addStyleNames="{style.btnPanel}">
+                <g:HorizontalPanel spacing="10" addStyleNames="{style.btnPanel}">
                     <g:cell>
                         <g:Button text="Удалить блокировку" ui:field="deleteButton" />
                     </g:cell>
@@ -77,11 +77,11 @@
                     <g:cell width="18px" horizontalAlignment="right">
                         <g:HTML addStyleNames="{style.separator}"/>
                     </g:cell>
-                    <g:cell width="217px" >
-                        <g:TextBox width="210px" ui:field="filterText"/>
+                    <g:cell>
+                        <g:ValueListBox ui:field="queueList" width="200px"/>
                     </g:cell>
-                    <g:cell width="18px" horizontalAlignment="right">
-                        <g:HTML addStyleNames="{style.separator}"/>
+                    <g:cell>
+                        <g:TextBox width="200px" ui:field="filterText"/>
                     </g:cell>
                     <g:cell horizontalAlignment="left">
                         <g:Button ui:field="findButton" addStyleNames="{style.btnFind}" text="Найти"/>

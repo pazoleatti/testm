@@ -3,6 +3,7 @@ package form_template.vat.vat_724_4.v2015
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
@@ -318,127 +319,6 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
     updateIndexes(destinationDataRows)
 }
 
-// Получение импортируемых данных
-void importData() {
-    def tmpRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'rowNum'), null, 8, 4)
-
-    checkHeaderSize(xml.row[3].cell.size(), xml.row.size(), 8, 4)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): getColumnName(tmpRow, 'rowNum'),
-            (xml.row[0].cell[2]): 'Данные бухгалтерского учёта',
-            (xml.row[0].cell[7]): getColumnName(tmpRow, 'nds'),
-
-            (xml.row[1].cell[2]): 'Налоговая база',
-            (xml.row[1].cell[5]): 'НДС',
-
-            (xml.row[2].cell[2]): 'наименование балансового счёта расхода',
-            (xml.row[2].cell[3]): 'номер балансового счёта расхода',
-            (xml.row[2].cell[4]): 'сумма',
-            (xml.row[2].cell[5]): 'номер балансового счёта',
-            (xml.row[2].cell[6]): 'сумма',
-
-            (xml.row[3].cell[0]): '1'
-    ]
-
-    (2..7).each { index ->
-        headerMapping.put((xml.row[3].cell[index]), index.toString())
-    }
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 4)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def sectionIndex = null
-    def mapRows = [:]
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount - 1) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
-        def firstValue = row.cell[1].text()
-        if (firstValue != null && firstValue != '' && firstValue != 'Итого') {
-            sectionIndex = firstValue[0]
-            mapRows.put(sectionIndex, [])
-            continue
-        } else if (firstValue == 'Итого') {
-            continue
-        }
-
-        def newRow = getNewRow()
-        newRow.setImportIndex(xlsIndexRow)
-
-        // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
-        record = getRecordImport(101, 'ACCOUNT', row.cell[3].text(), xlsIndexRow, 3 + colOffset, false)
-        newRow.number = record?.record_id?.value
-
-        // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
-        if (record != null) {
-            def value1 = record?.ACCOUNT_NAME?.value?.toString()
-            def value2 = row.cell[2].text()
-            formDataService.checkReferenceValue(101, value1, value2, xlsIndexRow, 2 + colOffset, logger, false)
-        }
-
-        // графа 4
-        newRow.sum = getNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset)
-
-        // графа 5
-        newRow.number2 = row.cell[5].text()
-
-        // графа 6
-        newRow.sum2 = getNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset)
-
-        // графа 7
-        newRow.nds = row.cell[7].text()
-
-        mapRows[sectionIndex].add(newRow)
-    }
-
-    def newRows = mapRows.values().sum { it }
-    showMessages(newRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
-        return
-    }
-
-    // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def templateRows = formTemplate.rows
-
-    def rows = []
-    sections.each { section ->
-        def firstRow = getDataRow(templateRows, getFirstRowAlias(section))
-        def lastRow = getDataRow(templateRows, getLastRowAlias(section))
-        def copyRows = mapRows[section]
-
-        rows.add(firstRow)
-        if (copyRows != null && !copyRows.isEmpty()) {
-            rows.addAll(copyRows)
-        }
-        rows.add(lastRow)
-    }
-    formDataService.getDataRowHelper(formData).save(rows)
-
-    updateIndexes(rows)
-}
-
 def getTotalRow(sectionsRows) {
     def newRow = formData.createDataRow()
     totalColumns.each { alias ->
@@ -528,7 +408,7 @@ void importTransportData() {
             }
 
             def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
-            if (rowCells.length < 8) {
+            if (rowCells.length < 8 || newRow == null) {
                 continue
             }
             // определить раздел по техническому полю и добавить строку в нужный раздел
@@ -543,7 +423,7 @@ void importTransportData() {
         reader.close()
     }
 
-    def newRows = mapRows.values().sum { it }
+    def newRows = (mapRows.values().sum { it } ?: [])
     showMessages(newRows, logger)
     if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
         return
@@ -611,26 +491,6 @@ void importTransportData() {
     updateIndexes(rows)
 }
 
-/** Добавляет строку в текущий буфер строк. */
-boolean addRow(def mapRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    if (rowCells == null) {
-        return true
-    }
-    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
-    if (newRow == null) {
-        return false
-    }
-
-    // определить раздел по техническому полю и добавить строку в нужный раздел
-    sectionIndex = pure(rowCells[8])
-    if (mapRows[sectionIndex] == null) {
-        mapRows[sectionIndex] = []
-    }
-    mapRows[sectionIndex].add(newRow)
-
-    return true
-}
-
 /**
  * Получить новую строку нф по строке из тф (*.rnu).
  *
@@ -692,4 +552,178 @@ String pure(String cell) {
 
 boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 8
+    int HEADER_ROW_COUNT = 4
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def allValuesCount = allValues.size()
+    def mapRows = [:]
+    def sectionIndex = null
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+
+        // Пропуск итоговых строк
+        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
+        def firstValue = rowValues[INDEX_FOR_SKIP]
+        if (firstValue != null && firstValue != '' && firstValue != 'Итого') {
+            sectionIndex = firstValue[0]
+            mapRows.put(sectionIndex, [])
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (firstValue == 'Итого') {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        mapRows[sectionIndex].add(newRow)
+
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    def newRows = (mapRows.values().sum { it } ?: [])
+    showMessages(newRows, logger)
+    if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
+        return
+    }
+
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+
+    def rows = []
+    sections.each { section ->
+        def firstRow = getDataRow(templateRows, getFirstRowAlias(section))
+        def lastRow = getDataRow(templateRows, getLastRowAlias(section))
+        def copyRows = mapRows[section]
+
+        rows.add(firstRow)
+        if (copyRows != null && !copyRows.isEmpty()) {
+            rows.addAll(copyRows)
+        }
+        rows.add(lastRow)
+    }
+    formDataService.getDataRowHelper(formData).save(rows)
+
+    updateIndexes(rows)
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+    def headerMapping = [
+            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
+            (headerRows[0][2]): 'Данные бухгалтерского учёта',
+            (headerRows[0][7]): getColumnName(tmpRow, 'nds'),
+
+            (headerRows[1][2]): 'Налоговая база',
+            (headerRows[1][5]): 'НДС',
+
+            (headerRows[2][2]): 'наименование балансового счёта расхода',
+            (headerRows[2][3]): 'номер балансового счёта расхода',
+            (headerRows[2][4]): 'сумма',
+            (headerRows[2][5]): 'номер балансового счёта',
+            (headerRows[2][6]): 'сумма',
+
+            (headerRows[3][0]): '1'
+    ]
+    (2..7).each { index ->
+        headerMapping.put((headerRows[3][index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // Графа 3 - атрибут 900 - ACCOUNT - «Номер балансового счета», справочник 101 «План счетов бухгалтерского учета»
+    def colIndex = 3
+    def record = getRecordImport(101, 'ACCOUNT', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.number = record?.record_id?.value
+
+    // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
+    if (record != null) {
+        colIndex = 2
+        def value1 = record?.ACCOUNT_NAME?.value?.toString()
+        def value2 = values[colIndex]
+        formDataService.checkReferenceValue(101, value1, value2, fileRowIndex, colIndex + colOffset, logger, false)
+    }
+
+    // графа 4
+    colIndex = 4
+    newRow.sum = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 5
+    colIndex = 5
+    newRow.number2 = values[colIndex]
+
+    // графа 6
+    colIndex = 6
+    newRow.sum2 = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 7
+    colIndex = 7
+    newRow.nds = values[colIndex]
+
+    return newRow
 }

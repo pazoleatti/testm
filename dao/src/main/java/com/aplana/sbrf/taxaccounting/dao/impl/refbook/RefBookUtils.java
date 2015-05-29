@@ -25,6 +25,14 @@ import java.util.regex.Pattern;
 @Repository
 public class RefBookUtils extends AbstractDao {
 
+    public static String INN_JUR_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}";
+    public static String INN_IND_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}";
+    public static String KPP_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})";
+    public static String TAX_ORGAN_PATTERN = "[0-9]{4}";
+    public static String OKATO_PATTERN = "[0-9]{11}";
+    public static String OKTMO_PATTERN = "[0-9]{11}|[0-9]{8}";
+    public static String CODE_TS_PATTERN = "[0-9]{3}([0-9]{2}|[?]{2})";
+
     public static List<String> checkFillRequiredRefBookAtributes(List<RefBookAttribute> attributes, Map<String, RefBookValue> record) {
         List<String> errors = new ArrayList<String>();
         for (RefBookAttribute a : attributes) {
@@ -45,10 +53,9 @@ public class RefBookUtils extends AbstractDao {
 
     public static List<String> checkRefBookAtributeValues(List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         List<String> errors = new ArrayList<String>();
-        String okatoRegex = "\\d{11}";
-        String codeTSRegex = "\\d{3}(\\d{2}|[?]{2})";
-        Pattern okatoPattern = Pattern.compile(okatoRegex);
-        Pattern codeTSPattern = Pattern.compile(codeTSRegex);
+        Pattern okatoPattern = Pattern.compile(OKATO_PATTERN);
+        Pattern oktmoPattern = Pattern.compile(OKTMO_PATTERN);
+        Pattern codeTSPattern = Pattern.compile(CODE_TS_PATTERN);
         for (RefBookRecord record : records) {
             Map<String, RefBookValue> values = record.getValues();
             for (RefBookAttribute a : attributes) {
@@ -56,22 +63,27 @@ public class RefBookUtils extends AbstractDao {
                 //Должны содержать только цифры - Код валюты. Цифровой, Определяющая часть кода ОКАТО, Определяющая часть кода ОКТМО, Цифровой код валюты выпуска
                 if ((a.getId() == 64L || a.getId() == 12L || a.getId() == 5L) &&
                         (value != null && !value.isEmpty() && !NumberUtils.isNumber(value.getStringValue()) || a.isRequired() && value == null)) {
-                    errors.add("Значение атрибута «" + a.getName() + "» должно содержать только цифры!");
+                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", a.getName(), value.getStringValue()));
                 }
 
                 //Проверка формата для кода окато
-                if ((a.getId() == 7L) && !okatoPattern.matcher(values.get(a.getAlias()).getStringValue()).matches()) {
-                    errors.add("Значение атрибута «" + a.getName() + "» должно быть задано в формате ×××××××××××, где × - цифра!");
+                if ((a.getId() == 7L) && !okatoPattern.matcher(value.getStringValue()).matches()) {
+                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", a.getName(), value.getStringValue(), "[0-9]{11}"));
+                }
+
+                //Проверка формата для кода октмо
+                if ((a.getId() == 840L) && !oktmoPattern.matcher(value.getStringValue()).matches()) {
+                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", a.getName(), value.getStringValue(), "[0-9]{11}\" / \"[0-9]{8}"));
                 }
 
                 //Проверка формата для кода ТС
-                if ((a.getId() == 411L) && !codeTSPattern.matcher(values.get(a.getAlias()).getStringValue()).matches()) {
-                    errors.add("Значение атрибута «" + a.getName() + "» должно быть задано в формате ××××× или ***??, где × - цифра!");
+                if ((a.getId() == 411L) && !codeTSPattern.matcher(value.getStringValue()).matches()) {
+                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", a.getName(), value.getStringValue(), "[0-9]{5}\" / \"[0-9]{3}[?]{2}"));
                 }
 
                 //Проверка для иерархичных справочников
                 if (record.getUniqueRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
-                    Long parentId = values.get(a.getAlias()).getReferenceValue();
+                    Long parentId = value.getReferenceValue();
                     if (record.getUniqueRecordId().equals(parentId)) {
                         errors.add("Элемент справочника не может быть родительским для самого себя!");
                     }
@@ -82,14 +94,14 @@ public class RefBookUtils extends AbstractDao {
                 }
 
                 if (a.getAttributeType().equals(RefBookAttributeType.NUMBER)) {
-                    Number number = values.get(a.getAlias()).getNumberValue();
+                    Number number = value.getNumberValue();
                     if (number == null) {
                         continue;
                     }
 
                     BigDecimal bigDecimal;
                     if (number instanceof BigDecimal) {
-                        bigDecimal = (BigDecimal) (values.get(a.getAlias()).getNumberValue());
+                        bigDecimal = (BigDecimal) (value.getNumberValue());
                         String valStr = bigDecimal.toPlainString();
                         if (valStr.contains(".")) {
                             bigDecimal = new BigDecimal(valStr.replaceAll("()(0+)(e|$)", "$1$3"));
@@ -142,5 +154,25 @@ public class RefBookUtils extends AbstractDao {
             result.setVersionEndFake(rs.getBoolean("endIsFake"));
             return result;
         }
+    }
+
+    /**
+     * Проверка контрольной суммы ИНН (физлица или организации)
+     * @param inn ИНН в виде строки
+     * @return результат проверки (успешная или нет)
+     */
+    public static boolean checkControlSumInn(String inn) {
+        if (inn == null || inn.length() < 10) {
+            return false;
+        }
+        int[] koefArray = new int[]{2, 4, 10, 3, 5, 9, 4, 6, 8};
+        int sum = 0;
+        for (int i = 0; i < 9; i++) {
+            if (!Character.isDigit(inn.charAt(i))){
+                return false;
+            }
+            sum += koefArray[i] * Character.getNumericValue(inn.charAt(i));
+        }
+        return (sum % 11) % 10 == Character.getNumericValue(inn.charAt(9));
     }
 }

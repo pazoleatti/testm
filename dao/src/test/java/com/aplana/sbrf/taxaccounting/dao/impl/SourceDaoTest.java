@@ -45,6 +45,20 @@ public class SourceDaoTest {
         sourceDao.deleteFormDataConsolidationInfo(Arrays.asList(1l));
         assertFalse(sourceDao.isFDSourceConsolidated(1, 1));
     }
+
+    @Test
+    public void testUpdateFD(){
+        sourceDao.addFormDataConsolidationInfo(1l, Arrays.asList(1l));
+        sourceDao.updateFDConsolidationInfo(1);
+        assertTrue(sourceDao.isFDConsolidationTopical(1));
+    }
+
+    @Test
+    public void testUpdateDD(){
+        sourceDao.addDeclarationConsolidationInfo(1l, Arrays.asList(1l));
+        sourceDao.updateDDConsolidationInfo(1);
+        assertTrue(sourceDao.isDDConsolidationTopical(1));
+    }
     /*@Test
     public void testSaveFormSources() {
         List<DepartmentFormType> sources = departmentFormTypeDao.getFormSources(2, 2, FormDataKind.fromId(3));

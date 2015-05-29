@@ -63,9 +63,8 @@ public class ReportController {
     @RequestMapping(value = "/processLogDownload/{uuid}", method = RequestMethod.GET)
     public void processLogDownload(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
         BlobData blobData = blobDataService.get(uuid);
-        createResponse(request, response, blobData);
         reportService.deleteAudit(uuid);
-        blobDataService.delete(uuid);
+        createResponse(request, response, blobData);
     }
 
     /**

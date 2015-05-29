@@ -1291,9 +1291,7 @@ void generateXML() {
                 }
 
                 def index = 0
-                def rowNum = 1
                 for (def row : dataRowsApp2) {
-                    rowNum++
                     //НомерСправ  Справка №
                     def nomerSprav = isCFOApp2 ? (++index) : row.refNum
                     //ИННФЛ       ИНН
@@ -1433,8 +1431,6 @@ void generateXML() {
                         }
                     }
                 }
-                if (rowNum >= 10000)
-                    decParams.setShowReport(false)
             }
         }
     }

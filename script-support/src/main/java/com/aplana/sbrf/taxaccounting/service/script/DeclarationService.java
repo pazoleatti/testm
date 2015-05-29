@@ -65,4 +65,11 @@ public interface DeclarationService {
      */
     @SuppressWarnings("unused")
     boolean checkUnique(DeclarationData declarationData, Logger logger);
+    /**
+     * Получить имя файла в формате законодателя
+     * @param declarationDataId идентификатор декларации
+     * @return имя файла взятого из xml данных
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
+     */
+    String getXmlDataFileName(long declarationDataId);
 }

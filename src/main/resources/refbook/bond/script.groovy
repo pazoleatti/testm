@@ -160,23 +160,28 @@ void importFromNSI() {
             // TODO Заменить warn на error после ответов из Банка
             // Проверка ссылки на «Эмитент»
             def issuerRef =  actualEmitentnMap[issuer]?.get(RefBook.RECORD_ID_ALIAS)?.numberValue
+            def String errIndex = "Для записи «Идентификатор ценной бумаги» = $id файла «$fileName»"
             if (issuer != null && !issuer.isEmpty() && issuerRef == null) {
-                logger.warn("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Эмитент» = $issuer, т.к. такой элемент отсутствует в Системе!")
+                logger.warn(errIndex + " не удается заполнить атрибут «Эмитент» = $issuer, т.к. такой элемент отсутствует в Системе!")
             }
             // Проверка ссылки на «Цифровой код валюты выпуска»
             def curRef =  actualCurrencyMap[codeCur]?.get(RefBook.RECORD_ID_ALIAS)?.numberValue
             if (codeCur != null && !codeCur.isEmpty() && curRef == null) {
-                logger.warn("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Цифровой код валюты выпуска» = $codeCur, т.к. такой элемент отсутствует в Системе!")
+                logger.warn(errIndex + " не удается заполнить атрибут «Цифровой код валюты выпуска» = $codeCur, т.к. такой элемент отсутствует в Системе!")
             }
             // Проверка ссылки на «Признак ценной бумаги»
             def signRef =  actualBondSignMap[sign]?.get(RefBook.RECORD_ID_ALIAS)?.numberValue
             if (sign != null && !sign.isEmpty() && signRef == null) {
-                logger.warn("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Признак ценной бумаги» = $sign, т.к. такой элемент отсутствует в Системе!")
+                logger.warn(errIndex + " не удается заполнить атрибут «Признак ценной бумаги» = $sign, т.к. такой элемент отсутствует в Системе!")
             }
             // Проверка ссылки на «Тип (вид) ценной бумаги»
             def typeRef =  actualBondTypeMap[type]?.get(RefBook.RECORD_ID_ALIAS)?.numberValue
             if (type != null && !type.isEmpty() && typeRef == null) {
-                logger.warn("Для записи «Идентификатор ценной бумаги» = $id файла «$fileName» не удается заполнить атрибут «Тип (вид) ценной бумаги» = $type, т.к. такой элемент отсутствует в Системе!")
+                logger.warn(errIndex + " не удается заполнить атрибут «Тип (вид) ценной бумаги» = $type, т.к. такой элемент отсутствует в Системе!")
+            }
+            // Проверка диапазона дат
+            if (startDate != null && endDate != null && startDate > endDate) {
+                logger.error(errIndex + " поле «Дата окончания действия» (${endDate.format('dd.MM.yyyy')}) должно быть больше или равно полю «Дата начала действия» (${startDate.format('dd.MM.yyyy')})!")
             }
 
             def actualRecord = actualBondMap.get(id)

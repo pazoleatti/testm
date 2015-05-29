@@ -5,15 +5,15 @@ import com.gwtplatform.dispatch.shared.Result;
 public class CreateReportResult implements Result {
     private static final long serialVersionUID = 7832261980997033051L;
 
-    private boolean existReport = false;
+    private CreateAsyncTaskStatus status;
     private String uuid;
 
-    public boolean isExistReport() {
-        return existReport;
+    public CreateAsyncTaskStatus getStatus() {
+        return status;
     }
 
-    public void setExistReport(boolean existReport) {
-        this.existReport = existReport;
+    public void setStatus(CreateAsyncTaskStatus status) {
+        this.status = status;
     }
 
     public String getUuid() {

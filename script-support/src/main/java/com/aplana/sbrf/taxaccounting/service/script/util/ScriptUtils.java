@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.script.util;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -13,19 +15,27 @@ import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
 import groovy.util.XmlSlurper;
 import groovy.util.slurpersupport.GPathResult;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.poi.xssf.model.SharedStringsTable;
+import org.apache.poi.xssf.model.StylesTable;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.parsers.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -111,6 +121,11 @@ public final class ScriptUtils {
     // разделитель между идентификаторами в ключе для кеширования записей справочника
     private static final String SEPARATOR = "_";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
+
+    public static String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
+    public static String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
+    public static String KPP_PATTERN = RefBookUtils.KPP_PATTERN;
+    public static String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -1527,5 +1542,382 @@ public final class ScriptUtils {
             throw new ServiceException(CHECK_OVERFLOW_MESSAGE, index, columnName, size, columnName, algorithm);
         }
     }
-}
 
+    /**
+     * Для обработки xlsx файла: проверка потока данных, имени файла, расширения, чтение файла, сбор данных.
+     *
+     * @param inputStream потом данных
+     * @param uploadFileName имя файла
+     * @param allValues список для хранения списков значении каждой строки данных
+     * @param headerValues список для хранения списков значении каждой строки шапки таблицы
+     * @param tableStartValue начальное значение, с которого начинается сбор данных
+     * @param tableEndValue конечное значение, с которого прекращается сбор данных
+     * @param headerRowCount количество строк в шапке таблицы
+     * @param paramsMap мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
+     */
+    public static void checkAndReadFile(BufferedInputStream inputStream, String uploadFileName,
+                            List<List<String>> allValues, List<List<String>>headerValues,
+                            String tableStartValue, String tableEndValue, int headerRowCount,
+                            Map<String, Object> paramsMap) throws IOException, OpenXML4JException, SAXException {
+        // проверка потока данных, имени файла, расширения
+        if (inputStream == null) {
+            throw new ServiceException(EMPTY_INPUT_STREAM);
+        }
+        String fileName = (uploadFileName != null ? uploadFileName.toLowerCase() : null);
+        if (fileName == null || fileName.equals("")) {
+            throw new ServiceException(EMPTY_FILE_NAME);
+        }
+        if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
+            throw new ServiceException(WRONG_XLS_FORMAT);
+        }
+
+        // получение строк из файла (из первого листа)
+        OPCPackage pkg = OPCPackage.open(inputStream);
+        XSSFReader r = new XSSFReader(pkg);
+        StylesTable styles = r.getStylesTable();
+        SharedStringsTable sst = r.getSharedStringsTable();
+        XMLReader parser = XMLReaderFactory.createXMLReader();
+        // обработчик
+        ContentHandler handler = new SheetHandler(sst, styles, allValues, headerValues, tableStartValue, tableEndValue, headerRowCount, paramsMap);
+        parser.setContentHandler(handler);
+        // обработать первый лист в книге
+        InputStream sheet1 = r.getSheet("rId1");
+        InputSource sheetSource = new InputSource(sheet1);
+        parser.parse(sheetSource);
+
+        // освобождение ресурсов для экономии памяти
+        sheet1.close();
+        sheet1 = null;
+        sheetSource = null;
+        parser = null;
+        handler = null;
+        sst = null;
+        styles = null;
+        r = null;
+        pkg.close();
+        pkg = null;
+    }
+
+    static class SheetHandler extends DefaultHandler {
+        private SharedStringsTable sst;     // таблица со строковыми значениями (Shared Strings Table)
+        private StylesTable stylesTable;    // таблица со стилями ячеек
+        private List<List<String>> allValues;     // список для хранения списков значении каждой строки данных
+        private List<List<String>> headerValues;  // список для хранения списков значении каждой строки шапки таблицы
+        private String tableStartValue;     // начальное значение, с которого начинается сбор данных
+        private String tableEndValue;       // конечное значение, с которого прекращается сбор данных
+        private int headerRowCount;         // количество строк в шапке таблицы
+        private Map<String, Object> paramsMap;  // мапа с параметрами
+
+        private StringBuffer lastValue;     // последнее считаное значение
+        private boolean nextIsString;       // признак того что следующее считаное значение хранится в виде строки в sst (Shared Strings Table)
+        private List<String> rowValues;     // список значении строки из файла
+
+        private boolean isData = false;     // признак того что считанные значения относятся к данным
+        private boolean isHeader = false;   // признак того что считанные значения относятся к шапке таблицы
+        private boolean endRead = false;    // признак того что встретилось значение окончания таблицы
+
+        private String position;            // позиция ячейки (A1, B2, C1 ... AB12)
+        private int maxColumnCount;         // максимальное количество значении в строке файла (определяется по шапке таблицы - строка с нумерацией столбцов)
+        private Integer rowOffset;          // отступ сверху (до данных)
+        private Integer colOffset;          // отступ слева
+        private int prevRowIndex = 0;       // номер предыдущей строки
+
+        private Map<String, XSSFCellStyle> styleMap = new HashMap<String, XSSFCellStyle>();// мапа со стилями
+        private Map<String, String> lastValuesMap = new HashMap<String, String>();  // мапа со считанными строковыми значениями из sst
+
+        private short formatIndex;          // идентификатор формата даты (дата хранится в виде числа)
+        private String formatString;        // формат даты
+        private final DataFormatter formatter;
+
+        /**
+         * Для обработки листа экселя.
+         *
+         * @param sst таблица со строковыми значениями (Shared Strings Table)
+         * @param stylesTable таблица со стилями ячеек
+         * @param allValues список для хранения списков значении каждой строки данных
+         * @param headerValues список для хранения списков значении каждой строки шапки таблицы
+         * @param tableStartValue начальное значение, с которого начинается сбор данных
+         * @param tableEndValue конечное значение, с которого прекращается сбор данных
+         * @param headerRowCount количество строк в шапке таблицы
+         * @param paramsMap мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
+         */
+        private SheetHandler(SharedStringsTable sst, StylesTable stylesTable,
+                             List<List<String>> allValues, List<List<String>> headerValues,
+                             String tableStartValue, String tableEndValue, int headerRowCount, Map<String, Object> paramsMap) {
+            this.sst = sst;
+            this.stylesTable = stylesTable;
+            this.allValues = allValues;
+            this.headerValues = headerValues;
+            this.tableStartValue = tableStartValue;
+            this.tableEndValue = tableEndValue;
+            this.headerRowCount = headerRowCount;
+            this.paramsMap = paramsMap;
+
+            this.rowOffset = Integer.parseInt(String.valueOf(paramsMap.get("rowOffset")));
+            this.colOffset = Integer.parseInt(String.valueOf(paramsMap.get("colOffset")));
+
+            this.lastValue = new StringBuffer();
+            this.formatter = new DataFormatter();
+        }
+
+        public void startElement(String uri, String localName, String name, Attributes attributes) {
+            // attributes.getValue("r") - позиция ячейки: A1, B1, ... AC15
+            // attributes.getValue("t") - тип ячейки: "s" строка, "str" формула, "n" число
+            // attributes.getValue("s") - стиль ячейки
+            // name.equals("c")         - ячейка
+            // name.equals("row")       - строка
+            // name.equals("v")         - значение
+
+            if (endRead) {
+                return;
+            }
+            if (name.equals("c")) { // ячейка
+                this.formatIndex = -1;
+                this.formatString = null;
+
+                position = attributes.getValue("r");
+                String cellType = attributes.getValue("t");
+                if (cellType != null && cellType.equals("s")) {
+                    // строковое значение
+                    nextIsString = true;
+                } else if (cellType == null || "".equals(cellType) || cellType.equals("n")) {
+                    // число или дата
+                    String cellStyleStr = attributes.getValue("s");
+                    if (cellStyleStr != null) {
+                        XSSFCellStyle style = getStyle(cellStyleStr);
+                        this.formatIndex = style.getDataFormat();
+                        this.formatString = style.getDataFormatString();
+                        if (this.formatString == null) {
+                            this.formatString = BuiltinFormats.getBuiltinFormat(this.formatIndex);
+                        }
+                    }
+                }
+            } else if (name.equals("row")) { // новая строка
+                rowValues = new ArrayList<String>();
+            }
+            lastValue.setLength(0);
+        }
+
+        public void endElement(String uri, String localName, String name) {
+            if (endRead) {
+                return;
+            }
+            if (nextIsString) {
+                String v = getLastValue(lastValue.toString());
+                lastValue.setLength(0);
+                lastValue.append(v);
+                nextIsString = false;
+            }
+
+            if (name.equals("v")) { // конец значения
+                // добавить отступ: если первое значение таблицы нашлось не в первом столбце, то делается отступ - пропуск лишних столбцов слева
+                int columnIndex = getColumnIndex(position);
+                if (columnIndex < colOffset) {
+                    endRead = (tableEndValue != null && tableEndValue.equals(getValue()));
+                    return;
+                }
+                // добавить отсутствующие/пропущенные ячейки
+                if (rowValues.size() < columnIndex - colOffset) {
+                    int n = (columnIndex - rowValues.size() - colOffset);
+                    for (int i = 1; i <= n; i++) {
+                        rowValues.add("");
+                    }
+                }
+                // строка
+                rowValues.add(getValue());
+            } else if (name.equals("row")) { // конец строки
+                if (isData) {
+                    endRead = (rowValues != null && rowValues.contains(tableEndValue));
+                    if (!endRead) {
+                        // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
+                        if (rowValues != null && rowValues.size() < maxColumnCount) {
+                            int n = maxColumnCount - rowValues.size();
+                            for (int i = 1; i <= n; i++) {
+                                rowValues.add("");
+                            }
+                        }
+                        int rowIndex = getRowIndex(position);
+                        if (rowIndex > prevRowIndex + 1) {
+                            int n = rowIndex - prevRowIndex - 1;
+                            for (int i = 1; i <= n; i++) {
+                                allValues.add(new ArrayList<String>());
+                            }
+                        }
+                        allValues.add(rowValues);
+                        prevRowIndex = rowIndex;
+                    }
+                } else {
+                    if (headerValues.isEmpty() && rowValues != null && rowValues.contains(tableStartValue)) {
+                        // найдено начало таблицы
+                        int from = rowValues.indexOf(tableStartValue);
+                        colOffset = from; // отступ слева
+                        if (from > 0) {
+                            int to = rowValues.size();
+                            rowValues = rowValues.subList(from, to);
+                        }
+                        isHeader = true;
+                    }
+                    if (isHeader) {
+                        headerValues.add(rowValues);
+                        if (headerValues.size() == headerRowCount) {
+                            // дальше только данные
+                            isData = true;
+                            isHeader = false;
+                            maxColumnCount = (rowValues != null ? rowValues.size() : 0); // максимальное количество значении в строке
+                            rowOffset = getRowIndex(position); // отступ сверху
+                            prevRowIndex = getRowIndex(position);
+                        }
+                    }
+                }
+            } else if (name.equals("sheetData")) {
+                // конец данных - обновить значения переданных параметов для использования в дальнейшем
+                paramsMap.put("rowOffset", rowOffset);
+                paramsMap.put("colOffset", colOffset + 1);
+            }
+        }
+
+        public void characters(char[] ch, int start, int length) {
+            lastValue.append(ch, start, length);
+        }
+
+        /** Получить номер столбца по значению позиции (A1, B1 ... AB12). */
+        private int getColumnIndex(String position) {
+            String onlyColumnName = position.replaceAll("[\\d]+", "");
+            return CellReference.convertColStringToIndex(onlyColumnName);
+        }
+
+        /** Получить номер строки по значению позиции (A1, B1 ... AB12). */
+        private int getRowIndex(String position) {
+            return Integer.parseInt(position.replaceAll("[^\\d]+", ""));
+        }
+
+        private XSSFCellStyle getStyle(String cellStyleStr) {
+            if (styleMap.get(cellStyleStr) == null) {
+                int styleIndex = Integer.parseInt(cellStyleStr);
+                styleMap.put(cellStyleStr, stylesTable.getStyleAt(styleIndex));
+            }
+            return styleMap.get(cellStyleStr);
+        }
+
+        private String getLastValue(String value) {
+            if (lastValuesMap.get(value) == null) {
+                int idx = Integer.parseInt(value);
+                lastValuesMap.put(value, new XSSFRichTextString(sst.getEntryAt(idx)).toString());
+            }
+            return lastValuesMap.get(value);
+        }
+
+        /** Получить значение в виде строки. */
+        private String getValue() {
+            // строка
+            String value = lastValue.toString();
+            if (this.formatString != null) {
+                // дата/число
+                value = formatter.formatRawCellContents(Double.parseDouble(value), this.formatIndex, this.formatString);
+            }
+            return value;
+        }
+    }
+
+    /**
+     * Проставление индексов у набора строк
+     *
+     * @param dataRows
+     */
+    @SuppressWarnings("unused")
+    public static void updateIndexes(List<DataRow<Cell>> dataRows) {
+        int index = 1;
+        for(DataRow<Cell> row: dataRows) {
+            row.setIndex(index++);
+        }
+    }
+
+    /**
+     * Проверка контрольной суммы ИНН
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value значение ИНН
+     * @param fatal фатально ли сообщение
+     * @return
+     */
+    public static boolean checkControlSumInn(Logger logger, DataRow<Cell> row, String alias, String value, boolean fatal) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        if (!RefBookUtils.checkControlSumInn(value)){
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Проверка диапазона даты (от 1900 до 2099)
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value проверяемое значение (строка или дата)
+     * @param fatal
+     */
+    public static boolean checkDateValid(Logger logger, DataRow<Cell> row, String alias, Object value, boolean fatal) {
+        if (value == null) {
+            return false;
+        }
+        Integer year = null;
+        Date date = null;
+        if (value instanceof Date){
+            date = (Date) value;
+        }
+        try {
+            if (value instanceof String) {
+                date = parseDate("dd.MM.yyyy", (String) value);
+            }
+            String yearString = formatDate(date, "yyyy");
+            if (yearString != null) {
+                year = Integer.valueOf(yearString);
+            }
+        } catch (ParseException e) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Ошибка при разборе значения даты атрибута «%s» (%s)", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+        if (year == null || year < 1900 || year > 2099) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, String pattern, boolean fatal) {
+        return checkPattern(logger, row, alias, value, Arrays.asList(pattern), fatal);
+    }
+
+    /**
+     * Проверка текста на паттерны
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value проверяемое значение (строка или дата)
+     * @param patterns regExp для проверки
+     * @param fatal
+     */
+    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, List<String> patterns, boolean fatal) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        StringBuilder sb = new StringBuilder();
+        boolean result = false;
+        for(String pattern : patterns){
+            if (!result){
+                result = checkFormat(value, pattern);
+            }
+            if (patterns.indexOf(pattern) != 0) {
+                sb.append("\" / \"");
+            }
+            sb.append(pattern);
+        }
+        if (!result) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", getColumnName(row, alias), value, sb.toString()), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+        return result;
+    }
+}

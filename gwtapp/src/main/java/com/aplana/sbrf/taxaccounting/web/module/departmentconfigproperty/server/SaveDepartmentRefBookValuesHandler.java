@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server;
 
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -23,6 +24,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -48,6 +50,15 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
+
+        Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
+        Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
+        Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
+
+        String inn = saveDepartmentRefBookValuesAction.getNotTableParams().get("INN").getStringValue();
+        if (checkPattern(logger, false, null, null, "ИНН", inn, innPattern)){
+            checkSumInn(logger, false, null, null, "ИНН", inn);
+        }
         for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
             String sig = row.get("SIGNATORY_ID").getDeRefValue();
             Integer signatoryId = (sig == null || sig.isEmpty()) ?
@@ -68,16 +79,28 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.INCORRECT_FIELDS);
                 break;
             }
+            String taxOrganCode = row.get("TAX_ORGAN_CODE").getStringValue();
+            String kpp = row.get("KPP").getStringValue();
+            if (checkPattern(logger, true,  taxOrganCode, kpp, "ИНН реорганизованной организации",row.get("REORG_INN").getStringValue(), innPattern)){
+                checkSumInn(logger, true, taxOrganCode, kpp, "ИНН реорганизованной организации", row.get("REORG_INN").getStringValue());
+            }
+            checkPattern(logger, true, taxOrganCode, kpp,"КПП",  row.get("KPP").getStringValue(), kppPattern);
+            checkPattern(logger, true, taxOrganCode, kpp, "КПП реорганизованной организации", row.get("REORG_KPP").getStringValue(), kppPattern);
+            checkPattern(logger, true, taxOrganCode, kpp, "Код налогового органа", row.get("TAX_ORGAN_CODE").getStringValue(), taxOrganPattern);
+        }
+
+        if (logger.containsLevel(LogLevel.ERROR) && result.getErrorType() == SaveDepartmentRefBookValuesResult.ERROR_TYPE.NONE){
+            result.setHasFatalError(true);
+            result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.COMMON_ERROR);
         }
 
         Map<Pair<String, String>, Integer> counter = new HashMap<Pair<String, String>, Integer>();
         for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
             Pair<String, String> p = new Pair<String, String>(row.get("KPP").getStringValue(), row.get("TAX_ORGAN_CODE").getStringValue());
             if (!counter.containsKey(p)) {
-                counter.put(p, new Integer(0));
+                counter.put(p, 0);
             }
             counter.put(p, counter.get(p) + 1);
-
         }
 
         for (Integer count : counter.values()) {
@@ -271,5 +294,25 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             convertedRow.put(e.getKey(), value);
         }
         return convertedRow;
+    }
+
+    private boolean checkPattern(Logger logger, boolean isTable, String taxOrganCode, String kpp, String name, String value, Pattern pattern) {
+        if (value != null && !pattern.matcher(value).matches()){
+            if (isTable)
+                logger.error("Код налогового органа \"%s\", КПП \"%s\": Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", taxOrganCode, kpp, name, value, pattern.pattern());
+            else
+                logger.error("Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", name, value, pattern.pattern());
+            return false;
+        }
+        return true;
+    }
+
+    private void checkSumInn(Logger logger, boolean isTable, String taxOrganCode, String kpp, String name, String value) {
+        if (value != null && !RefBookUtils.checkControlSumInn(value)){
+            if (isTable)
+                logger.error("Код налогового органа \"%s\", КПП \"%s\": Вычисленное контрольное число по полю \"%s\" некорректно (%s).", taxOrganCode, kpp, name, value);
+            else
+                logger.error("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", name, value);
+        }
     }
 }

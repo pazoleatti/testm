@@ -9,10 +9,12 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataResult;
@@ -44,6 +46,8 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     @Autowired
     LogEntryService logEntryService;
     @Autowired
+    ReportService reportService;
+    @Autowired
     private AsyncManager asyncManager;
 
     public PrintAuditDataHandler() {
@@ -66,6 +70,11 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
         params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter().convertTo());
         params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
         LockData lockData;
+        if (reportService.getAudit(userInfo, ReportType.CSV) != null){
+            logger.error("Для этого пользователя уже есть отчет по ЖА, проверьте выгрузку.");
+            result.setLogUuid(logEntryService.save(logger.getEntries()));
+            return result;
+        }
         try {
             if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
                     LockData.DescriptionTemplate.LOG_SYSTEM_CSV.getText(),

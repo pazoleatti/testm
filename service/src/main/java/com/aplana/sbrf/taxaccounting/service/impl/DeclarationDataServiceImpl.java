@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -59,7 +60,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat SDF_DD_MM_YYYY_HH_MM_SS = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
+
+    private static final String CALCULATION_NOT_TOPICAL = "Декларация / Уведомление содержит неактуальные консолидированные данные  " +
+            "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
+            "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
 
     @Autowired
     private DeclarationDataDao declarationDataDao;
@@ -118,9 +125,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private FormDataService formDataService;
 
     @Autowired
-    FormTypeService formTypeService;
+    private FormTypeService formTypeService;
 
-    private static final String DD_NOT_IN_RANGE = "Найдена форма: %s %d %s, %s, состояние - %s";
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
+
+    private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
     public static final String TAG_FILE = "Файл";
 	public static final String TAG_DOCUMENT = "Документ";
@@ -131,9 +141,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public static final String MSG_IS_EXIST_DECLARATION =
             "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"";
     private static final String NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING =
-            "Не выполнена консолидация данных из формы %s %s %s %s %d %s в статусе %s";
+            "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" в статусе \"%s\"";
     private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
-            "Не выполнена консолидация данных из формы %s %s %s %s %d %s - экземпляр формы не создан";
+            "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" - экземпляр формы не создан";
     private static final String FILE_NOT_DELETE = "Временный файл %s не удален";
 
     private static final Date MAX_DATE;
@@ -256,11 +266,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void check(Logger logger, long id, TAUserInfo userInfo) {
+    public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
+        log.info(String.format("Скриптовые проверки для декларации %s", id));
+        lockStateLogger.updateState("Скриптовые проверки");
         declarationDataScriptingService.executeScript(userInfo,
                 declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
         DeclarationData dd = declarationDataDao.get(id);
-        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK);
+        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
@@ -293,84 +305,84 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void delete(long id, TAUserInfo userInfo) {
-        LockData lockData = lock(id, userInfo);
-        if (lockData == null) {
-            try {
-                declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
-                DeclarationData declarationData = declarationDataDao.get(id);
+        LockData lockData = lockDataService.getLock(generateAsyncTaskKey(id, ReportType.XML_DEC));
+        LockData lockDataAccept = lockDataService.getLock(generateAsyncTaskKey(id, ReportType.ACCEPT_DEC));
+        LockData lockDataCheck = lockDataService.getLock(generateAsyncTaskKey(id, ReportType.CHECK_DEC));
+        if (lockData == null && lockDataAccept == null && lockDataCheck == null) {
+            declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
+            DeclarationData declarationData = declarationDataDao.get(id);
 
-                // удаляем записи о консолидации для текущего экземпляра
-                sourceService.deleteDeclarationConsolidateInfo(id);
+            deleteReport(id, userInfo.getUser().getId(), false);
+            declarationDataDao.delete(id);
 
-                declarationDataDao.delete(id);
-
-                auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
-                        declarationData.getReportPeriodId(),
-                        declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                        null, null, "Декларация удалена", null, null);
-            } finally {
-                unlock(id, userInfo);
-            }
+            auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
+                    declarationData.getReportPeriodId(),
+                    declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
+                    null, null, "Декларация удалена", null, null);
         } else {
-            throw new ServiceException(String.format(LockDataService.LOCK_DATA, taUserService.getUser(lockData.getUserId()).getName(), lockData.getUserId()));
+            if (lockData == null) lockData = lockDataAccept;
+            if (lockData == null) lockData = lockDataCheck;
+            Logger logger = new Logger();
+            TAUser blocker = taUserService.getUser(lockData.getUserId());
+            logger.error("Текущая декларация не может быть удалена, т.к. пользователем \"%s\" в \"%s\" запущена операция \"%s\"", blocker.getName(), SDF_DD_MM_YYYY_HH_MM_SS.format(lockData.getDateLock()), lockData.getDescription());
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
     }
 
     @Override
     @Transactional(readOnly = false)
-    public void setAccepted(Logger logger, long id, boolean accepted, TAUserInfo userInfo) {
-        if (lock(id, userInfo) == null) {
-            try {
-                // TODO (sgoryachkin) Это 2 метода должо быть
-                DeclarationData declarationData = declarationDataDao.get(id);
-                checkSources(declarationData, logger);
+    public void accept(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
+        DeclarationData declarationData = declarationDataDao.get(id);
+        checkSources(declarationData, logger);
 
-                if (accepted) {
-                    Map<String, Object> exchangeParams = new HashMap<String, Object>();
-                    declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
 
-                    validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
-                    declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+        validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, lockStateLogger);
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
-                    declarationData.setAccepted(true);
+        declarationData.setAccepted(true);
 
-                    String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
-                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-                    auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData.getDepartmentId(),
-                            declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null, null);
-                } else {
-                    declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+        String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
+        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
+        auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData.getDepartmentId(),
+                declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null, null);
 
-                    declarationData.setAccepted(false);
-
-                    Map<String, Object> exchangeParams = new HashMap<String, Object>();
-                    declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
-
-                    DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                    if (declarationTemplate.getType().getIsIfrs() &&
-                            departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
-                        IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
-                        if (ifrsData != null && ifrsData.getBlobDataId() != null) {
-                            ifrsDataService.deleteReport(declarationData, userInfo);
-                        } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
-                            ifrsDataService.cancelTask(declarationData, userInfo);
-                        }
-                    }
-
-                    String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
-                    logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
-                    auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData.getDepartmentId(),
-                            declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null, null);
-
-                }
-                declarationDataDao.setAccepted(id, accepted);
-            } finally {
-                unlock(id, userInfo);
-            }
-        } else {
-            throw new ServiceException("Декларация заблокирована и не может быть принята. Попробуйте выполнить операцию позже");
-        }
+        declarationDataDao.setAccepted(id, true);
     }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void cancel(Logger logger, long id, TAUserInfo userInfo) {
+        DeclarationData declarationData = declarationDataDao.get(id);
+        checkSources(declarationData, logger);
+
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_ACCEPTED_TO_CREATED);
+
+        declarationData.setAccepted(false);
+
+        Map<String, Object> exchangeParams = new HashMap<String, Object>();
+        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
+
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        if (declarationTemplate.getType().getIsIfrs() &&
+                departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
+            IfrsData ifrsData = ifrsDataService.get(declarationData.getReportPeriodId());
+            if (ifrsData != null && ifrsData.getBlobDataId() != null) {
+                ifrsDataService.deleteReport(declarationData, userInfo);
+            } else if (lockDataService.getLock(ifrsDataService.generateTaskKey(declarationData.getReportPeriodId())) != null) {
+                ifrsDataService.cancelTask(declarationData, userInfo);
+            }
+        }
+
+        String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
+        logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
+        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData.getDepartmentId(),
+                declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null, null);
+
+        declarationDataDao.setAccepted(id, false);
+    }
+
 
     @Override
     public InputStream getXmlDataAsStream(long declarationId, TAUserInfo userInfo) {
@@ -411,17 +423,30 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public byte[] getXlsxData(long id, TAUserInfo userInfo) {
+    public byte[] getXlsxData(long id, TAUserInfo userInfo, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
-        try {
-            DeclarationData declarationData = declarationDataDao.get(id);
-            String uuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
-            ObjectInputStream objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
-            JasperPrint jasperPrint = (JasperPrint)objectInputStream.readObject();
-            return exportXLSX(jasperPrint);
-        } catch (Exception e) {
-            throw new ServiceException("Не удалось извлечь объект для печати.", e);
+        DeclarationData declarationData = declarationDataDao.get(id);
+        String uuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
+        JasperPrint jasperPrint;
+        if (uuid != null) {
+            ObjectInputStream objectInputStream = null;
+            try {
+                objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
+                jasperPrint = (JasperPrint) objectInputStream.readObject();
+            } catch (IOException e) {
+                throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
+            } catch (ClassNotFoundException e) {
+                throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
+            }
+        } else {
+            log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+            stateLogger.updateState("Заполнение Jasper-макета");
+            jasperPrint = createJasperReport(declarationData, userInfo);
+            // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
         }
+        log.info(String.format("Заполнение XLSX-отчета декларации %s", declarationData.getId()));
+        stateLogger.updateState("Заполнение XLSX-отчета");
+        return exportXLSX(jasperPrint);
     }
 
 	@Override
@@ -430,38 +455,64 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return getBytesFromInputstream(reportService.getDec(userInfo, id, ReportType.PDF_DEC));
 	}
 
+    private JasperPrint createJasperReport(DeclarationData declarationData, TAUserInfo userInfo) {
+        String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
+        InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
+        if (zipXml != null) {
+            try {
+                ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
+                zipXmlIn.getNextEntry();
+                try {
+                    return fillReport(zipXmlIn,
+                            declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
+                } finally {
+                    IOUtils.closeQuietly(zipXml);
+                    IOUtils.closeQuietly(zipXmlIn);
+                }
+            } catch (IOException e) {
+                throw new ServiceException(e.getLocalizedMessage(), e);
+            }
+        } else {
+            throw new ServiceException("Декларация не сформирована");
+        }
+    }
+    
     @Override
     public void setPdfDataBlobs(Logger logger,
                                      DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         log.info(String.format("Получение данных декларации %s", declarationData.getId()));
         stateLogger.updateState("Получение данных декларации");
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
-        InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
-        if (zipXml != null) {            
+        if (xmlUuid != null) {            
             try {                
-                ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
-                zipXmlIn.getNextEntry();
-                try {
-                    log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
-                    stateLogger.updateState("Заполнение Jasper-макета");
-                    JasperPrint jasperPrint = fillReport(zipXmlIn,
-                            declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
-
-                    log.info(String.format("Сохранение PDF в БД для декларации %s", declarationData.getId()));
-                    stateLogger.updateState("Сохранение PDF в БД");
-                    reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
-                    log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
-                    stateLogger.updateState("Сохранение Jasper в БД");
-                    reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
-                } finally {
-                    IOUtils.closeQuietly(zipXml);
-                    IOUtils.closeQuietly(zipXmlIn);
-                }                
+                log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+                stateLogger.updateState("Заполнение Jasper-макета");
+                JasperPrint jasperPrint = createJasperReport(declarationData, userInfo);
+                
+                log.info(String.format("Сохранение PDF в БД для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение PDF в БД");
+                reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
+                log.info(String.format("Сохранение Jasper в БД для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение Jasper в БД");
+                reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             }
         } else {
             throw new ServiceException("Декларация не сформирована");
+        }
+    }
+
+    @Override
+    public void setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        try {
+            byte[] xlsxData = getXlsxData(declarationData.getId(), userInfo, stateLogger);
+            log.info(String.format("Сохранение XLSX в БД для декларации %s", declarationData.getId()));
+            stateLogger.updateState("Сохранение XLSX в БД");
+            reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xlsxData), ""), ReportType.EXCEL_DEC);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new ServiceException(e.getMessage());
         }
     }
 
@@ -473,16 +524,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         exchangeParams.put(DeclarationDataScriptParams.DOC_DATE, docDate);
         StringWriter writer = new StringWriter();
         exchangeParams.put(DeclarationDataScriptParams.XML, writer);
-        DeclarationParams params = new DeclarationParams();
-        exchangeParams.put(DeclarationDataScriptParams.DEC_PARAMS, params);
 
         File xmlFile = null;
         Writer fileWriter = null;
 
         try {
             try {
-                log.info(String.format("Cоздание временного файла для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Cоздание временного файла");
+                log.info(String.format("Создание временного файла для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Создание временного файла");
                 try {
                     xmlFile = File.createTempFile("file_for_validate", ".xml");
                     fileWriter = new FileWriter(xmlFile);
@@ -512,11 +561,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             saxParser.parse(xmlFile, handler);
             String decName = handler.getValues().get(TAG_FILE);
             Date decDate = getFormattedDate(handler.getValues().get(TAG_DOCUMENT));
+            if (decDate == null)
+                decDate = docDate;
 
             //Переименоввываем
             File renameToFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "xml"));
             if (xmlFile.renameTo(renameToFile)){
-                validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, renameToFile, stateLogger);
+                //validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, renameToFile, stateLogger);
 
                 //Архивирование перед сохраннеием в базу
                 File zipOutFile = null;
@@ -544,7 +595,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     if (zipOutFile != null && !zipOutFile.delete()) {
                         log.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
                     }
-                    if (renameToFile != null && !renameToFile.delete()) {
+                    if (!renameToFile.delete()) {
                         log.warn(String.format(FILE_NOT_DELETE, renameToFile.getAbsolutePath()));
                     }
                 }
@@ -567,7 +618,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
-                                     FormDataEvent operation) {
+                                     FormDataEvent operation, LockStateLogger lockStateLogger) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid == null) {
             TaxType taxType = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
@@ -576,12 +627,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
             throw new ServiceException(msg);
         }
-        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, new LockStateLogger() {
-            @Override
-            public void updateState(String state) {
-                //TODO передавать из асинхронной задачи, когда будет переделана проверка и принятие на асинки
-            }
-        });
+        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, lockStateLogger);
     }
 
     /**
@@ -601,13 +647,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 log.info(String.format("Валидация декларации %s", declarationData.getId()));
                 stateLogger.updateState("Валидация");
                 if (!validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile) && logger.containsLevel(LogLevel.ERROR)){
-                    throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                    throw new ServiceException();
                 }
             } catch (Exception e) {
                 log.info(String.format("Сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение логов об ошибках валидации");
                 log.error(VALIDATION_ERR_MSG, e);
-                logger.error(e);                
+                if (!(e instanceof ServiceException))
+                    logger.error(e);
                 String uuid = logEntryService.save(logger.getEntries());
                 throw new ServiceLoggerException(VALIDATION_ERR_MSG, uuid);
             } finally {
@@ -679,6 +726,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private static Date getFormattedDate(String stringToDate) {
+        if (stringToDate == null)
+            return null;
         // Преобразуем строку вида "dd.mm.yyyy" в Date
         try {
             return formatter.parse(stringToDate);
@@ -737,13 +786,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public String generateAsyncTaskKey(long declarationDataId, ReportType reportType) {
+        if (reportType == null) {
+            return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId;
+        }
         return LockData.LockObjects.DECLARATION_DATA.name() + "_" + declarationDataId + "_" + reportType.getName();
     }
 
     @Override
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
-        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId(),
+        LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId(),
                 getDeclarationFullName(declarationDataId, null),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
         checkLock(lockData, userInfo.getUser());
@@ -753,7 +805,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void unlock(final long declarationDataId, final TAUserInfo userInfo) {
-        lockDataService.unlock(generateAsyncTaskKey(declarationDataId, ReportType.XML_DEC), userInfo.getUser().getId());
+        lockDataService.unlock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId());
     }
 
     @Override
@@ -773,11 +825,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      */
     @Override
-    public void deleteReport(long declarationDataId, boolean isLock) {
-        if (isLock) {
-            ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.EXCEL_DEC};
-            for (ReportType reportType : reportTypes) {
-                lockDataService.unlock(generateAsyncTaskKey(declarationDataId, reportType), 0, true);
+    public void deleteReport(long declarationDataId, int userId, boolean isCalc) {
+        ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC, ReportType.ACCEPT_DEC};
+        for (ReportType reportType : reportTypes) {
+            if (!isCalc || isCalc && !ReportType.XML_DEC.equals(reportType)) {
+                LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
+                if (lock != null)
+                    lockDataService.interruptTask(lock, userId, true);
             }
         }
         reportService.deleteDec(declarationDataId);
@@ -803,27 +857,116 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public String getDeclarationFullName(long declarationId, String reportType) {
+    public String getDeclarationFullName(long declarationId, ReportType reportType) {
         DeclarationData declaration = declarationDataDao.get(declarationId);
         Department department = departmentService.getDepartment(declaration.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
-        return reportType != null ? String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
-                reportType,
-                declarationTemplate.getType().getName(),
-                department.getName(),
-                reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getCorrectionDate() != null
-                        ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                        : "")
-                :
-                String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
-                declarationTemplate.getType().getName(),
-                department.getName(),
-                reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                reportPeriod.getCorrectionDate() != null
-                        ? " " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                        : "");
+        if (reportType == null)
+            return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
+                    declarationTemplate.getType().getName(),
+                    declaration.getKpp(),
+                    declaration.getTaxOrganCode(),
+                    department.getName(),
+                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriod.getCorrectionDate() != null
+                            ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                            : "",
+                    declaration.getTaxOrganCode() != null
+                            ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                            : "",
+                    declaration.getKpp() != null
+                            ? ", КПП \"" + declaration.getKpp() + "\""
+                            : "");
+
+        switch (reportType) {
+            case EXCEL_DEC:
+            case PDF_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
+                        reportType.getName(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        declaration.getKpp(),
+                        declaration.getTaxOrganCode(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
+                                : "");
+            case XML_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_CALCULATE.getText(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        declaration.getKpp(),
+                        declaration.getTaxOrganCode(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
+                                : "");
+            case CHECK_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_CHECK.getText(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        declaration.getKpp(),
+                        declaration.getTaxOrganCode(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
+                                : "");
+            case ACCEPT_DEC:
+                return String.format(LockData.DescriptionTemplate.DECLARATION_ACCEPT.getText(),
+                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
+                        declarationTemplate.getType().getName(),
+                        declaration.getKpp(),
+                        declaration.getTaxOrganCode(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
+                                : "");
+            default:
+                return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
+                        declarationTemplate.getType().getName(),
+                        declaration.getKpp(),
+                        declaration.getTaxOrganCode(),
+                        department.getName(),
+                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        reportPeriod.getCorrectionDate() != null
+                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                : "",
+                        declaration.getTaxOrganCode() != null
+                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                : "",
+                        declaration.getKpp() != null
+                                ? ", КПП \"" + declaration.getKpp() + "\""
+                                : "");
+        }
     }
 
     @Override
@@ -832,8 +975,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
             if (uuid != null) {
                 Long size = blobDataService.getLength(uuid);
-                long maxSize = 150 * 1024;
-                long shortSize = 10 * 1024;
+                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                long maxSize = taskTypeData.getTaskLimit();
+                long shortSize = taskTypeData.getShortQueueLimit();
                 if (size > maxSize) {
                     return new Pair<BalancingVariants, Long>(null, size);
                 } else if (size < shortSize) {
@@ -847,8 +991,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
             if (uuid != null) {
                 Long size = blobDataService.getLength(uuid);
-                long maxSize = 150 * 1024;
-                long shortSize = 10 * 1024;
+                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                long maxSize = taskTypeData.getTaskLimit();
+                long shortSize = taskTypeData.getShortQueueLimit();
                 if (size > maxSize) {
                     return new Pair<BalancingVariants, Long>(null, size);
                 } else if (size < shortSize) {
@@ -865,6 +1010,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void checkSources(DeclarationData dd, Logger logger){
+        //Проверка на неактуальные консолидированные данные
+        if (sourceService.isDDConsolidationTopical(dd.getId())){
+            logger.error(CALCULATION_NOT_TOPICAL);
+            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+        }
         ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
         List<DepartmentFormType> sourceDDs = departmentFormTypeDao.getDeclarationSources(
                 dd.getDepartmentId(),
@@ -883,7 +1033,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         sourceDFT.getKind().getName(),
                         rp.getName(),
                         rp.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                 formatter.format(drp.getCorrectionDate())) : "");
             } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
                 DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
@@ -893,7 +1043,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         sourceFD.getKind().getName(),
                         rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
                         rp.getTaxPeriod().getYear(),
-                        sourceDRP.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                        sourceDRP.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                 formatter.format(sourceDRP.getCorrectionDate())) : "",
                         sourceFD.getState().getName());
             }

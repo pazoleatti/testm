@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -54,6 +55,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
         ConfigurationParamModel model = configurationDao.getAll();
+        return model;
+    }
+
+    @Override
+    public List<Map<String, String>> getEmailConfig() {
         RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
         PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
@@ -64,8 +70,29 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
             params.add(record);
         }
-        model.setEmailParams(params);
-        return model;
+        return params;
+    }
+
+    @Override
+    public List<Map<String, String>> getAsyncConfig() {
+        RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.ASYNC_CONFIG);
+        PagingResult<Map<String, RefBookValue>> values = provider.getRecords(new Date(), null, null, null);
+        List<Map<String, String>> params = new ArrayList<Map<String, String>>();
+        for (Map<String, RefBookValue> value : values) {
+            Map<String, String> record = new HashMap<String, String>();
+            for (Map.Entry<String, RefBookValue> entry : value.entrySet()) {
+                switch (entry.getValue().getAttributeType()) {
+                    case NUMBER:
+                        record.put(entry.getKey(), entry.getValue().getNumberValue().toString());
+                        break;
+                    case STRING:
+                        record.put(entry.getKey(), entry.getValue().getStringValue());
+                        break;
+                }
+            }
+            params.add(record);
+        }
+        return params;
     }
 
     @Override
@@ -77,7 +104,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, Logger logger) {
+    public void saveAllConfig(TAUserInfo userInfo, ConfigurationParamModel model, List<Map<String, String>> emailConfigs, List<Map<String, String>> asyncConfigs, Logger logger) {
         if (model == null) {
             return;
         }
@@ -173,10 +200,25 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
             configurationDao.save(model);
+
+            //Сохранение настроек почты
             RefBookDataProvider provider = refBookFactory.getDataProvider(RefBook.EMAIL_CONFIG);
 
             List<Map<String, RefBookValue>> records = new ArrayList<Map<String, RefBookValue>>();
-            for (Map<String, String> param : model.getEmailParams()) {
+            for (Map<String, String> param : emailConfigs) {
+                Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
+                for (Map.Entry<String, String> entry : param.entrySet()) {
+                    record.put(entry.getKey(), new RefBookValue(RefBookAttributeType.STRING, entry.getValue()));
+                }
+                records.add(record);
+            }
+            provider.updateRecords(userInfo, new Date(), records);
+
+            //Сохранение настроек асинхронных задач
+            provider = refBookFactory.getDataProvider(RefBook.ASYNC_CONFIG);
+
+            records = new ArrayList<Map<String, RefBookValue>>();
+            for (Map<String, String> param : asyncConfigs) {
                 Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
                 for (Map.Entry<String, String> entry : param.entrySet()) {
                     record.put(entry.getKey(), new RefBookValue(RefBookAttributeType.STRING, entry.getValue()));

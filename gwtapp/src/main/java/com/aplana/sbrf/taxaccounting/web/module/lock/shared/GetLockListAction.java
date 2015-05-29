@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.lock.shared;
 
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
@@ -16,6 +17,8 @@ public class GetLockListAction extends UnsecuredActionImpl<GetLockListResult> im
     /* ограничение по имени пользователя или ключу */
     private String filter;
 
+    private LockData.LockQueues queues;
+
     public String getFilter() {
         return filter;
     }
@@ -30,6 +33,14 @@ public class GetLockListAction extends UnsecuredActionImpl<GetLockListResult> im
 
     public void setPagingParams(PagingParams pagingParams) {
         this.pagingParams = pagingParams;
+    }
+
+    public LockData.LockQueues getQueues() {
+        return queues;
+    }
+
+    public void setQueues(LockData.LockQueues queues) {
+        this.queues = queues;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.source;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+
 import java.util.Date;
 
 /**
@@ -8,11 +10,14 @@ import java.util.Date;
  */
 public class ConsolidatedInstance {
     private String type;
-    private String formKind;
+    private FormDataKind formKind;
     private String department;
     private String period;
+    private Integer month;
     private Date correctionDate;
     private boolean declaration;
+    private String taxOrganCode;
+    private String kpp;
 
     public boolean isDeclaration() {
         return declaration;
@@ -30,12 +35,12 @@ public class ConsolidatedInstance {
         this.type = type;
     }
 
-    public String getFormKind() {
+    public FormDataKind getFormKind() {
         return formKind;
     }
 
-    public void setFormKind(String formKind) {
-        this.formKind = formKind;
+    public void setFormKind(int formKind) {
+        this.formKind = FormDataKind.fromId(formKind);
     }
 
     public String getDepartment() {
@@ -60,5 +65,29 @@ public class ConsolidatedInstance {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public void setMonth(Integer month) {
+        this.month = month;
+    }
+
+    public String getTaxOrganCode() {
+        return taxOrganCode;
+    }
+
+    public void setTaxOrganCode(String taxOrganCode) {
+        this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
     }
 }

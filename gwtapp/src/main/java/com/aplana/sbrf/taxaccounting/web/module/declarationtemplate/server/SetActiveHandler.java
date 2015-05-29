@@ -46,7 +46,7 @@ public class SetActiveHandler extends AbstractActionHandler<SetActiveAction, Set
         declarationTemplateService.lock(action.getDtId(), userInfo);
         SetActiveResult result = new SetActiveResult();
         Logger logger = new Logger();
-        result.setIsSetActiveSuccessfully(mainOperatingService.setStatusTemplate(action.getDtId(), logger, securityService.currentUserInfo().getUser(), action.getForce()));
+        result.setIsSetActiveSuccessfully(mainOperatingService.setStatusTemplate(action.getDtId(), logger, securityService.currentUserInfo(), action.getForce()));
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));
         result.setStatus(declarationTemplateService.get(action.getDtId()).getStatus().getId());

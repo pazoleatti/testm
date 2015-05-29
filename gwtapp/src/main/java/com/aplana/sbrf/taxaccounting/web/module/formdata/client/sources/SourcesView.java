@@ -44,10 +44,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     private final PopupPanel widget;
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
-    public static final String TITLE_FORM = "Налоговые формы";
-    public static final String TITLE_DEC = "Декларации";
-    public static final String TITLE_FORM_DEAL = "Формы";
-    public static final String TITLE_DEC_DEAL = "Уведомления";
+    public static final String TITLE_FORM = "Формы источники/приемники";
+    public static final String TITLE_DEC = "Декларации приемники";
+    public static final String TITLE_DEC_DEAL = "Уведомления приемники";
 
     @UiField
     Button close;
@@ -272,7 +271,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
                 table.addColumn(formTypeColumn, "Вид декларации");
             } else {
-                table.addColumn(formTypeColumn, "Вид уведоления");
+                table.addColumn(formTypeColumn, "Вид уведомления");
             }
             table.setColumnWidth(formTypeColumn, 110, Style.Unit.PX);
         }
@@ -297,7 +296,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
                 table.addColumn(stateColumn, "Состояние декларации");
             } else {
-                table.addColumn(stateColumn, "Состояние уведоления");
+                table.addColumn(stateColumn, "Состояние уведомления");
             }
         }
         table.setColumnWidth(stateColumn, 120, Style.Unit.PX);
@@ -315,20 +314,21 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         boolean isTaxTypeDeal = TaxType.DEAL.equals(getUiHandlers().getTaxType());
         formDecAnchor.setText(isForm ?
                 (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+                (isTaxTypeDeal ? TITLE_FORM : TITLE_FORM));
 
         formDecLabel.setText(!isForm ?
                 (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+                (isTaxTypeDeal ? TITLE_FORM : TITLE_FORM));
 
         source.setVisible(isForm);
-        destination.setVisible(isForm);
     }
 
     @Override
     public void setTableData(List<FormToFormRelation> result) {
         tableData = result;
         isForm = true;
+        if (result == null)
+            initColumns();
         updateSwitchMode();
         initCheckboxes();
         updateTableData();
@@ -340,8 +340,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             boolean src = source.getValue();
             boolean dst = destination.getValue();
             boolean uncr = uncreated.getValue();
-            if (!isForm)
-                dst = true;
 
             for (FormToFormRelation formToFormRelation : tableData) {
                 boolean fSrc = formToFormRelation.isSource();

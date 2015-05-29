@@ -212,7 +212,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                     String xmlUuid = reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), ReportType.XML_DEC);
                     if (xmlUuid != null) {
                         blobData = new BlobData();
-                        blobData.setInputStream(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationData.getId(), userService.getSystemUserInfo())));
+                        blobData.setInputStream(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationData.getId(), userService.getSystemUserInfo(), stateLogger)));
                     } else {
                         throw new ServiceException("Для декларации \"%s\" не произведен расчёт", declarationTemplate.getName());
                     }

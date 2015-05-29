@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction, CheckAccessResult> {
 
@@ -56,6 +58,36 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                         .getAuthentication().getPrincipal()));
                 auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
                         logger.getEntries().get(0).getMessage(), uuid, null);
+            }
+        } else if (group.equals(ConfigurationParamGroup.ASYNC)) {
+            for (Map<String,String> param : action.getAsyncParams()) {
+                String type = param.get(ConfigurationParamModel.ASYNC_TYPE);
+                int limit = 0;
+                int shortLimit = 0;
+                String sLimit = param.get(ConfigurationParamModel.ASYNC_LIMIT);
+                String sShortLimit = param.get(ConfigurationParamModel.ASYNC_SHORT_LIMIT);
+                boolean error = false;
+
+                try {
+                    limit = Integer.valueOf(sLimit);
+                } catch (NumberFormatException e) {
+                    logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть числовым (больше нуля)!", type, sLimit));
+                    error = true;
+                }
+                try {
+                    shortLimit = Integer.valueOf(sShortLimit);
+                } catch (NumberFormatException e) {
+                    logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть числовым (больше нуля)!", type, sShortLimit));
+                    error = true;
+                }
+                if (error) {
+                    continue;
+                }
+
+                if (shortLimit > limit) {
+                    logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" (\"%s\")!",
+                            type, sLimit, sShortLimit));
+                }
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

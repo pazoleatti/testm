@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskPersistenceException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -58,6 +59,10 @@ public class AsyncManagerMock implements AsyncManager {
             return BalancingVariants.SHORT;
         } catch (EmptyResultDataAccessException e) {
             throw new AsyncTaskPersistenceException("Не найден тип задачи с идентификатором = " + taskTypeId);
+        } catch (ServiceLoggerException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AsyncTaskException(e);
         }
     }
 

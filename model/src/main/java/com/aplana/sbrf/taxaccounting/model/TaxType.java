@@ -70,4 +70,12 @@ public enum TaxType {
 		}
 		throw new IllegalArgumentException("Wrong TaxType code: '" + code + "'");
 	}
+
+    public String getDeclarationShortName() {
+        if (this.equals(DEAL)) {
+            return "уведомления";
+        } else {
+            return "декларации";
+        }
+    }
 }

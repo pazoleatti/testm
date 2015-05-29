@@ -48,6 +48,14 @@ public interface DeclarationDataService {
      */
     void setPdfDataBlobs(Logger logger,
                          DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
+    /**
+     * Формирование Xlsx отчета
+     * @param logger
+     * @param declarationData
+     * @param userInfo
+     */
+    void setXlsxDataBlobs(Logger logger,
+                         DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger);
 	/**
 	 * Получить декларацию
 	 * @param declarationDataId идентификатор декларации
@@ -72,7 +80,7 @@ public interface DeclarationDataService {
 	 * @param logger - объект журнала
 	 * @throws AccessDeniedException если у пользователя не хватает прав на удаление
 	 */
-	void check(Logger logger, long declarationDataId, TAUserInfo userInfo);
+	void check(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
 
     /**
      * метод запускает скрипты с событием предрасчетные проверки
@@ -84,14 +92,23 @@ public interface DeclarationDataService {
     void preCalculationCheck(Logger logger, long declarationDataId, TAUserInfo userInfo);
 
 	/**
-	 * Установить в декларации флаг принятия
+	 * Принятие декларации
 	 * @param logger - объект журнала
 	 * @param declarationDataId идентификатор декларации
-	 * @param accepted значение флага
 	 * @param userInfo информация о пользователе, выполняющего действие
 	 * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
 	 */
-	void setAccepted(Logger logger, long declarationDataId, boolean accepted, TAUserInfo userInfo);
+    void accept(Logger logger, long declarationDataId, TAUserInfo userInfo, LockStateLogger lockStateLogger);
+
+
+    /**
+     * Отмена принятия декларации
+     * @param logger - объект журнала
+     * @param declarationDataId идентификатор декларации
+     * @param userInfo информация о пользователе, выполняющего действие
+     * @throws AccessDeniedException - если у пользователя нет прав на такое изменение статуса у декларации
+     */
+    void cancel(Logger logger, long declarationDataId, TAUserInfo userInfo);
 
     /**
      * Получить данные декларации в формате законодателя (XML)
@@ -109,7 +126,7 @@ public interface DeclarationDataService {
 	 * @return файл Xlsx в виде байтового массива
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	byte[] getXlsxData(long declarationDataId, TAUserInfo userInfo);
+	byte[] getXlsxData(long declarationDataId, TAUserInfo userInfo, LockStateLogger stateLogger);
 	/**
 	 * Получить печатное представление данных декларации в PDF формате
 	 * @param declarationId идентификатор декларации
@@ -187,7 +204,7 @@ public interface DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      * @param declarationDataId
      */
-    void deleteReport(long declarationDataId, boolean isLock);
+    void deleteReport(long declarationDataId, int userId, boolean isCalc);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 
@@ -199,5 +216,5 @@ public interface DeclarationDataService {
      * @param reportType тип отчета. Может быть null
      * @return название
      */
-    String getDeclarationFullName(long declarationId, String reportType);
+    String getDeclarationFullName(long declarationId, ReportType reportType);
 }

@@ -116,6 +116,8 @@ public class RefBookFactoryImpl implements RefBookFactory {
             return dataProvider;
         } else if (RefBook.EMAIL_CONFIG.equals(refBookId)) {
             return applicationContext.getBean("refBookRefBookEmailConfig", RefBookEmailConfigProvider.class);
+        } else if (RefBook.ASYNC_CONFIG.equals(refBookId)) {
+            return applicationContext.getBean("refBookAsyncConfigProvider", RefBookAsyncConfigProvider.class);
         } else {
 			RefBookUniversal refBookUniversal = (RefBookUniversal) applicationContext.getBean("refBookUniversal", RefBookDataProvider.class);
 			refBookUniversal.setRefBookId(refBookId);

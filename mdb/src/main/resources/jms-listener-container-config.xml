@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--Конфигурация на случай добавления адаптера для сообщений-->
+    <!--<bean id="remoteJndiTemplate" class="org.springframework.jndi.JndiTemplate" lazy-init="false">-->
+        <!--<property name="environment">-->
+            <!--<props>-->
+                <!--<prop key="java.naming.provider.url">iiop://localhost:2809</prop>-->
+                <!--<prop key="java.naming.factory.url.pkgs">com.ibm.ws.naming</prop>-->
+                <!--<prop key="java.naming.factory.initial">com.ibm.websphere.naming.WsnInitialContextFactory</prop>-->
+            <!--</props>-->
+        <!--</property>-->
+    <!--</bean>-->
+    <!--<int:channel id="inbound"/>-->
+    <!--<int-jms:message-driven-channel-adapter id="jmsIn"
+                                            channel="inbound"
+                                            container="messageListenerContainer"
+                                            acknowledge="transacted"/>-->
+
+    <bean id="remoteConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean" lazy-init="true">
+        <property name="jndiName" value="jms/transportConnectionFactory${releasePostfix}"/>
+        <property name="lookupOnStartup" value="false" />
+        <property name="proxyInterface" value="javax.jms.ConnectionFactory" />
+        <property name="cache" value="false" />
+    </bean>
+
+    <!--<int:service-activator
+            input-channel="inbound"
+            ref="messageHandler"
+            method="onMessage"
+            requires-reply="false">
+
+    </int:service-activator>-->
+    <bean id="messageListener" class="com.aplana.sbrf.taxaccounting.mdb.RateMDB" />
+
+    <bean id="messageHandler" class="com.aplana.sbrf.taxaccounting.mdb.RateMDB"/>
+    <bean id="receiveQueue" class="org.springframework.jndi.JndiObjectFactoryBean" lazy-init="true">
+        <property name="jndiName" value="jms/rateQueue${releasePostfix}"/>
+        <property name="cache" value="false" />
+        <property name="proxyInterface" value="javax.jms.Queue" />
+    </bean>
+
+    <bean id="messageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="remoteConnectionFactory"/>
+        <property name="destination" ref="receiveQueue"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="maxConcurrentConsumers" value="1"/>
+        <property name="concurrentConsumers" value="1"/>
+        <property name="receiveTimeout" value="5000"/>
+        <property name="recoveryInterval" value="60000"/>
+        <property name="autoStartup" value="true"/>
+        <property name="messageListener" ref="messageListener" />
+    </bean>
+
+</beans>

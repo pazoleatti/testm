@@ -136,6 +136,12 @@ public interface DataRowHelper {
     List<DataRow<Cell>> getAllCached();
 
     /**
+     * Функция сохранения данных формы в кэш
+     * без сохранения в бд
+     */
+    void setAllCached(List<DataRow<Cell>> dataRows);
+
+    /**
      * Сброс кэша
      */
     void dropCache();

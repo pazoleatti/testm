@@ -14,6 +14,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Mockito.mock;
@@ -557,5 +559,125 @@ public class ScriptUtilsTest {
         list.add(3, row);
 
         return list;
+    }
+
+    @Test
+    public void updateIndexesTest() {
+        List<DataRow<Cell>> dataRows = getTestSimpleRows();
+        ScriptUtils.updateIndexes(dataRows);
+        int i = 1;
+        for (DataRow<Cell> row : dataRows) {
+            Assert.assertEquals(i++, row.getIndex().intValue());
+        }
+
+        for (DataRow<Cell> row : dataRows) {
+            row.setIndex(null);
+        }
+        ScriptUtils.updateIndexes(dataRows);
+        i = 1;
+        for (DataRow<Cell> row : dataRows) {
+            Assert.assertEquals(i++, row.getIndex().intValue());
+        }
+    }
+
+    private FormData getDatePatternValidTestFormData() {
+        DateColumn col1 = new DateColumn();
+        col1.setId(1);
+        col1.setAlias("c1");
+        col1.setName("Тестовый колумн");
+        col1.setFormatId(Formats.DD_MM_YYYY.getId());
+
+        StringColumn col2 = new StringColumn();
+        col2.setId(2);
+        col2.setAlias("c2");
+        col2.setName("Тестовый колумн2");
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        formTemplate.getColumns().addAll(Arrays.asList(col1, col2));
+
+        FormData formData = new FormData(formTemplate);
+        formData.setId(1L);
+
+        return formData;
+    }
+
+    private List<DataRow<Cell>> getDatePatternValidTestRows() {
+        List<DataRow<Cell>> list = new LinkedList<DataRow<Cell>>();
+
+        FormData formData = getDatePatternValidTestFormData();
+        try {
+            // корректная дата
+            DataRow<Cell> row = formData.createDataRow();
+            row.setIndex(1);
+            row.setAlias("total");
+            list.add(row);
+            row.getCell("c1").setDateValue(new SimpleDateFormat("dd.MM.yyyy").parse("13.06.2066"));
+            row.getCell("c2").setStringValue("7723643863");
+            // некорректная дата
+            row = formData.createDataRow();
+            row.setIndex(2);
+            row.setAlias("subtotal4");
+            row.getCell("c1").setDateValue(new SimpleDateFormat("dd.MM.yyyy").parse("13.06.1066"));
+            row.getCell("c2").setStringValue("77236438634");
+            list.add(row);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    @Test
+    public void checkDateValidTest() {
+        Logger logger = new Logger();
+        List<DataRow<Cell>> dataRows = getDatePatternValidTestRows();
+        DataRow<Cell> row = dataRows.get(0);
+        // в виде даты
+        Assert.assertTrue(ScriptUtils.checkDateValid(logger, row, "c1", row.get("c1"), true));
+        // в виде строки
+        Assert.assertTrue(ScriptUtils.checkDateValid(logger, row, "c1", new SimpleDateFormat("dd.MM.yyyy").format(row.get("c1")), true));
+        Assert.assertTrue(ScriptUtils.checkDateValid(logger, row, "c1", "12.12.2012", true));
+        row = dataRows.get(1);
+        Assert.assertFalse(ScriptUtils.checkDateValid(logger, row, "c1", row.get("c1"), true));
+        Assert.assertEquals(1, logger.getEntries().size());
+        //ScriptUtilsTest.logger.info(logger.getEntries().get(0).getMessage());
+        Assert.assertFalse(ScriptUtils.checkDateValid(logger, row, "c1", new SimpleDateFormat("dd.MM.yyyy").format(row.get("c1")), true));
+        Assert.assertEquals(2, logger.getEntries().size());
+        //ScriptUtilsTest.logger.info(logger.getEntries().get(1).getMessage());
+        Assert.assertFalse(ScriptUtils.checkDateValid(logger, row, "c1", "12.02.2112", true));
+        Assert.assertEquals(3, logger.getEntries().size());
+        //ScriptUtilsTest.logger.info(logger.getEntries().get(2).getMessage());
+        // при некорректном формате даты выводится две ошибки.
+        Assert.assertFalse(ScriptUtils.checkDateValid(logger, row, "c1", "12022112", true));
+        Assert.assertEquals(5, logger.getEntries().size());
+        //ScriptUtilsTest.logger.info(logger.getEntries().get(3).getMessage());
+        //ScriptUtilsTest.logger.info(logger.getEntries().get(4).getMessage());
+    }
+
+    @Test
+    public void checkPatternTest() {
+        Logger logger = new Logger();
+        List<DataRow<Cell>> dataRows = getDatePatternValidTestRows();
+        DataRow<Cell> row = dataRows.get(0);
+        Assert.assertTrue(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), Arrays.asList(ScriptUtils.INN_JUR_PATTERN, ScriptUtils.INN_IND_PATTERN), true));
+        Assert.assertFalse(logger.containsLevel(LogLevel.ERROR));
+        row = dataRows.get(1);
+        Assert.assertFalse(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), ScriptUtils.INN_JUR_PATTERN, true));
+        Assert.assertEquals(1, logger.getEntries().size());
+        //ScriptUtilsTest.logger.info(logger.getEntries().get(0).getMessage());
+    }
+
+    @Test
+    public void checkControlSumInnTest() {
+        Logger logger = new Logger();
+        List<DataRow<Cell>> dataRows = getDatePatternValidTestRows();
+        DataRow<Cell> row = dataRows.get(0);
+        ScriptUtils.checkControlSumInn(logger, row, "c2", "7723643863", true);
+        Assert.assertFalse(logger.containsLevel(LogLevel.ERROR));
+        row = dataRows.get(1);
+        ScriptUtils.checkControlSumInn(logger, row, "c2", "7723643862", true);
+        Assert.assertEquals(1, logger.getEntries().size());
+        //ScriptUtilsTest.logger.info(logger.getEntries().get(0).getMessage());
     }
 }
