@@ -50,6 +50,13 @@ public interface DataRowDao {
 	void copyRows(long formDataSourceId, long formDataDestinationId);
 
 	/**
+	 * Создает версию ручного ввода, предварительно удалив из нее старые данные. Новые данные извлекаются из
+	 * автоматической версии из временного среза.
+	 * @param formData
+	 */
+	public void createManual(FormData formData);
+
+	/**
 	 * Создает временный срез, предварительно удалив из него старые данные. Работает как с обычной, так и с версией
 	 * ручного ввода.
 	 * @param formData
@@ -138,7 +145,7 @@ public interface DataRowDao {
 	void reorderRows(FormData formData, List<DataRow<Cell>> rows);
 
 	/**
-	 * Откатывает временный срез формы к постоянному.
+	 * Откатывает временный срез формы к постоянному. Удаляет все данные из временных срезов.
 	 *
 	 * @param formData
 	 */

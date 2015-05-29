@@ -12,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.DataRowType;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataSearchResult;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
@@ -447,8 +446,38 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void rollback(FormData formData) {
-		// удаляем временный срез
-		removeRows(formData);
+		removeRowsInternal(formData, DataRowType.TEMP);
+	}
+
+	@Override
+	public void createManual(FormData formData) {
+		if (!formData.isManual()) {
+			throw new IllegalArgumentException("Форма должна иметь признак ручного ввода");
+		}
+		// удаляет данные постоянного среза в версии ручного ввода
+		removeRowsInternal(formData, DataRowType.SAVED);
+		// формируем запрос на копирование среза
+		StringBuilder sql = new StringBuilder("INSERT INTO form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append(" (id, form_data_id, temporary, manual, ord, alias");
+		DataRowMapper.getColumnNamesString(formData, sql);
+		sql.append(") \nSELECT seq_form_data_nnn.nextval, form_data_id, :manual AS manual, :temporary AS temporary, ord, alias");
+		DataRowMapper.getColumnNamesString(formData, sql);
+		sql.append("\nFROM form_data_");
+		sql.append(formData.getFormTemplateId());
+		sql.append("\nWHERE form_data_id = :form_data_id AND temporary = :temporary_src");
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("form_data_id", formData.getId());
+		params.put("temporary_src", DataRowType.TEMP.getCode());
+		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("manual", DataRowType.MANUAL.getCode());
+
+		if (log.isTraceEnabled()) {
+			log.trace(params);
+			log.trace(sql.toString());
+		}
+		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
 
 	@Override
@@ -460,7 +489,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		sql.append(formData.getFormTemplateId());
 		sql.append(" (id, form_data_id, temporary, manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
-		sql.append(") \nSELECT seq_form_data_nnn.nextval, form_data_id, 1, manual, ord, alias");
+		sql.append(") \nSELECT seq_form_data_nnn.nextval, form_data_id, :temporary AS temporary, manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
 		sql.append("\nFROM form_data_");
 		sql.append(formData.getFormTemplateId());
@@ -468,6 +497,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
+		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
 		if (log.isTraceEnabled()) {
@@ -595,24 +625,31 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	/**
-	 * Удаляет все строки из временноо\постоянного срезов
+	 * Удаляет все строки из временноо\постоянного срезов. Для временного среза удаляет строки как в версии ручного
+	 * ввода, так и в автоматической версии. Признак formData.isManual учитывается только при удалении из
+	 * постоянного среза
 	 *
 	 * @param formData          НФ
-	 * @param stableOrTemporary признак из какого среза удалить строки
+	 * @param savedOrTemporary признак из какого среза удалить строки NO NULL
 	 */
-	private void removeRowsInternal(FormData formData, DataRowType stableOrTemporary) {
-		if (stableOrTemporary != DataRowType.TEMP && stableOrTemporary != DataRowType.SAVED) {
+	private void removeRowsInternal(FormData formData, DataRowType savedOrTemporary) {
+		if (savedOrTemporary != DataRowType.TEMP && savedOrTemporary != DataRowType.SAVED) {
 			throw new IllegalArgumentException("Value of argument 'isTemporary' is incorrect");
 		}
 
 		StringBuilder sql = new StringBuilder("DELETE FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual");
+		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary");
+		if (savedOrTemporary == DataRowType.SAVED) {
+			sql.append(" AND manual = :manual");
+		}
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
-		params.put("temporary", stableOrTemporary.getCode());
-		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+		params.put("temporary", savedOrTemporary.getCode());
+		if (savedOrTemporary == DataRowType.SAVED) {
+			params.put("manual", formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO);
+		}
 
 		if (log.isTraceEnabled()) {
 			log.trace(params);
@@ -677,7 +714,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// составляем список справочных граф
 		List<String> names = new ArrayList<String>();
 		for (Column column : formData.getFormColumns()) {
-			if (column.getColumnType() == ColumnType.REFERENCE && ((ReferenceColumn) column).getParentId() == 0) {
+			if (column.getColumnType() == ColumnType.REFBOOK) {
 				names.add("c" + column.getId());
 			}
 		}

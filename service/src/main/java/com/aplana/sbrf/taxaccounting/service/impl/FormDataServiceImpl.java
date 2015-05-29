@@ -208,13 +208,9 @@ public class FormDataServiceImpl implements FormDataService {
     public void createManualFormData(Logger logger, TAUserInfo userInfo, Long formDataId) {
         FormData formData = formDataDao.get(formDataId, false);
         formDataAccessService.canCreateManual(logger, userInfo, formDataId);
-
-        List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
-        formData.setManual(true);
-        formDataDao.updateManual(formData, true);
-        dataRowDao.saveRows(formData, rows);
-        dataRowDao.commit(formData);
-
+		formData.setManual(true);
+        formDataDao.updateManual(formData);
+        dataRowDao.createManual(formData);
         logger.info("Для налоговой формы успешно создана версия ручного ввода");
     }
 
@@ -1279,23 +1275,19 @@ public class FormDataServiceImpl implements FormDataService {
                 userInfo.getUser().getId(),
                 getFormDataFullName(formDataId, null, null),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
-		FormData formData = formDataDao.get(formDataId, false); //TODO SBRFACCTAX-11205 manual выставить!!!
+		FormData formData = formDataDao.get(formDataId, false);
 		dataRowDao.rollback(formData);
-		formData.setManual(true); //TODO удалить
-		dataRowDao.rollback(formData); //TODO удалить
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void unlock(final long formDataId, final TAUserInfo userInfo) {
-		final FormData formData = formDataDao.get(formDataId, false); //TODO SBRFACCTAX-11205 manual выставить!!!
+		final FormData formData = formDataDao.get(formDataId, false);
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
                 lockService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId());
                 dataRowDao.rollback(formData);
-				formData.setManual(true); //TODO удалить
-				dataRowDao.rollback(formData); //TODO удалить
             }
 
             @Override
