@@ -243,7 +243,6 @@ public interface FormDataDao {
      * Обновить значение ручного ввода.
      *
      * @param formData форма нф
-     * @param isManual признак ручного ввода
      */
-    void updateManual(FormData formData, boolean isManual);
+    void updateManual(FormData formData);
 }

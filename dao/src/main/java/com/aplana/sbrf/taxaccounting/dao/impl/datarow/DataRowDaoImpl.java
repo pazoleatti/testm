@@ -469,7 +469,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
-		params.put("temporary_src", DataRowType.TEMP.getCode());
+		params.put("temporary_src", DataRowType.SAVED.getCode()); // данные получаем из постоянного среза
 		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", DataRowType.MANUAL.getCode());
 

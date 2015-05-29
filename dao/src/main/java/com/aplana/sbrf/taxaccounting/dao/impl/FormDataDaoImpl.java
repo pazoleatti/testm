@@ -10,7 +10,15 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DataRowType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -414,7 +422,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public void deleteManual(FormData formData) {
 		dataRowDao.removeAllManualRows(formData);
-		getJdbcTemplate().update("UPDATE form_data SET manual = 0 WHERE id = ?", formData.getId());
+		formData.setManual(false);
+		updateManual(formData);
     }
 
     private static final String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT ROWNUM as row_number, sorted.* from " +
@@ -585,8 +594,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     @Override
-    public void updateManual(FormData formData, boolean isManual) {
-        int manual = (isManual ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+    public void updateManual(FormData formData) {
+        int manual = (formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
         getJdbcTemplate().update("UPDATE form_data SET manual = ? WHERE id = ?", manual, formData.getId());
     }
 

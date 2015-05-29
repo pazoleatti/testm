@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +34,6 @@ public class FormDataCacheDaoTest {
 
     @Autowired
     DataRowDao dataRowDao;
-
-    @Before
-    public void init(){
-        //ReflectionTestUtils.setField(dataRowDao, "dbUtils", BDUtilsMock.getBDUtils());
-    }
 
     @Test
     public void getRefBookMapTest1() {
