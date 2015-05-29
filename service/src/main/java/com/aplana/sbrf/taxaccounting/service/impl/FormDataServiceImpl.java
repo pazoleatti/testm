@@ -525,11 +525,6 @@ public class FormDataServiceImpl implements FormDataService {
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		checkLockAnotherUser(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), logger, userInfo.getUser());
-		// Временный срез формы должен быть в актуальном состоянии
-		// Если не заблокировано то откат среза на всякий случай
-		if (getObjectLock(formData.getId(), userInfo)==null){
-			dataRowDao.rollback(formData);
-		}
 
 		formDataAccessService.canRead(userInfo, formData.getId());
 
@@ -783,7 +778,6 @@ public class FormDataServiceImpl implements FormDataService {
 
         // Временный срез формы должен быть в актуальном состоянии
 		FormData formData = formDataDao.get(formDataId, manual);
-		dataRowDao.rollback(formData);
 
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
@@ -1276,7 +1270,6 @@ public class FormDataServiceImpl implements FormDataService {
                 getFormDataFullName(formDataId, null, null),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
 		FormData formData = formDataDao.get(formDataId, false);
-		dataRowDao.rollback(formData);
 	}
 
 	@Override
@@ -1287,7 +1280,6 @@ public class FormDataServiceImpl implements FormDataService {
             @Override
             public void execute() {
                 lockService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId());
-                dataRowDao.rollback(formData);
             }
 
             @Override

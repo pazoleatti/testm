@@ -48,13 +48,9 @@ public class GetRowsDataHandler extends
 
 	@Override
 	public GetRowsDataResult execute(GetRowsDataAction action, ExecutionContext context) throws ActionException {
-        Logger logger = new Logger();
         // Режим «Корректировки» не работает с ручным вводом
         if (action.isCorrectionDiff()) {
             action.setManual(false);
-        }
-        if (action.isReadOnly()){
-            dataRowService.createTemporary(formDataService.getFormData(securityService.currentUserInfo(), action.getFormDataId(), action.isManual(), logger));
         }
 		GetRowsDataResult result = new GetRowsDataResult();
 
@@ -92,6 +88,7 @@ public class GetRowsDataHandler extends
             result.setDataRows(new PagingResult<DataRow<Cell>>());
         }
 
+		Logger logger = new Logger();
         refBookHelper.dataRowsDereference(logger, result.getDataRows(),
                 formTemplate.getColumns());
         if (action.getInnerLogUuid() != null && !action.getInnerLogUuid().isEmpty()) {

@@ -2,7 +2,16 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Color;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -18,7 +27,34 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearc
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ConsolidateAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ConsolidateResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DestinationCheckAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DestinationCheckResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ExtendFormLockAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ExtendFormLockResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FillPreviousAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataEditAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataEditResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateDataRowsAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerReportAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerReportResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadDataRowsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormDataResult;
@@ -33,7 +69,11 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -255,20 +295,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onEditClicked(final boolean readOnlyMode) {
-        if (formData.isManual()) {
-            CheckManualAction action = new CheckManualAction();
-            action.setFormDataId(formData.getId());
-            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckManualResult>() {
+		FormDataEditAction action = new FormDataEditAction();
+		action.setFormData(formData);
+		dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<FormDataEditResult>() {
                 @Override
-                public void onSuccess(CheckManualResult result) {
+			public void onSuccess(FormDataEditResult result) {
                     modifiedRows.clear();
                     revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
                 }
             }, this));
-        } else {
-            modifiedRows.clear();
-            revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
-        }
 	}
 
 	@Override

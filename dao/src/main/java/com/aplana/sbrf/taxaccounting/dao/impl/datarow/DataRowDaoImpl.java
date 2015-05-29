@@ -648,7 +648,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("form_data_id", formData.getId());
 		params.put("temporary", savedOrTemporary.getCode());
 		if (savedOrTemporary == DataRowType.SAVED) {
-			params.put("manual", formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO);
+			params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 		}
 
 		if (log.isTraceEnabled()) {
