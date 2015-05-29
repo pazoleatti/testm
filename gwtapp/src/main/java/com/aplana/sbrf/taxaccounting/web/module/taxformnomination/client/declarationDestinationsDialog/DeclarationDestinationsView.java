@@ -1,24 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.declarationDestinationsDialog;
 
 import com.aplana.gwt.client.ModalWindow;
-import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
-import com.aplana.gwt.client.ListBoxWithTooltip;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
@@ -46,8 +43,8 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
     @Ignore
     Label declarationTypeTitle;
 
-    @UiField(provided = true)
-    ListBoxWithTooltip<DeclarationType> declarationTypeId;
+    @UiField
+    RefBookPickerWidget declarationTypeId;
 
     @UiField
     DepartmentPickerPopupWidget departmentPicker;
@@ -59,18 +56,9 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
     public DeclarationDestinationsView(Binder uiBinder, EventBus eventBus) {
         super(eventBus);
 
-        declarationTypeId = new ListBoxWithTooltip<DeclarationType>(new AbstractRenderer<DeclarationType>() {
-            @Override
-            public String render(DeclarationType object) {
-                if (object == null) {
-                    return "";
-                }
-                return object.getName();
-            }
-        });
-        declarationTypeId.setShowTooltip(true);
-
         initWidget(uiBinder.createAndBindUi(this));
+
+        declarationTypeId.setPeriodDates(new Date(), new Date());
 
         departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
             @Override
@@ -79,9 +67,9 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
             }
         });
 
-        declarationTypeId.addValueChangeHandler(new ValueChangeHandler<DeclarationType>() {
+        declarationTypeId.addValueChangeHandler(new ValueChangeHandler<List<Long>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<DeclarationType> declarationTypeValueChangeEvent) {
+            public void onValueChange(ValueChangeEvent<List<Long>> event) {
                 updateCreateButtonStatus();
             }
         });
@@ -119,7 +107,7 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 		if (declarationTypeId.getValue() == null) {
 			return Collections.EMPTY_LIST;
 		} else {
-			return Arrays.asList(declarationTypeId.getValue().getId());
+			return Arrays.asList(declarationTypeId.getValue().get(0).intValue());
 		}
 	}
 
@@ -127,12 +115,6 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
 	public void setDepartments(List<Department> departments, Set<Integer> availableValues) {
 		departmentPicker.setAvalibleValues(departments, availableValues);
 		departmentPicker.setValue(null);
-	}
-
-	@Override
-	public void setDeclarationTypes(List<DeclarationType> declarationTypes) {
-		declarationTypeId.setValue(null);
-		declarationTypeId.setAcceptableValues(declarationTypes);
 	}
 
     @Override
@@ -153,5 +135,17 @@ public class DeclarationDestinationsView extends PopupViewWithUiHandlers<Declara
         } else {
             continueButton.setEnabled(false);
         }
+    }
+
+    @Override
+    public void setDeclarationTypeFilter(TaxType taxType) {
+        declarationTypeId.setValue(null);
+        declarationTypeId.setDereferenceValue(null);
+
+        if (taxType == null) {
+            declarationTypeId.setFilter(null);
+            return;
+        }
+        declarationTypeId.setFilter("TAX_TYPE like '" + taxType.getCode() + "'");
     }
 }

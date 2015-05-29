@@ -12,7 +12,6 @@ public class GetDeclarationPopUpFilterResult implements Result {
 
 	Set<Integer> availableDepartmentSet;
 	List<Department> departments;
-	List<DeclarationType> declarationTypes;
 
 	public List<Department> getDepartments() {
 		return departments;
@@ -28,13 +27,5 @@ public class GetDeclarationPopUpFilterResult implements Result {
 
 	public void setAvailableDepartments(Set<Integer> availableDepartmentSet) {
 		this.availableDepartmentSet = availableDepartmentSet;
-	}
-
-	public List<DeclarationType> getDeclarationTypes() {
-		return declarationTypes;
-	}
-
-	public void setDeclarationTypes(List<DeclarationType> declarationTypes) {
-		this.declarationTypes = declarationTypes;
 	}
 }
