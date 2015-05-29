@@ -238,4 +238,12 @@ public interface FormDataDao {
      * @return идентификаторы
      */
     List<Integer> findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate);
+
+    /**
+     * Обновить значение ручного ввода.
+     *
+     * @param formData форма нф
+     * @param isManual признак ручного ввода
+     */
+    void updateManual(FormData formData, boolean isManual);
 }

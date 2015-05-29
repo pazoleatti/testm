@@ -195,6 +195,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
                                 @Override
                                 public void onSuccess(CreateManualFormDataResult result) {
+                                    formData.setManual(true);
                                     revealFormData(false, true, !absoluteView, result.getUuid());
                                 }
                             }, FormDataPresenter.this)

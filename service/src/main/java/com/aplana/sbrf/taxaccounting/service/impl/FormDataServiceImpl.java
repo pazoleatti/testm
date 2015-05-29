@@ -211,6 +211,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         List<DataRow<Cell>> rows = dataRowDao.getTempRows(formData, null);
         formData.setManual(true);
+        formDataDao.updateManual(formData, true);
         dataRowDao.saveRows(formData, rows);
         dataRowDao.commit(formData);
 
