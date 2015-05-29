@@ -7,7 +7,34 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
+import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.IfrsData;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.Months;
+import com.aplana.sbrf.taxaccounting.model.NumerationType;
+import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -16,7 +43,22 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.FormTypeService;
+import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
+import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.SignService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -31,9 +73,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -530,7 +586,7 @@ public class FormDataServiceImpl implements FormDataService {
                         departmentReportPeriodService.getLast(dftSource.getDepartmentId(), formData.getReportPeriodId());
                 FormData sourceFormData =
                         findFormData(dftSource.getFormTypeId(), dftSource.getKind(),
-                                sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+								sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
                 ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 if (sourceFormData == null){
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -547,16 +603,16 @@ public class FormDataServiceImpl implements FormDataService {
                 } else if (!sourceService.isFDSourceConsolidated(formData.getId(), sourceFormData.getId())){
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
                     logger.warn(
-                            NOT_CONSOLIDATE_SOURCE_FORM_WARNING,
-                            departmentService.getDepartment(sourceFormData.getDepartmentId()).getName(),
-                            sourceFormData.getFormType().getName(),
-                            sourceFormData.getKind().getName(),
-                            rp.getName() + (sourceFormData.getPeriodOrder() != null?" " + Months.fromId(sourceFormData.getPeriodOrder()).getTitle():""),
-                            rp.getTaxPeriod().getYear(),
-                            drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                    SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                            sourceFormData.getState().getName()
-                    );
+							NOT_CONSOLIDATE_SOURCE_FORM_WARNING,
+							departmentService.getDepartment(sourceFormData.getDepartmentId()).getName(),
+							sourceFormData.getFormType().getName(),
+							sourceFormData.getKind().getName(),
+							rp.getName() + (sourceFormData.getPeriodOrder() != null ? " " + Months.fromId(sourceFormData.getPeriodOrder()).getTitle() : ""),
+							rp.getTaxPeriod().getYear(),
+							drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+									SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
+							sourceFormData.getState().getName()
+					);
                 }
             }
             if (!dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
@@ -908,7 +964,7 @@ public class FormDataServiceImpl implements FormDataService {
         if (!needCheckTemp) {
             rows = dataRowDao.getSavedRows(formData, null);
         } else {
-            rows = dataRowDao.getRows(formData, null);
+            rows = dataRowDao.getTempRows(formData, null);
         }
         if (rows.size() > 0) {
             for (Column column : formData.getFormColumns()) {
@@ -1285,8 +1341,6 @@ public class FormDataServiceImpl implements FormDataService {
                 userInfo.getUser().getId(),
                 getFormDataFullName(formDataId, null, null),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
-		FormData formData = formDataDao.get(formDataId, null);
-		dataRowDao.rollback(formData);
 	}
 
 	@Override
