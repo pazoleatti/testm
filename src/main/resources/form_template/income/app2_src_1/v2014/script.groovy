@@ -315,6 +315,11 @@ void logicCheck() {
         needValue['taxBase'] = calc25(row)
         def arithmeticCheckAlias = needValue.keySet().asList()
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+
+        // 29. Проверка на соответствие паттерну
+        if (checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, true)) {
+            checkControlSumInn(logger, row, 'innRF', row.innRF, true)
+        }
     }
 }
 

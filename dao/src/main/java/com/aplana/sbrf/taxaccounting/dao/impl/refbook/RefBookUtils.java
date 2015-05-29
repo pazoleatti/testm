@@ -25,7 +25,8 @@ import java.util.regex.Pattern;
 @Repository
 public class RefBookUtils extends AbstractDao {
 
-    public static String INN_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}";
+    public static String INN_JUR_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}";
+    public static String INN_IND_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}";
     public static String KPP_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})";
     public static String TAX_ORGAN_PATTERN = "[0-9]{4}";
     public static String OKATO_PATTERN = "[0-9]{11}";
@@ -156,17 +157,20 @@ public class RefBookUtils extends AbstractDao {
     }
 
     /**
-     * Проверка контрольной суммы ИНН
+     * Проверка контрольной суммы ИНН (физлица или организации)
      * @param inn ИНН в виде строки
      * @return результат проверки (успешная или нет)
      */
     public static boolean checkControlSumInn(String inn) {
-        if (inn == null || inn.length() != 10) {
+        if (inn == null || inn.length() < 10) {
             return false;
         }
         int[] koefArray = new int[]{2, 4, 10, 3, 5, 9, 4, 6, 8};
         int sum = 0;
         for (int i = 0; i < 9; i++) {
+            if (!Character.isDigit(inn.charAt(i))){
+                return false;
+            }
             sum += koefArray[i] * Character.getNumericValue(inn.charAt(i));
         }
         return (sum % 11) % 10 == Character.getNumericValue(inn.charAt(9));

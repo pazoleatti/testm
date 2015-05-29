@@ -118,7 +118,10 @@ def pattern3Date = "^(\\d{1,3}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
 def pattern256Date = "^(\\S.{0,255}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
 
 @Field
-def replaceDatePattern = "\$1 \$2\\.\$4\\.\$6"
+def replaceDatePattern = /$1 $2\.$4\.$6/
+
+@Field
+def selectDatePattern = /$2\.$4\.$6/
 
 // Дата начала отчетного периода
 @Field
@@ -217,11 +220,11 @@ void logicCheck() {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'documentPay'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата» формат, «ДД.ММ.ГГГГ»>"))
         }
         // графа 10
-        if (row.salesmanInnKpp && !row.salesmanInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
+        if (row.salesmanInnKpp && !row.salesmanInnKpp.matches(/^(\S{12}|\S{10}\/\S{9})$/)) {
             loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'salesmanInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 12
-        if (row.agentInnKpp && !row.agentInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
+        if (row.agentInnKpp && !row.agentInnKpp.matches(/^(\S{12}|\S{10}\/\S{9})$/)) {
             loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'agentInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 14
@@ -230,7 +233,38 @@ void logicCheck() {
         }
         // графа 2
         if (row.typeCode && (!row.typeCode.matches("^[0-9]{2}\$") || !(Integer.valueOf(row.typeCode) in ((1..13) + (16..28))))) {
-            loggerError(row, String.format("Строка <Номер строки>: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 01, 02, …,13, 16, 17, …, 28.", index, getColumnName(row,'typeCode'), getColumnName(row,'typeCode')))
+            loggerError(row, String.format("Строка %s: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 01, 02, …,13, 16, 17, …, 28.", index, getColumnName(row,'typeCode'), getColumnName(row,'typeCode')))
+        }
+        def innKppPatterns = [/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})/, /([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}/]
+        ['salesmanInnKpp', 'agentInnKpp'].each { alias ->
+            if (checkPattern(logger, row, alias, row[alias], innKppPatterns, !isBalancePeriod())) {
+                checkControlSumInn(logger, row, alias, row[alias].split("/")[0], !isBalancePeriod())
+            }
+        }
+        // Проверки формата дат (графы 3-8)
+        // графа 3
+        if (row.invoice && row.invoice.matches(pattern1000DateImport)) {
+            checkDateValid(logger, row, 'invoice', row.invoice?.replaceFirst(pattern1000DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 4
+        if (row.invoiceCorrecting && row.invoiceCorrecting.matches(pattern3DateImport)) {
+            checkDateValid(logger, row, 'invoiceCorrecting', row.invoiceCorrecting?.replaceFirst(pattern3DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 5
+        if (row.invoiceCorrection && row.invoiceCorrection.matches(pattern256DateImport)) {
+            checkDateValid(logger, row, 'invoiceCorrection', row.invoiceCorrection?.replaceFirst(pattern256DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 6
+        if (row.invoiceCorrectingCorrection && row.invoiceCorrectingCorrection.matches(pattern3DateImport)) {
+            checkDateValid(logger, row, 'invoiceCorrectingCorrection', row.invoiceCorrectingCorrection?.replaceFirst(pattern3DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 7
+        if (row.documentPay && row.documentPay.matches(pattern256DateImport)) {
+            checkDateValid(logger, row, 'documentPay', row.documentPay?.replaceFirst(pattern256DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 8
+        if (row.dateRegistration) {
+            checkDateValid(logger, row, 'dateRegistration', row.dateRegistration, !isBalancePeriod())
         }
     }
 
