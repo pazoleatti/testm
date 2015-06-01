@@ -8,7 +8,13 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -29,7 +35,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao {
@@ -501,4 +512,14 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTypeId, formTypeDao.get(formTypeId).getName(), reportPeriod.getName());
         }
     }
+
+	@Override
+	public boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength) {
+		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
+		sql.append(formTemplateId);
+		sql.append(" WHERE length(c");
+		sql.append(columnId);
+		sql.append(") > ?");
+		return getJdbcTemplate().queryForInt(sql.toString().intern(), new Object[]{maxLength}, new int[]{Types.INTEGER}) > 0;
+	}
 }

@@ -51,7 +51,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         logger.setTaUserInfo(securityService.currentUserInfo());
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
 
-        Pattern innPattern = Pattern.compile(RefBookUtils.INN_PATTERN);
+        Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
         Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
         Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
 

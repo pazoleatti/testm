@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -60,14 +61,21 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public List<DataRow<Cell>> getAll() {
-		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
+        List<DataRow<Cell>> rows;
+        if (fd.getState() == WorkflowState.ACCEPTED) {
+            //Если нф принята, то в любом случае у нее есть только посточнный срез
+            rows = dataRowDao.getSavedRows(fd, null);
+        } else {
+            //Иначе берем временный. Предварительно он должен быть создан из постоянного с помощью метода com.aplana.sbrf.taxaccounting.service.impl.DataRowServiceImpl.createTemporary()
+            rows = dataRowDao.getTempRows(fd, null);
+        }
 		FormDataUtils.setValueOwners(rows);
 		return rows;
 	}
 
 	@Override
 	public int getCount() {
-		return dataRowDao.getSize(fd);
+		return dataRowDao.getTempSize(fd);
 	}
 
     /**
@@ -124,12 +132,12 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public void commit() {
-		dataRowDao.commit(fd.getId());
+		dataRowDao.commit(fd);
 	}
 
 	@Override
 	public void rollback() {
-		dataRowDao.rollback(fd.getId());
+		dataRowDao.rollback(fd);
 	}
 
 	@Override
@@ -226,7 +234,6 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
     @Override
     public void saveSort() {
-        updateIndexes(dataRows);
-        dataRowDao.saveSortRows(dataRows, fd);
+        dataRowDao.reorderRows(fd, dataRows);
     }
 }

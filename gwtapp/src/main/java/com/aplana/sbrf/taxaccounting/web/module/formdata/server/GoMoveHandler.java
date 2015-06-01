@@ -1,5 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,6 +37,9 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private LockDataService lockDataService;
+
 	public GoMoveHandler() {
 		super(GoMoveAction.class);
 	}
@@ -39,14 +47,28 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
 	@Override
 	public GoMoveResult execute(GoMoveAction action, ExecutionContext context)
 			throws ActionException {
-
-			Logger logger = new Logger();
-			formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
-					action.getMove(), action.getReasonToWorkflowMove(), logger);
-			GoMoveResult result = new GoMoveResult();
-            result.setUuid(logEntryService.save(logger.getEntries()));
-			return result;
-
+        final ReportType reportType = ReportType.MOVE_FD;
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        GoMoveResult result = new GoMoveResult();
+        Logger logger = new Logger();
+        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
+        if (lockType == null || reportType.equals(lockType.getFirst())) {
+            String keyTask = formDataService.generateTaskKey(action.getFormDataId(), reportType);
+            LockData lockDataTask = lockDataService.lock(keyTask,
+                    userInfo.getUser().getId(),
+                    formDataService.getFormDataFullName(action.getFormDataId(), null, reportType),
+                    lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+            if (lockDataTask == null) {
+                formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
+                        action.getMove(), action.getReasonToWorkflowMove(), logger);
+            } else {
+                throw new ActionException("Не удалось выполнить переход между этапами. Попробуйте выполнить операцию позже");
+            }
+        } else {
+            formDataService.locked(lockType.getSecond(), logger);
+        }
+        result.setUuid(logEntryService.save(logger.getEntries()));
+        return result;
 	}
 
 	@Override

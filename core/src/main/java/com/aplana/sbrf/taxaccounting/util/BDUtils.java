@@ -11,7 +11,7 @@ import java.util.List;
 public interface BDUtils {
 
     enum Sequence {
-        DATA_ROW("seq_data_row"),
+		FORM_DATA_NNN("seq_form_data_nnn"),
         FORM_COLUMN("seq_form_column"),
         REF_BOOK_RECORD("seq_ref_book_record"),
         REF_BOOK_RECORD_ROW("seq_ref_book_record_row_id"),
@@ -29,7 +29,7 @@ public interface BDUtils {
     }
 
     /**
-     * Метод возвращает список зарезервированных id для таблицы data_row
+     * Метод возвращает список зарезервированных id для таблицы form_data_nnn
      */
     List<Long> getNextDataRowIds(Long count);
 

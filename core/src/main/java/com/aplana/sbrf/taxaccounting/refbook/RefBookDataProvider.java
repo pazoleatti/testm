@@ -4,7 +4,11 @@ import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
@@ -321,9 +325,9 @@ public interface RefBookDataProvider {
 
 	/**
 	 * Разыменование набора ссылок
-	 * @param attributeId идентификатор атрибута-ссылки
+	 * @param attributeId идентификатор атрибута-ссылки для отображения
 	 * @param recordIds перечень ссылок
-	 * @return data_row.id - ref_book_value
+	 * @return ref_book_record.id - ref_book_value.value
 	 */
 	Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds);
 

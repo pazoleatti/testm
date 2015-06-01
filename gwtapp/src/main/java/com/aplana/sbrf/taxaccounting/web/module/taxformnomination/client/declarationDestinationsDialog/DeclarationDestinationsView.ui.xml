@@ -6,6 +6,7 @@
              xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:a="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
+             xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
     <ui:style>
         .content {
@@ -58,7 +59,8 @@
 
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label ui:field="declarationTypeTitle" text="Вид декларации" addStyleNames="{style.labels}"/>
-                    <g:ValueListBox width="250px" ui:field="declarationTypeId"/>
+                    <r:RefBookPickerWidget ui:field="declarationTypeId" attributeIdInt="2071" searchEnabled="false" versionEnabled="false"
+                                           isHierarchical="false" multiSelect="false" width="250px" title="Выбор вид декларации"/>
                 </g:HorizontalPanel>
 
             </g:VerticalPanel>

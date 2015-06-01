@@ -206,7 +206,7 @@ public class PeriodServiceImpl implements PeriodService {
 		boolean allGood = true;
         List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
         for (FormData fd : formDataList) {
-            LockData lock = lockDataService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + fd.getId());
+            LockData lock = lockDataService.getLock(formDataService.generateTaskKey(fd.getId(), ReportType.EDIT_FD));
             if (lock != null) {
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +

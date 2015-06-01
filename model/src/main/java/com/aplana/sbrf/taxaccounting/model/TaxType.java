@@ -78,4 +78,12 @@ public enum TaxType {
             return "декларации";
         }
     }
+
+    public String getTaxText() {
+        if (this.equals(DEAL)) {
+            return "";
+        } else {
+            return "налоговой ";
+        }
+    }
 }

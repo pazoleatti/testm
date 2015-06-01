@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -32,6 +33,8 @@ public class GetRowsDataHandler extends
 	SecurityService securityService;
 	@Autowired
 	FormTemplateService formTemplateService;
+    @Autowired
+    FormDataService formDataService;
 
     @Autowired
     RefBookHelper refBookHelper;
@@ -66,7 +69,7 @@ public class GetRowsDataHandler extends
                 dataRowRange = new DataRowRange(1, dataRowService.getRowCount(action.getFormDataId(),
                         action.isReadOnly() || action.isCorrectionDiff(), action.isManual()));
             } else {
-                dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getLimit());
+                dataRowRange = new DataRowRange(action.getRange().getOffset(), action.getRange().getCount());
             }
 
             // Порция строк, режим отображения различий для корр. периода также как и режим редактирования работат со
@@ -85,8 +88,7 @@ public class GetRowsDataHandler extends
             result.setDataRows(new PagingResult<DataRow<Cell>>());
         }
 
-
-        Logger logger = new Logger();
+		Logger logger = new Logger();
         refBookHelper.dataRowsDereference(logger, result.getDataRows(),
                 formTemplate.getColumns());
         if (action.getInnerLogUuid() != null && !action.getInnerLogUuid().isEmpty()) {

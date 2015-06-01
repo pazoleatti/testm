@@ -69,7 +69,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         Logger logger = new Logger();
         LockData lockData;
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
-                formDataService.getFormDataFullName(action.getFormDataId(), null, action.getType().getName()),
+                formDataService.getFormDataFullName(action.getFormDataId(), null, action.getType()),
                 LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA))) == null) {
             try {

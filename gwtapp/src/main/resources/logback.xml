@@ -3,7 +3,7 @@
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <charset>UTF-8</charset>
             <layout class="ch.qos.logback.classic.PatternLayout">
-                <pattern>%d{HH:mm:ss.SSS} %level %logger - %msg%n</pattern>
+                <pattern>%d{HH:mm:ss.SSS} %level %logger:%line - %msg%n</pattern>
             </layout>
 		</encoder>
 	</appender>

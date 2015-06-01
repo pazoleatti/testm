@@ -30,7 +30,7 @@ public class SaveFormDataHandler extends
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    RefBookHelper refBookHelper;
+	private RefBookHelper refBookHelper;
 
 	public SaveFormDataHandler() {
 		super(SaveFormDataAction.class);
@@ -45,6 +45,7 @@ public class SaveFormDataHandler extends
 		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
+		dataRowService.createTemporary(formData); // восстанавливаем временный срез, чтобы продолжить редактирование
 
 		logger.info("Данные успешно записаны");
 		DataRowResult result = new DataRowResult();

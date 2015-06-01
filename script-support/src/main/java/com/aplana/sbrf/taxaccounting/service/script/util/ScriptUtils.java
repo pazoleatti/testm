@@ -122,6 +122,11 @@ public final class ScriptUtils {
     private static final String SEPARATOR = "_";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
 
+    public static String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
+    public static String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
+    public static String KPP_PATTERN = RefBookUtils.KPP_PATTERN;
+    public static String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
+
     /**
      * Интерфейс для переопределения алгоритма расчета
      */
@@ -1829,10 +1834,90 @@ public final class ScriptUtils {
 
     /**
      * Проверка контрольной суммы ИНН
-     * @param inn ИНН в виде строки
-     * @return результат проверки (успешная или нет)
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value значение ИНН
+     * @param fatal фатально ли сообщение
+     * @return
      */
-    public static boolean checkControlSumInn(String inn) {
-        return RefBookUtils.checkControlSumInn(inn);
+    public static boolean checkControlSumInn(Logger logger, DataRow<Cell> row, String alias, String value, boolean fatal) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        if (!RefBookUtils.checkControlSumInn(value)){
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Проверка диапазона даты (от 1900 до 2099)
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value проверяемое значение (строка или дата)
+     * @param fatal
+     */
+    public static boolean checkDateValid(Logger logger, DataRow<Cell> row, String alias, Object value, boolean fatal) {
+        if (value == null) {
+            return false;
+        }
+        Integer year = null;
+        Date date = null;
+        if (value instanceof Date){
+            date = (Date) value;
+        }
+        try {
+            if (value instanceof String) {
+                date = parseDate("dd.MM.yyyy", (String) value);
+            }
+            String yearString = formatDate(date, "yyyy");
+            if (yearString != null) {
+                year = Integer.valueOf(yearString);
+            }
+        } catch (ParseException e) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Ошибка при разборе значения даты атрибута «%s» (%s)", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+        if (year == null || year < 1900 || year > 2099) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, String pattern, boolean fatal) {
+        return checkPattern(logger, row, alias, value, Arrays.asList(pattern), fatal);
+    }
+
+    /**
+     * Проверка текста на паттерны
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value проверяемое значение (строка или дата)
+     * @param patterns regExp для проверки
+     * @param fatal
+     */
+    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, List<String> patterns, boolean fatal) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        StringBuilder sb = new StringBuilder();
+        boolean result = false;
+        for(String pattern : patterns){
+            if (!result){
+                result = checkFormat(value, pattern);
+            }
+            if (patterns.indexOf(pattern) != 0) {
+                sb.append("\" / \"");
+            }
+            sb.append(pattern);
+        }
+        if (!result) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", getColumnName(row, alias), value, sb.toString()), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+        return result;
     }
 }

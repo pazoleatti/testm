@@ -22,7 +22,6 @@ import java.util.*;
  * User: ekuvshinov
  */
 @Service("refBookIncome101")
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookIncome101 implements RefBookDataProvider {
 

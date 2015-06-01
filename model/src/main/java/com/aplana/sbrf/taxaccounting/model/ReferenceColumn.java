@@ -33,11 +33,18 @@ public class ReferenceColumn extends Column {
 		setColumnType(ColumnType.REFERENCE);
 	}
 
+	/**
+	 * Возвращает код родительской графы
+	 */
     @XmlTransient
     public int getParentId() {
         return parentId;
     }
 
+	/**
+	 * Устанавливает ссылку на родительскую графу
+	 * @param parentId код родительской графы
+	 */
     public void setParentId(int parentId) {
         this.parentId = parentId;
     }

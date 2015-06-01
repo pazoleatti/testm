@@ -34,14 +34,10 @@ void save() {
         if (organization == 1 && (inn == null || inn == '')) {
             logger.error('Для организаций РФ атрибут «ИНН» является обязательным')
         }
-        if (inn && !(inn ==~ innPattern)) {
-            logger.error("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", "ИНН / КИО", inn, innPattern)
-        } else if (inn && !checkControlSumInn(inn)) {
-            logger.error("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", "ИНН / КИО", inn);
+        if (checkPattern(logger, null, null, inn, innPattern, true)) {
+            checkControlSumInn(logger, null, null, inn, true)
         }
-        if (kpp && !(kpp ==~ kppPattern)) {
-            logger.error("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", "КПП", kpp, kppPattern)
-        }
+        checkPattern(logger, null, null, kpp, kppPattern, true)
     }
 }
 

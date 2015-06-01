@@ -40,7 +40,7 @@
 					<Put name="user">TAX_0_6</Put>
 					<Put name="password">TAX</Put>
 				</Get>
-				<Call name="init" />
+                <Call name="init" />
 			</New>
 		</Arg>
 	</New>

@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -63,11 +67,11 @@ public interface FormDataService {
 
     /**
      * Заполнение кэша значений справочника
-     * @param formDataId
+     * @param formData
      * @param refBookCache
      */
     @SuppressWarnings("unused")
-    void fillRefBookCache(Long formDataId, Map<String, Map<String, RefBookValue>> refBookCache);
+    void fillRefBookCache(FormData formData, Map<String, Map<String, RefBookValue>> refBookCache);
 
     /**
      * Консолидация формы

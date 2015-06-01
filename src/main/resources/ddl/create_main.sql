@@ -430,7 +430,8 @@ create table form_data (
   return_sign number(1) not null,
   period_order number(2),
   number_previous_row number (9),
-  department_report_period_id number(18) not null
+  department_report_period_id number(18) not null,
+  manual number(1) default 0 not null
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
@@ -441,7 +442,7 @@ comment on column form_data.return_sign is 'Флаг возврата (0 - об�
 comment on column form_data.period_order is 'Указывает на очередность налоговой формы в рамках налогового периода. Необходимо для, например, месячных форм в рамках квартального отчетного периода';
 comment on column form_data.number_previous_row is 'Номер последней строки предыдущей НФ';
 comment on column form_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
-
+comment on column form_data.manual is 'Режим ввода данных (0 - не содержит версию ручного ввода; 1 - содержит)';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -474,46 +475,6 @@ comment on column form_data_performer.name is 'ФИО исполнителя';
 comment on column form_data_performer.phone is 'Телефон';
 comment on column form_data_performer.print_department_id is 'Подразделение, которое печатает налоговую форму';
 comment on column form_data_performer.report_department_name is 'Наименование подразделения, которое должно быть использовано в печатной форме';
---------------------------------------------------------------------------------------------------
-create table data_row (
-  id number(18) not null,
-  form_data_id number(18) not null,
-  alias varchar2(20),
-  ord number(14,0) not null,
-  type number(1) not null,
-  manual number(1) default 0 not null
-);
-comment on table data_row is 'Строки данных налоговых форм';
-comment on column data_row.alias is 'Идентификатор строки';
-comment on column data_row.form_data_id is 'Ссылка на записть в FORM_DATA';
-comment on column data_row.id is 'Код строки для доступа из скриптов';
-comment on column data_row.ord is 'Номер строки в форме';
-comment on column data_row.type is 'Тип строки (0 - подтвержденные данные, 1 - строка добавлена, -1 - строка удалена)';
-comment on column data_row.manual is 'Режим ввода данных (0 - обычная запись; 1 - версия ручного ввода)';
-
-create sequence seq_data_row start with 10000;
----------------------------------------------------------------------------------------------------
-create table data_cell (
-  row_id number(18) not null,
-  column_id number(9) not null,
-  svalue varchar2(2000 char),
-  nvalue decimal(27, 10),
-  dvalue date,
-  style_id number(9),
-  editable number(1) default 0,
-  colspan number(3),
-  rowspan number(3)
-);
-COMMENT ON TABLE data_cell IS 'Значения налоговых форм типа дата';
-COMMENT ON COLUMN data_cell.column_id IS 'Идентификатор столбца';
-COMMENT ON COLUMN data_cell.row_id IS 'Идентификатор строки';
-COMMENT ON COLUMN data_cell.svalue IS 'Строковое значение';
-COMMENT ON COLUMN data_cell.nvalue IS 'Числовое значение (в том числе и для ссылок)';
-COMMENT ON COLUMN data_cell.dvalue IS 'Значение для даты-времени';
-COMMENT ON COLUMN data_cell.style_id IS 'Идентификатор стиля ячейки';
-COMMENT ON COLUMN data_cell.editable IS 'Признак редактируемости ячейки (0 - только чтение, 1 - доступна на запись)';
-COMMENT ON COLUMN data_cell.colspan IS 'Количество объединяемых по горизонтали ячеек';
-COMMENT ON COLUMN data_cell.rowspan IS 'Количество объединяемых по вертикали ячеек';
 ---------------------------------------------------------------------------------------------------
 create table department_form_type (
   id      number(9) not null,
@@ -940,3 +901,13 @@ comment on column tax_type.id is 'Символьный идентификато�
 comment on column tax_type.name is 'Тип налога';
 
 --------------------------------------------------------------------------------------------------------
+create table form_data_ref_book
+(
+  form_data_id number(18) not null,
+  ref_book_id number(18) not null,
+  record_id number(18) not null
+);
+
+alter table form_data_ref_book add constraint form_data_ref_book_pk primary key (form_data_id, ref_book_id, record_id);
+--------------------------------------------------------------------------------------------------------
+CREATE SEQUENCE SEQ_FORM_DATA_NNN START WITH 10000;

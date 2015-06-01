@@ -31,7 +31,6 @@ import java.util.*;
  * @author dloshkarev
  */
 @Service("RefBookOktmoProvider")
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookOktmoProvider implements RefBookDataProvider {
 

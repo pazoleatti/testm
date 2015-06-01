@@ -55,7 +55,7 @@ public class GetPerformerHandler extends AbstractActionHandler<GetPerformerActio
         FormData formData = formDataService.getFormData(userInfo, action.getFormData().getId(), action.getFormData().isManual(), logger);
         result.setFormData(formData);
         if (formData.getState().equals(WorkflowState.CREATED) || formData.getState().equals(WorkflowState.PREPARED)) {
-            String key = LockData.LockObjects.FORM_DATA.name() + "_" + action.getFormData().getId();
+            String key = formDataService.generateTaskKey(action.getFormData().getId(), ReportType.EDIT_FD);
             LockData lockData = lockService.getLock(key);
             if (lockData == null) {
                 result.setReadOnlyMode(false);

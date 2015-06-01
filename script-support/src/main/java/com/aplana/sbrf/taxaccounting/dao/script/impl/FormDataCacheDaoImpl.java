@@ -3,16 +3,21 @@ package com.aplana.sbrf.taxaccounting.dao.script.impl;
 import com.aplana.sbrf.taxaccounting.dao.impl.AbstractDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRowType;
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +28,12 @@ import java.util.Map;
 @Repository("formDataCacheDao")
 public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDao {
 
-    private static final String REF_BOOK_VALUE_FOR_FORM_DATA = "select v.record_id, v.number_value, v.string_value, " +
-            "v.date_value, v.reference_value, a.type, a.precision, a.alias, a.ref_book_id from ref_book_value v, ref_book_attribute a " +
-            "where record_id in (select distinct nvalue from data_cell where row_id in (select id from data_row " +
-            "where form_data_id = ? and type = 0) and column_id in (select id from form_column where form_template_id = " +
-            "(select form_template_id from form_data where id = ?) and type = 'R')) and a.id = v.attribute_id";
+	private static Log log = LogFactory.getLog(FormDataCacheDaoImpl.class);
+
+    private static final String REF_BOOK_VALUE_FOR_FORM_DATA =
+			"SELECT v.record_id, v.number_value, v.string_value, v.date_value, v.reference_value, a.type, a.precision, a.alias, a.ref_book_id " +
+			"FROM ref_book_value v join ref_book_attribute a ON a.id = v.attribute_id " +
+            "WHERE record_id IN ";
 
     private class RefBookCacheMapper implements RowMapper<Pair<String, Pair<String, RefBookValue>>> {
 
@@ -61,18 +67,54 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
 
             RefBookValue rbValue = new RefBookValue(type, value);
 
-            String key = SqlUtils.getLong(rs,"ref_book_id") + "_" + SqlUtils.getLong(rs,"record_id");
+            String key = SqlUtils.getLong(rs, "ref_book_id") + "_" + SqlUtils.getLong(rs, "record_id");
             return new Pair<String, Pair<String, RefBookValue>>(key, new Pair<String, RefBookValue>(rs.getString("alias"), rbValue));
         }
     }
 
-    @Override
-    public Map<String, Map<String, RefBookValue>> getRefBookMap(Long formDataId) {
-        List<Pair<String, Pair<String, RefBookValue>>> valuesList = getJdbcTemplate().query(REF_BOOK_VALUE_FOR_FORM_DATA,
-                new Long[]{formDataId, formDataId}, new int[]{Types.NUMERIC, Types.NUMERIC},
-                new RefBookCacheMapper());
+	/**
+	 * Формирует запрос для разыменовывания ссылок НФ
+ 	 * @param formData
+	 * @return
+	 */
+	private String createSql(FormData formData) {
+		StringBuilder sql = new StringBuilder("(");
+		int count = 0;
+		for (Column column : formData.getFormColumns()){
+			if (column.getColumnType() == ColumnType.REFBOOK) {
+				if (count++ > 0) {
+					sql.append(" UNION ALL\n");
+				}
+				sql.append("SELECT DISTINCT c");
+				sql.append(column.getId());
+				sql.append(" FROM form_data_");
+				sql.append(formData.getFormTemplateId());
+				sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual");
+			}
+		}
+		sql.append(')');
+		if (count > 0) {
+			return sql.toString();
+		}
+		return null;
+	}
 
-        Map<String, Map<String, RefBookValue>> retVal = new HashMap<String, Map<String, RefBookValue>>();
+    @Override
+    public Map<String, Map<String, RefBookValue>> getRefBookMap(FormData formData) {
+		Map<String, Map<String, RefBookValue>> retVal = new HashMap<String, Map<String, RefBookValue>>();
+		String sql = createSql(formData);
+		if (sql == null) {
+			return retVal; // нет ссылок - нет работы
+		}
+		log.debug(REF_BOOK_VALUE_FOR_FORM_DATA + sql);
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("form_data_id", formData.getId());
+		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+
+        List<Pair<String, Pair<String, RefBookValue>>> valuesList = getNamedParameterJdbcTemplate().query(
+				REF_BOOK_VALUE_FOR_FORM_DATA + sql, params, new RefBookCacheMapper());
 
         for (Pair<String, Pair<String, RefBookValue>> pair : valuesList) {
             if (retVal.containsKey(pair.getFirst())) {

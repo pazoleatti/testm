@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.script;
 
+import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 
 import java.util.Map;
@@ -9,5 +10,11 @@ import java.util.Map;
  * @author Dmitriy Levykin
  */
 public interface FormDataCacheDao {
-    Map<String, Map<String, RefBookValue>> getRefBookMap(Long formDataId);
+
+	/**
+	 * Разыменовывает все ссылки НФ
+	 * @param formData
+	 * @return
+	 */
+    Map<String, Map<String, RefBookValue>> getRefBookMap(FormData formData);
 }
