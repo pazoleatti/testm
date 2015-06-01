@@ -11,11 +11,9 @@
        http://www.springframework.org/schema/jee
        http://www.springframework.org/schema/jee/spring-jee.xsd
        http://www.springframework.org/schema/tx
-       http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
+       http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
     <import resource="classpath:com/aplana/sbrf/taxaccounting/version-info.xml"/>
-    <import resource="jms-listener-container-config.xml"/>
 
     <!-- Тут специфичная работа с двумя датасорсами - оставил старый код -->
     <jee:remote-slsb id="dsHolder"
