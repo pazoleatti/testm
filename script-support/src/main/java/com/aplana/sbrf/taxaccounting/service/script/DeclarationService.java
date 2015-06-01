@@ -5,7 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import javax.xml.stream.XMLStreamReader;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 @ScriptExposed
 public interface DeclarationService {
@@ -50,6 +52,18 @@ public interface DeclarationService {
      */
     @SuppressWarnings("unused")
     String getXmlData(long declarationDataId);
+
+    /**
+     * Получить данные декларации в формате законодателя (XML) в виде потока
+     * @param declarationDataId идентификатор декларации
+     */
+    ZipInputStream getXmlStream(long declarationDataId);
+
+    /**
+     * Получить данные декларации в формате законодателя (XML) в виде потока для чтения StAX
+     * @param declarationDataId идентификатор декларации
+     */
+    XMLStreamReader getXmlStreamReader(long declarationDataId);
 
     /**
      * Проверить существование декларации в отчетном периоде (без учета подразделения).
