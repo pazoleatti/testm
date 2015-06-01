@@ -27,34 +27,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearc
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.AddRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CheckFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ConsolidateAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ConsolidateResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.CreateReportResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DataRowResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DeleteRowAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DestinationCheckAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.DestinationCheckResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ExtendFormLockAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ExtendFormLockResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FillPreviousAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataEditAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataEditResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetRowsDataResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GoMoveResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateDataRowsAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFormDataAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerReportAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerReportResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadDataRowsAction;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormDataResult;
@@ -63,6 +36,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -88,6 +62,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private Date lastSendingTime;
 
     private static final int EXTEND_LOCKTIME_LIMIT_IN_MINUTES = 5;
+    private Timer timer;
+    private ReportType timerType;
+
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -105,6 +82,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter, sourcesPresenter);
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize());
+        timer = new Timer() {
+            @Override
+            public void run() {
+                onTimer();
+            }
+        };
+        timer.cancel();;
 	}
 
 	@Override
@@ -607,15 +591,27 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onConsolidate() {
+    public void onConsolidate(final boolean force) {
         ConsolidateAction action = new ConsolidateAction();
         action.setManual(formData.isManual());
         action.setFormDataId(formData.getId());
+        action.setForce(force);
+        action.setTaxType(formData.getFormType().getTaxType());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<ConsolidateResult>() {
             @Override
             public void onSuccess(ConsolidateResult result) {
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                getView().updateData();
+                if (result.isLock()) {
+                    Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.CONSOLIDATE_FD.getDescription().replaceAll("\\%s", formData.getFormType().getTaxType().getTaxText()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            onConsolidate(true);
+                        }
+                    });
+                } else {
+                    timerType = ReportType.CONSOLIDATE_FD;
+                    timer.run();
+                }
             }
         }, this));
     }
@@ -806,6 +802,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                                 onTimerReport(ReportType.EXCEL, false);
                                 onTimerReport(ReportType.CSV, false);
+                                timer.scheduleRepeating(5000);
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));
@@ -862,5 +859,42 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         formSearchPresenter.close();
         getView().stopTimerReport(ReportType.CSV);
         getView().stopTimerReport(ReportType.EXCEL);
+        timer.cancel();
+    }
+
+    private void onTimer() {
+        final ReportType oldType = timerType;
+        TimerTaskAction action = new TimerTaskAction();
+        action.setFormDataId(formData.getId());
+        dispatcher.execute(
+                action,
+                CallbackUtils.defaultCallbackNoLock(
+                        new AbstractCallback<TimerTaskResult>() {
+                            @Override
+                            public void onSuccess(TimerTaskResult result) {
+                                timerType = result.getTaskType();
+                                if (readOnlyMode) {
+                                    if (timerType == null
+                                            && oldType != null) {
+                                        // задача завершена, обновляем форму
+                                        getView().updateData();
+                                    } else if (oldType != null && !oldType.equals(timerType)) {
+                                        // изменился тип задачи, возможно нужно обновить форму???
+                                        getView().updateData();
+                                    }
+                                } else {
+                                    if ((timerType == null || ReportType.EDIT_FD.equals(timerType))
+                                            && (oldType != null && !ReportType.EDIT_FD.equals(timerType))) {
+                                        // задача завершена, обновляем форму(создаем новый временный срез для режима редактирования)
+                                        //onEditClicked(false);
+                                    } else if (oldType != null && !oldType.equals(timerType)) {
+                                        // изменился тип задачи, возможно нужно обновить форму???
+                                        //onEditClicked(false);
+                                    }
+                                }
+
+                            }
+                        }, this)
+        );
     }
 }

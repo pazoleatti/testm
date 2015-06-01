@@ -573,7 +573,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("consolidationButton")
     void onConsolidationButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onConsolidate();
+            getUiHandlers().onConsolidate(false);
         }
     }
 

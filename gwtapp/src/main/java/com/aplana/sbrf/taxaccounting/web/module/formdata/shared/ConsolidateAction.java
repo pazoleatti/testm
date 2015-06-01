@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 /**
@@ -7,7 +8,9 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class ConsolidateAction extends UnsecuredActionImpl<ConsolidateResult> {
     private long formDataId;
+    private TaxType taxType;
     private boolean manual;
+    private boolean force;
 
     public boolean isManual() {
         return manual;
@@ -23,5 +26,21 @@ public class ConsolidateAction extends UnsecuredActionImpl<ConsolidateResult> {
 
     public void setFormDataId(long formDataId) {
         this.formDataId = formDataId;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
+
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
     }
 }

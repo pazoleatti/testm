@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -354,5 +355,34 @@ public interface FormDataService {
      * @param reportType тип отчета. Может быть null
      * @return название
      */
-    String getFormDataFullName(long formDataId, String fileName, String reportType);
+    String getFormDataFullName(long formDataId, String fileName, ReportType reportType);
+
+    /**
+     * Генерация ключа блокировки для задачи c типом reportType
+     * @param formDataId
+     * @param reportType тип задачи
+     * @return
+     */
+    String generateTaskKey(long formDataId, ReportType reportType);
+
+    /**
+     * Получение блокировки и её типа для НФ, null если для НФ нет блокировок
+     * @param formDataId
+     * @return
+     */
+    Pair<ReportType, LockData> getLockTaskType(long formDataId);
+
+    /**
+     * Вывод сообщения, что форма заблокирована
+     * @param lockData
+     * @param logger
+     */
+    void locked(LockData lockData, Logger logger);
+
+    /**
+     * Проверка возможности редактирования НФ
+     * @param formDataId
+     * @param logger
+     */
+    void checkLockedByTask(long formDataId, Logger logger);
 }

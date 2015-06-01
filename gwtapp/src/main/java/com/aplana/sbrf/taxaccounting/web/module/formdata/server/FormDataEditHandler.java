@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataEditAction;
@@ -22,7 +23,7 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
     @Autowired
     private SecurityService securityService;
 	@Autowired
-	private DataRowDao dataRowDao;
+	private DataRowService dataRowService;
 
     public FormDataEditHandler() {
         super(FormDataEditAction.class);
@@ -37,7 +38,7 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
 		if (formData.isManual()) {
         	accessService.canCreateManual(new Logger(), userInfo, formData.getId());
 		}
-		dataRowDao.createTemporary(formData);
+        dataRowService.createTemporary(formData);
         return new FormDataEditResult();
     }
 

@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -37,6 +41,9 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private LockDataService lockDataService;
+
 	public RecalculateFormDataHandler() {
 		super(RecalculateDataRowsAction.class);
 	}
@@ -44,14 +51,34 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 	@Override
 	public DataRowResult execute(RecalculateDataRowsAction action,
 			ExecutionContext context) throws ActionException {
-		TAUserInfo userInfo = securityService.currentUserInfo();
-		Logger logger = new Logger();
-		FormData formData = action.getFormData();
-		if (!action.getModifiedRows().isEmpty()) {
-			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
-		}
-        formDataService.doCalc(logger, userInfo, formData);
-		DataRowResult result = new DataRowResult();
+        final ReportType reportType = ReportType.CALCULATE_FD;
+        DataRowResult result = new DataRowResult();
+        TAUserInfo userInfo = securityService.currentUserInfo();
+        Logger logger = new Logger();
+        FormData formData = action.getFormData();
+        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormData().getId());
+        if (lockType != null && ReportType.EDIT_FD.equals(lockType.getFirst())) {
+            String keyTask = formDataService.generateTaskKey(action.getFormData().getId(), reportType);
+            LockData lockData = lockDataService.lock(keyTask,
+                        userInfo.getUser().getId(),
+                        formDataService.getFormDataFullName(action.getFormData().getId(), null, reportType),
+                        lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)
+                    );
+            if (lockData == null) {
+                try {
+                    if (!action.getModifiedRows().isEmpty()) {
+                        dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
+                    }
+                    formDataService.doCalc(logger, userInfo, formData);
+                } finally {
+                    lockDataService.unlock(keyTask, userInfo.getUser().getId());
+                }
+            } else {
+                throw new ActionException("Не удалось запустить расчет. Попробуйте выполнить операцию позже");
+            }
+        } else {
+            formDataService.locked(lockType.getSecond(), logger);
+        }
 		result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}

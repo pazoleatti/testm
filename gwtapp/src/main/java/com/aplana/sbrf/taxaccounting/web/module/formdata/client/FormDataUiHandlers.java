@@ -66,5 +66,5 @@ public interface FormDataUiHandlers extends UiHandlers{
 
     void onCorrectionSwitch();
 
-    void onConsolidate();
+    void onConsolidate(boolean force);
 }
