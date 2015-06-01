@@ -362,6 +362,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 if (event.isHasError()){
                     Dialog.errorMessage("Не удалось импортировать макет");
                 } else if (event.getUuid() == null || event.getUuid().isEmpty()){// TODO проверить условие
+                    reset();
                     Dialog.infoMessage("Макет успешно обновлен");
                 }
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
