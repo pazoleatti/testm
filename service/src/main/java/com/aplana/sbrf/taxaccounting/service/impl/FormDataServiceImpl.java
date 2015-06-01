@@ -41,6 +41,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -124,7 +125,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
     private static final String FD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\" в подразделении \"%s\", состояние - \"%s\"";
     private static final String LOCK_CURRENT =
-            "Текущая налоговая форма заблокирована пользователем %s в %s. Попробуйте выполнить операцию позже";
+            "Текущая налоговая форма заблокирована пользователем %s в %s(\"%s\"). Попробуйте выполнить операцию позже";
     private static final String LOCK_SOURCE =
             "Налоговая форма-источник \"%s\", \"%s\", \"%s\", \"%s\" заблокирована пользователем %s в %s. Попробуйте выполнить операцию позже";
     private static final String SOURCE_MSG_ERROR =
@@ -225,13 +226,13 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
-        String key = LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual;
+        String key = generateTaskKey(formDataId, ReportType.IMPORT_FD);
         log.info(String.format("Начался импорт excel-файла в налоговую форму по ключу %s", key));
         loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT);
         log.info(String.format("Закончился импорт excel-файла в налоговую форму по ключу %s", key));
         if (lockService.isLockExists(key, false)) {
             log.info(String.format("Снятие блокировки после импорта excel-файла по ключу %s", key));
-            lockService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formDataId + "_" + isManual, userInfo.getUser().getId());
+            lockService.unlock(key, userInfo.getUser().getId());
         } else {
             //Если блокировка уже не существует, значит загружаемые данные не актуальны - откатываем их
             //Т.к она снимается только при закрытии страницы, то этот эксепшен все равно никто не увидит
@@ -249,7 +250,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
     	// соответствовать редактированию (добавление, удаление, пересчет)
     	// Форма должна быть заблокирована текущим пользователем для редактирования
-        String key = LockData.LockObjects.FORM_DATA.name() + "_" + formDataId;
+        String key = generateTaskKey(formDataId, ReportType.EDIT_FD);
         checkLockedMe(lockService.getLock(key), userInfo.getUser());
 
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
@@ -453,9 +454,9 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void addRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
-        //Проверяем не заблокирована ли нф операцией загрузки в нее
-        checkLockedByImport(formData.getId(), logger);
+        checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
+        //Проверяем не заблокирована ли нф какими-либо операциями
+        checkLockedByTask(formData.getId(), logger);
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
@@ -479,9 +480,9 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
-        //Проверяем не заблокирована ли нф операцией загрузки в нее
-        checkLockedByImport(formData.getId(), logger);
+        checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
+        //Проверяем не заблокирована ли нф какими-либо операциями
+        checkLockedByTask(formData.getId(), logger);
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
@@ -515,9 +516,9 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
         //Проверяем не заблокирована ли нф операцией загрузки в нее
-        checkLockedByImport(formData.getId(), logger);
+        //checkLockedByImport(formData.getId(), logger);
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
@@ -534,7 +535,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
-		checkLockAnotherUser(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), logger, userInfo.getUser());
+		checkLockAnotherUser(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), logger, userInfo.getUser());
 
 		formDataAccessService.canRead(userInfo, formData.getId());
 
@@ -647,7 +648,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Transactional
     public void savePerformer(Logger logger, TAUserInfo userInfo, FormData formData) {
         // Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
         formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
         formDataDao.savePerformerSigner(formData);
 
@@ -671,7 +672,9 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId()), userInfo.getUser());
+        checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
+        //Проверяем не заблокирована ли нф какими-либо операциями
+        checkLockedByTask(formData.getId(), logger);
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
@@ -753,10 +756,10 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
-        checkLockAnotherUser(lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId),
+        checkLockAnotherUser(lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD)),
                 logger,  userInfo.getUser());
-        //Проверяем не заблокирована ли нф операцией загрузки в нее
-        checkLockedByImport(formDataId, logger);
+        //Проверяем не заблокирована ли нф какими-либо операциями
+        checkLockedByTask(formDataId, logger);
 
 		FormData formData = formDataDao.get(formDataId, manual);
         if (manual) {
@@ -784,10 +787,10 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
         // Форма не должна быть заблокирована даже текущим пользователем
-        String lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + formDataId;
-        checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
+        String lockKey = generateTaskKey(formDataId, ReportType.EDIT_FD);
+        //checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
         //Проверяем не заблокирована ли нф операцией загрузки в нее
-        checkLockedByImport(formDataId, logger);
+        //checkLockedByImport(formDataId, logger);
 
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
@@ -1194,24 +1197,25 @@ public class FormDataServiceImpl implements FormDataService {
         if (srcAcceptedIds.isEmpty()){
             logger.error("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
             throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-
         }
 
         //Блокировка всех экземпляров источников
         List<String> lockedForms = new ArrayList<String>();
         try {
             //Блокировка текущей формы
-            String lockCurrentKey = LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId();
+            String lockCurrentKey = generateTaskKey(formData.getId(), ReportType.EDIT_FD);
             LockData lockDataCurrent = lockService.lock(lockCurrentKey,
                     userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
                     lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
             if (lockDataCurrent != null) {
+                locked(lockDataCurrent, logger);
+                /*
                 logger.error(
                         String.format(
                                 LOCK_CURRENT, userInfo.getUser().getLogin(),
                                 SDF_HH_MM_DD_MM_YYYY.format(lockDataCurrent.getDateLock()))
                 );
-                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));*/
             } else {
                 lockedForms.add(lockCurrentKey);
             }
@@ -1220,7 +1224,7 @@ public class FormDataServiceImpl implements FormDataService {
             //Переменная для отмечания консолидации в таблице консолидации
             for (FormData sourceForm : sources){
                 // Проверяем/устанавливаем блокировку для источников
-                lockKey = LockData.LockObjects.FORM_DATA.name() + "_" + sourceForm.getId();
+                lockKey = generateTaskKey(sourceForm.getId(), ReportType.EDIT_FD);
                 LockData lockData = lockService.lock(
                         lockKey,
                         userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
@@ -1277,38 +1281,73 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public String getFormDataFullName(long formDataId, String fileName, String reportType) {
+    public String getFormDataFullName(long formDataId, String fileName, ReportType reportType) {
         //TODO: можно оптимизировать и сделать в 1 запрос
         FormData formData = formDataDao.get(formDataId, false);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         String name;
-        if (fileName != null) {
-            name = String.format(LockData.DescriptionTemplate.FORM_DATA_IMPORT.getText(),
-                    fileName,
-                    formData.getFormType().getName(),
-                    formData.getKind().getName(),
-                    department.getName(),
-                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    reportPeriod.getReportPeriod().getOrder() != 0
-                            ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
-                            : "",
-                    reportPeriod.getCorrectionDate() != null
-                            ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                            : "");
-        } else if (reportType != null) {
-            name = String.format(LockData.DescriptionTemplate.FORM_DATA_REPORT.getText(),
-                    reportType,
-                    formData.getFormType().getName(),
-                    formData.getKind().getName(),
-                    department.getName(),
-                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    reportPeriod.getReportPeriod().getOrder() != 0
-                            ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
-                            : "",
-                    reportPeriod.getCorrectionDate() != null
-                            ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                            : "");
+        if (reportType != null) {
+            switch (reportType) {
+                case CSV:
+                case EXCEL:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_REPORT.getText(),
+                            reportType.getName(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            department.getName(),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            reportPeriod.getReportPeriod().getOrder() != 0
+                                    ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "");
+                    break;
+                case CONSOLIDATE_FD:
+                case CALCULATE_FD:
+                case MOVE_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            department.getName(),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            reportPeriod.getReportPeriod().getOrder() != 0
+                                    ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "");
+                    break;
+                case IMPORT_FD:
+                case IMPORT_TF_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            String.format(reportType.getDescription(), fileName, formData.getFormType().getTaxType().getTaxText()),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            department.getName(),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            reportPeriod.getReportPeriod().getOrder() != 0
+                                    ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "");
+                    break;
+                default:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA.getText(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            department.getName(),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            reportPeriod.getReportPeriod().getOrder() != 0
+                                    ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "");
+            }
         } else {
             name = String.format(LockData.DescriptionTemplate.FORM_DATA.getText(),
                     formData.getFormType().getName(),
@@ -1337,7 +1376,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
 	@Transactional
 	public void lock(long formDataId, TAUserInfo userInfo) {
-        checkLockAnotherUser(lockService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId,
+        checkLockAnotherUser(lockService.lock(generateTaskKey(formDataId, ReportType.EDIT_FD),
                 userInfo.getUser().getId(),
                 getFormDataFullName(formDataId, null, null),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
@@ -1349,7 +1388,7 @@ public class FormDataServiceImpl implements FormDataService {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {
-                lockService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId, userInfo.getUser().getId());
+                lockService.unlock(generateTaskKey(formDataId, ReportType.EDIT_FD), userInfo.getUser().getId());
             }
 
             @Override
@@ -1365,7 +1404,7 @@ public class FormDataServiceImpl implements FormDataService {
         return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
             @Override
             public LockData executeWithReturn() {
-                return lockService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId);
+                return lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD));
             }
 
             @Override
@@ -1523,6 +1562,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             for (FormData data : formDataList) {
                 formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data));
+                deleteReport(data.getId(), null);
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
                 stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
                 if (--size > 0) {
@@ -1629,12 +1669,12 @@ public class FormDataServiceImpl implements FormDataService {
                     logEntryService.save(logger.getEntries()));
     }
 
-    private void checkLockedByImport(long formDataId, Logger logger) {
-        boolean lockedByImport = lockService.isLockExists(LockData.LockObjects.FORM_DATA_IMPORT + "_" + formDataId, true);
-        if (lockedByImport) {
+    @Override
+    public void checkLockedByTask(long formDataId, Logger logger) {
+        Pair<ReportType, LockData> lockType = getLockTaskType(formDataId);
+        if (lockType != null && !ReportType.EDIT_FD.equals(lockType.getFirst()))
             throw new ServiceLoggerException(LOCK_MESSAGE,
                     logEntryService.save(logger.getEntries()));
-        }
     }
 
     void checkLockedMe(LockData lockData, TAUser user){
@@ -1688,5 +1728,36 @@ public class FormDataServiceImpl implements FormDataService {
                     departmentService.getDepartment(fd.getDepartmentId()).getName(),
                     fd.getState().getName());
         }
+    }
+
+    @Override
+    public String generateTaskKey(long formDataId, ReportType reportType) {
+        if (reportType == null) {
+            return LockData.LockObjects.FORM_DATA.name() + "_" + formDataId;
+        }
+        return LockData.LockObjects.FORM_DATA.name() + "_" + formDataId + "_" + reportType.getName();
+    }
+
+
+    @Override
+    public Pair<ReportType, LockData> getLockTaskType(long formDataId) {
+        ReportType[] reportTypes = {ReportType.MOVE_FD, ReportType.CONSOLIDATE_FD, ReportType.IMPORT_TF_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.EDIT_FD};
+        for (ReportType reportType: reportTypes) {
+            LockData lockData = lockService.getLock(generateTaskKey(formDataId, reportType));
+            if (lockData != null)
+                return new Pair<ReportType, LockData>(reportType, lockData);
+        }
+        return null;
+    }
+
+    public void locked(LockData lockData, Logger logger) {
+        TAUser user = userService.getUser(lockData.getUserId());
+        logger.error(
+                String.format(
+                        LOCK_CURRENT, user.getName(),
+                        SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
+                        lockData.getDescription())
+        );
+        throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
     }
 }
