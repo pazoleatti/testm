@@ -684,8 +684,6 @@ public class FormDataServiceImpl implements FormDataService {
         //Проверка актуальности справочных значений
         checkReferenceValues(logger, formData, true);
 
-        dataRowDao.createTemporary(formData);
-
         // Отработка скриптом события сохранения
 		formDataScriptingService.executeScript(userInfo, formData,
                 FormDataEvent.SAVE, logger, null);
