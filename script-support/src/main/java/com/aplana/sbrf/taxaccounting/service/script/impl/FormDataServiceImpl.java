@@ -206,7 +206,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             }
 
             // Добавление строк из источников
-            for (DataRow<Cell> row : getDataRowHelper(sourceFormData).getAll()) {
+            for (DataRow<Cell> row : getDataRowHelper(sourceFormData).getAllSaved()) {
                 if (row.getAlias() == null) {
                     rows.add(row);
                 }
