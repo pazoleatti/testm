@@ -1705,12 +1705,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
             "  select fd.*, drp.report_period_id as report_period_id, drp.department_id as department_id from form_data fd \n" +
-            "  join department_report_period drp on drp.id = fd.department_report_period_id\n" +
-            "  join data_row dr on dr.form_data_id = fd.id\n" +
-            "  join data_cell nv on nv.row_id = dr.id\n" +
-            "  join form_column fc on fc.id = nv.column_id\n" +
-            "  join ref_book_attribute a on a.id = fc.attribute_id\n" +
-            "  join ref_book_record r on r.id = nv.nvalue\n" +
+            "  join department_report_period drp on drp.id = fd.department_report_period_id \n" +
+            "  join form_data_ref_book fdrf on fdrf.form_data_id = fd.id \n" +
             "  where %s\n" +
             ")" +
             "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year from forms f \n" +
@@ -1762,7 +1758,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         try {
             //Проверка использования в налоговых формах
-            in = transformToSqlInStatement("nv.nvalue", uniqueRecordIds);
+            in = transformToSqlInStatement("fdrf.record_id", uniqueRecordIds);
             sql = String.format(CHECK_USAGES_IN_FORMS, in);
             params.clear();
             params.put("refBookId", refBookId);
