@@ -23,6 +23,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -264,6 +267,36 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             }
         }
         return new String(byteArrayOutputStream.toByteArray());
+    }
+
+    @Override
+    public ZipInputStream getXmlStream(long declarationDataId) {
+        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId);
+        if (zipXmlIn != null) {
+            try {
+                zipXmlIn.getNextEntry();
+                return zipXmlIn;
+            } catch (IOException e) {
+                throw new ServiceException("Не удалось получить поток xml для скрипта.", e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public XMLStreamReader getXmlStreamReader(long declarationDataId) {
+        ZipInputStream zipXmlIn = getZipInputStream(declarationDataId);
+        if (zipXmlIn != null) {
+            try {
+                zipXmlIn.getNextEntry();
+                return XMLInputFactory.newInstance().createXMLStreamReader(zipXmlIn);
+            } catch (IOException e) {
+                throw new ServiceException("Не удалось получить поток xml для скрипта.", e);
+            } catch (XMLStreamException e) {
+                throw new ServiceException("Не удалось получить поток xml для скрипта.", e);
+            }
+        }
+        return null;
     }
 
     private ZipInputStream getZipInputStream(long declarationDataId) {
