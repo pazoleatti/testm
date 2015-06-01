@@ -6,7 +6,9 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,9 @@ public class DataRowServiceImpl implements DataRowService {
 	
 	@Autowired 
 	private FormDataDao formDataDao;
+
+    @Autowired
+    private FormDataService formDataService;
 
 	@Override
 	public PagingResult<DataRow<Cell>> getDataRows(long formDataId, DataRowRange range, boolean saved, boolean manual) {
@@ -49,7 +54,7 @@ public class DataRowServiceImpl implements DataRowService {
 	@Override
 	@Transactional(readOnly = false)
 	public void update(TAUserInfo userInfo, long formDataId, List<DataRow<Cell>> dataRows, boolean manual) {
-        checkLockedMe(lockDataService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formDataId), userInfo.getUser());
+        checkLockedMe(lockDataService.getLock(formDataService.generateTaskKey(formDataId, ReportType.EDIT_FD)), userInfo.getUser());
 		if ((dataRows != null) && (!dataRows.isEmpty())) {
 			FormData fd = formDataDao.get(formDataId, manual);
 			dataRowDao.updateRows(fd, dataRows);
@@ -75,6 +80,7 @@ public class DataRowServiceImpl implements DataRowService {
 
     @Override
     public void createTemporary(FormData formData) {
+        formDataService.checkLockedByTask(formData.getId(), new Logger());
         dataRowDao.createTemporary(formData);
     }
 
