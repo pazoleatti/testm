@@ -364,38 +364,40 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Override
     public void interruptTask(final LockData lockData, final int userId, final boolean force) {
-        tx.executeInNewTransaction(new TransactionLogic() {
-               @Override
-               public void execute() {
-                   try {
-                       TAUser user = userDao.getUser(userId);
-                       List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
-                       unlock(lockData.getKey(), userId, force);
-                       asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
-                       String msg = String.format(ReportType.CANCEL_TASK, user.getName(), lockData.getDescription());
-                       List<Notification> notifications = new ArrayList<Notification>();
-                       //Создаем оповещение для каждого пользователя из списка
-                       if (!waitingUsers.isEmpty()) {
-                           for (Integer waitingUser : waitingUsers) {
-                               Notification notification = new Notification();
-                               notification.setUserId(waitingUser);
-                               notification.setCreateDate(new Date());
-                               notification.setText(msg);
-                               notifications.add(notification);
-                           }
-                           notificationService.saveList(notifications);
-                       }
-                   } catch (Exception e) {
-                       throw new ServiceException("Не удалось прервать задачу", e);
-                   }
-               }
+        if (lockData != null) {
+            tx.executeInNewTransaction(new TransactionLogic() {
+                                           @Override
+                                           public void execute() {
+                                               try {
+                                                   TAUser user = userDao.getUser(userId);
+                                                   List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
+                                                   unlock(lockData.getKey(), userId, force);
+                                                   asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
+                                                   String msg = String.format(ReportType.CANCEL_TASK, user.getName(), lockData.getDescription());
+                                                   List<Notification> notifications = new ArrayList<Notification>();
+                                                   //Создаем оповещение для каждого пользователя из списка
+                                                   if (!waitingUsers.isEmpty()) {
+                                                       for (Integer waitingUser : waitingUsers) {
+                                                           Notification notification = new Notification();
+                                                           notification.setUserId(waitingUser);
+                                                           notification.setCreateDate(new Date());
+                                                           notification.setText(msg);
+                                                           notifications.add(notification);
+                                                       }
+                                                       notificationService.saveList(notifications);
+                                                   }
+                                               } catch (Exception e) {
+                                                   throw new ServiceException("Не удалось прервать задачу", e);
+                                               }
+                                           }
 
-               @Override
-               public Object executeWithReturn() {
-                   return null;
-               }
-           }
-        );
+                                           @Override
+                                           public Object executeWithReturn() {
+                                               return null;
+                                           }
+                                       }
+            );
+        }
     }
 
     @Override
