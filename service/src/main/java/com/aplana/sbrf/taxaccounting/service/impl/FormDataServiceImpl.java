@@ -302,7 +302,6 @@ public class FormDataServiceImpl implements FormDataService {
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
                 log.info(String.format("Выполнение скрипта началось: %s", key));
-                dataRowDao.createTemporary(fd);
                 formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
                 log.info(String.format("Выполнение скрипта закончилось: %s", key));
                 IOUtils.closeQuietly(dataFileInputStream);
@@ -539,8 +538,6 @@ public class FormDataServiceImpl implements FormDataService {
 		checkLockAnotherUser(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), logger, userInfo.getUser());
 
 		formDataAccessService.canRead(userInfo, formData.getId());
-
-        dataRowDao.createTemporary(formData);
 
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
 
@@ -1021,7 +1018,6 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-        dataRowDao.createTemporary(formData);
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (WorkflowMove.CREATED_TO_ACCEPTED.equals(workflowMove) ||

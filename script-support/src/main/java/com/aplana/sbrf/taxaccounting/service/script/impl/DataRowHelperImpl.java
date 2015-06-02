@@ -66,8 +66,12 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
             //Если нф принята, то в любом случае у нее есть только посточнный срез
             rows = dataRowDao.getSavedRows(fd, null);
         } else {
-            //Иначе берем временный. Предварительно он должен быть создан из постоянного с помощью метода com.aplana.sbrf.taxaccounting.service.impl.DataRowServiceImpl.createTemporary()
+            //Берем временный срез, считая что там самые актуальные данные
             rows = dataRowDao.getTempRows(fd, null);
+            if (rows == null || rows.isEmpty()) {
+                //Если временного среза нет, то берем постоянный
+                rows = dataRowDao.getSavedRows(fd, null);
+            }
         }
 		FormDataUtils.setValueOwners(rows);
 		return rows;
