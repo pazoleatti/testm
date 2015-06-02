@@ -86,7 +86,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         timer = new Timer() {
             @Override
             public void run() {
-                onTimer();
+                onTimer(false);
             }
         };
         timer.cancel();
@@ -746,15 +746,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                                 switch (result.getFormMode()) {
                                     case READ_UNLOCKED:
-                                        setReadUnlockedMode();
+                                        readOnlyMode = true;
                                         break;
                                     case READ_LOCKED:
-                                        setReadLockedMode(true,
-                                                result.getLockedByUser(),
-                                                result.getLockDate());
+                                        readOnlyMode = true;
                                         break;
                                     case EDIT:
-                                        setEditMode();
+                                        readOnlyMode = false;
                                         break;
                                 }
 
@@ -804,6 +802,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                                 onTimerReport(ReportType.EXCEL, false);
                                 onTimerReport(ReportType.CSV, false);
+                                onTimer(true);
                                 timer.scheduleRepeating(5000);
                             }
                         }, this).addCallback(
@@ -864,7 +863,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         timer.cancel();
     }
 
-    private void onTimer() {
+    private void onTimer(final boolean isForce) {
         final ReportType oldType = timerType;
         TimerTaskAction action = new TimerTaskAction();
         action.setFormDataId(formData.getId());
@@ -895,7 +894,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         getView().updateData();
                                     }
                                 }
-                                if (!result.getFormMode().equals(formMode))
+                                if (isForce || !result.getFormMode().equals(formMode))
                                     switch (result.getFormMode()) {
                                         case EDIT:
                                             if (readOnlyMode) {
@@ -905,15 +904,26 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             }
                                             break;
                                         case LOCKED_EDIT:
-                                            setReadLockedMode(readOnlyMode,
-                                                    result.getLockedByUser(),
-                                                    result.getLockDate());
+                                            if (readOnlyMode) {
+                                                setLowReadLockedMode(
+                                                        result.getLockedByUser(),
+                                                        result.getLockDate());
+                                            } else {
+                                                setLowEditLockedMode(
+                                                        result.getLockedByUser(),
+                                                        result.getLockDate());                                            }
                                             break;
                                         case LOCKED:
                                             setReadLockedMode(true,
                                                     result.getLockedByUser(),
                                                     result.getLockDate());
                                             break;
+                                        case LOCKED_READ:
+                                            setLowReadLockedMode(
+                                                    result.getLockedByUser(),
+                                                    result.getLockDate());
+                                            break;
+
                                     }
                                 formMode = result.getFormMode();
                             }
