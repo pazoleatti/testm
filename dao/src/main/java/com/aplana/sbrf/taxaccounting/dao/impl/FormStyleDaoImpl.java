@@ -1,11 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -70,7 +70,7 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 
 	@Transactional(readOnly = false)
 	@Override
-	public void saveFormStyles(final FormTemplate formTemplate) {
+	public Collection<Integer> saveFormStyles(final FormTemplate formTemplate) {
 		final int formTemplateId = formTemplate.getId();
 
 		JdbcTemplate jt = getJdbcTemplate();
@@ -96,8 +96,13 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 			}
 		}
 
+        HashSet<Integer> setIds = new HashSet<Integer>(removedStyles.size());
 		if(!removedStyles.isEmpty()){
             final String[] alias = new String[1];
+            Map<String, FormStyle> stylesMap = getAliasToFormStyleMap(formTemplateId);
+            for (String styleAlias : removedStyles){
+                setIds.add(stylesMap.get(styleAlias).getId());
+            }
 			try {
                 jt.batchUpdate(
                         "delete from form_style where alias = ? and form_template_id = ?",
@@ -180,5 +185,7 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
 					}
 				}
 		);
+
+        return setIds;
 	}
 }
