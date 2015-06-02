@@ -270,7 +270,7 @@ public class MessageServiceBean implements MessageService {
                 try {
                     processRateMessage(message);
                 } catch (Exception e) {
-                    logger.error("Произошла обишка при обработке сообщения, оно будет пропущено", e);
+                    logger.error("Произошла ошибка при обработке сообщения, оно будет пропущено", e);
                 }
             }
 
