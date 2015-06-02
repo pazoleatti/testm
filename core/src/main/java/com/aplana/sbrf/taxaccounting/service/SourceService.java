@@ -536,8 +536,6 @@ public interface SourceService {
      */
     void updateFDDDConsolidation(long sourceFormId);
 
-    List<ConsolidatedInstance> getFormInstances(long sourceId, Date newPeriodStart, Date newPeriodEnd);
-
     /**
      * Проверяет не изменились ли данные консолидации для НФ
      * @param fdTargetId идентификатор нф-приемника для проверки
