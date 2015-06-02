@@ -52,9 +52,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     Button deleteButton;
 
     @UiField
-    Button stopButton;
-
-    @UiField
     TextBox filterText;
 
     @UiField
@@ -229,7 +226,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         boolean status = selected && (hasRoleAdmin || !hasNoOwnLocks);
         deleteButton.setEnabled(status);
         extendButton.setEnabled(status);
-        stopButton.setEnabled(status && !hasNoAsyncLocks);
     }
 
     @Override
@@ -291,18 +287,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
             public void yes() {
                 if(getUiHandlers() != null){
                     getUiHandlers().onDeleteLock();
-                }
-            }
-        });
-    }
-
-    @UiHandler("stopButton")
-    public void onStop(ClickEvent event){
-        Dialog.confirmMessage("Остановка асинхронной задачи", "Вы действительно хотите остановить выполнение асинхронной задачи?", new DialogHandler() {
-            @Override
-            public void yes() {
-                if(getUiHandlers() != null){
-                    getUiHandlers().onStopAsync();
                 }
             }
         });
