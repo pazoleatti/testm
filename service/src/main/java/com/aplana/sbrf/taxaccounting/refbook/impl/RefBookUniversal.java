@@ -204,7 +204,12 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
                 //Выполняем создание записей
-                return createRecordVersionWithoutLock(logger, versionFrom, versionTo, records);
+                try {
+                    return createRecordVersionWithoutLock(logger, versionFrom, versionTo, records);
+                } catch (Exception e) {
+                    throw new ServiceLoggerException("Не удалось сохранить запись",
+                            logEntryService.save(logger.getEntries()));
+                }
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);
@@ -504,7 +509,12 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
                 //Выполняем обновление записей
-                updateRecordVersionWithoutLock(logger, uniqueRecordId, versionFrom, versionTo, records);
+                try {
+                    updateRecordVersionWithoutLock(logger, uniqueRecordId, versionFrom, versionTo, records);
+                } catch (Exception e) {
+                    throw new ServiceLoggerException("Не удалось сохранить запись",
+                            logEntryService.save(logger.getEntries()));
+                }
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);
@@ -892,7 +902,12 @@ public class RefBookUniversal implements RefBookDataProvider {
                         }
                     }
                 }
-                deleteRecordVersionsWithoutLock(logger, uniqueRecordIds);
+                try {
+                    deleteRecordVersionsWithoutLock(logger, uniqueRecordIds);
+                } catch (Exception e) {
+                    throw new ServiceLoggerException("Не удалось удалить запись",
+                            logEntryService.save(logger.getEntries()));
+                }
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);
