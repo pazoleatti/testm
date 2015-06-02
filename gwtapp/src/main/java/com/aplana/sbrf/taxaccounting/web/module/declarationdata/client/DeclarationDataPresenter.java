@@ -397,8 +397,8 @@ public class DeclarationDataPresenter
                         LogCleanEvent.fire(DeclarationDataPresenter.this);
                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                         if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
-                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
-                        } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
+                            Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", "данных") + " невозможна");
+                        } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
                             Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
                                 @Override
                                 public void yes() {

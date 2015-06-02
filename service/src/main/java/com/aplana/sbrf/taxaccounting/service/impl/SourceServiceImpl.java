@@ -408,10 +408,10 @@ public class SourceServiceImpl implements SourceService {
                                             ? " с датой сдачи корректировки " + SIMPLE_DATE_FORMAT.format(consolidatedInstance.getCorrectionDate())
                                             : "",
                                     consolidatedInstance.getTaxOrganCode() != null
-                                            ? ", налоговый орган \"" + consolidatedInstance.getTaxOrganCode() + "\""
+                                            ? ", налоговый орган " + consolidatedInstance.getTaxOrganCode()
                                             : "",
                                     consolidatedInstance.getKpp() != null
-                                            ? ", КПП \"" + consolidatedInstance.getKpp() + "\""
+                                            ? ", КПП " + consolidatedInstance.getKpp()
                                             : "")
                     );
                 }
