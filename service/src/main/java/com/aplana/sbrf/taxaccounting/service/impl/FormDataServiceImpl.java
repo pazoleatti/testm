@@ -1305,8 +1305,8 @@ public class FormDataServiceImpl implements FormDataService {
                             formData.getKind().getName(),
                             department.getName(),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            reportPeriod.getReportPeriod().getOrder() != 0
-                                    ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
@@ -1321,8 +1321,8 @@ public class FormDataServiceImpl implements FormDataService {
                             formData.getKind().getName(),
                             department.getName(),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            reportPeriod.getReportPeriod().getOrder() != 0
-                                    ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
@@ -1336,8 +1336,8 @@ public class FormDataServiceImpl implements FormDataService {
                             formData.getKind().getName(),
                             department.getName(),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            reportPeriod.getReportPeriod().getOrder() != 0
-                                    ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
@@ -1349,8 +1349,8 @@ public class FormDataServiceImpl implements FormDataService {
                             formData.getKind().getName(),
                             department.getName(),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            reportPeriod.getReportPeriod().getOrder() != 0
-                                    ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
@@ -1362,8 +1362,8 @@ public class FormDataServiceImpl implements FormDataService {
                     formData.getKind().getName(),
                     department.getName(),
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    reportPeriod.getReportPeriod().getOrder() != 0
-                            ? " " + Formats.getRussianMonthNameWithTier(reportPeriod.getReportPeriod().getOrder())
+                    formData.getPeriodOrder() != null
+                            ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                             : "",
                     reportPeriod.getCorrectionDate() != null
                             ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())

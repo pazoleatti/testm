@@ -91,8 +91,8 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                         kind.getName(),
                         department.getName(),
                         departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        departmentReportPeriod.getReportPeriod().getOrder() != 0
-                                ? " " + Formats.getRussianMonthNameWithTier(departmentReportPeriod.getReportPeriod().getOrder())
+                        action.getMonthId() != null
+                                ? " " + Formats.getRussianMonthNameWithTier(action.getMonthId())
                                 : "",
                         departmentReportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
