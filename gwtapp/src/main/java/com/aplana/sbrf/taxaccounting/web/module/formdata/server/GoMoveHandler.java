@@ -59,8 +59,12 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                     formDataService.getFormDataFullName(action.getFormDataId(), null, reportType),
                     lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
             if (lockDataTask == null) {
-                formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
-                        action.getMove(), action.getReasonToWorkflowMove(), logger);
+                try {
+                    formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
+                            action.getMove(), action.getReasonToWorkflowMove(), logger);
+                } finally {
+                    lockDataService.unlock(keyTask, userInfo.getUser().getId());
+                }
             } else {
                 throw new ActionException("Не удалось выполнить переход между этапами. Попробуйте выполнить операцию позже");
             }

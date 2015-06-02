@@ -118,6 +118,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSM_EXT = "xlsm";
     public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"";
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
+    final static String LOCK_MESSAGE_TASK = "Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
     final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
@@ -129,7 +130,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String LOCK_SOURCE =
             "Налоговая форма-источник \"%s\", \"%s\", \"%s\", \"%s\" заблокирована пользователем %s в %s. Попробуйте выполнить операцию позже";
     private static final String SOURCE_MSG_ERROR =
-            "Существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
+            "существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
     //Выводит информацию о НФ в определенном формате
     private static final String FORM_DATA_INFO_MSG = "«%s», «%s», «%s», «%s»%s";
     private static final String NOT_CONSOLIDATE_DESTINATION_FORM_WARNING =
@@ -456,7 +457,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
         //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formData.getId(), logger);
+        checkLockedByTask(formData.getId(), logger, "Добавление строки");
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
@@ -482,7 +483,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
         //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formData.getId(), logger);
+        checkLockedByTask(formData.getId(), logger, "Удаление строки");
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
@@ -673,8 +674,6 @@ public class FormDataServiceImpl implements FormDataService {
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
-        //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formData.getId(), logger);
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
@@ -759,7 +758,7 @@ public class FormDataServiceImpl implements FormDataService {
         checkLockAnotherUser(lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD)),
                 logger,  userInfo.getUser());
         //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formDataId, logger);
+        checkLockedByTask(formDataId, logger, "Удаление НФ");
 
 		FormData formData = formDataDao.get(formDataId, manual);
         if (manual) {
@@ -1094,75 +1093,22 @@ public class FormDataServiceImpl implements FormDataService {
      */
     @Transactional(readOnly = false)
     public void compose(final FormData formData, TAUserInfo userInfo, Logger logger) {
+        checkCompose(formData, userInfo, logger);
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-        //1А. Отчетный период закрыт
-        if (!departmentReportPeriod.isActive()){
-            logger.error("Отчетный период закрыт, консолидация не может быть выполнена");
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-        }
-        //1Б. Статус экземпляра не допускает его редактирование
-        if (formData.getState() != WorkflowState.CREATED) {
-            logger.error("Форма находится в статусе \"%s\", консолидация возможна только в статусе \"Создана\"",
-                    formData.getState().getName()
-            );
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-        }
-        //1В. Проверяем формы-приемники
-        List<DepartmentFormType> destinationDFTs = departmentFormTypeDao.getFormDestinations(
-                formData.getDepartmentId(),
-                formData.getFormType().getId(),
-                formData.getKind(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getEndDate());
-        ArrayList<String> msgPull = new ArrayList<String>(0);
-        for (DepartmentFormType destinationDFT : destinationDFTs){
-            DepartmentReportPeriod destinationDRP =
-                    departmentReportPeriodService.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
-            FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
-                    destinationDRP.getId(), formData.getPeriodOrder());
-            if (destinationForm != null && destinationForm.getState() != WorkflowState.CREATED){
-                msgPull.add(String.format(FORM_DATA_INFO_MSG,
-                        departmentService.getDepartment(formData.getDepartmentId()).getName(),
-                        formData.getKind().getName(),
-                        formData.getFormType().getName(),
-                        reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
-                        (destinationDRP.getCorrectionDate() != null ?
-                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(destinationDRP.getCorrectionDate()))
-                                :
-                                "")
-                ));
-            }
-        }
-        if (!msgPull.isEmpty()){
-            logger.error(SOURCE_MSG_ERROR);
-            for (String s : msgPull)
-                logger.error(s);
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-        }
-        //1Г. Отчетный период экземпляра является периодом ввода остатков.
-        if (departmentReportPeriod.isBalance()){
-            logger.error("Отчетный период является периодом ввода остатков, консолидация не может быть выполнена");
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-        }
 
-        //1Д. Не существует ни одной назначенной формы-источника.
         List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
                 formData.getDepartmentId(),
                 formData.getFormType().getId(),
                 formData.getKind(),
                 reportPeriod.getCalendarStartDate(),
                 reportPeriod.getEndDate());
-        if (departmentFormTypesSources.isEmpty()){
-            logger.error("Для текущей формы не назначено ни одного источника");
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-        }
 
         HashSet<Long> srcAcceptedIds = new HashSet<Long>();
         //Список для блокировки форм
         ArrayList<FormData> sources = new ArrayList<FormData>(departmentFormTypesSources.size());
-        msgPull.clear();
+        ArrayList<String> msgPull = new ArrayList<String>(0);
         for (DepartmentFormType sourceDFT : departmentFormTypesSources){
             // Последний отчетный период подразделения
             DepartmentReportPeriod sourceDepartmentReportPeriod =
@@ -1281,6 +1227,68 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
+    public void checkCompose(final FormData formData, TAUserInfo userInfo, Logger logger) {
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+        //1А. Отчетный период закрыт
+        if (!departmentReportPeriod.isActive()){
+            throw new ServiceException("отчетный период закрыт, консолидация не может быть выполнена.");
+        }
+        //1Б. Статус экземпляра не допускает его редактирование
+        if (formData.getState() != WorkflowState.CREATED) {
+            throw new ServiceException("форма находится в статусе \"%s\", консолидация возможна только в статусе \"Создана\"",
+                    formData.getState().getName());
+        }
+        //1В. Проверяем формы-приемники
+        List<DepartmentFormType> destinationDFTs = departmentFormTypeDao.getFormDestinations(
+                formData.getDepartmentId(),
+                formData.getFormType().getId(),
+                formData.getKind(),
+                reportPeriod.getCalendarStartDate(),
+                reportPeriod.getEndDate());
+        ArrayList<String> msgPull = new ArrayList<String>(0);
+        for (DepartmentFormType destinationDFT : destinationDFTs){
+            DepartmentReportPeriod destinationDRP =
+                    departmentReportPeriodService.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
+            FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
+                    destinationDRP.getId(), formData.getPeriodOrder());
+            if (destinationForm != null && destinationForm.getState() != WorkflowState.CREATED){
+                msgPull.add(String.format(FORM_DATA_INFO_MSG,
+                        departmentService.getDepartment(formData.getDepartmentId()).getName(),
+                        formData.getKind().getName(),
+                        formData.getFormType().getName(),
+                        reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
+                        (destinationDRP.getCorrectionDate() != null ?
+                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(destinationDRP.getCorrectionDate()))
+                                :
+                                "")
+                ));
+            }
+        }
+        if (!msgPull.isEmpty()){
+            logger.error(SOURCE_MSG_ERROR);
+            for (String s : msgPull)
+                logger.error(s);
+            throw new ServiceException(SOURCE_MSG_ERROR);
+        }
+        //1Г. Отчетный период экземпляра является периодом ввода остатков.
+        if (departmentReportPeriod.isBalance()){
+            throw new ServiceException("отчетный период является периодом ввода остатков, консолидация не может быть выполнена");
+        }
+
+        //1Д. Не существует ни одной назначенной формы-источника.
+        List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
+                formData.getDepartmentId(),
+                formData.getFormType().getId(),
+                formData.getKind(),
+                reportPeriod.getCalendarStartDate(),
+                reportPeriod.getEndDate());
+        if (departmentFormTypesSources.isEmpty()){
+            throw new ServiceException("для текущей формы не назначено ни одного источника");
+        }
+    }
+
+    @Override
     public String getFormDataFullName(long formDataId, String fileName, ReportType reportType) {
         //TODO: можно оптимизировать и сделать в 1 запрос
         FormData formData = formDataDao.get(formDataId, false);
@@ -1379,7 +1387,7 @@ public class FormDataServiceImpl implements FormDataService {
         checkLockAnotherUser(lockService.lock(generateTaskKey(formDataId, ReportType.EDIT_FD),
                 userInfo.getUser().getId(),
                 getFormDataFullName(formDataId, null, null),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null,  userInfo.getUser());
+                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null, userInfo.getUser());
 	}
 
 	@Override
@@ -1670,11 +1678,16 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void checkLockedByTask(long formDataId, Logger logger) {
+    public void checkLockedByTask(long formDataId, Logger logger, String taskName) {
         Pair<ReportType, LockData> lockType = getLockTaskType(formDataId);
-        if (lockType != null && !ReportType.EDIT_FD.equals(lockType.getFirst()))
-            throw new ServiceLoggerException(LOCK_MESSAGE,
-                    logEntryService.save(logger.getEntries()));
+        if (lockType != null && !ReportType.EDIT_FD.equals(lockType.getFirst())) {
+            logger.error("\"%s\" пользователем \"%s\" запущена операция \"%s\"",
+                    SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
+                    userService.getUser(lockType.getSecond().getUserId()).getName(),
+                    lockType.getSecond().getDescription());
+            throw new ServiceLoggerException(LOCK_MESSAGE_TASK,
+                    logEntryService.save(logger.getEntries()), taskName);
+        }
     }
 
     void checkLockedMe(LockData lockData, TAUser user){

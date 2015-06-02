@@ -340,6 +340,14 @@ public interface FormDataService {
     void findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate, Logger logger);
 
     /**
+     * Проверки перед консолидацией
+     * @param formData
+     * @param userInfo
+     * @param logger
+     */
+    void checkCompose(final FormData formData, TAUserInfo userInfo, Logger logger);
+
+    /**
      * Консолидация НФ
      * @param workflowMove
      * @param formData
@@ -384,5 +392,5 @@ public interface FormDataService {
      * @param formDataId
      * @param logger
      */
-    void checkLockedByTask(long formDataId, Logger logger);
+    void checkLockedByTask(long formDataId, Logger logger, String taskName);
 }

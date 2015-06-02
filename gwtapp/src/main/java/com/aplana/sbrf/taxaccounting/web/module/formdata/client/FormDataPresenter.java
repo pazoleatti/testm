@@ -64,6 +64,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private static final int EXTEND_LOCKTIME_LIMIT_IN_MINUTES = 5;
     private Timer timer;
     private ReportType timerType;
+    private TimerTaskResult.FormMode formMode;
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -88,7 +89,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 onTimer();
             }
         };
-        timer.cancel();;
+        timer.cancel();
+        formMode = null;
 	}
 
 	@Override
@@ -747,7 +749,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         setReadUnlockedMode();
                                         break;
                                     case READ_LOCKED:
-                                        setReadLockedMode(
+                                        setReadLockedMode(true,
                                                 result.getLockedByUser(),
                                                 result.getLockDate());
                                         break;
@@ -886,13 +888,34 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     if ((timerType == null || ReportType.EDIT_FD.equals(timerType))
                                             && (oldType != null && !ReportType.EDIT_FD.equals(timerType))) {
                                         // задача завершена, обновляем форму(создаем новый временный срез для режима редактирования)
-                                        //onEditClicked(false);
+                                        placeManager.setOnLeaveConfirmation(null);
+                                        onEditClicked(false);
                                     } else if (oldType != null && !oldType.equals(timerType)) {
                                         // изменился тип задачи, возможно нужно обновить форму???
-                                        //onEditClicked(false);
+                                        getView().updateData();
                                     }
                                 }
-
+                                if (!result.getFormMode().equals(formMode))
+                                    switch (result.getFormMode()) {
+                                        case EDIT:
+                                            if (readOnlyMode) {
+                                                setReadUnlockedMode();
+                                            } else {
+                                                setEditMode();
+                                            }
+                                            break;
+                                        case LOCKED_EDIT:
+                                            setReadLockedMode(readOnlyMode,
+                                                    result.getLockedByUser(),
+                                                    result.getLockDate());
+                                            break;
+                                        case LOCKED:
+                                            setReadLockedMode(true,
+                                                    result.getLockedByUser(),
+                                                    result.getLockDate());
+                                            break;
+                                    }
+                                formMode = result.getFormMode();
                             }
                         }, this)
         );

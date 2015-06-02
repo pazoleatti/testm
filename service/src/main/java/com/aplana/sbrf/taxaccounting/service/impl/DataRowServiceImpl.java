@@ -80,7 +80,6 @@ public class DataRowServiceImpl implements DataRowService {
 
     @Override
     public void createTemporary(FormData formData) {
-        formDataService.checkLockedByTask(formData.getId(), new Logger());
         dataRowDao.createTemporary(formData);
     }
 

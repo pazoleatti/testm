@@ -146,7 +146,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 	}
 
     /**
-     * Ппрверки правильности параметров запроса
+     * Проверки правильности параметров запроса
      */
     private void actionCheck(GetFormDataAction action) throws ActionException {
         if (!action.isReadOnly() && action.isCorrectionDiff()) {
@@ -294,7 +294,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
 		LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(),
                 securityService.currentUserInfo());
-        // Ззащита от перехода в режим редактирования для импортируемой нф
+        // Защита от перехода в режим редактирования, если запущена какая-либо операция
         Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
         LockData lockTask = null;
         if (lockType != null && !ReportType.EDIT_FD.equals(lockType.getFirst())) {
