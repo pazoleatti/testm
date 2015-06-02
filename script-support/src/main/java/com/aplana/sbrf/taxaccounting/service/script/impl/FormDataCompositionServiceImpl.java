@@ -91,6 +91,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 					null, formData.getFormType().getName(), formData.getKind().getId(), "Событие инициировано Системой", null, formTypeId);
 
 			// Execute composition scripts
+            dataRowDao.createTemporary(formData);
 			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), formData,
                     FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
 

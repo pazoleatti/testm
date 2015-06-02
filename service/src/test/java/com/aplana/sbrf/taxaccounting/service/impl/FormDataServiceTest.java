@@ -1008,7 +1008,7 @@ public class FormDataServiceTest {
         when(departmentReportPeriodService.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
 
         try{
-            formDataService.doCheck(logger, userInfo, formData);
+            formDataService.doCheck(logger, userInfo, formData, false);
         }catch (ServiceLoggerException e){
             assertEquals(
                     "Не выполнена консолидация данных в форму \"Тестовое подразделение\", \"РНУ\", \"Первичная\", \"1 квартал 2015\"",

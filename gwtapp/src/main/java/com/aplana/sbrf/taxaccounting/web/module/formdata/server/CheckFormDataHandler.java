@@ -51,7 +51,7 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 		if (!action.getModifiedRows().isEmpty()) {
 			dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
-		formDataService.doCheck(logger, securityService.currentUserInfo(), formData);
+		formDataService.doCheck(logger, securityService.currentUserInfo(), formData, action.isEditMode());
 		DataRowResult result = new DataRowResult();
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

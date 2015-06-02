@@ -78,8 +78,9 @@ public interface FormDataService {
 	 * @param logger логгер-объект для фиксации диагностических сообщений
 	 * @param userInfo информация о пользователе, запросившего операцию
 	 * @param formData объект с данными по налоговой форме
+     * @param editMode признак того, что операция вызвана из режима редактирования, когда временный срез уже создан
 	 */
-	void doCheck(Logger logger, TAUserInfo userInfo, FormData formData);
+	void doCheck(Logger logger, TAUserInfo userInfo, FormData formData, boolean editMode);
 
 	/**
 	 * Сохранить данные по налоговой форме
