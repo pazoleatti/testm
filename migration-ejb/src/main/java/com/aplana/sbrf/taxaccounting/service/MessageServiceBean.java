@@ -267,7 +267,11 @@ public class MessageServiceBean implements MessageService {
             /** Обработка сообщений */
             Message message;
             while ((message = queueReceiver.receive(1)) != null) {
-                processRateMessage(message);
+                try {
+                    processRateMessage(message);
+                } catch (Exception e) {
+                    logger.error("Произошла обишка при обработке сообщения, оно будет пропущено", e);
+                }
             }
 
             queueReceiver.close();
