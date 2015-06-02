@@ -8,7 +8,7 @@
     <import resource="classpath:/spring/enterprise-context.xml"/>
 
     <jee:local-slsb id="messageService"
-                     jndi-name="ejblocal:${releaseName}/migration-ejb.jar/MigrationBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal"
+                     jndi-name="ejblocal:${releaseName}/migration-ejb.jar/MessageServiceBean#com.aplana.sbrf.taxaccounting.service.MessageServiceLocal"
                      business-interface="com.aplana.sbrf.taxaccounting.service.MessageService"/>
 
     <jee:local-slsb

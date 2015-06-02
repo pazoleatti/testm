@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.mdb;
+package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ScriptStatusHolder;
@@ -7,9 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,15 +31,15 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class RateMDBTest {
+public class MessageServiceBeanTest {
 
     private final String ERROR_MESSAGE = "Test error";
     private final String EXCEPTION_MESSAGE = "Test Exception";
     private final String LOGGER_EXCEPTION_MESSAGE = "Test ServiceLoggerException";
-    private final String SUCCESS_IMPORT = String.format(RateMDB.SUCCESS_IMPORT, StringUtils.getNumberString(1, "Загружен", "Загружено", "Загружено"),
+    private final String SUCCESS_IMPORT = String.format(MessageServiceBean.SUCCESS_IMPORT, StringUtils.getNumberString(1, "Загружен", "Загружено", "Загружено"),
             1, StringUtils.getNumberString(1, "курс", "курса", "курсов"), "%s");
 
-    private RateMDB rmdb;
+    private MessageServiceBean rmdb;
 
     private List<String> logList;
 
@@ -52,7 +49,7 @@ public class RateMDBTest {
 
     @Before
     public void init() {
-        rmdb = new RateMDB();
+        rmdb = new MessageServiceBean();
 
         // Сброс флагов
         refBookServiceScriptException = false;
@@ -323,7 +320,7 @@ public class RateMDBTest {
     public void onMessage1Test() throws Exception {
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
-        rmdb.onMessage(new TextMessageImpl(output.toString()));
+        rmdb.processRateMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
         Assert.assertEquals(String.format(SUCCESS_IMPORT, "Курсы Валют"), logList.get(0));
     }
@@ -333,7 +330,7 @@ public class RateMDBTest {
     public void onMessage2Test() throws Exception {
         StringWriter output = new StringWriter();
         IOUtils.copy(getMetalRateStream(), output);
-        rmdb.onMessage(new TextMessageImpl(output.toString()));
+        rmdb.processRateMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
         Assert.assertEquals(String.format(SUCCESS_IMPORT, "Курсы драгоценных металлов"), logList.get(0));
     }
@@ -341,17 +338,17 @@ public class RateMDBTest {
     // Сообщение null — неправильный формат
     @Test
     public void nullMessageTest() {
-        rmdb.onMessage(new TextMessageImpl(null));
+        rmdb.processRateMessage(new TextMessageImpl(null));
         Assert.assertEquals(1, logList.size());
-        Assert.assertTrue(logList.contains(String.format(RateMDB.FAIL_IMPORT, RateMDB.ERROR_FORMAT)));
+        Assert.assertTrue(logList.contains(String.format(MessageServiceBean.FAIL_IMPORT, MessageServiceBean.ERROR_FORMAT)));
     }
 
     // Неправильный формат
     @Test
     public void badFormatMessageTest() {
-        rmdb.onMessage(new TextMessageImpl("Test ERROR_MESSAGE"));
+        rmdb.processRateMessage(new TextMessageImpl("Test ERROR_MESSAGE"));
         Assert.assertEquals(1, logList.size());
-        Assert.assertTrue(logList.contains(String.format(RateMDB.FAIL_IMPORT, RateMDB.ERROR_FORMAT)));
+        Assert.assertTrue(logList.contains(String.format(MessageServiceBean.FAIL_IMPORT, MessageServiceBean.ERROR_FORMAT)));
     }
 
     // Исключение в скрипте
@@ -360,7 +357,7 @@ public class RateMDBTest {
         refBookServiceScriptException = true;
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
-        rmdb.onMessage(new TextMessageImpl(output.toString()));
+        rmdb.processRateMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
         Assert.assertTrue(logList.get(0).contains(EXCEPTION_MESSAGE));
     }
@@ -371,16 +368,16 @@ public class RateMDBTest {
         refBookServiceScriptServiceLoggerException = true;
         StringWriter output = new StringWriter();
         IOUtils.copy(getCurrencyRateStream(), output);
-        rmdb.onMessage(new TextMessageImpl(output.toString()));
+        rmdb.processRateMessage(new TextMessageImpl(output.toString()));
         Assert.assertEquals(1, logList.size());
         Assert.assertTrue(logList.get(0).contains(LOGGER_EXCEPTION_MESSAGE));
     }
 
     private static InputStream getCurrencyRateStream() {
-        return RateMDBTest.class.getResourceAsStream("public-currency_1.xml");
+        return MessageServiceBean.class.getResourceAsStream("public-currency_1.xml");
     }
 
     private static InputStream getMetalRateStream() {
-        return RateMDBTest.class.getResourceAsStream("public-currency_5.xml");
+        return MessageServiceBean.class.getResourceAsStream("public-currency_5.xml");
     }
 }

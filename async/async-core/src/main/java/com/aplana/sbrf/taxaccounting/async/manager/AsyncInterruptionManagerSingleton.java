@@ -38,7 +38,7 @@ public class AsyncInterruptionManagerSingleton implements AsyncInterruptionManag
                     }
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error("Не удалось отменить задачу", e);
                 //Игнорируем ошибки
             }
         }

@@ -496,6 +496,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             // Если при выполнении скрипта возникли фатальные ошибки, то
             if (localLogger.containsLevel(LogLevel.ERROR)) {
+                if (!formWasCreated) {
+                    formDataDao.delete(formData.getId());
+                }
                 // Исключение для отката транзакции сознания и заполнения НФ
                 throw new ServiceException("При выполнении загрузки произошли ошибки");
             }
@@ -524,6 +527,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Снимаем блокировку
             lockDataService.unlock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD), userInfo.getUser().getId());
             lockDataService.unlock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD), userInfo.getUser().getId());
+            if (localLogger.containsLevel(LogLevel.ERROR) && !formWasCreated) {
+                formDataDao.delete(formData.getId());
+            }
         }
 
         // 20 Загрузка формы завершена

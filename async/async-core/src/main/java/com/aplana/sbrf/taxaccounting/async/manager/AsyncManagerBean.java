@@ -78,7 +78,7 @@ public class AsyncManagerBean implements AsyncManager {
             ObjectMessage objectMessage = session.createObjectMessage();
             objectMessage.setObject(asyncMdbObject);
             messageProducer.send(objectMessage);
-            log.info(String.format("Задача с ключом %s помещена в очередь", params.get(LOCKED_OBJECT.name())));
+            log.info(String.format("Задача с ключом %s помещена в очередь %s", params.get(LOCKED_OBJECT.name()), balancingVariant.name()));
             log.debug("Async task creation has been finished successfully");
             return balancingVariant;
         } catch (ServiceLoggerException e) {
