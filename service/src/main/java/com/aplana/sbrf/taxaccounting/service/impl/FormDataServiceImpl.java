@@ -802,6 +802,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         FormData formData = formDataDao.get(formDataId, manual);
+        dataRowDao.createTemporary(formData);
         List<String> lockedObjects = new ArrayList<String>();
         try {
             switch (workflowMove){
