@@ -20,9 +20,4 @@ public interface AsyncInterruptionManager {
      * @param keys ключи блокировки
      */
     void interruptAll(Collection<String> keys);
-
-    /**
-     * Останавливает все задачи из списока
-     */
-    void interruptAll();
 }

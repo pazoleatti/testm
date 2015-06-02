@@ -372,7 +372,7 @@ public class LockDataServiceImpl implements LockDataService {
                                                    TAUser user = userDao.getUser(userId);
                                                    List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
                                                    unlock(lockData.getKey(), userId, force);
-                                                   asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
+                                                   //asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
                                                    String msg = String.format(ReportType.CANCEL_TASK, user.getName(), lockData.getDescription());
                                                    List<Notification> notifications = new ArrayList<Notification>();
                                                    //Создаем оповещение для каждого пользователя из списка

@@ -43,10 +43,4 @@ public class AsyncInterruptionManagerSingleton implements AsyncInterruptionManag
             }
         }
     }
-
-    @Override
-    public void interruptAll() {
-        log.info(String.format("Запущена остановка всех асинхронных задач"));
-        interruptAll(tasks.keySet());
-    }
 }
