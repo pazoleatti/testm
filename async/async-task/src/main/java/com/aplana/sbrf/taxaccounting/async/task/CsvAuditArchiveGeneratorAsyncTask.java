@@ -48,7 +48,7 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
         if (records.isEmpty())
             throw new ServiceException("Нет записей за указанную дату.");
         String uuid = printingService.generateAuditZip(records);
-        reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.CSV_AUDIT);
+        reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.ARCHIVE_AUDIT);
 
         auditService.removeRecords(
                 filter,
@@ -66,7 +66,7 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
     @Override
     protected String getNotificationMsg(Map<String, Object> params) {
         LogSystemFilter filter = (LogSystemFilter)params.get(AuditService.AsyncNames.LOG_FILTER.name());
-        Integer count = (Integer)params.get(AuditService.AsyncNames.LOG_COUNT.name());
+        Long count = (Long)params.get(AuditService.AsyncNames.LOG_COUNT.name());
 
         return String.format(SUCCESS_MSG,
                 SDF.format(filter.getFromSearchDate()),

@@ -208,7 +208,8 @@ public class PrintingServiceImpl implements PrintingService {
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
             reportPath = logSystemCsvBuilder.createReport();
-            return blobDataService.create(new FileInputStream(reportPath), "");
+            String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
+            return blobDataService.create(new FileInputStream(reportPath), fileName);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemXlsxReportBuilder.class);
