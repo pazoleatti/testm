@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +26,29 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+        int userId = (Integer)params.get(USER_ID.name());
+        long formDataId = (Long)params.get("formDataId");
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(userId));
+        Logger logger = new Logger();
+        FormData formData = formDataService.getFormData(
+                userInfo,
+                formDataId,
+                false,
+                logger);
+        try {
+            formDataService.checkCompose(formData, userInfo, logger);
+        } catch (ServiceException e) {
+            throw new ServiceLoggerException(ReportType.CHECK_TASK,
+                    logEntryService.save(logger.getEntries()),
+                    String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
+                    e.getMessage());
+        }
         return BalancingVariants.SHORT;
     }
 
@@ -36,6 +59,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
+        checkTaskLimit(params);
         FormData formData = formDataService.getFormData(
                 userInfo,
                 formDataId,

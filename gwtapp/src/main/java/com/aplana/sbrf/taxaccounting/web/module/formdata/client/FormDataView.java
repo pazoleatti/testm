@@ -650,8 +650,16 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
 	@Override
-	public void showSaveCancelPanel(boolean show) {
-		saveCancelPanel.setVisible(show);
+	public void showSaveCancelPanel(boolean show, boolean readOnlyMode) {
+        if (show || readOnlyMode) {
+            cancelButton.setVisible(show);
+            cancelButton.setVisible(show);
+            saveButton.setVisible(show);
+        } else {
+            saveCancelPanel.setVisible(true);
+            cancelButton.setVisible(true);
+            saveButton.setVisible(false);
+        }
         fileUploader.setVisible(show);
 	}
 
@@ -722,11 +730,16 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-	public void setLockInformation(boolean isVisible, String lockDate, String lockedBy){
+	public void setLockInformation(boolean isVisible, boolean readOnlyMode, String lockDate, String lockedBy){
 		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
-            String text = "Выбранная налоговая форма в текущий момент редактируется другим пользователем \"" + lockedBy
-                    + "\" (с "+ lockDate + " )";
+            String text;
+            if (readOnlyMode) {
+                text = "Выбранная налоговая форма в текущий момент редактируется другим пользователем \"" + lockedBy
+                        + "\" (с " + lockDate + ")";
+            } else {
+                text = "Выбранная налоговая форма в текущий момент заблокирована на редактирование текущим пользователем (с " + lockDate + ")";
+            }
 			lockInformation.setText(text);
 			lockInformation.setTitle(text);
 		}
@@ -916,5 +929,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void setCorrectionText(String text) {
         correctionButton.setText(text);
+    }
+
+    @Override
+    public void setTableMode(boolean readOnlyMode, boolean forceEditMode) {
+        factory.setReadOnly(readOnlyMode);
+        factory.setSuperEditMode(forceEditMode);
     }
 }

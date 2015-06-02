@@ -6,7 +6,16 @@ import com.gwtplatform.dispatch.shared.Result;
 public class TimerTaskResult implements Result {
     private static final long serialVersionUID = 7832261980997033051L;
 
+    public static enum FormMode {
+        LOCKED, // Открыта только для чтения
+        LOCKED_EDIT, // Заблокирована в режиме редактрирования
+        EDIT // Открыта для редактирования
+    }
+
     private ReportType taskType;
+    private FormMode formMode;
+    private String lockDate;
+    private String lockedByUser;
 
     public ReportType getTaskType() {
         return taskType;
@@ -14,5 +23,29 @@ public class TimerTaskResult implements Result {
 
     public void setTaskType(ReportType taskType) {
         this.taskType = taskType;
+    }
+
+    public FormMode getFormMode() {
+        return formMode;
+    }
+
+    public void setFormMode(FormMode formMode) {
+        this.formMode = formMode;
+    }
+
+    public String getLockDate() {
+        return lockDate;
+    }
+
+    public void setLockDate(String lockDate) {
+        this.lockDate = lockDate;
+    }
+
+    public String getLockedByUser() {
+        return lockedByUser;
+    }
+
+    public void setLockedByUser(String lockedByUser) {
+        this.lockedByUser = lockedByUser;
     }
 }
