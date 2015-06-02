@@ -89,6 +89,9 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                             type, sLimit, sShortLimit));
                 }
             }
+            if (logger.getEntries().isEmpty()) {
+                logger.info("Проверка завершена, ошибок не обнаружено");
+            }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
 
