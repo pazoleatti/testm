@@ -42,7 +42,6 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
 		if (formData.isManual()) {
         	accessService.canCreateManual(logger, userInfo, formData.getId());
 		}
-        dataRowService.createTemporary(formData);
         return new FormDataEditResult();
     }
 
