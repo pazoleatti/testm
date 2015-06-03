@@ -303,6 +303,7 @@ public class FormDataServiceImpl implements FormDataService {
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
                 log.info(String.format("Выполнение скрипта началось: %s", key));
+                dataRowDao.createTemporary(fd);
                 formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
                 log.info(String.format("Выполнение скрипта закончилось: %s", key));
                 IOUtils.closeQuietly(dataFileInputStream);
@@ -534,12 +535,15 @@ public class FormDataServiceImpl implements FormDataService {
 	}
 
 	@Override
-	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData) {
+	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData, boolean editMode) {
 		// Форма не должна быть заблокирована для редактирования другим пользователем
 		checkLockAnotherUser(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), logger, userInfo.getUser());
 
 		formDataAccessService.canRead(userInfo, formData.getId());
 
+        if (!editMode) {
+            dataRowDao.createTemporary(formData);
+        }
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
 
         checkPerformer(logger, formData);
@@ -681,6 +685,7 @@ public class FormDataServiceImpl implements FormDataService {
         checkReferenceValues(logger, formData, true);
 
         // Отработка скриптом события сохранения
+        // dataRowDao.createTemporary(formData); не вызываем, т.к это должно быть сделано до этого, в вызывающих операциях
 		formDataScriptingService.executeScript(userInfo, formData,
                 FormDataEvent.SAVE, logger, null);
 

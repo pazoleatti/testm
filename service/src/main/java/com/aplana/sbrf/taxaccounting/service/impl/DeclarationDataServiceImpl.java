@@ -269,9 +269,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         log.info(String.format("Скриптовые проверки для декларации %s", id));
         lockStateLogger.updateState("Скриптовые проверки");
-        declarationDataScriptingService.executeScript(userInfo,
-                declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
         DeclarationData dd = declarationDataDao.get(id);
+        checkSources(dd, logger);
+        declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, logger, null);
         validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -279,7 +279,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     "Найдены ошибки при выполнении проверки декларации",
                     logEntryService.save(logger.getEntries()));
         } else {
-            checkSources(dd, logger);
             logger.info("Проверка завершена, ошибок не обнаружено");
         }
     }

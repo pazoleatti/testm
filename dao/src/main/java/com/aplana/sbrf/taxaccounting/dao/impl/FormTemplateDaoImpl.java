@@ -8,13 +8,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionSegment;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -29,6 +23,8 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
@@ -105,6 +101,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
+
+    private static String FORM_DATA_COLUMNS_DELETE = "alter table form_data_%d drop (%s)";
+    private static String FORM_DATA_COLUMNS_ADD = "alter table FORM_DATA_%d add (%s)";
+    private static String FORM_DATA_COLUMNS_UPDATE = "alter table FORM_DATA_%d modify (%s)";
+    private static String FORM_DATA_COLUMNS_COMMENT = "comment on column form_data_%d.c%d is '%s'";
 	/**
 	 * Кэш инфалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
 	 * Иначе, если версии не совпадают кэш продолжает возвращать старую версию.
@@ -144,8 +145,112 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTemplate.getStatus().getId(),
                     formTemplateId
             );
-            formStyleDao.saveFormStyles(formTemplate);
-            columnDao.saveFormColumns(formTemplate);
+
+            //http://jira.aplana.com/browse/SBRFACCTAX-11384
+            Collection<Integer> removedStyleIds = formStyleDao.saveFormStyles(formTemplate);
+            //Получаем макет ради колонок, чтобы потом сравнить тип
+            FormTemplate dbT = getJdbcTemplate().queryForObject(
+                    "select id, version, name, fullname, type_id, fixed_rows, header, script, status, monthly " +
+                            "from form_template where id = ?",
+                    new Object[]{formTemplateId},
+                    new int[]{Types.NUMERIC},
+                    new FormTemplateMapper(true)
+            );
+            final Map<ColumnDao.KEYS, Collection<Long>> columns = columnDao.updateFormColumns(formTemplate);
+
+            if (columns.get(ColumnDao.KEYS.DELETED) != null){
+                String sqlColumnForDrop =
+                        String.format(FORM_DATA_COLUMNS_DELETE, formTemplate.getId(), transformToCommaDeleted(columns.get(ColumnDao.KEYS.DELETED)));
+                getJdbcTemplate().execute(sqlColumnForDrop);
+                logger.info(
+                        String.format(
+                                "Deleted columns in table FORM_DATA_%d",
+                                formTemplate.getId()
+                        )
+                );
+            }
+
+            if (columns.get(ColumnDao.KEYS.ADDED) !=null){
+                String sqlColumnForAdd =
+                        String.format(FORM_DATA_COLUMNS_ADD, formTemplate.getId(), transformToCommaAdded(columns.get(ColumnDao.KEYS.ADDED), formTemplate));
+                getJdbcTemplate().execute(sqlColumnForAdd);
+                for (Long aLong : columns.get(ColumnDao.KEYS.ADDED)){
+                    Column column = formTemplate.getColumn(aLong.intValue());
+                    getJdbcTemplate().execute(
+                            String.format(FORM_DATA_COLUMNS_COMMENT,
+                                    formTemplateId,
+                                    aLong,
+                                    column.getAlias() + "-" + column.getName())
+                    );
+                }
+                logger.info(
+                        String.format(
+                                "Added columns in table FORM_DATA_%d",
+                                formTemplate.getId()
+                        )
+                );
+            }
+
+            if (columns.get(ColumnDao.KEYS.UPDATED) !=null){
+                Collection<Long> longs = columns.get(ColumnDao.KEYS.UPDATED);
+                ArrayList<Long> changeType = new ArrayList<Long>();
+                for (Long aLong : longs){
+                    Column newCol = formTemplate.getColumn(aLong.intValue());
+                    Column oldCol = dbT.getColumn(aLong.intValue());
+                    if (newCol.getColumnType() != oldCol.getColumnType()){
+                        changeType.add(aLong);
+                    }
+                    if (newCol.getName().equals(oldCol.getName()) || !newCol.getAlias().equals(oldCol.getAlias())){
+                        getJdbcTemplate().execute(
+                                String.format(FORM_DATA_COLUMNS_COMMENT,
+                                        formTemplateId,
+                                        aLong,
+                                        newCol.getAlias() + "-" + newCol.getName())
+                        );
+                    }
+                }
+                if (!changeType.isEmpty()){
+                    int num = getJdbcTemplate().update(
+                            String.format(
+                                    "update form_data_%d set %s",
+                                    formTemplateId, transformForCleanColumns(changeType, ""))
+                    );
+                    logger.info("Number of updated columns " + num);
+                    String sqlColumnForUpdate =
+                            String.format(FORM_DATA_COLUMNS_UPDATE, formTemplate.getId(), transformToCommaUpdated(changeType, formTemplate));
+                    getJdbcTemplate().execute(sqlColumnForUpdate);
+                    logger.info(
+                            String.format(
+                                    "Updated columns in table FORM_DATA_%d",
+                                    formTemplate.getId()
+                            )
+                    );
+                }
+            }
+
+            //Очистка полей содержащих значения удаленных стилей
+            if (!removedStyleIds.isEmpty()){
+                ArrayList<Number> allColumnsForUpdate = new ArrayList<Number>() {{
+                    addAll(columns.get(ColumnDao.KEYS.UPDATED)!=null?columns.get(ColumnDao.KEYS.UPDATED):new ArrayList<Number>(0));
+                    addAll(columns.get(ColumnDao.KEYS.ADDED)!=null?columns.get(ColumnDao.KEYS.ADDED):new ArrayList<Number>(0));
+                }};
+                StringBuilder sb = new StringBuilder();
+                for (int i=0; i<allColumnsForUpdate.size(); i++){
+                    Integer colId = (Integer)allColumnsForUpdate.toArray()[i];
+                    sb.append(SqlUtils.transformToSqlInStatement(String.format("c%d_style_id", colId), removedStyleIds));
+                    if (i!=removedStyleIds.size()-1){
+                        sb.append(" OR ");
+                    }
+                }
+
+                int num = getJdbcTemplate().update(
+                        String.format(
+                                "update form_data_%d set %s where %s",
+                                formTemplateId, transformForCleanColumns(allColumnsForUpdate, "_style_id"), sb.toString())
+                );
+                logger.info("Number of updated styles " + num);
+            }
+
             return formTemplateId;
         } catch (DataAccessException e){
             logger.error("Ошибка при сохранении шаблона.", e);
@@ -408,6 +513,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
     }
 
+    private static String FD_TABLE_CREATE_PROCEDURE_NAME = "create_form_data_nnn";
     @Override
     public int saveNew(FormTemplate formTemplate) {
 
@@ -445,7 +551,13 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             );
 
             formStyleDao.saveFormStyles(formTemplate);
-            columnDao.saveFormColumns(formTemplate);
+            columnDao.updateFormColumns(formTemplate);
+            new SimpleJdbcCall(getJdbcTemplate()).
+                    withProcedureName(FD_TABLE_CREATE_PROCEDURE_NAME).
+                    declareParameters(
+                            new SqlParameter("FT_ID", Types.NUMERIC)
+                    ).execute(formTemplateId);
+
             return formTemplateId;
         }catch (DataAccessException e){
             logger.error("Ошибка при сохранении новой версии макета.",e);
@@ -511,6 +623,89 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             throw new DaoException("Для даного вида налоговой формы %d - %s найдено несколько активных шаблонов налоговой формы в одном отчетном периоде %s.",
                     formTypeId, formTypeDao.get(formTypeId).getName(), reportPeriod.getName());
         }
+    }
+
+    private static String COLUMN_PATTERN_DELETED = "c%d, c%d_style_id, c%d_editable, c%d_colspan, c%d_rowspan,";
+    private static String transformToCommaDeleted(Collection<Long> collection){
+        StringBuilder sb = new StringBuilder();
+        for (Long colId : collection){
+            sb.append(String.format(COLUMN_PATTERN_DELETED, colId, colId, colId, colId, colId));
+        }
+
+        return sb.toString().substring(0, sb.length() - 1);
+    }
+
+    private static String COLUMN_PATTERN_ADDED =
+                    "c%d %s null, " +
+                    "c%d_style_id number(9) null, " +
+                    "c%d_editable number(1) null, " +
+                    "c%d_colspan number(3) null, " +
+                    "c%d_rowspan number(3) null,";
+    private static String transformToCommaAdded(Collection<Long> columns, FormTemplate ft){
+        StringBuilder sb = new StringBuilder();
+        for (Long colId : columns){
+            switch (ft.getColumn(colId.intValue()).getColumnType()){
+                case STRING:
+                    sb.append(String.format(COLUMN_PATTERN_ADDED, colId, "VARCHAR(4000)", colId, colId, colId, colId));
+                    break;
+                case NUMBER:
+                    NumericColumn numericColumn = (NumericColumn)ft.getColumn(colId.intValue());
+                    sb.append(String.format(
+                                    COLUMN_PATTERN_ADDED,
+                                    colId, String.format("NUMBER(%d,%d)", numericColumn.getMaxLength(), numericColumn.getPrecision()), colId, colId, colId, colId)
+                    );
+                    break;
+                case REFBOOK:
+                case REFERENCE:
+                case AUTO:
+                    sb.append(String.format(COLUMN_PATTERN_ADDED, colId, "NUMBER(18)", colId, colId, colId, colId));
+                    break;
+                case DATE:
+                    sb.append(String.format(COLUMN_PATTERN_ADDED, colId, "DATE", colId, colId, colId, colId));
+                    break;
+            }
+        }
+
+        return sb.toString().substring(0, sb.length() - 1);
+    }
+
+    private static String COLUMN_PATTERN_UPDATED = "c%d %s,";
+    private static String transformToCommaUpdated(Collection<Long> columns, FormTemplate ft){
+        StringBuilder sb = new StringBuilder();
+        for (Long colId : columns){
+            switch (ft.getColumn(colId.intValue()).getColumnType()){
+                case STRING:
+                    sb.append(String.format(COLUMN_PATTERN_UPDATED, colId, "VARCHAR(4000)", colId, colId, colId, colId));
+                    break;
+                case NUMBER:
+                    NumericColumn numericColumn = (NumericColumn)ft.getColumn(colId.intValue());
+                    sb.append(String.format(
+                            COLUMN_PATTERN_UPDATED, colId, String.format("NUMBER(%d,%d)",
+                            numericColumn.getMaxLength(), numericColumn.getPrecision()), colId, colId, colId, colId)
+                    );
+                    break;
+                case REFBOOK:
+                case REFERENCE:
+                case AUTO:
+                    sb.append(String.format(COLUMN_PATTERN_UPDATED, colId, "NUMBER(18)", colId, colId, colId, colId));
+                    break;
+                case DATE:
+                    sb.append(String.format(COLUMN_PATTERN_UPDATED, colId, "DATE", colId, colId, colId, colId));
+                    break;
+            }
+        }
+
+        return sb.toString().substring(0, sb.length()-1);
+    }
+
+    private static final String CLEAR_COLS = "c%s%s = null,";
+    private static <T extends Number> String transformForCleanColumns(Collection<T> columns, String prefix){
+        StringBuilder sb = new StringBuilder();
+        for (T colId : columns){
+            sb.append(String.format(CLEAR_COLS, colId, prefix));
+        }
+
+        return sb.toString().substring(0, sb.length()-1);
     }
 
 	@Override

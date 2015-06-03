@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -37,5 +38,5 @@ public interface FormStyleDao {
 	 * Сохранить список стилей формы
 	 * @param formTemplate форма
 	 */
-	void saveFormStyles(FormTemplate formTemplate);
+	Collection<Integer> saveFormStyles(FormTemplate formTemplate);
 }

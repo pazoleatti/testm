@@ -438,6 +438,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         LogCleanEvent.fire(this);
         CheckFormDataAction checkAction = new CheckFormDataAction();
         checkAction.setFormData(formData);
+        checkAction.setEditMode(!readOnlyMode);
         checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         dispatcher.execute(checkAction, createDataRowResultCallback(false));
 	}  	
