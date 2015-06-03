@@ -32,6 +32,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -48,15 +49,18 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -85,8 +89,7 @@ def editableStyle = 'Редактируемая'
 //// Кастомные методы
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // подсчет итогов
     def itogValues = calcItog(dataRows)
@@ -94,7 +97,6 @@ void calc() {
     totalColumns.each { alias ->
         itog.getCell(alias).setValue(itogValues[alias], itog.getIndex())
     }
-    dataRowHelper.save(dataRows);
 }
 
 def logicCheck() {
@@ -146,8 +148,7 @@ def getReportPeriodEndDate() {
 
 // Консолидация
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     dataRows.each{
         it.realizeCost = null
@@ -159,15 +160,13 @@ void consolidation() {
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.VAT) {
             formDataService.getDataRowHelper(source).allCached.each { srcRow ->
                 if (srcRow.getAlias() != null && !srcRow.getAlias().equals('itog')) {
-                    def row = dataRowHelper.getDataRow(dataRows, srcRow.getAlias())
+                    def row = getDataRow(dataRows, srcRow.getAlias())
                     row.realizeCost = (row.realizeCost ?: 0) + (srcRow.realizeCost ?: 0)
                     row.obtainCost = (row.obtainCost ?: 0) + (srcRow.obtainCost ?: 0)
                 }
             }
         }
     }
-
-    dataRowHelper.update(dataRows)
 }
 
 def calcItog(def dataRows) {
@@ -211,8 +210,7 @@ void importTransportData() {
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     try {
         // пропускаем заголовок
@@ -268,9 +266,6 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-    }
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        dataRowHelper.update(dataRows)
     }
 }
 
@@ -379,8 +374,7 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -413,9 +407,6 @@ void importData() {
         rowValues.clear()
     }
     showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(dataRows)
-    }
 }
 
 /**
