@@ -60,8 +60,9 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
         } else {
             if (lockType == null) {
                 result.setFormMode(TimerTaskResult.FormMode.EDIT);
+            } else if (lockType.getSecond().getUserId() == userInfo.getUser().getId()) {
+                result.setFormMode(TimerTaskResult.FormMode.LOCKED_READ);
             } else {
-                // есто блокировка
                 result.setFormMode(TimerTaskResult.FormMode.LOCKED);
             }
         }

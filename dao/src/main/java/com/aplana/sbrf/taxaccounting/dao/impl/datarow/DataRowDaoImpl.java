@@ -328,6 +328,44 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		insertRows(formData, 1, dataRows);
 	}
 
+    @Override
+    public boolean compareRows(FormData formData) {
+        StringBuffer sqlColumns = new StringBuffer("ORD, alias");
+        Map<Integer, String[]> columnNames = DataRowMapper.getColumnNames(formData);
+        for (Column column : formData.getFormColumns()) {
+            for (String name : columnNames.get(column.getId())) {
+                sqlColumns.append(", ").append(name);
+            }
+        }
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("form_data_id", formData.getId());
+        params.put("manual", formData.isManual());
+
+        StringBuilder sql = new StringBuilder(" SELECT count(*) FROM ( \n (SELECT ");
+        sql.append(sqlColumns);
+        sql.append("\n FROM form_data_");
+        sql.append(formData.getFormTemplateId());
+        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = 0");
+        sql.append("\n MINUS \n SELECT ");
+        sql.append(sqlColumns);
+        sql.append("\n FROM form_data_");
+        sql.append(formData.getFormTemplateId());
+        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = 1)");
+        sql.append("\n UNION ALL \n (SELECT ");
+        sql.append(sqlColumns);
+        sql.append("\n FROM form_data_");
+        sql.append(formData.getFormTemplateId());
+        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = 1");
+        sql.append("\n MINUS \n SELECT ");
+        sql.append(sqlColumns);
+        sql.append("\n FROM form_data_");
+        sql.append(formData.getFormTemplateId());
+        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = 0))");
+
+        return getNamedParameterJdbcTemplate().queryForLong(sql.toString(), params) == 0 ? true : false;
+    }
+
 	@Override
 	public void updateRows(FormData formData, Collection<DataRow<Cell>> rows) {
 		StringBuilder sql = new StringBuilder("UPDATE form_data_");

@@ -30,7 +30,6 @@ import groovy.transform.Field
  * 15 cost                        Стоимость покупок по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры
  * 16 nds                         Сумма НДС по счету-фактуре, разница суммы НДС по корректировочному счету-фактуре, принимаемая к вычету, в рублях и копейках
  */
-
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -38,6 +37,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -62,15 +62,18 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -139,16 +142,12 @@ def endDate = null
 def isBalancePeriod
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def totalRow = getDataRow(dataRows, 'total')
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
-    dataRowHelper.update(totalRow)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void changeDateFormat(def row){
@@ -175,8 +174,7 @@ void changeDateFormat(def row){
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def FILLED_FILLED_ERROR_MSG = "Строка %s: В случае если графа «%s» заполнена, должна быть заполнена графа «%s»!"
     def ONE_FMT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s». Оба поля обязательны для заполнения."
@@ -294,7 +292,7 @@ def getReportPeriodEndDate() {
 
 // Консолидация с группировкой по подразделениям
 void consolidation() {
-    def dataRows = []
+    def rows = []
 
     // получить данные из источников
     def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
@@ -307,18 +305,20 @@ void consolidation() {
             def final childData = formDataService.getDataRowHelper(child)
             def final department = departmentService.get(child.departmentId)
             def headRow = getFixedRow(department.name, "head_${department.id}")
-            dataRows.add(headRow)
+            rows.add(headRow)
             def final childDataRows = childData.all
-            dataRows.addAll(childDataRows.findAll { it.getAlias() == null })
+            rows.addAll(childDataRows.findAll { it.getAlias() == null })
             def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}")
             calcTotalSum(childDataRows, subTotalRow, totalSumColumns)
-            dataRows.add(subTotalRow)
+            rows.add(subTotalRow)
         }
     }
 
     def totalRow = getFixedRow('Всего','total')
-    dataRows.add(totalRow)
-    formDataService.getDataRowHelper(formData).save(dataRows)
+    rows.add(totalRow)
+
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /** Получить произвольную фиксированную строку со стилями. */
@@ -362,7 +362,7 @@ def loggerError(def row, def msg) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -373,7 +373,11 @@ void sortFormDataRows() {
         sortRows(dataRows, sortColumns)
         dataRows.add(totalRow)
 
-        dataRowHelper.saveSort()
+        if (saveInDB) {
+            dataRowHelper.saveSort()
+        } else {
+            updateIndexes(dataRows);
+        }
     }
 }
 
@@ -450,11 +454,10 @@ void importTransportData() {
     }
 
     showMessages(newRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
-    // вставляем строки в БД
-    formDataService.getDataRowHelper(formData).save(newRows)
 }
 
 boolean isEmptyCells(def rowCells) {
@@ -593,7 +596,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

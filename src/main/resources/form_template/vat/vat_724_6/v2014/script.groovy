@@ -33,6 +33,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -55,15 +56,18 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -120,8 +124,7 @@ def getReportPeriodEndDate() {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def FORMAT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s»"
 
@@ -152,20 +155,17 @@ void logicCheck() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+
     def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalColumns)
-    dataRowHelper.save(dataRows)
 
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 // Консолидация с группировкой по подразделениям
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = []
+    def rows = []
 
     // получить данные из источников
     def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
@@ -178,19 +178,20 @@ void consolidation() {
             def final childData = formDataService.getDataRowHelper(child)
             def final department = departmentService.get(child.departmentId)
             def headRow = getFixedRow(department.name, "head_${department.id}", false)
-            dataRows.add(headRow)
+            rows.add(headRow)
             def final childDataRows = childData.all
-            dataRows.addAll(childDataRows.findAll { it.getAlias() == null })
+            rows.addAll(childDataRows.findAll { it.getAlias() == null })
             def subTotalRow = getFixedRow("Итого по ${department.name}", "total_${department.id}", false)
             calcTotalSum(childDataRows, subTotalRow, totalColumns)
-            dataRows.add(subTotalRow)
+            rows.add(subTotalRow)
         }
     }
 
     def totalRow = getFixedRow('Итого', 'total', true)
-    dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
-    dataRows = null
+    rows.add(totalRow)
+
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /** Получить произвольную фиксированную строку со стилями.
@@ -223,7 +224,7 @@ def getNewRow() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -234,7 +235,11 @@ void sortFormDataRows() {
         sortRows(dataRows, sortColumns)
         dataRows.add(totalRow)
 
-        dataRowHelper.saveSort()
+        if (saveInDB) {
+            dataRowHelper.saveSort()
+        } else {
+            updateIndexes(dataRows);
+        }
     }
 }
 
@@ -331,7 +336,8 @@ void importTransportData() {
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -462,7 +468,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

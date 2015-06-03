@@ -518,7 +518,7 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
+        //checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
         //Проверяем не заблокирована ли нф операцией загрузки в нее
         //checkLockedByImport(formData.getId(), logger);
 
@@ -1154,6 +1154,7 @@ public class FormDataServiceImpl implements FormDataService {
         //Блокировка всех экземпляров источников
         List<String> lockedForms = new ArrayList<String>();
         try {
+            /*
             //Блокировка текущей формы
             String lockCurrentKey = generateTaskKey(formData.getId(), ReportType.EDIT_FD);
             LockData lockDataCurrent = lockService.lock(lockCurrentKey,
@@ -1167,20 +1168,25 @@ public class FormDataServiceImpl implements FormDataService {
                                 LOCK_CURRENT, userInfo.getUser().getLogin(),
                                 SDF_HH_MM_DD_MM_YYYY.format(lockDataCurrent.getDateLock()))
                 );
-                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));*/
+                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
             } else {
                 lockedForms.add(lockCurrentKey);
-            }
-
-            String lockKey;
+            }*/
+            String lockKey = "";
             //Переменная для отмечания консолидации в таблице консолидации
             for (FormData sourceForm : sources){
                 // Проверяем/устанавливаем блокировку для источников
-                lockKey = generateTaskKey(sourceForm.getId(), ReportType.EDIT_FD);
-                LockData lockData = lockService.lock(
-                        lockKey,
-                        userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
-                        lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+                LockData lockData;
+                Pair<ReportType, LockData> lockType = getLockTaskType(sourceForm.getId());
+                if (lockType == null) {
+                    lockKey = generateTaskKey(sourceForm.getId(), ReportType.EDIT_FD);
+                    lockData = lockService.lock(
+                            lockKey,
+                            userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
+                            lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+                } else {
+                    lockData = lockType.getSecond();
+                }
 
                 if (lockData != null) {
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());

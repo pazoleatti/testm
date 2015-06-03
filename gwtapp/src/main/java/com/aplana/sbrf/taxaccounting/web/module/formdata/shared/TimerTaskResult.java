@@ -8,7 +8,8 @@ public class TimerTaskResult implements Result {
 
     public static enum FormMode {
         LOCKED, // Открыта только для чтения
-        LOCKED_EDIT, // Заблокирована в режиме редактрирования
+        LOCKED_READ, // Заблокирована в режиме просмотра текущим пользователем
+        LOCKED_EDIT, // Заблокирована в режиме редактрирования текущим пользователем
         EDIT // Открыта для редактирования
     }
 

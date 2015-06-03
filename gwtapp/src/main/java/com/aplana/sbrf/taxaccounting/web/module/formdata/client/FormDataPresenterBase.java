@@ -220,6 +220,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		MyView view = getView();
 		view.showSaveCancelPanel(false, readOnlyMode);
         view.showAddRemoveRowsBlock(false);
+        view.showConsolidation(false);
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
@@ -238,6 +239,79 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
     }
 
+    protected void setLowReadLockedMode(String lockedBy, String lockDate){
+        readOnlyMode = true;
+
+        MyView view = getView();
+        view.showSaveCancelPanel(false, readOnlyMode);
+        view.showEditModeLabel(false);
+        view.showAddRemoveRowsBlock(false);
+        view.showConsolidation(WorkflowState.ACCEPTED != formData.getState()
+                &&
+                (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind())
+                &&
+                readOnlyMode);
+        view.showRecalculateButton(false);
+        view.showOriginalVersionButton(false);
+        view.showPrintAnchor(false);
+        view.showDeleteFormButton(formDataAccessParams.isCanDelete());
+        view.setLockInformation(true, false, lockDate, lockedBy);
+
+        view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
+        view.showCheckButton(formDataAccessParams.isCanRead());
+
+        view.showEditAnchor(formDataAccessParams.isCanEdit());
+        view.showModeAnchor(existManual, formData.isManual());
+        view.showManualAnchor(canCreatedManual && !existManual);
+        view.showDeleteManualAnchor(false);
+
+        view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
+        placeManager.setOnLeaveConfirmation(null);
+    }
+
+    protected void setLowEditLockedMode(String lockedBy, String lockDate){
+        readOnlyMode = false;
+
+        MyView view = getView();
+        // сводная форма уровня Банка.
+        if ((formData.getDepartmentId() == 1)
+                && (formData.getKind() == FormDataKind.SUMMARY)) {
+            view.showOriginalVersionButton(true);
+        } else {
+            view.showOriginalVersionButton(false);
+        }
+
+        view.showSaveCancelPanel(true, readOnlyMode);
+        view.showEditModeLabel(true);
+        view.showConsolidation(false);
+        view.showRecalculateButton(!formData.isManual());
+        view.showAddRemoveRowsBlock(false);
+
+        view.showPrintAnchor(false);
+        view.showDeleteFormButton(false);
+        view.setLockInformation(true, false, lockDate, lockedBy);
+
+        view.setWorkflowButtons(null);
+        view.showCheckButton(formDataAccessParams.isCanRead());
+        view.setSelectedRow(null, true);
+
+        getView().showEditAnchor(false);
+        getView().showModeAnchor(false, false);
+        getView().showManualAnchor(false);
+        getView().showDeleteManualAnchor(formData.isManual());
+
+        getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
+
+        placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
+        closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
+            @Override
+            public void onClose(CloseEvent<Window> event) {
+                closeFormDataHandlerRegistration.removeHandler();
+                unlockForm(formData.getId());
+            }
+        });
+    }
+
 	protected void setReadUnlockedMode() {
         readOnlyMode = true;
 		
@@ -245,6 +319,11 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showSaveCancelPanel(false, readOnlyMode);
         view.showEditModeLabel(false);
         view.showAddRemoveRowsBlock(false);
+        view.showConsolidation(WorkflowState.ACCEPTED != formData.getState()
+                &&
+                (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind())
+                &&
+                readOnlyMode);
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
@@ -277,6 +356,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showSaveCancelPanel(true, readOnlyMode);
         view.showEditModeLabel(true);
+        view.showConsolidation(false);
 		view.showRecalculateButton(!formData.isManual());
         view.showAddRemoveRowsBlock(!fixedRows);
 

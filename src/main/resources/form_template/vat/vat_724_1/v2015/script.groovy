@@ -32,6 +32,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -56,15 +57,18 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -182,9 +186,7 @@ void setRowStyles(def row, def isSection7) {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def superTotalRow = getDataRow(dataRows, 'total')
     totalColumns.each{
         superTotalRow[it] = BigDecimal.ZERO
@@ -219,12 +221,8 @@ void calc() {
             }
         }
     }
-    updateIndexes(dataRows)
 
-    dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -323,8 +321,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     deleteExtraRows(dataRows)
@@ -350,7 +347,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 // Удалить нефиксированные строки
@@ -377,13 +373,6 @@ def getFixedRow(String title, String alias, boolean isLongName) {
         total.getCell(it).setStyleAlias('Контрольные суммы')
     }
     return total
-}
-
-/** Поправить индексы. */
-void updateIndexes(def dataRows) {
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
 }
 
 /**
@@ -471,7 +460,7 @@ def getLastRowAlias(def section) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -490,7 +479,11 @@ void sortFormDataRows() {
             sortRows(sectionsRows, sortColumns)
         }
 
-        dataRowHelper.saveSort()
+        if (saveInDB) {
+            dataRowHelper.saveSort()
+        } else {
+            updateIndexes(dataRows);
+        }
     }
 }
 
@@ -619,9 +612,9 @@ void importTransportData() {
             rows.add(getDataRow(templateRows, 'total'))
         }
     }
-    formDataService.getDataRowHelper(formData).save(rows)
 
     updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /**
@@ -804,7 +797,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
