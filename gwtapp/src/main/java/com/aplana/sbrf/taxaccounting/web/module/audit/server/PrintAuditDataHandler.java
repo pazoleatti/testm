@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
@@ -61,7 +60,8 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
         Logger logger = new Logger();
         long recordsCount = auditService.getCountRecords(action.getLogSystemFilter().convertTo(), userInfo);
         if (recordsCount==0) {
-            throw new ServiceException("В журнале аудита отсутствуют записи по заданным параметрам поиска.");
+            result.setLogUuid(null);
+            return result;
         }
         String key = LockData.LockObjects.LOG_SYSTEM_CSV.name() + "_" + userInfo.getUser().getId();
         HashMap<String, Object> params = new HashMap<String, Object>();

@@ -121,6 +121,11 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
             dispatcher.execute(dataAction, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<PrintAuditDataResult>() {
                 @Override
                 public void onSuccess(PrintAuditDataResult result) {
+                    if (result.getLogUuid() == null) {
+                        MessageEvent.fire(AuditClientPresenter.this, true,
+                                "В журнале аудита отсутствуют записи по заданным параметрам поиска.");
+                        return;
+                    }
                     LogAddEvent.fire(AuditClientPresenter.this, result.getLogUuid());
                     getView().startTimerReport(ReportType.CSV_AUDIT);
                 }
