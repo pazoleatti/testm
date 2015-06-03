@@ -112,6 +112,11 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		GetFormDataResult result = new GetFormDataResult();
 		Logger logger = new Logger();
 
+        if (!action.isReadOnly()) {
+            FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
+            dataRowService.createTemporary(formData);
+        }
+
 		fillLockData(action, userInfo, result);
 		fillFormAndTemplateData(action, userInfo, logger, result);
 		fillFormDataAccessParams(action, userInfo, result);

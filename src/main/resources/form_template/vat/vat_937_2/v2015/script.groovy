@@ -41,6 +41,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -64,16 +65,20 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
+        calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -170,16 +175,12 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def totalRow = getDataRow(dataRows, 'total')
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
-    dataRowHelper.update(totalRow)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void changeDateFormat(def row){
@@ -206,8 +207,7 @@ void changeDateFormat(def row){
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def FILLED_FILLED_ERROR_MSG = "Строка %s: В случае если графа «%s» заполнена, должна быть заполнена графа «%s»!"
     def NOT_FILLED_FILLED_ERROR_MSG = "Строка %s: В случае если графа «%s» не заполнена, должна быть заполнена графа «%s»!"
@@ -300,7 +300,7 @@ String getLastTextPart(String value, def pattern) {
 
 // Консолидация с группировкой по подразделениям
 void consolidation() {
-    def dataRows = []
+    def rows = []
 
     // получить данные из источников
     def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
@@ -313,19 +313,20 @@ void consolidation() {
             def final childData = formDataService.getDataRowHelper(child)
             def final department = departmentService.get(child.departmentId)
             def headRow = getFixedRow(department.name, "head_${department.id}")
-            dataRows.add(headRow)
+            rows.add(headRow)
             def final childDataRows = childData.all
-            dataRows.addAll(childDataRows.findAll { it.getAlias() == null })
+            rows.addAll(childDataRows.findAll { it.getAlias() == null })
             def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}")
             calcTotalSum(childDataRows, subTotalRow, totalSumColumns)
-            dataRows.add(subTotalRow)
+            rows.add(subTotalRow)
         }
     }
 
     def totalRow = getFixedRow('Всего','total')
-    dataRows.add(totalRow)
-    formDataService.getDataRowHelper(formData).save(dataRows)
-    dataRows = null
+    rows.add(totalRow)
+
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /** Получить произвольную фиксированную строку со стилями. */
@@ -361,7 +362,7 @@ def isBalancePeriod() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -372,7 +373,11 @@ void sortFormDataRows() {
         sortRows(dataRows, sortColumns)
         dataRows.add(totalRow)
 
-        dataRowHelper.saveSort()
+        if (saveInDB) {
+            dataRowHelper.saveSort()
+        } else {
+            updateIndexes(dataRows);
+        }
     }
 }
 
@@ -381,24 +386,6 @@ def loggerError(def row, def msg) {
         rowWarning(logger, row, msg)
     } else {
         rowError(logger, row, msg)
-    }
-}
-
-void save(def dataRows) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    // запись
-    dataRowHelper.clear()
-    def rows = []
-    dataRows.each { row ->
-        rows.add(row)
-        if (rows.size() > 1000) {
-            dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-            rows.clear()
-        }
-    }
-    if (rows.size() > 0) {
-        dataRowHelper.insert(rows, dataRowHelper.allCached.size() + 1)
-        rows.clear()
     }
 }
 
@@ -475,9 +462,9 @@ void importTransportData() {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    // вставляем строки в БД
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -602,7 +589,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

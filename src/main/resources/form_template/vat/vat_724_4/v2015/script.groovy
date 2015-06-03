@@ -33,14 +33,15 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         }
@@ -57,15 +58,18 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -177,8 +181,7 @@ def getNewRow() {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def section : sections) {
         def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
@@ -190,12 +193,8 @@ void calc() {
         def rows = (from <= to ? dataRows[from..to] : [])
         calcTotalSum(rows, lastRow, totalColumns)
     }
-    updateIndexes(dataRows)
 
-    dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -254,8 +253,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     deleteNotFixedRows(dataRows)
@@ -274,7 +272,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 // Удалить нефиксированные строки
@@ -288,13 +285,6 @@ void deleteNotFixedRows(def dataRows) {
     if (!deleteRows.isEmpty()) {
         dataRows.removeAll(deleteRows)
         updateIndexes(dataRows)
-    }
-}
-
-/** Поправить индексы. */
-void updateIndexes(def dataRows) {
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
     }
 }
 
@@ -343,7 +333,7 @@ def getLastRowAlias(def section) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -355,13 +345,17 @@ void sortFormDataRows() {
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
         // Массовое разыменование строк НФ
-        def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
         sortRows(sectionsRows, sortColumns)
     }
 
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 void importTransportData() {
@@ -432,7 +426,7 @@ void importTransportData() {
     // сравнение итогов
     if (totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [ 'sum' : 4, 'sum2' : 6 ]
+        def totalColumnsIndexMap = ['sum': 4, 'sum2': 6]
 
         // итоговая строка для сверки сумм
         def totalTmp = formData.createStoreMessagingDataRow()
@@ -487,8 +481,8 @@ void importTransportData() {
         }
         rows.add(lastRow)
     }
-    formDataService.getDataRowHelper(formData).save(rows)
     updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /**
@@ -564,7 +558,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -643,9 +637,8 @@ void importData() {
         }
         rows.add(lastRow)
     }
-    formDataService.getDataRowHelper(formData).save(rows)
-
     updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /**
