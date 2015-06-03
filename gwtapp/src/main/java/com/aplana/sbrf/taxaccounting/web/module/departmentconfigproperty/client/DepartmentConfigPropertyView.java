@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client;
 
 import com.aplana.gwt.client.DoubleBox;
-import com.aplana.gwt.client.LongBox;
 import com.aplana.gwt.client.TextBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.sortable.AsyncDataProviderWithSortableTable;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.TableCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
@@ -39,7 +38,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
-import com.google.gwt.view.client.RowCountChangeEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
@@ -247,6 +245,10 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 }
                 DepartmentConfigPropertyView.this.currentReportPeriodId = selPeriodId;
                 editButton.setEnabled(false);
+                Pair<Date, Date> period = periodPickerPopup.getPeriodDates(periodPickerPopup.getValue().get(0));
+                System.out.println("periodPickerPopup changed: "+period.getFirst() + "; " + period.getSecond());
+                factory.setDateRange(period.getFirst(), period.getSecond());
+                getUiHandlers().createTableColumns();
             }
         });
 
