@@ -234,7 +234,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
-        checkSources(declarationData, logger);
 
         //2. проверяет состояние XML отчета экземпляра декларации
         setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
