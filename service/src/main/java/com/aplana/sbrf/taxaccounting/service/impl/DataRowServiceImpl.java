@@ -83,6 +83,11 @@ public class DataRowServiceImpl implements DataRowService {
         dataRowDao.createTemporary(formData);
     }
 
+    @Override
+    public boolean compareRows(FormData formData) {
+        return dataRowDao.compareRows(formData);
+    }
+
     private void checkLockedMe(LockData lockData, TAUser user){
         if (lockData.getUserId() != user.getId()) {
             throw new ServiceException("Объект не заблокирован текущим пользователем");

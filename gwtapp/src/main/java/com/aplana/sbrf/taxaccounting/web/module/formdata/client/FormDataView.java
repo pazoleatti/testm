@@ -522,7 +522,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("recalculateButton")
 	void onRecalculateButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onRecalculateClicked();
+			getUiHandlers().onRecalculateClicked(false, false);
 		}
 	}
 
@@ -652,7 +652,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@Override
 	public void showSaveCancelPanel(boolean show, boolean readOnlyMode) {
         if (show || readOnlyMode) {
-            cancelButton.setVisible(show);
+            saveCancelPanel.setVisible(show);
             cancelButton.setVisible(show);
             saveButton.setVisible(show);
         } else {

@@ -432,7 +432,53 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			return showMsg ? CallbackUtils.defaultCallback(callback, this) :
 				CallbackUtils.defaultCallbackNoModalError(callback, this);
 	}
-	
+
+    private AsyncCallback<RecalculateFormDataResult> createDataRowResultCallback(final boolean force, final boolean save, final ReportType reportType){
+        LogCleanEvent.fire(this);
+        AbstractCallback<RecalculateFormDataResult> callback = new AbstractCallback<RecalculateFormDataResult>() {
+            @Override
+            public void onSuccess(RecalculateFormDataResult result) {
+                if (result.isLock()) {
+                    Dialog.confirmMessage("Запрашиваемая операция \"" + reportType.getDescription().replaceAll("\\%s", formData.getFormType().getTaxType().getTaxText()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            if (ReportType.CALCULATE_FD.equals(reportType)) {
+                                onRecalculateClicked(true, false);
+                            } else if (ReportType.IMPORT_FD.equals(reportType)) {
+                            }
+                        }
+                    });
+                } else if (result.isSave()) {
+                    Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            if (ReportType.CALCULATE_FD.equals(reportType)) {
+                                onRecalculateClicked(force, true);
+                            } else if (ReportType.IMPORT_FD.equals(reportType)) {
+                            }
+                        }
+                    });
+                } else {
+                    modifiedRows.clear();
+                    innerLogUuid = result.getUuid();
+                    getView().updateData();
+                    getView().setSelectedRow(null, true);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                if (caught instanceof TaActionException) {
+                    innerLogUuid = ((TaActionException) caught).getUuid();
+                }
+                modifiedRows.clear();
+                getView().updateData();
+            }
+
+        };
+        return CallbackUtils.defaultCallback(callback, this);
+    }
+
 	@Override
 	public void onCheckClicked() {
         LogCleanEvent.fire(this);
@@ -493,11 +539,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
      * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRecalculateClicked()
      */
 	@Override
-	public void onRecalculateClicked() {
+	public void onRecalculateClicked(final boolean force, final boolean save) {
 		RecalculateDataRowsAction action = new RecalculateDataRowsAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, createDataRowResultCallback(true));
+        action.setForce(force);
+        action.setSave(save);
+		dispatcher.execute(action, createDataRowResultCallback(force, save, ReportType.CALCULATE_FD));
 	}
 
 	@Override
@@ -912,7 +960,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             } else {
                                                 setLowEditLockedMode(
                                                         result.getLockedByUser(),
-                                                        result.getLockDate());                                            }
+                                                        result.getLockDate());
+                                            }
                                             break;
                                         case LOCKED:
                                             setReadLockedMode(true,

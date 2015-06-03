@@ -180,4 +180,10 @@ public interface DataRowDao {
 	 */
 	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
 
+    /**
+     * Сравнивает строки во временном срезе и основном
+     * @param formData
+     * @return true - изменении нету, иначе false
+     */
+    boolean compareRows(FormData formData);
 }

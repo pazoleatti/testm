@@ -61,4 +61,11 @@ public interface DataRowService {
      * @param formData
      */
     void createTemporary(FormData formData);
+
+    /**
+     * Сравнивает строки во временном срезе и основном
+     * @param formData
+     * @return true - изменении нету, иначе false
+     */
+    boolean compareRows(FormData formData);
 }
