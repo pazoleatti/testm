@@ -832,28 +832,6 @@ public class FormDataServiceImpl implements FormDataService {
         if (lockData == null) {
             //Блокировка установлена
             listWithLocks.add(lockKey);
-            //Блокируем связанные справочники
-            for (Column column : formData.getFormColumns()) {
-                if (ColumnType.REFBOOK.equals(column.getColumnType())) {
-                    Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
-                    if (attributeId != null) {
-                        RefBook refBook = refBookDao.getByAttribute(attributeId);
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-                        if (!listWithLocks.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
-                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
-                            if (referenceLockData == null) {
-                                //Блокировка установлена
-                                listWithLocks.add(referenceLockKey);
-                            } else {
-                                throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
-                                        logEntryService.save(logger.getEntries()));
-                            }
-                        }
-                    }
-                }
-            }
         } else {
             throw new ServiceLoggerException(LOCK_MESSAGE,
                     logEntryService.save(logger.getEntries()));
