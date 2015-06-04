@@ -499,7 +499,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		sql.append(formData.getFormTemplateId());
 		sql.append(" (id, form_data_id, temporary, manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
-		sql.append(") \nSELECT seq_form_data_nnn.nextval, form_data_id, :manual AS manual, :temporary AS temporary, ord, alias");
+		sql.append(") \nSELECT seq_form_data_nnn.nextval, form_data_id, :temporary AS temporary, :manual AS manual, ord, alias");
 		DataRowMapper.getColumnNamesString(formData, sql);
 		sql.append("\nFROM form_data_");
 		sql.append(formData.getFormTemplateId());

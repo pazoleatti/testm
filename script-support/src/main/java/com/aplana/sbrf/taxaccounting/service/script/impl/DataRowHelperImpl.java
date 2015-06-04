@@ -63,7 +63,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	public List<DataRow<Cell>> getAll() {
         List<DataRow<Cell>> rows;
         if (fd.getState() == WorkflowState.ACCEPTED) {
-            //Если нф принята, то в любом случае у нее есть только посточнный срез
+            //Если нф принята, то в любом случае у нее есть только постоянный срез
             rows = dataRowDao.getSavedRows(fd, null);
         } else {
             //Иначе берем временный. Предварительно он должен быть создан из постоянного с помощью метода com.aplana.sbrf.taxaccounting.service.impl.DataRowServiceImpl.createTemporary()
