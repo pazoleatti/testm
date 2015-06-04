@@ -89,7 +89,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant.getName());
-                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
+                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getTaxText());
                     result.setLock(false);
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
