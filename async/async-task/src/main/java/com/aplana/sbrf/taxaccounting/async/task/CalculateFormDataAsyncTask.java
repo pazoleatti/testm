@@ -44,15 +44,6 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 false,
                 logger);
-        /*
-        try {
-            formDataService.checkCompose(formData, userInfo, logger);
-        } catch (ServiceException e) {
-            throw new ServiceLoggerException(ReportType.CHECK_TASK,
-                    logEntryService.save(logger.getEntries()),
-                    String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
-                    e.getMessage());
-        }*/
         return BalancingVariants.SHORT;
     }
 

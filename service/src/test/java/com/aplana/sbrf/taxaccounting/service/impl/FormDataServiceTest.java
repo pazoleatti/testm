@@ -99,6 +99,8 @@ public class FormDataServiceTest {
     private static final int FORM_TEMPLATE_ID = 1;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
+    TAUserInfo userInfo;
+
     @Before
     public void init() {
         // Макет
@@ -124,7 +126,9 @@ public class FormDataServiceTest {
 		TAUser user = new TAUser();
 		user.setId(666);
 		user.setLogin("MockUser");
-		when(userService.getUser(666)).thenReturn(user);
+        userInfo = new TAUserInfo();
+        userInfo.setUser(user);
+        when(userService.getUser(666)).thenReturn(user);
 		ReflectionTestUtils.setField(formDataService, "userService", userService);
     }
     /**
@@ -485,8 +489,8 @@ public class FormDataServiceTest {
         doReturn(false).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
         doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -503,8 +507,8 @@ public class FormDataServiceTest {
         doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
         doReturn(1L).when(formData).getId();
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -521,8 +525,8 @@ public class FormDataServiceTest {
         doReturn(1L).when(formData).getId();
         doReturn(WorkflowState.CREATED).when(formData).getState();
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
-        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -535,8 +539,8 @@ public class FormDataServiceTest {
 
         doReturn(false).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
 
-        dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -551,8 +555,8 @@ public class FormDataServiceTest {
 
         doReturn(true).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
 
-        dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger);
-        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger, userInfo);
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -584,7 +588,7 @@ public class FormDataServiceTest {
 
         InOrder inOrder = inOrder(dataService, formDataDao);
 
-        inOrder.verify(dataService, times(1)).updatePreviousRowNumberAttr(formData, logger);
+        inOrder.verify(dataService, times(1)).updatePreviousRowNumberAttr(formData, logger, userInfo);
         inOrder.verify(formDataDao, times(1)).save(formData);
     }
 

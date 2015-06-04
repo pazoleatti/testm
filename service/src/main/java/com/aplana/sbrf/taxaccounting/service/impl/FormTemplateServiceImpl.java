@@ -101,7 +101,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             int formTemplateId = formTemplateDao.save(formTemplate);
             List<Long> formDataIds = formDataService.getFormDataListInActualPeriodByTemplate(formTemplateId, formTemplate.getVersion());
             for(Long formDataId: formDataIds)
-                formDataService.deleteReport(formDataId, null);
+                formDataService.deleteReport(formDataId, null, 0);
             return formTemplateId;
         } else
             return formTemplateDao.saveNew(formTemplate);
@@ -397,7 +397,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
+    public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger, TAUserInfo user) {
         // Если есть хоть одна автонумеруемая графа
         if (isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
             Integer formTemplateId = formTemplate.getId();
@@ -425,7 +425,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                             stringBuilder.toString() + ". " +
                             "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
                 } else {
-                    formDataService.batchUpdatePreviousNumberRow(formTemplate);
+                    formDataService.batchUpdatePreviousNumberRow(formTemplate, user);
                 }
             }
         }

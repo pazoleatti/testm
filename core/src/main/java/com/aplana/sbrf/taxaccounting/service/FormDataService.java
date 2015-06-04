@@ -245,7 +245,7 @@ public interface FormDataService {
      * @param dateTo
      * @param isChangeTB true - показывает, что изменился тип подразделения с типа ТБ
      */
-    void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo, boolean isChangeTB);
+    void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo, boolean isChangeTB, TAUserInfo user);
 
     /**
      * Обновляет имена подразделений в печатных формах(полях для печатных форм, вторая часть имени)
@@ -255,7 +255,7 @@ public interface FormDataService {
      * @param dateFrom дата отчетного периода, начиная с которой надо поменять наименование отчетного периода
      * @param dateTo дата отчетного периода, до которой надо поменять наименование отчетного периода
      */
-    void updateFDDepartmentNames(int depTBId, String depName, Date dateFrom, Date dateTo);
+    void updateFDDepartmentNames(int depTBId, String depName, Date dateFrom, Date dateTo, TAUserInfo user);
 
     /**
      * Получить значение "Номер последней строки предыдущей НФ"
@@ -268,7 +268,7 @@ public interface FormDataService {
      * Обновить Номер последней строки предыдущей НФ
      * @param formData экземпляр НФ, для которой необходимо обновить
      */
-    void updatePreviousRowNumber(FormData formData);
+    void updatePreviousRowNumber(FormData formData, TAUserInfo user);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
@@ -276,7 +276,7 @@ public interface FormDataService {
      * @param formData экземпляр НФ, для которой необходимо обновить
      * @param logger   логгер для регистрации ошибок
      */
-    void updatePreviousRowNumber(FormData formData, Logger logger);
+    void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
@@ -285,7 +285,7 @@ public interface FormDataService {
      * @param formTemplate макет НФ
      * @param logger       логгер для регистрации ошибок
      */
-    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger);
+    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода
@@ -309,7 +309,7 @@ public interface FormDataService {
      *
      * @param formTemplate макет НФ
      */
-    void batchUpdatePreviousNumberRow(FormTemplate formTemplate);
+    void batchUpdatePreviousNumberRow(FormTemplate formTemplate, TAUserInfo user);
 
     /**
      * НФ созданная в последнем отчетном периоде подразделения
@@ -336,7 +336,7 @@ public interface FormDataService {
      * @param formDataId идентификатор налоговой формы
      * @param manual признак версии ручного ввода. Если null - то удаляются отчеты для обеих версий
      */
-    void deleteReport(long formDataId, Boolean manual);
+    void deleteReport(long formDataId, Boolean manual, int userId);
 
     void findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate, Logger logger);
 
