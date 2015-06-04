@@ -242,7 +242,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
         DeclarationTemplate template = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
-                (int) id,
+                declarationData.getDepartmentId(),
                 template.getType().getId(),
                 reportPeriod.getCalendarStartDate(),
                 reportPeriod.getEndDate());
