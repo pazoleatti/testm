@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,10 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,8 +59,10 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
     private LockDataService lockDataService;
 
     @Autowired
-    private AsyncManager asyncManager;
+    private TAUserService taUserService;
 
+    @Autowired
+    private AsyncManager asyncManager;
 
 	public RecalculateFormDataHandler() {
 		super(RecalculateDataRowsAction.class);
@@ -85,6 +91,8 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                         } else {
                             // вызов диалога
                             result.setLock(true);
+                            lockDataService.lockInfo(lockType.getSecond(), logger);
+                            result.setUuid(logEntryService.save(logger.getEntries()));
                             return result;
                         }
                     } else {
@@ -108,7 +116,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
             if (!action.getModifiedRows().isEmpty()) {
                 dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
             }
-            // проверка
+            // проверка наличия не сохраненных изменений
             if (!dataRowService.compareRows(formData)) {
                 if (action.isSave()) {
                     // сохраняем данные при нажантии "Да"
@@ -126,8 +134,13 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
             if (lockDataService.lock(keyTask,
                     userInfo.getUser().getId(),
                     formDataService.getFormDataFullName(action.getFormData().getId(), null, reportType),
+                    LockData.State.IN_QUEUE.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                 try {
+                    List<String> lockKeys = new ArrayList<String>();
+                    lockKeys.add(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_DEC));
+                    lockDataService.interuptAllTasks(lockKeys, userInfo.getUser().getId());
+                    formDataService.deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("formDataId", action.getFormData().getId());
                     params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
@@ -138,7 +151,6 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant.getName());
                     logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getFormData().getFormType().getTaxType().getDeclarationShortName());
-                    formDataService.doCalc(logger, userInfo, formData);
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
                     if (e instanceof ServiceLoggerException) {

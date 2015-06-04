@@ -407,7 +407,7 @@ public interface SourceService {
      * @param dateTo дата окончания действия
      * @return список назначений
      */
-    List<Pair<DepartmentFormType, Date>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo);
+    List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo);
 
     /**
      * Находит назначенные виды налоговые форм, которые являются источниками налоговой формы{@code typeId}
@@ -416,7 +416,7 @@ public interface SourceService {
      * @param dateTo дата окончания действия
      * @return список назначений
      */
-    List<Pair<DepartmentFormType, Date>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo);
+    List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo);
 
     /**
      * Находит назначенные виды налоговые форм, которые являются источниками для вида декларации{@code typeId}
@@ -425,7 +425,7 @@ public interface SourceService {
      * @param dateTo дата окончания действия
      * @return список назначений
      */
-    List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo);
+    List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo);
 
     /**
      * Находит назначенные виды деклараций, которые являются потребителями налоговой формы{@code typeId}
@@ -434,7 +434,7 @@ public interface SourceService {
      * @param dateTo дата окончания действия
      * @return список назначений
      */
-    List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo);
+    List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo);
 
     /**
      * Получение назначений НФ

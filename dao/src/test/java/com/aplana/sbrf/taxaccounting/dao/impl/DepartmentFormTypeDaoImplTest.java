@@ -131,7 +131,7 @@ public class DepartmentFormTypeDaoImplTest {
         Date dateStart = calendar.getTime();
         calendar.set(2014, Calendar.DECEMBER, 31);
         Date dateEnd = calendar.getTime();
-        List<Pair<DepartmentFormType, Date>> pairs = departmentFormTypeDao.findSourcesForFormType(2, dateStart, dateEnd);
+        List<Pair<DepartmentFormType, Pair<Date, Date>>> pairs = departmentFormTypeDao.findSourcesForFormType(2, dateStart, dateEnd);
         assertEquals(1, pairs.size());
     }
 

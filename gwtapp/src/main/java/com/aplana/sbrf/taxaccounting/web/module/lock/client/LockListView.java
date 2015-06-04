@@ -152,7 +152,7 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getDateLock();
             }
         };
-        stateDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        stateDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 
         TextColumn<LockDataItem> dateLockColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -170,14 +170,15 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         };
         dateBeforeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        lockDataTable.setColumnWidth(checkColumn, 40, Style.Unit.PX);
+        lockDataTable.setColumnWidth(checkColumn, 20, Style.Unit.PX);
         lockDataTable.setColumnWidth(dateLockColumn, 110, Style.Unit.PX);
         lockDataTable.setColumnWidth(dateBeforeColumn, 110, Style.Unit.PX);
         lockDataTable.setColumnWidth(userColumn, 120, Style.Unit.PX);
-        lockDataTable.setColumnWidth(stateColumn, 300, Style.Unit.PX);
-        lockDataTable.setColumnWidth(stateDateColumn, 110, Style.Unit.PX);
+        lockDataTable.setColumnWidth(stateColumn, 100, Style.Unit.PX);
+        lockDataTable.setColumnWidth(stateDateColumn, 120, Style.Unit.PX);
         lockDataTable.setColumnWidth(keyColumn, 200, Style.Unit.PX);
-        lockDataTable.setColumnWidth(queueColumn, 150, Style.Unit.PX);
+        lockDataTable.setColumnWidth(descriptionColumn, 250, Style.Unit.PX);
+        lockDataTable.setColumnWidth(queueColumn, 100, Style.Unit.PX);
         lockDataTable.setColumnWidth(queuePositionColumn, 65, Style.Unit.PX);
 
         lockDataTable.addColumn(checkColumn);

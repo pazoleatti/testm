@@ -409,7 +409,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 		dataRowDao.commit(formData);
 
-        updatePreviousRowNumber(formData);
+        updatePreviousRowNumber(formData, userInfo);
         return formData.getId();
 	}
 
@@ -657,7 +657,7 @@ public class FormDataServiceImpl implements FormDataService {
         formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
         formDataDao.savePerformerSigner(formData);
 
-        deleteReport(formData.getId(), null);
+        deleteReport(formData.getId(), null, userInfo.getUser().getId());
     }
 
     /**
@@ -702,13 +702,13 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         // Обновление для сквозной нумерации
-        updatePreviousRowNumberAttr(formData, logger);
+        updatePreviousRowNumberAttr(formData, logger, userInfo);
 
         formDataDao.save(formData);
 
 		dataRowDao.commit(formData);
 
-        deleteReport(formData.getId(), formData.isManual());
+        deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
 
         // ЖА и история изменений
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
@@ -775,7 +775,7 @@ public class FormDataServiceImpl implements FormDataService {
                     null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
 
             formDataDao.delete(formDataId);
-            deleteReport(formDataId, null);
+            deleteReport(formDataId, null, userInfo.getUser().getId());
             auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                     null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
         }
@@ -1067,13 +1067,13 @@ public class FormDataServiceImpl implements FormDataService {
         logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
 
         //Считаем что при наличие версии ручного ввода движение о жц невозможно
-        deleteReport(formData.getId(), null);
+        deleteReport(formData.getId(), null, userInfo.getUser().getId());
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                 null, formData.getFormType().getName(), formData.getKind().getId(), workflowMove.getEvent().getTitle(), null, formData.getFormType().getId());
 
-        updatePreviousRowNumberAttr(formData, workflowMove, logger);
+        updatePreviousRowNumberAttr(formData, workflowMove, logger, userInfo);
     }
 
     private static final String CORRECTION_PATTERN = ", «%s»";
@@ -1225,7 +1225,7 @@ public class FormDataServiceImpl implements FormDataService {
             //Удаление отчета НФ
             reportService.delete(formData.getId(), null);
             //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
-            updatePreviousRowNumber(formData, logger);
+            updatePreviousRowNumber(formData, logger, userInfo);
             //Обновление записей о консолидации
             sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
             sourceService.addFormDataConsolidationInfo(formData.getId(), srcAcceptedIds);
@@ -1473,13 +1473,13 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo, boolean isChangeTB) {
+    public void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo, boolean isChangeTB, TAUserInfo user) {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
             List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
             for(Long formDataId: formDataIds)
-                deleteReport(formDataId, null);
+                deleteReport(formDataId, null, user.getUser().getId());
             formDataDao.updateFDPerformerTBDepartmentNames(depTBId, depName, dateFrom, dateTo, isChangeTB);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -1487,13 +1487,13 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void updateFDDepartmentNames(int depTBId, String depName, Date dateFrom, Date dateTo) {
+    public void updateFDDepartmentNames(int depTBId, String depName, Date dateFrom, Date dateTo, TAUserInfo user) {
         if (dateFrom == null)
             throw new ServiceException("Должна быть установлена хотя бы \"Дата от\"");
         try {
             List<Long> formDataIds = formPerformerDao.getFormDataId(depTBId, dateFrom, dateTo);
             for(Long formDataId: formDataIds)
-                deleteReport(formDataId, null);
+                deleteReport(formDataId, null, user.getUser().getId());
             formDataDao.updateFDPerformerDepartmentNames(depTBId, depName, dateFrom, dateTo);
         } catch (ServiceException e){
             throw new ServiceException("Ошибка при обновлении имени ТБ", e);
@@ -1531,11 +1531,11 @@ public class FormDataServiceImpl implements FormDataService {
      * @param logger   логгер для регистрации ошибок
      * @param formData редактируемый экземпляр НФ
      */
-    void updatePreviousRowNumberAttr(FormData formData, Logger logger) {
+    void updatePreviousRowNumberAttr(FormData formData, Logger logger, TAUserInfo user) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         if (!formData.isManual() && beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
                 && dataRowDao.isDataRowsCountChanged(formData)) {
-            updatePreviousRowNumber(formData, logger);
+            updatePreviousRowNumber(formData, logger, user);
         }
     }
 
@@ -1546,25 +1546,25 @@ public class FormDataServiceImpl implements FormDataService {
      * @param logger       логгер для регистрации ошибок
      * @param formData     редактируемый экземпляр НФ
      */
-    public void updatePreviousRowNumberAttr(FormData formData, WorkflowMove workflowMove, Logger logger) {
+    public void updatePreviousRowNumberAttr(FormData formData, WorkflowMove workflowMove, Logger logger, TAUserInfo user) {
         if (canUpdatePreviousRowNumberWhenDoMove(workflowMove)) {
-            updatePreviousRowNumber(formData, logger);
+            updatePreviousRowNumber(formData, logger, user);
         }
     }
 
     @Override
-    public void updatePreviousRowNumber(FormData formData) {
-        updatePreviousRowNumber(formData, null);
+    public void updatePreviousRowNumber(FormData formData, TAUserInfo user) {
+        updatePreviousRowNumber(formData, null, user);
     }
 
     @Override
-    public void updatePreviousRowNumber(FormData formData, Logger logger) {
+    public void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user) {
         FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
-        updatePreviousRowNumber(formData, formTemplate, logger);
+        updatePreviousRowNumber(formData, formTemplate, logger, user);
     }
 
     @Override
-    public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger) {
+    public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user) {
         String msg = null;
 
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
@@ -1582,7 +1582,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             for (FormData data : formDataList) {
                 formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data));
-                deleteReport(data.getId(), null);
+                deleteReport(data.getId(), null, user.getUser().getId());
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
                 stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
                 if (--size > 0) {
@@ -1605,10 +1605,10 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void batchUpdatePreviousNumberRow(FormTemplate formTemplate) {
+    public void batchUpdatePreviousNumberRow(FormTemplate formTemplate, TAUserInfo user) {
         List<FormData> formDataList = formDataDao.getFormDataListByTemplateId(formTemplate.getId());
         for (FormData formData : formDataList) {
-            updatePreviousRowNumber(formData, formTemplate, null);
+            updatePreviousRowNumber(formData, formTemplate, null, user);
         }
     }
 
@@ -1716,22 +1716,24 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void deleteReport(long formDataId, Boolean manual) {
+    public void deleteReport(long formDataId, Boolean manual, int userId) {
+        List<String> lockKeys = new ArrayList<String>();
         boolean[] b = {false, true};
         ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
         for (ReportType reportType: reportTypes) {
             for (boolean showChecked : b) {
                 for(boolean saved : b) {
                     if (manual != null) {
-                        lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved), 0, true);
+                        lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved));
                     } else {
                         for(boolean manual1: b) {
-                            lockService.unlock(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual1, saved), 0, true);
+                            lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual1, saved));
                         }
                     }
                 }
             }
         }
+        lockService.interuptAllTasks(lockKeys, userId);
         reportService.delete(formDataId, manual);
     }
 

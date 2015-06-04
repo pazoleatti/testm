@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -404,6 +406,23 @@ public class LockDataServiceImpl implements LockDataService {
     public void interuptAllTasks(List<String> lockKeys, int userId) {
         for (String key : lockKeys) {
             interruptTask(getLock(key), userId, true);
+        }
+    }
+
+    public void lockInfo(LockData lockData, Logger logger) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+        if (LockData.State.IN_QUEUE.getText().equals(lockData.getState())) {
+            logger.info("\"%s\" пользователем \"%s\" запущена операция \"%s\"(статус \"%s\")",
+                    formatter.format(lockData.getDateLock()),
+                    userDao.getUser(lockData.getUserId()).getName(),
+                    lockData.getDescription(),
+                    lockData.getState());
+        } else {
+            logger.info("\"%s\" пользователем \"%s\" запущена операция \"%s\". Данная операция уже выполняется Системой(статус \"%s\")",
+                    formatter.format(lockData.getDateLock()),
+                    userDao.getUser(lockData.getUserId()).getName(),
+                    lockData.getDescription(),
+                    lockData.getState());
         }
     }
 }

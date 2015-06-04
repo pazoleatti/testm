@@ -438,8 +438,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         AbstractCallback<RecalculateFormDataResult> callback = new AbstractCallback<RecalculateFormDataResult>() {
             @Override
             public void onSuccess(RecalculateFormDataResult result) {
+                innerLogUuid = result.getUuid();
                 if (result.isLock()) {
-                    Dialog.confirmMessage("Запрашиваемая операция \"" + reportType.getDescription().replaceAll("\\%s", formData.getFormType().getTaxType().getTaxText()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    Dialog.confirmMessage("Запуск операции приведет к удалению блокировок для некоторых ранее запущенных операций (операции, уже выполняемые Системой, будут отменены только после выполнения бизнес-логики, при этом изменения не будут сохранены). Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {
                             if (ReportType.CALCULATE_FD.equals(reportType)) {
@@ -449,6 +451,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         }
                     });
                 } else if (result.isSave()) {
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {
@@ -460,8 +463,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     });
                 } else {
                     modifiedRows.clear();
-                    innerLogUuid = result.getUuid();
-                    getView().updateData();
+                    timerType = reportType;
+                    timer.run();
                     getView().setSelectedRow(null, true);
                 }
             }
@@ -926,7 +929,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 if (readOnlyMode) {
                                     if (timerType == null
                                             && oldType != null) {
-                                        // задача завершена, обновляем форму
+                                        // задача завершена, обновляем таблицу с данными
                                         getView().updateData();
                                     } else if (oldType != null && !oldType.equals(timerType)) {
                                         // изменился тип задачи, возможно нужно обновить форму???
@@ -935,9 +938,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 } else {
                                     if ((timerType == null || ReportType.EDIT_FD.equals(timerType))
                                             && (oldType != null && !ReportType.EDIT_FD.equals(timerType))) {
-                                        // задача завершена, обновляем форму(создаем новый временный срез для режима редактирования)
-                                        placeManager.setOnLeaveConfirmation(null);
-                                        onEditClicked(false);
+                                        // задача завершена, обновляем таблицу с данными
+                                        getView().updateData();
                                     } else if (oldType != null && !oldType.equals(timerType)) {
                                         // изменился тип задачи, возможно нужно обновить форму???
                                         getView().updateData();

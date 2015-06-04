@@ -77,7 +77,7 @@ public class DepartmentDeclarationTypeDaoImplTest {
         Date dateStart = calendar.getTime();
         calendar.set(2014, Calendar.DECEMBER, 31);
         Date dateEnd = calendar.getTime();
-        List<Pair<DepartmentFormType, Date>> pairs = departmentDeclarationTypeDao.findSourceFTsForDeclaration(2, dateStart, dateEnd);
+        List<Pair<DepartmentFormType, Pair<Date, Date>>> pairs = departmentDeclarationTypeDao.findSourceFTsForDeclaration(2, dateStart, dateEnd);
         assertEquals(1, pairs.size());
     }
 

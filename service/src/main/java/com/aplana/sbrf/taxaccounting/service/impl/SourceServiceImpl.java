@@ -1197,7 +1197,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Pair<DepartmentFormType, Date>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
+    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
         if (dateFrom == null){
             dateTo = MIN_DATE;
         }
@@ -1208,7 +1208,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Pair<DepartmentFormType, Date>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
+    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
         if (dateFrom == null){
             dateTo = MIN_DATE;
         }
@@ -1219,7 +1219,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
+    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
         if (dateFrom == null){
             dateTo = MIN_DATE;
         }
@@ -1230,7 +1230,7 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
+    public List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
         if (dateFrom == null){
             dateTo = MIN_DATE;
         }

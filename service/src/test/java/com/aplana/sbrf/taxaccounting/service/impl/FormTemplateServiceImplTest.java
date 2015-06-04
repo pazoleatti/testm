@@ -34,6 +34,8 @@ public class FormTemplateServiceImplTest extends Assert {
 
     FormTemplate formTemplateFromDB;
 
+    TAUserInfo userInfo;
+
     private List<DepartmentReportPeriod> departmentReportPeriodList;
 
     private DepartmentReportPeriodDao departmentReportPeriodDao;
@@ -49,6 +51,11 @@ public class FormTemplateServiceImplTest extends Assert {
     @Before
     public void init() {
         logger = new Logger();
+        userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(0);
+        user.setName("Name");
+        userInfo.setUser(user);
 
         // Макет, который "хранится" в БД. До редактирования
         formTemplateFromDB = new FormTemplate();
@@ -99,8 +106,8 @@ public class FormTemplateServiceImplTest extends Assert {
      */
     @Test
     public void validateFormAutoNumerationColumn_notCross() {
-        formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
-        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class));
+        formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger, userInfo);
+        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
         assertTrue(logger.getEntries().size() == 0);
     }
 
@@ -116,9 +123,9 @@ public class FormTemplateServiceImplTest extends Assert {
         autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
         when(departmentReportPeriodDao.getClosedForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(new ArrayList<DepartmentReportPeriod>(0));
-        formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
+        formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger, userInfo);
 
-        verify(formDataService, times(1)).batchUpdatePreviousNumberRow(any(FormTemplate.class));
+        verify(formDataService, times(1)).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
         assertTrue(logger.getEntries().size() == 0);
     }
 
@@ -136,9 +143,9 @@ public class FormTemplateServiceImplTest extends Assert {
 
         when(departmentReportPeriodDao.getClosedForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(departmentReportPeriodList);
 
-        formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
+        formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger, userInfo);
 
-        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class));
+        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
         assertTrue(logger.getEntries().size() == 1);
         assertEquals(MESSAGE, logger.getEntries().get(0).getMessage());
     }
@@ -160,9 +167,9 @@ public class FormTemplateServiceImplTest extends Assert {
 
         when(formTemplateDao.get(FORM_TEMPLATE_ID)).thenReturn(formTemplateFromDB);
 
-        formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger);
+        formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger, userInfo);
 
-        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class));
+        verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
         assertTrue(logger.getEntries().size() == 0);
     }
 
