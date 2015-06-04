@@ -31,6 +31,14 @@
             border-right: 1px solid #aeaeac;
         }
 
+        .table {
+            position: absolute !important;
+            bottom: 30px;
+            right: 10px;
+            left: 10px;
+            top: 45px;
+        }
+
         .btnFind {
             margin-left: 6px;
             margin-right: 15px;
@@ -85,8 +93,8 @@
                     </g:cell>
                 </g:HorizontalPanel>
 
-                <g:ResizeLayoutPanel height="100%" width="100%">
-                    <style:GenericDataGrid ui:field="lockDataTable"/>
+                <g:ResizeLayoutPanel addStyleNames="{style.table}">
+                    <style:GenericDataGrid ui:field="lockDataTable" height="100%" width="100%"/>
                 </g:ResizeLayoutPanel>
                 <pager:FlexiblePager ui:field="pager" location="CENTER"
                                      showFastForwardButton="false" fastForwardRows="0"

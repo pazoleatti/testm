@@ -21,7 +21,7 @@ public final class FormDataListUtils {
     public static final String REPORT_PERIOD_TITLE = "Период";
     public static final String PERIOD_MONTH_TITLE = "Месяц";
     public static final String FORM_DATA_STATE_TITLE = "Состояние";
-    public static final String FORM_DATA_RETURN_TITLE = "Признак возрата";
+    public static final String FORM_DATA_RETURN_TITLE = "Признак возврата";
 
     public static final String FORM_DATA_CREATE = "Создать налоговую форму...";
     public static final String FORM_DATA_CREATE_D = "Создать форму...";
