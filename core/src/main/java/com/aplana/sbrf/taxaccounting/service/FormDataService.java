@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -394,4 +395,13 @@ public interface FormDataService {
      * @param logger
      */
     void checkLockedByTask(long formDataId, Logger logger, String taskName);
+
+    /**
+     *
+     * @param userInfo
+     * @param formData
+     * @param reportType
+     * @return
+     */
+    Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, FormData formData, ReportType reportType);
 }
