@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -44,7 +45,8 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 false,
                 logger);
-        return BalancingVariants.SHORT;
+        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CALCULATE_FD);
+        return checkTaskLimit.getFirst();
     }
 
     @Override

@@ -1,40 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
-import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.IfrsData;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.Months;
-import com.aplana.sbrf.taxaccounting.model.NumerationType;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -203,6 +178,8 @@ public class FormDataServiceImpl implements FormDataService {
     private IfrsDataService ifrsDataService;
     @Autowired
     private SourceService sourceService;
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
 
     @Override
     public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder) {
@@ -1147,31 +1124,12 @@ public class FormDataServiceImpl implements FormDataService {
 
         //1Е.  Система проверяет экземпляр на возможность выполнения консолидации в него. Не существует ни одной принятой формы-источника
         if (srcAcceptedIds.isEmpty()){
-            logger.error("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            throw new ServiceException("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
         }
 
         //Блокировка всех экземпляров источников
         List<String> lockedForms = new ArrayList<String>();
         try {
-            /*
-            //Блокировка текущей формы
-            String lockCurrentKey = generateTaskKey(formData.getId(), ReportType.EDIT_FD);
-            LockData lockDataCurrent = lockService.lock(lockCurrentKey,
-                    userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
-                    lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-            if (lockDataCurrent != null) {
-                locked(lockDataCurrent, logger);
-                /*
-                logger.error(
-                        String.format(
-                                LOCK_CURRENT, userInfo.getUser().getLogin(),
-                                SDF_HH_MM_DD_MM_YYYY.format(lockDataCurrent.getDateLock()))
-                );
-                throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-            } else {
-                lockedForms.add(lockCurrentKey);
-            }*/
             String lockKey = "";
             //Переменная для отмечания консолидации в таблице консолидации
             for (FormData sourceForm : sources){
@@ -1204,7 +1162,7 @@ public class FormDataServiceImpl implements FormDataService {
 
             //2А. Выводим ошибки блокировок
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException("Ошибка при консолидации", logEntryService.save(logger.getEntries()));
+                throw new ServiceException("Ошибка при консолидации");
             }
             //3. Консолидируем
             ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
@@ -1786,5 +1744,31 @@ public class FormDataServiceImpl implements FormDataService {
                         lockData.getDescription())
         );
         throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+    }
+
+    public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, FormData formData, ReportType reportType) {
+        switch (reportType) {
+            case CHECK_FD:
+            case MOVE_FD:
+            case CALCULATE_FD:
+            case EXCEL:
+            case CSV:
+                int rowCount = dataRowDao.getSavedSize(formData);
+                int columnCount = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                long size = rowCount * columnCount;
+                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                long shortSize = taskTypeData.getShortQueueLimit();
+                if (size < shortSize) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+            case CONSOLIDATE_FD:
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+            case IMPORT_FD:
+            case IMPORT_TF_FD:
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+            default:
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+        }
     }
 }

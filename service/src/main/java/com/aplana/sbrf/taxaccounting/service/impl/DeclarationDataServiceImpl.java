@@ -969,42 +969,44 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
-        if (ReportType.PDF_DEC.equals(reportType)) {
-            String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
-            if (uuid != null) {
-                Long size = blobDataService.getLength(uuid);
-                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                long maxSize = taskTypeData.getTaskLimit();
-                long shortSize = taskTypeData.getShortQueueLimit();
-                if (size > maxSize) {
-                    return new Pair<BalancingVariants, Long>(null, size);
-                } else if (size < shortSize) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+        switch (reportType) {
+            case PDF_DEC:
+                String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+                if (uuid != null) {
+                    Long size = blobDataService.getLength(uuid);
+                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                    long maxSize = taskTypeData.getTaskLimit() * 1024;
+                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
+                    if (size > maxSize) {
+                        return new Pair<BalancingVariants, Long>(null, size);
+                    } else if (size < shortSize) {
+                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                    }
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                } else {
+                    return null;
                 }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
-            } else {
-                return null;
-            }
-        } else if (ReportType.EXCEL_DEC.equals(reportType)) {
-            String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
-            if (uuid != null) {
-                Long size = blobDataService.getLength(uuid);
-                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                long maxSize = taskTypeData.getTaskLimit();
-                long shortSize = taskTypeData.getShortQueueLimit();
-                if (size > maxSize) {
-                    return new Pair<BalancingVariants, Long>(null, size);
-                } else if (size < shortSize) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+            case EXCEL_DEC:
+                String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+                if (uuidXml != null) {
+                    Long size = blobDataService.getLength(uuidXml);
+                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                    long maxSize = taskTypeData.getTaskLimit() * 1024;
+                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
+                    if (size > maxSize) {
+                        return new Pair<BalancingVariants, Long>(null, size);
+                    } else if (size < shortSize) {
+                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                    }
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                } else {
+                    return null;
                 }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
-            } else {
-                return null;
-            }
-        } else if (ReportType.XML_DEC.equals(reportType)) {
-            return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+            case XML_DEC:
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+            default:
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }
-        throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
     }
 
     private void checkSources(DeclarationData dd, Logger logger){
