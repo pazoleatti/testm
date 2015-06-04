@@ -311,7 +311,7 @@ public interface DepartmentFormTypeDao {
      * @param dateTo дата окончания периода
      * @return список пар подразделений с началом периода
      */
-    List<Pair<DepartmentFormType, Date>> findDestinationsForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+    List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationsForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
 
     /**
      * Находим источники, у которых этот макет является приемником
@@ -320,7 +320,7 @@ public interface DepartmentFormTypeDao {
      * @param dateTo дата окончания периода
      * @return список пар подразделений с началом периода
      */
-    List<Pair<DepartmentFormType, Date>> findSourcesForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+    List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourcesForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
 
     /**
      * Получает назначения подразделений типов НФ

@@ -39,27 +39,29 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		}
 	};
 
-    private static final RowMapper<Pair<DepartmentFormType, Date>> DFT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentFormType, Date>>() {
+    private static final RowMapper<Pair<DepartmentFormType, Pair<Date, Date>>> DFT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentFormType, Pair<Date, Date>>>() {
 
         @Override
-        public Pair<DepartmentFormType, Date> mapRow(ResultSet rs, int i) throws SQLException {
+        public Pair<DepartmentFormType, Pair<Date, Date>> mapRow(ResultSet rs, int i) throws SQLException {
             DepartmentFormType departmentFormType = new DepartmentFormType();
             departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
             departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
             departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
-            return new Pair<DepartmentFormType, Date>(departmentFormType, rs.getDate("start_date"));
+            Pair<Date, Date> dates = new Pair<Date, Date>(rs.getDate("start_date"), rs.getDate("end_date"));
+            return new Pair<DepartmentFormType, Pair<Date, Date>>(departmentFormType, dates);
         }
     };
 
-    private static final RowMapper<Pair<DepartmentDeclarationType, Date>> DDT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentDeclarationType, Date>>() {
+    private static final RowMapper<Pair<DepartmentDeclarationType, Pair<Date, Date>>> DDT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentDeclarationType, Pair<Date, Date>>>() {
 
         @Override
-        public Pair<DepartmentDeclarationType, Date> mapRow(ResultSet rs, int i) throws SQLException {
+        public Pair<DepartmentDeclarationType, Pair<Date, Date>> mapRow(ResultSet rs, int i) throws SQLException {
             DepartmentDeclarationType departmentDeclarationType = new DepartmentDeclarationType();
             departmentDeclarationType.setId(rs.getInt("id"));
             departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
             departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
-            return new Pair<DepartmentDeclarationType, Date>(departmentDeclarationType, rs.getDate("start_date"));
+            Pair<Date, Date> dates = new Pair<Date, Date>(rs.getDate("start_date"), rs.getDate("end_date"));
+            return new Pair<DepartmentDeclarationType, Pair<Date, Date>>(departmentDeclarationType, dates);
         }
     };
 
@@ -142,14 +144,14 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 	}
 
     @Override
-    public List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
+    public List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
         try {
             HashMap<String, Object> values = new HashMap<String, Object>();
             values.put("formTypeId", typeId);
             values.put("dateFrom", dateFrom);
             values.put("dateTo", dateTo);
 
-            return getNamedParameterJdbcTemplate().query("select tgt.id id, tgt.DEPARTMENT_ID department_id, tgt.DECLARATION_TYPE_ID declaration_type_id, ds.PERIOD_START start_date\n" +
+            return getNamedParameterJdbcTemplate().query("select tgt.id id, tgt.DEPARTMENT_ID department_id, tgt.DECLARATION_TYPE_ID declaration_type_id, ds.PERIOD_START start_date, ds.PERIOD_END end_date \n" +
                     "from department_form_type src \n" +
                     "join declaration_source ds on src.id = ds.src_department_form_type_id\n" +
                     "join department_declaration_type tgt on ds.department_declaration_type_id = tgt.id \n" +
@@ -168,14 +170,14 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     }
 
     @Override
-    public List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
+    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
         try {
             HashMap<String, Object> values = new HashMap<String, Object>();
             values.put("formTypeId", typeId);
             values.put("dateFrom", dateFrom);
             values.put("dateTo", dateTo);
 
-            return getNamedParameterJdbcTemplate().query("select src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, ds.PERIOD_START start_date\n" +
+            return getNamedParameterJdbcTemplate().query("select src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, ds.PERIOD_START start_date, ds.PERIOD_END end_date \n" +
                     "from department_form_type src \n" +
                     "join declaration_source ds on src.id = ds.src_department_form_type_id\n" +
                     "join department_declaration_type tgt on ds.department_declaration_type_id = tgt.id \n" +
