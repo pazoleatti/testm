@@ -191,7 +191,7 @@ public class TestScriptHelper {
      */
     public void initRowData() {
         // Строки из шаблона
-        mockHelper.getDataRowHelper().save(formTemplate.getRows());
+        mockHelper.getDataRowHelper().save(formTemplate.clone().getRows());
     }
 
     /**
@@ -302,7 +302,7 @@ public class TestScriptHelper {
      * Макет НФ
      */
     public FormTemplate getFormTemplate() {
-        return formTemplate;
+        return formTemplate.clone();
     }
 
     /**
