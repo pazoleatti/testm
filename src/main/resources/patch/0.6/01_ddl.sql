@@ -132,10 +132,10 @@ create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 ---------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-11339: Таблица для конфигов асинхронных задач
 --совместно с http://jira.aplana.com/browse/SBRFACCTAX-11160
-alter table async_task_type add short_queue_limit number(18) default 0 not null;
+alter table async_task_type add short_queue_limit number(18);
 comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
 
-alter table async_task_type add task_limit number(18) default 0 not null;
+alter table async_task_type add task_limit number(18);
 comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
 
 alter table async_task_type add limit_kind varchar2(400);
