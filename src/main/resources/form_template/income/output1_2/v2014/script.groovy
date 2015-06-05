@@ -57,6 +57,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -77,9 +78,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -150,8 +153,7 @@ void calc() {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def row in dataRows) {
         def rowNum = row.getIndex()
@@ -240,8 +242,7 @@ void warnMessage9or10(def row, def alias, def condition) {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = []
+    def rows = []
 
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     def prevPeriodStartDate
@@ -262,15 +263,17 @@ void consolidation() {
             def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
-                def rowMap = getRowMap(sourceHelper.getAll())
+                def rowMap = getRowMap(sourceHelper.allSaved)
                 rowMap.each { key, sourceRows ->
                     def newRow = formNewRow(sourceRows, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate)
-                    dataRows.add(newRow)
+                    rows.add(newRow)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows)
+
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 def getRowMap(def rows) {
@@ -534,7 +537,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

@@ -55,6 +55,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         def columns = (getBalancePeriod() ? allColumns - ['rowNumber'] : editableColumns)
@@ -78,20 +79,24 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
             importTransportData()
+            formDataService.saveCachedDataRows(formData, logger)
         } else {
             importData()
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 calc()
                 logicCheck()
+                formDataService.saveCachedDataRows(formData, logger)
             }
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -190,8 +195,7 @@ def getNumber(def value, def indexRow, def indexCol) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     deleteAllAliased(dataRows)
     // отсортировать/группировать
     dataRows = sort(dataRows)
@@ -245,8 +249,6 @@ void calc() {
         i++
     }
     updateIndexes(dataRows)
-
-    dataRowHelper.save(dataRows)
 }
 
 // Логические проверки
@@ -439,7 +441,7 @@ def getPrevDataRows() {
     }
 
     def formDataOld = formDataService.getFormDataPrev(formData)
-    return formDataOld != null ? formDataService.getDataRowHelper(formDataOld).allCached : null
+    return formDataOld != null ? formDataService.getDataRowHelper(formDataOld).allSaved : null
 }
 
 def calc6(def row, def prevRow, def hasPrev) {
@@ -655,9 +657,9 @@ void importTransportData() {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    // вставляем строки в БД
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -965,7 +967,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

@@ -68,6 +68,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -90,12 +91,15 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -147,18 +151,15 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows =  formDataService.getDataRowHelper(formData).allCached
 
     // сортировка
     sortRows(dataRows, sortColumns)
-
-    dataRowHelper.save(dataRows)
 }
 
 def logicCheck() {
     // TODO (Ramil Timerbaev) в чтз пока не описано
-    def dataRows = formDataService.getDataRowHelper(formData)?.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
     for (def row in dataRows) {
         def index = row.getIndex()
@@ -261,9 +262,9 @@ void importTransportData() {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    // вставляем строки в БД
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -523,7 +524,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

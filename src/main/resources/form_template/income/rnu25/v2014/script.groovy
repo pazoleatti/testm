@@ -50,6 +50,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
@@ -68,25 +69,30 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         prevPeriodCheck()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
             importTransportData()
+            formDataService.saveCachedDataRows(formData, logger)
         } else {
             importData()
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 calc()
                 logicCheck()
+                formDataService.saveCachedDataRows(formData, logger)
             }
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -164,8 +170,7 @@ def isBalancePeriod() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить строку "итого" и "итого по ГРН: ..."
     deleteAllAliased(dataRows)
@@ -214,16 +219,10 @@ void calc() {
     def totalRow = getCalcTotalRow(dataRows)
     dataRows.add(totalRow)
     if (dataRows.size() == 1) {
-        dataRowHelper.save(dataRows)
         return
     }
-
-    // обновить индексы строк
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
-
     updateIndexes(dataRows)
+
     // итоговые значения по ГРН
     def i = 0
     for (def codeName : totalGroupsName) {
@@ -240,8 +239,6 @@ void calc() {
         i++
     }
     updateIndexes(dataRows)
-    // запись
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
@@ -466,7 +463,7 @@ def getPrevDataRows() {
         return null
     }
     def prevFormData = formDataService.getFormDataPrev(formData)
-    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
+    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : null)
 }
 
 /** Получить общую итоговую строку с суммами. */
@@ -618,8 +615,7 @@ BigDecimal roundTo2(BigDecimal value) {
  * @param totalRow итоговая строка из транспортного файла
  */
 void checkTotalRow(def totalRow) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def totalCalc = getCalcTotalRow(dataRows)
 
     def totalSumColumns = [4: 'lotSizePrev', 5: 'lotSizeCurrent', 7: 'cost', 10: 'costOnMarketQuotation',
@@ -650,13 +646,6 @@ def loggerError(def row, def msg) {
         rowWarning(logger, row, msg)
     } else {
         rowError(logger, row, msg)
-    }
-}
-
-// обновить индексы строк
-def updateIndexes(def dataRows) {
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
     }
 }
 
@@ -749,9 +738,9 @@ void importTransportData() {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    // вставляем строки в БД
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -876,7 +865,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

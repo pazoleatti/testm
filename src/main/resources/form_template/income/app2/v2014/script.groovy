@@ -103,6 +103,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -116,6 +117,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
@@ -128,9 +130,11 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -200,8 +204,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 //// Кастомные методы
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -289,8 +292,7 @@ void logicCheck() {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -317,10 +319,7 @@ void calc() {
         row.taxBase = value26
     }
 
-    dataRowHelper.update(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 /**
@@ -391,11 +390,15 @@ def getNewRow() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, null, null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 // Округляет число до требуемой точности
@@ -408,8 +411,7 @@ def roundValue(def value, int precision = 2) {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = []
+    def rows = []
 
     def source1FormTypeId = 418
     def source2FormTypeId = 419
@@ -425,13 +427,13 @@ void consolidation() {
             // Сведения о доходах физического лица, выплаченных ему налоговым агентом ... (ЦФО НДФЛ)
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+                def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 sourceDataRows.each { row ->
                     def newRow = getNewRow()
                     consilidationColumns.each { column ->
                         newRow[column] = row[column]
                     }
-                    dataRows.add(newRow)
+                    rows.add(newRow)
                 }
             }
         } else if (it.formTypeId == source2FormTypeId || it.formTypeId == source2FormTypeIdAlt) {
@@ -439,7 +441,9 @@ void consolidation() {
             // TODO (Ramil Timerbaev) в чтз не описано как консолидировать второй источник
         }
     }
-    dataRowHelper.save(dataRows)
+
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 void importData() {
@@ -491,7 +495,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

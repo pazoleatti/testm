@@ -47,6 +47,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -70,6 +71,7 @@ switch (formDataEvent) {
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.SORT_ROWS:
@@ -107,8 +109,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (!dataRows.isEmpty()) {
 
         for (def row in dataRows) {
@@ -154,10 +155,9 @@ void calc() {
             // графа 24
             row.taxSumFromPeriod = calc24(row)
         }
-        dataRowHelper.update(dataRows);
     }
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 def BigDecimal calc4(def row) {
@@ -211,7 +211,7 @@ def BigDecimal calc24(def row) {
     // --
     formPrev = formDataService.getFormDataPrev(formData)
     if (formPrev != null) {
-        for (rowPrev in formDataService.getDataRowHelper(formPrev).getAll()) {
+        for (rowPrev in formDataService.getDataRowHelper(formPrev).allSaved) {
             if (rowPrev.financialYear.format('yyyy') == row.financialYear.format('yyyy')) {
                 result += rowPrev.taxSumFromPeriod ?: 0 + rowPrev.taxSumFromPeriodAll ?: 0
                 // return rowPrev.taxSumFromPeriod ?: 0 + rowPrev.taxSumFromPeriodAll ?: 0
@@ -223,8 +223,7 @@ def BigDecimal calc24(def row) {
 }
 
 def logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
     // Алиасы граф для арифметической проверки
     def arithmeticCheckAlias = ['dividendSumRaspredPeriod', 'dividendSumForTaxAll', 'dividendSumForTaxStavka9',
@@ -257,11 +256,15 @@ def roundValue(BigDecimal value, def precision) {
     value?.setScale(precision, BigDecimal.ROUND_HALF_UP)
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, null, null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 void importData() {
@@ -312,7 +315,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

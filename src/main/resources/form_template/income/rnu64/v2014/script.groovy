@@ -40,6 +40,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -62,16 +63,19 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -139,8 +143,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (formDataEvent != FormDataEvent.IMPORT) {
         sortRows(dataRows, sortColumns)
@@ -156,9 +159,7 @@ void calc() {
         total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
 
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 def getDataRowsPrev() {
@@ -167,15 +168,14 @@ def getDataRowsPrev() {
         def formDataPrev = formDataService.getFormDataPrev(formData)
         formDataPrev = (formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null)
         if (formDataPrev != null) {
-            return formDataService.getDataRowHelper(formDataPrev)?.allCached
+            return formDataService.getDataRowHelper(formDataPrev)?.allSaved
         }
     }
     return null
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def totalRow = null
     def totalQuarterRow = null
     def dFrom = getReportPeriodStartDate()
@@ -281,7 +281,9 @@ void consolidation() {
 
     rows.add(getDataRow(dataRows, 'totalQuarter'))
     rows.add(totalRow)
-    dataRowHelper.save(rows)
+
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
@@ -399,7 +401,8 @@ void importTransportData() {
 
     showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -452,11 +455,15 @@ boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'totalQuarter')], getDataRow(dataRows, 'total'), true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 void importData() {
@@ -521,7 +528,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

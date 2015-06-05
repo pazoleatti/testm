@@ -26,17 +26,11 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
         break
     case FormDataEvent.CHECK:
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
-        logicCheck()
-        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -46,6 +40,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -54,8 +49,7 @@ switch (formDataEvent) {
 def nonEmptyColumns = ['date', 'sum']
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def row : dataRows) {
         def index = row.getIndex()
@@ -69,11 +63,6 @@ void logicCheck() {
             }
         }
     }
-}
-
-void calc() {
-    // расчетов нет
-    // сортировки нет, все строки фиксированные
 }
 
 void importData() {
@@ -104,8 +93,7 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -133,7 +121,8 @@ void importData() {
     }
     showMessages(dataRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(dataRows)
+        updateIndexes(dataRows)
+        formDataService.getDataRowHelper(formData).allCached = dataRows
     }
 }
 

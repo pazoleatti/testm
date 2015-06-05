@@ -27,6 +27,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -51,16 +52,19 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -139,8 +143,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!dataRows.isEmpty()) {
         // Удаление подитогов
@@ -182,10 +185,8 @@ void calc() {
 
     // Общий итог
     dataRows.add(dataRows.size(), calcTotalRow(dataRows))
-    dataRowHelper.save(dataRows)
 
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 def calcTotalRow(def dataRows) {
@@ -204,7 +205,7 @@ def calcTotalRow(def dataRows) {
 
 // Логические проверки
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -271,8 +272,7 @@ def String getKnu(def code) {
  * Консолидация.
  */
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = []
+    def rows = []
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
@@ -283,7 +283,7 @@ void consolidation() {
                     if (sRow.getAlias() == null || sRow.getAlias() == '') {
                         def isFind = false
                         // строки приемника - искать совпадения, если совпадения есть, то суммировать графу 5
-                        for (def row : dataRows) {
+                        for (def row : rows) {
                             if (sRow.balance == row.balance) {
                                 isFind = true
                                 totalColumns.each { alias ->
@@ -295,22 +295,27 @@ void consolidation() {
                         }
                         // если совпадений нет, то просто добавить строку
                         if (!isFind) {
-                            dataRows.add(sRow)
+                            rows.add(sRow)
                         }
                     }
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows)
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), dataRows.find { it.getAlias() == 'total' }, true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 // Получение подитоговых строк
@@ -396,7 +401,8 @@ void importTransportData() {
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -502,7 +508,7 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
