@@ -32,6 +32,7 @@ switch (formDataEvent) {
         checkRegionId()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkRegionId()
@@ -60,10 +61,12 @@ switch (formDataEvent) {
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.GET_SOURCES:
         getSources()
@@ -301,19 +304,16 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     calcCheckSubjects(dataRows, true)
     dataRows.each { row ->
         row.taxBaseSum = (row.taxBase1?:0) - (row.taxBase2?:0) + (row.taxBase3?:0) - (row.taxBase4?:0) - (row.taxBase5?:0)
     }
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def subject
     def subjectId = null
@@ -874,7 +874,8 @@ void addData(def xml, int headRowCount) {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -931,7 +932,7 @@ void importTransportData() {
         if (newRows.size() > ROW_MAX) {
             showMessages(newRows, logger)
             if (!logger.containsLevel(LogLevel.ERROR)) {
-                dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+                dataRowHelper.allCached.addAll(dataRowHelper.allCached.size(), newRows)
             }
             newRows.clear()
         }
@@ -941,7 +942,7 @@ void importTransportData() {
     if (newRows.size() != 0) {
         showMessages(newRows, logger)
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            dataRowHelper.insert(newRows, dataRowHelper.allCached.size() + 1)
+            dataRowHelper.allCached.addAll(dataRowHelper.allCached.size(), newRows)
         }
     }
 

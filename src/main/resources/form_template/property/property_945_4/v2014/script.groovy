@@ -45,6 +45,7 @@ switch (formDataEvent) {
         checkPrevForm()
         calc()
         logicCheck()
+        formDataService.getDataRowHelper(formData).allCached = rows
         break
     case FormDataEvent.CHECK:
         checkPrevForm()
@@ -71,6 +72,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.getDataRowHelper(formData).allCached = rows
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -157,8 +159,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
 
@@ -193,7 +194,7 @@ void calc() {
     // итоги и промежуточные итоги
     addFixedRows(dataRows, totalRow)
 
-    dataRowHelper.save(dataRows)
+    updateIndexes(dataRows)
 }
 
 void logicCheck() {
@@ -228,8 +229,7 @@ void logicCheck() {
 }
 
 def consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def totalRow = getDataRow(dataRows, 'total')
 
     // удалить фиксированные строки
@@ -244,7 +244,7 @@ def consolidation() {
         if (it.formTypeId == sourceFormTypeId) {
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceRows = formDataService.getDataRowHelper(source).getAll()
+                def sourceRows = formDataService.getDataRowHelper(source).allSaved
                 for (def sourceRow : sourceRows) {
                     if (sourceRow.getAlias() != null) {
                         continue
@@ -281,9 +281,9 @@ def consolidation() {
             }
         }
     }
-
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
+
+    updateIndexes(dataRows)
 }
 
 def getReportPeriod() {
@@ -371,7 +371,7 @@ def calc18(def row, def isYear) {
     def forms = getPrevForms()
     for (def form : forms) {
         if (form.state == WorkflowState.ACCEPTED) {
-            def formDataRows = formDataService.getDataRowHelper(form)?.allCached
+            def formDataRows = formDataService.getDataRowHelper(form)?.allSaved
             for (def formRow : formDataRows) {
                 if (formRow.getAlias() == null && !isDiffRow(row, formRow, searchAliases)) {
                     tmp += (row.sum ?: BigDecimal.ZERO)

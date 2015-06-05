@@ -44,6 +44,7 @@ switch (formDataEvent) {
         checkPrevForm()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkPrevForm()
@@ -276,8 +277,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // получить группы со строками
     def groupsMap = getGroupsMap(dataRows)
@@ -304,10 +304,6 @@ void calc() {
         calcTotalSum(categoryRows, row2, totalColumns)
     }
 
-    // вывод информационного сообщения №2
-    newDataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
     infoMessagesRowMap.keySet().each { key ->
         def row = infoMessagesRowMap[key]
 
@@ -320,7 +316,8 @@ void calc() {
                 "«Код субъекта» = $subject, «Код НО» = $taxAuthority, «КПП» = $kpp, «Код ОКТМО» = $oktmo")
     }
 
-    dataRowHelper.save(newDataRows)
+    updateIndexes(newDataRows)
+    formDataService.getDataRowHelper(formData).allCached = newDataRows
 }
 
 void logicCheck() {
@@ -442,7 +439,7 @@ def getConsolidationGroupsRows() {
     sources.each { source ->
         // получить алиас заполняемой графы - зависит от месяца источника: январь - графа 5, февраль - графа 6 ... декабрь - графа 16, январь следующего года - 17.
         def alias = aliasMap[source.id]
-        def sourceRows = formDataService.getDataRowHelper(source).getAll()
+        def sourceRows = formDataService.getDataRowHelper(source).allSaved
 
         // получить список групп 1
         def rowsGroup1 = getRowsGroupBySubject(sourceRows)
@@ -998,7 +995,7 @@ def getPrevDataRows() {
     }
     if (prevDataRows == null) {
         def prevFormData = formDataService.getFormDataPrev(formData)
-        prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
+        prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : null)
     }
     return prevDataRows
 }
