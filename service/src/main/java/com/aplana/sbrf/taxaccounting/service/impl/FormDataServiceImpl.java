@@ -225,11 +225,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, boolean isInner, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
-		// Поскольку импорт используется как часть редактирования НФ, т.е. иморт только строк (форма уже существует) то все проверки должны 
-    	// соответствовать редактированию (добавление, удаление, пересчет)
-    	// Форма должна быть заблокирована текущим пользователем для редактирования
         String key = generateTaskKey(formDataId, ReportType.EDIT_FD);
-        checkLockedMe(lockService.getLock(key), userInfo.getUser());
 
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
 
@@ -435,7 +431,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
         //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formData.getId(), logger, "Добавление строки");
+        checkLockedByTask(formData.getId(), logger, userInfo, "Добавление строки", true);
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
@@ -461,7 +457,7 @@ public class FormDataServiceImpl implements FormDataService {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
         checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
         //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formData.getId(), logger, "Удаление строки");
+        checkLockedByTask(formData.getId(), logger, userInfo, "Удаление строки", true);
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
 		
@@ -740,7 +736,7 @@ public class FormDataServiceImpl implements FormDataService {
         checkLockAnotherUser(lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD)),
                 logger,  userInfo.getUser());
         //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formDataId, logger, "Удаление НФ");
+        checkLockedByTask(formDataId, logger, userInfo, "Удаление НФ", true);
 
 		FormData formData = formDataDao.get(formDataId, manual);
         if (manual) {
@@ -1640,9 +1636,10 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void checkLockedByTask(long formDataId, Logger logger, String taskName) {
+    public void checkLockedByTask(long formDataId, Logger logger, TAUserInfo userInfo, String taskName, boolean editMode) {
         Pair<ReportType, LockData> lockType = getLockTaskType(formDataId);
-        if (lockType != null && !ReportType.EDIT_FD.equals(lockType.getFirst())) {
+        if (lockType != null &&
+                !(editMode && ReportType.EDIT_FD.equals(lockType.getFirst()) && lockType.getSecond().getUserId() == userInfo.getUser().getId())) {
             logger.error("\"%s\" пользователем \"%s\" запущена операция \"%s\"",
                     SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
                     userService.getUser(lockType.getSecond().getUserId()).getName(),
@@ -1747,17 +1744,47 @@ public class FormDataServiceImpl implements FormDataService {
             case CSV:
                 int rowCount = dataRowDao.getSavedSize(formData);
                 int columnCount = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
-                long size = rowCount * columnCount;
+                long cellCount = rowCount * columnCount;
                 AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                long shortSize = taskTypeData.getShortQueueLimit();
-                if (size < shortSize) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                if (cellCount < taskTypeData.getShortQueueLimit()) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCount);
                 }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCount);
             case CONSOLIDATE_FD:
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+                List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
+                        formData.getDepartmentId(),
+                        formData.getFormType().getId(),
+                        formData.getKind(),
+                        reportPeriod.getCalendarStartDate(),
+                        reportPeriod.getEndDate());
+                long cellCountSource = 0;
+                for (DepartmentFormType sourceDFT : departmentFormTypesSources){
+                    // Последний отчетный период подразделения
+                    DepartmentReportPeriod sourceDepartmentReportPeriod =
+                            departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
+                    if (sourceDepartmentReportPeriod == null) {
+                        continue;
+                    }
+                    FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
+                            sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+                    if (sourceForm == null){
+                        continue;
+                    }
+                    //Запись на будущее, чтобы второго цикла не делать
+                    //1E.
+                    if (sourceForm.getState() == WorkflowState.ACCEPTED){
+                        int rowCountSource = dataRowDao.getSavedSize(formData);
+                        int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                        cellCountSource += rowCountSource * columnCountSource;
+                    }
+                }
+                AsyncTaskTypeData taskTypeConsolidate= asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                if (cellCountSource < taskTypeConsolidate.getShortQueueLimit()) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountSource);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountSource);
             case IMPORT_FD:
-            case IMPORT_TF_FD:
                 return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());

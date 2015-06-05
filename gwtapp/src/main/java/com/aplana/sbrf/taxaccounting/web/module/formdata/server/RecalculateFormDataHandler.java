@@ -59,9 +59,6 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
     private LockDataService lockDataService;
 
     @Autowired
-    private TAUserService taUserService;
-
-    @Autowired
     private AsyncManager asyncManager;
 
 	public RecalculateFormDataHandler() {
@@ -83,7 +80,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
             if (lockType != null) {
                 if (lockType.getFirst().equals(ReportType.EDIT_FD)) {
                     // всё номально, продолжаем выполнение
-                } else if (lockType.getFirst().equals(ReportType.CALCULATE_FD)) {
+                } else if (lockType.getFirst().equals(reportType)) {
                     if (lockType.getSecond().getUserId() == userInfo.getUser().getId()) {
                         if (action.isForce()) {
                             // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
@@ -143,6 +140,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     formDataService.deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("formDataId", action.getFormData().getId());
+                    params.put("manual", action.getFormData().isManual());
                     params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                     params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), keyTask);
                     LockData lockData = lockDataService.getLock(keyTask);

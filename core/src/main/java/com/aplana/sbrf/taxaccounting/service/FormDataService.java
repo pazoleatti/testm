@@ -390,11 +390,14 @@ public interface FormDataService {
     void locked(LockData lockData, Logger logger);
 
     /**
-     * Проверка возможности редактирования НФ
+     * Проверка возможности изменения НФ
      * @param formDataId
      * @param logger
+     * @param userInfo
+     * @param taskName
+     * @param editMode
      */
-    void checkLockedByTask(long formDataId, Logger logger, String taskName);
+    void checkLockedByTask(long formDataId, Logger logger, TAUserInfo userInfo, String taskName, boolean editMode);
 
     /**
      *

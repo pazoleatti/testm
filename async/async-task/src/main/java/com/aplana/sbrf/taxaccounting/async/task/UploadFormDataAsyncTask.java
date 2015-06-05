@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -13,7 +11,7 @@ import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
-public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
+public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
@@ -28,6 +26,9 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
     private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Autowired
+    private BlobDataService blobDataService;
+
+    @Autowired
     private DataRowService dataRowService;
 
     @Autowired
@@ -38,6 +39,8 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
+        String uuid = (String)params.get("uuid");
+
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
         Logger logger = new Logger();
@@ -46,7 +49,7 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CALCULATE_FD);
+        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.IMPORT_FD);
         return checkTaskLimit.getFirst();
     }
 
@@ -55,6 +58,8 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
+        String uuid = (String)params.get("uuid");
+
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -64,16 +69,17 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        formDataService.doCalc(logger, userInfo, formData);
-        // сохраняем данные в основном срезе
-        formDataService.saveFormData(logger, userInfo, formData);
-        // восстанавливаем временный срез, чтобы продолжить редактирование
-        dataRowService.createTemporary(formData);
+        BlobData blobData = blobDataService.get(uuid);
+
+        logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
+        //Парсит загруженный в фаловое хранилище xls-файл
+        formDataService.importFormData(logger, userInfo,
+                formData.getId(), formData.isManual(), blobData.getInputStream(), blobData.getName());
     }
 
     @Override
     protected String getAsyncTaskName() {
-        return "Расчет НФ";
+        return "Загрузке XLSM-файла с формы экземпляра НФ";
     }
 
     @Override
@@ -90,9 +96,9 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         Integer periodOrder = formData.getPeriodOrder();
         if (periodOrder == null){
-            return String.format("Выполнен расчет налоговой формы: Период: \"%s, %s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"", reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
+            return String.format("Выполнен импорт данных из XLSM файла в экземпляр налоговой формы: Период: \"%s, %s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"", reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
         } else {
-            return String.format("Выполнен расчет налоговой формы: Период: \"%s, %s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"", reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
+            return String.format("Выполнен импорт данных из XLSM файла в экземпляр налоговой формы: Период: \"%s, %s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"", reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
         }
     }
 
@@ -110,10 +116,10 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         Integer periodOrder = formData.getPeriodOrder();
         if (periodOrder == null){
-            return String.format("Выполнен расчет налоговой формы: Период: \"%s, %s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
+            return String.format("Выполнен импорт данных из XLSM файла в экземпляр налоговой формы: Период: \"%s, %s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
                     reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
         } else {
-            return String.format("Выполнен расчет налоговой формы: Период: \"%s, %s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
+            return String.format("Выполнен импорт данных из XLSM файла в экземпляр налоговой формы: Период: \"%s, %s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
                     reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
         }
     }

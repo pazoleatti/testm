@@ -656,7 +656,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             public void onSuccess(ConsolidateResult result) {
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                 if (result.isLock()) {
-                    Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.CONSOLIDATE_FD.getDescription().replaceAll("\\%s", formData.getFormType().getTaxType().getTaxText()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                    Dialog.confirmMessage("Запуск операции приведет к отмене некоторых ранее запущенных операций (операции, уже выполняемые Системой выполнятся до конца, но результат их выполнения не будет сохранен). Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {
                             onConsolidate(true);
@@ -881,17 +881,59 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         ValueChangeHandler<String> valueChangeHandler = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                String uuid = event.getValue();
-
-                UploadDataRowsAction action = new UploadDataRowsAction();
-                action.setUuid(uuid);
-                action.setFormData(formData);
-                dispatcher.execute(action, createDataRowResultCallback(true));
+                onUploadTF(false, false, event.getValue());
             }
         };
 
         getView().addFileUploadValueChangeHandler(valueChangeHandler);
         addRegisteredHandler(SetFocus.getType(), this);
+    }
+
+    private void onUploadTF(final boolean force, final boolean save, final String uuid) {
+        final ReportType reportType = ReportType.IMPORT_FD;
+        final UploadDataRowsAction action = new UploadDataRowsAction();
+        action.setFormData(formData);
+        action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+        action.setForce(force);
+        action.setSave(save);
+        action.setUuid(uuid);
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<UploadFormDataResult>() {
+            @Override
+            public void onSuccess(UploadFormDataResult result) {
+                innerLogUuid = result.getUuid();
+                if (result.isLock()) {
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    Dialog.confirmMessage("Запуск операции приведет к удалению блокировок для некоторых ранее запущенных операций (операции, уже выполняемые Системой, будут отменены только после выполнения бизнес-логики, при этом изменения не будут сохранены). Продолжить?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            onUploadTF(true, false, uuid);
+                        }
+                    });
+                } else if (result.isSave()) {
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            onUploadTF(force, true, uuid);
+                        }
+                    });
+                } else {
+                    modifiedRows.clear();
+                    timerType = reportType;
+                    timer.run();
+                    getView().setSelectedRow(null, true);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                if (caught instanceof TaActionException) {
+                    innerLogUuid = ((TaActionException) caught).getUuid();
+                }
+                modifiedRows.clear();
+                getView().updateData();
+            }
+        }, this));
     }
 
     @Override

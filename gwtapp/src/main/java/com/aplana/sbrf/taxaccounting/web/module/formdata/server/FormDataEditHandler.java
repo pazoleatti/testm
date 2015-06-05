@@ -37,7 +37,7 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		FormData formData = action.getFormData();
         Logger logger = new Logger();
-        formDataService.checkLockedByTask(formData.getId(), logger, "Редактирование НФ");
+        formDataService.checkLockedByTask(formData.getId(), logger, userInfo, "Редактирование НФ", true);
 		accessService.canEdit(userInfo, formData.getId(), formData.isManual());
 		if (formData.isManual()) {
         	accessService.canCreateManual(logger, userInfo, formData.getId());
