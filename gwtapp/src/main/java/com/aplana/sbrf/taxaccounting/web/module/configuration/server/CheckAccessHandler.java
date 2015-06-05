@@ -68,29 +68,39 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                 String sShortLimit = param.get(ConfigurationParamModel.ASYNC_SHORT_LIMIT);
                 boolean error = false;
 
-                try {
-                    limit = Integer.valueOf(sLimit);
-                } catch (NumberFormatException e) {
-                    logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть числовым (больше нуля)!", type, sLimit));
-                    error = true;
+                if (sLimit != null && !sLimit.isEmpty()) {
+                    try {
+                        limit = Integer.valueOf(sLimit);
+                    } catch (NumberFormatException e) {
+                        logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть числовым (больше нуля)!", type, sLimit));
+                        error = true;
+                    }
                 }
-                try {
-                    shortLimit = Integer.valueOf(sShortLimit);
-                } catch (NumberFormatException e) {
-                    logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть числовым (больше нуля)!", type, sShortLimit));
-                    error = true;
+
+                if (sShortLimit != null && !sShortLimit.isEmpty()) {
+                    try {
+                        shortLimit = Integer.valueOf(sShortLimit);
+                    } catch (NumberFormatException e) {
+                        logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть числовым (больше нуля)!", type, sShortLimit));
+                        error = true;
+                    }
                 }
                 if (error) {
                     continue;
                 }
 
-                if (shortLimit > limit) {
+                if (limit != 0 && shortLimit != 0 && shortLimit > limit) {
                     logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" (\"%s\")!",
                             type, sLimit, sShortLimit));
                 }
             }
             if (logger.getEntries().isEmpty()) {
                 logger.info("Проверка завершена, ошибок не обнаружено");
+                result.setHasError(false);
+            } else {
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    result.setHasError(false);
+                }
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

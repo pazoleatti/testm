@@ -519,13 +519,20 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckAccessResult>() {
             @Override
             public void onSuccess(CheckAccessResult result) {
-                if (result.getUuid() != null) {
-                    LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
-                    LogShowEvent.fire(ConfigurationPresenter.this, true);
-                } else if (needSaveAfter) {
-                    onSave();
+                if (needSaveAfter) {
+                    if (result.isHasError()) {
+                        LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
+                        LogShowEvent.fire(ConfigurationPresenter.this, true);
+                    } else {
+                        onSave();
+                    }
                 } else {
-                    getView().clearSelection();
+                    if (result.getUuid() != null) {
+                        LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
+                        LogShowEvent.fire(ConfigurationPresenter.this, true);
+                    } else {
+                        getView().clearSelection();
+                    }
                 }
             }
         }, this));

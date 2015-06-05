@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.RefBookAsyncConfigDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -22,15 +23,25 @@ public class RefBookAsyncConfigDaoImpl extends AbstractDao implements RefBookAsy
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords() {
-        List<Map<String, RefBookValue>> records = getJdbcTemplate().query("select ID, NAME, LIMIT_KIND, TASK_LIMIT, SHORT_QUEUE_LIMIT from async_task_type where SHORT_QUEUE_LIMIT != 0 and TASK_LIMIT != 0 order by NAME ", new RowMapper<Map<String, RefBookValue>>() {
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query("select ID, NAME, LIMIT_KIND, TASK_LIMIT, SHORT_QUEUE_LIMIT from async_task_type order by NAME ", new RowMapper<Map<String, RefBookValue>>() {
             @Override
             public Map<String, RefBookValue> mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                 map.put(ConfigurationParamModel.ASYNC_TYPE_ID, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.ASYNC_TYPE_ID)));
                 map.put(ConfigurationParamModel.ASYNC_TYPE, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.ASYNC_TYPE)));
                 map.put(ConfigurationParamModel.ASYNC_LIMIT_KIND, new RefBookValue(RefBookAttributeType.STRING, rs.getString(ConfigurationParamModel.ASYNC_LIMIT_KIND)));
-                map.put(ConfigurationParamModel.ASYNC_LIMIT, new RefBookValue(RefBookAttributeType.NUMBER, rs.getBigDecimal(ConfigurationParamModel.ASYNC_LIMIT).setScale(0, BigDecimal.ROUND_HALF_UP)));
-                map.put(ConfigurationParamModel.ASYNC_SHORT_LIMIT, new RefBookValue(RefBookAttributeType.NUMBER, rs.getBigDecimal(ConfigurationParamModel.ASYNC_SHORT_LIMIT).setScale(0, BigDecimal.ROUND_HALF_UP)));
+                Integer limit = SqlUtils.getInteger(rs, (ConfigurationParamModel.ASYNC_LIMIT));
+                if (rs.wasNull()) {
+                    map.put(ConfigurationParamModel.ASYNC_LIMIT, new RefBookValue(RefBookAttributeType.NUMBER, null));
+                } else {
+                    map.put(ConfigurationParamModel.ASYNC_LIMIT, new RefBookValue(RefBookAttributeType.NUMBER, limit));
+                }
+                Integer shortLimit = SqlUtils.getInteger(rs, (ConfigurationParamModel.ASYNC_SHORT_LIMIT));
+                if (rs.wasNull()) {
+                    map.put(ConfigurationParamModel.ASYNC_SHORT_LIMIT, new RefBookValue(RefBookAttributeType.NUMBER, null));
+                } else {
+                    map.put(ConfigurationParamModel.ASYNC_SHORT_LIMIT, new RefBookValue(RefBookAttributeType.NUMBER, shortLimit));
+                }
                 return map;
             }
         });

@@ -83,7 +83,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             for (Map.Entry<String, RefBookValue> entry : value.entrySet()) {
                 switch (entry.getValue().getAttributeType()) {
                     case NUMBER:
-                        record.put(entry.getKey(), entry.getValue().getNumberValue().toString());
+                        Number nValue = entry.getValue().getNumberValue();
+                        record.put(entry.getKey(), nValue != null ? nValue.toString() : null);
                         break;
                     case STRING:
                         record.put(entry.getKey(), entry.getValue().getStringValue());
