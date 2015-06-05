@@ -4,7 +4,21 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.NumerationType;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -25,7 +39,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
@@ -80,7 +101,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             int formTemplateId = formTemplateDao.save(formTemplate);
             List<Long> formDataIds = formDataService.getFormDataListInActualPeriodByTemplate(formTemplateId, formTemplate.getVersion());
             for(Long formDataId: formDataIds)
-                formDataService.deleteReport(formDataId, null);
+                formDataService.deleteReport(formDataId, null, 0);
             return formTemplateId;
         } else
             return formTemplateDao.saveNew(formTemplate);
@@ -321,12 +342,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             }
 
             if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
-                List<String> formDataList = formDataDao.getStringList(column.getId(), formTemplateTypeId);
-                for (String string : formDataList) {
-                    if (string != null && string.length() > ((StringColumn) column).getMaxLength()) {
-                        logger.error("Длина одного из существующих значений графы '" + column.getName() + "' больше указанной длины " + ((StringColumn) column).getPrevLength());
-                        break;
-                    }
+				if (formTemplateDao.checkExistLargeString(formTemplateTypeId, column.getId(), ((StringColumn) column).getMaxLength())) {
+					logger.error("Длина одного из существующих значений графы '" + column.getName() + "' больше указанной длины " + ((StringColumn) column).getPrevLength());
                 }
             }
         }
@@ -380,7 +397,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger) {
+    public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger, TAUserInfo user) {
         // Если есть хоть одна автонумеруемая графа
         if (isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
             Integer formTemplateId = formTemplate.getId();
@@ -408,7 +425,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                             stringBuilder.toString() + ". " +
                             "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
                 } else {
-                    formDataService.batchUpdatePreviousNumberRow(formTemplate);
+                    formDataService.batchUpdatePreviousNumberRow(formTemplate, user);
                 }
             }
         }

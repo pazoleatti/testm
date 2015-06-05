@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetDeclarationPopUpFilterAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetDeclarationPopUpFilterResult;
@@ -20,8 +19,7 @@ import java.util.Set;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class GetDeclarationPopUpFilterHandler extends AbstractActionHandler<GetDeclarationPopUpFilterAction, GetDeclarationPopUpFilterResult> {{
-}
+public class GetDeclarationPopUpFilterHandler extends AbstractActionHandler<GetDeclarationPopUpFilterAction, GetDeclarationPopUpFilterResult> {
 
 	public GetDeclarationPopUpFilterHandler() {
 		super(GetDeclarationPopUpFilterAction.class);
@@ -32,9 +30,6 @@ public class GetDeclarationPopUpFilterHandler extends AbstractActionHandler<GetD
 
 	@Autowired
 	private SecurityService securityService;
-
-	@Autowired
-	private SourceService sourceService;
 
 	@Override
 	public GetDeclarationPopUpFilterResult execute(GetDeclarationPopUpFilterAction action, ExecutionContext executionContext) throws ActionException {
@@ -56,8 +51,6 @@ public class GetDeclarationPopUpFilterHandler extends AbstractActionHandler<GetD
 		for (Department d: availablePerformersList){
 			availablePerformersSet.add(d.getId());
 		}
-
-		result.setDeclarationTypes(sourceService.allDeclarationTypeByTaxType(action.getTaxType()));
 
 		return result;
 	}

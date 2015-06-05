@@ -713,8 +713,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         }
 
         if (newColumn != null) {
-            getUiHandlers().removeColumn(column);
-            getUiHandlers().addColumn(index, newColumn);
+            getUiHandlers().changeColumnType(index, column, newColumn);
             if (newColumn.getId() == null) {
                 newColumn.setId(getUiHandlers().getNextGeneratedColumnId());
             }

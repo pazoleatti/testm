@@ -12,29 +12,29 @@ public class DataRowRange implements Serializable{
 	private static final long serialVersionUID = -7454326888865205588L;
 
 	/**
-	 * Максимальное количество строк диапазона
+	 * Количество строк диапазона
 	 */
-	private int limit;
+	private int count;
 
 	/**
-	 * С какого индекса строки начинается диапазон (ндекс от 0)
+	 * С какого индекса строки начинается диапазон (индекс от 1)
 	 */
 	private int offset;
 
 	public DataRowRange(){
 	}
 
-	public DataRowRange(int offset, int limit){
+	public DataRowRange(int offset, int count){
 		this.offset = offset;
-		this.limit = limit;
+		this.count = count;
 	}
 
-	public int getLimit() {
-		return limit;
+	public int getCount() {
+		return count;
 	}
 
-	public void setLimit(int limit) {
-		this.limit = limit;
+	public void setCount(int count) {
+		this.count = count;
 	}
 
 	public int getOffset() {

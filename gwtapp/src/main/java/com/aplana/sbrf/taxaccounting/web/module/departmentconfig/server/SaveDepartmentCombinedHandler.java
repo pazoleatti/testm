@@ -21,12 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
-
-import static java.util.Arrays.asList;
 
 /**
  * @author Dmitriy Levykin
@@ -157,7 +154,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             record.setRecordId(depCombined.getRecordId());
 
             // Проверка значения атрибута на соответствие паттерну
-            Pattern innPattern = Pattern.compile(RefBookUtils.INN_PATTERN);
+            Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
             Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
             Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
 

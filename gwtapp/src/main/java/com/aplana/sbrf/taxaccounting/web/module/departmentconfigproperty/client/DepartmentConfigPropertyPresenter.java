@@ -320,7 +320,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                 }, this));
     }
 
-    private void createTableColumns() {
+    @Override
+    public void createTableColumns() {
         GetFormAttributesAction action = new GetFormAttributesAction();
         action.setRefBookId(getCurrentRefBookId());
         action.setTableRefBookId(getCurrentTableRefBookId());

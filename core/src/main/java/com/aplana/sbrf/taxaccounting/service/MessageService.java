@@ -14,4 +14,9 @@ public interface MessageService {
      * @return Результат миграции
      */
     MigrationSendResult sendFiles(long[] rnus, long[] year);
+
+    /**
+     * Получение данных из MQ КСШ
+     */
+    void getRateMessages();
 }

@@ -2,7 +2,16 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Color;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -27,13 +36,18 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.*;
+import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
+import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,6 +62,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private Date lastSendingTime;
 
     private static final int EXTEND_LOCKTIME_LIMIT_IN_MINUTES = 5;
+    private Timer timer;
+    private ReportType timerType;
+    private TimerTaskResult.FormMode formMode;
+
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
 	 * 's proxy.
@@ -65,6 +83,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter, sourcesPresenter);
 		getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize());
+        timer = new Timer() {
+            @Override
+            public void run() {
+                onTimer(false);
+            }
+        };
+        timer.cancel();
+        formMode = null;
 	}
 
 	@Override
@@ -195,6 +221,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             .defaultCallback(new AbstractCallback<CreateManualFormDataResult>() {
                                 @Override
                                 public void onSuccess(CreateManualFormDataResult result) {
+                                    formData.setManual(true);
                                     revealFormData(false, true, !absoluteView, result.getUuid());
                                 }
                             }, FormDataPresenter.this)
@@ -254,20 +281,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onEditClicked(final boolean readOnlyMode) {
-        if (formData.isManual()) {
-            CheckManualAction action = new CheckManualAction();
-            action.setFormDataId(formData.getId());
-            dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckManualResult>() {
+		FormDataEditAction action = new FormDataEditAction();
+		action.setFormData(formData);
+		dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<FormDataEditResult>() {
                 @Override
-                public void onSuccess(CheckManualResult result) {
+			public void onSuccess(FormDataEditResult result) {
                     modifiedRows.clear();
                     revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
                 }
             }, this));
-        } else {
-            modifiedRows.clear();
-            revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
-        }
 	}
 
 	@Override
@@ -410,12 +432,62 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			return showMsg ? CallbackUtils.defaultCallback(callback, this) :
 				CallbackUtils.defaultCallbackNoModalError(callback, this);
 	}
-	
+
+    private AsyncCallback<RecalculateFormDataResult> createDataRowResultCallback(final boolean force, final boolean save, final ReportType reportType){
+        LogCleanEvent.fire(this);
+        AbstractCallback<RecalculateFormDataResult> callback = new AbstractCallback<RecalculateFormDataResult>() {
+            @Override
+            public void onSuccess(RecalculateFormDataResult result) {
+                innerLogUuid = result.getUuid();
+                if (result.isLock()) {
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    Dialog.confirmMessage("Запуск операции приведет к удалению блокировок для некоторых ранее запущенных операций (операции, уже выполняемые Системой, будут отменены только после выполнения бизнес-логики, при этом изменения не будут сохранены). Продолжить?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            if (ReportType.CALCULATE_FD.equals(reportType)) {
+                                onRecalculateClicked(true, false);
+                            } else if (ReportType.IMPORT_FD.equals(reportType)) {
+                            }
+                        }
+                    });
+                } else if (result.isSave()) {
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            if (ReportType.CALCULATE_FD.equals(reportType)) {
+                                onRecalculateClicked(force, true);
+                            } else if (ReportType.IMPORT_FD.equals(reportType)) {
+                            }
+                        }
+                    });
+                } else {
+                    modifiedRows.clear();
+                    timerType = reportType;
+                    timer.run();
+                    getView().setSelectedRow(null, true);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                if (caught instanceof TaActionException) {
+                    innerLogUuid = ((TaActionException) caught).getUuid();
+                }
+                modifiedRows.clear();
+                getView().updateData();
+            }
+
+        };
+        return CallbackUtils.defaultCallback(callback, this);
+    }
+
 	@Override
 	public void onCheckClicked() {
         LogCleanEvent.fire(this);
         CheckFormDataAction checkAction = new CheckFormDataAction();
         checkAction.setFormData(formData);
+        checkAction.setEditMode(!readOnlyMode);
         checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         dispatcher.execute(checkAction, createDataRowResultCallback(false));
 	}  	
@@ -470,11 +542,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
      * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRecalculateClicked()
      */
 	@Override
-	public void onRecalculateClicked() {
+	public void onRecalculateClicked(final boolean force, final boolean save) {
 		RecalculateDataRowsAction action = new RecalculateDataRowsAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, createDataRowResultCallback(true));
+        action.setForce(force);
+        action.setSave(save);
+		dispatcher.execute(action, createDataRowResultCallback(force, save, ReportType.CALCULATE_FD));
 	}
 
 	@Override
@@ -571,15 +645,27 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onConsolidate() {
+    public void onConsolidate(final boolean force) {
         ConsolidateAction action = new ConsolidateAction();
         action.setManual(formData.isManual());
         action.setFormDataId(formData.getId());
+        action.setForce(force);
+        action.setTaxType(formData.getFormType().getTaxType());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<ConsolidateResult>() {
             @Override
             public void onSuccess(ConsolidateResult result) {
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                getView().updateData();
+                if (result.isLock()) {
+                    Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.CONSOLIDATE_FD.getDescription().replaceAll("\\%s", formData.getFormType().getTaxType().getTaxText()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            onConsolidate(true);
+                        }
+                    });
+                } else {
+                    timerType = ReportType.CONSOLIDATE_FD;
+                    timer.run();
+                }
             }
         }, this));
     }
@@ -712,15 +798,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                                 switch (result.getFormMode()) {
                                     case READ_UNLOCKED:
-                                        setReadUnlockedMode();
+                                        readOnlyMode = true;
                                         break;
                                     case READ_LOCKED:
-                                        setReadLockedMode(
-                                                result.getLockedByUser(),
-                                                result.getLockDate());
+                                        readOnlyMode = true;
                                         break;
                                     case EDIT:
-                                        setEditMode();
+                                        readOnlyMode = false;
                                         break;
                                 }
 
@@ -770,6 +854,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                                 onTimerReport(ReportType.EXCEL, false);
                                 onTimerReport(ReportType.CSV, false);
+                                onTimer(true);
+                                timer.scheduleRepeating(5000);
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));
@@ -826,5 +912,74 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         formSearchPresenter.close();
         getView().stopTimerReport(ReportType.CSV);
         getView().stopTimerReport(ReportType.EXCEL);
+        timer.cancel();
+    }
+
+    private void onTimer(final boolean isForce) {
+        final ReportType oldType = timerType;
+        TimerTaskAction action = new TimerTaskAction();
+        action.setFormDataId(formData.getId());
+        dispatcher.execute(
+                action,
+                CallbackUtils.defaultCallbackNoLock(
+                        new AbstractCallback<TimerTaskResult>() {
+                            @Override
+                            public void onSuccess(TimerTaskResult result) {
+                                timerType = result.getTaskType();
+                                if (readOnlyMode) {
+                                    if (timerType == null
+                                            && oldType != null) {
+                                        // задача завершена, обновляем таблицу с данными
+                                        getView().updateData();
+                                    } else if (oldType != null && !oldType.equals(timerType)) {
+                                        // изменился тип задачи, возможно нужно обновить форму???
+                                        getView().updateData();
+                                    }
+                                } else {
+                                    if ((timerType == null || ReportType.EDIT_FD.equals(timerType))
+                                            && (oldType != null && !ReportType.EDIT_FD.equals(timerType))) {
+                                        // задача завершена, обновляем таблицу с данными
+                                        getView().updateData();
+                                    } else if (oldType != null && !oldType.equals(timerType)) {
+                                        // изменился тип задачи, возможно нужно обновить форму???
+                                        getView().updateData();
+                                    }
+                                }
+                                if (isForce || !result.getFormMode().equals(formMode))
+                                    switch (result.getFormMode()) {
+                                        case EDIT:
+                                            if (readOnlyMode) {
+                                                setReadUnlockedMode();
+                                            } else {
+                                                setEditMode();
+                                            }
+                                            break;
+                                        case LOCKED_EDIT:
+                                            if (readOnlyMode) {
+                                                setLowReadLockedMode(
+                                                        result.getLockedByUser(),
+                                                        result.getLockDate());
+                                            } else {
+                                                setLowEditLockedMode(
+                                                        result.getLockedByUser(),
+                                                        result.getLockDate());
+                                            }
+                                            break;
+                                        case LOCKED:
+                                            setReadLockedMode(true,
+                                                    result.getLockedByUser(),
+                                                    result.getLockDate());
+                                            break;
+                                        case LOCKED_READ:
+                                            setLowReadLockedMode(
+                                                    result.getLockedByUser(),
+                                                    result.getLockDate());
+                                            break;
+
+                                    }
+                                formMode = result.getFormMode();
+                            }
+                        }, this)
+        );
     }
 }

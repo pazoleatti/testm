@@ -39,7 +39,6 @@ import static com.aplana.sbrf.taxaccounting.model.DepartmentType.*;
  * User: ekuvshinov
  */
 @Service("refBookDepartment")
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookDepartment implements RefBookDataProvider {
 
@@ -437,10 +436,10 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (versionFrom != null){
                     if (oldType != TERR_BANK){
                         //Обновляем имена подразделений в печатных формах
-                        formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo);
+                        formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo, logger.getTaUserInfo());
                     }else {
                         //Обновляем имена ТБ в печатных формах
-                        formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo, oldType == TERR_BANK && isChangeType);
+                        formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo, oldType == TERR_BANK && isChangeType, logger.getTaUserInfo());
                     }
                 }
 

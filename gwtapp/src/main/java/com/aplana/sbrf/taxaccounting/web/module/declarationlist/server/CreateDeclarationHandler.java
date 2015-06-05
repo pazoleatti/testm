@@ -18,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -73,16 +72,6 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
 
         if (departmentReportPeriod == null) {
             throw new ActionException("Не удалось определить налоговый период.");
-        }
-
-        if (command.getTaxType().equals(TaxType.DEAL)) {
-            List<DeclarationType> declarationTypeList = declarationTypeService.getTypes(departmentReportPeriod.getDepartmentId(),
-                    departmentReportPeriod.getReportPeriod().getId(), TaxType.DEAL);
-            if (declarationTypeList.size() == 1) {
-                declarationTypeId = declarationTypeList.get(0).getId();
-            } else {
-                throw new ActionException("Не удалось определить шаблон для уведомления.");
-            }
         }
 
         if (lockDataService.lock(key, userInfo.getUser().getId(),

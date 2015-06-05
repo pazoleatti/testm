@@ -15,9 +15,4 @@ public class AsyncInterruptionManagerMock implements AsyncInterruptionManager {
     public void interruptAll(Collection<String> keys) {
 
     }
-
-    @Override
-    public void interruptAll() {
-
-    }
 }

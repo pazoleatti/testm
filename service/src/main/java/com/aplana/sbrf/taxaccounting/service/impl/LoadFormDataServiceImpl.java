@@ -465,14 +465,14 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
 
         // Блокировка
-        LockData lockData = lockDataService.lock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(),
+        LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD),
                 userInfo.getUser().getId(),
                 formDataService.getFormDataFullName(formData.getId(), null, null),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
         // Защита от перехода в режим редактирования для импортируемой нф
-        lockDataService.lock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formData.getId(),
+        lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
                 userInfo.getUser().getId(),
-                formDataService.getFormDataFullName(formData.getId(), currentFile.getName(), null),
+                formDataService.getFormDataFullName(formData.getId(), currentFile.getName(), ReportType.IMPORT_TF_FD),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
         if (lockData != null)
             throw new ServiceException(String.format(
@@ -496,6 +496,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             // Если при выполнении скрипта возникли фатальные ошибки, то
             if (localLogger.containsLevel(LogLevel.ERROR)) {
+                if (!formWasCreated) {
+                    formDataDao.delete(formData.getId());
+                }
                 // Исключение для отката транзакции сознания и заполнения НФ
                 throw new ServiceException("При выполнении загрузки произошли ошибки");
             }
@@ -522,8 +525,11 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         } finally {
             // Снимаем блокировку
-            lockDataService.unlock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId(), userInfo.getUser().getId());
-            lockDataService.unlock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + formData.getId(), userInfo.getUser().getId());
+            lockDataService.unlock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD), userInfo.getUser().getId());
+            lockDataService.unlock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD), userInfo.getUser().getId());
+            if (localLogger.containsLevel(LogLevel.ERROR) && !formWasCreated) {
+                formDataDao.delete(formData.getId());
+            }
         }
 
         // 20 Загрузка формы завершена

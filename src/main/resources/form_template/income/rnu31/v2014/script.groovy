@@ -29,59 +29,64 @@ import groovy.transform.Field
 // графа 12 - corporateBonds
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         prevPeriodCheck()
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         // Всего форма должна содержать одну строку
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         // Всего форма должна содержать одну строку
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         prevPeriodCheck()
         logicCheck()
         break
-    // обобщить
-    case FormDataEvent.COMPOSE :
+// обобщить
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.IMPORT :
+    case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
             importTransportData()
+            formDataService.saveCachedDataRows(formData, logger)
         } else {
             importData()
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 calc()
                 logicCheck()
+                formDataService.saveCachedDataRows(formData, logger)
             }
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
 // Редактируемые атрибуты (графа 3..12)
 @Field
 def editableColumns = ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds', 'municipalBondsBefore',
-        'rtgageBondsBefore', 'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
+                       'rtgageBondsBefore', 'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds']
 
 // Проверяемые на пустые значения атрибуты (графа 3..12)
 @Field
@@ -116,18 +121,16 @@ def getNumber(def value, def indexRow, def indexCol) {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def row = getDataRow(dataRows, 'total')
     row.number = formData.periodOrder
-    dataRowHelper.update(dataRows)
 }
 
 void logicCheck() {
     if (formData.periodOrder == null) {
         throw new ServiceException("Месячная форма создана как квартальная!")
     }
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     // строка из текущего отчета
     def row = getDataRow(dataRows, 'total')
 
@@ -161,14 +164,15 @@ void logicCheck() {
     }
 
     // 14-22. Проверка на неотрицательные значения
-    for (def column : ['ofz', 'municipalBonds', 'mortgageBonds', 'municipalBondsBefore', 'rtgageBondsBefore', 'corporateBonds']) {
+    for (
+            def column : ['ofz', 'municipalBonds', 'mortgageBonds', 'municipalBondsBefore', 'rtgageBondsBefore', 'corporateBonds']) {
         def value = row.getCell(column).value
         if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
             rowError(logger, row, "Значение графы «$columnName» по строке 1 отрицательное!")
         }
     }
-    for (def column : ['governmentBonds','ovgvz','eurobondsRF','itherEurobonds']) {
+    for (def column : ['governmentBonds', 'ovgvz', 'eurobondsRF', 'itherEurobonds']) {
         def value = row.getCell(column).value
         if (value != null && value < 0) {
             def columnName = getColumnName(row, column)
@@ -178,8 +182,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // занулить данные и просуммировать из источников
     def row = getDataRow(dataRows, 'total')
@@ -192,7 +195,7 @@ void consolidation() {
         if (it.formTypeId == formData.formType.id) {
             def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allCached
+                def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allSaved
                 def sourceRow = getDataRow(sourceDataRows, 'total')
                 editableColumns.each { alias ->
                     row.getCell(alias).setValue(sourceRow.getCell(alias).value + row.getCell(alias).getValue(), row.getIndex())
@@ -200,7 +203,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 void importTransportData() {
@@ -209,8 +211,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 3
     def int colOffset = 1
     def row = getDataRow(dataRows, 'total')
@@ -240,7 +241,6 @@ void addTransportData(def xml) {
     row.corporateBonds = getNumber(xmlRow.cell[12].text(), rnuIndexRow, 12 + colOffset)
 
     showMessages(dataRows, logger)
-    dataRowHelper.save(dataRows)
 }
 
 // Получить строку за прошлый месяц
@@ -251,7 +251,7 @@ def getPrevMonthTotalRow() {
     }
     def prevFormData = formDataService.getFormDataPrev(formData)
     if (prevFormData != null) {
-        def prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allCached
+        def prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allSaved
         return getDataRow(prevDataRows, 'total')
     }
     return null
@@ -273,7 +273,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -292,8 +292,7 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -320,9 +319,6 @@ void importData() {
         rowValues.clear()
     }
     showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(dataRows)
-    }
 }
 
 /**
@@ -385,7 +381,7 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     // графа 3..12
     def colIndex = 1
     ['ofz', 'municipalBonds', 'governmentBonds', 'mortgageBonds', 'municipalBondsBefore',
-            'rtgageBondsBefore', 'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds'].each { alias ->
+     'rtgageBondsBefore', 'ovgvz', 'eurobondsRF', 'itherEurobonds', 'corporateBonds'].each { alias ->
         colIndex++
         dataRow[alias] = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
     }

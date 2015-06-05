@@ -23,7 +23,6 @@ import java.util.Map;
  */
 
 @Service("refBookTaxOrganKpp")
-@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Transactional
 public class RefBookTaxOrganKpp extends AbstractReadOnlyRefBook {
 

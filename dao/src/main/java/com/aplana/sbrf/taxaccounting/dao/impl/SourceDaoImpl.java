@@ -376,43 +376,45 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             ")";
 
     @Override
-    public List<ConsolidatedInstance> findConsolidatedInstances(Long source, Date periodStart, Date periodEnd) {
+    public List<ConsolidatedInstance> findConsolidatedInstances(Long source, Date periodStart, Date periodEnd, boolean declaration) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("source", source);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         List<ConsolidatedInstance> formsAndDeclarations = new ArrayList<ConsolidatedInstance>();
 
-        /** Получаем формы, которые консолидируются из указанного источника */
-        formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FIND_CONSOLIDATED_FORMS, params, new RowMapper<ConsolidatedInstance>() {
-            @Override
-            public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
-                ConsolidatedInstance form = new ConsolidatedInstance();
-                form.setFormKind(rs.getInt("kind"));
-                form.setType(rs.getString("type"));
-                form.setDepartment(rs.getString("department"));
-                form.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
-                form.setCorrectionDate(rs.getDate("correctionDate"));
-                form.setMonth(SqlUtils.getInteger(rs, "month"));
-                return form;
-            }
-        }));
-
-        /** Получаем декларации, которые консолидируются из указанного источника */
-        formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FIND_CONSOLIDATED_DECLARATIONS, params, new RowMapper<ConsolidatedInstance>() {
-            @Override
-            public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
-                ConsolidatedInstance declaration = new ConsolidatedInstance();
-                declaration.setType(rs.getString("type"));
-                declaration.setDepartment(rs.getString("department"));
-                declaration.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
-                declaration.setCorrectionDate(rs.getDate("correctionDate"));
-                declaration.setDeclaration(true);
-                declaration.setTaxOrganCode(rs.getString("taxOrganCode"));
-                declaration.setKpp(rs.getString("kpp"));
-                return declaration;
-            }
-        }));
+        if (declaration) {
+            /** Получаем декларации, которые консолидируются из указанного источника */
+            formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FIND_CONSOLIDATED_DECLARATIONS, params, new RowMapper<ConsolidatedInstance>() {
+                @Override
+                public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    ConsolidatedInstance declaration = new ConsolidatedInstance();
+                    declaration.setType(rs.getString("type"));
+                    declaration.setDepartment(rs.getString("department"));
+                    declaration.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
+                    declaration.setCorrectionDate(rs.getDate("correctionDate"));
+                    declaration.setDeclaration(true);
+                    declaration.setTaxOrganCode(rs.getString("taxOrganCode"));
+                    declaration.setKpp(rs.getString("kpp"));
+                    return declaration;
+                }
+            }));
+        } else {
+            /** Получаем формы, которые консолидируются из указанного источника */
+            formsAndDeclarations.addAll(getNamedParameterJdbcTemplate().query(FIND_CONSOLIDATED_FORMS, params, new RowMapper<ConsolidatedInstance>() {
+                @Override
+                public ConsolidatedInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    ConsolidatedInstance form = new ConsolidatedInstance();
+                    form.setFormKind(rs.getInt("kind"));
+                    form.setType(rs.getString("type"));
+                    form.setDepartment(rs.getString("department"));
+                    form.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
+                    form.setCorrectionDate(rs.getDate("correctionDate"));
+                    form.setMonth(SqlUtils.getInteger(rs, "month"));
+                    return form;
+                }
+            }));
+        }
         return formsAndDeclarations;
     }
 

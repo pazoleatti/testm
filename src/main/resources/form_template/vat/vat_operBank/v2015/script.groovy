@@ -29,6 +29,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -45,6 +46,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         // TODO (Ramil Timerbaev) загрузку из экселя сказали пока не делать
@@ -101,8 +103,7 @@ def getReportPeriodEndDate() {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def row in dataRows) {
         if (row.getAlias() in [totalTBAlias, totalSBAlias]) {
@@ -128,8 +129,7 @@ void logicCheck() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def row : dataRows) {
         // пропустить итоговые строки
@@ -144,8 +144,6 @@ void calc() {
     calcTotal(dataRows, totalTBAlias, totalTBRows)
     // итоги по СБ
     calcTotal(dataRows, totalSBAlias, totalSBRows)
-
-    dataRowHelper.save(dataRows)
 }
 
 def calc3(def row) {
@@ -185,8 +183,7 @@ void checkTotal(def dataRows, def totalAlias, def totalRows) {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
@@ -198,7 +195,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 // Округляет число до требуемой точности

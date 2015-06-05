@@ -234,7 +234,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void calculate(Logger logger, long id, TAUserInfo userInfo, Date docDate, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.CALCULATE);
         DeclarationData declarationData = declarationDataDao.get(id);
-        checkSources(declarationData, logger);
 
         //2. проверяет состояние XML отчета экземпляра декларации
         setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
@@ -243,7 +242,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
         DeclarationTemplate template = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
-                (int) id,
+                declarationData.getDepartmentId(),
                 template.getType().getId(),
                 reportPeriod.getCalendarStartDate(),
                 reportPeriod.getEndDate());
@@ -269,9 +268,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         log.info(String.format("Скриптовые проверки для декларации %s", id));
         lockStateLogger.updateState("Скриптовые проверки");
-        declarationDataScriptingService.executeScript(userInfo,
-                declarationDataDao.get(id), FormDataEvent.CHECK, logger, null);
         DeclarationData dd = declarationDataDao.get(id);
+        checkSources(dd, logger);
+        declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, logger, null);
         validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
         // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
@@ -279,7 +278,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     "Найдены ошибки при выполнении проверки декларации",
                     logEntryService.save(logger.getEntries()));
         } else {
-            checkSources(dd, logger);
             logger.info("Проверка завершена, ошибок не обнаружено");
         }
     }
@@ -312,7 +310,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             DeclarationData declarationData = declarationDataDao.get(id);
 
-            deleteReport(id, false);
+            deleteReport(id, userInfo.getUser().getId(), false);
             declarationDataDao.delete(id);
 
             auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
@@ -825,13 +823,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      */
     @Override
-    public void deleteReport(long declarationDataId, boolean isCalc) {
+    public void deleteReport(long declarationDataId, int userId, boolean isCalc) {
         ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC, ReportType.ACCEPT_DEC};
         for (ReportType reportType : reportTypes) {
             if (!isCalc || isCalc && !ReportType.XML_DEC.equals(reportType)) {
                 LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
                 if (lock != null)
-                    lockDataService.interruptTask(lock, 0, true);
+                    lockDataService.interruptTask(lock, userId, true);
             }
         }
         reportService.deleteDec(declarationDataId);
@@ -971,42 +969,44 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
-        if (ReportType.PDF_DEC.equals(reportType)) {
-            String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
-            if (uuid != null) {
-                Long size = blobDataService.getLength(uuid);
-                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                long maxSize = taskTypeData.getTaskLimit();
-                long shortSize = taskTypeData.getShortQueueLimit();
-                if (size > maxSize) {
-                    return new Pair<BalancingVariants, Long>(null, size);
-                } else if (size < shortSize) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+        switch (reportType) {
+            case PDF_DEC:
+                String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+                if (uuid != null) {
+                    Long size = blobDataService.getLength(uuid);
+                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                    long maxSize = taskTypeData.getTaskLimit() * 1024;
+                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
+                    if (size > maxSize) {
+                        return new Pair<BalancingVariants, Long>(null, size);
+                    } else if (size < shortSize) {
+                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                    }
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                } else {
+                    return null;
                 }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
-            } else {
-                return null;
-            }
-        } else if (ReportType.EXCEL_DEC.equals(reportType)) {
-            String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
-            if (uuid != null) {
-                Long size = blobDataService.getLength(uuid);
-                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                long maxSize = taskTypeData.getTaskLimit();
-                long shortSize = taskTypeData.getShortQueueLimit();
-                if (size > maxSize) {
-                    return new Pair<BalancingVariants, Long>(null, size);
-                } else if (size < shortSize) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+            case EXCEL_DEC:
+                String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+                if (uuidXml != null) {
+                    Long size = blobDataService.getLength(uuidXml);
+                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                    long maxSize = taskTypeData.getTaskLimit() * 1024;
+                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
+                    if (size > maxSize) {
+                        return new Pair<BalancingVariants, Long>(null, size);
+                    } else if (size < shortSize) {
+                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                    }
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                } else {
+                    return null;
                 }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
-            } else {
-                return null;
-            }
-        } else if (ReportType.XML_DEC.equals(reportType)) {
-            return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+            case XML_DEC:
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+            default:
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }
-        throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
     }
 
     private void checkSources(DeclarationData dd, Logger logger){

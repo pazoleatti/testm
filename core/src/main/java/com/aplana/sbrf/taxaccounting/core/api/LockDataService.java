@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Date;
 import java.util.List;
@@ -220,4 +221,11 @@ public interface LockDataService {
      * @param userId идентификатор пользователя, отменяющего блокировку
      */
     void interuptAllTasks(List<String> lockKeys, int userId);
+
+    /**
+     * Выводит в logger информации о блокировке
+     * @param lockData
+     * @param logger
+     */
+    void lockInfo(LockData lockData, Logger logger);
 }

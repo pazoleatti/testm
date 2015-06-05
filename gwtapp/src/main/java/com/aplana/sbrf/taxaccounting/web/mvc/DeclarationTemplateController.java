@@ -90,7 +90,6 @@ public class DeclarationTemplateController {
         try {
             DeclarationTemplate declarationTemplateOld = declarationTemplateService.get(declarationTemplateId);
             String jrxmBlobIdOld = declarationTemplateOld.getJrxmlBlobId();
-            String xsdUuidOld = declarationTemplateOld.getXsdId();
             req.setCharacterEncoding("UTF-8");
             FileItemFactory factory = new DiskFileItemFactory();
             ServletFileUpload upload = new ServletFileUpload(factory);
@@ -107,6 +106,12 @@ public class DeclarationTemplateController {
 
             deleteBlobs(customLog, jrxmBlobIdOld);// xsd удаляется при сохранении
             checkErrors(customLog, resp);
+            JSONObject resultUuid = new JSONObject();
+            resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
+            resp.getWriter().printf(resultUuid.toString());
+        } catch (JSONException e) {
+            logger.error(e);
+            throw new ServiceException("", e);
         } finally {
             declarationTemplateService.unlock(declarationTemplateId, userInfo);
         }

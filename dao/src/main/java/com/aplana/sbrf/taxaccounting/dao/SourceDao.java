@@ -108,9 +108,10 @@ public interface SourceDao {
      * @param source идентификатор назначения-источника
      * @param periodStart начало диапазона
      * @param periodEnd окончание диапазона
+     * @param declaration признак того, что экземпляры-приемники надо искать только среди деклараций
      * @return
      */
-    List<ConsolidatedInstance> findConsolidatedInstances(Long source, Date periodStart, Date periodEnd);
+    List<ConsolidatedInstance> findConsolidatedInstances(Long source, Date periodStart, Date periodEnd, boolean declaration);
 
     /**
      * Возвращает названия подразделений для указанных источников

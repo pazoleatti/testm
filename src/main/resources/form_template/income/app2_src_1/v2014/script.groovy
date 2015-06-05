@@ -9,18 +9,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
-import java.sql.Statement
-import java.sql.PreparedStatement
-
-@Field
-Statement stmt
-
-@Field
-PreparedStatement dataRowStatement
-
-@Field
-PreparedStatement dataCellStatement
-
 /**
  * Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с
  * финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов (ЦФО НДФЛ).
@@ -29,8 +17,6 @@ PreparedStatement dataCellStatement
  * 31.03.2015 - Ramil Timerbaev:
  *      Добавлена массовая загрузка справочных записей в кеш.
  *      Не стал добавлять сообещние при нескольких записях с одинаковым кодом.
- * 21.04.2015 - доработки от Марата:
- *      При загрузке тф скрипт напрямую записывает данные в базу.
  * 13.05.2015 - Bulat Kinzyabulatov:
  *      Проверки на корректность данных перед сохранением
  *
@@ -118,6 +104,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -131,6 +118,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
@@ -143,12 +131,15 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -231,8 +222,7 @@ def getNumber(def value, def indexRow, def indexCol) {
 //// Кастомные методы
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -315,13 +305,17 @@ void logicCheck() {
         needValue['taxBase'] = calc25(row)
         def arithmeticCheckAlias = needValue.keySet().asList()
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
+
+        // 29. Проверка на соответствие паттерну
+        if (checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, true)) {
+            checkControlSumInn(logger, row, 'innRF', row.innRF, true)
+        }
     }
 }
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -348,10 +342,7 @@ void calc() {
         row.taxBase = value25
     }
 
-    dataRowHelper.update(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 /**
@@ -421,11 +412,15 @@ def getNewRow() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, null, null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 // Округляет число до требуемой точности
@@ -438,124 +433,113 @@ def roundValue(def value, int precision = 2) {
 }
 
 void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
     int COLUMN_COUNT = 70
-    int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
 
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
-
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.clear()
-
     String[] rowCells
-    int countEmptyRow = 0   // количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
-    def totalTF = null        // итоговая строка со значениями из тф для добавления
+    def total = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     loadRecordIdsInMap()
 
-    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
-    def totalColumnsIndexMap = [
-            'income'           : 23,
-            'deduction'        : 24,
-            'taxBase'          : 25,
-            'calculated'       : 26,
-            'withheld'         : 27,
-            'listed'           : 28,
-            'withheldAgent'    : 29,
-            'nonWithheldAgent' : 30,
-            'col_041_1'        : 32,
-            'col_043_1_1'      : 34,
-            'col_043_1_2'      : 36,
-            'col_043_1_3'      : 38,
-            'col_043_1_4'      : 40,
-            'col_043_1_5'      : 42,
-            'col_041_2'        : 44,
-            'col_043_2_1'      : 46,
-            'col_043_2_2'      : 48,
-            'col_043_2_3'      : 50,
-            'col_043_2_4'      : 52,
-            'col_043_2_5'      : 54,
-            'col_041_3'        : 56,
-            'col_043_3_1'      : 58,
-            'col_043_3_2'      : 60,
-            'col_043_3_3'      : 62,
-            'col_043_3_4'      : 64,
-            'col_043_3_5'      : 66,
-            'col_052_3_1'      : 68,
-            'col_052_3_2'      : 70
-    ]
-    // итоговая строка для сверки сумм
-    def totalTmp = formData.createStoreMessagingDataRow()
-    totalColumnsIndexMap.keySet().asList().each { alias ->
-        totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-    }
-
-    // подключение к базе
-    def connection = dataSource.connection
     try {
-        createStatements(connection)
-        // удалить все строки НФ
-        clearFormData(formData)
-
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
         while ((rowCells = reader.readNext()) != null) {
             fileRowIndex++
-            def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-            if (isEmptyRow) {
-                if (countEmptyRow > 0) {
-                    // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
-                    // итоговая строка тф
-                    totalTF = getNewRow(reader.readNext(), COLUMN_COUNT, ++fileRowIndex, ++rowIndex)
-                    break
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
                 }
-                countEmptyRow++
-                continue
-            }
-
-            // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
-            // обычная строка
-            if (countEmptyRow != 0 && !addRow(newRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
                 break
             }
-
-            // периодически сбрасываем строки
-            if (newRows.size() >= ROW_MAX) {
-                showMessages(newRows, logger)
-                if (!logger.containsLevel(LogLevel.ERROR)) {
-                    insertRows(formData, newRows, rowIndex)
-                }
-                calcTotal(totalTmp, newRows, totalColumnsIndexMap)
-                newRows.clear()
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
+            if (newRow) {
+                newRows.add(newRow)
             }
-        }
-        reader.close()
-
-        if (newRows.size() != 0) {
-            showMessages(newRows, logger)
-            if (!logger.containsLevel(LogLevel.ERROR)) {
-                insertRows(formData, newRows, rowIndex)
-            }
-            calcTotal(totalTmp, newRows, totalColumnsIndexMap)
         }
     } finally {
-        connection.close()
+        reader.close()
     }
+
     // сравнение итогов
-    if (totalTF) {
+    if (total) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
+        def totalColumnsIndexMap = [
+                'income'           : 23,
+                'deduction'        : 24,
+                'taxBase'          : 25,
+                'calculated'       : 26,
+                'withheld'         : 27,
+                'listed'           : 28,
+                'withheldAgent'    : 29,
+                'nonWithheldAgent' : 30,
+                'col_041_1'        : 32,
+                'col_043_1_1'      : 34,
+                'col_043_1_2'      : 36,
+                'col_043_1_3'      : 38,
+                'col_043_1_4'      : 40,
+                'col_043_1_5'      : 42,
+                'col_041_2'        : 44,
+                'col_043_2_1'      : 46,
+                'col_043_2_2'      : 48,
+                'col_043_2_3'      : 50,
+                'col_043_2_4'      : 52,
+                'col_043_2_5'      : 54,
+                'col_041_3'        : 56,
+                'col_043_3_1'      : 58,
+                'col_043_3_2'      : 60,
+                'col_043_3_3'      : 62,
+                'col_043_3_4'      : 64,
+                'col_043_3_5'      : 66,
+                'col_052_3_1'      : 68,
+                'col_052_3_2'      : 70
+        ]
+
+        // итоговая строка для сверки сумм
+        def totalTmp = formData.createDataRow()
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+        }
+
+        // подсчет итогов
+        for (def row : newRows) {
+            if (row.getAlias()) {
+                continue
+            }
+            totalColumnsIndexMap.keySet().asList().each { alias ->
+                def value1 = totalTmp.getCell(alias).value
+                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+                totalTmp.getCell(alias).setValue(value1 + value2, null)
+            }
+        }
+
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
+            def v1 = total.getCell(alias).value
             def v2 = totalTmp.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
@@ -567,20 +551,16 @@ void importTransportData() {
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
+
+    showMessages(newRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).save(newRows)
+    }
 }
 
-def calcTotal(def totalTmp, def rows, def totalColumnsIndexMap) {
-    // подсчет итогов
-    for (def row : rows) {
-        if (row.getAlias()) {
-            continue
-        }
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            def value1 = totalTmp.getCell(alias).value
-            def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-            totalTmp.getCell(alias).setValue(value1 + value2, null)
-        }
-    }
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }
 
 /** Добавляет строку в текущий буфер строк. */
@@ -612,7 +592,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     newRow.setImportIndex(fileRowIndex)
 
     if (rowCells.length != columnCount + 2) {
-        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG + " Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
         return null
     }
 
@@ -873,115 +853,6 @@ def getId(def refBookId, def code, def rowIndex, def colIndex) {
     return result
 }
 
-
-/**
- Удаляет все строки НФ из постоянного и временного среза
- */
-def clearFormData(def formData) {
-    updateQuery("delete from data_row where form_data_id = ${formData.id}");
-}
-
-/**
- Получает информацию о графах [alias:[id, type]]
- */
-def getFormColumnTypes(def formTemplateId) {
-    def result = [:]
-    def rs = selectQuery("select id, alias, type from form_column where form_template_id = ${formTemplateId}")
-    while (rs.next()) {
-        def id = rs.getLong(1)
-        def alias = rs.getString(2)
-        def type = rs.getString(3)
-        result[alias] = ['id':id, 'type':type]
-    }
-    return result
-}
-
-long getStyleId(def styleAlias, def formTemplateId) {
-    def rs = selectQuery("select id from form_style where alias = \'$styleAlias\' and form_template_id = $formTemplateId")
-    while (rs.next()) {
-        return rs.getLong(1)
-    }
-}
-
-def insertRows(def formData, def rows, def totalCount) {
-    def columns = getFormColumnTypes(formData.formTemplateId)
-    def styleAlias = 'Редактируемая'
-    long editableStyleId = getStyleId(styleAlias, formData.formTemplateId)
-    int startOrd = totalCount - rows.size() + 1;
-    def ids = getNextIds(rows.size(), 'seq_data_row')
-
-    for (int i = 0; i < rows.size(); i++) {
-        dataRowStatement.setLong(1, ids[i])
-        dataRowStatement.setLong(2, formData.id)
-        dataRowStatement.setLong(3, (startOrd + i) * 100000)
-        dataRowStatement.setLong(4, 0) // постоянный срез
-        dataRowStatement.addBatch()
-
-        def row = rows[i]
-        columns.each{column ->
-            def alias = column.key
-            def value = row.get(alias)
-            if (value != null) {
-                def type = column.value.type
-                value = row[alias]
-                if (value != null) {
-                    dataCellStatement.setLong(1, ids[i])
-                    dataCellStatement.setLong(2, column.value.id)
-                    dataCellStatement.setNull(3, java.sql.Types.VARCHAR)
-                    dataCellStatement.setNull(4, java.sql.Types.INTEGER)
-                    dataCellStatement.setNull(5, java.sql.Types.DATE)
-                    switch (type) {
-                        case 'N': dataCellStatement.setBigDecimal(4, value)
-                            break;
-                        case 'S': dataCellStatement.setString(3, value)
-                            break;
-                        case 'R': dataCellStatement.setLong(4, value.longValue())
-                            break;
-                        case 'D': dataCellStatement.setDate(5, new java.sql.Date(value.getTime()))
-                            break;
-                    }
-                    if (editableColumns.contains(alias)) {
-                        dataCellStatement.setLong(6, editableStyleId)
-                        dataCellStatement.setLong(7, 1)
-                    } else {
-                        dataCellStatement.setNull(6, java.sql.Types.INTEGER)
-                        dataCellStatement.setNull(7, java.sql.Types.INTEGER)
-                    }
-                    dataCellStatement.addBatch()
-                }
-            }
-        }
-    }
-    dataRowStatement.executeBatch()
-    dataCellStatement.executeBatch()
-}
-
-def getNextIds(def count, def sequenceName) {
-    def result = []
-    def rs = selectQuery("select ${sequenceName}.nextval from dual connect by level <= ${count}")
-    while (rs.next()) {
-        result += rs.getLong(1)
-    }
-    return result
-}
-
-/**
- Создаем шаблоны запросов
- */
-def createStatements(def connection) {
-    stmt = connection.createStatement()
-    dataRowStatement = connection.prepareStatement("insert into data_row (id, form_data_id, ord, type) values (?, ?, ?, ?)")
-    dataCellStatement = connection.prepareStatement("insert into data_cell (row_id, column_id, svalue, nvalue, dvalue, style_id, editable) values (?, ?, ?, ?, ?, ?, ?)")
-}
-
-def updateQuery(def sql) {
-    stmt.executeUpdate(sql)
-}
-
-def selectQuery(def sql) {
-    stmt.executeQuery(sql)
-}
-
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 70
@@ -1031,6 +902,7 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).save(rows)
     }
 }

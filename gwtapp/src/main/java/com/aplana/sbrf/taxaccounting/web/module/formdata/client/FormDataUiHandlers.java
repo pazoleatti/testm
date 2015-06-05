@@ -28,7 +28,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onOriginalVersionClicked();
 
-	void onRecalculateClicked();
+	void onRecalculateClicked(boolean force, boolean save);
 
 	void onCheckClicked();
 
@@ -66,5 +66,5 @@ public interface FormDataUiHandlers extends UiHandlers{
 
     void onCorrectionSwitch();
 
-    void onConsolidate();
+    void onConsolidate(boolean force);
 }

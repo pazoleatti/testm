@@ -62,16 +62,17 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         }
     };
 
-    private static final RowMapper<Pair<DepartmentFormType, Date>> DFT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentFormType, Date>>() {
+    private static final RowMapper<Pair<DepartmentFormType, Pair<Date, Date>>> DFT_SOURCES_MAPPER = new RowMapper<Pair<DepartmentFormType, Pair<Date, Date>>>() {
 
         @Override
-        public Pair<DepartmentFormType, Date> mapRow(ResultSet rs, int i) throws SQLException {
+        public Pair<DepartmentFormType, Pair<Date, Date>> mapRow(ResultSet rs, int i) throws SQLException {
             DepartmentFormType departmentFormType = new DepartmentFormType();
             departmentFormType.setId(rs.getInt("id"));
             departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
             departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
             departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
-            return new Pair<DepartmentFormType, Date>(departmentFormType, rs.getDate("start_date"));
+            Pair<Date, Date> dates = new Pair<Date, Date>(rs.getDate("start_date"), rs.getDate("end_date"));
+            return new Pair<DepartmentFormType, Pair<Date, Date>>(departmentFormType, dates);
         }
     };
 
@@ -763,7 +764,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private static final String FIND_DESTINATIONS_SQL = "SELECT tgt.id id, tgt.DEPARTMENT_ID department_id, tgt.FORM_TYPE_ID form_type_id, tgt.KIND kind, fds.PERIOD_START start_date \n" +
+    private static final String FIND_DESTINATIONS_SQL = "SELECT tgt.id id, tgt.DEPARTMENT_ID department_id, tgt.FORM_TYPE_ID form_type_id, tgt.KIND kind, fds.PERIOD_START start_date, fds.PERIOD_END end_date \n" +
             "from department_form_type src \n" +
             "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
             "join department_form_type tgt on fds.department_form_type_id = tgt.id \n" +
@@ -773,7 +774,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "   OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
             "   AND fds.PERIOD_END IS null))";
     @Override
-    public List<Pair<DepartmentFormType, Date>> findDestinationsForFormType(int typeId, Date dateFrom, Date dateTo) {
+    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationsForFormType(int typeId, Date dateFrom, Date dateTo) {
         try {
             HashMap<String, Object> values = new HashMap<String, Object>();
             values.put("formTypeId", typeId);
@@ -790,7 +791,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         }
     }
 
-    private static final String FIND_SOURCES_SQL = "SELECT src.id id, src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, fds.PERIOD_START start_date \n" +
+    private static final String FIND_SOURCES_SQL = "SELECT src.id id, src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, fds.PERIOD_START start_date, fds.PERIOD_END end_date \n" +
             "from department_form_type src \n" +
             "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
             "join department_form_type tgt on fds.department_form_type_id = tgt.id \n" +
@@ -800,7 +801,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "   OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
             "   AND fds.PERIOD_END IS null))";
     @Override
-    public List<Pair<DepartmentFormType, Date>> findSourcesForFormType(int typeId, Date dateFrom, Date dateTo) {
+    public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourcesForFormType(int typeId, Date dateFrom, Date dateTo) {
         try {
             HashMap<String, Object> values = new HashMap<String, Object>();
             values.put("formTypeId", typeId);

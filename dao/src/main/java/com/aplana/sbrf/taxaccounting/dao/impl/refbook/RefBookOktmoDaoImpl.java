@@ -581,8 +581,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     private static final String CHECK_USAGES_IN_REFBOOK = "with checkRecords as (select * from %s where %s)\n" +
             "select count(r.id) from ref_book_value v, checkRecords cr, ref_book_record r where v.attribute_id in (select id from ref_book_attribute where ref_book_id=?) and r.version >= cr.version and cr.id=v.reference_value and v.record_id=r.id";
 
-    private static final String CHECK_USAGES_IN_FORMS = "select count(*) from data_cell where column_id in (select id from form_column " +
-            "where attribute_id in (select attribute_id from ref_book_value where attribute_id in (select id from ref_book_attribute where ref_book_id=?) and %s)) and %s";
+    private static final String CHECK_USAGES_IN_FORMS = "select count(*) from form_data_ref_book where ref_book_id=? and %s";
 
     @Override
     public boolean isVersionUsed(String tableName, Long refBookId, List<Long> uniqueRecordIds) {
@@ -591,9 +590,8 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         String sql = String.format(CHECK_USAGES_IN_REFBOOK, tableName, idIn);
         boolean hasReferences = getJdbcTemplate().queryForInt(sql, refBookId) != 0;
         if (!hasReferences) {
-            String valIn = SqlUtils.transformToSqlInStatement("nvalue", uniqueRecordIds);
             String recordIdIn = SqlUtils.transformToSqlInStatement("record_id", uniqueRecordIds);
-            sql = String.format(CHECK_USAGES_IN_FORMS, recordIdIn, valIn);
+            sql = String.format(CHECK_USAGES_IN_FORMS, recordIdIn);
             return getJdbcTemplate().queryForInt(sql, refBookId) != 0;
         } else return true;
     }

@@ -1,3 +1,4 @@
+/*
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.cache.ExtendedSimpleCacheManager;
@@ -33,10 +34,12 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+*/
 /**
  * User: avanteev
  * Тест для проверки кэшей
- */
+ *//*
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"CacheTest.xml"})
 @Transactional
@@ -126,12 +129,16 @@ public class CacheTest {
         formTemplateDao.save(formTemplate);
 
         //Проверяем кэширование dataRows
-        /*formTemplateDao.getDataCells(formTemplate);
-        checkExistInCache(CacheConstants.FORM_TEMPLATE, FORM_TEMPLATE_JNDI, String.valueOf(formTemplate.getId()) + "_data_rows", rows);*/
+        */
+/*formTemplateDao.getDataCells(formTemplate);
+        checkExistInCache(CacheConstants.FORM_TEMPLATE, FORM_TEMPLATE_JNDI, String.valueOf(formTemplate.getId()) + "_data_rows", rows);*//*
+
 
         //Проверяем кэширование headers
-        /*formTemplateDao.getHeaderCells(formTemplate);
-        checkExistInCache(CacheConstants.FORM_TEMPLATE, FORM_TEMPLATE_JNDI, String.valueOf(formTemplate.getId()) + "_data_headers", headers1);*/
+        */
+/*formTemplateDao.getHeaderCells(formTemplate);
+        checkExistInCache(CacheConstants.FORM_TEMPLATE, FORM_TEMPLATE_JNDI, String.valueOf(formTemplate.getId()) + "_data_headers", headers1);*//*
+
 
         //Проверяем кэширование скрипта
         formTemplate = formTemplateDao.get(1);
@@ -160,7 +167,9 @@ public class CacheTest {
         DeclarationTemplate declarationTemplate = new DeclarationTemplate();
         declarationTemplate.setId(1);
         declarationTemplate.setName("Декларация");
-        /*declarationTemplate.setActive(true);*/
+        */
+/*declarationTemplate.setActive(true);*//*
+
         declarationTemplate.setVersion(new Date());
         declarationTemplate.setCreateScript("MyScript");
         declarationTemplate.setJrxmlBlobId(SAMPLE_BLOB_ID);
@@ -213,3 +222,4 @@ public class CacheTest {
         assertNotEquals(v, daoObject.getCachedNumberFromPrivateInsideMethod("1234"));
     }
 }
+*/

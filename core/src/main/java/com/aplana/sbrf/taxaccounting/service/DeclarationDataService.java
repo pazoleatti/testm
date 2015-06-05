@@ -204,7 +204,7 @@ public interface DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      * @param declarationDataId
      */
-    void deleteReport(long declarationDataId, boolean isCalc);
+    void deleteReport(long declarationDataId, int userId, boolean isCalc);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 

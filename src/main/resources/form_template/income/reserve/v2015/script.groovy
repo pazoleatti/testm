@@ -39,6 +39,7 @@ switch (formDataEvent) {
         preCalcLogicCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -50,6 +51,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -134,13 +136,10 @@ def getReportPeriodEndDate() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def prevDataRows = getPrevDataRows()
     calcRows(dataRows, prevDataRows)
-
-    dataRowHelper.update(dataRows)
 }
 
 /**
@@ -297,8 +296,7 @@ def calc13(def row, def prevDataRows) {
 }
 
 void preCalcLogicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // 1. Проверка назначения источником данных форм: первчиные по сомнительным долгам
     def departmentFormTypes = departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
@@ -343,8 +341,7 @@ void preCalcLogicCheck() {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // обязательные для заполнения поля (графа 3..9, 12..17)
     // (тут наиболее часто требуемые графы, для разных строк разный состав обязательных граф)
@@ -402,8 +399,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // очищаем форму
     clearNotEditableValues(dataRows)
@@ -426,7 +422,7 @@ void consolidation() {
         }
         def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, null)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
-            def childRows = formDataService.getDataRowHelper(child).all
+            def childRows = formDataService.getDataRowHelper(child).allSaved
             def rowTotal = getDataRow(childRows, 'total')
             def childDepartmentId = child.departmentId
             def entry = departmentRowMap.find { index, departmentId ->
@@ -438,7 +434,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.update(dataRows)
 }
 
 /**
@@ -497,7 +492,7 @@ def getPrevFormData() {
 def getPrevDataRows() {
     if (prevDataRows == null) {
         def prevFormData = getPrevFormData()
-        prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : [])
+        prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : [])
     }
     return prevDataRows
 }

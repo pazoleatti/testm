@@ -143,6 +143,7 @@ alter table form_data add constraint form_data_fk_kind foreign key (kind) refere
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
 alter table form_data add constraint form_data_chk_return_sign check(return_sign in (0,1));
 alter table form_data add constraint form_data_chk_period_order check(period_order in (1,2,3,4,5,6,7,8,9,10,11,12));
+alter table form_data add constraint form_data_chk_manual check (manual in (0, 1));
 
 alter table form_data_signer add constraint form_data_signer_pk primary key (id);
 alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
@@ -150,18 +151,6 @@ alter table form_data_signer add constraint form_data_signer_fk_formdata foreign
 alter table form_data_performer add constraint form_data_performer_pk primary key (form_data_id);
 alter table form_data_performer add constraint formdata_performer_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_performer add constraint formdata_performer_fk_dept foreign key (print_department_id) references department(id);
-
-alter table data_row add constraint data_row_pk primary key (id);
-alter table data_row add constraint data_row_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
-alter table data_row add constraint data_row_chk_type check (type in (-1, 0, 1));
-alter table data_row add constraint data_row_chk_manual check (manual in (0, 1));
-
-alter table data_cell add constraint data_cell_pk primary key (row_id, column_id);
-alter table data_cell add constraint data_cell_fk_column_id foreign key (column_id) references form_column(id);
-alter table data_cell add constraint data_cell_fk_style_id foreign key (style_id) references form_style(id);
-alter table data_cell add constraint data_cell_fk_data_row foreign key (row_id) references data_row(id) on delete cascade;
-alter table data_cell add constraint data_cell_chk_editable check (editable in (0, 1));
-alter table data_cell add constraint data_cell_chk_min_dvalue check (dvalue >= to_date('01.01.1900', 'DD.MM.YYYY'));
 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_perf_dep_id foreign key (performer_dep_id) references department(id);
@@ -274,8 +263,6 @@ alter table log_system_report add constraint log_system_report_unq_sec_user uniq
 
 ------------------------------------------------------------------------------------------------------
 create index i_department_parent_id on department(parent_id);
-create index i_data_row_form_data_id on data_row(form_data_id);
-create index i_data_row_fdata_manual_type on data_row(form_data_id, manual, type);
 create index i_form_data_dep_rep_per_id on form_data(department_report_period_id);
 create index i_form_data_form_template_id on form_data(form_template_id);
 create index i_form_data_kind on form_data(kind);

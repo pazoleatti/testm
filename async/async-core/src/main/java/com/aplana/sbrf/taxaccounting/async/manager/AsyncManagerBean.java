@@ -21,6 +21,8 @@ import javax.naming.NamingException;
 import java.io.Serializable;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+
 @Stateless
 @Local(AsyncManagerLocal.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -76,7 +78,7 @@ public class AsyncManagerBean implements AsyncManager {
             ObjectMessage objectMessage = session.createObjectMessage();
             objectMessage.setObject(asyncMdbObject);
             messageProducer.send(objectMessage);
-            log.info(String.format("Задача с ключом %s помещена в очередь", params.get(AsyncTask.RequiredParams.LOCKED_OBJECT)));
+            log.info(String.format("Задача с ключом %s помещена в очередь %s", params.get(LOCKED_OBJECT.name()), balancingVariant.name()));
             log.debug("Async task creation has been finished successfully");
             return balancingVariant;
         } catch (ServiceLoggerException e) {

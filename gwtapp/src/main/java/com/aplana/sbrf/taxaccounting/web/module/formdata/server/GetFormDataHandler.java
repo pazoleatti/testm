@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -97,9 +98,10 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
 		if (!action.isReadOnly()) {
 			try {
-                // Защита от перехода в режим редактирования для импортируемой нф
-                LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormDataId());
-                if (lockImport == null) {
+                Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
+                // Защита от перехода в режим редактирования если нф заблокирована какой-либо операцией
+//                LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormDataId());
+                if (lockType == null || ReportType.EDIT_FD.equals(lockType.getFirst())) {
                     formDataService.lock(action.getFormDataId(), userInfo);
                 }
 			} catch (Exception e){
@@ -109,6 +111,11 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
 		GetFormDataResult result = new GetFormDataResult();
 		Logger logger = new Logger();
+
+        if (!action.isReadOnly()) {
+            FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
+            dataRowService.createTemporary(formData);
+        }
 
 		fillLockData(action, userInfo, result);
 		fillFormAndTemplateData(action, userInfo, logger, result);
@@ -144,7 +151,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 	}
 
     /**
-     * Ппрверки правильности параметров запроса
+     * Проверки правильности параметров запроса
      */
     private void actionCheck(GetFormDataAction action) throws ActionException {
         if (!action.isReadOnly() && action.isCorrectionDiff()) {
@@ -292,14 +299,17 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
 		LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(),
                 securityService.currentUserInfo());
-        // Ззащита от перехода в режим редактирования для импортируемой нф
-        LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormDataId());
-
-		if (lockInformation != null || lockImport != null) {
+        // Защита от перехода в режим редактирования, если запущена какая-либо операция
+        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
+        LockData lockTask = null;
+        if (lockType != null && !ReportType.EDIT_FD.equals(lockType.getFirst())) {
+            lockTask = lockType.getSecond();
+        }
+		if (lockInformation != null || lockTask != null) {
             LockData lockData;
             boolean forcedLock = false;
-            if (lockImport != null) {
-                lockData = lockImport;
+            if (lockTask != null) {
+                lockData = lockTask;
                 //Надо заблокировать даже от автора блокировки
                 forcedLock = true;
             } else {

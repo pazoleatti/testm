@@ -30,7 +30,7 @@ public class SaveFormDataHandler extends
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    RefBookHelper refBookHelper;
+	private RefBookHelper refBookHelper;
 
 	public SaveFormDataHandler() {
 		super(SaveFormDataAction.class);
@@ -40,11 +40,13 @@ public class SaveFormDataHandler extends
 	public DataRowResult execute(SaveFormDataAction action, ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
+        formDataService.checkLockedByTask(formData.getId(), logger, "Сохранение НФ");
 		if (!action.getModifiedRows().isEmpty()) {
             refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
 		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
+		dataRowService.createTemporary(formData); // восстанавливаем временный срез, чтобы продолжить редактирование
 
 		logger.info("Данные успешно записаны");
 		DataRowResult result = new DataRowResult();

@@ -32,7 +32,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
 
     @Autowired
     private LoadRefBookDataService loadRefBookDataService;
-    
+
     @Autowired
     private SecurityService securityService;
 
@@ -49,12 +49,12 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
         super(LoadRefBookAction.class);
     }
 
-	@Override
-	public LoadRefBookResult execute(LoadRefBookAction arg0,
-			ExecutionContext arg1) throws ActionException {
+    @Override
+    public LoadRefBookResult execute(LoadRefBookAction arg0,
+                                     ExecutionContext arg1) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         LoadRefBookResult result = new LoadRefBookResult();
-		Logger logger = new Logger();
+        Logger logger = new Logger();
         // Проверки путей
         ConfigurationParamModel model = configurationService.getByDepartment(0, securityService.currentUserInfo());
         List<String> okatoList = model.get(ConfigurationParam.OKATO_UPLOAD_DIRECTORY, 0);
@@ -88,7 +88,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
                 logger.info("Получен: %s.", catalogStrList.get(0));
             } else {
                 logger.info("Получены: %s.", StringUtils.join(catalogStrList.toArray(), ", ", null));
-            }                    
+            }
             String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
             lockDataService.lock(key, userInfo.getUser().getId(),
                     LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
@@ -109,12 +109,12 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
             logger.warn("Не указан путь ни к одному из каталогов загрузки ТФ, содержащих данные справочников.");
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
-		return result;
-	}
+        return result;
+    }
 
-	@Override
-	public void undo(LoadRefBookAction arg0, LoadRefBookResult arg1,
-			ExecutionContext arg2) throws ActionException {
-		// Auto-generated method stub
-	}
+    @Override
+    public void undo(LoadRefBookAction arg0, LoadRefBookResult arg1,
+                     ExecutionContext arg2) throws ActionException {
+        // Auto-generated method stub
+    }
 }

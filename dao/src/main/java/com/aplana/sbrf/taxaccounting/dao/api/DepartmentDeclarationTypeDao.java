@@ -64,8 +64,8 @@ public interface DepartmentDeclarationTypeDao {
      */
     void delete(Long id);
 
-    List<Pair<DepartmentDeclarationType, Date>> findDestinationDTsForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
-    List<Pair<DepartmentFormType, Date>> findSourceFTsForDeclaration(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+    List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
+    List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForDeclaration(int typeId, @NotNull Date dateFrom, @NotNull Date dateTo);
 
     List<DepartmentDeclarationType> getDDTByDeclarationType(@NotNull Integer declarationTypeId);
 

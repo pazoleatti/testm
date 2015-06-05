@@ -18,6 +18,14 @@ public enum ReportType {
     CHECK_DEC(0, "CHECK_DECLARATION", "Проверка %s", 14L, 114L),
     ACCEPT_DEC(1, "ACCEPT_DECLARATION", "Принятие %s", 15L, 115L),
 
+    CONSOLIDATE_FD(0, "CONSOLIDATE_FORM_DATA", "Консолидация %sформы", 16L, 116L),
+    CALCULATE_FD(1, "CALCULATE_FORM_DATA", "Расчет %sформы", 17L, 117L),
+    IMPORT_FD(2, "IMPORT_FORM_DATA", "Импорт файла %s для %sформы", 20L, 120L), //импорт из режима редактирования
+    CHECK_FD(3, "CHECK_FORM_DATA", "Проверка %sформы", 0L, 0L),
+    IMPORT_TF_FD(4, "IMPORT_TF_FORM_DATA", "Импорт файла %s для %sформы из каталога загрузки", 0L, 0L), //формально является задачей, т.к. блокирует форму для изменния при импорт из каталога загрузки
+    EDIT_FD(5, "EDIT_FORM_DATA", "Блокировка %sформы", 0L, 0L), //формально является задачей, нужна для блокирки формы в режиме редартирования/при консолидации приемника
+    MOVE_FD(6, "MOVE_FORM_DATA", "Переход между этапами %sформы", 0L, 0L),
+
     ZIP_IFRS(0, "Zip", "", 9L, 109L),
 
     ARCHIVE_AUDIT(0, "ARCHIVE_AUDIT", "", 10L, 110L),

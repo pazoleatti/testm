@@ -202,7 +202,7 @@ public interface FormTemplateService {
      * @param formTemplate макета НФ
      * @param logger       логгер
      */
-    void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger);
+    void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger, TAUserInfo user);
 
     /**
      * Есть ли хоть одна автонумеруемая графа указанного типа в макете

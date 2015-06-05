@@ -98,7 +98,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                         LockData.State.IN_QUEUE.getText(),
                         lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
                     try {
-                        declarationDataService.deleteReport(action.getDeclarationId(), true);
+                        declarationDataService.deleteReport(action.getDeclarationId(), userId, true);
                         params.put("declarationDataId", action.getDeclarationId());
                         params.put("docDate", action.getDocDate());
                         params.put(AsyncTask.RequiredParams.USER_ID.name(), userId);

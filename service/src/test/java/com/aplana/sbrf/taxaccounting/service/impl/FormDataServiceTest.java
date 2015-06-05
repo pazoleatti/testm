@@ -9,7 +9,14 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.FormTypeService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
@@ -27,11 +34,34 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyCollectionOf;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("FormDataServiceTest.xml")
@@ -69,6 +99,8 @@ public class FormDataServiceTest {
     private static final int FORM_TEMPLATE_ID = 1;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
+    TAUserInfo userInfo;
+
     @Before
     public void init() {
         // Макет
@@ -94,7 +126,9 @@ public class FormDataServiceTest {
 		TAUser user = new TAUser();
 		user.setId(666);
 		user.setLogin("MockUser");
-		when(userService.getUser(666)).thenReturn(user);
+        userInfo = new TAUserInfo();
+        userInfo.setUser(user);
+        when(userService.getUser(666)).thenReturn(user);
 		ReflectionTestUtils.setField(formDataService, "userService", userService);
     }
     /**
@@ -381,8 +415,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getSizeWithoutTotal(formData)).thenReturn(3);
-        when(dataRowDao.getSizeWithoutTotal(formData1)).thenReturn(5);
+        when(dataRowDao.getTempSizeWithoutTotal(formData)).thenReturn(3);
+        when(dataRowDao.getTempSizeWithoutTotal(formData1)).thenReturn(5);
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
@@ -429,8 +463,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getSizeWithoutTotal(formData)).thenReturn(3);
-        when(dataRowDao.getSizeWithoutTotal(formData1)).thenReturn(5);
+        when(dataRowDao.getTempSizeWithoutTotal(formData)).thenReturn(3);
+        when(dataRowDao.getTempSizeWithoutTotal(formData1)).thenReturn(5);
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
@@ -453,10 +487,10 @@ public class FormDataServiceTest {
         FormDataServiceImpl dataService = spy(formDataService);
 
         doReturn(false).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
-        doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -470,11 +504,11 @@ public class FormDataServiceTest {
         FormDataServiceImpl dataService = spy(formDataService);
 
         doReturn(true).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
-        doReturn(false).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
         doReturn(1L).when(formData).getId();
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -487,12 +521,12 @@ public class FormDataServiceTest {
         FormData formData = mock(FormData.class);
         FormDataServiceImpl dataService = spy(formDataService);
         doReturn(true).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
-        doReturn(true).when(dataRowDao).isDataRowsCountChanged(anyLong());
+        doReturn(true).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
         doReturn(1L).when(formData).getId();
         doReturn(WorkflowState.CREATED).when(formData).getState();
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)));
-        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -505,8 +539,8 @@ public class FormDataServiceTest {
 
         doReturn(false).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
 
-        dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -521,8 +555,8 @@ public class FormDataServiceTest {
 
         doReturn(true).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
 
-        dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger);
-        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class));
+        dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger, userInfo);
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
     }
 
     /**
@@ -540,7 +574,7 @@ public class FormDataServiceTest {
         LockData lockData = new LockData();
         lockData.setUserId(user.getId());
 
-        when(lockDataService.getLock(LockData.LockObjects.FORM_DATA.name() + "_" + formData.getId())).
+        when(lockDataService.getLock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD))).
                 thenReturn(lockData);
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
@@ -554,7 +588,7 @@ public class FormDataServiceTest {
 
         InOrder inOrder = inOrder(dataService, formDataDao);
 
-        inOrder.verify(dataService, times(1)).updatePreviousRowNumberAttr(formData, logger);
+        inOrder.verify(dataService, times(1)).updatePreviousRowNumberAttr(formData, logger, userInfo);
         inOrder.verify(formDataDao, times(1)).save(formData);
     }
 
@@ -978,7 +1012,7 @@ public class FormDataServiceTest {
         when(departmentReportPeriodService.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
 
         try{
-            formDataService.doCheck(logger, userInfo, formData);
+            formDataService.doCheck(logger, userInfo, formData, false);
         }catch (ServiceLoggerException e){
             assertEquals(
                     "Не выполнена консолидация данных в форму \"Тестовое подразделение\", \"РНУ\", \"Первичная\", \"1 квартал 2015\"",

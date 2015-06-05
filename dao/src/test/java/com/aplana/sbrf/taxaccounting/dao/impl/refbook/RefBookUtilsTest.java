@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author auldanov
@@ -57,4 +58,15 @@ public class RefBookUtilsTest {
         // не заполнено имя, метод должен вернуть мапу с NAME
         assertTrue(RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records2).size() == 1);
     }
+
+    @Test
+    public void checkControlSumInnTest() {
+        // длина больше 10, но для проверки используются только первые 10 символов
+        assertTrue(RefBookUtils.checkControlSumInn("7723643863"));
+        assertTrue(RefBookUtils.checkControlSumInn("772364386312"));
+        assertFalse(RefBookUtils.checkControlSumInn("7723643862"));
+        assertFalse(RefBookUtils.checkControlSumInn("111"));
+        assertFalse(RefBookUtils.checkControlSumInn("abcderfsdf"));
+    }
+
 }

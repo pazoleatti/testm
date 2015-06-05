@@ -212,7 +212,7 @@ public class AdminPresenter
 
     @Override
     public void onUpdateTable(UpdateTableEvent event) {
-        updateFormData();
+        updateFormData(getView().getSelectedElementId());
         if (event.getUuid() != null)
             LogAddEvent.fire(this, event.getUuid());
     }

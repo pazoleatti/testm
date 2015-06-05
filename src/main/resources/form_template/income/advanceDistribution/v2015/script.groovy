@@ -54,6 +54,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicalCheckAfterCalc()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -79,6 +80,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -186,8 +188,7 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
  * Расчеты. Алгоритмы заполнения полей формы.
  */
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить фиксированные строки
     deleteAllAliased(dataRows)
@@ -324,9 +325,7 @@ void calc() {
         caTotalRow.taxSumOutside = 0.9 * sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
     }
 
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 // название подразделения
@@ -498,8 +497,7 @@ def logicalCheck() {
 }
 
 void logicalCheckBeforeCalc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def departmentParam
     def fieldNumber = 0
 
@@ -574,8 +572,7 @@ void logicalCheckBeforeCalc() {
 }
 
 void logicalCheckAfterCalc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def row : dataRows) {
         if (isFixedRow(row)) {
@@ -597,7 +594,6 @@ void logicalCheckAfterCalc() {
  * Консолидация.
  */
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = []
 
     // Идентификатор шаблона источников (Приложение 5).
@@ -609,7 +605,7 @@ void consolidation() {
         if (it.formTypeId == id) {
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+                def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 sourceDataRows.each { row ->
                     if ((row.getAlias() == null || row.getAlias() == '') && row.regionBankDivision != null) {
                         newRow = dataRows.find {
@@ -649,7 +645,9 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
+
+    updateIndexes(dataRows)
+    formDataService.getDataRowHelper(formData).allCached = dataRows
 }
 
 /**
@@ -751,19 +749,19 @@ def getTaxBaseAsDeclaration() {
     // Данные налоговых форм.
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
-    def dataRowsComplexIncome = getData(getFormDataSummary(302))?.allCached
+    def dataRowsComplexIncome = getData(getFormDataSummary(302))?.allSaved
 
     /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleIncome = getData(getFormDataSummary(301))?.allCached
+    def dataRowsSimpleIncome = getData(getFormDataSummary(301))?.allSaved
 
     /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
-    def dataRowsComplexConsumption = getData(getFormDataSummary(303))?.allCached
+    def dataRowsComplexConsumption = getData(getFormDataSummary(303))?.allSaved
 
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleConsumption = getData(getFormDataSummary(304))?.allCached
+    def dataRowsSimpleConsumption = getData(getFormDataSummary(304))?.allSaved
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
-    //    def dataRowsSum = getData(getFormDataSummary(421))?.allCached
+    //    def dataRowsSum = getData(getFormDataSummary(421))?.allSaved
     //    if (dataRowsSum == null) {// TODO wtf?
     //    }
 
@@ -1129,7 +1127,7 @@ def getTaxBase() {
 
     // Расходы сложные
     if (dataOutcomeComplex != null) {
-        for (row in dataOutcomeComplex.allCached) {
+        for (row in dataOutcomeComplex.allSaved) {
             String khy = row.getCell('consumptionTypeId').hasValueOwner() ? row.getCell('consumptionTypeId').getValueOwner().value : row.getCell('consumptionTypeId').value
 
             // 9
@@ -1276,17 +1274,21 @@ def roundValue(BigDecimal value, def precision) {
 /** Получить строки за предыдущий отчетный период. */
 def getPrevDataRows() {
     def prevFormData = formDataService.getFormDataPrev(formData)
-    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
+    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : null)
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     // есть итоговые строки
     if (dataRows.size() > 2) {
         sortRows(refBookService, logger, dataRows, [dataRows.find { it.getAlias() == 'ca' }], dataRows.find { it.getAlias() == 'total' }, true)
-        dataRowHelper.saveSort()
+        if (saveInDB) {
+            dataRowHelper.saveSort()
+        } else {
+            updateIndexes(dataRows);
+        }
     }
 }
 
@@ -1299,7 +1301,7 @@ def getDataRows(def formId, def kind) {
     def periodOrder = formData.periodOrder
     def sourceFormData = formDataService.getLast(formId, kind, departmentId, reportPeriodId, periodOrder)
     if (sourceFormData != null && sourceFormData.id != null)
-        return formDataService.getDataRowHelper(sourceFormData)?.allCached
+        return formDataService.getDataRowHelper(sourceFormData)?.allSaved
     return null
 }
 

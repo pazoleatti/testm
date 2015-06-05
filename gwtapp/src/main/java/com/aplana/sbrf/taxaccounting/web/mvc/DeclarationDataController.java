@@ -44,7 +44,11 @@ public class DeclarationDataController {
             throws IOException {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
-        String fileName = URLEncoder.encode(getFileName(id, userInfo, "xlsx"), ENCODING);
+        String fileName = null;
+        String xmlDataFileName = declarationService.getXmlDataFileName(id, userInfo);
+        if (xmlDataFileName != null) {
+            fileName = URLEncoder.encode(xmlDataFileName.replace("zip", "xlsx"), ENCODING);
+        }
 
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
@@ -91,10 +95,5 @@ public class DeclarationDataController {
                 + fileName + "\"");
         IOUtils.copy(xmlDataIn, response.getOutputStream());
         IOUtils.closeQuietly(xmlDataIn);
-    }
-
-    private String getFileName(long id, TAUserInfo userInfo, String fileExtension) {
-        return declarationService.getXmlDataFileName(id, userInfo) + '.'
-                + fileExtension;
     }
 }

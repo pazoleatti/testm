@@ -89,8 +89,9 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
             auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(),
 					formData.getDepartmentId(), formData.getReportPeriodId(),
 					null, formData.getFormType().getName(), formData.getKind().getId(), "Событие инициировано Системой", null, formTypeId);
-			
+
 			// Execute composition scripts
+            dataRowDao.createTemporary(formData);
 			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), formData,
                     FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
 
@@ -108,8 +109,8 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 
             formDataDao.save(formData);
 			// Коммитим строки после отработки скрипта. http://jira.aplana.com/browse/SBRFACCTAX-3637
-			dataRowDao.commit(formData.getId());
-            formDataService.deleteReport(formData.getId(), formData.isManual());
+			dataRowDao.commit(formData);
+            formDataService.deleteReport(formData.getId(), formData.isManual(), scriptComponentContext.getUserInfo().getUser().getId());
             logBusinessService.add(formData.getId(), null, scriptComponentContext.getUserInfo(), FormDataEvent.COMPOSE,
                     "Событие инициировано Системой");
 		}

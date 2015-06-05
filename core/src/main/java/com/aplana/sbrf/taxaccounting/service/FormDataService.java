@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -77,8 +79,9 @@ public interface FormDataService {
 	 * @param logger логгер-объект для фиксации диагностических сообщений
 	 * @param userInfo информация о пользователе, запросившего операцию
 	 * @param formData объект с данными по налоговой форме
+     * @param editMode признак того, что операция вызвана из режима редактирования, когда временный срез уже создан
 	 */
-	void doCheck(Logger logger, TAUserInfo userInfo, FormData formData);
+	void doCheck(Logger logger, TAUserInfo userInfo, FormData formData, boolean editMode);
 
 	/**
 	 * Сохранить данные по налоговой форме
@@ -243,7 +246,7 @@ public interface FormDataService {
      * @param dateTo
      * @param isChangeTB true - показывает, что изменился тип подразделения с типа ТБ
      */
-    void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo, boolean isChangeTB);
+    void updateFDTBNames(int depTBId,  String depName, Date dateFrom, Date dateTo, boolean isChangeTB, TAUserInfo user);
 
     /**
      * Обновляет имена подразделений в печатных формах(полях для печатных форм, вторая часть имени)
@@ -253,7 +256,7 @@ public interface FormDataService {
      * @param dateFrom дата отчетного периода, начиная с которой надо поменять наименование отчетного периода
      * @param dateTo дата отчетного периода, до которой надо поменять наименование отчетного периода
      */
-    void updateFDDepartmentNames(int depTBId, String depName, Date dateFrom, Date dateTo);
+    void updateFDDepartmentNames(int depTBId, String depName, Date dateFrom, Date dateTo, TAUserInfo user);
 
     /**
      * Получить значение "Номер последней строки предыдущей НФ"
@@ -266,7 +269,7 @@ public interface FormDataService {
      * Обновить Номер последней строки предыдущей НФ
      * @param formData экземпляр НФ, для которой необходимо обновить
      */
-    void updatePreviousRowNumber(FormData formData);
+    void updatePreviousRowNumber(FormData formData, TAUserInfo user);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
@@ -274,7 +277,7 @@ public interface FormDataService {
      * @param formData экземпляр НФ, для которой необходимо обновить
      * @param logger   логгер для регистрации ошибок
      */
-    void updatePreviousRowNumber(FormData formData, Logger logger);
+    void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
@@ -283,7 +286,7 @@ public interface FormDataService {
      * @param formTemplate макет НФ
      * @param logger       логгер для регистрации ошибок
      */
-    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger);
+    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода
@@ -307,7 +310,7 @@ public interface FormDataService {
      *
      * @param formTemplate макет НФ
      */
-    void batchUpdatePreviousNumberRow(FormTemplate formTemplate);
+    void batchUpdatePreviousNumberRow(FormTemplate formTemplate, TAUserInfo user);
 
     /**
      * НФ созданная в последнем отчетном периоде подразделения
@@ -334,9 +337,17 @@ public interface FormDataService {
      * @param formDataId идентификатор налоговой формы
      * @param manual признак версии ручного ввода. Если null - то удаляются отчеты для обеих версий
      */
-    void deleteReport(long formDataId, Boolean manual);
+    void deleteReport(long formDataId, Boolean manual, int userId);
 
     void findFormDataIdsByRangeInReportPeriod(int formTemplateId, Date startDate, Date endDate, Logger logger);
+
+    /**
+     * Проверки перед консолидацией
+     * @param formData
+     * @param userInfo
+     * @param logger
+     */
+    void checkCompose(final FormData formData, TAUserInfo userInfo, Logger logger);
 
     /**
      * Консолидация НФ
@@ -354,5 +365,43 @@ public interface FormDataService {
      * @param reportType тип отчета. Может быть null
      * @return название
      */
-    String getFormDataFullName(long formDataId, String fileName, String reportType);
+    String getFormDataFullName(long formDataId, String fileName, ReportType reportType);
+
+    /**
+     * Генерация ключа блокировки для задачи c типом reportType
+     * @param formDataId
+     * @param reportType тип задачи
+     * @return
+     */
+    String generateTaskKey(long formDataId, ReportType reportType);
+
+    /**
+     * Получение блокировки и её типа для НФ, null если для НФ нет блокировок
+     * @param formDataId
+     * @return
+     */
+    Pair<ReportType, LockData> getLockTaskType(long formDataId);
+
+    /**
+     * Вывод сообщения, что форма заблокирована
+     * @param lockData
+     * @param logger
+     */
+    void locked(LockData lockData, Logger logger);
+
+    /**
+     * Проверка возможности редактирования НФ
+     * @param formDataId
+     * @param logger
+     */
+    void checkLockedByTask(long formDataId, Logger logger, String taskName);
+
+    /**
+     *
+     * @param userInfo
+     * @param formData
+     * @param reportType
+     * @return
+     */
+    Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, FormData formData, ReportType reportType);
 }

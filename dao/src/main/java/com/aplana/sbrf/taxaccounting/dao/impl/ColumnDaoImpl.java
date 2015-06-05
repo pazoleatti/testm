@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.util.OrderUtils;
@@ -92,7 +91,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			return result;
 		}
 	}
-	
+
 	@Override
     public List<Column> getFormColumns(int formId) {
 		return getJdbcTemplate().query(
@@ -109,9 +108,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	}
 
 	@Override
-	public void saveFormColumns(final FormTemplate formTemplate) {
-		final Logger log = new Logger();
-
+	public Map<KEYS, Collection<Long>> updateFormColumns(final FormTemplate formTemplate) {
 		final int formTemplateId = formTemplate.getId();
 
 		JdbcTemplate jt = getJdbcTemplate();
@@ -123,8 +120,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                 String.class
 		));
 
-		final List<Column> newColumns =  new ArrayList<Column>();
-		final List<Column> oldColumns = new ArrayList<Column>();
+		List<Column> newColumns =  new ArrayList<Column>();
+		List<Column> oldColumns = new ArrayList<Column>();
 
         List<Column> columns = formTemplate.getColumns();
 
@@ -141,118 +138,88 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			}
 		}
 
+        HashMap<KEYS, Collection<Long>> columnsInfo = new HashMap<KEYS, Collection<Long>>(3);
 		if(!removedColumns.isEmpty()){
-            final String[] alias = new String[1];
-			try {
-                jt.batchUpdate(
-                        "DELETE FROM form_column WHERE alias = ? and form_template_id = ?",
-                        new BatchPreparedStatementSetter() {
-
-                            @Override
-                            public void setValues(PreparedStatement ps, int index) throws SQLException {
-                                alias[0] = iterator.next();
-                                ps.setString(1, alias[0]);
-                                ps.setInt(2, formTemplateId);
-                            }
-
-                            @Override
-                            public int getBatchSize() {
-                                return removedColumns.size();
-                            }
-
-                            private Iterator<String> iterator = removedColumns.iterator();
-                        }
-                );
-            } catch (DataIntegrityViolationException e){
-                logger.error("", e);
-                throw new DaoException("Обнаружено использование колонки", e);
-            }
+            columnsInfo.put(KEYS.DELETED, deleteFormColumns(removedColumns, formTemplate.getId()));
+		}
+		if (!newColumns.isEmpty()) {
+            columnsInfo.put(KEYS.ADDED, createFormColumns(newColumns, formTemplate));
+		}
+		if(!oldColumns.isEmpty()){
+            columnsInfo.put(KEYS.UPDATED, updateFormColumns(oldColumns, formTemplate));
 		}
 
+        return columnsInfo;
+	}
+
+    private List<Long> createFormColumns(final List<Column> newColumns, final FormTemplate formTemplate) {
         // Сгенерированый ключ -> реальный ключ в БД
         Map<Integer, Integer> idsMapping = new HashMap<Integer, Integer>();
+        OrderUtils.reorder(newColumns);
 
-		if (!newColumns.isEmpty()) {
-            List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());
-            int counter = 0;
-            for (Column column : newColumns) {
-                if (column.getId() == null || column.getId() < 0) {
-                    if (column.getId() != null) {
-                        idsMapping.put(column.getId(), genKeys.get(counter).intValue());
-                    }
-                    column.setId(genKeys.get(counter).intValue());
-                }
-                counter++;
-            }
-            for (Column column : oldColumns){
-                column.setId(getColumnIdByAlias(formTemplateId, column.getAlias()));
-            }
-            // Подмена ссылок
-            for (Column column : columns) {
-                if (ColumnType.REFERENCE.equals(column.getColumnType())) {
-                    ReferenceColumn referenceColumn = (ReferenceColumn)column;
-                    // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
-                    if(referenceColumn.getParentId()==0 && referenceColumn.getParentAlias()!=null){
-                        referenceColumn.setParentId(
-                                formTemplate.getColumn(
-                                        referenceColumn.getParentAlias()).getId());
-                    }
-                    else if(referenceColumn.getParentId() < 0) {
-                        referenceColumn.setParentId(idsMapping.get(referenceColumn.getParentId()));
-                    }
+        List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());
+        for (int i = 0; i<newColumns.size(); i++) {
+            Column column = newColumns.get(i);
+            column.setId(genKeys.get(i).intValue());
+            if (ColumnType.REFERENCE.equals(column.getColumnType())) {
+                ReferenceColumn referenceColumn = (ReferenceColumn)column;
+                //TODO: Может быть проблема с получением родительского id, но пока так оставим
+                if(referenceColumn.getParentAlias()!=null){
+                    referenceColumn.setParentId(formTemplate.getColumn(referenceColumn.getParentAlias()).getId());
                 }
             }
+        }
 
-			jt.batchUpdate(
-				"INSERT INTO form_column (id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
-                "checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				new BatchPreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps, int index) throws SQLException {
-						Column col = newColumns.get(index);
+        getJdbcTemplate().batchUpdate(
+                "INSERT INTO form_column (id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
+                        "checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int index) throws SQLException {
+                        Column col = newColumns.get(index);
 
                         ps.setInt(1, col.getId());
-						ps.setString(2, col.getName());
-						ps.setInt(3, formTemplateId);
-						ps.setString(4, col.getAlias());
-						ps.setString(5, String.valueOf(col.getColumnType().getCode()));
-						ps.setInt(6, col.getWidth());
+                        ps.setString(2, col.getName());
+                        ps.setInt(3, formTemplate.getId());
+                        ps.setString(4, col.getAlias());
+                        ps.setString(5, String.valueOf(col.getColumnType().getCode()));
+                        ps.setInt(6, col.getWidth());
 
-						if (ColumnType.NUMBER.equals(col.getColumnType())) {
-							if (((NumericColumn) col).getPrecision() > NumericColumn.MAX_PRECISION){
-								log.warn("Превышена максимально допустимая точность числа в графе " + col.getName() +
-										"\". Будет установлено максимальное значение: " + NumericColumn.MAX_PRECISION);
-							}
-							ps.setInt(7, ((NumericColumn)col).getPrecision());
-						} else {
-							ps.setNull(7, Types.NUMERIC);
-						}
+                        if (ColumnType.NUMBER.equals(col.getColumnType())) {
+                            if (((NumericColumn) col).getPrecision() > NumericColumn.MAX_PRECISION){
+                                logger.warn("Превышена максимально допустимая точность числа в графе " + col.getName() +
+                                        "\". Будет установлено максимальное значение: " + NumericColumn.MAX_PRECISION);
+                            }
+                            ps.setInt(7, ((NumericColumn)col).getPrecision());
+                        } else {
+                            ps.setNull(7, Types.NUMERIC);
+                        }
 
                         ps.setInt(8, col.getOrder());
                         ps.setBoolean(10, col.isChecking());
 
-						if (ColumnType.STRING.equals(col.getColumnType())) {
-							if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
-								log.warn("Превышена максимально допустимая длина строки в графе \"" + col.getName() +
-									"\". Будет установлено максимальное значение: " + StringColumn.MAX_LENGTH);
-							}
-							ps.setInt(9, Math.min(((StringColumn) col).getMaxLength(), StringColumn.MAX_LENGTH));
-							ps.setNull(11, Types.INTEGER);
-						} else if (ColumnType.NUMBER.equals(col.getColumnType())) {
-							if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH){
-								log.warn("Превышена максимально допустимая длина числа в графе " + col.getName() +
-										"\". Будет установлено максимальное значение: " + NumericColumn.MAX_LENGTH);
-							}
-							ps.setInt(9, Math.min(((NumericColumn) col).getMaxLength(), NumericColumn.MAX_LENGTH));
-							ps.setNull(11, Types.INTEGER);
-						} else if (ColumnType.DATE.equals(col.getColumnType())) {
-							ps.setInt(11, ((DateColumn)col).getFormatId());
-							ps.setNull(9, Types.INTEGER);
-						} else {
-							ps.setNull(9, Types.INTEGER);
-							ps.setNull(11, Types.INTEGER);
-						}
+                        if (ColumnType.STRING.equals(col.getColumnType())) {
+                            if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
+                                logger.warn("Превышена максимально допустимая длина строки в графе \"" + col.getName() +
+                                        "\". Будет установлено максимальное значение: " + StringColumn.MAX_LENGTH);
+                            }
+                            ps.setInt(9, Math.min(((StringColumn) col).getMaxLength(), StringColumn.MAX_LENGTH));
+                            ps.setNull(11, Types.INTEGER);
+                        } else if (ColumnType.NUMBER.equals(col.getColumnType())) {
+                            if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH){
+                                logger.warn("Превышена максимально допустимая длина числа в графе " + col.getName() +
+                                        "\". Будет установлено максимальное значение: " + NumericColumn.MAX_LENGTH);
+                            }
+                            ps.setInt(9, Math.min(((NumericColumn) col).getMaxLength(), NumericColumn.MAX_LENGTH));
+                            ps.setNull(11, Types.INTEGER);
+                        } else if (ColumnType.DATE.equals(col.getColumnType())) {
+                            ps.setInt(11, ((DateColumn)col).getFormatId());
+                            ps.setNull(9, Types.INTEGER);
+                        } else {
+                            ps.setNull(9, Types.INTEGER);
+                            ps.setNull(11, Types.INTEGER);
+                        }
 
                         if (ColumnType.REFBOOK.equals(col.getColumnType())) {
                             ps.setLong(12, ((RefBookColumn) col).getRefBookAttributeId());
@@ -291,123 +258,166 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                         }
                     }
 
-					@Override
-					public int getBatchSize() {
-						return newColumns.size();
-					}
-				}
-			);
-		}
+                    @Override
+                    public int getBatchSize() {
+                        return newColumns.size();
+                    }
+                }
+        );
 
-		if(!oldColumns.isEmpty()){
-			jt.batchUpdate(
-					"UPDATE form_column SET name = ?, alias = ?, type = ?, width = ?, precision = ?, ord = ?, " +
-                            "max_length = ?, checking = ?, format = ?, attribute_id = ?, filter = ?, " +
-                            "parent_column_id = ?, attribute_id2 = ?, numeration_row = ? " +
-                            "WHERE alias = ? and form_template_id = ?",
-					new BatchPreparedStatementSetter() {
-						@Override
-						public void setValues(PreparedStatement ps, int index) throws SQLException {
-							Column col = oldColumns.get(index);
-							ps.setString(1, col.getName());
-							ps.setString(2, col.getAlias());
-							ps.setString(3, String.valueOf(col.getColumnType().getCode()));
-							ps.setInt(4, col.getWidth());
+        return genKeys;
+    }
 
-							if (ColumnType.NUMBER.equals(col.getColumnType())) {
-								ps.setInt(5, ((NumericColumn)col).getPrecision());
-							} else {
-								ps.setNull(5, Types.NUMERIC);
-							}
+    /**
+     * Удаляем столбцы
+     * @return возвращаем идентификаторы колонок удаленных
+     */
+    private Collection<Long> deleteFormColumns(final Set<String> removedColumns, final int ftId) {
+        try {
+            HashSet<Long> setIds = new HashSet<Long>(removedColumns.size());
+            for (String colAlias : removedColumns){
+                setIds.add((long) getColumnIdByAlias(ftId, colAlias));
+            }
 
-                            ps.setInt(6, col.getOrder());
-                            ps.setBoolean(8, col.isChecking());
+            getJdbcTemplate().batchUpdate(
+                    "DELETE FROM form_column WHERE alias = ? and form_template_id = ?",
+                    new BatchPreparedStatementSetter() {
 
-							if (ColumnType.STRING.equals(col.getColumnType())) {
-								ps.setInt(7, ((StringColumn) col).getMaxLength());
-								ps.setNull(9, Types.INTEGER);
-								ps.setNull(10, Types.NUMERIC);
-                                ps.setNull(11, Types.CHAR);
-                                ps.setNull(12, Types.NUMERIC);
-                                ps.setNull(13, Types.NUMERIC);
-                                ps.setNull(14, Types.NUMERIC);
-							} else if(ColumnType.NUMBER.equals(col.getColumnType())){
-								ps.setInt(7, ((NumericColumn) col).getMaxLength());
-								ps.setNull(9, Types.INTEGER);
-								ps.setNull(10, Types.NUMERIC);
-                                ps.setNull(11, Types.CHAR);
-                                ps.setNull(12, Types.NUMERIC);
-                                ps.setNull(13, Types.NUMERIC);
-                                ps.setNull(14, Types.NUMERIC);
-							} else if (ColumnType.DATE.equals(col.getColumnType())) {
-                                if (((DateColumn)col).getFormatId() == null)
-                                    ps.setNull(9, Types.INTEGER);
-                                else
-								    ps.setInt(9, ((DateColumn)col).getFormatId());
-								ps.setNull(7, Types.INTEGER);
-								ps.setNull(10, Types.NUMERIC);
-                                ps.setNull(11, Types.CHAR);
-                                ps.setNull(12, Types.NUMERIC);
-                                ps.setNull(13, Types.NUMERIC);
-                                ps.setNull(14, Types.NUMERIC);
-							} else if (ColumnType.REFBOOK.equals(col.getColumnType())) {
-								ps.setNull(7, Types.INTEGER);
-								ps.setNull(9, Types.INTEGER);
-								ps.setLong(10, ((RefBookColumn) col).getRefBookAttributeId());
-                                ps.setString(11, ((RefBookColumn) col).getFilter());
-                                ps.setNull(12, Types.NUMERIC);
-                                if (((RefBookColumn) col).getRefBookAttributeId2() != null) {
-                                    ps.setLong(13, ((RefBookColumn) col).getRefBookAttributeId2());
-                                } else {
-                                    ps.setNull(13, Types.NULL);
-                                }
-                                ps.setNull(14, Types.NUMERIC);
-							} else if (ColumnType.REFERENCE.equals(col.getColumnType())) {
-                                ps.setNull(7, Types.INTEGER);
+                        @Override
+                        public void setValues(PreparedStatement ps, int index) throws SQLException {
+                            String alias = iterator.next();
+                            ps.setString(1, alias);
+                            ps.setInt(2, ftId);
+                        }
+
+                        @Override
+                        public int getBatchSize() {
+                            return removedColumns.size();
+                        }
+
+                        Iterator<String> iterator = removedColumns.iterator();
+                    }
+            );
+
+            return setIds;
+        } catch (DataIntegrityViolationException e){
+            logger.error("", e);
+            throw new DaoException("Обнаружено использование колонки", e);
+        }
+    }
+
+    private Collection<Long> updateFormColumns(final List<Column> oldColumns, final FormTemplate formTemplate){
+        final HashSet<Long> updatedColumns = new HashSet<Long>();
+        getJdbcTemplate().batchUpdate(
+                "UPDATE form_column SET name = ?, alias = ?, type = ?, width = ?, precision = ?, ord = ?, " +
+                        "max_length = ?, checking = ?, format = ?, attribute_id = ?, filter = ?, " +
+                        "parent_column_id = ?, attribute_id2 = ?, numeration_row = ? " +
+                        "WHERE alias = ? and form_template_id = ?",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int index) throws SQLException {
+                        Column col = oldColumns.get(index);
+                        updatedColumns.add(Long.valueOf(col.getId()));
+                        ps.setString(1, col.getName());
+                        ps.setString(2, col.getAlias());
+                        ps.setString(3, String.valueOf(col.getColumnType().getCode()));
+                        ps.setInt(4, col.getWidth());
+
+                        if (ColumnType.NUMBER.equals(col.getColumnType())) {
+                            ps.setInt(5, ((NumericColumn)col).getPrecision());
+                        } else {
+                            ps.setNull(5, Types.NUMERIC);
+                        }
+
+                        ps.setInt(6, col.getOrder());
+                        ps.setBoolean(8, col.isChecking());
+
+                        if (ColumnType.STRING.equals(col.getColumnType())) {
+                            ps.setInt(7, ((StringColumn) col).getMaxLength());
+                            ps.setNull(9, Types.INTEGER);
+                            ps.setNull(10, Types.NUMERIC);
+                            ps.setNull(11, Types.CHAR);
+                            ps.setNull(12, Types.NUMERIC);
+                            ps.setNull(13, Types.NUMERIC);
+                            ps.setNull(14, Types.NUMERIC);
+                        } else if(ColumnType.NUMBER.equals(col.getColumnType())){
+                            ps.setInt(7, ((NumericColumn) col).getMaxLength());
+                            ps.setNull(9, Types.INTEGER);
+                            ps.setNull(10, Types.NUMERIC);
+                            ps.setNull(11, Types.CHAR);
+                            ps.setNull(12, Types.NUMERIC);
+                            ps.setNull(13, Types.NUMERIC);
+                            ps.setNull(14, Types.NUMERIC);
+                        } else if (ColumnType.DATE.equals(col.getColumnType())) {
+                            if (((DateColumn)col).getFormatId() == null)
                                 ps.setNull(9, Types.INTEGER);
-                                ps.setLong(10, ((ReferenceColumn) col).getRefBookAttributeId());
-                                ps.setNull(11, Types.CHAR);
-                                if (((ReferenceColumn) col).getParentId() != 0)
-                                    ps.setLong(12, ((ReferenceColumn) col).getParentId());
-                                else
-                                    ps.setLong(12, getColumnIdByAlias(formTemplateId, ((ReferenceColumn) col).getParentAlias()));
-                                if (((ReferenceColumn) col).getRefBookAttributeId2() != null) {
-                                    ps.setLong(13, ((ReferenceColumn) col).getRefBookAttributeId2());
-                                } else {
-                                    ps.setNull(13, Types.NULL);
-                                }
-                                ps.setNull(14, Types.NUMERIC);
-                            } else if (ColumnType.AUTO.equals(col.getColumnType())) {
-                                ps.setNull(7, Types.INTEGER);
-                                ps.setNull(9, Types.INTEGER);
-                                ps.setNull(10, Types.NUMERIC);
-                                ps.setNull(11, Types.CHAR);
-                                ps.setNull(12, Types.NUMERIC);
-                                ps.setNull(13, Types.NUMERIC);
-                                ps.setInt(14, ((AutoNumerationColumn) col).getNumerationType().getId());
+                            else
+                                ps.setInt(9, ((DateColumn)col).getFormatId());
+                            ps.setNull(7, Types.INTEGER);
+                            ps.setNull(10, Types.NUMERIC);
+                            ps.setNull(11, Types.CHAR);
+                            ps.setNull(12, Types.NUMERIC);
+                            ps.setNull(13, Types.NUMERIC);
+                            ps.setNull(14, Types.NUMERIC);
+                        } else if (ColumnType.REFBOOK.equals(col.getColumnType())) {
+                            ps.setNull(7, Types.INTEGER);
+                            ps.setNull(9, Types.INTEGER);
+                            ps.setLong(10, ((RefBookColumn) col).getRefBookAttributeId());
+                            ps.setString(11, ((RefBookColumn) col).getFilter());
+                            ps.setNull(12, Types.NUMERIC);
+                            if (((RefBookColumn) col).getRefBookAttributeId2() != null) {
+                                ps.setLong(13, ((RefBookColumn) col).getRefBookAttributeId2());
                             } else {
-								ps.setNull(7, Types.INTEGER);
-								ps.setNull(9, Types.INTEGER);
-								ps.setNull(10, Types.NUMERIC);
-                                ps.setNull(11, Types.CHAR);
-                                ps.setNull(12, Types.NUMERIC);
-                                ps.setNull(13, Types.NUMERIC);
-                                ps.setNull(14, Types.NUMERIC);
-							}
-							ps.setString(15, col.getAlias());
-                            ps.setInt(16, formTemplateId);
-						}
+                                ps.setNull(13, Types.NULL);
+                            }
+                            ps.setNull(14, Types.NUMERIC);
+                        } else if (ColumnType.REFERENCE.equals(col.getColumnType())) {
+                            ps.setNull(7, Types.INTEGER);
+                            ps.setNull(9, Types.INTEGER);
+                            ps.setLong(10, ((ReferenceColumn) col).getRefBookAttributeId());
+                            ps.setNull(11, Types.CHAR);
+                            if (((ReferenceColumn) col).getParentId() != 0)
+                                ps.setLong(12, ((ReferenceColumn) col).getParentId());
+                            else
+                                ps.setLong(12, getColumnIdByAlias(formTemplate.getId(), ((ReferenceColumn) col).getParentAlias()));
+                            if (((ReferenceColumn) col).getRefBookAttributeId2() != null) {
+                                ps.setLong(13, ((ReferenceColumn) col).getRefBookAttributeId2());
+                            } else {
+                                ps.setNull(13, Types.NULL);
+                            }
+                            ps.setNull(14, Types.NUMERIC);
+                        } else if (ColumnType.AUTO.equals(col.getColumnType())) {
+                            ps.setNull(7, Types.INTEGER);
+                            ps.setNull(9, Types.INTEGER);
+                            ps.setNull(10, Types.NUMERIC);
+                            ps.setNull(11, Types.CHAR);
+                            ps.setNull(12, Types.NUMERIC);
+                            ps.setNull(13, Types.NUMERIC);
+                            ps.setInt(14, ((AutoNumerationColumn) col).getNumerationType().getId());
+                        } else {
+                            ps.setNull(7, Types.INTEGER);
+                            ps.setNull(9, Types.INTEGER);
+                            ps.setNull(10, Types.NUMERIC);
+                            ps.setNull(11, Types.CHAR);
+                            ps.setNull(12, Types.NUMERIC);
+                            ps.setNull(13, Types.NUMERIC);
+                            ps.setNull(14, Types.NUMERIC);
+                        }
+                        ps.setString(15, col.getAlias());
+                        ps.setInt(16, formTemplate.getId());
+                    }
 
-						@Override
-						public int getBatchSize() {
-							return oldColumns.size();
-						}
-					}
-			);
-		}
-	}
+                    @Override
+                    public int getBatchSize() {
+                        return oldColumns.size();
+                    }
+                }
+        );
 
-	private static final String getAttributeId2Query = "SELECT DISTINCT attribute_id, attribute_id2 " +
+        return updatedColumns;
+    }
+
+    private static final String getAttributeId2Query = "SELECT DISTINCT attribute_id, attribute_id2 " +
 			" FROM form_column WHERE %s AND attribute_id2 IS NOT NULL AND attribute_id2 <> 0";
 
     @Override

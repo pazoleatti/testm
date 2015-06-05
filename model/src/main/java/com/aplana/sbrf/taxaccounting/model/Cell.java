@@ -334,6 +334,10 @@ public class Cell extends AbstractCell {
 		final StringBuilder sb = new StringBuilder("Cell{");
 		sb.append("value=").append(getValue());
 		sb.append("; dereference=").append(getRefBookDereference());
+		sb.append("; colspan=").append(getColSpan());
+		sb.append("; rowspan=").append(getRowSpan());
+		sb.append("; style=").append(getStyle());
+		sb.append("; editable=").append(isEditable());
 		sb.append('}');
 
 		return sb.toString();

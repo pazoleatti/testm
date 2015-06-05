@@ -28,6 +28,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -44,15 +45,18 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -82,11 +86,9 @@ def getReportPeriodEndDate() {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def itog = getDataRow(dataRows, 'itog')
     itog?.base = calcItog(dataRows)
-    dataRowHelper.update(dataRows);
 }
 
 // Расчет итога
@@ -101,8 +103,7 @@ def calcItog(def dataRows) {
 }
 
 def logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row in dataRows) {
         def index = row.getIndex()
         // 1. Проверка заполнения граф
@@ -117,8 +118,7 @@ def logicCheck() {
 
 // Консолидация
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     dataRows.each {
         it.base = null
     }
@@ -134,7 +134,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.update(dataRows)
 }
 
 void importTransportData() {
@@ -155,8 +154,7 @@ void importTransportData() {
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     try {
         // пропускаем заголовок
@@ -213,10 +211,6 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-    }
-
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        dataRowHelper.update(dataRows)
     }
 }
 
@@ -321,8 +315,7 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -355,9 +348,6 @@ void importData() {
         rowValues.clear()
     }
     showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(dataRows)
-    }
 }
 
 /**

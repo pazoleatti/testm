@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,11 @@ import java.util.Map;
  * В первую очередь предназначено для использования при реализации {@link FormTemplateDao} 
  */
 public interface ColumnDao {
+    enum KEYS{
+        UPDATED,
+        ADDED,
+        DELETED
+    }
     /**
 	 * Получить список столбцов, входящих в заданную форму
 	 * @param formId идентификатор формы
@@ -22,7 +28,7 @@ public interface ColumnDao {
 	 * Сохранить список столбцов формы
 	 * @param form форма
 	 */
-	void saveFormColumns(FormTemplate form);
+    Map<KEYS, Collection<Long>> updateFormColumns(FormTemplate form);
 
     /**
      * Получить список атрибутов второго уровня для атрибута который используется в колонках.

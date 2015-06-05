@@ -38,6 +38,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -62,15 +63,18 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -153,21 +157,16 @@ void addNewRow() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def totalRow = getDataRow(dataRows, 'total')
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalSumColumns)
 
-    dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def FILLED_FILLED_ERROR_MSG = "Строка %s: В случае если графа «%s» заполнена, должна быть заполнена графа «%s»!"
     def ONE_FMT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s». Оба поля обязательны для заполнения."
@@ -224,7 +223,7 @@ void logicCheck() {
         }
         // графа 2
         if (row.typeCode && (!row.typeCode.matches("^[0-9]{2}\$") || !(Integer.valueOf(row.typeCode) in ((1..13) + (16..28))))) {
-            loggerLog(row, String.format("Строка <Номер строки>: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 01, 02, …,13, 16, 17, …, 28.", index, getColumnName(row,'typeCode'), getColumnName(row,'typeCode')))
+            loggerLog(row, String.format("Строка %s: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 01, 02, …,13, 16, 17, …, 28.", index, getColumnName(row,'typeCode'), getColumnName(row,'typeCode')))
         }
     }
 
@@ -252,7 +251,7 @@ def isBalancePeriod() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -264,7 +263,12 @@ void sortFormDataRows() {
         sortRows(dataRows, sortColumns)
 
         dataRows.add(totalRow)
-        dataRowHelper.saveSort()
+
+        if (saveInDB) {
+            dataRowHelper.saveSort()
+        } else {
+            updateIndexes(dataRows);
+        }
     }
 }
 
@@ -277,11 +281,9 @@ def loggerLog(def row, def msg, LogLevel logLevel = LogLevel.ERROR) {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def totalRow = getDataRow(dataRows, 'total')
-    dataRows = []
+    def rows = []
 
     // собрать из источников строки
     def formSources = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
@@ -296,18 +298,19 @@ void consolidation() {
                 def final childDataRows = formDataService.getDataRowHelper(child).allCached
                 def final department = departmentService.get(child.departmentId)
                 def depHeadRow = getFixedRow(department.name, "head_${department.id}", true)
-                dataRows.add(depHeadRow)
+                rows.add(depHeadRow)
                 // добавить только нефиксированные строки
-                dataRows.addAll(childDataRows.findAll { row -> row.getAlias() == null || row.getAlias() == '' })
+                rows.addAll(childDataRows.findAll { row -> row.getAlias() == null || row.getAlias() == '' })
                 def subTotalRow = getFixedRow("Всего по ${department.name}", "total_${department.id}", true)
                 calcTotalSum(childDataRows, subTotalRow, totalSumColumns)
-                dataRows.add(subTotalRow)
+                rows.add(subTotalRow)
             }
         }
     }
-    dataRows.add(totalRow)
+    rows.add(totalRow)
 
-    dataRowHelper.save(dataRows)
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /** Получить произвольную фиксированную строку со стилями. */
@@ -400,13 +403,11 @@ void importTransportData() {
     }
 
     showMessages(newRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        logger.info("newRows "+newRows.size())
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
-
-    // вставляем строки в БД
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.save(newRows)
 }
 
 boolean isEmptyCells(def rowCells) {
@@ -526,7 +527,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

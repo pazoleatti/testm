@@ -8,9 +8,17 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
  * @author Eugene Stetsenko
  */
 public class CheckFormDataAction extends AbstractDataRowAction implements ActionName {
+    private boolean editMode;
 
+    public boolean isEditMode() {
+        return editMode;
+    }
 
-	@Override
+    public void setEditMode(boolean editMode) {
+        this.editMode = editMode;
+    }
+
+    @Override
 	public String getName() {
 		return "Обработка запроса на проверку формы";
 	}

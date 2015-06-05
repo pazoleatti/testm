@@ -26,9 +26,9 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     public static final String MSG_IS_USED_VERSION =
             "Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s\" %d%s для макета";
     private static final String MSG_HAVE_DESTINATION =
-            "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
+            "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
     private static final String MSG_HAVE_SOURCE =
-            "Существует назначение декларации в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода \"%s\"!";
+            "Существует назначение декларации в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -162,28 +162,36 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     @Override
     public void checkDestinationsSources(int typeId, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
-        List<Pair<DepartmentFormType, Date>> sourcePairs = sourceService.findSourceFTsForDeclaration(typeId, versionActualDateStart, versionActualDateEnd);
-        List<Pair<DepartmentDeclarationType, Date>> destinationPairs = sourceService.findDestinationDTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
-        for (Pair<DepartmentFormType, Date> pair : sourcePairs){
+        List<Pair<DepartmentFormType, Pair<Date, Date>>> sourcePairs = sourceService.findSourceFTsForDeclaration(typeId, versionActualDateStart, versionActualDateEnd);
+        List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> destinationPairs = sourceService.findDestinationDTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
+        for (Pair<DepartmentFormType, Pair<Date, Date>> pair : sourcePairs){
             DepartmentFormType first = pair.getFirst();
             logger.error(
                     String.format(MSG_HAVE_SOURCE,
                             first.getKind().getName(),
                             formTypeService.get(first.getFormTypeId()).getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
-                            sdf.format(pair.getSecond())
+                            getPeriod(pair.getSecond())
                     )
             );
         }
-        for (Pair<DepartmentDeclarationType, Date> pair : destinationPairs){
+        for (Pair<DepartmentDeclarationType, Pair<Date, Date>> pair : destinationPairs){
             DepartmentDeclarationType first = pair.getFirst();
             logger.error(
                     String.format(MSG_HAVE_DESTINATION,
                             declarationTypeService.get(first.getDeclarationTypeId()).getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
-                            sdf.format(pair.getSecond())
+                            getPeriod(pair.getSecond())
                     )
             );
+        }
+    }
+
+    private String getPeriod(Pair<Date, Date> pair) {
+        if (pair.getSecond() == null) {
+            return String.format("\"%s\"", sdf.format(pair.getFirst()));
+        } else {
+            return String.format("\"%s\" до периода \"%s\"", sdf.format(pair.getFirst()), sdf.format(pair.getSecond()));
         }
     }
 

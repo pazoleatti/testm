@@ -47,6 +47,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
 			throw new LockException("Ошибка при поиске блокировки с кодом = %s", key);
 		}
 	}
@@ -66,6 +67,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
         } catch (EmptyResultDataAccessException e) {
             return null;
         } catch (Exception e) {
+			LOG.error(e.getMessage(), e);
             throw new LockException("Ошибка при поиске блокировки с кодом = %s и датой начала = %s", key, lockDate);
         }
     }

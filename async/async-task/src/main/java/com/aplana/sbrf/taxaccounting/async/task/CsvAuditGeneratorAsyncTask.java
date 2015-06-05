@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
@@ -18,12 +19,12 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
     private static final String SUCCESS_MSG =
-            "Сформирован ZIP файл с данными журнала аудита по следующим параметрам поиска: " +
-                    "От даты %s, До даты %s, Критерий поиска: %s, Искать в найденном: %s, Искать по полям: %s.";
+            "Сформирован ZIP файл с данными журнала аудита по следующим параметрам поиска: %s.";
     private static final String ERROR_MSG =
-            "Произошла непредвиденная ошибка при формировании ZIP файла с данными журнала аудита по следующим параметрам поиска: " +
-                    "От даты %s, До даты %s, Критерий поиска: %s, Искать в найденном: %s, Искать по полям: %s." +
+            "Произошла непредвиденная ошибка при формировании ZIP файла с данными журнала аудита по следующим параметрам поиска: %s. " +
                     "Для запуска процедуры формирования необходимо повторно инициировать формирование данного файла.";
+    private static final String EMPTY_DATA_ERROR_MSG = "ZIP файл с данными журнала аудита не сформирован. В журнале аудита отсутствуют данные по заданным параметрам поиска: %s.";
+    private static final String SEARCH_CRITERIA = "От даты: \"%s\", До даты: \"%s\", Критерий поиска: \"%s\", Искать в найденном: \"%s\", Искать по полям: \"%s\"";
 
     @Autowired
     TAUserService userService;
@@ -51,6 +52,9 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
             records = auditService.getLogsByFilter(filter);
         else
             records = auditService.getLogsBusiness(filter, userInfo);
+        if (records == null || records.isEmpty()) {
+            throw new ServiceException(getMsg(params, true, true, records));
+        }
 
         String uuid = printingService.generateAuditZip(records);
         reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.CSV_AUDIT);
@@ -64,37 +68,46 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getNotificationMsg(Map<String, Object> params) {
-        LogSystemFilter filter = (LogSystemFilter)params.get(AuditService.AsyncNames.LOG_FILTER.name());
-        StringBuilder builder = new StringBuilder();
-        for (Long aLong : filter.getAuditFieldList()){
-            builder.append(AuditFieldList.fromId(aLong).getName());
-        }
-        String fields = builder.substring(0, builder.toString().length()-2);
-
-        return String.format(SUCCESS_MSG,
-                SDF.format(filter.getFromSearchDate()),
-                SDF.format(filter.getToSearchDate()),
-                filter.getFilter(),
-                filter.getOldLogSystemFilter()==null?"Нет":"Да",
-                fields
-        );
+        return getMsg(params, false, false, null);
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
+        return getMsg(params, true, false, null);
+    }
+
+    /**
+     * Возвращает текст оповещения, которое будет создано для пользователей, ожидающих выполнение задачи.
+     *
+     * @param params параметры задачи
+     * @param isError признак ошибки
+     * @param checkRecords учитывать ли наличие данных для фильтра
+     * @param records данные для фильтра
+     * @return текст сообещения
+     */
+    private String getMsg(Map<String, Object> params, boolean isError, boolean checkRecords, PagingResult<LogSearchResultItem> records) {
         LogSystemFilter filter = (LogSystemFilter)params.get(AuditService.AsyncNames.LOG_FILTER.name());
         StringBuilder builder = new StringBuilder();
-        for (Long aLong : filter.getAuditFieldList()){
-            builder.append(AuditFieldList.fromId(aLong).getName());
+        for (Long aLong : filter.getAuditFieldList()) {
+            builder.append(AuditFieldList.fromId(aLong).getName()).append(", ");
         }
-        String fields = builder.substring(0, builder.toString().length()-2);
+        String fields = builder.substring(0, builder.toString().length() - 2);
 
-        return String.format(ERROR_MSG,
+        String searchCriteria = String.format(SEARCH_CRITERIA,
                 SDF.format(filter.getFromSearchDate()),
                 SDF.format(filter.getToSearchDate()),
-                filter.getFilter(),
-                filter.getOldLogSystemFilter()==null?"Нет":"Да",
+                filter.getFilter() != null ? filter.getFilter() : "Не задано",
+                filter.getOldLogSystemFilter() == null ? "Нет" : "Да",
                 fields
         );
+
+        String msg;
+        if (checkRecords && (records == null || records.isEmpty())) {
+            msg = EMPTY_DATA_ERROR_MSG;
+        } else {
+            msg = (isError ? ERROR_MSG : SUCCESS_MSG);
+        }
+
+        return String.format(msg, searchCriteria);
     }
 }

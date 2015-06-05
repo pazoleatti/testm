@@ -62,6 +62,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         def columns = editableColumns
@@ -89,20 +90,24 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
             importTransportData()
+            formDataService.saveCachedDataRows(formData, logger)
         } else {
             importData()
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 calc()
                 logicCheck()
+                formDataService.saveCachedDataRows(formData, logger)
             }
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -199,8 +204,7 @@ void prevPeriodCheck() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     deleteAllAliased(dataRows)
 
@@ -212,7 +216,7 @@ void calc() {
     if (!isConsolidated) {
         def formPrev = getFormPrev()
         def dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
-        dataPrevRows = dataPrev?.allCached
+        dataPrevRows = dataPrev?.allSaved
     }
 
     if (!isBalancePeriod() && !isConsolidated) {
@@ -234,10 +238,7 @@ void calc() {
     // добавить строку "итого"
     dataRows.add(getCalcTotalRow(dataRows))
 
-    // используется save() т.к. есть сортировка
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 def logicCheck() {
@@ -248,7 +249,7 @@ def logicCheck() {
     if (!isConsolidated) {
         formPrev = getFormPrev()
         dataPrev = formPrev != null ? formDataService.getDataRowHelper(formPrev) : null
-        dataPrevRows = dataPrev?.allCached
+        dataPrevRows = dataPrev?.allSaved
     }
 
     for (DataRow row in dataRows) {
@@ -812,7 +813,8 @@ void importTransportData() {
 
     // вставляем строки в БД
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -906,7 +908,7 @@ boolean isEmptyCells(def rowCells) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     def rowsMap = [:]
@@ -942,7 +944,12 @@ void sortFormDataRows() {
     // если остались данные вне иерархии, добавляем их перед итогами
     sortAddRows(rowList, dataRows)
     dataRows.add(total)
-    dataRowHelper.saveSort()
+
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 void sortAddRows(def addRows, def dataRows) {
@@ -1013,7 +1020,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

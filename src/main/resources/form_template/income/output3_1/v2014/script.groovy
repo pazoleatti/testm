@@ -30,6 +30,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -50,9 +51,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -133,8 +136,7 @@ def getRecordId(def ref_id, String alias, String value, Date date) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (!dataRows.isEmpty()) {
 
         for (def row in dataRows) {
@@ -150,16 +152,13 @@ void calc() {
                 row.budgetClassificationCode = '18210101060011000110'
             }
         }
-        dataRowHelper.update(dataRows);
 
-        // Сортировка групп и строк
-        sortFormDataRows()
+        sortFormDataRows(false)
     }
 }
 
 def logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row in dataRows) {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
@@ -167,8 +166,7 @@ def logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = []
+    def rows = []
 
     // «Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)»
     def sourceFormType03 = 10070
@@ -183,7 +181,7 @@ void consolidation() {
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
-            def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.all
+            def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allSaved
             def newDataRows = []
             switch (it.formTypeId) {
                 case sourceFormType03:
@@ -198,11 +196,13 @@ void consolidation() {
                     break
             }
             if(!newDataRows.isEmpty()) {
-                dataRows.addAll(newDataRows)
+                rows.addAll(newDataRows)
             }
         }
     }
-    dataRowHelper.save(dataRows)
+
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 def formNewRows03(def rows) {
@@ -256,11 +256,15 @@ def formNewRowsFRN(def rows) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, null, null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 void importData() {
@@ -313,7 +317,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

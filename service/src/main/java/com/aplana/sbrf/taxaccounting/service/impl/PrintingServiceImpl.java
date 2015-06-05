@@ -94,7 +94,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getSavedRows(formData, null) : dataRowDao.getRows(formData, null));
+            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getSavedRows(formData, null) : dataRowDao.getTempRows(formData, null));
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
@@ -137,7 +137,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getSavedRows(formData, null) : dataRowDao.getRows(formData, null));
+            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getSavedRows(formData, null) : dataRowDao.getTempRows(formData, null));
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
@@ -208,7 +208,8 @@ public class PrintingServiceImpl implements PrintingService {
         try {
             LogSystemCsvBuilder logSystemCsvBuilder = new LogSystemCsvBuilder(resultItems);
             reportPath = logSystemCsvBuilder.createReport();
-            return blobDataService.create(new FileInputStream(reportPath), "");
+            String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
+            return blobDataService.create(new FileInputStream(reportPath), fileName);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemXlsxReportBuilder.class);

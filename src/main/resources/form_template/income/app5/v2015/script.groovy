@@ -35,6 +35,7 @@ switch (formDataEvent) {
         logicCheckBeforeCalc()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -43,7 +44,9 @@ switch (formDataEvent) {
         addRow()
         break
     case FormDataEvent.DELETE_ROW:
-        if (currentDataRow != null && currentDataRow.getAlias() == null) formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && currentDataRow.getAlias() == null) {
+            formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        }
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -57,15 +60,18 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -166,8 +172,7 @@ void addRow() {
 
 // Логические проверки
 void logicCheckBeforeCalc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
     for (row in dataRows) {
         if (row != null && row.getAlias() != null) {
@@ -227,8 +232,7 @@ void logicCheckBeforeCalc() {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -271,8 +275,7 @@ void logicCheck() {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -302,7 +305,6 @@ void calc() {
     }
 
     dataRows.add(getTotalRow(dataRows))
-    dataRowHelper.save(dataRows)
 }
 
 
@@ -510,9 +512,9 @@ void importTransportData() {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    // вставляем строки в БД
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
@@ -623,7 +625,8 @@ void importData() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

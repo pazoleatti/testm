@@ -43,6 +43,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -67,15 +68,18 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -162,15 +166,12 @@ def getReportPeriodEndDate() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     calc1AndChangeDateFormat(dataRows)
     calcTotal(dataRows)
 
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -345,7 +346,7 @@ def isBalancePeriod() {
 
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -363,7 +364,11 @@ void sortFormDataRows() {
 
             sortRowsSimple(sectionRows)
         }
-        dataRowHelper.saveSort()
+        if (saveInDB) {
+            dataRowHelper.saveSort()
+        } else {
+            updateIndexes(dataRows);
+        }
     }
 }
 
@@ -396,8 +401,7 @@ def addRow() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     deleteExtraRows(dataRows)
@@ -420,7 +424,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 // Удалить нефиксированные строки
@@ -478,13 +481,6 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
     calcTotalSum(copyRows, subTotalRow, totalSumColumns)
     destinationDataRows.add(getDataRow(destinationDataRows, toAlias).getIndex() - 1, subTotalRow)
     updateIndexes(destinationDataRows)
-}
-
-// Поправить индексы.
-void updateIndexes(def dataRows) {
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
 }
 
 def roundValue(def value, int precision = 2) {
@@ -594,7 +590,7 @@ def getPrevDataRows() {
             // форма подходит если: она существует, она не в состоянии "создана" и не в корректирующем периоде
             if (formDataTmp != null && !isCorrectionPeriod(formDataTmp.departmentReportPeriodId)
                     && formDataTmp.state != WorkflowState.CREATED) {
-                prevDataRows = formDataService.getDataRowHelper(formDataTmp)?.getAllSaved()
+                prevDataRows = formDataService.getDataRowHelper(formDataTmp)?.allSaved
                 break
             }
         }
@@ -734,13 +730,10 @@ void importTransportData() {
     }
 
     showMessages(newRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
-
-    // вставляем строки в БД
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    dataRowHelper.save(newRows)
 }
 
 boolean isEmptyCells(def rowCells) {
@@ -891,8 +884,8 @@ void importData() {
 
     showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(newRows)
         updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }
 
