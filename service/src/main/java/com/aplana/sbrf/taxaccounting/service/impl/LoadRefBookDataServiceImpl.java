@@ -373,6 +373,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     public boolean checkPathArchiveError(TAUserInfo userInfo, Logger logger) {
         String archivePath = getRefBookArchivePath(userInfo, logger);
         String errorPath = getRefBookErrorPath(userInfo, logger);
+        if (archivePath == null || errorPath == null) {
+            return false;
+        }
         List<String> pathList = new ArrayList<String>();
         if (!checkPath(archivePath)) {
             pathList.add("к каталогу архива «" + archivePath + "»");
@@ -402,7 +405,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     @Override
     public ImportCounter importRefBookNsi(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger) {
-        log(userInfo, LogData.L23, logger);
         ImportCounter importCounter = new ImportCounter();
         try {
             // ОКАТО
@@ -430,7 +432,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     @Override
     public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger) {
-        log(userInfo, LogData.L23, logger);
         ImportCounter importCounter = new ImportCounter();
         try {
             importCounter = importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY,
@@ -451,7 +452,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
     @Override
     public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger) {
-        log(userInfo, LogData.L23, logger);
         ImportCounter importCounter = new ImportCounter();
         try {
             importCounter = importRefBook(userInfo, logger, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY,
@@ -477,6 +477,32 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.SAVE, logger, additionalParameters);
     }
 
+    @Override
+    public void checkImportRefBookTransportData(TAUserInfo userInfo, Logger logger, String lock, Date lockDate) {
+        log(userInfo, LogData.L23, logger);
+        if (checkPathArchiveError(userInfo, logger)){
+            // Diasoft
+            lockService.updateState(lock, lockDate, "Импорт справочников \"Diasoft\"");
+            importRefBookDiasoft(userInfo, logger);
+            // Средняя стоимость транспортных средств
+            lockService.updateState(lock, lockDate, "Импорт справочника \"Средняя стоимость транспортных средств\"");
+            importRefBookAvgCost(userInfo, logger);
+        }
+    }
+
+    @Override
+    public void checkImportRefBooks(TAUserInfo userInfo, Logger logger) {
+        log(userInfo, LogData.L23, logger);
+        if (checkPathArchiveError(userInfo, logger)){
+            // Импорт справочников из ЦАС НСИ
+            importRefBookNsi(userInfo, logger);
+            // Импорт справочников из Diasoft Custody
+            importRefBookDiasoft(userInfo, logger);
+            // Импорт справочников в справочник "Средняя стоимость транспортных средств"
+            importRefBookAvgCost(userInfo, logger);
+        }
+    }
+
     /**
      * Проверка строки на соответствие регулярке из набора
      */
@@ -497,7 +523,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> pathList = model.get(ConfigurationParam.REF_BOOK_ARCHIVE_DIRECTORY, 0);
         if (pathList == null || pathList.isEmpty()) {
-            log(userInfo, LogData.L_2, logger);
+            log(userInfo, LogData.L43_2, logger);
             return null;
         }
         return pathList.get(0);
@@ -510,7 +536,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> pathList = model.get(ConfigurationParam.REF_BOOK_ERROR_DIRECTORY, 0);
         if (pathList == null || pathList.isEmpty()) {
-            log(userInfo, LogData.L_1, logger);
+            log(userInfo, LogData.L43_1, logger);
             return null;
         }
         return pathList.get(0);
