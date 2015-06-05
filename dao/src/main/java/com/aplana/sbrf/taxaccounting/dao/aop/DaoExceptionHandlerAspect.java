@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.aop;
 
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ public class DaoExceptionHandlerAspect {
     @AfterThrowing(pointcut = "execution(* com.aplana.sbrf.taxaccounting.dao..*.*(..)) " +
             "&& !within(com.aplana.sbrf.taxaccounting.dao.impl.DBInfo)", throwing = "e")
     public void handleDaoException(Throwable e) throws DaoException {
+        System.out.println("root: " + ExceptionUtils.getRootCause(e));
         if (e instanceof DaoException) {
             throw (DaoException) e;
         } if (e instanceof  IllegalArgumentException) {
