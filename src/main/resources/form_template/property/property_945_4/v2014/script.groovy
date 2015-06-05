@@ -45,7 +45,7 @@ switch (formDataEvent) {
         checkPrevForm()
         calc()
         logicCheck()
-        formDataService.getDataRowHelper(formData).allCached = rows
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkPrevForm()
@@ -72,7 +72,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
-        formDataService.getDataRowHelper(formData).allCached = rows
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
