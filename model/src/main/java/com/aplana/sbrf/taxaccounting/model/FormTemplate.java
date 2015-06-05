@@ -318,4 +318,69 @@ public class FormTemplate extends IdentityObject<Integer> {
     public void setMonthly(boolean monthly) {
         this.monthly = monthly;
     }
+
+    public FormTemplate clone() {
+        FormTemplate formTemplateClone = new FormTemplate();
+
+        formTemplateClone.setId(this.getId());
+        formTemplateClone.setType(this.getType());
+        formTemplateClone.setVersion(this.getVersion());
+        formTemplateClone.setFixedRows(this.isFixedRows());
+        formTemplateClone.setName(this.getName());
+        formTemplateClone.setFullName(this.getFullName());
+        formTemplateClone.setHeader(this.getHeader());
+        formTemplateClone.setMonthly(this.isMonthly());
+        formTemplateClone.setScript(this.getScript());
+        formTemplateClone.getColumns().addAll(this.getColumns());
+        formTemplateClone.getStyles().addAll(this.getStyles());
+        formTemplateClone.getHeaders().addAll(this.getHeaders());
+        formTemplateClone.setStatus(this.getStatus());
+
+        // клонировать строки, иначе измения в них попадут в макет формы
+        List<DataRow<Cell>> rows = getCloneRows(this.getRows());
+        formTemplateClone.getRows().addAll(rows);
+
+        return formTemplateClone;
+    }
+
+    /** Получить копию строки. */
+    private List<DataRow<Cell>> getCloneRows(List<DataRow<Cell>> dataRows) {
+        // клонировать список
+        List<DataRow<Cell>> clone = new ArrayList<DataRow<Cell>>(dataRows.size());
+        List<Cell> cells = new ArrayList<Cell>();
+        List<FormStyle> formStyleList = new ArrayList<FormStyle>();
+        for (DataRow<Cell> row : dataRows) {
+            for (String key : row.keySet()) {
+                if (row.getCell(key).getStyle() != null) {
+                    formStyleList.add(row.getCell(key).getStyle());
+                }
+            }
+        }
+        // сделать копии строк
+        for (DataRow<Cell> row : dataRows) {
+            cells.clear();
+            for (String key : row.keySet()) {
+                Cell cell = new Cell(row.getCell(key).getColumn(),  formStyleList);
+                cells.add(cell);
+            }
+            DataRow<Cell> newRow = new DataRow<Cell>(row.getAlias(), cells);
+
+            newRow.setAlias(row.getAlias());
+            newRow.setIndex(row.getIndex());
+            newRow.setId(row.getId());
+            newRow.setImportIndex(row.getImportIndex());
+            for (String alias : row.keySet()) {
+                Cell newCell = newRow.getCell(alias);
+                Cell cell = row.getCell(alias);
+
+                newCell.setValue(cell.getValue(), null);
+                newCell.setEditable(cell.isEditable());
+                newCell.setColSpan(cell.getColSpan());
+                newCell.setRowSpan(cell.getRowSpan());
+                newCell.setStyleAlias(cell.getStyleAlias());
+            }
+            clone.add(newRow);
+        }
+        return clone;
+    }
 }

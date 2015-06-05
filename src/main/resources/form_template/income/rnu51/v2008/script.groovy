@@ -47,6 +47,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -71,6 +72,7 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['itogoKvartal', 'itogo'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         def fileName = UploadFileName?.toLowerCase()
@@ -79,13 +81,16 @@ switch (formDataEvent) {
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 calc()
                 logicCheck()
+                formDataService.saveCachedDataRows(formData, logger)
             }
         } else {
             importData()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.MIGRATION:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -210,8 +215,7 @@ def getDataRowHelperPrev() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // Сортировка
     dataRows.sort({ DataRow a, DataRow b ->
@@ -268,10 +272,7 @@ void calc() {
         totalTwoRow[it] = totalTwoSum[it]
     }
 
-    dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 // Итого по форме
@@ -301,7 +302,7 @@ def calcTotalTwo(def totalOneSum) {
         def prevTotal = null
         def prevFormData = getFormDataPrev()
         if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
-            def prevRows = getDataRowHelperPrev().allCached
+            def prevRows = getDataRowHelperPrev().allSaved
             prevTotal = getDataRow(prevRows, 'itogoKvartal')
         }
         totalColumns.each {
@@ -312,7 +313,7 @@ def calcTotalTwo(def totalOneSum) {
             if (it.formTypeId == formData.getFormType().getId()) {
                 def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
-                    formDataService.getDataRowHelper(source).getAllCached().each { row ->
+                    formDataService.getDataRowHelper(source).getAllSaved().each { row ->
                         if (row.getAlias() == 'itogoKvartal') {
                             totalColumns.each {
                                 result[it] = (totalOneSum[it] ?: 0) + (row[it] ?: 0)
@@ -404,7 +405,7 @@ def BigDecimal round(BigDecimal value, def int precision = 2) {
 }
 
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
@@ -513,8 +514,7 @@ void importData() {
 
 // Заполнить форму данными
 def addData(def xml, def fileName) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // Поиск итоговых строк
     def totalOneRow = getDataRow(dataRows, 'itogoKvartal')
@@ -721,7 +721,8 @@ def addData(def xml, def fileName) {
         }
     }
 
-    dataRowHelper.save(dataRows)
+    updateIndexes(dataRows)
+    formDataService.getDataRowHelper(formData).allCached = dataRows
 }
 
 // для получения данных из RNU или XML
@@ -742,11 +743,15 @@ void loggerError(def msg) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'itogoKvartal')], getDataRow(dataRows, 'itogo'), true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 void importDataXLS() {
@@ -803,8 +808,7 @@ void importDataXLS() {
         rowValues.clear()
     }
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
     def totalOneRow = getDataRow(dataRows, 'itogoKvartal')
     def totalTwoRow = getDataRow(dataRows, 'itogo')
@@ -820,7 +824,8 @@ void importDataXLS() {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

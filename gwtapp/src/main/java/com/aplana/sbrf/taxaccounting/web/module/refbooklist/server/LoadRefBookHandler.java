@@ -94,14 +94,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
                     LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
             try {
-                if (loadRefBookDataService.checkPathArchiveError(securityService.currentUserInfo(), logger)){
-                    // Импорт справочников из ЦАС НСИ
-                    loadRefBookDataService.importRefBookNsi(securityService.currentUserInfo(), logger);
-                    // Импорт справочников из Diasoft Custody
-                    loadRefBookDataService.importRefBookDiasoft(securityService.currentUserInfo(), logger);
-                    // Импорт справочников в справочник "Средняя стоимость транспортных средств"
-                    loadRefBookDataService.importRefBookAvgCost(securityService.currentUserInfo(), logger);
-                }
+                loadRefBookDataService.checkImportRefBooks(securityService.currentUserInfo(), logger);
             } finally {
                 lockDataService.unlock(key, userInfo.getUser().getId());
             }

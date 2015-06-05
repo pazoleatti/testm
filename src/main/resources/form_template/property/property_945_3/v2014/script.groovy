@@ -46,6 +46,7 @@ switch (formDataEvent) {
         checkPrevForm()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkPrevForm()
@@ -71,6 +72,7 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -171,8 +173,7 @@ def getRefBookRecordId(Long refBookId, String alias, String value, Date recordDa
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def ReportPeriod reportPeriod = getReportPeriod()
     def isTaxPeriod = reportPeriod.order == 4
 
@@ -242,7 +243,6 @@ void calc() {
         }
     }
     addFixedRows(dataRows, totalRow)
-    dataRowHelper.save(dataRows)
 }
 
 void addFixedRows(def dataRows, totalRow) {
@@ -305,8 +305,7 @@ void sort(def dataRows) {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def row : dataRows) {
         def index = row.getIndex()
@@ -343,8 +342,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
     dataRows = []
@@ -358,7 +356,8 @@ void consolidation() {
         unite(dataRows, sourceGroups, prevRowsMap)
     }
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
+
+    updateIndexes(dataRows)
 }
 
 def getSourceRowsGroups() {
@@ -369,7 +368,7 @@ def getSourceRowsGroups() {
         if (it.formTypeId == sourceFormTypeId){
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                sourceRows = formDataService.getDataRowHelper(source).allCached
+                sourceRows = formDataService.getDataRowHelper(source).allSaved
             }
         }
     }
@@ -399,7 +398,7 @@ def getPrevRowsMap() {
             if (period.order != 4) {
                 def fd = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, period.id, null)
                 if (fd != null && fd.state == WorkflowState.ACCEPTED) {
-                    prevRowsMap.put(period.order, formDataService.getDataRowHelper(fd).allCached)
+                    prevRowsMap.put(period.order, formDataService.getDataRowHelper(fd).allSaved)
                 } else {
                     errorPeriods.add(period)
                 }

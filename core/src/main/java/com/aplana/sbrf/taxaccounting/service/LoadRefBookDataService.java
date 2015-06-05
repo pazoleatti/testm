@@ -86,5 +86,9 @@ public interface LoadRefBookDataService {
      * @param isNewRecords признак новой записи
      */
     void saveRefBookRecords(long refBookId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
-                                   Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
+                            Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
+
+    void checkImportRefBookTransportData(TAUserInfo userInfo, Logger logger, String lock, Date lockDate);
+
+    void checkImportRefBooks(TAUserInfo userInfo, Logger logger);
 }

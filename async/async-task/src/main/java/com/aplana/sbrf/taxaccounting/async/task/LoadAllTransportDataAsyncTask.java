@@ -1,9 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -13,8 +11,6 @@ import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ejb.*;
-import javax.interceptor.Interceptors;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -67,13 +63,8 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
                 LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
         try {
-            // Diasoft
-            lockService.updateState(lock, lockDate, "Импорт справочников \"Diasoft\"");
-            loadRefBookDataService.importRefBookDiasoft(userInfo, logger);
-
-            lockService.updateState(lock, lockDate, "Импорт справочника \"Средняя стоимость транспортных средств\"");
-            loadRefBookDataService.importRefBookAvgCost(userInfo, logger);
-
+            // Справочники
+            loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate);
             // НФ
             lockService.updateState(lock, lockDate, "Импорт налоговых форм");
             loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger);

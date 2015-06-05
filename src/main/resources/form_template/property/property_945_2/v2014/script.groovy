@@ -35,11 +35,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CREATE:
         addPrevDataRows()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CALCULATE:
         checkRegionId()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkRegionId()
@@ -68,6 +70,7 @@ switch (formDataEvent) {
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.SORT_ROWS:
@@ -169,7 +172,7 @@ void addPrevDataRows() {
         return
     }
     def prevFormData = formDataService.getFormDataPrev(formData)
-    def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.getAllSaved() : null)
+    def prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : null)
 
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     if (reportPeriod.order == 1){
@@ -195,18 +198,15 @@ void addPrevDataRows() {
         }
     }
     if (prevDataRows) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.allCached
+        def dataRows = formDataService.getDataRowHelper(formData).allCached
         def totalRow = getDataRow(dataRows, 'total')
         deleteAllAliased(prevDataRows)
         addFixedRows(prevDataRows, totalRow)
-        dataRowHelper.save(prevDataRows)
     }
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
 
@@ -222,10 +222,7 @@ void calc() {
 
     addFixedRows(dataRows, totalRow)
 
-    dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 def calcBasis(def recordId) {
@@ -279,8 +276,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // строки для сравнения
     def rowsToCompare = dataRows.clone()
@@ -519,7 +515,8 @@ void addData(def xml, int headRowCount) {
         def templateRows = formTemplate.rows
         rows.add(getDataRow(templateRows, 'total'))
 
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -559,11 +556,15 @@ void sort(def dataRows) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getTotalRow(dataRows), true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 // Получение подитоговых строк

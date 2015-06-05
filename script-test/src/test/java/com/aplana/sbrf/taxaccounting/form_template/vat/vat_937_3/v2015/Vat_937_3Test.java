@@ -86,8 +86,7 @@ public class Vat_937_3Test extends ScriptTestBase {
     }
 
     // Проверка пустой
-    // TODO SBRFACCTAX-11483
-    // @Test
+    @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertFalse(testHelper.getLogger().containsLevel(LogLevel.ERROR));

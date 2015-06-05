@@ -851,7 +851,7 @@ def getSumOutcomeSimple(def knuCodes) {
         return 0
     }
     def formDataSimple = getFormDataSimple(reportPeriodPrevIncome.id)
-    def dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.getAll() : null)
+    def dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.allSaved : null)
     for (def row : dataRowsSimple) {
         if (row.consumptionTypeId in knuCodes) {
             tmp += row.rnu5Field5Accepted

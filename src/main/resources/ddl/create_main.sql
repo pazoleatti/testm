@@ -762,8 +762,8 @@ create table async_task_type
 id number(18) not null,
 name varchar2(100) not null,
 handler_jndi varchar2(500) not null,
-short_queue_limit number(18) default 0 not null,
-task_limit number(18) default 0 not null,
+short_queue_limit number(18),
+task_limit number(18),
 limit_kind varchar2(400)
 );
 

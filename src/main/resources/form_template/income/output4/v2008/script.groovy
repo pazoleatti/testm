@@ -36,6 +36,7 @@ switch (formDataEvent) {
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
 }
@@ -44,8 +45,7 @@ switch (formDataEvent) {
 def nonEmptyColumns = ['taxSum']
 
 def logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row in dataRows) {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
@@ -80,8 +80,7 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -109,7 +108,8 @@ void importData() {
     }
     showMessages(dataRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(dataRows)
+        updateIndexes(dataRows)
+        formDataService.getDataRowHelper(formData).allCached = dataRows
     }
 }
 

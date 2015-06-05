@@ -62,37 +62,43 @@ import java.math.RoundingMode
  */
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     // подготовить/утвердить
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     // принятия
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // принять из утверждена
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // принять из утверждена
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // принять из создана
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
 }
@@ -218,19 +224,15 @@ def getRecordId(def ref_id, String alias, String value, Date date) {
 }
 
 void calc() {
-    def dataRowsHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowsHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // итоговые строки
     getDataRow(dataRows, firstTotalRowAlias)[totalColumn] = getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum)
     getDataRow(dataRows, secondTotalRowAlias)[totalColumn] = getSum(dataRows, totalColumn, rowsAliasesForSecondControlSum)
-
-    dataRowsHelper.update(dataRows)
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def rowIndexes = []
     rowsAliasesFor35to40.each { rowAlias ->
@@ -268,17 +270,15 @@ void logicCheck() {
         calc4to5(dataRows)      // расчет строк 4 и 5
         calc35to40(dataRows)    // расчет строк 35-40
     }
-    dataRowHelper.update(dataRows)
 }
 
 // Консолидация формы
 def consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(), getReportPeriodStartDate(), getReportPeriodEndDate())
     def isFromSummary = isFromSummary(formSources)
     isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
-    dataRowHelper.update(dataRows)
+
 }
 
 boolean isFromSummary(def formSources) {
@@ -321,7 +321,7 @@ void consolidationFromSummary(def dataRows, def formSources) {
     formSources.each {
         def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
-            for (def row : formDataService.getDataRowHelper(child).allCached) {
+            for (def row : formDataService.getDataRowHelper(child).allSaved) {
                 if (row.getAlias() == null) {
                     continue
                 }
@@ -365,7 +365,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
             def childOld = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, prevReportPeriod.id, null)
             //(РНУ-75) Регистр налогового учета доходов по операциям депозитария
             if (childOld != null && childOld.formType.id == formTypeId_RNU75) {
-                def dataRowsChildOld = formDataService.getDataRowHelper(childOld)?.allCached
+                def dataRowsChildOld = formDataService.getDataRowHelper(childOld)?.allSaved
                 // графа 7 = сумма граф 7 итогов форм за предыдущий период
                 addChildTotalData(dataRows, '10650', 'incomeBuhSumPrevTaxPeriod', dataRowsChildOld, 'total', ['factSum'])
                 addChildTotalData(dataRows, '10670', 'incomeBuhSumPrevTaxPeriod', dataRowsChildOld, 'total', ['factSum'])
@@ -382,7 +382,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         }
         for (def child in children) {
             if (child != null) {
-                def dataRowsChild = formDataService.getDataRowHelper(child)?.allCached
+                def dataRowsChild = formDataService.getDataRowHelper(child)?.allSaved
                 switch (child.formType.id) {
                     case formTypeId_RNU75: //(РНУ-75) Регистр налогового учета доходов по операциям депозитария
                         // графа 6 = сумма граф 7 итогов форм
@@ -676,7 +676,7 @@ def getIncomeSimpleDataRows() {
     // TODO (Ramil Timerbaev) Аналитик сказала, что ничего нового от банка пока нет, оставь так как есть
     def incomeSimpleFormData = formDataService.getLast(formId, formDataKind, departmentId, reportPeriodId, periodOrder)
     if (incomeSimpleFormData != null && incomeSimpleFormData.id != null)
-        return formDataService.getDataRowHelper(incomeSimpleFormData)?.allCached
+        return formDataService.getDataRowHelper(incomeSimpleFormData)?.allSaved
     return null
 }
 
@@ -797,8 +797,7 @@ void importData() {
     def rowIndex = 0
     def allValuesCount = allValues.size()
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -824,7 +823,8 @@ void importData() {
     }
     showMessages(dataRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(dataRows)
+        updateIndexes(dataRows)
+        formDataService.getDataRowHelper(formData).allCached = dataRows
     }
 }
 
