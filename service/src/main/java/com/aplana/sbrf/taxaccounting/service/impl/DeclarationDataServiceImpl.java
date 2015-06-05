@@ -251,7 +251,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
             FormData formData =
                     formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), null);
-            formDataIds.add(formData.getId());
+            if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
+                formDataIds.add(formData.getId());
+            }
         }
         //Обновление информации о консолидации.
         sourceService.deleteDeclarationConsolidateInfo(id);
