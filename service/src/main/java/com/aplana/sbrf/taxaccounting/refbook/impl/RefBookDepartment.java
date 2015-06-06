@@ -21,8 +21,6 @@ import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -823,7 +821,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             setDepartmentIds(new HashSet<Integer>(Arrays.asList(department.getId())));
         }});
         for (TAUserView taUser : users)
-            logger.error(String.format("Подразделению %s назначен пользовател с логином %s!", department.getName(), taUser.getName()));
+            logger.error(String.format("Подразделению %s назначен пользователь с логином %s!", department.getName(), taUser.getName()));
 
         //9 точка запроса Источники-приёмники
         List<DepartmentFormType> departmentFormTypesDest = sourceService.getFormDestinations(department.getId(), 0, null, null, null);
