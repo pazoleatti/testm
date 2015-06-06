@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplateversionlist.server;
 
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
@@ -32,6 +33,9 @@ public class DeleteVersionHandler extends AbstractActionHandler<DeleteVersionAct
     @Autowired
     private SecurityService  securityService;
 
+    @Autowired
+    FormTemplateDao formTemplateDao;
+
 
     public DeleteVersionHandler() {
         super(DeleteVersionAction.class);
@@ -42,6 +46,7 @@ public class DeleteVersionHandler extends AbstractActionHandler<DeleteVersionAct
         Logger logger = new Logger();
         DeleteVersionResult result = new DeleteVersionResult();
         result.setLastVersion(mainOperatingService.deleteVersionTemplate(action.getFormTemplateId(), logger, securityService.currentUserInfo()));
+        formTemplateDao.dropFDTable(action.getFormTemplateId());
         result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;

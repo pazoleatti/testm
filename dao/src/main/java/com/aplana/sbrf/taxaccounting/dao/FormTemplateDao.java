@@ -1,11 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionSegment;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 
 import java.util.Collection;
@@ -181,4 +176,19 @@ public interface FormTemplateDao {
 	 * @return true - есть длинные строки, false - нет
 	 */
 	boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength);
+
+    /**
+     * Метод для создания таблиц НФ в новой структуре.
+     * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
+     * http://jira.aplana.com/browse/SBRFACCTAX-11384
+     * @param ftId идентификатор макета НФ
+     */
+    void createFDTable(int ftId);
+
+    /**
+     * Метод для удаления таблиц НФ в новой структуре.
+     * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
+     * @param ftId идентификатор макета НФ
+     */
+    void dropFDTable(int ftId);
 }

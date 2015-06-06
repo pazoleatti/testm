@@ -20,23 +20,12 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Repository
 public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao {
@@ -147,106 +136,27 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             );
 
             //http://jira.aplana.com/browse/SBRFACCTAX-11384
-            Collection<Integer> removedStyleIds = formStyleDao.saveFormStyles(formTemplate);
-            //Получаем макет ради колонок, чтобы потом сравнить тип
-            FormTemplate dbT = getJdbcTemplate().queryForObject(
-                    "select id, version, name, fullname, type_id, fixed_rows, header, script, status, monthly " +
-                            "from form_template where id = ?",
-                    new Object[]{formTemplateId},
-                    new int[]{Types.NUMERIC},
-                    new FormTemplateMapper(true)
-            );
-            final Map<ColumnDao.KEYS, Collection<Long>> columns = columnDao.updateFormColumns(formTemplate);
-
-            if (columns.get(ColumnDao.KEYS.DELETED) != null){
-                String sqlColumnForDrop =
-                        String.format(FORM_DATA_COLUMNS_DELETE, formTemplate.getId(), transformToCommaDeleted(columns.get(ColumnDao.KEYS.DELETED)));
-                getJdbcTemplate().execute(sqlColumnForDrop);
-                logger.info(
-                        String.format(
-                                "Deleted columns in table FORM_DATA_%d",
-                                formTemplate.getId()
-                        )
-                );
-            }
-
-            if (columns.get(ColumnDao.KEYS.ADDED) !=null){
-                String sqlColumnForAdd =
-                        String.format(FORM_DATA_COLUMNS_ADD, formTemplate.getId(), transformToCommaAdded(columns.get(ColumnDao.KEYS.ADDED), formTemplate));
-                getJdbcTemplate().execute(sqlColumnForAdd);
-                for (Long aLong : columns.get(ColumnDao.KEYS.ADDED)){
-                    Column column = formTemplate.getColumn(aLong.intValue());
-                    getJdbcTemplate().execute(
-                            String.format(FORM_DATA_COLUMNS_COMMENT,
-                                    formTemplateId,
-                                    aLong,
-                                    column.getAlias() + "-" + column.getName())
-                    );
-                }
-                logger.info(
-                        String.format(
-                                "Added columns in table FORM_DATA_%d",
-                                formTemplate.getId()
-                        )
-                );
-            }
-
-            if (columns.get(ColumnDao.KEYS.UPDATED) !=null){
-                Collection<Long> longs = columns.get(ColumnDao.KEYS.UPDATED);
-                ArrayList<Long> changeType = new ArrayList<Long>();
-                for (Long aLong : longs){
-                    Column newCol = formTemplate.getColumn(aLong.intValue());
-                    Column oldCol = dbT.getColumn(aLong.intValue());
-                    if (newCol.getColumnType() != oldCol.getColumnType()){
-                        changeType.add(aLong);
-                    }
-                    if (newCol.getName().equals(oldCol.getName()) || !newCol.getAlias().equals(oldCol.getAlias())){
-                        getJdbcTemplate().execute(
-                                String.format(FORM_DATA_COLUMNS_COMMENT,
-                                        formTemplateId,
-                                        aLong,
-                                        newCol.getAlias() + "-" + newCol.getName())
-                        );
-                    }
-                }
-                if (!changeType.isEmpty()){
-                    int num = getJdbcTemplate().update(
-                            String.format(
-                                    "update form_data_%d set %s",
-                                    formTemplateId, transformForCleanColumns(changeType, ""))
-                    );
-                    logger.info("Number of updated columns " + num);
-                    String sqlColumnForUpdate =
-                            String.format(FORM_DATA_COLUMNS_UPDATE, formTemplate.getId(), transformToCommaUpdated(changeType, formTemplate));
-                    getJdbcTemplate().execute(sqlColumnForUpdate);
-                    logger.info(
-                            String.format(
-                                    "Updated columns in table FORM_DATA_%d",
-                                    formTemplate.getId()
-                            )
-                    );
-                }
-            }
+            final Collection<Integer> removedStyleIds = formStyleDao.saveFormStyles(formTemplate);
+            final Map<ColumnKeyEnum, Collection<Long>> columns  = columnDao.updateFormColumns(formTemplate);
 
             //Очистка полей содержащих значения удаленных стилей
             if (!removedStyleIds.isEmpty()){
-                ArrayList<Number> allColumnsForUpdate = new ArrayList<Number>() {{
-                    addAll(columns.get(ColumnDao.KEYS.UPDATED)!=null?columns.get(ColumnDao.KEYS.UPDATED):new ArrayList<Number>(0));
-                    addAll(columns.get(ColumnDao.KEYS.ADDED)!=null?columns.get(ColumnDao.KEYS.ADDED):new ArrayList<Number>(0));
+                ArrayList<Long> allColumnsForUpdate = new ArrayList<Long>() {{
+                    addAll(columns.get(ColumnKeyEnum.UPDATED)!=null?columns.get(ColumnKeyEnum.UPDATED):new ArrayList<Long>(0));
+                    addAll(columns.get(ColumnKeyEnum.ADDED)!=null?columns.get(ColumnKeyEnum.ADDED):new ArrayList<Long>(0));
                 }};
                 StringBuilder sb = new StringBuilder();
-                for (int i=0; i<allColumnsForUpdate.size(); i++){
-                    Integer colId = (Integer)allColumnsForUpdate.toArray()[i];
+                for (Long colId : allColumnsForUpdate) {
                     sb.append(SqlUtils.transformToSqlInStatement(String.format("c%d_style_id", colId), removedStyleIds));
-                    if (i!=removedStyleIds.size()-1){
-                        sb.append(" OR ");
-                    }
+                    sb.append(" OR ");
                 }
+                String sqlForUpdateStyles = sb.toString().substring(0, sb.toString().lastIndexOf("OR") - 1);
 
                 int num = getJdbcTemplate().update(
                         String.format(
                                 "update form_data_%d set %s where %s",
-                                formTemplateId, transformForCleanColumns(allColumnsForUpdate, "_style_id"), sb.toString())
+                                formTemplate.getId(),
+                                transformForCleanColumns(allColumnsForUpdate, "_style_id"), sqlForUpdateStyles)
                 );
                 logger.info("Number of updated styles " + num);
             }
@@ -513,7 +423,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
     }
 
-    private static String FD_TABLE_CREATE_PROCEDURE_NAME = "create_form_data_nnn";
     @Override
     public int saveNew(FormTemplate formTemplate) {
 
@@ -552,11 +461,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
             formStyleDao.saveFormStyles(formTemplate);
             columnDao.updateFormColumns(formTemplate);
-            new SimpleJdbcCall(getJdbcTemplate()).
-                    withProcedureName(FD_TABLE_CREATE_PROCEDURE_NAME).
-                    declareParameters(
-                            new SqlParameter("FT_ID", Types.NUMERIC)
-                    ).execute(formTemplateId);
 
             return formTemplateId;
         }catch (DataAccessException e){
@@ -708,6 +612,89 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         return sb.toString().substring(0, sb.length()-1);
     }
 
+    //Пока еще не используем, просто блокируем столбцы
+    private void modifyTables(FormTemplate formTemplate, final Map<ColumnKeyEnum, Collection<Long>> columns){
+        //Получаем макет ради колонок, чтобы потом сравнить тип
+        FormTemplate dbT = getJdbcTemplate().queryForObject(
+                "select id, version, name, fullname, type_id, fixed_rows, header, script, status, monthly " +
+                        "from form_template where id = ?",
+                new Object[]{formTemplate.getId()},
+                new int[]{Types.NUMERIC},
+                new FormTemplateMapper(true)
+        );
+
+        /*if (columns.get(ColumnDao.KEYS.DELETED) != null){
+            String sqlColumnForDrop =
+                    String.format(FORM_DATA_COLUMNS_DELETE, formTemplate.getId(), transformToCommaDeleted(columns.get(ColumnDao.KEYS.DELETED)));
+            getJdbcTemplate().execute(sqlColumnForDrop);
+            logger.info(
+                    String.format(
+                            "Deleted columns in table FORM_DATA_%d",
+                            formTemplate.getId()
+                    )
+            );
+        }*/
+
+        if (columns.get(ColumnKeyEnum.ADDED) !=null){
+            String sqlColumnForAdd =
+                    String.format(FORM_DATA_COLUMNS_ADD, formTemplate.getId(), transformToCommaAdded(columns.get(ColumnKeyEnum.ADDED), formTemplate));
+            getJdbcTemplate().execute(sqlColumnForAdd);
+            /*for (Long aLong : columns.get(ColumnDao.KEYS.ADDED)){
+                Column column = formTemplate.getColumn(aLong.intValue());
+                getJdbcTemplate().execute(
+                        String.format(FORM_DATA_COLUMNS_COMMENT,
+                                formTemplate.getId(),
+                                aLong,
+                                column.getAlias() + "-" + column.getName())
+                );
+            }*/
+            logger.info(
+                    String.format(
+                            "Added columns in table FORM_DATA_%d",
+                            formTemplate.getId()
+                    )
+            );
+        }
+
+        if (columns.get(ColumnKeyEnum.UPDATED) !=null){
+            Collection<Long> longs = columns.get(ColumnKeyEnum.UPDATED);
+            ArrayList<Long> changeType = new ArrayList<Long>();
+            for (Long aLong : longs){
+                Column newCol = formTemplate.getColumn(aLong.intValue());
+                Column oldCol = dbT.getColumn(aLong.intValue());
+                if (newCol.getColumnType() != oldCol.getColumnType()){
+                    changeType.add(aLong);
+                }
+                if (newCol.getName().equals(oldCol.getName()) || !newCol.getAlias().equals(oldCol.getAlias())){
+                    getJdbcTemplate().execute(
+                            String.format(FORM_DATA_COLUMNS_COMMENT,
+                                    formTemplate.getId(),
+                                    aLong,
+                                    newCol.getAlias() + "-" + newCol.getName())
+                    );
+                }
+            }
+            if (!changeType.isEmpty()){
+                int num = getJdbcTemplate().update(
+                        String.format(
+                                "update form_data_%d set %s",
+                                formTemplate.getId(),
+                                transformForCleanColumns(changeType, ""))
+                );
+                logger.info("Number of updated columns " + num);
+                String sqlColumnForUpdate =
+                        String.format(FORM_DATA_COLUMNS_UPDATE, formTemplate.getId(), transformToCommaUpdated(changeType, formTemplate));
+                getJdbcTemplate().execute(sqlColumnForUpdate);
+                logger.info(
+                        String.format(
+                                "Updated columns in table FORM_DATA_%d",
+                                formTemplate.getId()
+                        )
+                );
+            }
+        }
+    }
+
 	@Override
 	public boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength) {
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
@@ -717,4 +704,47 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		sql.append(") > ?");
 		return getJdbcTemplate().queryForInt(sql.toString().intern(), new Object[]{maxLength}, new int[]{Types.INTEGER}) > 0;
 	}
+
+    @Override
+    public void createFDTable(final int ftId) {
+        getJdbcTemplate().call(new CallableStatementCreator() {
+            @Override
+            public CallableStatement createCallableStatement(Connection con) throws SQLException {
+                CallableStatement statement = con.prepareCall("call create_form_data_nnn(?)");
+                statement.setInt(1, ftId);
+                return statement;
+            }
+        }, new ArrayList<SqlParameter>() {{
+            add(new SqlParameter("FT_ID", ftId));
+        }});
+    }
+
+    @Override
+    public void dropFDTable(int ftId) {
+        getJdbcTemplate().execute(String.format("drop table form_data_%d", ftId));
+    }
+
+    //@Override
+    public void modifyAdd(FormTemplate formTemplate, Map<ColumnKeyEnum, Collection<Long>> columns) {
+        if (columns.get(ColumnKeyEnum.ADDED) !=null){
+            String sqlColumnForAdd =
+                    String.format(FORM_DATA_COLUMNS_ADD, formTemplate.getId(), transformToCommaAdded(columns.get(ColumnKeyEnum.ADDED), formTemplate));
+            getJdbcTemplate().execute(sqlColumnForAdd);
+            for (Long aLong : columns.get(ColumnKeyEnum.ADDED)){
+                Column column = formTemplate.getColumn(aLong.intValue());
+                getJdbcTemplate().execute(
+                        String.format(FORM_DATA_COLUMNS_COMMENT,
+                                formTemplate.getId(),
+                                aLong,
+                                column.getAlias() + "-" + column.getName())
+                );
+            }
+            logger.info(
+                    String.format(
+                            "Added columns in table FORM_DATA_%d",
+                            formTemplate.getId()
+                    )
+            );
+        }
+    }
 }

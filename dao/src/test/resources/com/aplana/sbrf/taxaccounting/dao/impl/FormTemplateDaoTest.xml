@@ -4,6 +4,9 @@
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd">
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.util.TransactionHelper"/>
+    </bean>
     <import resource="classpath:testDaoContext.xml"/>
     <jdbc:initialize-database>
         <jdbc:script location="classpath:data/TaxType.sql" encoding="UTF-8"/>

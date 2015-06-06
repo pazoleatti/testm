@@ -10,8 +10,18 @@ import com.google.gwt.user.client.TakesValue;
 import com.google.gwt.user.client.ui.*;
 
 
-public class ColumnAttributeEditor extends Composite implements Editor<Column>, TakesValue<Column> {
-	interface MyUiBinder extends UiBinder<Widget, ColumnAttributeEditor> {
+public class ColumnAttributeEditor extends Composite implements Editor<Column>, TakesValue<Column>, HasEnabled {
+    @Override
+    public boolean isEnabled() {
+        return alias.isEnabled();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        alias.setEnabled(enabled);
+    }
+
+    interface MyUiBinder extends UiBinder<Widget, ColumnAttributeEditor> {
 	}
 
 	private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
