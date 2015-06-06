@@ -5,7 +5,7 @@ drop index i_form_data_signer_formdataid;
 drop index i_form_data_kind;
 drop index i_form_data_form_template_id;
 drop index i_form_data_dep_rep_per_id;
-drop index i_data_row_form_data_id;
+--drop index i_data_row_form_data_id;
 drop index i_department_parent_id;
 drop index i_decl_data_dep_rep_per_id;
 drop sequence seq_department_report_period;
@@ -33,15 +33,23 @@ drop table form_data_source;
 drop table declaration_source;
 drop sequence seq_department_form_type;
 drop table department_form_type;
-drop table data_cell;
-drop sequence seq_data_row;
-drop table data_row;
+--drop table data_cell;
+--drop sequence seq_data_row;
+--drop table data_row;
 drop table form_data_performer;
 drop sequence seq_form_data_signer;
 drop table form_data_signer;
 drop sequence seq_form_data;
 drop table form_data_consolidation;
 drop table declaration_data_consolidation;
+drop table form_data_ref_book;
+
+begin
+ for x in (select * from user_tables where table_name like 'FORM_DATA_%') loop
+     execute immediate 'DROP TABLE '||x.table_name;     
+ end loop;
+end;
+/
 drop table form_data;
 drop sequence seq_declaration_data;
 drop table declaration_data;
@@ -90,3 +98,11 @@ drop table async_task_type;
 drop table configuration_email;
 drop table configuration_lock;
 drop table tax_type;
+drop table log_clob_query;
+drop sequence seq_form_data_nnn;
+drop sequence seq_log_query;
+drop sequence seq_log_query_session;
+
+drop function blob_to_clob;
+drop procedure create_form_data_nnn;
+drop procedure create_form_data_nnn_archive;
