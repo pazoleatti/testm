@@ -193,7 +193,7 @@ public interface SourceDao {
     /**
      * Проверяет не изменились ли данные консолидации для декларации
      * @param ddTargetId идентификатор декларации-приемника для проверки
-     * @return true если есть хоть одна строка где поле status=0
+     * @return false если есть хоть одна строка где НФ-источник равна null
      */
     boolean isDDConsolidationTopical(long ddTargetId);
 }

@@ -57,7 +57,7 @@ public class SourceDaoTest {
     public void testUpdateDD(){
         sourceDao.addDeclarationConsolidationInfo(1l, Arrays.asList(1l));
         sourceDao.updateDDConsolidationInfo(1);
-        assertTrue(sourceDao.isDDConsolidationTopical(1));
+        assertFalse(sourceDao.isDDConsolidationTopical(1));
     }
     /*@Test
     public void testSaveFormSources() {

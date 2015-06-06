@@ -569,6 +569,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public boolean isDDConsolidationTopical(long ddTargetId) {
         return getJdbcTemplate().queryForInt(
                 "select count(*) from DECLARATION_DATA_CONSOLIDATION where TARGET_DECLARATION_DATA_ID = ? and SOURCE_FORM_DATA_ID is null",
-                ddTargetId) > 0;
+                ddTargetId) == 0;
     }
 }
