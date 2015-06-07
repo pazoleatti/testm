@@ -23,7 +23,6 @@
             <g:FileUpload ui:field="uploader" name="uploader" visible="false" addStyleNames="{style.heightInherit}"/>
             <st:LinkButton ui:field="uploadButton" imageResource="{imageResources.icon}" text="Загрузить файл"
                            addStyleNames="{style.heightInherit}"/>
-            <g:Button ui:field="justButton" visible="false" text="Загрузить файл"/>
         </g:HorizontalPanel>
     </g:FormPanel>
 </ui:UiBinder>
