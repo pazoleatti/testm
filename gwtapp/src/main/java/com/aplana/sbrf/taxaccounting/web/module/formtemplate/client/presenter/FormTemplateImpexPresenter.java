@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSaveEvent;
@@ -37,6 +38,8 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateImpexUiHandlers> {
         String ERROR_RESP = "erroruuid ";
+        String SUCCESS_RESP = "uuid ";
+        String ERROR = "error ";
 
 		void setFormId(int formId);
 	}
@@ -55,6 +58,12 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	}
 
     @Override
+    public void uploadFormTemplateSuccess() {
+        MessageEvent.fire(FormTemplateImpexPresenter.this, "Форма сохранена");
+        FormTemplateSaveEvent.fire(this);
+    }
+
+    @Override
 	public void uploadFormTemplateSuccess(String uuid) {
         if (uuid != null && !uuid.isEmpty() && !uuid.equalsIgnoreCase("<pre></pre>")){
             LogAddEvent.fire(this, uuid);
@@ -65,6 +74,11 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	}
 
 	@Override
+	public void uploadFormTemplateFail(String msg) {
+        Dialog.errorMessage("Загрузить макет не удалось. Ошибка: " + msg);
+	}
+
+	@Override
 	public void downloadFormTemplate() {
 		Window.open(GWT.getHostPageBaseURL() + "download/formTemplate/download/" + formTemplate.getId(), null, null);
 	}
@@ -72,6 +86,6 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
     @Override
     public void uploadDectResponseWithErrorUuid(String uuid) {
         LogAddEvent.fire(this, uuid);
-        Dialog.errorMessage("Загрузить макет не удалось.");
+        Dialog.errorMessage("Загрузить макет не удалось. Проверьте источник данных");
     }
 }
