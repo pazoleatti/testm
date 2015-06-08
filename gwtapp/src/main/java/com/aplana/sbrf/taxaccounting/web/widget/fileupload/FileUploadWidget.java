@@ -42,8 +42,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     @UiField
     LinkButton uploadButton;
-    @UiField
-    Button justButton;
 
     private CheckHandler checkHandler = new CheckHandler() {
         @Override
@@ -60,7 +58,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     @Override
     public void setEnabled(boolean enabled) {
         uploadButton.setEnabled(enabled);
-        justButton.setEnabled(enabled);
     }
 
     public interface IconResource extends ClientBundle{
@@ -159,6 +156,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                     uuid = answer.get(UuidEnum.ERROR_UUID.toString()).isString().stringValue();
                     isErrors = true;
                 }
+                uploadData.reset();
 
                 EndLoadFileEvent.fire(FileUploadWidget.this, uuid, isErrors);
             }
@@ -173,7 +171,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         });
     }
 
-    @UiHandler(value = {"uploadButton", "justButton"})
+    @UiHandler(value = {"uploadButton"})
     void onUploadButtonClicked(ClickEvent event) {
         if (checkHandler != null && checkHandler.onCheck()) {
             uploaderClick();
@@ -186,7 +184,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     public void setText(String text) {
         uploadButton.setText(text);
-        justButton.setText(text);
     }
 
     public String getText() {
@@ -196,7 +193,6 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     @Override
     public void setWidth(String width){
         uploadButton.setWidth(width);
-        justButton.setWidth(width);
     }
 
     /**

@@ -74,11 +74,6 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	}
 
 	@Override
-	public void uploadFormTemplateFail(String msg) {
-        Dialog.errorMessage("Загрузить макет не удалось. Ошибка: " + msg);
-	}
-
-	@Override
 	public void downloadFormTemplate() {
 		Window.open(GWT.getHostPageBaseURL() + "download/formTemplate/download/" + formTemplate.getId(), null, null);
 	}
@@ -86,6 +81,6 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
     @Override
     public void uploadDectResponseWithErrorUuid(String uuid) {
         LogAddEvent.fire(this, uuid);
-        Dialog.errorMessage("Загрузить макет не удалось. Проверьте источник данных");
+        Dialog.errorMessage("Загрузить макет не удалось.");
     }
 }

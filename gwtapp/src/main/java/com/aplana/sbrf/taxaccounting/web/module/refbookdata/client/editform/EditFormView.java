@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueS
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -181,8 +182,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     public void cleanErrorFields() {
         for (Map.Entry<RefBookColumn, HasValue> widget : widgets.entrySet()){
             if (RefBookAttributeType.STRING.equals(widget.getKey().getAttributeType()) || RefBookAttributeType.NUMBER.equals(widget.getKey().getAttributeType())) {
-                ((Widget) widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
-                        .getStyle().setBackgroundColor("");
+                Element element = ((Widget) widget.getValue()).getElement().getFirstChildElement().getFirstChildElement();
+                if (element!= null && element.getStyle()!=null){
+                    ((Widget) widget.getValue()).getElement().getFirstChildElement().getFirstChildElement()
+                            .getStyle().setBackgroundColor("");
+                }
             }
         }
     }
@@ -279,6 +283,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 }
                 break;
             case NUMBER:
+                if (widget instanceof CheckBox) {
+                    return;
+                }
                 TextBox hasValue = new TextBox();
                 hasValue.setText(value.toString());
                 try {

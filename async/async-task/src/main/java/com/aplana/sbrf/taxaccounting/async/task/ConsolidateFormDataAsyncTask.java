@@ -45,12 +45,13 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
         try {
             formDataService.checkCompose(formData, userInfo, logger);
         } catch (ServiceException e) {
-            throw new ServiceLoggerException(ReportType.CHECK_TASK,
-                    logEntryService.save(logger.getEntries()),
+            String errorMsg = String.format(ReportType.CHECK_TASK,
                     String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
                     e.getMessage());
+            throw new ServiceLoggerException(errorMsg,
+                    logEntryService.save(logger.getEntries()));
         }
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CONSOLIDATE_FD);
+        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CONSOLIDATE_FD, null);
         return checkTaskLimit.getFirst();
     }
 

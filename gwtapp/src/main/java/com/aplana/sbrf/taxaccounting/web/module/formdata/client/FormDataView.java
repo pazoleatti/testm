@@ -394,6 +394,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         noResultLabel.setWidth(tableWidth + "em");
 	}
 
+    @Override
+    public void setTableLockMode(boolean lockMode) {
+        factory.setLockMode(lockMode);
+    }
+
 	@Override
 	public void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData) {
 		formDataTable.setRowCount(totalCount);
@@ -929,11 +934,5 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void setCorrectionText(String text) {
         correctionButton.setText(text);
-    }
-
-    @Override
-    public void setTableMode(boolean readOnlyMode, boolean forceEditMode) {
-        factory.setReadOnly(readOnlyMode);
-        factory.setSuperEditMode(forceEditMode);
     }
 }

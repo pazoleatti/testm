@@ -9,14 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.FormTypeService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import org.junit.Assert;
@@ -34,34 +27,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyCollectionOf;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyObject;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("FormDataServiceTest.xml")
@@ -95,6 +65,8 @@ public class FormDataServiceTest {
     TAUserService userService;
     @Autowired
     ReportService reportService;
+    @Autowired
+    FormDataAccessService formDataAccessService;
 
     private static final int FORM_TEMPLATE_ID = 1;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
@@ -557,6 +529,51 @@ public class FormDataServiceTest {
 
         dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger, userInfo);
         verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
+    }
+
+    @Test
+    public void testDoMove() {
+        FormType type = new FormType();
+        type.setName("form_type");
+        FormData formData = mock(FormData.class);
+        when(formData.getId()).thenReturn(1l);
+        when(formData.getFormColumns()).thenReturn(new ArrayList<Column>(0));
+        when(formData.getFormType()).thenReturn(type);
+        when(formData.getKind()).thenReturn(FormDataKind.CONSOLIDATED);
+        when(formData.getDepartmentId()).thenReturn(1);
+        when(formData.getPeriodOrder()).thenReturn(1);
+        when(formData.getDepartmentReportPeriodId()).thenReturn(1);
+        when(formData.getReportPeriodId()).thenReturn(1);
+
+        Logger logger = mock(Logger.class);
+        Department department = new Department();
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        ReportPeriod rp = new ReportPeriod();
+        rp.setName("report");
+        Date startDate = new Date(0);
+        Date endDate = new Date(1000);
+        rp.setCalendarStartDate(startDate);
+        rp.setEndDate(endDate);
+        TaxPeriod tp = new TaxPeriod();
+        tp.setYear(2015);
+        rp.setTaxPeriod(tp);
+        drp.setReportPeriod(rp);
+        when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp);
+
+        LockData lockData = new LockData();
+        lockData.setUserId(userInfo.getUser().getId());
+
+        when(formDataAccessService.getAvailableMoves(userInfo, formData.getId())).thenReturn(new ArrayList<WorkflowMove>(){{add(WorkflowMove.APPROVED_TO_ACCEPTED);}});
+        when(formDataDao.get(formData.getId(), false)).thenReturn(formData);
+        when(departmentService.getDepartment(formData.getDepartmentId())).thenReturn(department);
+        when(periodService.getReportPeriod(formData.getReportPeriodId())).thenReturn(rp);
+        when(lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)).thenReturn(1000);
+        when(lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD), userInfo.getUser().getId(), "FORM_DATA", 1000)).
+                thenReturn(lockData);
+
+        formDataService.doMove(formData.getId(), false, userInfo, WorkflowMove.APPROVED_TO_ACCEPTED, "", logger);
+
+        assertEquals(0, logger.getEntries().size());
     }
 
     /**

@@ -10,13 +10,14 @@ import java.util.Date;
 public class DataRowColumnFactory {
 	private boolean readOnly;
 	private boolean superEditMode;
+    private boolean lockMode;
 	private Date startDate;
 	private Date endDate;
     private Long formDataId;
 
 	public Column<DataRow<Cell>, ?> createTableColumn(com.aplana.sbrf.taxaccounting.model.Column col, AbstractCellTable<DataRow<Cell>> cellTable) {
 		ColumnContext columnContext = new ColumnContext();
-		if (readOnly) {
+		if (lockMode || readOnly) {
 			columnContext.setMode(ColumnContext.Mode.READONLY_MODE);
 		} else {
 			if (superEditMode){
@@ -84,7 +85,11 @@ public class DataRowColumnFactory {
 		this.superEditMode = editOnly;
 	}
 
-	public void setDateRange(Date startDate, Date endDate) {
+    public void setLockMode(boolean lockMode) {
+        this.lockMode = lockMode;
+    }
+
+    public void setDateRange(Date startDate, Date endDate) {
 		this.startDate = startDate;
 		this.endDate = endDate;
 	}

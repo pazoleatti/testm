@@ -108,7 +108,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	}
 
 	@Override
-	public Map<KEYS, Collection<Long>> updateFormColumns(final FormTemplate formTemplate) {
+	public Map<ColumnKeyEnum, Collection<Long>> updateFormColumns(final FormTemplate formTemplate) {
 		final int formTemplateId = formTemplate.getId();
 
 		JdbcTemplate jt = getJdbcTemplate();
@@ -138,15 +138,15 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			}
 		}
 
-        HashMap<KEYS, Collection<Long>> columnsInfo = new HashMap<KEYS, Collection<Long>>(3);
+        HashMap<ColumnKeyEnum, Collection<Long>> columnsInfo = new HashMap<ColumnKeyEnum, Collection<Long>>(3);
 		if(!removedColumns.isEmpty()){
-            columnsInfo.put(KEYS.DELETED, deleteFormColumns(removedColumns, formTemplate.getId()));
+            columnsInfo.put(ColumnKeyEnum.DELETED, deleteFormColumns(removedColumns, formTemplate.getId()));
 		}
 		if (!newColumns.isEmpty()) {
-            columnsInfo.put(KEYS.ADDED, createFormColumns(newColumns, formTemplate));
+            columnsInfo.put(ColumnKeyEnum.ADDED, createFormColumns(newColumns, formTemplate));
 		}
 		if(!oldColumns.isEmpty()){
-            columnsInfo.put(KEYS.UPDATED, updateFormColumns(oldColumns, formTemplate));
+            columnsInfo.put(ColumnKeyEnum.UPDATED, updateFormColumns(oldColumns, formTemplate));
 		}
 
         return columnsInfo;
@@ -154,7 +154,6 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
     private List<Long> createFormColumns(final List<Column> newColumns, final FormTemplate formTemplate) {
         // Сгенерированый ключ -> реальный ключ в БД
-        Map<Integer, Integer> idsMapping = new HashMap<Integer, Integer>();
         OrderUtils.reorder(newColumns);
 
         List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());

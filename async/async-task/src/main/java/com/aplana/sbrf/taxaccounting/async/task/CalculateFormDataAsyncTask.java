@@ -35,15 +35,16 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
+        boolean manual = (Boolean)params.get("manual");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
         Logger logger = new Logger();
         FormData formData = formDataService.getFormData(
                 userInfo,
                 formDataId,
-                false,
+                manual,
                 logger);
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CALCULATE_FD);
+        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CALCULATE_FD, null);
         return checkTaskLimit.getFirst();
     }
 
@@ -51,6 +52,7 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
+        boolean manual = (Boolean)params.get("manual");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -58,7 +60,7 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(
                 userInfo,
                 formDataId,
-                false,
+                manual,
                 logger);
         formDataService.doCalc(logger, userInfo, formData);
         // сохраняем данные в основном срезе

@@ -44,6 +44,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void setColumnsData(List<Column> columnsData, boolean readOnly, boolean forceEditMode);
 
+        void setTableLockMode(boolean lockMode);
+
 		void setRowsData(int start, int totalCount, List<DataRow<Cell>> rowsData);
 
 		void addCustomHeader(List<DataRow<HeaderCell>> headers);
@@ -122,8 +124,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
 
         void showConsolidation(boolean isShown);
-
-        void setTableMode(boolean readOnlyMode, boolean forceEditMode);
     }
 
 	public static final String NAME_TOKEN = "!formData";
@@ -236,6 +236,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showManualAnchor(false);
         view.showDeleteManualAnchor(false);
 
+        view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
     }
 
@@ -265,7 +266,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showManualAnchor(canCreatedManual && !existManual);
         view.showDeleteManualAnchor(false);
 
+        getView().setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
+
         placeManager.setOnLeaveConfirmation(null);
     }
 
@@ -295,12 +298,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showCheckButton(formDataAccessParams.isCanRead());
         view.setSelectedRow(null, true);
 
-        getView().showEditAnchor(false);
-        getView().showModeAnchor(false, false);
-        getView().showManualAnchor(false);
-        getView().showDeleteManualAnchor(formData.isManual());
+        view.showEditAnchor(false);
+        view.showModeAnchor(false, false);
+        view.showManualAnchor(false);
+        view.showDeleteManualAnchor(formData.isManual());
 
-        getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
+        view.setTableLockMode(true);
+        view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
         placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
         closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
@@ -333,12 +337,14 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
 		view.showCheckButton(formDataAccessParams.isCanRead());
 
-        getView().showEditAnchor(formDataAccessParams.isCanEdit());
-        getView().showModeAnchor(existManual, formData.isManual());
-        getView().showManualAnchor(canCreatedManual && !existManual);
-        getView().showDeleteManualAnchor(false);
+        view.showEditAnchor(formDataAccessParams.isCanEdit());
+        view.showModeAnchor(existManual, formData.isManual());
+        view.showManualAnchor(canCreatedManual && !existManual);
+        view.showDeleteManualAnchor(false);
 
-        getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
+        view.setTableLockMode(false);
+        view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
+
         placeManager.setOnLeaveConfirmation(null);
 	}
 
@@ -368,12 +374,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showCheckButton(formDataAccessParams.isCanRead());
 		view.setSelectedRow(null, true);
 
-        getView().showEditAnchor(false);
-        getView().showModeAnchor(false, false);
-        getView().showManualAnchor(false);
-        getView().showDeleteManualAnchor(formData.isManual());
+        view.showEditAnchor(false);
+        view.showModeAnchor(false, false);
+        view.showManualAnchor(false);
+        view.showDeleteManualAnchor(formData.isManual());
 
-        getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
+        view.setTableLockMode(false);
+        view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
 		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
 		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {

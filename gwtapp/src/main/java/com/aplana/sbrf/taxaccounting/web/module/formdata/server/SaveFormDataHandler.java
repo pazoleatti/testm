@@ -40,7 +40,7 @@ public class SaveFormDataHandler extends
 	public DataRowResult execute(SaveFormDataAction action, ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
-        formDataService.checkLockedByTask(formData.getId(), logger, "Сохранение НФ");
+        formDataService.checkLockedByTask(formData.getId(), logger, securityService.currentUserInfo(), "Сохранение НФ", true);
 		if (!action.getModifiedRows().isEmpty()) {
             refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
 		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());

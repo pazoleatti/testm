@@ -322,7 +322,7 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                                                             mode = FormMode.VIEW;
                                                         }
                                                         setMode(mode);
-                                                        checkRecord();
+                                                        if (canVersion)checkRecord();
                                                     } else {
                                                         recordId = null;
                                                         getView().clearFilterInputBox();

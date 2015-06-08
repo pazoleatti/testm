@@ -17,6 +17,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import com.google.inject.Inject;
@@ -462,7 +463,20 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		}
 	}
 
-	private void setupColumns(int index) {
+    @Override
+    public void setEnableModify(boolean isEnable) {
+        addColumn.setEnabled(isEnable);
+        removeColumn.setEnabled(isEnable);
+        upColumn.setEnabled(isEnable);
+        downColumn.setEnabled(isEnable);
+        DOM.setElementPropertyBoolean(typeColumnDropBox.getElement(), "disabled", !isEnable);
+        DOM.setElementPropertyBoolean(precisionBox.getElement(), "disabled", !isEnable);
+        DOM.setElementPropertyBoolean(dateFormat.getElement(), "disabled", !isEnable);
+        numericMaxLengthBox.setEnabled(isEnable);
+        columnAttributeEditor.setEnabled(isEnable);
+    }
+
+    private void setupColumns(int index) {
 		setColumnList();
 		setAttributesPanel();
 		if (columns != null && !columns.isEmpty()) {

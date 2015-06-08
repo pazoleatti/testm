@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.Test;
@@ -302,19 +303,26 @@ public class DeclarationDataServiceImplTest {
 
         when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
 
-        declarationDataService.check(logger, 1l, userInfo, new LockStateLogger() {
-            @Override
-            public void updateState(String state) {
-            }
-        });
+        try{
+            declarationDataService.check(logger, 1l, userInfo, new LockStateLogger() {
+                @Override
+                public void updateState(String state) {
+                }
+            });
+        } catch (ServiceLoggerException e){
+            //Nothing
+        }
+
+        assertEquals("Декларация / Уведомление содержит неактуальные консолидированные данные  (расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"",
+                logger.getEntries().get(0).getMessage());
 
         assertEquals(
                 "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Первичная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" в статусе \"Принята\"",
-                logger.getEntries().get(0).getMessage()
+                logger.getEntries().get(1).getMessage()
         );
         assertEquals(
                 "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Консолидированная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" - экземпляр формы не создан",
-                logger.getEntries().get(1).getMessage()
+                logger.getEntries().get(2).getMessage()
         );
     }
 }

@@ -703,7 +703,7 @@ comment on column template_changes.declaration_template_id is 'Идентифи�
 comment on column template_changes.event is 'Событие версии';
 comment on column template_changes.author is 'Автор изменения';
 comment on column template_changes.date_event is 'Дата изменения';
-
+--------------------------------------------------------------------------------------------------------
 create table event
 (
 id number(9) NOT NULL,
@@ -908,6 +908,33 @@ create table form_data_ref_book
   record_id number(18) not null
 );
 
+comment on table form_data_ref_book is 'Связь экземпляров НФ с элементами справочников';
+comment on column form_data_ref_book.form_data_id is 'Идентификатор экземляра налоговой формы';
+comment on column form_data_ref_book.ref_book_id is 'Идентификатор справочника';
+comment on column form_data_ref_book.record_id is 'Идентификатор записи справочники';
+
 alter table form_data_ref_book add constraint form_data_ref_book_pk primary key (form_data_id, ref_book_id, record_id);
 --------------------------------------------------------------------------------------------------------
-CREATE SEQUENCE SEQ_FORM_DATA_NNN START WITH 10000;
+create sequence seq_form_data_nnn start with 10000;
+
+--------------------------------------------------------------------------------------------------------
+create table log_clob_query 
+(
+id number(9) not null primary key, 
+form_template_id number(9), 
+sql_mode varchar2(10), 
+text_query clob, 
+log_date timestamp(6) default current_timestamp not null, 
+session_id number(18) default 0 not null);
+
+comment on table log_clob_query is 'Логирование DDL/DML запросов из ХП';
+comment on column log_clob_query.id is 'Идентификатор записи (seq_log_query)';
+comment on column log_clob_query.form_template_id is 'Идентификатор шаблона';
+comment on column log_clob_query.sql_mode is 'DDL/DML';
+comment on column log_clob_query.text_query is 'Текст запроса';
+comment on column log_clob_query.log_date is 'Дата/время начала обработки запроса';
+comment on column log_clob_query.session_id is 'Идентификатор сессии (seq_log_query_session)';
+
+create sequence seq_log_query start with 1;
+create sequence seq_log_query_session start with 1;
+--------------------------------------------------------------------------------------------------------

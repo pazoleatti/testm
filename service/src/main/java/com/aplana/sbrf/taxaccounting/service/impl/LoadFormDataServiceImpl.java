@@ -464,13 +464,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             formData.initFormTemplateParams(formTemplate);
         }
 
+        formDataService.checkLockedByTask(formData.getId(), localLogger, userInfo, "Загрузка ТФ НФ", false);
         // Блокировка
-        LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD),
-                userInfo.getUser().getId(),
-                formDataService.getFormDataFullName(formData.getId(), null, null),
-                lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-        // Защита от перехода в режим редактирования для импортируемой нф
-        lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
+        LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
                 userInfo.getUser().getId(),
                 formDataService.getFormDataFullName(formData.getId(), currentFile.getName(), ReportType.IMPORT_TF_FD),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
@@ -525,7 +521,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             }
         } finally {
             // Снимаем блокировку
-            lockDataService.unlock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD), userInfo.getUser().getId());
             lockDataService.unlock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD), userInfo.getUser().getId());
             if (localLogger.containsLevel(LogLevel.ERROR) && !formWasCreated) {
                 formDataDao.delete(formData.getId());

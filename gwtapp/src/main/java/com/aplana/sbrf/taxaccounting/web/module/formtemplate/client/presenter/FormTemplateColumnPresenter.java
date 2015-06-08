@@ -53,6 +53,13 @@ public class FormTemplateColumnPresenter
         void setRefBookList(List<RefBook> refBookList);
 
 		void flush();
+
+        /**
+         * Устанавливает доступность колонок на редактирование.
+         * Если только создали версию макета, то доступны, в остальных случаях нет.
+         * Задача http://jira.aplana.com/browse/SBRFACCTAX-11384.
+         */
+        void setEnableModify(boolean isEnable);
 	}
 
 	private FormTemplate formTemplate;
@@ -96,6 +103,7 @@ public class FormTemplateColumnPresenter
 
         getView().setRefBookList(refBookList);
 		getView().setColumnList(formTemplate.getColumns(), isFormChanged);
+        getView().setEnableModify(formTemplate.getId()==null||formTemplate.getId()==0);
 	}
 
 	@Override

@@ -62,6 +62,8 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                     lockDataService.interruptTask(lockDataTask, userInfo.getUser().getId(), false);
                 } else {
                     result.setLock(true);
+                    lockDataService.lockInfo(lockType.getSecond(), logger);
+                    result.setUuid(logEntryService.save(logger.getEntries()));
                     return result;
                 }
             } else if (lockDataTask != null) {

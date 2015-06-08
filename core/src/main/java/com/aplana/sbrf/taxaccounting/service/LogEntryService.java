@@ -47,11 +47,20 @@ public interface LogEntryService {
     Map<LogLevel, Integer> getLogCount(String uuid);
 
     /**
-     * Обновить ранее сохраненный список сообщений
+     * Обновить ранее сохраненный список сообщений, добавив новые логи в конец имеющихся.
      *
      * @param logEntries новые сообщения
      * @param uuid идентификатор записи
      * @return
      */
     String update(List<LogEntry> logEntries, String uuid);
+
+    /**
+     * Обновить ранее сохраненный список сообщений, добавив новые логи в начало имеющихся.
+     *
+     * @param logEntries новые сообещения
+     * @param uuid идентификатор записи
+     * @return идентификатор записи
+     */
+    String addFirst(List<LogEntry> logEntries, String uuid);
 }

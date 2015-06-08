@@ -1,12 +1,12 @@
 package com.aplana.sbrf.taxaccounting.cache;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
+
+import java.io.Serializable;
+import java.util.Map;
 
 public class MapCache implements Cache {
 
@@ -44,7 +44,7 @@ public class MapCache implements Cache {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.springframework.cache.Cache#getNativeCache()
 	 */
 	@Override
@@ -67,7 +67,12 @@ public class MapCache implements Cache {
 				: null);
 	}
 
-	@Override
+    @Override
+    public <T> T get(Object key, Class<T> type) {
+        return null;
+    }
+
+    @Override
     public void put(Object key, Object value) {
 		if (log.isDebugEnabled()) {
 			log.debug("Put element with key = " + key + " to cache '" + name
@@ -76,7 +81,12 @@ public class MapCache implements Cache {
 		this.store.put(new KeyWrapper(this.name, key), toStoreValue(value));
 	}
 
-	@Override
+    @Override
+    public ValueWrapper putIfAbsent(Object key, Object value) {
+        return null;
+    }
+
+    @Override
 	public void evict(Object key) {
 		if (log.isDebugEnabled()) {
 			log.debug("Remove element with key = " + key + " from cache '"
