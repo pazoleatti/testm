@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
@@ -86,7 +86,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                 /*String uuid = blobDataService.get(userInfo);*/
                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                 BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
                 logger.info(String.format("Задание на архивацию журнала аудита (до даты: %s) поставлено в очередь на формирование.", SDF.format(action.getLogSystemFilter().getToSearchDate())));
                 return result;
             } catch (AsyncTaskException e) {

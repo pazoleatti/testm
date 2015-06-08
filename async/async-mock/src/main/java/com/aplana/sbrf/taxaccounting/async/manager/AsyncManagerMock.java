@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.manager;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.entity.AsyncTaskType;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskPersistenceException;

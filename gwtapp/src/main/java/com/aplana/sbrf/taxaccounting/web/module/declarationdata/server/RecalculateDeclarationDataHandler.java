@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -26,7 +26,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -109,7 +108,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
                     logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
                     result.setStatus(CreateAsyncTaskStatus.CREATE);
                 } catch (Exception e) {

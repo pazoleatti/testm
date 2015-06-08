@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.server;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
@@ -77,7 +77,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
                 try {
                     lockDataService.addUserWaitingForLock(key, userId);
                     BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userId);

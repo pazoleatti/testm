@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.ifrs.server;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
@@ -91,7 +91,7 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
                         lockDataService.addUserWaitingForLock(key, userId);
                     }
                     BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
                     logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");

@@ -1,10 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
@@ -115,7 +114,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                             params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                             lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                             BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                            lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                            lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
                             logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
                             result.setStatus(CreateAsyncTaskStatus.CREATE);
                         } catch (Exception e) {
