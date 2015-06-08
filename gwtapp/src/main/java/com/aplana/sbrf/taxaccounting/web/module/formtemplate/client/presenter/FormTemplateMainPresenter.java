@@ -318,6 +318,8 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
                     FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
+                    formTemplate.getColumns().clear();
+                    formTemplate.getColumns().addAll(result.getColumns());
                 }
             }, this));
         }

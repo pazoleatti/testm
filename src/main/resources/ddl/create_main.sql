@@ -733,7 +733,7 @@ create table lock_data
   state varchar2(500),
   state_date date,
   description varchar2(4000),
-  queue varchar2(100)
+  queue number(9) default 0 not null
 );
 
 comment on table lock_data is 'Информация о блокировках';

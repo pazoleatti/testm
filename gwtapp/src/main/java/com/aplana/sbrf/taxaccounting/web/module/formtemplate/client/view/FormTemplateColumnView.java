@@ -336,7 +336,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@UiHandler("stringMaxLengthBox")
 	public void onStringMaxLengthBox(BlurEvent event) {
-        final Integer maxLength = ((StringColumn) columns.get(columnListBox.getSelectedIndex())).MAX_LENGTH;
+        final Integer maxLength = StringColumn.MAX_LENGTH;
         int length = stringMaxLengthBox.getValue() != null?stringMaxLengthBox.getValue():0;
         if (length == 0){
             event.getRelativeElement().getStyle().setBackgroundColor("#ffccd2");
@@ -470,9 +470,6 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         upColumn.setEnabled(isEnable);
         downColumn.setEnabled(isEnable);
         DOM.setElementPropertyBoolean(typeColumnDropBox.getElement(), "disabled", !isEnable);
-        DOM.setElementPropertyBoolean(precisionBox.getElement(), "disabled", !isEnable);
-        DOM.setElementPropertyBoolean(dateFormat.getElement(), "disabled", !isEnable);
-        numericMaxLengthBox.setEnabled(isEnable);
         columnAttributeEditor.setEnabled(isEnable);
     }
 
