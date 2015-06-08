@@ -116,10 +116,11 @@ alter table ref_book add constraint ref_book_chk_versioned check (is_versioned i
 update ref_book set is_versioned = 0 where id in (30, 93, 207, 95, 74, 103, 94, 105, 104, 108, 204, 205, 400);
 ---------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-11209: Расширение полей LOCK_DATA
+-- + http://jira.aplana.com/browse/SBRFACCTAX-11540
 alter table lock_data add state varchar2(500);
 alter table lock_data add state_date date;
 alter table lock_data add description varchar2(4000);
-alter table lock_data add queue varchar2(100);
+alter table lock_data add queue number(9) default 0 not null;
 
 comment on column lock_data.state is 'Статус выполнения асинхронной задачи, связанной с блокировкой';
 comment on column lock_data.state_date is 'Дата последнего изменения статуса';
