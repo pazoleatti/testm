@@ -65,7 +65,6 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
