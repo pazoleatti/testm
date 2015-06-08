@@ -207,7 +207,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 try {
                     return createRecordVersionWithoutLock(logger, versionFrom, versionTo, records);
                 } catch (Exception e) {
-                    throw new ServiceLoggerException("Не удалось сохранить запись",
+                    throw new ServiceLoggerException(e.getLocalizedMessage(),
                             logEntryService.save(logger.getEntries()));
                 }
             } finally {
@@ -512,7 +512,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 try {
                     updateRecordVersionWithoutLock(logger, uniqueRecordId, versionFrom, versionTo, records);
                 } catch (Exception e) {
-                    throw new ServiceLoggerException("Не удалось сохранить запись",
+                    throw new ServiceLoggerException(e.getLocalizedMessage(),
                             logEntryService.save(logger.getEntries()));
                 }
             } finally {
@@ -905,7 +905,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 try {
                     deleteRecordVersionsWithoutLock(logger, uniqueRecordIds);
                 } catch (Exception e) {
-                    throw new ServiceLoggerException("Не удалось удалить запись",
+                    throw new ServiceLoggerException(e.getLocalizedMessage(),
                             logEntryService.save(logger.getEntries()));
                 }
             } finally {
