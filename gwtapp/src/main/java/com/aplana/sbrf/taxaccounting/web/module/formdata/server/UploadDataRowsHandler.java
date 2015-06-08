@@ -147,8 +147,7 @@ public class UploadDataRowsHandler extends
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant.getName());
-                    BlobData blobData = blobDataService.get(action.getUuid());
-                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), blobData.getName(), action.getFormData().getFormType().getTaxType().getTaxText());
+                    logger.info(ReportType.CREATE_TASK, reportType.getDescription());
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
                     if (e instanceof ServiceLoggerException) {
