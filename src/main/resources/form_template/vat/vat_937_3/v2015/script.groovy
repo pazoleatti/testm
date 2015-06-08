@@ -140,10 +140,6 @@ def startDate = null
 @Field
 def endDate = null
 
-// данные предыдущего преиода
-@Field
-def prevDataRows = null
-
 // признак корректирующего периода
 @Field
 def isCorrectionPeriodMap = [:]
@@ -192,9 +188,8 @@ void logicCheck() {
     // 01, 02, …, 13, 16, 17, …, 28
     def codeValues = ((1..13) + (16..28))
 
-    def index1 = getPrevLastIndex(true)
-    def index2 = getPrevLastIndex(false)
-    def needRecalc = false
+    def index1 = 0
+    def index2 = 0
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -515,8 +510,8 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
 
 /** Рассчитать нумерацию строк. Для каждой части нф нумерация начинается с 1. */
 void calc1AndChangeDateFormat(def dataRows) {
-    def index1 = getPrevLastIndex(true)
-    def index2 = getPrevLastIndex(false)
+    def index1 = 0
+    def index2 = 0
     def isFirstSection = null
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -554,48 +549,6 @@ void calc1AndChangeDateFormat(def dataRows) {
             }
         }
     }
-}
-
-/** Получить последний номер строки из формы предыдушего периода из указаной части. */
-def getPrevLastIndex(def isFirstPart) {
-    def prevDataRows = getPrevDataRows()
-    // если предыдущих данных нет или в предыдущей форме только фиксированные строки, то 0
-    if (!prevDataRows || prevDataRows.size() == sections.size() * 2) {
-        return 0
-    }
-    def lastRow
-    def totalAlias = (isFirstPart ? 'total_1' : 'total_2')
-    // находим строку итоги и по ней получаем последнюю строку части
-    def tmpRow = getDataRow(prevDataRows, totalAlias)
-    lastRow = prevDataRows.get(tmpRow.getIndex() - 2)
-
-    return roundValue(lastRow.getAlias() == null ? lastRow.rowNumber : 0)
-}
-
-/** Получить строки предыдущего периода не в статусе "создана". */
-def getPrevDataRows() {
-    if (getReportPeriod()?.order == 1 || isCorrectionPeriod(formData.departmentReportPeriodId)) {
-        return null
-    }
-    if (prevDataRows == null) {
-        // получить предыдущие периоды текущего года
-        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-        def start = format.parse("01.01." + getReportPeriodStartDate().format('yyyy'))
-        def end = getReportPeriodStartDate() - 1
-        def reportPeriods = reportPeriodService.getReportPeriodsByDate(formData.formType.taxType, start, end)?.reverse()
-
-        // поиск формы предыдущего периода в статусе отличной от "создана"
-        for (def report : reportPeriods) {
-            def formDataTmp = formDataService.getLast(formData.formType.id, formData.kind,  formDataDepartment.id, report.id, null)
-            // форма подходит если: она существует, она не в состоянии "создана" и не в корректирующем периоде
-            if (formDataTmp != null && !isCorrectionPeriod(formDataTmp.departmentReportPeriodId)
-                    && formDataTmp.state != WorkflowState.CREATED) {
-                prevDataRows = formDataService.getDataRowHelper(formDataTmp)?.allSaved
-                break
-            }
-        }
-    }
-    return prevDataRows
 }
 
 def isCorrectionPeriod(def departmentReportPeriodId) {

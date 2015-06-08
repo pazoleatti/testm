@@ -298,15 +298,15 @@ void generateXML() {
                                 organInfo = getRefBookValue(70, map.ORGANIZATION.referenceValue)?.CODE?.numberValue
                                 organName = map?.NAME?.stringValue
                                 organINN = map?.INN_KIO?.stringValue
-                                organKPP = map?.KPP?.stringValue
-                                organRegNum = map?.REG_NUM?.stringValue
-                                taxpayerCode = map?.TAXPAYER_CODE?.stringValue
-                                address = map?.ADDRESS?.stringValue
+                                organKPP = map?.KPP?.numberValue
                             }
+                            organRegNum = row.organRegNum
+                            taxpayerCode = row.taxpayerCode
+                            address = row.address
 
                             // Раздел 2.Сведения об организации – участнике контролируемой сделки (группы однородных сделок)
                             СвОргУчаст(
-                                    [НомПорСд: rowCounter] +
+                                    [НомПорСд: row.dealMemberNum] +
                                             [ПрОрг: organInfo] +
                                             [ОКСМ: countryCode3] +
                                             [НаимОрг: organName] +

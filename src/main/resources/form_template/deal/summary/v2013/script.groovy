@@ -12,7 +12,13 @@ import groovy.transform.Field
  *
  * formTemplateId = 2409
  *
+ * TODO:
+ *      - признак ручного ввода или автоматического выставляется в 0.5.1 неправильно, в 0.5.1 нельзя править ядро,
+ *      поэтому для правильной загрузки файла в ручном вводе formData.setManual(true) сделан в скрипте. Убрать это
+ *      когда поправят в FormDataServiceImpl.loadFormData (FormData fd = formDataDao.get(formDataId, isManual);)
+ *
  */
+
 // 1.	dealNum1	п. 010 "Порядковый номер сделки по уведомлению"
 // 2.	interdependenceSing	п. 100
 // 3.	f121	п. 121
@@ -104,6 +110,7 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.IMPORT:
+        formData.setManual(true) // TODO (Ramil Timerbaev) потом убрать
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
@@ -409,9 +416,11 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             break
         case 384: // 9
         case 381: // 6
-        case 393: // 18
         case 394: // 19
             val13 = '015'
+            break
+        case 393: // 18
+            val13 = '032'
             break
         case 385: // 10
         case 404: // 26
@@ -419,10 +428,12 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             break
         case 386: // 11
         case 388: // 13
-        case 402: // 23
         case 401: // 24
         case 403: // 25
             val13 = '003'
+            break
+        case 402: // 23
+            val13 = '012'
             break
         case 387: // 12
         case 389: // 14
@@ -502,8 +513,10 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 397: // 20
             val14 = '007'
             break
-        case 401: // 24
         case 402: // 23
+            val14 = '020'
+            break
+        case 401: // 24
         case 403: // 25
             val14 = '002'
             break
@@ -628,7 +641,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             row.dealSubjectName = 'Размещение денежных средств корпоративным клиентам - не регулируемые сделки'
             break
         case 388: // 13
-            row.dealSubjectName = 'Выдача гарантий (открытие аккредитивов и инструментов торгового финансирования)'
+            row.dealSubjectName = 'Выдача гарантий'
             break
         case 389: // 14
             row.dealSubjectName = 'Размещение денежных средств в межбанковские кредиты'
@@ -676,14 +689,11 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             val25and26 = srcRow.metalName
             break
     }
-    if (val25and26 != null) {
+    if (val25and26 != null && val23 == 1) {
         metal = getRefBookValue(17, val25and26)
 
         // Графа 25
-        def values25 = getRefBookValue(64, row.dealType)
-        if (values25 != null && values25.CODE.numberValue == 2) {
-            row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
-        }
+        row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
 
         // Графа 26
         def String innerCode = metal.INNER_CODE.stringValue
@@ -703,61 +713,66 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
     }
 
     // Графа 27
-    def String val27 = null
-    switch (formTypeId) {
-        case 376: // 1
-            val27 = '70.20.2'
-            break
-        case 377: // 2
-            val27 = '70.32.2'
-            break
-        case 375: // 3
-            val27 = '72.20'
-            break
-        case 379: // 4
-        case 380: // 5
-            val27 = '74.8'
-            break
-        case 393: // 18
-        case 394: // 19
-            val27 = '65.12'
-            break
-        case 381: // 6
-        case 384: // 9
-        case 386: // 11
-        case 388: // 13
-        case 391: // 16
-        case 392: // 17
-        case 401: // 24
-        case 403: // 25
-            val27 = '65.23'
-            break
-        case 382: // 7
-            val27 = '67.12'
-            break
-        case 383: // 8
-        case 385: // 10
-        case 387: // 12
-        case 389: // 14
-        case 404: // 26
-            val27 = '65.22'
-            break
-        case 390: // 15
-        case 397: // 20
-        case 402: // 23
-            val27 = '65.12'
-            break
-        case 398: // 21
-        case 399: // 22
-            val27 = '74'
-            break
-    }
-    if (val27 != null) {
-        row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27")
+    if (val23 in [2, 3]) {
+        def String val27 = null
+        switch (formTypeId) {
+            case 376: // 1
+                val27 = '70.20.2'
+                break
+            case 377: // 2
+                val27 = '70.32.2'
+                break
+            case 375: // 3
+                val27 = '72.20'
+                break
+            case 379: // 4
+            case 380: // 5
+                val27 = '74.8'
+                break
+            case 393: // 18
+            case 394: // 19
+                val27 = '65.12'
+                break
+            case 381: // 6
+            case 384: // 9
+            case 386: // 11
+            case 388: // 13
+            case 391: // 16
+            case 392: // 17
+            case 401: // 24
+            case 403: // 25
+                val27 = '65.23'
+                break
+            case 382: // 7
+                val27 = '65.12'
+                break
+            case 383: // 8
+            case 385: // 10
+            case 387: // 12
+            case 389: // 14
+            case 404: // 26
+                val27 = '65.22'
+                break
+            case 390: // 15
+            case 397: // 20
+            case 402: // 23
+                val27 = '65.12'
+                break
+            case 398: // 21
+            case 399: // 22
+                val27 = '74'
+                break
+        }
+        if (val27 != null) {
+            row.dealSubjectCode3 = getRecordId(34, 'CODE', "$val27")
+        }
     }
 
     // Графа 28
     row.otherNum = 1
+
+    // Графа 48
+    row.dealMemberNum = row.otherNum
 
     // Графа 29
     // заполняется предварительно для каждой строки getPreRow
@@ -837,11 +852,12 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
     }
 
     // Графа 40
-    if (formTypeId == 393) {
-        row.deliveryCode = srcRow.conditionCode
-    }
-    if (formTypeId == 394) {
-        row.deliveryCode = srcRow.deliveryCode
+    if (val23 == 1) {
+        if (formTypeId == 393) {
+            row.deliveryCode = srcRow.conditionCode
+        } else if (formTypeId == 394) {
+            row.deliveryCode = srcRow.deliveryCode
+        }
     }
 
     // Графа 41
@@ -913,10 +929,10 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         // «Организации – участники контролируемых сделок» атрибут «Резидент оффшорной зоны» = 1,
         // то заполняется значением «0». В ином случае заполняется значением «1».
         def val = getRefBookValue(9, row.organName)
-        row.f121 = val.OFFSHORE.numberValue == 1 ? recNoId : recYesId
+        row.f121 = (val.OFFSHORE.referenceValue == recYesId) ? recNoId : recYesId
 
         // Графа 5 (логика, обратная графе 3)
-        row.f123 = row.f121 == recYesId ? recNoId : recYesId
+        row.f123 = (row.f121 == recYesId) ? recNoId : recYesId
 
         // Графа 7 (та же логика, что у графы 3)
         row.f131 = row.f121
@@ -925,14 +941,32 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         // Если атрибут 50 «Матрицы» содержит значение, в котором в справочнике
         // «Организации – участники контролируемых сделок» атрибут «Освобождена от налога на прибыль либо является
         // резидентом Сколково» = 1, то заполняется значением «1». В ином случае заполняется значением «0».
-        row.f134 = val.SKOLKOVO.numberValue == 1 ? recYesId : recNoId
+        row.f134 = (val.SKOLKOVO.referenceValue == recYesId) ? recYesId : recNoId
 
         // Графа 49
         // Код страны
         row.countryCode3 = val.COUNTRY?.referenceValue
+
+        // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
+        def organizationCode = getRefBookValue(70, val.ORGANIZATION?.referenceValue)?.CODE?.value
+        // заполняются только для иностранных организации (код равен 2)
+        if (organizationCode == 2) {
+            // Графа 53
+            row.organRegNum = val?.REG_NUM?.value
+
+            // Графа 54
+            row.taxpayerCode = val?.TAXPAYER_CODE?.value
+
+            // Графа 55
+            row.address = val?.ADDRESS?.value
+
+            if (!row.organRegNum && !row.taxpayerCode) {
+                row.organRegNum = '0'
+            }
+        }
     }
 
-    // Графа 48, 51, 52, 53, 54, 55
+    // Графа 48, 51, 52
     // зависимые в конфигураторе
 
     return row
@@ -1330,6 +1364,7 @@ boolean isGroupClass2(def matrixRow, def srcRow, def typeMap) {
             class2ext = srcRow.transactionDeliveryDate == null
             break
         case 386: // 11
+        case 388: // 13
         case 389: // 14
         case 390: // 15
         case 391: // 16
@@ -1338,9 +1373,6 @@ boolean isGroupClass2(def matrixRow, def srcRow, def typeMap) {
         case 401: // 24
         case 403: // 25
             class2ext = srcRow.dealNumber == null && srcRow.dealDate == null
-            break
-        case 388: // 13
-            class2ext = srcRow.dealNumber == null && srcRow.transactionDeliveryDate == null
             break
     }
     return class2ext || (matrixRow.contractDate != null && matrixRow.contractNum != null)
@@ -1888,6 +1920,9 @@ void addData(def xml, int headRowCount) {
         // 45. п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
         xmlIndexCol = 43
         newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+        // 47. п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
+        xmlIndexCol = 45
+        newRow.dealMemberNum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
         // 49. п. 030 "Код страны по классификатору ОКСМ"
         xmlIndexCol = 47
         newRow.countryCode3 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
@@ -1920,6 +1955,16 @@ void addData(def xml, int headRowCount) {
             // 55. п. 090 "Адрес"
             xmlIndexCol = 53
             formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.ADDRESS?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
+
+            // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
+            // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
+            newRow.organRegNum = map.REG_NUM?.stringValue
+
+            // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
+            newRow.taxpayerCode = map.TAXPAYER_CODE?.stringValue
+
+            // 55. п. 090 "Адрес"
+            newRow.address = map.ADDRESS?.stringValue
         }
 
         rows.add(newRow)

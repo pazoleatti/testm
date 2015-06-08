@@ -21,7 +21,7 @@
         <name>№ п/п</name>
         <order>2</order>
         <width>5</width>
-        <numerationType>CROSS</numerationType>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>typeCode</alias>
