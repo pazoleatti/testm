@@ -35,7 +35,7 @@ public class AsyncManagerMock implements AsyncManager {
     private ApplicationContext applicationContext;
 
     @Override
-    public BalancingVariants executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException {
+    public BalancingVariants executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException, ServiceLoggerException {
         try {
             AsyncTaskType asyncTaskType = getJdbcTemplate().queryForObject("select id, name, handler_jndi from async_task_type where id = ?", new RowMapper<AsyncTaskType>() {
                 @Override

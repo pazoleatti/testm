@@ -46,7 +46,7 @@ public class AsyncManagerBean implements AsyncManager {
     private AsyncTaskPersistenceServiceLocal persistenceService;
 
     @Override
-    public BalancingVariants executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException {
+    public BalancingVariants executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException, ServiceLoggerException {
         log.debug("Async task creation has been started");
         ConnectionFactory connectionFactory;
         Queue queue;
