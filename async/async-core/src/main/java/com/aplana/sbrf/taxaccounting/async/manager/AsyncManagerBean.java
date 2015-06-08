@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationExcep
 import com.aplana.sbrf.taxaccounting.async.persistence.AsyncTaskPersistenceServiceLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -81,6 +82,13 @@ public class AsyncManagerBean implements AsyncManager {
             log.debug("Async task creation has been finished successfully");
             return balancingVariant;
         } catch (ServiceLoggerException e) {
+            throw e;
+        } catch (EJBException e) {
+            e.printStackTrace();
+            int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+            if (i != -1) {
+                throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
+            }
             throw e;
         } catch (Exception e) {
             log.error("Async task creation has been failed!", e);
