@@ -58,6 +58,7 @@ public class CreateNewVersionHandler extends AbstractActionHandler<CreateNewVers
         int formTemplateId = mainOperatingService.createNewTemplateVersion(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo());
         formTemplateDao.createFDTable(formTemplateId);
         result.setFormTemplateId(formTemplateId);
+        result.setColumns(formTemplateService.get(formTemplateId).getColumns());
         if (!logger.getEntries().isEmpty())
             result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
