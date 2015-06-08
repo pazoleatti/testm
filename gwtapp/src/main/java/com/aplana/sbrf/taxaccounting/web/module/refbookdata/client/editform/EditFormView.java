@@ -283,6 +283,9 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 }
                 break;
             case NUMBER:
+                if (widget instanceof CheckBox) {
+                    return;
+                }
                 TextBox hasValue = new TextBox();
                 hasValue.setText(value.toString());
                 try {
