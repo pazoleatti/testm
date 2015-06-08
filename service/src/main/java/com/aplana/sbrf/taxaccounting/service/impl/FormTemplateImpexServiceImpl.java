@@ -1,11 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormTemplateContent;
+import com.aplana.sbrf.taxaccounting.model.Translator;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
@@ -146,21 +148,22 @@ public class FormTemplateImpexServiceImpl implements
 					Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 					ftc = (FormTemplateContent) jaxbUnmarshaller.unmarshal(
                             new InputStreamReader(new ByteArrayInputStream(files.get(CONTENT_FILE)), ENCODING));
-					ftc.fillFormTemplate(ft);
+					ftc.fillFormTemplateWithoutRows(ft);
 				}
 				if (files.get(SCRIPT_FILE).length != 0) {
 					ft.setScript(new String(files.get(SCRIPT_FILE), ENCODING));
                 }
-				if (files.get(ROWS_FILE).length != 0) {
+                //TODO avanteev: Отключил пока импорт колонок в связи с изменением структуры хранения НФ
+				/*if (files.get(ROWS_FILE).length != 0) {
 					ft.getRows().clear();
 					ft.getRows().addAll(xmlSerializationUtils.deserialize
 							(new String(files.get(ROWS_FILE), ENCODING), ft.getColumns(), ft.getStyles(), Cell.class));
-                }
-				if (files.get(HEADERS_FILE).length != 0) {
+                }*/
+				/*if (files.get(HEADERS_FILE).length != 0) {
 					ft.getHeaders().clear();
 					ft.getHeaders().addAll(xmlSerializationUtils.deserialize
 							(new String(files.get(HEADERS_FILE), ENCODING), ft.getColumns(), ft.getStyles(), HeaderCell.class));
-				}
+				}*/
             	return ft;
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);

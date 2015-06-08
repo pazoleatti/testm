@@ -46,4 +46,13 @@ public class FormTemplateContent {
 		formTemplate.getColumns().clear();
 		formTemplate.getColumns().addAll(columns != null?columns:new ArrayList<Column>());
 	}
+
+    public void fillFormTemplateWithoutRows(FormTemplate formTemplate) {
+        formTemplate.setFixedRows(fixedRows);
+        formTemplate.setName(name);
+        formTemplate.setFullName(fullName);
+        formTemplate.setHeader(header);
+        formTemplate.getStyles().clear();
+        formTemplate.getStyles().addAll(styles != null?styles:new ArrayList<FormStyle>());
+    }
 }
