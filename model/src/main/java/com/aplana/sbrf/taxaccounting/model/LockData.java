@@ -25,7 +25,7 @@ public final class LockData {
     /* Описание блокировки */
     private String description;
     /* Очередь, в которой находится связанная асинхронная задача */
-    private String queue;
+    private LockQueues queue;
     /* Положение задачи в очереди */
     private int queuePosition;
 
@@ -84,6 +84,7 @@ public final class LockData {
 
     public enum State {
         IN_QUEUE("В очереди на выполнение"),
+        LOCKED("Ожидает отмены выполнения предыдущей задачи"),
         STARTED("Началось выполнение"),
         SAVING_MSGS("Выполняется сохранение уведомлений"),
         SENDING_MSGS("Выполняется рассылка уведомлений"),
@@ -102,21 +103,40 @@ public final class LockData {
     }
 
     public enum LockQueues {
-        ALL("Все блокировки"),
-        LONG("Очередь длительных задач"),
-        SHORT("Очередь кратковременных задач"),
-        NONE("Без очереди");
+        ALL("Все блокировки", -1),
+        LONG("Очередь длительных задач", BalancingVariants.LONG.getId()),
+        SHORT("Очередь кратковременных задач", BalancingVariants.SHORT.getId()),
+        NONE("Без очереди", 0);
 
         private String text;
+        private Integer id;
 
-        LockQueues(String text) {
+        LockQueues(String text, int id) {
             this.text = text;
+            this.id = id;
         }
 
         public String getText() {
             return text;
         }
+
+        public int getId() {
+            return id;
+        }
+
+        public static LockQueues getById(int id) {
+            for (LockQueues queue : LockQueues.values()) {
+                if (queue.getId() == id) {
+                    return queue;
+                }
+            }
+            return null;
+        }
     }
+
+    public static final String CANCEL_MSG = "Запрашиваемая операция \"%s\" уже поставлена в очередь.  Отменить задачу и создать новую?";
+    public static final String RESTART_MSG = "Запрашиваемая операция \"%s\" уже выполняется Системой. При ее отмене задача выполнится до конца, но результат выполнения не будет сохранен. Отменить задачу и создать новую?";
+    public static final String RESTART_LINKED_TASKS_MSG = "Запуск операции приведет к отмене некоторых ранее запущенных операций (операции, уже выполняемые Системой выполнятся до конца, но результат их выполнения не будет сохранен). Продолжить?";
 
 	public LockData(){
 	}
@@ -183,11 +203,11 @@ public final class LockData {
         this.description = description;
     }
 
-    public String getQueue() {
+    public LockQueues getQueue() {
         return queue;
     }
 
-    public void setQueue(String queue) {
+    public void setQueue(LockQueues queue) {
         this.queue = queue;
     }
 

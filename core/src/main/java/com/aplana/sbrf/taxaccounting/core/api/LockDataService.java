@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.api;
 
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
@@ -203,7 +204,7 @@ public interface LockDataService {
      * @param lockDate дата начала действия блокировки
      * @param queue очередь
      */
-    void updateQueue(String key, Date lockDate, String queue);
+    void updateQueue(String key, Date lockDate, BalancingVariants queue);
 
     /**
      * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и

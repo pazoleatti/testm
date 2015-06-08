@@ -6,6 +6,7 @@ public class CheckDeclarationDataResult implements Result {
 
     private String uuid;
     private CreateAsyncTaskStatus status;
+    private String restartMsg;
 
     public String getUuid() {
         return uuid;
@@ -21,5 +22,13 @@ public class CheckDeclarationDataResult implements Result {
 
     public void setStatus(CreateAsyncTaskStatus status) {
         this.status = status;
+    }
+
+    public void setRestartMsg(String restartMsg) {
+        this.restartMsg = restartMsg;
+    }
+
+    public String getRestartMsg() {
+        return restartMsg;
     }
 }

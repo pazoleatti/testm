@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
@@ -194,14 +194,14 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             switch (queues) {
                 case SHORT:
                     queueSql = "queue = :queue";
-                    params.put("queue", BalancingVariants.SHORT.getName());
+                    params.put("queue", BalancingVariants.SHORT.getId());
                     break;
                 case LONG:
                     queueSql = "queue = :queue";
-                    params.put("queue", BalancingVariants.LONG.getName());
+                    params.put("queue", BalancingVariants.LONG.getId());
                     break;
                 case NONE:
-                    queueSql = "queue is null";
+                    queueSql = "queue = 0";
                     break;
             }
             params.put("start", pagingParams.getStartIndex() + 1);
@@ -247,10 +247,10 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void updateQueue(String key, Date lockDate, String queue) {
+    public void updateQueue(String key, Date lockDate, BalancingVariants queue) {
         getJdbcTemplate().update("update lock_data set queue = ?, state_date = sysdate where key = ? and date_lock = ?",
-                new Object[] {queue, key, lockDate},
-                new int[] {Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
+                new Object[] {queue.getId(), key, lockDate},
+                new int[] {Types.INTEGER, Types.VARCHAR, Types.TIMESTAMP});
     }
 
     private static final class LockDataMapper implements RowMapper<LockData> {
@@ -264,7 +264,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             result.setState(rs.getString("state"));
             result.setStateDate(result.getState() != null ? rs.getTimestamp("state_date") : null);
             result.setDescription(rs.getString("description"));
-            result.setQueue(rs.getString("queue"));
+            result.setQueue(LockData.LockQueues.getById(rs.getInt("queue")));
             result.setQueuePosition(rs.getInt("queue_position"));
 			return result;
 		}

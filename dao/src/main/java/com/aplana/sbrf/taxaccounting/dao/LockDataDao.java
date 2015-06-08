@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
@@ -126,5 +127,5 @@ public interface LockDataDao {
      * @param lockDate дата начала действия блокировки
      * @param queue очередь
      */
-    void updateQueue(String key, Date lockDate, String queue);
+    void updateQueue(String key, Date lockDate, BalancingVariants queue);
 }

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.manager;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject;
 import com.aplana.sbrf.taxaccounting.async.entity.AsyncTaskTypeEntity;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskPersistenceExcepti
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskSerializationException;
 import com.aplana.sbrf.taxaccounting.async.persistence.AsyncTaskPersistenceServiceLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
-import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

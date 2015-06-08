@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.async.balancing;
+package com.aplana.sbrf.taxaccounting.model;
 
 /**
  * Варианты, определяющие, в какую очередь будет направлена задача

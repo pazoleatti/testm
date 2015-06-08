@@ -283,8 +283,8 @@ public class DeclarationDataPresenter
 									public void onSuccess(
 											RecalculateDeclarationDataResult result) {
                                         LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
-                                        if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
-                                            Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.XML_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                                        if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
+                                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                                 @Override
                                                 public void yes() {
                                                     onRecalculateClicked(docDate, true);
@@ -323,8 +323,8 @@ public class DeclarationDataPresenter
                                             LogAddEvent.fire(DeclarationDataPresenter.this, result.getUuid());
                                             if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
                                                 Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.ACCEPT_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
-                                            } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
-                                                Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.ACCEPT_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                                            } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
+                                                Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                                     @Override
                                                     public void yes() {
                                                         accept(true, true);
@@ -399,7 +399,7 @@ public class DeclarationDataPresenter
                         if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
                             Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", "данных") + " невозможна");
                         } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && !force) {
-                            Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.CHECK_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     check(true);
@@ -463,7 +463,7 @@ public class DeclarationDataPresenter
                         if (CreateAsyncTaskStatus.NOT_EXIST_XML.equals(result.getStatus())) {
                             Dialog.infoMessage("Для текущего экземпляра " + taxType.getDeclarationShortName() + " не выполнен расчет. " + ReportType.PDF_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + " невозможно");
                         } else if (CreateAsyncTaskStatus.LOCKED.equals(result.getStatus()) && force == false) {
-                            Dialog.confirmMessage("Запрашиваемая операция \"" + ReportType.PDF_DEC.getDescription().replaceAll("\\%s", taxType.getDeclarationShortName()) + "\" уже выполняется Системой. Отменить уже выполняющуюся операцию и запустить новую?", new DialogHandler() {
+                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     viewReport(true, reportType);

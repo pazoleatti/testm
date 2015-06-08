@@ -94,7 +94,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         if (!lockService.isLockExists(lock, lockDate)) {
                             //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                             //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
-                            throw new RuntimeException("Результат выполнения задачи \"" + getAsyncTaskName() + "\" больше не актуален. Выполняется откат транзакции");
+                            throw new RuntimeException(String.format("Результат выполнения задачи %s больше не актуален. Выполняется откат транзакции", lock));
                         }
 
                         transactionHelper.executeInNewTransaction(new TransactionLogic() {
@@ -120,7 +120,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             }
                         });
                     } else {
-                        throw new RuntimeException("Задача \"" + getAsyncTaskName() + "\" больше не актуальна.");
+                        throw new RuntimeException(String.format("Задача %s больше не актуальна.", lock));
                     }
                 } catch (final Exception e) {
                     try {

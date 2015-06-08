@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
@@ -19,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -320,7 +320,7 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void updateQueue(final String key, final Date lockDate, final String queue) {
+    public void updateQueue(final String key, final Date lockDate, final BalancingVariants queue) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public void execute() {

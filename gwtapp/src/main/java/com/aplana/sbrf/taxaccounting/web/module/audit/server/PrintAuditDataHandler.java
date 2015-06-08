@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
@@ -84,7 +84,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                 BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.CSV_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant.getName());
+                lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
             } else {
                 if (lockData.getUserId() != userInfo.getUser().getId()) {
                     try {

@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -146,7 +145,7 @@ public class UploadDataRowsHandler extends
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                    lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant.getName());
+                    lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant);
                     logger.info(ReportType.CREATE_TASK, reportType.getDescription());
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
