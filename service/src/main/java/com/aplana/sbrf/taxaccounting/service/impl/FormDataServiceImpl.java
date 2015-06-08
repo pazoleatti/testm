@@ -19,22 +19,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.FormTypeService;
-import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.SignService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -180,6 +165,8 @@ public class FormDataServiceImpl implements FormDataService {
     private SourceService sourceService;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
+    @Autowired
+    private BlobDataService blobDataService;
 
     @Override
     public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder) {
@@ -208,14 +195,6 @@ public class FormDataServiceImpl implements FormDataService {
         log.info(String.format("Начался импорт excel-файла в налоговую форму по ключу %s", key));
         loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT);
         log.info(String.format("Закончился импорт excel-файла в налоговую форму по ключу %s", key));
-        if (lockService.isLockExists(key, false)) {
-            log.info(String.format("Снятие блокировки после импорта excel-файла по ключу %s", key));
-            lockService.unlock(key, userInfo.getUser().getId());
-        } else {
-            //Если блокировка уже не существует, значит загружаемые данные не актуальны - откатываем их
-            //Т.к она снимается только при закрытии страницы, то этот эксепшен все равно никто не увидит
-            throw new ServiceException("Загружаемые данные уже не актуальны. Изменения были отменены.");
-        }
     }
 
     @Override
@@ -1735,7 +1714,8 @@ public class FormDataServiceImpl implements FormDataService {
         throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
     }
 
-    public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, FormData formData, ReportType reportType) {
+    @Override
+    public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid) {
         switch (reportType) {
             case CHECK_FD:
             case MOVE_FD:
@@ -1785,7 +1765,16 @@ public class FormDataServiceImpl implements FormDataService {
                 }
                 return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountSource);
             case IMPORT_FD:
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+                Long fileSize = blobDataService.getLength(uuid);
+                AsyncTaskTypeData taskTypeDataImport = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                Long maxSize = taskTypeDataImport.getTaskLimit() * 1024;
+                Long shortSize = taskTypeDataImport.getShortQueueLimit() * 1024;
+                if (maxSize != 0 && fileSize > maxSize) {
+                    return new Pair<BalancingVariants, Long>(null, fileSize);
+                } else if (fileSize < shortSize) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, fileSize);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, fileSize);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }

@@ -51,7 +51,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
             throw new ServiceLoggerException(errorMsg,
                     logEntryService.save(logger.getEntries()));
         }
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CONSOLIDATE_FD);
+        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CONSOLIDATE_FD, null);
         return checkTaskLimit.getFirst();
     }
 

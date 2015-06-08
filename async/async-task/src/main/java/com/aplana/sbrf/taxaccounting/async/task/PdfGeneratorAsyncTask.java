@@ -62,7 +62,7 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
             Logger logger = new Logger();
             DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-            logger.error("Критерий возможности формирования формы предварительного просмотра %s задается в конфигурационных параметрах. За разъяснениями обратитесь к Администратору", declarationTemplate.getType().getTaxType().getDeclarationShortName());
+            logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
             throw new ServiceLoggerException(ReportType.CHECK_TASK,
                     logEntryService.save(logger.getEntries()),
                     String.format(ReportType.EXCEL_DEC.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
