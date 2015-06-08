@@ -103,11 +103,24 @@ public class LogEntryServiceImpl implements LogEntryService {
 
     @Override
     public String update(List<LogEntry> logEntries, String uuid) {
+        return add(logEntries, uuid, false);
+    }
+
+    @Override
+    public String addFirst(List<LogEntry> logEntries, String uuid) {
+        return add(logEntries, uuid, true);
+    }
+
+    private String add(List<LogEntry> logEntries, String uuid, boolean first) {
         if (uuid == null || uuid.isEmpty()) {
             return null;
         }
         List<LogEntry> list = getAll(uuid);
-        list.addAll(logEntries);
+        if (first) {
+            list.addAll(0, logEntries);
+        } else {
+            list.addAll(logEntries);
+        }
         logEntryDao.update(list, uuid);
         return uuid;
     }

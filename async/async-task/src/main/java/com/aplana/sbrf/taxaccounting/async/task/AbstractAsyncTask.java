@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.Notification;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.NotificationService;
@@ -101,10 +103,12 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 try {
                                     log.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SAVING_MSGS.getText());
+                                    String msg = getNotificationMsg(params);
+                                    logger.getEntries().add(0, new LogEntry(LogLevel.INFO, msg));
                                     String uuid = logEntryService.save(logger.getEntries());
                                     log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SENDING_MSGS.getText());
-                                    sendNotifications(lock, getNotificationMsg(params), uuid);
+                                    sendNotifications(lock, msg, uuid);
                                 } catch (Exception e) {
                                     log.error("Произошла ошибка при рассылке сообщений", e);
                                 }
@@ -128,13 +132,16 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 public void execute() {
                                     log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SENDING_ERROR_MSGS.getText());
+                                    String msg = getErrorMsg(params);
                                     if (e instanceof ServiceLoggerException && ((ServiceLoggerException) e).getUuid() != null) {
                                         Logger logger1 = new Logger();
+                                        logger1.error(msg);
                                         logger1.error(e);
-                                        sendNotifications(lock, getErrorMsg(params), logEntryService.update(logger1.getEntries(), ((ServiceLoggerException) e).getUuid()));
+                                        sendNotifications(lock, msg, logEntryService.addFirst(logger1.getEntries(), ((ServiceLoggerException) e).getUuid()));
                                     } else {
+                                        logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
                                         logger.error(e);
-                                        sendNotifications(lock, getErrorMsg(params), logEntryService.save(logger.getEntries()));
+                                        sendNotifications(lock, msg, logEntryService.save(logger.getEntries()));
                                     }
                                 }
 
