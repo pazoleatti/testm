@@ -784,6 +784,7 @@ public class FormDataServiceImpl implements FormDataService {
                 case APPROVED_TO_CREATED:
                 case ACCEPTED_TO_APPROVED:
                 case ACCEPTED_TO_PREPARED:
+                case ACCEPTED_TO_CREATED:
                     sourceService.updateFDDDConsolidation(formDataId);
                     moveProcess(formData, userInfo, workflowMove, note, logger);
                     break;
