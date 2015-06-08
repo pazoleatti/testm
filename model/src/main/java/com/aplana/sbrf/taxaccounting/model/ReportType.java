@@ -37,7 +37,7 @@ public enum ReportType {
 
     public static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
     public static final String CHECK_TASK = "Выполнение операции \"%s\" невозможно, т.к. %s";
-    public static final String CANCEL_TASK = "Пользователем \"%s\" отменена задача \"%s\"";
+    public static final String CANCEL_TASK = "Пользователем \"%s\" удалена блокировка для задачи \"%s\"";
 
     private int id;
     private String name;

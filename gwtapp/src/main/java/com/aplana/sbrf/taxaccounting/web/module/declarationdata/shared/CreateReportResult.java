@@ -7,6 +7,7 @@ public class CreateReportResult implements Result {
 
     private CreateAsyncTaskStatus status;
     private String uuid;
+    private String restartMsg;
 
     public CreateAsyncTaskStatus getStatus() {
         return status;
@@ -22,5 +23,13 @@ public class CreateReportResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public void setRestartMsg(String restartMsg) {
+        this.restartMsg = restartMsg;
+    }
+
+    public String getRestartMsg() {
+        return restartMsg;
     }
 }

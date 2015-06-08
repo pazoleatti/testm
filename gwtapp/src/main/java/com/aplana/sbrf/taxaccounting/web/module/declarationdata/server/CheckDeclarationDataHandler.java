@@ -72,6 +72,10 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                         lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId(), false);
                     } else {
                         result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                        String restartMsg = (lockDataReportTask.getState().equals(LockData.State.IN_QUEUE.getText())) ?
+                                String.format(LockData.CANCEL_MSG, String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName())) :
+                                String.format(LockData.RESTART_MSG, String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName()));
+                        result.setRestartMsg(restartMsg);
                         return result;
                     }
                 } else if (lockDataReportTask != null) {
