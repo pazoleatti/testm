@@ -190,6 +190,7 @@ void logicCheck() {
 
     def index1 = 0
     def index2 = 0
+    def needRecalc = false
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
