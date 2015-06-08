@@ -976,21 +976,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
         switch (reportType) {
             case PDF_DEC:
-                String uuid = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
-                if (uuid != null) {
-                    Long size = blobDataService.getLength(uuid);
-                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                    long maxSize = taskTypeData.getTaskLimit() * 1024;
-                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
-                    if (size > maxSize) {
-                        return new Pair<BalancingVariants, Long>(null, size);
-                    } else if (size < shortSize) {
-                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
-                    }
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
-                } else {
-                    return null;
-                }
             case EXCEL_DEC:
                 String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
                 if (uuidXml != null) {

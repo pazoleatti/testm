@@ -900,9 +900,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<UploadFormDataResult>() {
             @Override
             public void onSuccess(UploadFormDataResult result) {
+                LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                 innerLogUuid = result.getUuid();
                 if (result.isLock()) {
-                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     Dialog.confirmMessage("Запуск операции приведет к удалению блокировок для некоторых ранее запущенных операций (операции, уже выполняемые Системой, будут отменены только после выполнения бизнес-логики, при этом изменения не будут сохранены). Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {
@@ -910,7 +910,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         }
                     });
                 } else if (result.isSave()) {
-                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {

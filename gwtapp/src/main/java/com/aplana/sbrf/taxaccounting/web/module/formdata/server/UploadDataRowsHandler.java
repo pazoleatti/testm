@@ -40,7 +40,7 @@ public class UploadDataRowsHandler extends
         AbstractActionHandler<UploadDataRowsAction, UploadFormDataResult> {
 
     @Autowired
-    BlobDataService blobDataService;
+    private BlobDataService blobDataService;
 
     @Autowired
     private FormDataService formDataService;
@@ -147,7 +147,8 @@ public class UploadDataRowsHandler extends
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant.getName());
-                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getFormData().getFormType().getTaxType().getTaxText());
+                    BlobData blobData = blobDataService.get(action.getUuid());
+                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), blobData.getName(), action.getFormData().getFormType().getTaxType().getTaxText());
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
                     if (e instanceof ServiceLoggerException) {
@@ -164,47 +165,6 @@ public class UploadDataRowsHandler extends
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
-        /*
-        TAUserInfo userInfo = securityService.currentUserInfo();
-        DataRowResult result = new DataRowResult();
-        Logger logger = new Logger();
-
-        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormData().getId());
-        if (lockType != null && ReportType.EDIT_FD.equals(lockType.getFirst())) {
-            //Пытаемся установить блокировку на операцию импорта в текущую нф
-            String key = formDataService.generateTaskKey(action.getFormData().getId(), ReportType.IMPORT_FD);
-            BlobData blobData = blobDataService.get(action.getUuid());
-            LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
-                    formDataService.getFormDataFullName(action.getFormData().getId(), blobData.getName(), ReportType.IMPORT_FD),
-                    lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
-            if (lockData == null) {
-                try {
-                    FormData formData = action.getFormData();
-
-                    dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
-
-                    logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
-                    //Парсит загруженный в фаловое хранилище xls-файл
-                    formDataService.importFormData(logger, userInfo,
-                            formData.getId(), formData.isManual(), blobData.getInputStream(), blobData.getName());
-
-                } catch (Exception e) {
-                    throw new ServiceLoggerException("Не удалось выполнить операцию импорта данных в налоговую форму", logEntryService.save(logger.getEntries()));
-                } finally {
-                    try {
-                        if (lockDataService.isLockExists(key, false)) {
-                            lockDataService.unlock(key, userInfo.getUser().getId());
-                        }
-                    } catch (Exception e2) {}
-                }
-            } else {
-                throw new ActionException("Операция импорта данных в текущую налоговую форму уже выполняется другим пользователем!");
-            }
-        } else {
-            formDataService.locked(lockType.getSecond(), logger);
-        }
-        result.setUuid(logEntryService.save(logger.getEntries()));
-        return result;*/
     }
 
     @Override

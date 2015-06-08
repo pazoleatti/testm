@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.balancing.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -49,7 +50,14 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.IMPORT_FD);
+        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.IMPORT_FD, uuid);
+        if (checkTaskLimit.getFirst() == null) {
+            logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
+            throw new ServiceLoggerException(ReportType.CHECK_TASK,
+                    logEntryService.save(logger.getEntries()),
+                    String.format(ReportType.PDF_DEC.getDescription(), formData.getFormType().getTaxType().getTaxText()),
+                    String.format("выбранный файл имеет слишком большой размер (%s байт)!",  checkTaskLimit.getSecond()));
+        }
         return checkTaskLimit.getFirst();
     }
 
