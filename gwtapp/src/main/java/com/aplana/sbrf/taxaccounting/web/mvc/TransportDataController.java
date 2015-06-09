@@ -5,15 +5,10 @@ import com.aplana.sbrf.taxaccounting.model.UploadResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
-import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.UploadTransportDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +16,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 public class TransportDataController {
@@ -41,27 +36,17 @@ public class TransportDataController {
     @Autowired
     private UploadTransportDataService uploadTransportDataService;
 
-    @Autowired
-    private LoadFormDataService loadFormDataService;
-
-    @Autowired
-    private LoadRefBookDataService loadRefBookDataService;
-
     @RequestMapping(value = "transportData/upload", method = RequestMethod.POST)
-    public void upload(HttpServletRequest request, HttpServletResponse response)
+    public void upload(@RequestParam(value = "uploader", required = true) MultipartFile file,
+                       HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
         Logger logger = new Logger();
 
-        ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
-        upload.setHeaderEncoding("UTF-8");
-
-        List<FileItem> items = upload.parseRequest(request);
-
-        if (items == null || items.isEmpty()) {
+        if (file == null || file.isEmpty()) {
             throw new ServiceException("Не указан файл для загрузки!");
         }
 
-        String fileName = items.get(0).getName();
+        String fileName = file.getOriginalFilename();
         if (fileName.contains("\\")) {
             // IE Выдает полный путь
             fileName = fileName.substring(fileName.lastIndexOf('\\') + 1);
@@ -71,7 +56,7 @@ public class TransportDataController {
 
         // Загрузка в каталог
         UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, fileName,
-                items.get(0).getInputStream(), logger);
+                file.getInputStream(), logger);
 
         // Загрузка из каталога
         /*if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
