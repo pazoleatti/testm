@@ -11,8 +11,11 @@ import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -48,6 +51,12 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
     LinkButton addRow;
     @UiField
     LinkButton deleteRow;
+
+    interface UrlTemplates extends SafeHtmlTemplates {
+        @Template("#{0};id={1};{2}={3}")
+        SafeHtml getBackAction(String refBookTypeKey, long refBookId, String recordKey, long recordId);
+    }
+    private static final UrlTemplates backUrlTemplates = GWT.create(UrlTemplates.class);
 
 	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
@@ -185,8 +194,8 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
     }
 
     @Override
-    public void setBackAction(String url) {
-        backAction.setHref(url);
+    public void setBackAction(String refBookType, long refBookId, String record, long recordId) {
+        backAction.setHref(backUrlTemplates.getBackAction(refBookType, refBookId, record, recordId).asString());
     }
 
     @UiHandler("addRow")
