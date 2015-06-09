@@ -48,7 +48,7 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
         if (records.isEmpty())
             throw new ServiceException("Нет записей за указанную дату.");
         String uuid = printingService.generateAuditZip(records);
-        reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.ARCHIVE_AUDIT);
+        reportService.createAudit(null, uuid, ReportType.ARCHIVE_AUDIT);
 
         auditService.removeRecords(
                 filter,
