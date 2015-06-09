@@ -176,9 +176,9 @@ void calc() {
     }
 
     // добавить "итого по коду" в таблицу
-    def i = 1
+    def i = 0
     totalRows.each { index, row ->
-        dataRows.insert(row, index + i++)
+        dataRows.add(index + i++, row)
     }
 
     dataRows.add(calcTotalRow(dataRows))
