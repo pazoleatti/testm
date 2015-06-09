@@ -177,7 +177,7 @@ public class LoadRefBookDataServiceTest {
     public void otherFileTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_1);
         file.createNewFile();
-        ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger());
+        ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger(), "1");
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
@@ -194,7 +194,7 @@ public class LoadRefBookDataServiceTest {
     public void successEmitentLoadTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_2);
         file.createNewFile();
-        ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger());
+        ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger(), "1");
         // Счетчики
         Assert.assertEquals(1, importCounter.getSuccessCounter());
         Assert.assertEquals(0, importCounter.getFailCounter());
@@ -227,7 +227,7 @@ public class LoadRefBookDataServiceTest {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_2);
         file.createNewFile();
 
-        ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger());
+        ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger(), "1");
 
         // Счетчики
         Assert.assertEquals(1, importCounter.getSuccessCounter());
@@ -251,7 +251,7 @@ public class LoadRefBookDataServiceTest {
 
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_2);
         file.createNewFile();
-        ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger());
+        ImportCounter importCounter = service.importRefBookDiasoft(USER_INFO, new Logger(), "1");
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
@@ -268,7 +268,7 @@ public class LoadRefBookDataServiceTest {
     public void successNsiLoadTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_3);
         file.createNewFile();
-        ImportCounter importCounter = service.importRefBookNsi(USER_INFO, new Logger());
+        ImportCounter importCounter = service.importRefBookNsi(USER_INFO, new Logger(), "1");
         // Счетчики
         Assert.assertEquals(1, importCounter.getSuccessCounter());
         // importRefBookNsi грузит в 3 справочника: ОКАТО, Субъекты РФ, План счетов - в 1ый удачно, для остальные два справочника файл будет пропущен
@@ -286,7 +286,7 @@ public class LoadRefBookDataServiceTest {
     public void successAvgCostLoadTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_4);
         file.createNewFile();
-        ImportCounter importCounter = service.importRefBookAvgCost(USER_INFO, new Logger());
+        ImportCounter importCounter = service.importRefBookAvgCost(USER_INFO, new Logger(), "1");
         // Счетчики
         Assert.assertEquals(1, importCounter.getSuccessCounter());
         // Каталог загрузки

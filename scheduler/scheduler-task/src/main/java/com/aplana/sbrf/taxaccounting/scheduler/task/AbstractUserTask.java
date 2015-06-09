@@ -24,11 +24,13 @@ public abstract class AbstractUserTask implements UserTask {
     @Autowired
     LockDataService lockDataService;
 
+    protected String lockId;
+
     @Override
     public void execute(Map<String, TaskParam> params, int userId, long taskId) throws TaskExecutionException {
-        String key = LockData.LockObjects.SCHEDULER_TASK + "_" + taskId;
+        lockId = LockData.LockObjects.SCHEDULER_TASK + "_" + taskId;
         LockData lockData;
-        if ((lockData = lockDataService.lock(key, TAUser.SYSTEM_USER_ID,
+        if ((lockData = lockDataService.lock(lockId, TAUser.SYSTEM_USER_ID,
                 String.format(LockData.DescriptionTemplate.SCHEDULER_TASK.getText(), getTaskName()),
                 lockDataService.getLockTimeout(LockData.LockObjects.SCHEDULER_TASK))) == null) {
             try {
@@ -36,7 +38,7 @@ public abstract class AbstractUserTask implements UserTask {
                 executeBusinessLogic(params, userId);
                 log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
             } finally {
-                lockDataService.unlock(key, TAUser.SYSTEM_USER_ID, true);
+                lockDataService.unlock(lockId, TAUser.SYSTEM_USER_ID, true);
             }
         } else {
             log.info("Задача планировщика \"" + getTaskName() + "\" уже выполняется. Дата начала выполнения: " + lockData.getDateLock());

@@ -16,14 +16,14 @@ public interface LoadFormDataService {
      * Загрузка ТФ НФ ТБ (FORM_UPLOAD_DIRECTORY)
      * Все ТБ
      */
-    ImportCounter importFormData(TAUserInfo userInfo, Logger logger);
+    ImportCounter importFormData(TAUserInfo userInfo, Logger logger, String lock);
 
     /**
      * Загрузка ТФ НФ ТБ (FORM_UPLOAD_DIRECTORY)
      * Указанные ТБ и список имен файлов
      */
     ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList, List<String> loadedFileNameList,
-                                 Logger logger);
+                                 Logger logger, String lock);
 
     /**
      * Список доступных ТБ

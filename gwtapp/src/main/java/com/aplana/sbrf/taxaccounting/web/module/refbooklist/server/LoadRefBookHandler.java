@@ -94,7 +94,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
                     LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
             try {
-                loadRefBookDataService.checkImportRefBooks(securityService.currentUserInfo(), logger);
+                loadRefBookDataService.checkImportRefBooks(securityService.currentUserInfo(), logger, UUID.randomUUID().toString().toLowerCase());
             } finally {
                 lockDataService.unlock(key, userInfo.getUser().getId());
             }

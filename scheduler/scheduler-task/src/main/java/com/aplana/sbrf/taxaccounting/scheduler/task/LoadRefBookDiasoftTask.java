@@ -51,7 +51,7 @@ public class LoadRefBookDiasoftTask extends AbstractUserTask {
                 LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
         try {
-            loadRefBookDataService.importRefBookDiasoft(userService.getSystemUserInfo(), new Logger());
+            loadRefBookDataService.importRefBookDiasoft(userService.getSystemUserInfo(), new Logger(), lockId);
         } finally {
             lockDataService.unlock(key, userId);
         }

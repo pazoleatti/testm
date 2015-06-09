@@ -18,34 +18,34 @@ public interface LoadRefBookDataService {
     /**
      * Загрузка ТФ справочников из ЦАС НСИ (ACCOUNT_PLAN_UPLOAD_DIRECTORY, OKATO_UPLOAD_DIRECTORY, REGION_UPLOAD_DIRECTORY)
      */
-    ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger);
+    ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger, String lockId);
 
     /**
      * Загрузка ТФ справочников из ЦАС НСИ (ACCOUNT_PLAN_UPLOAD_DIRECTORY, OKATO_UPLOAD_DIRECTORY, REGION_UPLOAD_DIRECTORY)
      * Указанный список файлов
      */
-    ImportCounter importRefBookNsi(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger);
+    ImportCounter importRefBookNsi(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId);
 
     /**
      * Загрузка ТФ справочников из Diasoft (DIASOFT_UPLOAD_DIRECTORY)
      */
-    ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger);
+    ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger, String lockId);
 
     /**
      * Загрузка ТФ справочников из Diasoft (DIASOFT_UPLOAD_DIRECTORY)
      * Указанный список файлов
      */
-    ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger);
+    ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId);
 
     /**
      * Загрузка ТФ справочника Средняя стоимость транспортных средст (AVG_COST_UPLOAD_DIRECTORY)
      */
-    ImportCounter importRefBookAvgCost(TAUserInfo userInfo, Logger logger);
+    ImportCounter importRefBookAvgCost(TAUserInfo userInfo, Logger logger, String lockId);
 
     /**
      * Загрузка ТФ справочника Средняя стоимость транспортных средст (AVG_COST_UPLOAD_DIRECTORY)
      */
-    ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger);
+    ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId);
 
     /**
      * Проверка доступа к каталогам архива и ошибок
@@ -53,7 +53,7 @@ public interface LoadRefBookDataService {
      * @param logger
      * @return
      */
-    boolean checkPathArchiveError(TAUserInfo userInfo, Logger logger);
+    boolean checkPathArchiveError(TAUserInfo userInfo, Logger logger, String lockId);
 
     /**
      * Соответствие имени файла ТФ справочников, поставляемых ЦАС НСИ:
@@ -90,5 +90,5 @@ public interface LoadRefBookDataService {
 
     void checkImportRefBookTransportData(TAUserInfo userInfo, Logger logger, String lock, Date lockDate);
 
-    void checkImportRefBooks(TAUserInfo userInfo, Logger logger);
+    void checkImportRefBooks(TAUserInfo userInfo, Logger logger, String uuid);
 }
