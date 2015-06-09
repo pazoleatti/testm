@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +15,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DataRowService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UploadDataRowsAction;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +57,11 @@ public class UploadDataRowsHandler extends
     @Autowired
     private AsyncManager asyncManager;
 
+    @Autowired
+    private TAUserService userService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+
     public UploadDataRowsHandler() {
         super(UploadDataRowsAction.class);
     }
@@ -93,6 +96,10 @@ public class UploadDataRowsHandler extends
                         // добавление подписчика
                         try {
                             lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
+                            logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                    String.format(reportType.getDescription(), action.getFormData().getFormType().getTaxType().getDeclarationShortName()),
+                                    sdf.format(lockType.getSecond().getDateLock()),
+                                    userService.getUser(lockType.getSecond().getUserId()).getName()));
                         } catch (ServiceException e) {
                         }
                         result.setLock(false);

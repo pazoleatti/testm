@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.RecalculateDeclarationDataAction;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +47,11 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
 
     @Autowired
     private LockDataService lockDataService;
+
+    @Autowired
+    private TAUserService userService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
 
     public RecalculateDeclarationDataHandler() {
         super(RecalculateDeclarationDataAction.class);
@@ -87,6 +94,10 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
             } else if (lockDataReportTask != null) {
                 try {
                     lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                    logger.info(String.format(LockData.LOCK_INFO_MSG,
+                            String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName()),
+                            sdf.format(lockDataReportTask.getDateLock()),
+                            userService.getUser(lockDataReportTask.getUserId()).getName()));
                 } catch (ServiceException e) {
                 }
                 result.setStatus(CreateAsyncTaskStatus.CREATE);

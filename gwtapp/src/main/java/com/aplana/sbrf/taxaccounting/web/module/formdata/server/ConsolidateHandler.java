@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ConsolidateAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.ConsolidateResult;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +43,10 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
     private AsyncManager asyncManager;
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private TAUserService userService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
 
     public ConsolidateHandler() {
         super(ConsolidateAction.class);
@@ -69,6 +75,10 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
             } else if (lockDataTask != null) {
                 try {
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
+                    logger.info(String.format(LockData.LOCK_INFO_MSG,
+                            String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName()),
+                            sdf.format(lockDataTask.getDateLock()),
+                            userService.getUser(lockDataTask.getUserId()).getName()));
                 } catch (ServiceException e) {
                 }
                 result.setLock(false);
