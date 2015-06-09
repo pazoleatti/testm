@@ -878,8 +878,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         if (reportType == null)
             return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
                     declarationTemplate.getType().getName(),
-                    declaration.getKpp(),
-                    declaration.getTaxOrganCode(),
                     department.getName(),
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriod.getCorrectionDate() != null
@@ -899,8 +897,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         reportType.getName(),
                         declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                         declarationTemplate.getType().getName(),
-                        declaration.getKpp(),
-                        declaration.getTaxOrganCode(),
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
@@ -916,8 +912,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 return String.format(LockData.DescriptionTemplate.DECLARATION_CALCULATE.getText(),
                         declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                         declarationTemplate.getType().getName(),
-                        declaration.getKpp(),
-                        declaration.getTaxOrganCode(),
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
@@ -933,8 +927,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 return String.format(LockData.DescriptionTemplate.DECLARATION_CHECK.getText(),
                         declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                         declarationTemplate.getType().getName(),
-                        declaration.getKpp(),
-                        declaration.getTaxOrganCode(),
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
@@ -950,8 +942,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 return String.format(LockData.DescriptionTemplate.DECLARATION_ACCEPT.getText(),
                         declarationTemplate.getType().getTaxType().getDeclarationShortName(),
                         declarationTemplate.getType().getName(),
-                        declaration.getKpp(),
-                        declaration.getTaxOrganCode(),
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
@@ -966,8 +956,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             default:
                 return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
                         declarationTemplate.getType().getName(),
-                        declaration.getKpp(),
-                        declaration.getTaxOrganCode(),
                         department.getName(),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null

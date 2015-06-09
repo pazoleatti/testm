@@ -78,8 +78,6 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                 String.format(LockData.DescriptionTemplate.DECLARATION_CREATE.getText(),
                         declarationType.getTaxType().getDeclarationShortName(),
                         declarationType.getName(),
-                        command.getTaxOrganKpp(),
-                        command.getTaxOrganCode(),
                         department.getName(),
                         reportPeriod.getName() + " " + reportPeriod.getTaxPeriod().getYear(),
                         departmentReportPeriod.getCorrectionDate() != null
