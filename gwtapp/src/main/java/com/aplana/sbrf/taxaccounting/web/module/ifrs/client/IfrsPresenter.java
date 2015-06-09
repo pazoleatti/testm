@@ -154,13 +154,13 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
             reportPeriodIds.add(row.getReportPeriodId());
         }
         action.setReportPeriodIds(reportPeriodIds);
-        dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(
+        dispatcher.execute(action, CallbackUtils.simpleCallback(
                 new AbstractCallback<UpdateStatusIrfsDataResult>() {
                         @Override
                         public void onSuccess(UpdateStatusIrfsDataResult result) {
                                 getView().updateStatus(result.getIfrsStatusMap());
                         }
-                }, IfrsPresenter.this).addCallback(new ManualRevealCallback<GetIrfsDataResult>(IfrsPresenter.this)));
+                }).addCallback(new ManualRevealCallback<GetIrfsDataResult>(IfrsPresenter.this)));
     }
 
     @Override

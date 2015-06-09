@@ -139,7 +139,7 @@ public class UploadDataRowsHandler extends
                     lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                 try {
                     List<String> lockKeys = new ArrayList<String>();
-                    lockKeys.add(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_DEC));
+                    lockKeys.add(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_FD));
                     lockDataService.interuptAllTasks(lockKeys, userInfo.getUser().getId());
                     formDataService.deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
                     Map<String, Object> params = new HashMap<String, Object>();

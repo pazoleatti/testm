@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -15,7 +14,7 @@ import java.util.List;
  * @author Eugene Stetsenko
  * @author Vitalii Samolovskikh
  */
-public class RecalculateDataRowsAction extends UnsecuredActionImpl<RecalculateFormDataResult> implements ActionName {
+public class RecalculateDataRowsAction extends UnsecuredActionImpl<TaskFormDataResult> implements ActionName {
 
     private boolean force;
     private boolean save;

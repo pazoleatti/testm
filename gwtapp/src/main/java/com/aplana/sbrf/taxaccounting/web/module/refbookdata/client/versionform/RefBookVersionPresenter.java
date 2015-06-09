@@ -70,6 +70,8 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 
+    private RefBookType refBookType;
+
     public interface MyView extends View, HasUiHandlers<RefBookVersionUiHandlers> {
 		void setTableColumns(final List<RefBookColumn> columns);
 		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
@@ -82,7 +84,13 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
         void resetRefBookElements();
 		RefBookDataRow getSelectedRow();
         void setTitleDetails(String uniqueAttrValues);
-        void setBackAction(String url);
+
+        /**
+         * Ссылка для возвращения на форму справочников
+         * @param refBookType тип !refbookhier или !refbook
+         * @param record RefBookDataTokens.REFBOOK_RECORD_ID, но вдруг поменяется
+         */
+        void setBackAction(String refBookType, long refBookId, String record, long recordId);
         void updateMode(FormMode mode);
         // позиция выделенной строки в таблице
         Integer getSelectedRowIndex();
@@ -177,6 +185,11 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                 editFormPresenter.show(null);
                                 if (result.getNextVersion() != null) {
                                     getView().updateTable();
+
+                                    getView().setBackAction(
+                                            refBookType.equals(RefBookType.LINEAR) ?
+                                                    RefBookDataTokens.refBookData :
+                                                    RefBookDataTokens.refBookHierData, refBookId, RefBookDataTokens.REFBOOK_RECORD_ID, result.getNextVersion());
                                 } else {
                                     placeManager
                                             .revealPlace(new PlaceRequest.Builder().nameToken(isHierarchy ? RefBookDataTokens.refBookHierData : RefBookDataTokens.refBookData)
@@ -243,12 +256,11 @@ public class RefBookVersionPresenter extends Presenter<RefBookVersionPresenter.M
                                                 public void onSuccess(GetNameResult result) {
                                                     getView().setRefBookNameDesc(result.getName());
                                                     getView().setTitleDetails(result.getUniqueAttributeValues());
-                                                    String href = "#" + (
-                                                            result.getRefBookType().equals(RefBookType.LINEAR.getId()) ?
+                                                    refBookType = RefBookType.get(result.getRefBookType());
+                                                    getView().setBackAction(
+                                                            refBookType.equals(RefBookType.LINEAR) ?
                                                                     RefBookDataTokens.refBookData :
-                                                                    RefBookDataTokens.refBookHierData
-                                                    ) + ";id=" + refBookId + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + uniqueRecordId;
-                                                    getView().setBackAction(href);
+                                                                    RefBookDataTokens.refBookHierData, refBookId, RefBookDataTokens.REFBOOK_RECORD_ID, uniqueRecordId);
                                                     editFormPresenter.setRecordId(result.getRecordId());
                                                 }
                                             }, RefBookVersionPresenter.this));

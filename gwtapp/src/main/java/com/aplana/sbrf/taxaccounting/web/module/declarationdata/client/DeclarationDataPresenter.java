@@ -209,7 +209,7 @@ public class DeclarationDataPresenter
         action.setDeclarationDataId(declarationId);
         action.setType(reportType);
         dispatcher.execute(action, CallbackUtils
-                .defaultCallbackNoLock(new AbstractCallback<TimerReportResult>() {
+                .simpleCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
                         if (ReportType.PDF_DEC.equals(reportType) && result.getExistXMLReport() != null) {
@@ -251,7 +251,7 @@ public class DeclarationDataPresenter
                             getView().startTimerReport(reportType);
                         }
                     }
-                }, this));
+                }));
     }
 
     @Override

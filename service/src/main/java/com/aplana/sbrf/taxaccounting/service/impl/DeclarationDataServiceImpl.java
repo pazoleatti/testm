@@ -653,13 +653,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException();
                 }
             } catch (Exception e) {
-                log.info(String.format("Сохранение логов об ошибках валидации для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Сохранение логов об ошибках валидации");
                 log.error(VALIDATION_ERR_MSG, e);
                 if (!(e instanceof ServiceException))
                     logger.error(e);
-                String uuid = logEntryService.save(logger.getEntries());
-                throw new ServiceLoggerException(VALIDATION_ERR_MSG, uuid);
+                throw new ServiceException(VALIDATION_ERR_MSG);
             } finally {
                 Locale.setDefault(oldLocale);
             }

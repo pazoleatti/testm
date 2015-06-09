@@ -8,5 +8,4 @@ public interface EditFormUiHandlers extends UiHandlers {
 	void onCancelClicked();
 	void valueChanged(String alias, Object value);
     void setMode(FormMode mode);
-    void updateHistory();
 }
