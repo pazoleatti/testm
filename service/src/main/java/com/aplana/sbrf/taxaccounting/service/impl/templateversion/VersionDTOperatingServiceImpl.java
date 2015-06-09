@@ -24,7 +24,7 @@ import java.util.List;
 public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     public static final String MSG_IS_USED_VERSION =
-            "Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s\" %d%s для макета";
+            "Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s %d\"%s%s для макета";
     private static final String MSG_HAVE_DESTINATION =
             "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
     private static final String MSG_HAVE_SOURCE =
@@ -61,13 +61,22 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
             ReportPeriod period = periodService.getReportPeriod(declarationData.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
 
+            StringBuilder taKPPString = new StringBuilder("");
+            if (declarationData.getTaxOrganCode() != null) {
+                taKPPString.append(", налоговый орган: \"").append(declarationData.getTaxOrganCode()).append("\"");
+            }
+            if (declarationData.getKpp() != null) {
+                taKPPString.append(", КПП: \"").append(declarationData.getKpp()).append("\"");
+            }
+
             logger.error(String.format(MSG_IS_USED_VERSION,
                     declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
                     departmentService.getDepartment(declarationData.getDepartmentId()).getName(),
                     period.getName(),
                     period.getTaxPeriod().getYear(),
                     drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                            sdf.format(drp.getCorrectionDate())) : ""));
+                            sdf.format(drp.getCorrectionDate())) : "",
+                    taKPPString.toString()));
         }
 
     }

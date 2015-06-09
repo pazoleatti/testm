@@ -76,7 +76,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String XLSM_EXT = "xlsm";
-    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"";
+    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"%s";
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_MESSAGE_TASK = "Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
@@ -1387,12 +1387,14 @@ public class FormDataServiceImpl implements FormDataService {
             for (long formDataId : formDataIds) {
                 FormData formData = formDataDao.getWithoutRows(formDataId);
                 ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+                DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
 
                 logger.error(MSG_IS_EXIST_FORM,
                         formData.getFormType().getName(),
                         kind.getName(),
                         departmentService.getDepartment(departmentId).getName(),
-                        period.getName() + " " + period.getTaxPeriod().getYear());
+                        period.getName() + (formData.getPeriodOrder() != null ? (" - " + Months.fromId(formData.getPeriodOrder()).getTitle()) : "") + " " + period.getTaxPeriod().getYear(),
+                        (drp.getCorrectionDate() != null ? (" с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""));
             }
         }
         return !formDataIds.isEmpty();
