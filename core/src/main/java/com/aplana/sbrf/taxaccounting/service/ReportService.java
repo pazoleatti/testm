@@ -34,7 +34,7 @@ public interface ReportService {
      * @param blobDataId ссылка на отчет
      * @param type тип
      */
-    void createAudit(int userId, String blobDataId, ReportType type);
+    void createAudit(Integer userId, String blobDataId, ReportType type);
 
     /**
      * Получение записи об отчете НФ

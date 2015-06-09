@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.AcceptDeclarationDataResult;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,11 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
     @Autowired
     private AsyncManager asyncManager;
+
+    @Autowired
+    private TAUserService userService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
 
     public AcceptDeclarationDataHandler() {
         super(AcceptDeclarationDataAction.class);
@@ -77,14 +84,18 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                         } else {
                             result.setStatus(CreateAsyncTaskStatus.LOCKED);
                             String restartMsg = (lockDataReportTask.getState().equals(LockData.State.IN_QUEUE.getText())) ?
-                                    String.format(LockData.CANCEL_MSG, String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName())) :
-                                    String.format(LockData.RESTART_MSG, String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName()));
+                                    String.format(LockData.CANCEL_MSG, String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName())) :
+                                    String.format(LockData.RESTART_MSG, String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName()));
                             result.setRestartMsg(restartMsg);
                             return result;
                         }
                     } else if (lockDataReportTask != null) {
                         try {
                             lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                            logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                    String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName()),
+                                    sdf.format(lockDataReportTask.getDateLock()),
+                                    userService.getUser(lockDataReportTask.getUserId()).getName()));
                         } catch (ServiceException e) {
                         }
                         result.setStatus(CreateAsyncTaskStatus.CREATE);

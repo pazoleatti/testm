@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateReportAction;
@@ -55,6 +56,11 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private TAUserService userService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
+
     public CreateReportDeclarationHandler() {
         super(CreateReportAction.class);
     }
@@ -85,14 +91,18 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                             } else {
                                 result.setStatus(CreateAsyncTaskStatus.LOCKED);
                                 String restartMsg = (lockDataReportTask.getState().equals(LockData.State.IN_QUEUE.getText())) ?
-                                        String.format(LockData.CANCEL_MSG, String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName())) :
-                                        String.format(LockData.RESTART_MSG, String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName()));
+                                        String.format(LockData.CANCEL_MSG, String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName())) :
+                                        String.format(LockData.RESTART_MSG, String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName()));
                                 result.setRestartMsg(restartMsg);
                                 return result;
                             }
                         } else if (lockDataReportTask != null) {
                             try {
                                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                                logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                        String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName()),
+                                        sdf.format(lockDataReportTask.getDateLock()),
+                                        userService.getUser(lockDataReportTask.getUserId()).getName()));
                             } catch (ServiceException e) {
                             }
                             result.setStatus(CreateAsyncTaskStatus.CREATE);

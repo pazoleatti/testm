@@ -29,6 +29,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +59,11 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 
     @Autowired
     private AsyncManager asyncManager;
+
+    @Autowired
+    private TAUserService userService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
 
 	public RecalculateFormDataHandler() {
 		super(RecalculateDataRowsAction.class);
@@ -94,6 +100,10 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                         // добавление подписчика
                         try {
                             lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
+                            logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                    String.format(reportType.getDescription(), action.getFormData().getFormType().getTaxType().getDeclarationShortName()),
+                                    sdf.format(lockType.getSecond().getDateLock()),
+                                    userService.getUser(lockType.getSecond().getUserId()).getName()));
                         } catch (ServiceException e) {
                         }
                         result.setLock(false);
