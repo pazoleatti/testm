@@ -534,7 +534,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("checkButton")
 	void onCheckButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onCheckClicked();
+			getUiHandlers().onCheckClicked(false, false);
 		}
 	}
 

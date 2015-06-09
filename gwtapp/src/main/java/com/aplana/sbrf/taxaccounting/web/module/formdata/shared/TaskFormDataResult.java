@@ -9,7 +9,7 @@ import com.gwtplatform.dispatch.shared.Result;
  *
  * @author Eugene Stetsenko
  */
-public class RecalculateFormDataResult implements Result {
+public class TaskFormDataResult implements Result {
 	private static final long serialVersionUID = -4686362790466910194L;
 
     private String uuid;

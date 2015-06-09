@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceRollbackException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -469,33 +470,25 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
-		// Форма должна быть заблокирована текущим пользователем для редактирования
-        //checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
-        //Проверяем не заблокирована ли нф операцией загрузки в нее
-        //checkLockedByImport(formData.getId(), logger);
-
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
 		formDataScriptingService.executeScript(userInfo, formData,
                 FormDataEvent.CALCULATE, logger, null);
 
         if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException("Найдены ошибки при выполнении расчета формы", logEntryService.save(logger.getEntries()));
+			throw new ServiceException("Найдены ошибки при выполнении расчета формы");
 		} else {
 			logger.info("Расчет завершен, фатальных ошибок не обнаружено");
 		}
 	}
 
 	@Override
+    @Transactional
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData, boolean editMode) {
-		// Форма не должна быть заблокирована для редактирования другим пользователем
-		checkLockAnotherUser(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), logger, userInfo.getUser());
+        formDataAccessService.canRead(userInfo, formData.getId());
 
 		formDataAccessService.canRead(userInfo, formData.getId());
 
-        if (!editMode) {
-            dataRowDao.createTemporary(formData);
-        }
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
 
         checkPerformer(logger, formData);
@@ -578,7 +571,7 @@ public class FormDataServiceImpl implements FormDataService {
             }
             // Ошибка для отката транзакции
             logger.info("Проверка завершена, фатальных ошибок не обнаружено");
-            throw new ServiceLoggerException("Ошибок не обнаружено", logEntryService.save(logger.getEntries()));
+            throw new ServiceRollbackException("Ошибок не обнаружено");
         }
     }
 
@@ -628,9 +621,6 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
-		// Форма должна быть заблокирована текущим пользователем для редактирования
-        checkLockedMe(lockService.getLock(generateTaskKey(formData.getId(), ReportType.EDIT_FD)), userInfo.getUser());
-
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
         //Проверка актуальности справочных значений

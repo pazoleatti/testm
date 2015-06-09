@@ -30,7 +30,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onRecalculateClicked(boolean force, boolean save);
 
-	void onCheckClicked();
+	void onCheckClicked(final boolean force, final boolean save);
 
 	void onPrintExcelClicked();
 
