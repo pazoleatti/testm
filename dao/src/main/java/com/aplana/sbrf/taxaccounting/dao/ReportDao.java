@@ -31,7 +31,7 @@ public interface ReportDao {
      * @param blobDataId
      * @param type
      */
-    void createAudit(int userId, String blobDataId, ReportType type);
+    void createAudit(Integer userId, String blobDataId, ReportType type);
 
     /**
      * Получение записи об отчете НФ
@@ -59,7 +59,7 @@ public interface ReportDao {
      * @param type
      * @return uuid
      */
-    String getAudit(int userId, ReportType type);
+    String getAudit(Integer userId, ReportType type);
 
     /**
      * Удаление всех отчетов для НФ

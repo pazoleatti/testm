@@ -139,7 +139,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
     private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
     public static final String MSG_IS_EXIST_DECLARATION =
-            "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"";
+            "Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"%s%s для макета!";
     private static final String NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING =
             "Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" в статусе \"%s\"";
     private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
@@ -765,11 +765,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             for (long declarationId : declarationIds) {
                 DeclarationData declarationData = declarationDataDao.get(declarationId);
                 ReportPeriod period = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
+                DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
 
+                StringBuilder taKPPString = new StringBuilder("");
+                if (declarationData.getTaxOrganCode() != null) {
+                    taKPPString.append(", налоговый орган: \"").append(declarationData.getTaxOrganCode()).append("\"");
+                }
+                if (declarationData.getKpp() != null) {
+                    taKPPString.append(", КПП: \"").append(declarationData.getKpp()).append("\"");
+                }
                 logs.add(new LogEntry(LogLevel.ERROR, String.format(MSG_IS_EXIST_DECLARATION,
                         declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
                         departmentService.getDepartment(departmentId).getName(),
-                        period.getName() + " " + period.getTaxPeriod().getYear())));
+                        period.getName() + " " + period.getTaxPeriod().getYear(),
+                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s", formatter.format(drp.getCorrectionDate())) : "",
+                        taKPPString.toString())));
             }
         }
         return !declarationIds.isEmpty();

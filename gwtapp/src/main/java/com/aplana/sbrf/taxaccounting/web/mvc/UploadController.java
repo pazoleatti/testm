@@ -30,7 +30,7 @@ public class UploadController {
                                  HttpServletRequest request, HttpServletResponse response)
             throws FileUploadException, IOException {
         request.setCharacterEncoding("UTF-8");
-        String uuid = blobDataService.create(file.getInputStream(), file.getName());
+        String uuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
         response.getWriter().printf("{uuid : \"%s\"}", uuid);
     }
 }

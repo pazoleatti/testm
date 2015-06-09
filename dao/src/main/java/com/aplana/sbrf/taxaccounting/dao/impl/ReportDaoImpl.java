@@ -68,7 +68,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public void createAudit(int userId, String blobDataId, ReportType type) {
+    public void createAudit(Integer userId, String blobDataId, ReportType type) {
         try{
             getJdbcTemplate().update(
                     "INSERT INTO LOG_SYSTEM_REPORT (SEC_USER_ID, BLOB_DATA_ID, TYPE) VALUES (?,?,?)",
@@ -115,11 +115,15 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public String getAudit(int userId, ReportType type) {
+    public String getAudit(Integer userId, ReportType type) {
         try{
+            String sql = (userId != null ?
+                    "select blob_data_id from log_system_report where type=? and sec_user_id=?" :
+                    "select blob_data_id from log_system_report where type=? and sec_user_id is null");
+            Object[] objects = (userId != null ? new Object[] {type.getId(), userId} : new Object[] { type.getId() });
             return getJdbcTemplate().queryForObject(
-                    "select blob_data_id from log_system_report where type=? and sec_user_id=?",
-                    new Object[]{type.getId(), userId},
+                    sql,
+                    objects,
                     String.class);
         } catch (EmptyResultDataAccessException e){
             return null;

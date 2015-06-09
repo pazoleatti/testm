@@ -51,8 +51,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void createAudit(int userId, String blobDataId, ReportType type) {
-        if (reportDao.getAudit(userId, type)!=null){
+    public void createAudit(Integer userId, String blobDataId, ReportType type) {
+        String uuid = reportDao.getAudit(userId, type);
+        if (type == ReportType.ARCHIVE_AUDIT) {
+            reportDao.deleteAudit(uuid);
+        } else if (uuid != null){
             throw new ServiceException("Для этого пользователя уже есть отчет по ЖА, проверьте выгрузку.");
         }
         reportDao.createAudit(userId, blobDataId, type);
@@ -66,7 +69,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public String getAudit(TAUserInfo userInfo, ReportType type) {
-        return reportDao.getAudit(userInfo.getUser().getId(), type);
+        Integer userId = (type == ReportType.ARCHIVE_AUDIT ? null : userInfo.getUser().getId());
+        return reportDao.getAudit(userId, type);
     }
 
     @Override

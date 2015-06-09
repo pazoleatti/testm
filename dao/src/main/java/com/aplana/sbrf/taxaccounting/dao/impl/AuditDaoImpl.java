@@ -501,11 +501,15 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     ")";
 
     @Override
-    public void removeRecords(final LogSystemFilter filter) {
+    public void removeRecords(LogSystemFilter filter) {
+        final Calendar c = Calendar.getInstance();
+        c.setTime(filter.getToSearchDate());
+        c.add(Calendar.DAY_OF_MONTH, 1);
+
         getNamedParameterJdbcTemplate().update(
                 DELETE_RECORDS_BY_FILTER,
                 new HashMap<String, Object>() {{
-                    put("toDate", filter.getToSearchDate());
+                    put("toDate", c.getTime());
                 }});
     }
 
