@@ -162,7 +162,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         TimerReportAction action = new TimerReportAction();
         action.setReportType(reportType);
         dispatcher.execute(action, CallbackUtils
-                .defaultCallbackNoLock(new AbstractCallback<TimerReportResult>() {
+                .simpleCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
                         if (reportType==ReportType.ARCHIVE_AUDIT){
@@ -192,7 +192,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                             }
                         }
                     }
-                }, this));
+                }));
     }
 
     @Override

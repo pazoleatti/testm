@@ -75,12 +75,12 @@ public class ManualMenuPresenter extends AbstractMenuPresenter<ManualMenuPresent
 
     public void updateNotificationCount() {
         dispatchAsync.execute(new GetNotificationCountAction(), CallbackUtils
-                .defaultCallbackNoLock(new AbstractCallback<GetNotificationCountResult>() {
+                .simpleCallback(new AbstractCallback<GetNotificationCountResult>() {
                     @Override
                     public void onSuccess(GetNotificationCountResult result) {
                         getView().updateNotificationCount(result.getNotificationCount());
                     }
-                }, ManualMenuPresenter.this));
+                }));
     }
 
     public interface MyView extends AbstractMenuPresenter.MyView {

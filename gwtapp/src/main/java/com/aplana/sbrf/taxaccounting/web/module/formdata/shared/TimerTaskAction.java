@@ -22,6 +22,6 @@ public class TimerTaskAction extends UnsecuredActionImpl<TimerTaskResult> implem
 
     @Override
 	public String getName() {
-		return "Проверка наличия файлов для выгрузки";
+		return "";
 	}
 }

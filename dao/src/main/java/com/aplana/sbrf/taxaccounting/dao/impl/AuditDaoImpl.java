@@ -497,7 +497,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             "delete from LOG_SYSTEM where id in (\n" +
                     "  select ls.id\n" +
                     "    from log_system ls \n" +
-                    "    WHERE  log_date <= :toDate \n" +
+                    "    WHERE  log_date < :toDate \n" +
                     ")";
 
     @Override

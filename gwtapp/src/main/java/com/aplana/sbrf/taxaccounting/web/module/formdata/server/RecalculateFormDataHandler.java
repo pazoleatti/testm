@@ -14,7 +14,7 @@ import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.RecalculateFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TaskFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,7 +40,7 @@ import java.util.Map;
  */
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
-public class RecalculateFormDataHandler extends AbstractActionHandler<RecalculateDataRowsAction, RecalculateFormDataResult> {
+public class RecalculateFormDataHandler extends AbstractActionHandler<RecalculateDataRowsAction, TaskFormDataResult> {
 
 	@Autowired
 	private FormDataService formDataService;
@@ -70,10 +70,10 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 	}
 
 	@Override
-	public RecalculateFormDataResult execute(RecalculateDataRowsAction action,
+	public TaskFormDataResult execute(RecalculateDataRowsAction action,
 			ExecutionContext context) throws ActionException {
         final ReportType reportType = ReportType.CALCULATE_FD;
-        RecalculateFormDataResult result = new RecalculateFormDataResult();
+        TaskFormDataResult result = new TaskFormDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         FormData formData = action.getFormData();
@@ -143,7 +143,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                 try {
                     List<String> lockKeys = new ArrayList<String>();
-                    lockKeys.add(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_DEC));
+                    lockKeys.add(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_FD));
                     lockDataService.interuptAllTasks(lockKeys, userInfo.getUser().getId());
                     formDataService.deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
                     Map<String, Object> params = new HashMap<String, Object>();
@@ -176,7 +176,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 	}
 
 	@Override
-	public void undo(RecalculateDataRowsAction action, RecalculateFormDataResult result,
+	public void undo(RecalculateDataRowsAction action, TaskFormDataResult result,
 			ExecutionContext context) throws ActionException {
 		// Ничего не делаем
 	}
