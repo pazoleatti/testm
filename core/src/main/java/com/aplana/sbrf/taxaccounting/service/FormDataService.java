@@ -361,11 +361,11 @@ public interface FormDataService {
     /**
      * Получает полное название нф с указанием подразделения, периода и прочего
      * @param formDataId идентификатор нф
-     * @param fileName название файла из которого выполняется импорт в нф. Может быть null
+     * @param str название файла(при импорте ТФ)/название кнопки(при переходе по ЖЦ) Может быть null
      * @param reportType тип отчета. Может быть null
      * @return название
      */
-    String getFormDataFullName(long formDataId, String fileName, ReportType reportType);
+    String getFormDataFullName(long formDataId, String str, ReportType reportType);
 
     /**
      * Генерация ключа блокировки для задачи c типом reportType
@@ -383,11 +383,20 @@ public interface FormDataService {
     Pair<ReportType, LockData> getLockTaskType(long formDataId);
 
     /**
+     * Удаление блокировок для задач(отмена задачи)
+     * @param formDataId
+     * @param userInfo
+     * @param lockKeys
+     */
+    void interruptTask(long formDataId, TAUserInfo userInfo, List<ReportType> reportTypes);
+
+    /**
      * Вывод сообщения, что форма заблокирована
      * @param lockData
      * @param logger
+     * @param reportType тип текущей операции
      */
-    void locked(LockData lockData, Logger logger);
+    void locked(LockData lockData, Logger logger, ReportType reportType);
 
     /**
      * Проверка возможности изменения НФ

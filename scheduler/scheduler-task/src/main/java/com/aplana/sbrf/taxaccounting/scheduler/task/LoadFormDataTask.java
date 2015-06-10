@@ -86,7 +86,7 @@ public class LoadFormDataTask extends AbstractUserTask {
                 LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
         try {
-            loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger());
+            loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger(), lockId);
         } finally {
             lockDataService.unlock(key, userId);
         }

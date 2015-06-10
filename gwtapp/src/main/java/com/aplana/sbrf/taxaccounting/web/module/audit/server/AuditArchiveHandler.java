@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -21,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,6 +67,15 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
         TAUserInfo userInfo = securityService.currentUserInfo();
         AuditArchiveResult result = new AuditArchiveResult();
         LockData lockData;
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(action.getLogSystemFilter().getToSearchDate());
+        c.set(Calendar.HOUR_OF_DAY, 23);
+        c.set(Calendar.MINUTE, 59);
+        c.set(Calendar.SECOND, 59);
+        c.set(Calendar.MILLISECOND, 999);
+        action.getLogSystemFilter().setToSearchDate(c.getTime());
+
         long recordsCount = auditService.getCountRecords(action.getLogSystemFilter(), userInfo);
         if (recordsCount==0)
             throw new ServiceException("Нет записей за указанную дату.");
@@ -89,10 +100,13 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                 lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
                 logger.info(String.format("Задание на архивацию журнала аудита (до даты: %s) поставлено в очередь на формирование.", SDF.format(action.getLogSystemFilter().getToSearchDate())));
                 return result;
-            } catch (AsyncTaskException e) {
+            } catch (Exception e) {
                 lockDataService.unlock(key, userInfo.getUser().getId());
-            } finally{
-                lockDataService.unlock(key, userInfo.getUser().getId());
+                if (e instanceof ServiceLoggerException) {
+                    throw (ServiceLoggerException) e;
+                } else {
+                    throw new ActionException(e);
+                }
             }
         } else {
             if (lockData.getUserId() != userInfo.getUser().getId()) {

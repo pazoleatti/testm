@@ -740,18 +740,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		GoMoveAction action = new GoMoveAction();
 		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
+        action.setTaxType(formData.getFormType().getTaxType());
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                        revealFormData(true, formData.isManual(), !absoluteView, result.getUuid());
-                        getView().showConsolidation(
-                                !WorkflowState.ACCEPTED.equals(formData.getState())
-                                        &&
-                                        (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind())
-                                        &&
-                                        readOnlyMode);
+                        innerLogUuid = result.getUuid();
+                        timerType = ReportType.MOVE_FD;
+                        timer.run();
                     }
                 }, this));
 	}
@@ -970,11 +967,23 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     if (timerType == null
                                             && oldType != null) {
                                         // задача завершена, обновляем таблицу с данными
-                                        getView().updateData();
+                                        switch (oldType) {
+                                            case MOVE_FD:
+                                                revealFormData(true, formData.isManual(), !absoluteView, innerLogUuid);
+                                                break;
+                                            default:
+                                                getView().updateData();
+                                        }
                                         manualMenuPresenter.updateNotificationCount();
                                     } else if (oldType != null && !oldType.equals(timerType)) {
                                         // изменился тип задачи, возможно нужно обновить форму???
-                                        getView().updateData();
+                                        switch (oldType) {
+                                            case MOVE_FD:
+                                                revealFormData(true, formData.isManual(), !absoluteView, innerLogUuid);
+                                                break;
+                                            default:
+                                                getView().updateData();
+                                        }
                                         manualMenuPresenter.updateNotificationCount();
                                     }
                                 } else {

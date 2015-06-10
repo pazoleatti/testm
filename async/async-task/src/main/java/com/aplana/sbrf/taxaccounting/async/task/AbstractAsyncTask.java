@@ -136,11 +136,11 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                     if (e instanceof ServiceLoggerException && ((ServiceLoggerException) e).getUuid() != null) {
                                         Logger logger1 = new Logger();
                                         logger1.error(msg);
-                                        logger1.error(e);
+                                        if (e.getMessage() != null && !e.getMessage().isEmpty()) logger1.error(e);
                                         sendNotifications(lock, msg, logEntryService.addFirst(logger1.getEntries(), ((ServiceLoggerException) e).getUuid()));
                                     } else {
                                         logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, msg));
-                                        logger.error(e);
+                                        if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
                                         sendNotifications(lock, msg, logEntryService.save(logger.getEntries()));
                                     }
                                 }

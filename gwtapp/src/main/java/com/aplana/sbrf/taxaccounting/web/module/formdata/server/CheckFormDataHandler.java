@@ -97,7 +97,7 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     }
                 } else {
                     // ошибка
-                    formDataService.locked(lockType.getSecond(), logger);
+                    formDataService.locked(lockType.getSecond(), logger, reportType);
                 }
             }
             result.setLock(false);

@@ -101,7 +101,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                         try {
                             lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                             logger.info(String.format(LockData.LOCK_INFO_MSG,
-                                    String.format(reportType.getDescription(), action.getFormData().getFormType().getTaxType().getDeclarationShortName()),
+                                    String.format(reportType.getDescription(), action.getFormData().getFormType().getTaxType().getTaxText()),
                                     sdf.format(lockType.getSecond().getDateLock()),
                                     userService.getUser(lockType.getSecond().getUserId()).getName()));
                         } catch (ServiceException e) {
@@ -113,7 +113,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     }
                 } else {
                     // ошибка
-                    formDataService.locked(lockType.getSecond(), logger);
+                    formDataService.locked(lockType.getSecond(), logger, reportType);
                 }
             }
             result.setLock(false);
@@ -142,9 +142,9 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     LockData.State.IN_QUEUE.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                 try {
-                    List<String> lockKeys = new ArrayList<String>();
-                    lockKeys.add(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_FD));
-                    lockDataService.interuptAllTasks(lockKeys, userInfo.getUser().getId());
+                    List<ReportType> reportTypes = new ArrayList<ReportType>();
+                    reportTypes.add(ReportType.CHECK_FD);
+                    formDataService.interruptTask(formData.getId(), userInfo, reportTypes);
                     formDataService.deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("formDataId", action.getFormData().getId());
