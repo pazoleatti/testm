@@ -113,6 +113,29 @@ public interface SourceDao {
      */
     List<ConsolidatedInstance> findConsolidatedInstances(Long source, Date periodStart, Date periodEnd, boolean declaration);
 
+
+    /**
+     * Получает список идентификаторов нф/деклараций для которых указанная нф является источником при консолидаци и которые находятся
+     * внутри указанного диапазона дат
+     * @param source идентификатор назначения-источника
+     * @param periodStart начало диапазона
+     * @param periodEnd окончание диапазона
+     * @param declaration признак того, что экземпляры-приемники надо искать только среди деклараций
+     * @return
+     */
+    Collection<Long> findConsolidatedInstanceIds(Long source, Date periodStart, Date periodEnd, boolean declaration);
+
+    /**
+     * Получает список идентификаторов нф, которые являются экземплярами указанного идентификатора
+     * формы-источника и по которым есть записи в таблице консолидаций
+     * @param source
+     * @param periodStart
+     * @param periodEnd
+     * @param declaration
+     * @return
+     */
+    Collection<Long> findFDConsolidatedSourceInstanceIds(Long source, Date periodStart, Date periodEnd, boolean declaration);
+
     /**
      * Возвращает названия подразделений для указанных источников
      * @param sources пары id источника - название подразделения
@@ -176,6 +199,10 @@ public interface SourceDao {
      * @return колличество обновленных строк
      */
     int updateFDConsolidationInfo(long sourceFormId);
+
+    int updateFDConsolidationInfo(Collection<? extends Number> sourceFormId, Collection<? extends Number> tgtFormId);
+
+    int updateDDConsolidationInfo(Collection<? extends Number> sourceFormId, Collection<? extends Number> tgtFormId);
 
     /**
      * Проставление признака неактуальности данных в НФ/декларации-приёмнике

@@ -9,13 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.*;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,10 +79,10 @@ public class SourceServiceImpl implements SourceService {
     private DeclarationTypeDao declarationTypeDao;
 
     @Autowired
-    private DepartmentDao departmentDao;
+    private DepartmentService departmentService;
 
     @Autowired
-    private DepartmentService departmentService;
+    private DepartmentDao departmentDao;
 
     @Autowired
     private SourceDao sourceDao;
@@ -104,7 +100,7 @@ public class SourceServiceImpl implements SourceService {
     private LogEntryService logEntryService;
 
     @Autowired
-    private FormTemplateDao formTemplateDao;
+    private FormTemplateService formTemplateService;
 
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
@@ -624,8 +620,8 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public void createSources(Logger logger, SourceClientData sourceClientData) {
         if (sourceClientData.getSourcePairs() != null && !sourceClientData.getSourcePairs().isEmpty()) {
-            String sourceDepartmentName = departmentDao.getDepartment(sourceClientData.getSourceDepartmentId()).getName();
-            String destinationDepartmentName = departmentDao.getDepartment(sourceClientData.getDestinationDepartmentId()).getName();
+            String sourceDepartmentName = departmentService.getDepartment(sourceClientData.getSourceDepartmentId()).getName();
+            String destinationDepartmentName = departmentService.getDepartment(sourceClientData.getDestinationDepartmentId()).getName();
             /** Проверка существования назначения подразделению */
             List<SourcePair> sourcePairs = checkExistence(logger, sourceClientData.getSourcePairs(),
                     sourceClientData.getMode(), sourceClientData.isDeclaration(),
@@ -712,19 +708,30 @@ public class SourceServiceImpl implements SourceService {
     public void deleteSources(Logger logger, SourceClientData sourceClientData) {
         if (sourceClientData.getSourcePairs() != null && !sourceClientData.getSourcePairs().isEmpty()) {
             List<SourceObject> sourceObjects = sourceClientData.getSourceObjects();
-            List<Long> sourceIds = new ArrayList<Long>();
-            for (SourceObject sourceObject : sourceObjects) {
-                sourceIds.add(sourceObject.getSourcePair().getSource());
-            }
+            HashSet<Long> sourceIds = new HashSet<Long>();
+            HashSet<Long> destIds = new HashSet<Long>();
+
             /** Получаем источники, имеющие принятые экземпляры в удаляемых периодах */
             List<ConsolidatedInstance> consolidatedInstances = new ArrayList<ConsolidatedInstance>();
             Set<Long> processedSources = new HashSet<Long>();
             for (SourceObject sourceObject: sourceObjects) {
-                Long source = sourceObject.getSourcePair().getSource();
+                final Long source = sourceObject.getSourcePair().getSource();
                 if (!processedSources.contains(source)) {
                     /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
                     consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(source,
                             sourceObject.getPeriodStart(), sourceObject.getPeriodEnd(), sourceClientData.isDeclaration()));
+                    destIds.addAll(sourceDao.findConsolidatedInstanceIds(
+                            source,
+                            sourceObject.getPeriodStart(),
+                            sourceObject.getPeriodEnd(),
+                            sourceClientData.isDeclaration())
+                    );
+                    sourceIds.addAll(
+                            sourceDao.findFDConsolidatedSourceInstanceIds( source,
+                                    sourceObject.getPeriodStart(),
+                                    sourceObject.getPeriodEnd(),
+                                    sourceClientData.isDeclaration())
+                    );
                     processedSources.add(source);
                 }
             }
@@ -761,6 +768,10 @@ public class SourceServiceImpl implements SourceService {
                     );
                 }
             }
+            if (!sourceClientData.isDeclaration())
+                sourceDao.updateFDConsolidationInfo(sourceIds, destIds);
+            else
+                sourceDao.updateDDConsolidationInfo(sourceIds, destIds);
         } else {
             throw new ServiceException(EMPTY_LIST_MSG);
         }
@@ -1294,7 +1305,7 @@ public class SourceServiceImpl implements SourceService {
         FormToFormRelation formToFormRelation = new FormToFormRelation();
         formToFormRelation.setSource(isSource);
         formToFormRelation.setFormDataKind(departmentFormType.getKind());
-        formToFormRelation.setPerformer(departmentFormType.getPerformerId() != null ? departmentDao.getDepartment(departmentFormType.getPerformerId()) : null);
+        formToFormRelation.setPerformer(departmentFormType.getPerformerId() != null ? departmentService.getDepartment(departmentFormType.getPerformerId()) : null);
         formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
         if (departmentreportPeriod != null) {
             if (departmentreportPeriod.getCorrectionDate() != null) {
@@ -1346,7 +1357,7 @@ public class SourceServiceImpl implements SourceService {
             fillFormDataRelation(formToFormRelation, formData);
         } else {
             // Созданный экземпляр не найден, ищем не созданный в том же периоде
-            if (formTemplateDao.existFormTemplate(departmentFormType.getFormTypeId(),
+            if (formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(),
                     departmentReportPeriod.getReportPeriod().getId())) {
                 formToFormRelation.setCreated(false);
                 formToFormRelation.setFormType(formTypeDao.get(departmentFormType.getFormTypeId()));
@@ -1395,12 +1406,12 @@ public class SourceServiceImpl implements SourceService {
                                                    DepartmentReportPeriod departmentReportPeriod,
                                                    Integer periodOrder) {
         List<FormToFormRelation> relations = new ArrayList<FormToFormRelation>();
-        if (!formTemplateDao.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
+        if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
             return relations;
 
         List<Integer> periodOrders = new ArrayList<Integer>();
-        int formTemplateId = formTemplateDao.getActiveFormTemplateId(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
-        if (formTemplateDao.get(formTemplateId).isMonthly() && periodOrder == null) {
+        int formTemplateId = formTemplateService.getActiveFormTemplateId(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
+        if (formTemplateService.get(formTemplateId).isMonthly() && periodOrder == null) {
             for(Months month: reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId())) {
                 if (month != null) periodOrders.add(month.getId());
             }
@@ -1434,7 +1445,7 @@ public class SourceServiceImpl implements SourceService {
                                                         DepartmentReportPeriod departmentReportPeriod,
                                                         Integer periodOrder) {
         List<FormToFormRelation> retVal = new LinkedList<FormToFormRelation>();
-        if (!formTemplateDao.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
+        if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
             return retVal;
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
@@ -1456,8 +1467,8 @@ public class SourceServiceImpl implements SourceService {
             departmentReportPeriodList.removeAll(delList);
         }
 
-        int formTemplateId = formTemplateDao.getActiveFormTemplateId(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
-        if (!formTemplateDao.get(formTemplateId).isMonthly()) {
+        int formTemplateId = formTemplateService.getActiveFormTemplateId(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
+        if (!formTemplateService.get(formTemplateId).isMonthly()) {
             periodOrder = null;
         }
         for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {

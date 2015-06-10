@@ -9,6 +9,7 @@ import java.util.Date;
  * @author dloshkarev
  */
 public class ConsolidatedInstance {
+    private int id;
     private String type;
     private FormDataKind formKind;
     private String department;
@@ -18,6 +19,14 @@ public class ConsolidatedInstance {
     private boolean declaration;
     private String taxOrganCode;
     private String kpp;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public boolean isDeclaration() {
         return declaration;
