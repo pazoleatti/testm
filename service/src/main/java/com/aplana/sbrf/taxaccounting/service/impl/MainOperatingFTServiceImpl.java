@@ -102,7 +102,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         int id = formTemplateService.save(formTemplate);
 
         auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, null, null, null, formTemplate.getType().getName(), null, null, null);
-        //logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
+        logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
         return id;
     }
 
@@ -157,7 +157,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         int id = formTemplateService.save(formTemplate);
 
         auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, null, formTemplate.getType().getName(), null, null, null);
-        //logging(id, FormDataEvent.TEMPLATE_CREATED, user);
+        logging(id, FormDataEvent.TEMPLATE_CREATED, user.getUser());
         return id;
     }
 
@@ -170,7 +170,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         int id = formTemplateService.save(formTemplate);
 
         auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, null, formTemplate.getType().getName(), null, null, null);
-        //logging(id, FormDataEvent.TEMPLATE_CREATED, user);
+        logging(id, FormDataEvent.TEMPLATE_CREATED, user.getUser());
         return id;
     }
 
@@ -229,7 +229,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;
         }
-        //logging(templateId, FormDataEvent.TEMPLATE_DELETED, user);
+        logging(templateId, FormDataEvent.TEMPLATE_DELETED, user.getUser());
         auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, null, template.getType().getName(), null, null, null);
         return isDeleteAll;
     }
@@ -243,10 +243,10 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                     template.getVersion(), null, logger);
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             formTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
-            //logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user);
+            logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user.getUser());
         } else {
             formTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
-            //logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user);
+            logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user.getUser());
         }
         return true;
     }

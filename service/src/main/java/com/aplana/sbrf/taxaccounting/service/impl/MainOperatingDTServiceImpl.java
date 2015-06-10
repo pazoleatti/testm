@@ -93,7 +93,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         int id = declarationTemplateService.save(declarationTemplate);
 
         auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
-        //logging(id, FormDataEvent.TEMPLATE_MODIFIED, user);
+        logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
         return id;
     }
 
@@ -111,7 +111,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         int id = declarationTemplateService.save(declarationTemplate);
 
         auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
-        //logging(id, FormDataEvent.TEMPLATE_CREATED, user);
+        logging(id, FormDataEvent.TEMPLATE_CREATED, user.getUser());
         return id;
     }
 
@@ -126,7 +126,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         int id = declarationTemplateService.save(declarationTemplate);
 
         auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
-        //logging(id, FormDataEvent.TEMPLATE_CREATED, user);
+        logging(id, FormDataEvent.TEMPLATE_CREATED, user.getUser());
         return id;
     }
 
@@ -187,7 +187,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             isDeleteAll = true;
         }
         auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, template.getType().getName(), null, null, null, null);
-        //logging(templateId, FormDataEvent.TEMPLATE_DELETED, user);
+        logging(templateId, FormDataEvent.TEMPLATE_DELETED, user.getUser());
         return isDeleteAll;
     }
 
@@ -201,11 +201,11 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             if (!force && logger.containsLevel(LogLevel.ERROR)) return false;
             declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
             declarationTemplateService.updateVersionStatus(VersionedObjectStatus.DRAFT, templateId);
-            //logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user);
+            logging(templateId, FormDataEvent.TEMPLATE_DEACTIVATED, user.getUser());
         } else {
             declarationTemplate.setStatus(VersionedObjectStatus.NORMAL);
             declarationTemplateService.updateVersionStatus(VersionedObjectStatus.NORMAL, templateId);
-            //logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user);
+            logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user.getUser());
         }
         return true;
     }
