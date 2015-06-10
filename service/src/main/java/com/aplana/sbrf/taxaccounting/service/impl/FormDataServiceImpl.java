@@ -86,10 +86,10 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
     private static final String FD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\" в подразделении \"%s\", состояние - \"%s\"";
-    private static final String LOCK_CURRENT =
-            "Текущая налоговая форма заблокирована пользователем %s в %s(\"%s\"). Попробуйте выполнить операцию позже";
-    private static final String LOCK_SOURCE =
-            "Налоговая форма-источник \"%s\", \"%s\", \"%s\", \"%s\" заблокирована пользователем %s в %s. Попробуйте выполнить операцию позже";
+    private static final String LOCK_CURRENT_1 =
+            "Текущая налоговая форма заблокирована пользователем \"%s\" в \"%s\". Попробуйте выполнить операцию позже";
+    private static final String LOCK_CURRENT_2 =
+            "\"%s\" пользователем \"%s\" запущена операция \"%s\"";
     private static final String SOURCE_MSG_ERROR =
             "существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
     //Выводит информацию о НФ в определенном формате
@@ -1211,7 +1211,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public String getFormDataFullName(long formDataId, String fileName, ReportType reportType) {
+    public String getFormDataFullName(long formDataId, String str, ReportType reportType) {
         //TODO: можно оптимизировать и сделать в 1 запрос
         FormData formData = formDataDao.get(formDataId, false);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
@@ -1236,9 +1236,23 @@ public class FormDataServiceImpl implements FormDataService {
                     break;
                 case CONSOLIDATE_FD:
                 case CALCULATE_FD:
-                case MOVE_FD:
+                case CHECK_FD:
                     name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
                             String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            department.getName(),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "");
+                    break;
+                case MOVE_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            String.format(reportType.getDescription(), str, formData.getFormType().getTaxType().getTaxText()),
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
                             department.getName(),
@@ -1253,7 +1267,7 @@ public class FormDataServiceImpl implements FormDataService {
                 case IMPORT_FD:
                 case IMPORT_TF_FD:
                     name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            String.format(reportType.getDescription(), fileName, formData.getFormType().getTaxType().getTaxText()),
+                            String.format(reportType.getDescription(), str, formData.getFormType().getTaxType().getTaxText()),
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
                             department.getName(),
@@ -1678,6 +1692,14 @@ public class FormDataServiceImpl implements FormDataService {
         return LockData.LockObjects.FORM_DATA.name() + "_" + formDataId + "_" + reportType.getName();
     }
 
+    @Override
+    public void interruptTask(long formDataId, TAUserInfo userInfo, List<ReportType> reportTypes) {
+        List<String> lockKeys = new ArrayList<String>();
+        for(ReportType reportType: reportTypes)
+            lockKeys.add(generateTaskKey(formDataId, reportType));
+        lockService.interuptAllTasks(lockKeys, userInfo.getUser().getId());
+    }
+
 
     @Override
     public Pair<ReportType, LockData> getLockTaskType(long formDataId) {
@@ -1690,14 +1712,28 @@ public class FormDataServiceImpl implements FormDataService {
         return null;
     }
 
-    public void locked(LockData lockData, Logger logger) {
+    @Override
+    public void locked(LockData lockData, Logger logger, ReportType reportType) {
         TAUser user = userService.getUser(lockData.getUserId());
-        logger.error(
-                String.format(
-                        LOCK_CURRENT, user.getName(),
-                        SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
-                        lockData.getDescription())
-        );
+        switch (reportType) {
+            case CONSOLIDATE_FD:
+                logger.error(
+                        String.format(
+                                LOCK_CURRENT_1,
+                                user.getName(),
+                                SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
+                                lockData.getDescription())
+                );
+                break;
+            default:
+                logger.error(
+                        String.format(
+                                LOCK_CURRENT_2,
+                                SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
+                                user.getName(),
+                                lockData.getDescription())
+                );
+        }
         throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
     }
 

@@ -26,7 +26,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -76,7 +78,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                 try {
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     logger.info(String.format(LockData.LOCK_INFO_MSG,
-                            String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName()),
+                            String.format(reportType.getDescription(), action.getTaxType().getTaxText()),
                             sdf.format(lockDataTask.getDateLock()),
                             userService.getUser(lockDataTask.getUserId()).getName()));
                 } catch (ServiceException e) {
@@ -91,6 +93,11 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                     LockData.State.IN_QUEUE.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                 try {
+                    List<ReportType> reportTypes = new ArrayList<ReportType>();
+                    reportTypes.add(ReportType.CHECK_FD);
+                    reportTypes.add(ReportType.CALCULATE_FD);
+                    reportTypes.add(ReportType.IMPORT_FD);
+                    formDataService.interruptTask(action.getFormDataId(), userInfo, reportTypes);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("formDataId", action.getFormDataId());
                     params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
@@ -114,7 +121,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                 throw new ActionException("Не удалось запустить консолидацию. Попробуйте выполнить операцию позже");
             }
         } else {
-            formDataService.locked(lockType.getSecond(), logger);
+            formDataService.locked(lockType.getSecond(), logger, reportType);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
