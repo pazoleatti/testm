@@ -148,13 +148,13 @@ public class LoadRefBookDataServiceTest {
     public void isNSIFileTest() {
         // ЦАС НСИ
         for (String name : new String[]{"OKA99VVV.RR", "payments.OKATO.9999.VVV.RR", "OKAdd777.99",
-                "payments.OKATO.f00f.h0h.00", "RNU00VVV.RR", "generaluse.AS_RNU.VVV.RR", "bookkeeping.Bookkeeping.VVV.RR"}) {
+                "payments.OKATO.f00f.h0h.00", "RNU00VVV.RR", "BUH00VVV.RR", "generaluse.AS_RNU.VVV.RR", "bookkeeping.Bookkeeping.VVV.RR"}) {
             Assert.assertTrue("File \"" + name + "\" is NSI file!", service.isNSIFile(name));
         }
         // Не ЦАС НСИ
         for (String name : new String[]{null, "OKA99VVVV.RR", "OKA99VVV..RR", "OKA.", "OKA99VVVV.",
                 "payments.OKATO.9999......RR", "payments.OKATO.99999VVV.RR", "OKAdd77799", "payments.OKATO.f00f.h0h.000",
-                "RNU.", "generaluse.AS_RNU.", "bookkeeping.Bookkeeping.", "bookkeeping.Bookkeeping.000000"}) {
+                "RNU.", "generaluse.AS_RNU.", "BUH00VVV.RRR", "bookkeeping.Bookkeeping.", "bookkeeping.Bookkeeping.000000"}) {
             Assert.assertFalse("File \"" + name + "\" is not NSI file!", service.isNSIFile(name));
         }
     }

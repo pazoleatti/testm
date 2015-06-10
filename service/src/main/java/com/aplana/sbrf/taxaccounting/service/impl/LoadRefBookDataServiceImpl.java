@@ -107,7 +107,9 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         nsiRegionMappingMap.put("generaluse\\.as_rnu\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(true, REF_BOOK_RF_SUBJ_CODE)));
 
         // Архив «План счетов»
-        nsiAccountPlanMappingMap.put("bookkeeping\\.bookkeeping\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_ACCOUNT_PLAN)));
+        nsiAccountPlanMappingMap.put("buh.{5}\\..{2}", asList(new Pair<Boolean, Long>(false, REF_BOOK_ACCOUNT_PLAN)));
+        // Файл «План счетов»
+        nsiAccountPlanMappingMap.put("bookkeeping\\.bookkeeping\\..{3}\\..{2}", asList(new Pair<Boolean, Long>(true, REF_BOOK_ACCOUNT_PLAN)));
     }
 
     /**
