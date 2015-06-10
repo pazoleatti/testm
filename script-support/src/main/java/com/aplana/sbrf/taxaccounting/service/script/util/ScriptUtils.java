@@ -383,7 +383,7 @@ public final class ScriptUtils {
         }
 
         // формат строки и шаблона не совпадают (excel может подставить в ячейку "yyyy" значение "01.01.yyyy")
-        if (!tmp.contains(".") && format.contains(".")) {
+        if (tmp.matches("\\d*") && format.contains(".")) {
             BigDecimal tmpNum = parseNumber(tmp, indexRow, indexColumn, logger, required);
             if (tmpNum != null && !tmpNum.equals(0)) {
                 return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
@@ -400,6 +400,13 @@ public final class ScriptUtils {
         try {
             retVal = parseDate(format, tmp);
         } catch (ParseException ex) {
+            // костыль для обхода http://jira.aplana.com/browse/SBRFACCTAX-11560
+            try {
+                if (format.toLowerCase().equals("dd.mm.yyyy") && tmp.matches("\\d{1,2}/\\d{1,2}/\\d{1,2}")) {
+                    retVal = parseDate("M/d/yy", tmp);
+                }
+            } catch (ParseException ex2) {
+            }
         }
         if (retVal == null) {
             String msg = String.format(WRONG_DATE, indexRow, getXLSColumnName(indexColumn), value, format);
