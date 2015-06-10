@@ -1085,73 +1085,67 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceException("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
         }
 
+        /*
         //Блокировка всех экземпляров источников
         List<String> lockedForms = new ArrayList<String>();
-        try {
-            String lockKey = "";
-            //Переменная для отмечания консолидации в таблице консолидации
-            for (FormData sourceForm : sources){
-                // Проверяем/устанавливаем блокировку для источников
-                LockData lockData;
-                Pair<ReportType, LockData> lockType = getLockTaskType(sourceForm.getId());
-                if (lockType == null) {
-                    lockKey = generateTaskKey(sourceForm.getId(), ReportType.EDIT_FD);
-                    lockData = lockService.lock(
-                            lockKey,
-                            userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
-                            lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-                } else {
-                    lockData = lockType.getSecond();
-                }
-
-                if (lockData != null) {
-                    DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
-                    logger.error(LOCK_SOURCE,
-                            sourceForm.getFormType().getName(),
-                            sourceForm.getKind().getName(),
-                            drp.getReportPeriod().getTaxPeriod().getYear() + " " + drp.getReportPeriod().getName(),
-                            departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
-                            userService.getUser(lockData.getUserId()).getName(),
-                            SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
-                } else {
-                    lockedForms.add(lockKey);
-                }
+        String lockKey = "";
+        //Переменная для отмечания консолидации в таблице консолидации
+        for (FormData sourceForm : sources){
+            // Проверяем/устанавливаем блокировку для источников
+            LockData lockData;
+            Pair<ReportType, LockData> lockType = getLockTaskType(sourceForm.getId());
+            if (lockType == null) {
+                lockKey = generateTaskKey(sourceForm.getId(), ReportType.EDIT_FD);
+                lockData = lockService.lock(
+                        lockKey,
+                        userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
+                        lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+            } else {
+                lockData = lockType.getSecond();
             }
 
-            //2А. Выводим ошибки блокировок
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceException("Ошибка при консолидации");
-            }
-            //3. Консолидируем
-            ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
-            scriptComponentContext.setUserInfo(userInfo);
-            scriptComponentContext.setLogger(logger);
-            FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
-            ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-            /*Integer periodOrder =
-                    (formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;*/
-            formDataCompositionService.compose(formData, 0, null, formData.getFormType().getId(), formData.getKind());
-
-            //Система выводит сообщение в панель уведомлений
-            logger.info("Выполнена консолидация данных из форм-источников:");
-            for (String s : msgPull){
-                logger.info(s);
-            }
-
-            //Удаление отчета НФ
-            reportService.delete(formData.getId(), null);
-            //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
-            updatePreviousRowNumber(formData, logger, userInfo);
-            //Обновление записей о консолидации
-            sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
-            sourceService.addFormDataConsolidationInfo(formData.getId(), srcAcceptedIds);
-
-        } finally {
-            //5. Система разблокирует текущий экземпляр и все налоговые формы - источники.
-            for (String lockKey : lockedForms) {
-                lockService.unlock(lockKey, userInfo.getUser().getId());
+            if (lockData != null) {
+                DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
+                logger.error(LOCK_SOURCE,
+                        sourceForm.getFormType().getName(),
+                        sourceForm.getKind().getName(),
+                        drp.getReportPeriod().getTaxPeriod().getYear() + " " + drp.getReportPeriod().getName(),
+                        departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
+                        userService.getUser(lockData.getUserId()).getName(),
+                        SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
+            } else {
+                lockedForms.add(lockKey);
             }
         }
+
+        //2А. Выводим ошибки блокировок
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException("Ошибка при консолидации");
+        }
+         */
+        //3. Консолидируем
+        ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
+        scriptComponentContext.setUserInfo(userInfo);
+        scriptComponentContext.setLogger(logger);
+        FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
+        ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
+        /*Integer periodOrder =
+                (formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;*/
+        formDataCompositionService.compose(formData, 0, null, formData.getFormType().getId(), formData.getKind());
+
+        //Система выводит сообщение в панель уведомлений
+        logger.info("Выполнена консолидация данных из форм-источников:");
+        for (String s : msgPull){
+            logger.info(s);
+        }
+
+        //Удаление отчета НФ
+        reportService.delete(formData.getId(), null);
+        //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
+        updatePreviousRowNumber(formData, logger, userInfo);
+        //Обновление записей о консолидации
+        sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
+        sourceService.addFormDataConsolidationInfo(formData.getId(), srcAcceptedIds);
     }
 
     @Override
