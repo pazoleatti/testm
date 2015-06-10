@@ -172,7 +172,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     @Override
     public void updatePrintReportButtonName(ReportType reportType, boolean isVisibleLoad) {
         if (reportType == ReportType.ARCHIVE_AUDIT){
-            downloadArchive.setVisible(isVisibleLoad);
+            downloadArchive.setVisible(isVisibleLoad && archive.isVisible());
         } else {
             printButton.setVisible(!isVisibleLoad);
             downloadCsvButton.setVisible(isVisibleLoad);
