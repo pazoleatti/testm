@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
@@ -1026,7 +1027,8 @@ public class FormDataServiceImpl implements FormDataService {
      *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
      */
     @Transactional(readOnly = false)
-    public void compose(final FormData formData, TAUserInfo userInfo, Logger logger) {
+    public void compose(final FormData formData, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
+        stateLogger.updateState("Выполнение проверок на возможность консолидации");
         checkCompose(formData, userInfo, logger);
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -1040,9 +1042,9 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getEndDate());
 
         HashSet<Long> srcAcceptedIds = new HashSet<Long>();
+        ArrayList<String> msgPull = new ArrayList<String>(0);
         //Список для блокировки форм
         ArrayList<FormData> sources = new ArrayList<FormData>(departmentFormTypesSources.size());
-        ArrayList<String> msgPull = new ArrayList<String>(0);
         for (DepartmentFormType sourceDFT : departmentFormTypesSources){
             // Последний отчетный период подразделения
             DepartmentReportPeriod sourceDepartmentReportPeriod =
@@ -1117,6 +1119,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
          */
         //3. Консолидируем
+        stateLogger.updateState("Консолидация данных в форму");
         ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
         scriptComponentContext.setUserInfo(userInfo);
         scriptComponentContext.setLogger(logger);
@@ -1132,10 +1135,12 @@ public class FormDataServiceImpl implements FormDataService {
             logger.info(s);
         }
 
-        //Удаление отчета НФ
+        //Удаление отчета НФ             
+        stateLogger.updateState("Удаление отчетов формы");
         reportService.delete(formData.getId(), null);
         //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
-        updatePreviousRowNumber(formData, logger, userInfo);
+        stateLogger.updateState("Обновление сквозной нумерации");
+        updatePreviousRowNumber(formData, logger, userInfo, false);
         //Обновление записей о консолидации
         sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));
         sourceService.addFormDataConsolidationInfo(formData.getId(), srcAcceptedIds);
@@ -1420,7 +1425,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public Integer getPreviousRowNumber(FormData formData) {
+    public Integer getPreviousRowNumber(FormData formData, FormData savingFormData) {
         int previousRowNumber = 0;
         // Отчетный период подразделения
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -1433,7 +1438,7 @@ public class FormDataServiceImpl implements FormDataService {
         if (formDataList.size() > 0) {
             for (FormData aFormData : formDataList) {
                 if (beInOnAutoNumeration(aFormData.getState(), departmentReportPeriod)) {
-                    previousRowNumber += dataRowDao.getTempSizeWithoutTotal(aFormData);
+                    previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData, savingFormData != null && (aFormData.getId().equals(savingFormData.getId())));
                 }
                 if (aFormData.getId().equals(formData.getId())) {
                     return previousRowNumber;
@@ -1454,7 +1459,7 @@ public class FormDataServiceImpl implements FormDataService {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         if (!formData.isManual() && beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
                 && dataRowDao.isDataRowsCountChanged(formData)) {
-            updatePreviousRowNumber(formData, logger, user);
+            updatePreviousRowNumber(formData, logger, user, true);
         }
     }
 
@@ -1467,23 +1472,23 @@ public class FormDataServiceImpl implements FormDataService {
      */
     public void updatePreviousRowNumberAttr(FormData formData, WorkflowMove workflowMove, Logger logger, TAUserInfo user) {
         if (canUpdatePreviousRowNumberWhenDoMove(workflowMove)) {
-            updatePreviousRowNumber(formData, logger, user);
+            updatePreviousRowNumber(formData, logger, user, false);
         }
     }
 
     @Override
     public void updatePreviousRowNumber(FormData formData, TAUserInfo user) {
-        updatePreviousRowNumber(formData, null, user);
+        updatePreviousRowNumber(formData, null, user, false);
     }
 
     @Override
-    public void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user) {
+    public void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave) {
         FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
-        updatePreviousRowNumber(formData, formTemplate, logger, user);
+        updatePreviousRowNumber(formData, formTemplate, logger, user, isSave);
     }
 
     @Override
-    public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user) {
+    public void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave) {
         String msg = null;
 
         if (formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
@@ -1493,14 +1498,14 @@ public class FormDataServiceImpl implements FormDataService {
             List<FormData> formDataList = formDataDao.getNextFormDataList(formData, taxPeriod);
 
             // Устанавливаем значение для текущего экземпляра НФ
-            formDataDao.updatePreviousRowNumber(formData.getId(), getPreviousRowNumber(formData));
+            formDataDao.updatePreviousRowNumber(formData.getId(), getPreviousRowNumber(formData, null));
 
             StringBuilder stringBuilder = new StringBuilder();
             // Обновляем последующие периоды
             int size = formDataList.size();
 
             for (FormData data : formDataList) {
-                formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data));
+                formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data, isSave ? formData : null));
                 deleteReport(data.getId(), null, user.getUser().getId());
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
                 stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
@@ -1527,7 +1532,7 @@ public class FormDataServiceImpl implements FormDataService {
     public void batchUpdatePreviousNumberRow(FormTemplate formTemplate, TAUserInfo user) {
         List<FormData> formDataList = formDataDao.getFormDataListByTemplateId(formTemplate.getId());
         for (FormData formData : formDataList) {
-            updatePreviousRowNumber(formData, formTemplate, null, user);
+            updatePreviousRowNumber(formData, formTemplate, null, user, false);
         }
     }
 

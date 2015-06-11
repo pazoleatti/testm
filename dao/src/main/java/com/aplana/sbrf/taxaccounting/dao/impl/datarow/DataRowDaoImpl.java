@@ -566,8 +566,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public int getTempSizeWithoutTotal(FormData formData) {
-		return getSizeWithoutTotalInternal(formData, DataRowType.TEMP);
+	public int getSizeWithoutTotal(FormData formData, boolean isTemp) {
+		return getSizeWithoutTotalInternal(formData, isTemp ? DataRowType.TEMP : DataRowType.SAVED);
 	}
 
 	/**

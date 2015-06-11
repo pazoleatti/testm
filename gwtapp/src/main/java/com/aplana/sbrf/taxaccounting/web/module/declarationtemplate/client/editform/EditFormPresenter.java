@@ -27,6 +27,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         DeclarationType getDecTypeData();
         boolean isChangeFilter();
         void edit(DeclarationType type);
+        boolean checkIfrs();
     }
 
     DispatchAsync dispatchAsync;
@@ -58,6 +59,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     @Override
     public void onSave() {
+        if (!getView().checkIfrs()) {
+            Dialog.errorMessage("Макет не сохранен", "При установке признака \"Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
+            return;
+        }
         EditDeclarationTypeNameAction action = new EditDeclarationTypeNameAction();
         action.setNewDeclarationType(getView().getDecTypeData());
         dispatchAsync.execute(action, CallbackUtils
@@ -102,6 +107,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
                 }
             });
         } else {
+            initDeclarationType = type;
             getView().edit(type);
         }
     }

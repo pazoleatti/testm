@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -261,9 +262,10 @@ public interface FormDataService {
     /**
      * Получить значение "Номер последней строки предыдущей НФ"
      * @param formData {@link com.aplana.sbrf.taxaccounting.model.FormData экземпляр НФ}
+     * @param savingFormData сохраняемая НФ, для которой надо брать временный срез
      * @return
      */
-    Integer getPreviousRowNumber(FormData formData);
+    Integer getPreviousRowNumber(FormData formData, FormData savingFormData);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
@@ -273,20 +275,20 @@ public interface FormDataService {
 
     /**
      * Обновить Номер последней строки предыдущей НФ
-     *
-     * @param formData экземпляр НФ, для которой необходимо обновить
+     *  @param formData экземпляр НФ, для которой необходимо обновить
      * @param logger   логгер для регистрации ошибок
+     * @param save
      */
-    void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user);
+    void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
-     *
-     * @param formData     экземпляр НФ, для которой необходимо обновить
+     *  @param formData     экземпляр НФ, для которой необходимо обновить
      * @param formTemplate макет НФ
      * @param logger       логгер для регистрации ошибок
+     * @param save
      */
-    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user);
+    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода
@@ -356,7 +358,7 @@ public interface FormDataService {
      * @param userInfo
      * @param logger
      */
-    void compose(final FormData formData, TAUserInfo userInfo, Logger logger);
+    void compose(final FormData formData, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger);
 
     /**
      * Получает полное название нф с указанием подразделения, периода и прочего

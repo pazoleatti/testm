@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserView;
@@ -17,7 +18,7 @@ public interface PrintingService {
      * @param saved
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
-    String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved);
+    String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger);
     /**
      * Формирует CSV-отчет НФ, сохраняет его в таблицы BLOB_DATA и возвращает uuid
      * @param userInfo
@@ -27,7 +28,7 @@ public interface PrintingService {
      * @param saved
      * @return uuid записи с данными из таблицы BLOB_DATA
      */
-    String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved);
+    String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger);
 	String generateExcelLogEntry(List<LogEntry> listLogEntries);
     String generateExcelUsers(List<TAUserView> taUserViewList);
     String generateExcelLogSystem(List<LogSearchResultItem> resultItems);

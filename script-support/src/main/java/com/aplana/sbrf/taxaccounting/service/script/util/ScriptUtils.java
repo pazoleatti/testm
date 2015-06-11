@@ -921,10 +921,15 @@ public final class ScriptUtils {
 
     /**
      * Сравнение строки с эталонной
-     *
-     * @return null если строки совпадают, иначе текст ошибки
      */
     public static void checkHeaderEquals(Map<Object, String> headerMapping) {
+        checkHeaderEquals(headerMapping, null);
+    }
+
+    /**
+     * Сравнение строки с эталонной для всего набора строк (если передан Logger)
+     */
+    public static void checkHeaderEquals(Map<Object, String> headerMapping, Logger logger) {
         for (Object currentString : headerMapping.keySet()) {
             String referenceString = headerMapping.get(currentString);
             if (currentString == null || referenceString == null) {
@@ -938,9 +943,14 @@ public final class ScriptUtils {
             if (s1.equalsIgnoreCase(s2)) {
                 continue;
             }
-            throw new ServiceException(WRONG_HEADER_EQUALS, s2, s1);
+
+            if (logger == null) {
+                throw new ServiceException(WRONG_HEADER_EQUALS, s2, s1);
+            }
+            logger.error(WRONG_HEADER_EQUALS, s2, s1);
         }
     }
+
 
     /**
      * Проверка пустых значений

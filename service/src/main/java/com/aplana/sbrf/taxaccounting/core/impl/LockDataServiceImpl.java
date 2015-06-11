@@ -367,6 +367,7 @@ public class LockDataServiceImpl implements LockDataService {
     @Override
     public void interruptTask(final LockData lockData, final int userId, final boolean force) {
         if (lockData != null) {
+            log.info(String.format("Останавливается асинхронная задача с ключом %s", lockData.getKey()));
             tx.executeInNewTransaction(new TransactionLogic() {
                                            @Override
                                            public void execute() {
