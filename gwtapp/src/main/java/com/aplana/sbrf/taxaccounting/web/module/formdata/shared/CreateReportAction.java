@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 /**
- * Действие добавления строки.
+ * Создание задачи для генерации отчетов
  *
  * @author lhaziev
  */
@@ -59,6 +59,6 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     @Override
 	public String getName() {
-		return "Создание задачи для генерации отчетов";
+		return "";
 	}
 }

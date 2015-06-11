@@ -388,6 +388,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
     @UiHandler("refBookAttrBox")
     public void onRefBookAttrBox(ValueChangeEvent<RefBookAttribute> event) {
+        if (event.getValue()==null){
+            return;
+        }
         Column currentColumn = columns.get(columnListBox.getSelectedIndex());
         if (ColumnType.REFBOOK.equals(currentColumn.getColumnType())) {
             ((RefBookColumn) currentColumn).setRefBookAttributeId(event.getValue().getId());
@@ -592,7 +595,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             refBooktAttrParentPanel.setVisible(true);
             refBookAttrPanel.setVisible(true);
             refBookAttrRefBox.setVisible(true);
-            List<Column> availableList = getRefBookColumn(null);
+            List<Column> availableList = getRefBookColumn(column);
             if (!availableList.isEmpty()) {
                 RefBookColumn parentColumn = null;
                 for (Column col : availableList) {
@@ -713,7 +716,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
                 referenceColumn.setParentId(parentColumn.getId());
                 RefBook parentRefBook = getUiHandlers().getRefBook(
                         getUiHandlers().getRefBookByAttributeId(parentColumn.getRefBookAttributeId(), false));
-                referenceColumn.setRefBookAttributeId(parentRefBook.getAttributes().get(0).getId());
+                if (parentRefBook!=null){
+                    referenceColumn.setRefBookAttributeId(parentRefBook.getAttributes().get(0).getId());
+                }
                 copyMainColumnAttributes(column, referenceColumn);
                 newColumn = referenceColumn;
             }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
@@ -46,7 +47,7 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
     private LockDataService lockService;
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
@@ -54,16 +55,16 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
 
         Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.PDF_DEC);
         if (checkTaskLimit == null) {
-            throw new ServiceException("Декларация не сформирована");
+            throw new AsyncTaskException("Декларация не сформирована");
         } else if (checkTaskLimit.getFirst() == null) {
             Logger logger = new Logger();
             DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
             logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-            throw new ServiceLoggerException(ReportType.CHECK_TASK,
+            throw new AsyncTaskException(new ServiceLoggerException(ReportType.CHECK_TASK,
                     logEntryService.save(logger.getEntries()),
                     String.format(ReportType.EXCEL_DEC.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
-                    String.format("xml файл %s имеет слишком большой размер(%s байт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), checkTaskLimit.getSecond()));
+                    String.format("xml файл %s имеет слишком большой размер(%s байт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), checkTaskLimit.getSecond())));
         }
         return checkTaskLimit.getFirst();
     }

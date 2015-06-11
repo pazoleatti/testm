@@ -121,16 +121,16 @@ public class DataRowDaoImplTest extends Assert {
 	}
 
 	@Test
-	public void getTempSizeWithoutTotal() {
+	public void getSizeWithoutTotal() {
 		FormData formData = formDataDao.get(329, false);
-		Assert.assertEquals(2, dataRowDao.getTempSizeWithoutTotal(formData));
+		Assert.assertEquals(2, dataRowDao.getSizeWithoutTotal(formData, true));
 		formData.setManual(true);
-		Assert.assertEquals(0, dataRowDao.getTempSizeWithoutTotal(formData));
+		Assert.assertEquals(0, dataRowDao.getSizeWithoutTotal(formData, true));
 
 		formData = formDataDao.get(3291, false);
-		Assert.assertEquals(1, dataRowDao.getTempSizeWithoutTotal(formData));
+		Assert.assertEquals(1, dataRowDao.getSizeWithoutTotal(formData, true));
 		formData.setManual(true);
-		Assert.assertEquals(0, dataRowDao.getTempSizeWithoutTotal(formData));
+		Assert.assertEquals(0, dataRowDao.getSizeWithoutTotal(formData, true));
 	}
 
 	@Test

@@ -55,6 +55,21 @@ public interface AuditService {
              String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId);
 
     /**
+     * Добавить информацию об логировании из версий макетов
+     * @param event событие {@link FormDataEvent} (обязательное)
+     * @param userInfo информация о пользователе, который совершает событие (обязательное)
+     * @param departmentId подразделение НФ/декларации (необязательное)
+     * @param reportPeriodId отчетный период (необязательное)
+     * @param declarationTemplateName наименование типа декларации (необязательное)
+     * @param formTemplateName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
+     * @param formKindId вид НФ (необязательное)
+     * @param note пояснение (необязательное)
+     * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
+     */
+    void add(FormDataEvent event, TAUserInfo userInfo, Date startDate, Date endDate,
+             String declarationTemplateName, String formTemplateName, String note, String blobDataId);
+
+    /**
      * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.
      * @param itemList архивированные записи
      */

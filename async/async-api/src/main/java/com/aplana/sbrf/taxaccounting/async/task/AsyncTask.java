@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 
 import java.util.Date;
@@ -48,5 +49,5 @@ public interface AsyncTask {
      * @param params
      * @return
      */
-    BalancingVariants checkTaskLimit(Map<String, Object> params);
+    BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException;
 }

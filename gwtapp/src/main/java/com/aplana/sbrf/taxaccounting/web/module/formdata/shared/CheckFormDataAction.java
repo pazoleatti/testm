@@ -71,6 +71,6 @@ public class CheckFormDataAction extends UnsecuredActionImpl<TaskFormDataResult>
 
     @Override
 	public String getName() {
-		return "Обработка запроса на проверку формы";
+		return "";
 	}
 }

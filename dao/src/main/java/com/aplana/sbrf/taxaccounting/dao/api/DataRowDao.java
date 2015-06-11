@@ -88,7 +88,7 @@ public interface DataRowDao {
     /**
      * Метод получает количество строк редактируемого среза без учета итоговых
      */
-    int getTempSizeWithoutTotal(FormData formData);
+    int getSizeWithoutTotal(FormData formData, boolean isTemp);
 
 	/**
 	 * Вставляет строки начиная с указанного индекса. Выставленные в rows значения id и index игнорируются и

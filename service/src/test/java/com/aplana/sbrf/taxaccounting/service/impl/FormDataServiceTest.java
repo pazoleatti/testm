@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceRollbackException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -356,7 +355,7 @@ public class FormDataServiceTest {
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
 
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
-                formDataService.getPreviousRowNumber(newFormData).equals(0));
+                formDataService.getPreviousRowNumber(newFormData, null).equals(0));
     }
 
     /**
@@ -394,8 +393,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getTempSizeWithoutTotal(formData)).thenReturn(3);
-        when(dataRowDao.getTempSizeWithoutTotal(formData1)).thenReturn(5);
+        when(dataRowDao.getSizeWithoutTotal(formData, false)).thenReturn(3);
+        when(dataRowDao.getSizeWithoutTotal(formData1, false)).thenReturn(5);
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
@@ -403,7 +402,7 @@ public class FormDataServiceTest {
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 8",
-                formDataService.getPreviousRowNumber(newFormData).equals(8));
+                formDataService.getPreviousRowNumber(newFormData, null).equals(8));
     }
 
     /**
@@ -442,8 +441,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getTempSizeWithoutTotal(formData)).thenReturn(3);
-        when(dataRowDao.getTempSizeWithoutTotal(formData1)).thenReturn(5);
+        when(dataRowDao.getSizeWithoutTotal(formData, false)).thenReturn(3);
+        when(dataRowDao.getSizeWithoutTotal(formData1, false)).thenReturn(5);
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
@@ -452,7 +451,7 @@ public class FormDataServiceTest {
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
-                formDataService.getPreviousRowNumber(newFormData).equals(3));
+                formDataService.getPreviousRowNumber(newFormData, null).equals(3));
     }
 
     /**
@@ -469,7 +468,7 @@ public class FormDataServiceTest {
         doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
 
         dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true));
     }
 
     /**
@@ -487,7 +486,7 @@ public class FormDataServiceTest {
         doReturn(1L).when(formData).getId();
 
         dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true));
     }
 
     /**
@@ -505,7 +504,7 @@ public class FormDataServiceTest {
         doReturn(WorkflowState.CREATED).when(formData).getState();
 
         dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
-        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true));
     }
 
     /**
@@ -519,7 +518,7 @@ public class FormDataServiceTest {
         doReturn(false).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
 
         dataService.updatePreviousRowNumberAttr(any(FormData.class), any(WorkflowMove.class), any(Logger.class), any(TAUserInfo.class));
-        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
+        verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(false));
     }
 
     /**
@@ -535,7 +534,7 @@ public class FormDataServiceTest {
         doReturn(true).when(dataService).canUpdatePreviousRowNumberWhenDoMove(any(WorkflowMove.class));
 
         dataService.updatePreviousRowNumberAttr(formData, WorkflowMove.ACCEPTED_TO_APPROVED, logger, userInfo);
-        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class));
+        verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(false));
     }
 
     @Test
