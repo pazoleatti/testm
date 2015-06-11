@@ -1049,10 +1049,9 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getEndDate());
 
         HashSet<Long> srcAcceptedIds = new HashSet<Long>();
-        stateLogger.updateState("Установка блокировки формы и форм-источников");
+        ArrayList<String> msgPull = new ArrayList<String>(0);
         //Список для блокировки форм
         ArrayList<FormData> sources = new ArrayList<FormData>(departmentFormTypesSources.size());
-        ArrayList<String> msgPull = new ArrayList<String>(0);
         for (DepartmentFormType sourceDFT : departmentFormTypesSources){
             // Последний отчетный период подразделения
             DepartmentReportPeriod sourceDepartmentReportPeriod =
