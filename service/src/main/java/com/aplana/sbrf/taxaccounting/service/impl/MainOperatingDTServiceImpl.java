@@ -92,7 +92,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         int id = declarationTemplateService.save(declarationTemplate);
 
-        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
+        auditService.add(FormDataEvent.TEMPLATE_MODIFIED, user, declarationTemplate.getVersion(),
+                declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);
         logging(id, FormDataEvent.TEMPLATE_MODIFIED, user.getUser());
         return id;
     }
@@ -110,7 +111,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         declarationTemplate.setStatus(VersionedObjectStatus.DRAFT);
         int id = declarationTemplateService.save(declarationTemplate);
 
-        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
+        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, declarationTemplate.getVersion(),
+                declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);
         logging(id, FormDataEvent.TEMPLATE_CREATED, user.getUser());
         return id;
     }
@@ -125,7 +127,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
         checkError(logger, SAVE_MESSAGE);
         int id = declarationTemplateService.save(declarationTemplate);
 
-        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, null, null, declarationTemplate.getType().getName(), null, null, null, null);
+        auditService.add(FormDataEvent.TEMPLATE_CREATED, user, declarationTemplate.getVersion(),
+                declarationTemplateService.getDTEndDate(id), declarationTemplate.getName(), null, null, null);
         logging(id, FormDataEvent.TEMPLATE_CREATED, user.getUser());
         return id;
     }
@@ -150,7 +153,6 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
                     String.format(HAVE_DDT_MESSAGE,
                             departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
-        auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, declarationTypeService.get(typeId).getName(), null, null, null, null);
         declarationTypeService.delete(typeId);
     }
 
@@ -167,6 +169,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
 
         versionOperatingService.cleanVersions(template.getId(), template.getType().getId(),
                 template.getStatus(), template.getVersion(), dateEndActualize, logger);
+        Date endDate = declarationTemplateService.getDTEndDate(templateId);
         int deletedFTid = declarationTemplateService.delete(template.getId());
         List<DeclarationTemplate> declarationTemplates = declarationTemplateService.getDecTemplateVersionsByStatus(template.getType().getId(),
                 VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
@@ -186,7 +189,8 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;
         }
-        auditService.add(FormDataEvent.TEMPLATE_DELETED, user, null, null, template.getType().getName(), null, null, null, null);
+        auditService.add(FormDataEvent.TEMPLATE_DELETED, user, template.getVersion(),
+                endDate, template.getName(), null, null, null);
         logging(templateId, FormDataEvent.TEMPLATE_DELETED, user.getUser());
         return isDeleteAll;
     }

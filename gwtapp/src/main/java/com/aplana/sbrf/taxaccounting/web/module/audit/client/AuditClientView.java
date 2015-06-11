@@ -296,9 +296,15 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
             @Override
             public String getValue(LogSearchResultItem object) {
                 if (object.getFormTypeName() != null) {
-                    return AuditFormType.FORM_TYPE_TAX.getName();
+                    if (object.getDepartmentName()!=null)
+                        return AuditFormType.FORM_TYPE_TAX.getName();
+                    else
+                        return AuditFormType.FORM_TEMPLATE_VERSION.getName();
                 } else if (object.getDeclarationTypeName() != null) {
-                    return AuditFormType.FORM_TYPE_DECLARATION.getName();
+                    if (object.getDepartmentName()!=null)
+                        return AuditFormType.FORM_TYPE_DECLARATION.getName();
+                    else
+                        return AuditFormType.DECLARATION_VERSION.getName();
                 }
                 return null;
             }
