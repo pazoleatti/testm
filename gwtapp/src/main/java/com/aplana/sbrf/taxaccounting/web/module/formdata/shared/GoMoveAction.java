@@ -52,7 +52,7 @@ public class GoMoveAction extends UnsecuredActionImpl<GoMoveResult> implements A
 
     @Override
 	public String getName() {
-		return "Запроса для перехода между этапами";
+		return "";
 	}
 
 

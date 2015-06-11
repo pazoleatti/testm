@@ -56,6 +56,6 @@ public class RecalculateDataRowsAction extends UnsecuredActionImpl<TaskFormDataR
 
     @Override
 	public String getName() {
-		return "Пересчет данных формы";
+		return "";
 	}
 }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -31,7 +32,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
     private LogEntryService logEntryService;
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         TAUserInfo userInfo = new TAUserInfo();
@@ -48,8 +49,8 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
             String errorMsg = String.format(ReportType.CHECK_TASK,
                     String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
                     e.getMessage());
-            throw new ServiceLoggerException(errorMsg,
-                    logEntryService.save(logger.getEntries()));
+            throw new AsyncTaskException(new ServiceLoggerException(errorMsg,
+                    logEntryService.save(logger.getEntries())));
         }
         Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CONSOLIDATE_FD, null);
         return checkTaskLimit.getFirst();
@@ -62,12 +63,20 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        checkTaskLimit(params);
         FormData formData = formDataService.getFormData(
                 userInfo,
                 formDataId,
                 false,
                 logger);
+        try {
+            formDataService.checkCompose(formData, userInfo, logger);
+        } catch (ServiceException e) {
+            String errorMsg = String.format(ReportType.CHECK_TASK,
+                    String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
+                    e.getMessage());
+            throw new ServiceLoggerException(errorMsg,
+                    logEntryService.save(logger.getEntries()));
+        }
         formDataService.compose(formData, userInfo, logger);
     }
 
