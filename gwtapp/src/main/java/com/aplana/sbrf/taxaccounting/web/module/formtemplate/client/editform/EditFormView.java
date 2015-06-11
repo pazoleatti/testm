@@ -86,10 +86,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
 
     @UiHandler("save")
     public void onSave(ClickEvent event) {
-        if (getTypeData().getIsIfrs() && (getTypeData().getIfrsName() == null || getTypeData().getIfrsName().isEmpty())) {
-            Dialog.errorMessage("Макет не сохранен", "При установке признака \"Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
-            return;
-        }
         if (getUiHandlers() != null) {
             getUiHandlers().onSave();
         }
@@ -136,5 +132,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
             ifrsNamePanel.setVisible(false);
         }
         getUiHandlers().setModel(type);
+    }
+
+    @Override
+    public boolean checkIfrs() {
+        return !(getTypeData().getIsIfrs() && (getTypeData().getIfrsName() == null || getTypeData().getIfrsName().isEmpty()));
     }
 }
