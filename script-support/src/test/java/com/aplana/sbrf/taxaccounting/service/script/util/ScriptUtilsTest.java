@@ -201,8 +201,44 @@ public class ScriptUtilsTest {
     public void checkHeaderEquals() {
         Map<Object, String> headerMapping = new HashMap<Object, String>();
         headerMapping.put("столбец 1", "столбец 1");
+        headerMapping.put("столбец 1", "СТОЛБЕЦ 1");
+        headerMapping.put("столбец 1", "столбец  1");
+        headerMapping.put("столбец 1 ", " столбец 1");
         headerMapping.put("", "");
         headerMapping.put(null, null);
+        ScriptUtils.checkHeaderEquals(headerMapping);
+
+        Logger logger = new Logger();
+        ScriptUtils.checkHeaderEquals(headerMapping, logger);
+        Assert.assertTrue(logger.getEntries().isEmpty());
+
+        headerMapping.put("столбец 1", "столбец  2");
+        ScriptUtils.checkHeaderEquals(headerMapping, logger);
+        Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
+    }
+
+    @Test(expected = ServiceException.class)
+    public void checkHeaderEqualsError() {
+        // неодинаковые
+        equalsColumns("столбец 2", "столбец 1");
+        // неодинаковые с %
+        equalsColumns("столбец 1 % столбец 2", "столбец 1");
+        // неодинаковые с %%
+        equalsColumns("столбец 1 %% столбец 2", "столбец 1");
+        // неодинаковые с %%%
+        equalsColumns("столбец 1 % столбец 2", "столбец 1 %% столбец 2");
+    }
+
+    private void equalsColumns(String column1, String column2) {
+        Map<Object, String> headerMapping = new HashMap<Object, String>();
+        headerMapping.put(column1, column2);
+        ScriptUtils.checkHeaderEquals(headerMapping);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void checkHeaderEqualsError2() {
+        Map<Object, String> headerMapping = new HashMap<Object, String>();
+        headerMapping.put("столбец 1", "столбец 2");
         ScriptUtils.checkHeaderEquals(headerMapping);
     }
 
@@ -231,24 +267,6 @@ public class ScriptUtilsTest {
         ScriptUtils.checkOverflow(a, null, "test", 2, 3, "test");
         // проверяем число null
         ScriptUtils.checkOverflow(null, null, "test", 2, 2, "test");
-    }
-
-    @Test(expected = ServiceException.class)
-    public void checkHeaderEqualsError() {
-        // неодинаковые
-        equalsColumns("столбец 2", "столбец 1");
-        // неодинаковые с %
-        equalsColumns("столбец 1 % столбец 2", "столбец 1");
-        // неодинаковые с %%
-        equalsColumns("столбец 1 %% столбец 2", "столбец 1");
-        // неодинаковые с %%%
-        equalsColumns("столбец 1 % столбец 2", "столбец 1 %% столбец 2");
-    }
-
-    private void equalsColumns(String column1, String column2) {
-        Map<Object, String> headerMapping = new HashMap<Object, String>();
-        headerMapping.put(column1, column2);
-        ScriptUtils.checkHeaderEquals(headerMapping);
     }
 
     @Test
