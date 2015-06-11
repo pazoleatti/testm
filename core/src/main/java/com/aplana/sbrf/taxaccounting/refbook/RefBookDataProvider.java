@@ -68,6 +68,14 @@ public interface RefBookDataProvider {
     List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter);
 
     /**
+     * Возвращает дату начала версии следующей за указанной
+     * @param version дата актуальности
+     * @param filter фильтр для отбора записей
+     * @return дата начала следующей версии
+     */
+    Date getNextVersion(Date version, String filter);
+
+    /**
      * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра
      * @param version дата актуальности
      * @param filter условие фильтрации строк. Может быть не задано

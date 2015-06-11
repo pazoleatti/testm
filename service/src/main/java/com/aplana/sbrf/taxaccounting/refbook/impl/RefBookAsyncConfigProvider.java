@@ -41,6 +41,11 @@ public class RefBookAsyncConfigProvider implements RefBookDataProvider {
     }
 
     @Override
+    public Date getNextVersion(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Long> getUniqueRecordIds(Date version, String filter) {
         throw new UnsupportedOperationException();
     }

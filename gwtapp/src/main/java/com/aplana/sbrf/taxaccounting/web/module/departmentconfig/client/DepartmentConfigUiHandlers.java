@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.gwtplatform.mvp.client.UiHandlers;
 
+import java.util.Date;
+
 /**
  * Хендлеры формы настройки подразделений
  *
@@ -65,4 +67,5 @@ public interface DepartmentConfigUiHandlers extends UiHandlers {
      */
     boolean isControlUnp();
 
+    void getRefBookPeriod(Integer currentReportPeriodId, Integer currentDepartmentId);
 }

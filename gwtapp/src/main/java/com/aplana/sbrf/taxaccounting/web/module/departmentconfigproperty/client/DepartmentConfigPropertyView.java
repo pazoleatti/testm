@@ -245,10 +245,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 }
                 DepartmentConfigPropertyView.this.currentReportPeriodId = selPeriodId;
                 editButton.setEnabled(false);
-                Pair<Date, Date> period = periodPickerPopup.getPeriodDates(periodPickerPopup.getValue().get(0));
-                System.out.println("periodPickerPopup changed: "+period.getFirst() + "; " + period.getSecond());
-                factory.setDateRange(period.getFirst(), period.getSecond());
-                getUiHandlers().createTableColumns();
+                getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
             }
         });
 
@@ -776,6 +773,12 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void updateVisibleEditButton() {
         editButton.setEnabled(!isEditMode);
+    }
+
+    @Override
+    public void setRefBookPeriod(Date startDate, Date endDate) {
+        factory.setDateRange(startDate, endDate);
+        getUiHandlers().createTableColumns();
     }
 
     /**

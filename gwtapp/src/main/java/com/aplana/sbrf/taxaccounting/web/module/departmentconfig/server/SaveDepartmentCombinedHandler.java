@@ -204,16 +204,23 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 needEdit = true;
                 // Запись нашлась
                 if (recordPairs.size() != 1) {
-                    throw new ActionException("Найдено несколько настроек для подразделения ");
+                    throw new ActionException("Найдено несколько настроек для подразделения");
                 }
                 depCombined.setRecordId(recordPairs.get(0).getFirst());
             }
 
             RefBookRecordVersion recordVersion;
             if (!needEdit) {
+                //Получаем дату окончания = дате начала следующей версии. Нужно для проверки справочных атрибутов
+                /*Date versionEnd = provider.getNextVersion(period.getCalendarStartDate(), filter);
+                if (versionEnd != null && period.getCalendarStartDate().after(versionEnd)) {
+                    throw new ActionException("Дата окончания настроек подразделения получена некорректно");
+                }*/
                 List<Long> newRecordIds = provider.createRecordVersion(logger, period.getCalendarStartDate(), null, Arrays.asList(record));
                 recordVersion = provider.getRecordVersionInfo(newRecordIds.get(0));
             } else {
+                /*recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
+                provider.updateRecordVersion(logger, depCombined.getRecordId(), recordVersion.getVersionStart(), recordVersion.getVersionEnd(), paramsMap);*/
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), null, paramsMap);
                 recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
             }
