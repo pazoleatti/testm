@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -356,7 +357,7 @@ public interface FormDataService {
      * @param userInfo
      * @param logger
      */
-    void compose(final FormData formData, TAUserInfo userInfo, Logger logger);
+    void compose(final FormData formData, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger);
 
     /**
      * Получает полное название нф с указанием подразделения, периода и прочего

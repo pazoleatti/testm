@@ -71,7 +71,7 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Расчет НФ";
+        return "Расчет данных налоговой формы";
     }
 
     @Override

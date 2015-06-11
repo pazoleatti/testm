@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.LogBusinessDao;
@@ -73,7 +74,7 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
         String filePath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
@@ -101,8 +102,14 @@ public class PrintingServiceImpl implements PrintingService {
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                 getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
 
+            if (stateLogger != null) {
+                stateLogger.updateState("Формирование XLSM-файла");
+            }
             FormDataXlsmReportBuilder builder = new FormDataXlsmReportBuilder(data, isShowChecked, dataRows, refBookValue);
             filePath = builder.createReport();
+            if (stateLogger != null) {
+                stateLogger.updateState("Сохранение XLSM-файла в базе данных");
+            }
             return blobDataService.create(new FileInputStream(filePath), FILE_NAME + POSTFIX);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -116,7 +123,7 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 
     @Override
-    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved) {
+    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
         String reportPath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
@@ -144,8 +151,10 @@ public class PrintingServiceImpl implements PrintingService {
 
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                     getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
+            stateLogger.updateState("Формирование CSV-файла");
             FormDataCSVReportBuilder builder = new FormDataCSVReportBuilder(data, isShowChecked, dataRows, refBookValue);
             reportPath = builder.createReport();
+            stateLogger.updateState("Сохранение CSV-файла в базе данных");
             return blobDataService.create(new FileInputStream(reportPath), FILE_NAME + ".csv");
         } catch (IOException e) {
             logger.error(e.getMessage(), e);

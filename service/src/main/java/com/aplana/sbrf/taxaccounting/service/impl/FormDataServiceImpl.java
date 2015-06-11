@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
@@ -1033,7 +1034,8 @@ public class FormDataServiceImpl implements FormDataService {
      *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
      */
     @Transactional(readOnly = false)
-    public void compose(final FormData formData, TAUserInfo userInfo, Logger logger) {
+    public void compose(final FormData formData, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
+        stateLogger.updateState("Выполнение проверок на возможность консолидации");
         checkCompose(formData, userInfo, logger);
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -1047,6 +1049,7 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getEndDate());
 
         HashSet<Long> srcAcceptedIds = new HashSet<Long>();
+        stateLogger.updateState("Установка блокировки формы и форм-источников");
         //Список для блокировки форм
         ArrayList<FormData> sources = new ArrayList<FormData>(departmentFormTypesSources.size());
         ArrayList<String> msgPull = new ArrayList<String>(0);
@@ -1124,6 +1127,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
          */
         //3. Консолидируем
+        stateLogger.updateState("Консолидация данных в форму");
         ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
         scriptComponentContext.setUserInfo(userInfo);
         scriptComponentContext.setLogger(logger);
@@ -1139,9 +1143,11 @@ public class FormDataServiceImpl implements FormDataService {
             logger.info(s);
         }
 
-        //Удаление отчета НФ
+        //Удаление отчета НФ             
+        stateLogger.updateState("Удаление отчетов формы");
         reportService.delete(formData.getId(), null);
         //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
+        stateLogger.updateState("Обновление сквозной нумерации");
         updatePreviousRowNumber(formData, logger, userInfo);
         //Обновление записей о консолидации
         sourceService.deleteFDConsolidationInfo(Arrays.asList(formData.getId()));

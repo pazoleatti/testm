@@ -86,7 +86,7 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Загрузке XLSM-файла с формы экземпляра НФ";
+        return "Импорт XLSX-файла";
     }
 
     @Override

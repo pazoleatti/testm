@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
@@ -245,7 +246,12 @@ public class FormDataServiceTest {
         when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType1);
         when(formDataDao.get(formData.getId(), false)).thenReturn(formData);
 
-        formDataService.compose(formData, userInfo, logger);
+        formDataService.compose(formData, userInfo, logger, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+
+            }
+        });
         // проверяем что источник удален
         Assert.assertTrue(list.size() == 1);
     }

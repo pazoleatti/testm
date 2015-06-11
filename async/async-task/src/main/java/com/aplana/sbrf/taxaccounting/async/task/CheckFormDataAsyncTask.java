@@ -86,7 +86,7 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected String getAsyncTaskName() {
-        return "Проверка НФ";
+        return "Проверка данных налоговой формы";
     }
 
     @Override
