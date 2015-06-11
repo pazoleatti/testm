@@ -158,15 +158,24 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
             Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
 
-            if (checkPattern(logger, "ИНН", depCombined.getInn(), innPattern)){
-                checkSumInn(logger, "ИНН", depCombined.getInn());
+            if (depCombined.getReorgInn() != null && !depCombined.getReorgInn().isEmpty()) {
+                if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern)){
+                    checkSumInn(logger, "ИНН реорганизованной организации", depCombined.getReorgInn());
+                }
+                checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern);
             }
-            if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern)){
-                checkSumInn(logger, "ИНН реорганизованной организации", depCombined.getReorgInn());
+            if (depCombined.getInn() != null && !depCombined.getInn().isEmpty()) {
+                if (checkPattern(logger, "ИНН", depCombined.getInn(), innPattern)){
+                    checkSumInn(logger, "ИНН", depCombined.getInn());
+                }
             }
-            checkPattern(logger, "КПП", depCombined.getKpp(), kppPattern);
-            checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern);
-            checkPattern(logger, "Код налогового органа", depCombined.getTaxOrganCode(), taxOrganPattern);
+            if (depCombined.getKpp() != null && !depCombined.getKpp().isEmpty()) {
+                checkPattern(logger, "КПП", depCombined.getKpp(), kppPattern);
+            }
+
+            if (depCombined.getTaxOrganCode() != null && !depCombined.getTaxOrganCode().isEmpty()) {
+                checkPattern(logger, "Код налогового органа", depCombined.getTaxOrganCode(), taxOrganPattern);
+            }
 
             // Проверка необходимости редактирования
             boolean needEdit = false;
