@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -56,7 +57,12 @@ public class CreateNewVersionHandler extends AbstractActionHandler<CreateNewVers
             throw new ServiceLoggerException("Ошибки при валидации.", logEntryService.save(logger.getEntries()));
         }
         int formTemplateId = mainOperatingService.createNewTemplateVersion(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo());
-        formTemplateDao.createFDTable(formTemplateId);
+        try {
+            formTemplateDao.createFDTable(formTemplateId);
+        } catch (Exception e){
+            formTemplateService.delete(formTemplateId);
+            throw new ServiceException("", e);
+        }
         result.setFormTemplateId(formTemplateId);
         result.setColumns(formTemplateService.get(formTemplateId).getColumns());
         if (!logger.getEntries().isEmpty())
