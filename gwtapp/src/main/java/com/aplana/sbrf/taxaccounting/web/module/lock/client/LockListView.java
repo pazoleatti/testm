@@ -37,7 +37,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
 
     public static final String KEY_TITLE = "Ключ блокировки";
     public static final String QUEUE_TITLE = "Тип очереди";
-    public static final String QUEUE_POSITION_TITLE = "Порядок в очереди";
     public static final String DESCRIPTION_TITLE = "Описание";
     public static final String USER_TITLE = "Пользователь";
     public static final String STATE_TITLE = "Состояние задачи";
@@ -115,14 +114,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
             }
         };
 
-        TextColumn<LockDataItem> queuePositionColumn = new TextColumn<LockDataItem>() {
-            @Override
-            public String getValue(LockDataItem taskItem) {
-                return taskItem.getQueuePosition() != -1 ? String.valueOf(taskItem.getQueuePosition()) : "";
-            }
-        };
-        queuePositionColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
 
         TextColumn<LockDataItem> keyColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -179,7 +170,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         lockDataTable.setColumnWidth(keyColumn, 200, Style.Unit.PX);
         lockDataTable.setColumnWidth(descriptionColumn, 250, Style.Unit.PX);
         lockDataTable.setColumnWidth(queueColumn, 100, Style.Unit.PX);
-        lockDataTable.setColumnWidth(queuePositionColumn, 65, Style.Unit.PX);
 
         lockDataTable.addColumn(checkColumn);
         lockDataTable.addResizableColumn(dateLockColumn, DATE_LOCK);
@@ -189,7 +179,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         lockDataTable.addColumn(userColumn, USER_TITLE);
         lockDataTable.addColumn(queueColumn, QUEUE_TITLE);
         lockDataTable.addColumn(stateColumn, STATE_TITLE);
-        lockDataTable.addColumn(queuePositionColumn, QUEUE_POSITION_TITLE);
         lockDataTable.addColumn(stateDateColumn, STATE_DATE_TITLE);
 
         lockDataTable.setSelectionModel(selectionModel, DefaultSelectionEventManager
