@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -318,8 +315,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
                     FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
-                    formTemplate.getColumns().clear();
-                    formTemplate.getColumns().addAll(result.getColumns());
+                    for (Column column : result.getColumns()){
+                        Column col = formTemplate.getColumn(column.getAlias());
+                        if (col.getId()==null){
+                            col.setId(column.getId());
+                        }
+                    }
                 }
             }, this));
         }
@@ -332,8 +333,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     .defaultCallback(new AbstractCallback<UpdateFormResult>() {
                         @Override
                         public void onSuccess(UpdateFormResult result) {
-                            formTemplate.getColumns().clear();
-                            formTemplate.getColumns().addAll(result.getFormTemplate().getColumns());
                             LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                             Dialog.infoMessage("Форма сохранена");
                         }
