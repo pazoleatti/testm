@@ -45,7 +45,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	@Autowired
 	private FormDataDao formDataDao;
 
-	//TODO SBRFACCTAX-11205 поменять на новую структуру хранения
 	@Override
 	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive) {
 		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive);
@@ -83,7 +82,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		return new PagingResult<FormDataSearchResult>(dataRows, count);
 	}
 
-	//TODO SBRFACCTAX-11205 поменять на новую структуру хранения
 	/**
 	 * Метод возвращает пару - строку запроса и параметры
 	 *
@@ -91,67 +89,71 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 */
 	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive) {
 
-		String sql =
-				"WITH dcell_temp AS (SELECT row_id, column_id, nvalue, svalue, dvalue FROM data_cell WHERE row_id IN (SELECT id FROM data_row WHERE form_data_id=:fdId)), \n" +
-						"dcell AS (SELECT row_id, column_id, svalue, dvalue, CASE WHEN fc.type = 'R' and fc.parent_column_id is not NULL THEN \n" +
-						"  (SELECT reference_value FROM ref_book_value WHERE attribute_id = fc.attribute_id AND record_id = \n" +
-						"   (SELECT nvalue FROM dcell_temp WHERE dcell_temp.column_id = fc.parent_column_id AND dcell_temp.row_id = dc.row_id)) \n" +
-						"  ELSE nvalue END AS nvalue \n" +
-						"FROM dcell_temp dc JOIN FORM_COLUMN fc ON fc.id=dc.column_id) \n" +
-						"SELECT row_number() over (order by row_index, column_index) as IDX, row_index, column_index, true_val \n" +
-						"from (SELECT dense_rank()over(order by dr.ord) row_index, dc.ord as column_index, dc.type, val, dc.attribute_id, dc.attribute_id2, \n" +
-						"       case when dc.type='R' and (select ref_book_id from ref_book_attribute where id=dc.attribute_id)=30 then \n" +
-						"           (case when (select alias from ref_book_attribute where id=dc.attribute_id)='NAME' then (select name from department where id=val) \n" +
-						"               when (select alias from ref_book_attribute where id=dc.attribute_id)='PARENT_ID' then (select to_char(parent_id) from department where id=val) \n" +
-						"               when (select alias from ref_book_attribute where id=dc.attribute_id)='REGION_ID' then (select to_char(region_id) from department where id=val) \n" +
-						"               when (select alias from ref_book_attribute where id=dc.attribute_id)='SBRF_CODE' then (select to_char(sbrf_code) from department where id=val) \n" +
-						"               when (select alias from ref_book_attribute where id=dc.attribute_id)='SHORTNAME' then (select to_char(shortname) from department where id=val) \n" +
-						"               when (select alias from ref_book_attribute where id=dc.attribute_id)='TB_INDEX' then (select to_char(tb_index) from department where id=val) \n" +
-						"               when (select alias from ref_book_attribute where id=dc.attribute_id)='ID' then (select to_char(id) from department where id=val) \n" +
-						"               when (select alias from ref_book_attribute where id=dc.attribute_id)='TYPE' then (select to_char(type) from department where id=val) \n" +
-						"           else null end ) \n" +
-						"       when dc.type='R' then (select coalesce(string_value, TO_CHAR(number_value), TO_CHAR(date_value)) from ref_book_value where record_id=val and attribute_id=coalesce(dc.attribute_id2, dc.attribute_id)) else val end true_val \n" +
-						"   from(   SELECT row_id, column_id, TO_CHAR(dvalue) as val FROM dcell \n" +
-						"           UNION ALL SELECT row_id, column_id, svalue FROM dcell \n" +
-						"           UNION ALL SELECT dcell.row_id, dcell.column_id, \n" +
-						"                case when fc.precision is null or fc.precision = 0 then \n" +
-						"                    TO_CHAR(dcell.nvalue) \n" +
-						"                else \n" +
-						"                    ltrim(TO_CHAR(dcell.nvalue,substr('99999999999999999D0000000000',1,18+fc.precision))) \n" +
-						"                end as val \n" +
-						"            FROM dcell JOIN form_column fc ON fc.id = dcell.column_id \n" +
-						"           UNION ALL SELECT row_id, rfc.id as column_id, rsq.val \n" +
-						"           FROM (SELECT row_id, column_id, TO_CHAR(nvalue) AS val FROM dcell ) rsq \n" +
-						"                 JOIN form_column rfc ON rsq.column_id = rfc.parent_column_id \n" +
-						"                   WHERE rfc.form_template_id = :ftId and rfc.type = 'R' and rfc.parent_column_id is not null \n" +
-						"           UNION all SELECT data_row.id as row_id, rfc.id as column_id, TO_CHAR( (row_number() over(order by data_row.ord)) + \n" +
-						"              case when rfc.NUMERATION_ROW=0 then \n" +
-						"                0 \n" +
-						"              else \n" +
-						"                (select number_previous_row from form_data where form_data.id = :fdId) \n" +
-						"              end) as val \n" +
-						"            FROM data_row \n" +
-						"            JOIN FORM_COLUMN rfc ON rfc.form_template_id = :ftId \n" +
-						"            WHERE rfc.form_template_id = :ftId and rfc.type = 'A' and form_data_id= :fdId and data_row.alias is null) d \n" +
-						"    RIGHT JOIN ( select id, ord from DATA_ROW where form_data_id=:fdId) dr ON dr.id = d.row_id \n" +
-						"    LEFT JOIN FORM_COLUMN dc ON dc.id = d.column_id \n" +
-						"    ORDER BY dr.ord \n" +
-						") \n" +
-
-						// check case sensitive
-						(
-								isCaseSensitive ?
-										"            WHERE true_val like :key \n" :
-										"            WHERE LOWER(true_val) like LOWER(:key) \n"
-						) +
-						"            ORDER BY row_index, column_index ";
+		String generateSubSqlQuery = "select listagg(row_query, ' ' ) WITHIN GROUP (ORDER BY pos) as query from \n" +
+				"(\n" +
+				"with fc as (select row_number() over (order by ord) as pos, form_template_id, id, ord, type, numeration_row, precision from form_column fc where form_template_id = :ftId order by ord)\n" +
+				"select fc.pos, fc.form_template_id, case when fc.pos = 1 then '' else ' union all ' end \n" +
+				"       || 'select ord as row_index, '||fc.id ||' as column_id, '\n" +
+				"       || case when type = 'S' then 'to_char(c'||fc.id||') as raw_value, '\n" +
+				"               when type = 'N' then case when fc.precision is null or fc.precision = 0 then 'to_char(c'||fc.id||') as raw_value, '\n" +
+				"                 else 'ltrim(to_char(c'||fc.id||',substr(''99999999999999999D0000000000'',1,18+'||fc.precision||'))) as raw_value, ' end\n" +
+				"               when type = 'A' then 'to_char((row_number() over(order by ord)) + ' || case when fc.NUMERATION_ROW=0 then 0 else (select number_previous_row from form_data where id = :fdId) end ||') as raw_value,'  \n" +
+				"               else ' null as raw_value, ' end\n" +
+				"       || case when type = 'R' then 'c'||fc.id||' as reference_id ' else ' null as reference_id ' end  \n" +
+				"       || ' from t ' as row_query\n" +
+				"from fc\n" +
+				")";
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("fdId", formDataId);
 		params.put("ftId", formTemplateId);
 		params.put("key", "%" + key + "%");
 
-		return new Pair<String, Map<String, Object>>(sql.toString(), params);
+		String subSql = getNamedParameterJdbcTemplate().queryForObject(generateSubSqlQuery, params, String.class);
+
+		String sql =
+				"SELECT row_number() OVER (ORDER BY a.row_index, a.column_index) AS idx, row_index, column_index, true_val\n" +
+						"FROM (\n" +
+						"  SELECT row_index, fc.ord AS column_index, coalesce(raw_value, d.string_value, o.string_value, z.string_value) AS true_val\n" +
+						"  FROM (\n" +
+						"    WITH t AS (\n" +
+						"        SELECT * FROM form_data_" + formTemplateId + " fd WHERE fd.form_data_id = :fdId and fd.temporary = 0)\n" +
+						subSql +
+						"        ) hell\n" +
+						"  INNER JOIN form_column fc ON fc.id = hell.column_id\n" +
+						"  LEFT JOIN ref_book_attribute rba ON rba.id = fc.attribute_id\n" +
+						"  LEFT JOIN (\n" +
+						"      SELECT dep.id AS record_id, rba.id AS attribute_id, dep.string_value AS string_value\n" +
+						"      FROM (\n" +
+						"        SELECT id, to_char(NAME) AS NAME, to_char(type) AS type, to_char(shortname) AS shortname, to_char(tb_index) AS tb_index, to_char(sbrf_code) AS sbrf_code, to_char(code) code\n" +
+						"        FROM department\n" +
+						"        )\n" +
+						"      unpivot(string_value FOR alias IN (NAME, type, shortname, tb_index, sbrf_code, code)) dep\n" +
+						"      INNER JOIN ref_book_attribute rba ON rba.ref_book_id = 30 AND dep.alias = rba.alias\n" +
+						"      ) d ON fc.type = 'R' AND rba.ref_book_id = 30 AND d.record_id = hell.reference_id AND coalesce(fc.attribute_id, fc.attribute_id2) = d.attribute_id\n" +
+						"   LEFT JOIN (\n" +
+						"      SELECT oktmo.id AS record_id, rba.id AS attribute_id, oktmo.string_value\n" +
+						"      FROM (\n" +
+						"        SELECT id, to_char(code) AS code, to_char(NAME) AS NAME\n" +
+						"        FROM ref_book_oktmo rbo\n" +
+						"        )\n" +
+						"      unpivot(string_value FOR alias IN (code, NAME)) oktmo\n" +
+						"      INNER JOIN ref_book_attribute rba ON rba.ref_book_id = 96 AND oktmo.alias = rba.alias\n" +
+						"    ) o ON fc.type = 'R' AND rba.ref_book_id = 96 AND o.record_id = hell.reference_id AND coalesce(fc.attribute_id, fc.attribute_id2) = o.attribute_id\n" +
+						"  LEFT JOIN (\n" +
+						"      SELECT record_id, attribute_id, coalesce(string_value, TO_CHAR(number_value), TO_CHAR(date_value)) AS string_value\n" +
+						"      FROM ref_book_value\n" +
+						"      ) z ON fc.type = 'R' AND rba.ref_book_id NOT IN (30, 96) AND z.record_id = hell.reference_id AND coalesce(fc.attribute_id, fc.attribute_id2) = z.attribute_id\n" +
+						"  ) a\n" +
+
+						// check case sensitive
+						(
+								isCaseSensitive ?
+										"            WHERE true_val like :key \n" :
+										"            WHERE LOWER(true_val) like LOWER(:key) \n"
+						);
+
+		return new Pair<String, Map<String, Object>>(sql, params);
 	}
 
 	@Override

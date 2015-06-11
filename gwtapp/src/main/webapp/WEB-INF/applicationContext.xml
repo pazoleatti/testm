@@ -28,6 +28,7 @@
     <!--Спринговая реализация для запросов на загрузку файлов.
     Получает файловый ресурс из запроса, позволяя инъктить его в метод-->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"/>
     </bean>
 
     <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/TaxAccDS" />
