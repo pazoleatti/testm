@@ -1647,6 +1647,7 @@ public final class ScriptUtils {
         private short formatIndex;          // идентификатор формата даты (дата хранится в виде числа)
         private String formatString;        // формат даты
         private final DataFormatter formatter;
+        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy"); // свой формат дат, что б исключить использование фомратов по умолчанию: н-р d/m/yyyy
 
         /**
          * Для обработки листа экселя.
@@ -1832,7 +1833,12 @@ public final class ScriptUtils {
             String value = lastValue.toString();
             if (this.formatString != null) {
                 // дата/число
-                value = formatter.formatRawCellContents(Double.parseDouble(value), this.formatIndex, this.formatString);
+                if (DateUtil.isADateFormat(this.formatIndex, this.formatString)) {
+                    Date date = DateUtil.getJavaDate(Double.parseDouble(value), false);
+                    value = simpleDateFormat.format(date);
+                } else {
+                    value = formatter.formatRawCellContents(Double.parseDouble(value), this.formatIndex, this.formatString);
+                }
             }
             return value;
         }
