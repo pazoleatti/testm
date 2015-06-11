@@ -94,7 +94,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         if (!lockService.isLockExists(lock, lockDate)) {
                             //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                             //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
-                            throw new RuntimeException(String.format("Результат выполнения задачи %s больше не актуален. Выполняется откат транзакции", lock));
+                            throw new RuntimeException(String.format("Результат выполнения задачи %s больше не актуален. Выполняется переход к следующей задаче в очереди", lock));
                         }
 
                         transactionHelper.executeInNewTransaction(new TransactionLogic() {
@@ -123,10 +123,10 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         throw new RuntimeException(String.format("Задача %s больше не актуальна.", lock));
                     }
                 } catch (final Exception e) {
-                    try {
-                        log.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой начала %s (%s)",
-                                lock, sdf.format(lockDate), lockDate.getTime()), e);
-                        if (lockService.isLockExists(lock, lockDate)) {
+                    log.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой начала %s (%s)",
+                            lock, sdf.format(lockDate), lockDate.getTime()), e);
+                    if (lockService.isLockExists(lock, lockDate)) {
+                        try {
                             transactionHelper.executeInNewTransaction(new TransactionLogic() {
                                 @Override
                                 public void execute() {
@@ -150,10 +150,10 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                     return null;
                                 }
                             });
+                        } finally {
+                            log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
+                            lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                         }
-                    } finally {
-                        log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
-                        lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                     }
                     log.info(String.format("Для задачи с ключом %s выполняется откат транзакции", lock));
                     if (e instanceof ServiceLoggerException) {

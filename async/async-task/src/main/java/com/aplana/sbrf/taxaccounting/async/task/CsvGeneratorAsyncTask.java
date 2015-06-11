@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
@@ -17,8 +19,11 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
@@ -44,6 +49,9 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
+    @Autowired
+    private LockDataService lockService;
+
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         return BalancingVariants.SHORT;
@@ -58,9 +66,16 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         boolean saved = (Boolean)params.get("saved");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         formDataAccessService.canRead(userInfo, formDataId);
-        String uuid = printingService.generateCSV(userInfo, formDataId, manual, isShowChecked, saved);
+        String uuid = printingService.generateCSV(userInfo, formDataId, manual, isShowChecked, saved, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+                lockService.updateState(lock, lockDate, state);
+            }
+        });
         reportService.create(formDataId, uuid, ReportType.CSV, isShowChecked, manual, saved);
     }
 

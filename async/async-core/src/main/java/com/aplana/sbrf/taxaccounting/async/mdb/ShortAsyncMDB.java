@@ -57,7 +57,7 @@ public class ShortAsyncMDB implements MessageListener {
                 AsyncTask task = (AsyncTask) ic.lookup(taskType.getHandlerJndi());
                 Map<String, Object> params = asyncMdbObject.getParams();
                 //Сохраняем данные о потоке-исполнителе в менеджере, для того чтобы можно было остановить поток
-                interruptionManager.addTask((String) params.get(LOCKED_OBJECT.name()), Thread.currentThread());
+                //interruptionManager.addTask((String) params.get(LOCKED_OBJECT.name()), Thread.currentThread());
                 task.execute(params);
             } else {
                 log.error("Unexpected empty message content. Instance of com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject cannot be null!");

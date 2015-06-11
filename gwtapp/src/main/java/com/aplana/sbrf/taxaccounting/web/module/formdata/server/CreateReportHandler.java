@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -86,18 +87,12 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                     lockDataService.unlock(key, userInfo.getUser().getId());
                 }
             } catch (Exception e) {
-                try {
-                    lockDataService.unlock(key, userInfo.getUser().getId());
-                } catch (ServiceException e2) {
-                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
-                        throw new ActionException(e2);
-                    }
+                lockDataService.unlock(key, userInfo.getUser().getId());
+                int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+                if (i != -1) {
+                    throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
                 }
-                if (e instanceof ServiceLoggerException) {
-                    throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                } else {
-                    throw new ActionException(e);
-                }
+                throw new ActionException(e);
             }
         } else {
             if (lockData.getUserId() != userInfo.getUser().getId()) {

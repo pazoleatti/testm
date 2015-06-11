@@ -112,16 +112,11 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                     result.setLock(false);
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
-                    if (e instanceof ServiceLoggerException) {
-                        throw (ServiceLoggerException) e;
-                    } else {
-                        e.printStackTrace();
-                        int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
-                        if (i != -1) {
-                            throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
-                        }
-                        throw new ActionException(e);
+                    int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+                    if (i != -1) {
+                        throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
                     }
+                    throw new ActionException(e);
                 }
             } else {
                 throw new ActionException("Не удалось запустить консолидацию. Попробуйте выполнить операцию позже");

@@ -62,6 +62,6 @@ public class UploadDataRowsAction extends UnsecuredActionImpl<UploadFormDataResu
 
     @Override
     public String getName() {
-        return "Импорт данных формы";
+        return "";
     }
 }

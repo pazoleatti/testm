@@ -70,9 +70,9 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
             String keyTask = formDataService.generateTaskKey(action.getFormData().getId(), reportType);
             Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormData().getId());
             if (lockType != null) {
-                if (lockType.getFirst().equals(ReportType.EDIT_FD) && action.isEditMode()) {
+                if (lockType.getFirst().equals(ReportType.EDIT_FD)) {
                     // всё нормально, продолжаем выполнение
-                } else if (lockType.getFirst().equals(reportType) && !(!action.isEditMode() && lockDataEdit != null)) {
+                } else if (lockType.getFirst().equals(reportType)) {
                     if (lockType.getSecond().getUserId() == userInfo.getUser().getId()) {
                         if (action.isForce()) {
                             // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.editform;
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateTableEvent;
@@ -23,6 +24,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         FormTypeTemplate getTypeData();
         void edit(FormTypeTemplate type);
         void changeItem(FormTypeTemplate type);
+        boolean checkIfrs();
     }
 
     DispatchAsync dispatchAsync;
@@ -46,6 +48,10 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 
     @Override
     public void onSave() {
+        if (!getView().checkIfrs()) {
+            Dialog.errorMessage("Макет не сохранен", "При установке признака \"Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
+            return;
+        }
         EditFormTypeAction action = new EditFormTypeAction();
         FormTypeTemplate formTypeTemplate1 = getView().getTypeData();
         action.setFormTypeId(formTypeTemplate1.getFormTypeId());

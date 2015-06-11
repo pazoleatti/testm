@@ -81,15 +81,6 @@ public class AsyncManagerBean implements AsyncManager {
             log.info(String.format("Задача с ключом %s помещена в очередь %s", params.get(LOCKED_OBJECT.name()), balancingVariant.name()));
             log.debug("Async task creation has been finished successfully");
             return balancingVariant;
-        } catch (ServiceLoggerException e) {
-            throw e;
-        } catch (EJBException e) {
-            e.printStackTrace();
-            int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
-            if (i != -1) {
-                throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
-            }
-            throw e;
         } catch (Exception e) {
             log.error("Async task creation has been failed!", e);
             throw new AsyncTaskException(e);

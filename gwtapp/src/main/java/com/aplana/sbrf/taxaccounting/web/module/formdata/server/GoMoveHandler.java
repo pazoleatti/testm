@@ -171,6 +171,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
         }
         return "";
     }
+
 	@Override
 	public void undo(GoMoveAction action, GoMoveResult result,
 			ExecutionContext context) throws ActionException {

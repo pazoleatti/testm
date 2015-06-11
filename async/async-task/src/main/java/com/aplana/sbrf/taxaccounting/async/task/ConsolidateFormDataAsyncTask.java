@@ -1,5 +1,8 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -9,8 +12,11 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
@@ -30,8 +36,11 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LogEntryService logEntryService;
 
+    @Autowired
+    private LockDataService lockService;
+
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         TAUserInfo userInfo = new TAUserInfo();
@@ -48,8 +57,8 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
             String errorMsg = String.format(ReportType.CHECK_TASK,
                     String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
                     e.getMessage());
-            throw new ServiceLoggerException(errorMsg,
-                    logEntryService.save(logger.getEntries()));
+            throw new AsyncTaskException(new ServiceLoggerException(errorMsg,
+                    logEntryService.save(logger.getEntries())));
         }
         Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CONSOLIDATE_FD, null);
         return checkTaskLimit.getFirst();
@@ -61,14 +70,28 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
         long formDataId = (Long)params.get("formDataId");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
-        checkTaskLimit(params);
         FormData formData = formDataService.getFormData(
                 userInfo,
                 formDataId,
                 false,
                 logger);
-        formDataService.compose(formData, userInfo, logger);
+        try {
+            formDataService.checkCompose(formData, userInfo, logger);
+        } catch (ServiceException e) {
+            String errorMsg = String.format(ReportType.CHECK_TASK,
+                    String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
+                    e.getMessage());
+            throw new ServiceException(errorMsg);
+        }
+        formDataService.compose(formData, userInfo, logger, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+                lockService.updateState(lock, lockDate, state);
+            }
+        });
     }
 
     @Override

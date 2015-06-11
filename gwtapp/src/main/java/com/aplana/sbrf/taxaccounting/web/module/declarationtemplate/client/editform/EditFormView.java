@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.editform;
 
-import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -64,10 +63,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
 
     @UiHandler("save")
     public void onSave(ClickEvent event) {
-        if (isIfrs.getValue() && (ifrsName.getValue() == null || ifrsName.getValue().isEmpty())){
-            Dialog.errorMessage("Макет не сохранен", "При установке признака \"Отчетность для МСФО\" должно быть заполнено поле \"Наименование для МСФО\"!");
-            return;
-        }
         if (getUiHandlers() != null) {
             getUiHandlers().onSave();
         }
@@ -87,5 +82,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     public void edit(DeclarationType type) {
         driver.edit(type);
         ifrsPanel.setVisible(type.getIsIfrs());
+    }
+
+    @Override
+    public boolean checkIfrs() {
+        return !(isIfrs.getValue() && (ifrsName.getValue() == null || ifrsName.getValue().isEmpty()));
     }
 }
