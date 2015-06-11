@@ -1400,7 +1400,9 @@ public final class ScriptUtils {
      */
     @SuppressWarnings("unused")
     public static void checkFixedValue(DataRow<Cell> row, String value, String valueExpected, int indexRow, String alias, Logger logger, boolean required) {
-        if (value != null && !value.equals(valueExpected) || value == null && valueExpected != null) {
+        if (value != null && valueExpected != null && !value.equals(valueExpected) ||
+                valueExpected != null && !"".equals(valueExpected) && !valueExpected.equals(value) ||
+                value != null && !"".equals(value) && valueExpected == null) {
             String msg;
             if (valueExpected != null && !valueExpected.trim().isEmpty() && value != null && !value.trim().isEmpty()) {
                 msg = String.format(WRONG_FIXED_VALUE, indexRow, getColumnName(row, alias), value, valueExpected);

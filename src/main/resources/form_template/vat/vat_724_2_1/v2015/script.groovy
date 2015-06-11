@@ -452,6 +452,7 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     dataRow.setImportIndex(fileRowIndex)
     dataRow.setIndex(rowIndex)
     def colIndex = -1
+    def skipValue = (rowIndex in [9, 10, 13, 15, 19, 20, 21, 22, 23, 24, 25])
 
     def tmpValues = [:]
     colIndex++
@@ -460,19 +461,25 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     tmpValues.code = values[colIndex]
     colIndex++
     tmpValues.name = values[colIndex]
+    if (skipValue) {
+        colIndex = 4
+        tmpValues.obtainCost = values[colIndex]
+    }
 
     // Проверить фиксированные значения (графа 1..3)
-    ['rowNum', 'code', 'name'].each { alias ->
+    tmpValues.keySet().toArray().each { alias ->
         def value = StringUtils.cleanString(tmpValues[alias]?.toString())
         def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
         checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
     }
 
     // графа 4
-    colIndex++
+    colIndex = 3
     dataRow.realizeCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     // графа 5
-    colIndex++
-    dataRow.obtainCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    if (!skipValue) {
+        colIndex++
+        dataRow.obtainCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
 }
