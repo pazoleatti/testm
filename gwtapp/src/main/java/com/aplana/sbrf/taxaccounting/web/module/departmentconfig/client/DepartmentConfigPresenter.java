@@ -87,12 +87,6 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void setDepartmentCombined(DepartmentCombined combinedDepartmentParam);
 
         /**
-         * Устанавливаем всем справочникам на форме "ограничивающий период"
-         * @param reportPeriodId идентификатор отчетного периода
-         */
-        void resetRefBookWidgetsDatePeriod(Integer reportPeriodId);
-
-        /**
          * Установка типа налога
          * @param type
          */
@@ -156,6 +150,13 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         void removeResizeHandler();
 
         void update();
+
+        /**
+         * Устанавливаем всем справочникам на форме "ограничивающий период"
+         * @param startDate
+         * @param endDate
+         */
+        void setRefBookPeriod(Date startDate, Date endDate);
     }
 
     @Inject
@@ -384,6 +385,22 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
     @Override
     public boolean isControlUnp() {
         return isControlUnp;
+    }
+
+    @Override
+    public void getRefBookPeriod(Integer currentReportPeriodId, Integer currentDepartmentId) {
+        GetRefBookPeriodAction action = new GetRefBookPeriodAction();
+        action.setDepartmentId(currentDepartmentId);
+        action.setReportPeriodId(currentReportPeriodId);
+        action.setTaxType(getView().getTaxType());
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetRefBookPeriodResult>() {
+                            @Override
+                            public void onSuccess(GetRefBookPeriodResult result) {
+                                getView().setRefBookPeriod(result.getStartDate(), result.getEndDate());
+                            }
+                        }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
     }
 
     @Override

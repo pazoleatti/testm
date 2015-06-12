@@ -350,6 +350,73 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
+    public Date getNextVersion(Long refBookId, Date version, String filter) {
+        PreparedStatementData ps = new PreparedStatementData();
+
+        RefBook refBook = get(refBookId);
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+
+        PreparedStatementData filterPS = new PreparedStatementData();
+        UniversalFilterTreeListener universalFilterTreeListener = applicationContext.getBean("universalFilterTreeListener", UniversalFilterTreeListener.class);
+        universalFilterTreeListener.setRefBook(refBook);
+        universalFilterTreeListener.setPs(filterPS);
+        Filter.getFilterQuery(filter, universalFilterTreeListener);
+
+        StringBuilder fromSql = new StringBuilder();
+        fromSql.append("\nfrom ref_book_record r\n");
+        ps.appendQuery("select min(r.version) as version \n");
+
+        for (int i = 0; i < attributes.size(); i++) {
+            RefBookAttribute attribute = attributes.get(i);
+            String alias = attribute.getAlias();
+
+            fromSql.append(" left join ref_book_value a");
+            fromSql.append(alias);
+            fromSql.append(" on a");
+            fromSql.append(alias);
+            fromSql.append(".record_id = r.id and a");
+            fromSql.append(alias);
+            fromSql.append(".attribute_id = ");
+            fromSql.append(attribute.getId());
+        }
+
+        // добавляем join'ы относящиеся к фильтру
+        if (filterPS.getJoinPartsOfQuery() != null) {
+            fromSql.append(filterPS.getJoinPartsOfQuery());
+        }
+
+        ps.appendQuery(fromSql.toString());
+        ps.appendQuery("where\n  r.ref_book_id = ?");
+        ps.addParam(refBookId);
+        ps.appendQuery(" and r.version > ?");
+        ps.addParam(version);
+        ps.appendQuery(" and\n  status <> -1\n");
+
+        // обработка параметров фильтра
+        if (filterPS.getQuery().length() > 0) {
+            ps.appendQuery(" and\n ");
+            ps.appendQuery("(");
+            ps.appendQuery(filterPS.getQuery().toString());
+            ps.appendQuery(")");
+            ps.appendQuery("\n");
+            ps.addParam(filterPS.getParams());
+        }
+
+        try {
+            List<Date> versions = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(),
+                    new RowMapper<Date>() {
+                        @Override
+                        public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return rs.getDate("version");
+                        }
+                    });
+            return versions.get(0);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
     public int getRecordsCount(Long refBookId, Date version, String filter) {
         PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, null, filter, null, true);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
@@ -2686,7 +2753,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         logger.error("Период элемента, указанного в поле \"%s\" составляет %s - %s и не пересекается %s",
                                 attributeIds.get(id),
                                 sdf.format(versionStart),
-                                sdf.format(versionEnd),
+                                versionEnd != null ? sdf.format(versionEnd) : "\"-\"",
                                 (isConfig ? "с отчетным периодом!" : "с периодом актуальности версии!"));
                     }
                 });

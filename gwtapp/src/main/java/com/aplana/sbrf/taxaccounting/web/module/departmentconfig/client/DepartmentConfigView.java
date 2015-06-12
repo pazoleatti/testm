@@ -200,7 +200,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 if (event.getValue() != null && event.getValue().size() == 1) {
                     onReportPeriodsSelected(event.getValue().get(0));
                 } else {
-                    onReportPeriodsSelected(null);
+                    clear();
                     isReportPeriodActive = false;
                 }
             }
@@ -421,8 +421,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 		}
         this.currentReportPeriodId = reportPeriodId;
         editButton.setEnabled(false);
-        resetRefBookWidgetsDatePeriod(currentReportPeriodId);
-        clear();
+        getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
 	}
 
 	@Override
@@ -462,44 +461,17 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	public void setDereferenceValue(Map<Long, String> rbTextValues) {
 		this.dereferenceValues = rbTextValues;
 		if (dereferenceValues != null) {
-			Pair<Date, Date> period = periodPickerPopup.getPeriodDates(periodPickerPopup.getValue().get(0));
 			// Заполнение текстовых значений справочников
 			dictRegionId.setDereferenceValue(rbTextValues.get(dictRegionId.getAttributeId()));
-			dictRegionId.setPeriodDates(period.getFirst(), period.getSecond());
+			//dictRegionId.setPeriodDates(period.getFirst(), period.getSecond());
 			reorgFormCode.setDereferenceValue(rbTextValues.get(reorgFormCode.getAttributeId()));
-			reorgFormCode.setPeriodDates(period.getFirst(), period.getSecond());
 			signatoryId.setDereferenceValue(rbTextValues.get(signatoryId.getAttributeId()));
-			signatoryId.setPeriodDates(period.getFirst(), period.getSecond());
 			taxPlaceTypeCode.setDereferenceValue(rbTextValues.get(taxPlaceTypeCode.getAttributeId()));
-			taxPlaceTypeCode.setPeriodDates(period.getFirst(), period.getSecond());
 			obligation.setDereferenceValue(rbTextValues.get(obligation.getAttributeId()));
-			obligation.setPeriodDates(period.getFirst(), period.getSecond());
 			oktmo.setDereferenceValue(rbTextValues.get(oktmo.getAttributeId()));
-			oktmo.setPeriodDates(period.getFirst(), period.getSecond());
 			okvedCode.setDereferenceValue(rbTextValues.get(okvedCode.getAttributeId()));
-			okvedCode.setPeriodDates(period.getFirst(), period.getSecond());
 			type.setDereferenceValue(rbTextValues.get(type.getAttributeId()));
-			type.setPeriodDates(period.getFirst(), period.getSecond());
 		}
-	}
-
-	@Override
-	public final void resetRefBookWidgetsDatePeriod(Integer reportPeriodId) {
-		Date startDate = null;
-		Date endDate = null;
-		Pair<Date, Date> dates = periodPickerPopup.getPeriodDates(reportPeriodId);
-		if (dates != null) {
-			startDate = dates.getFirst();
-			endDate = dates.getSecond();
-		}
-		dictRegionId.setPeriodDates(startDate, endDate);
-		reorgFormCode.setPeriodDates(startDate, endDate);
-		signatoryId.setPeriodDates(startDate, endDate);
-		taxPlaceTypeCode.setPeriodDates(startDate, endDate);
-		obligation.setPeriodDates(startDate, endDate);
-		oktmo.setPeriodDates(startDate, endDate);
-		okvedCode.setPeriodDates(startDate, endDate);
-		type.setPeriodDates(startDate, endDate);
 	}
 
 	@Override
@@ -558,6 +530,19 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             dereferenceValues.put(okvedCode.getAttributeId(), okvedCode.getDereferenceValue());
             dereferenceValues.put(type.getAttributeId(), type.getDereferenceValue());
         }
+    }
+
+    @Override
+    public void setRefBookPeriod(Date startDate, Date endDate) {
+        clear();
+        dictRegionId.setPeriodDates(startDate, endDate);
+        reorgFormCode.setPeriodDates(startDate, endDate);
+        signatoryId.setPeriodDates(startDate, endDate);
+        taxPlaceTypeCode.setPeriodDates(startDate, endDate);
+        obligation.setPeriodDates(startDate, endDate);
+        oktmo.setPeriodDates(startDate, endDate);
+        okvedCode.setPeriodDates(startDate, endDate);
+        type.setPeriodDates(startDate, endDate);
     }
 
     private void addResizeHandler() {

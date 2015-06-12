@@ -123,6 +123,8 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
          * Обновление видимости дял кнопки "Редактировать"
          */
         void updateVisibleEditButton();
+
+        void setRefBookPeriod(Date startDate, Date endDate);
     }
 
     @Inject
@@ -339,6 +341,22 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     }
 
+    @Override
+    public void getRefBookPeriod(Integer currentReportPeriodId, Integer currentDepartmentId) {
+        GetRefBookPeriodAction action = new GetRefBookPeriodAction();
+        action.setDepartmentId(currentDepartmentId);
+        action.setReportPeriodId(currentReportPeriodId);
+        action.setTaxType(getView().getTaxType());
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetRefBookPeriodResult>() {
+                            @Override
+                            public void onSuccess(GetRefBookPeriodResult result) {
+                                getView().setRefBookPeriod(result.getStartDate(), result.getEndDate());
+                            }
+                        }, this).addCallback(new ManualRevealCallback<GetUserDepartmentAction>(this)));
+    }
+
     private boolean isKppTaxOrgCodeFiled(List<Map<String, TableCell>> rows) {
         for (Map<String, TableCell> row : rows) {
             String kpp = row.get("KPP").getStringValue();
@@ -472,7 +490,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                 // Список отчетных периодов
                                 getView().setReportPeriods(result.getReportPeriods() == null
                                         ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods());
-                                createTableColumns();
+                             //   createTableColumns();
                                 getData();
 
                             }

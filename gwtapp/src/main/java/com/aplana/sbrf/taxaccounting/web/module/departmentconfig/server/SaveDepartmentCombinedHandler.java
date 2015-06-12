@@ -158,15 +158,24 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
             Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
 
-            if (checkPattern(logger, "ИНН", depCombined.getInn(), innPattern)){
-                checkSumInn(logger, "ИНН", depCombined.getInn());
+            if (depCombined.getReorgInn() != null && !depCombined.getReorgInn().isEmpty()) {
+                if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern)){
+                    checkSumInn(logger, "ИНН реорганизованной организации", depCombined.getReorgInn());
+                }
+                checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern);
             }
-            if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern)){
-                checkSumInn(logger, "ИНН реорганизованной организации", depCombined.getReorgInn());
+            if (depCombined.getInn() != null && !depCombined.getInn().isEmpty()) {
+                if (checkPattern(logger, "ИНН", depCombined.getInn(), innPattern)){
+                    checkSumInn(logger, "ИНН", depCombined.getInn());
+                }
             }
-            checkPattern(logger, "КПП", depCombined.getKpp(), kppPattern);
-            checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern);
-            checkPattern(logger, "Код налогового органа", depCombined.getTaxOrganCode(), taxOrganPattern);
+            if (depCombined.getKpp() != null && !depCombined.getKpp().isEmpty()) {
+                checkPattern(logger, "КПП", depCombined.getKpp(), kppPattern);
+            }
+
+            if (depCombined.getTaxOrganCode() != null && !depCombined.getTaxOrganCode().isEmpty()) {
+                checkPattern(logger, "Код налогового органа", depCombined.getTaxOrganCode(), taxOrganPattern);
+            }
 
             // Проверка необходимости редактирования
             boolean needEdit = false;
@@ -195,16 +204,23 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 needEdit = true;
                 // Запись нашлась
                 if (recordPairs.size() != 1) {
-                    throw new ActionException("Найдено несколько настроек для подразделения ");
+                    throw new ActionException("Найдено несколько настроек для подразделения");
                 }
                 depCombined.setRecordId(recordPairs.get(0).getFirst());
             }
 
             RefBookRecordVersion recordVersion;
             if (!needEdit) {
+                //Получаем дату окончания = дате начала следующей версии. Нужно для проверки справочных атрибутов
+                /*Date versionEnd = provider.getNextVersion(period.getCalendarStartDate(), filter);
+                if (versionEnd != null && period.getCalendarStartDate().after(versionEnd)) {
+                    throw new ActionException("Дата окончания настроек подразделения получена некорректно");
+                }*/
                 List<Long> newRecordIds = provider.createRecordVersion(logger, period.getCalendarStartDate(), null, Arrays.asList(record));
                 recordVersion = provider.getRecordVersionInfo(newRecordIds.get(0));
             } else {
+                /*recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
+                provider.updateRecordVersion(logger, depCombined.getRecordId(), recordVersion.getVersionStart(), recordVersion.getVersionEnd(), paramsMap);*/
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), null, paramsMap);
                 recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
             }

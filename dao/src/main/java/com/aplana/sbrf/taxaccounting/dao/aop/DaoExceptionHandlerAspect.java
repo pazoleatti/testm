@@ -20,7 +20,10 @@ public class DaoExceptionHandlerAspect {
     @AfterThrowing(pointcut = "execution(* com.aplana.sbrf.taxaccounting.dao..*.*(..)) " +
             "&& !within(com.aplana.sbrf.taxaccounting.dao.impl.DBInfo)", throwing = "e")
     public void handleDaoException(Throwable e) throws DaoException {
-        System.out.println("root: " + ExceptionUtils.getRootCause(e));
+        Throwable rootCause = ExceptionUtils.getRootCause(e);
+        if (rootCause instanceof java.sql.SQLSyntaxErrorException && rootCause.getLocalizedMessage().contains("ORA-02049")) {
+            throw new DaoException("Объект заблокирован другой операцией. Попробуйте выполнить операцию позже", e);
+        }
         if (e instanceof DaoException) {
             throw (DaoException) e;
         } if (e instanceof  IllegalArgumentException) {

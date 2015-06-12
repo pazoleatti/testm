@@ -1077,4 +1077,9 @@ public class RefBookUniversal implements RefBookDataProvider {
     public List<String> getMatchedRecords(List<RefBookAttribute> attributes, List<Map<String, RefBookValue>> records, Integer accountPeriodId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Date getNextVersion(Date version, String filter) {
+        return refBookDao.getNextVersion(refBookId, version, filter);
+    }
 }

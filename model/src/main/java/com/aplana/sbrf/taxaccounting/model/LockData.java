@@ -26,8 +26,6 @@ public final class LockData {
     private String description;
     /* Очередь, в которой находится связанная асинхронная задача */
     private LockQueues queue;
-    /* Положение задачи в очереди */
-    private int queuePosition;
 
     public enum LockObjects {
         REF_BOOK,
@@ -212,14 +210,6 @@ public final class LockData {
         this.queue = queue;
     }
 
-    public int getQueuePosition() {
-        return queuePosition;
-    }
-
-    public void setQueuePosition(int queuePosition) {
-        this.queuePosition = queuePosition;
-    }
-
     @Override
     public String toString() {
         return "LockData{" +
@@ -230,8 +220,7 @@ public final class LockData {
                 ", state='" + state + '\'' +
                 ", stateDate=" + stateDate +
                 ", description='" + description + '\'' +
-                ", queue='" + queue + '\'' +
-                ", queuePosition=" + queuePosition +
+                ", queue=" + queue +
                 '}';
     }
 }

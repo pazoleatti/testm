@@ -27,6 +27,11 @@ public abstract class AbstractPermanentRefBook extends AbstractReadOnlyRefBook {
      */
     abstract protected PagingResult<Map<String, RefBookValue>> getRecords(String filter);
 
+    @Override
+    public Date getNextVersion(Date version, String filter) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * В реализации игнорируются: версия, сортировка
      */
