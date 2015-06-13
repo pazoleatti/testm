@@ -139,6 +139,9 @@ def pattern256Date = "^(\\S.{0,255}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})
 @Field
 def replaceDatePattern = "\$1 \$2\\.\$4\\.\$6"
 
+@Field
+def selectDatePattern = /$2\.$4\.$6/
+
 // Признак периода ввода остатков
 @Field
 def isBalancePeriod
@@ -267,11 +270,11 @@ void logicCheck() {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
         // графа 8
-        if (row.buyerInnKpp && !row.buyerInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
+        if (row.buyerInnKpp && !row.buyerInnKpp.matches(/^(\S{12}|\S{10}\/\S{9})$/)) {
             loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'buyerInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 10
-        if (row.mediatorInnKpp && !row.mediatorInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
+        if (row.mediatorInnKpp && !row.mediatorInnKpp.matches(/^(\S{12}|\S{10}\/\S{9})$/)) {
             loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'mediatorInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
         }
         // графа 11
@@ -285,6 +288,37 @@ void logicCheck() {
         // графа 2
         if (row.opTypeCode && (!row.opTypeCode.matches("^[0-9]{2}\$") || !(Integer.valueOf(row.opTypeCode) in ((1..13) + (16..28))))) {
             loggerError(row, String.format("Строка %s: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 01, 02, …,13, 16, 17, …, 28.", index, getColumnName(row,'opTypeCode'), getColumnName(row,'opTypeCode')))
+        }
+        def innKppPatterns = [/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})/, /([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}/]
+        ['buyerInnKpp', 'mediatorInnKpp'].each { alias ->
+            if (checkPattern(logger, row, alias, row[alias], innKppPatterns, null, !isBalancePeriod())) {
+                checkControlSumInn(logger, row, alias, row[alias].split("/")[0], !isBalancePeriod())
+            } else {
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_JUR_PATTERN, INN_JUR_MEANING))
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, KPP_PATTERN, KPP_MEANING))
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_IND_PATTERN, INN_IND_MEANING))
+            }
+        }
+        // Проверки формата дат (графы 3-6, 11)
+        // графа 3
+        if (row.invoiceNumDate && row.invoiceNumDate.matches(pattern1000DateImport)) {
+            checkDateValid(logger, row, 'invoiceNumDate', row.invoiceNumDate?.replaceFirst(pattern1000DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 4
+        if (row.invoiceCorrNumDate && row.invoiceCorrNumDate.matches(pattern3DateImport)) {
+            checkDateValid(logger, row, 'invoiceCorrNumDate', row.invoiceCorrNumDate?.replaceFirst(pattern3DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 5
+        if (row.corrInvoiceNumDate && row.corrInvoiceNumDate.matches(pattern256DateImport)) {
+            checkDateValid(logger, row, 'corrInvoiceNumDate', row.corrInvoiceNumDate?.replaceFirst(pattern256DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 6
+        if (row.corrInvCorrNumDate && row.corrInvCorrNumDate.matches(pattern3DateImport)) {
+            checkDateValid(logger, row, 'corrInvCorrNumDate', row.corrInvCorrNumDate?.replaceFirst(pattern3DateImport, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 11
+        if (row.paymentDocNumDate && row.paymentDocNumDate.matches(pattern256DateImport)) {
+            checkDateValid(logger, row, 'paymentDocNumDate', row.paymentDocNumDate?.replaceFirst(pattern256DateImport, selectDatePattern), !isBalancePeriod())
         }
     }
 

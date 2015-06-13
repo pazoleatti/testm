@@ -240,6 +240,10 @@ void logicCheck() {
         ['salesmanInnKpp', 'agentInnKpp'].each { alias ->
             if (checkPattern(logger, row, alias, row[alias], innKppPatterns, null, !isBalancePeriod())) {
                 checkControlSumInn(logger, row, alias, row[alias].split("/")[0], !isBalancePeriod())
+            } else {
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_JUR_PATTERN, INN_JUR_MEANING))
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, KPP_PATTERN, KPP_MEANING))
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_IND_PATTERN, INN_IND_MEANING))
             }
         }
         // Проверки формата дат (графы 3-8)

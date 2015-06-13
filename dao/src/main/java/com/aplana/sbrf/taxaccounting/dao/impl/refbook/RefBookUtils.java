@@ -28,6 +28,7 @@ public class RefBookUtils extends AbstractDao {
     public static String INN_JUR_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}";
     public static String INN_JUR_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9).";
     public static String INN_IND_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}";
+    public static String INN_IND_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 10 символов: (0-9)";
     public static String KPP_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})";
     public static String KPP_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9).";
     public static String TAX_ORGAN_PATTERN = "[0-9]{4}";

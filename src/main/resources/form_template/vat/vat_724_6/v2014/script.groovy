@@ -145,8 +145,13 @@ void logicCheck() {
 
         // 4. Проверка формата заполнения
         // графа 9
-        if (row.number2 && !row.number2.matches("^\\S{9}\\/\\S{2}\\-\\S{4}\$")) {
+        if (row.number2 && !row.number2.matches(/\S{9}\/\S{2}\-\S{4}/)) {
             loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'number2'), "ХХХХХХХХХ/ХХ-ХХХХ"))
+        }
+        ['operDate', 'date'].each{
+            if (row[it]) {
+                checkDateValid(logger, row, it, row[it], !isBalancePeriod())
+            }
         }
     }
 

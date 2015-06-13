@@ -125,6 +125,7 @@ public final class ScriptUtils {
     public static String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
+    public static String INN_IND_MEANING = RefBookUtils.INN_IND_MEANING;
     public static String KPP_PATTERN = RefBookUtils.KPP_PATTERN;
     public static String KPP_MEANING = RefBookUtils.KPP_MEANING;
     public static String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
