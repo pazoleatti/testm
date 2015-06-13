@@ -21,11 +21,6 @@ switch (formDataEvent) {
 @Field
 def refBookCache = [:]
 
-@Field
-def innPattern = /([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}/;
-@Field
-def kppPattern = /([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})/;
-
 void save() {
     saveRecords.each {
         def String inn = it.INN_KIO?.stringValue
@@ -34,10 +29,10 @@ void save() {
         if (organization == 1 && (inn == null || inn == '')) {
             logger.error('Для организаций РФ атрибут «ИНН» является обязательным')
         }
-        if (checkPattern(logger, null, null, inn, innPattern, true)) {
+        if (checkPattern(logger, null, null, inn, INN_JUR_PATTERN, INN_JUR_MEANING,true)) {
             checkControlSumInn(logger, null, null, inn, true)
         }
-        checkPattern(logger, null, null, kpp, kppPattern, true)
+        checkPattern(logger, null, null, kpp, KPP_PATTERN, KPP_MEANING, true)
     }
 }
 

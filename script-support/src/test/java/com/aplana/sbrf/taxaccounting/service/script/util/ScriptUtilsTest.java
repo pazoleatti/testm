@@ -678,11 +678,11 @@ public class ScriptUtilsTest {
         Logger logger = new Logger();
         List<DataRow<Cell>> dataRows = getDatePatternValidTestRows();
         DataRow<Cell> row = dataRows.get(0);
-        Assert.assertTrue(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), Arrays.asList(ScriptUtils.INN_JUR_PATTERN, ScriptUtils.INN_IND_PATTERN), true));
+        Assert.assertTrue(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), Arrays.asList(ScriptUtils.INN_JUR_PATTERN, ScriptUtils.INN_IND_PATTERN), Arrays.asList(ScriptUtils.INN_JUR_MEANING, null), true));
         Assert.assertFalse(logger.containsLevel(LogLevel.ERROR));
         row = dataRows.get(1);
-        Assert.assertFalse(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), ScriptUtils.INN_JUR_PATTERN, true));
-        Assert.assertEquals(1, logger.getEntries().size());
+        Assert.assertFalse(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), ScriptUtils.INN_JUR_PATTERN, ScriptUtils.INN_JUR_MEANING, true));
+        Assert.assertEquals(2, logger.getEntries().size());
         //ScriptUtilsTest.logger.info(logger.getEntries().get(0).getMessage());
     }
 
