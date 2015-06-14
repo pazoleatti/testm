@@ -123,6 +123,7 @@ public class ScriptUtilsTest {
         String str4 = "  000AA";
         String str5 = " 99 9 9 00";
         String str6 = "";
+        String str7 = "1 016,94";
         double d1 = -0.9999345345345436d;
         long l1 = 999900L;
 
@@ -135,6 +136,7 @@ public class ScriptUtilsTest {
         Assert.assertEquals(l1, ScriptUtils.parseNumber(str5, 1, 1, null, false).longValue());
         Assert.assertNull(ScriptUtils.parseNumber(str6, 1, 1, null, true));
         Assert.assertNull(ScriptUtils.parseNumber(str6, 1, 1, null, false));
+        Assert.assertEquals(1016.94, ScriptUtils.parseNumber(str7, 1, 1, null, false).doubleValue(), 0);
     }
 
     @Test
