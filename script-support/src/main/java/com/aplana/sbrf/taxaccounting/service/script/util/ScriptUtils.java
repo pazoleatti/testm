@@ -350,7 +350,7 @@ public final class ScriptUtils {
         if (tmp.isEmpty()) {
             return null;
         }
-        tmp = tmp.replaceAll(",", ".").replace(" ", "");
+        tmp = tmp.replaceAll(",", ".").replace(" ", "").replaceAll("\\u00A0", "");
         if (tmp.matches("-?\\d+(\\.\\d+)?")) {
             return new BigDecimal(tmp);
         } else {
