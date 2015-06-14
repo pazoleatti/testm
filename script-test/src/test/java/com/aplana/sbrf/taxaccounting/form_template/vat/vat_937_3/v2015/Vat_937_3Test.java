@@ -208,7 +208,7 @@ public class Vat_937_3Test extends ScriptTestBase {
     }
 
     // Консолидация
-    @Test
+    //@Test
     public void composeTest() {
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();
