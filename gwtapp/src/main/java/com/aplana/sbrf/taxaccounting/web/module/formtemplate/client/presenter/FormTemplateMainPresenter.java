@@ -314,7 +314,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
-                    FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
+                    //FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
                     for (Column column : result.getColumns()){
                         Column col = formTemplate.getColumn(column.getAlias());
                         if (col.getId()==null){
