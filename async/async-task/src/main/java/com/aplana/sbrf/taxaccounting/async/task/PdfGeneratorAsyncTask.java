@@ -55,7 +55,7 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
 
         Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.PDF_DEC);
         if (checkTaskLimit == null) {
-            throw new AsyncTaskException("Декларация не сформирована");
+            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
         } else if (checkTaskLimit.getFirst() == null) {
             Logger logger = new Logger();
             DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
