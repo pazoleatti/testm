@@ -375,10 +375,17 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     public boolean checkPathArchiveError(TAUserInfo userInfo, Logger logger, String lockId) {
         String archivePath = getRefBookArchivePath(userInfo, logger, lockId);
         String errorPath = getRefBookErrorPath(userInfo, logger, lockId);
-        if (archivePath == null || errorPath == null) {
+        List<String> pathList = new ArrayList<String>();
+        if (archivePath == null) {
+            pathList.add("к каталогу архива");
+        }
+        if (errorPath == null) {
+            pathList.add("к каталогу ошибок");
+        }
+        if (!pathList.isEmpty()) {
+            log(userInfo, LogData.L43, logger, lockId, StringUtils.join(pathList, ", "));
             return false;
         }
-        List<String> pathList = new ArrayList<String>();
         if (!checkPath(archivePath)) {
             pathList.add("к каталогу архива «" + archivePath + "»");
         }
@@ -525,7 +532,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> pathList = model.get(ConfigurationParam.REF_BOOK_ARCHIVE_DIRECTORY, 0);
         if (pathList == null || pathList.isEmpty()) {
-            log(userInfo, LogData.L43_2, logger, lockId);
             return null;
         }
         return pathList.get(0);
@@ -538,7 +544,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> pathList = model.get(ConfigurationParam.REF_BOOK_ERROR_DIRECTORY, 0);
         if (pathList == null || pathList.isEmpty()) {
-            log(userInfo, LogData.L43_1, logger, lockId);
             return null;
         }
         return pathList.get(0);
