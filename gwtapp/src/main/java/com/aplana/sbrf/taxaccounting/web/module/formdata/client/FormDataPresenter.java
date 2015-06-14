@@ -957,6 +957,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         final ReportType oldType = timerType;
         TimerTaskAction action = new TimerTaskAction();
         action.setFormDataId(formData.getId());
+        action.setTaxType(formData.getFormType().getTaxType());
         dispatcher.execute(
                 action,
                 CallbackUtils.simpleCallback(
@@ -1012,22 +1013,26 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             if (readOnlyMode) {
                                                 setLowReadLockedMode(
                                                         result.getLockedByUser(),
-                                                        result.getLockDate());
+                                                        result.getLockDate(),
+                                                        result.getTitle());
                                             } else {
                                                 setLowEditLockedMode(
                                                         result.getLockedByUser(),
-                                                        result.getLockDate());
+                                                        result.getLockDate(),
+                                                        result.getTitle());
                                             }
                                             break;
                                         case LOCKED:
                                             setReadLockedMode(true,
                                                     result.getLockedByUser(),
-                                                    result.getLockDate());
+                                                    result.getLockDate(),
+                                                    result.getTitle());
                                             break;
                                         case LOCKED_READ:
                                             setLowReadLockedMode(
                                                     result.getLockedByUser(),
-                                                    result.getLockDate());
+                                                    result.getLockDate(),
+                                                    result.getTitle());
                                             break;
 
                                     }

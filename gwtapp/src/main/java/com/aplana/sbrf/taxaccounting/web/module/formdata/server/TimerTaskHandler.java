@@ -48,6 +48,7 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
             result.setLockedByUser(taUserService.getUser(lockType.getSecond().getUserId()).getName());
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
             result.setLockDate(formatter.format(lockType.getSecond().getDateLock()));
+            result.setTitle(String.format("Запущена операция \"%s\"", String.format(lockType.getFirst().getDescription(), action.getTaxType().getTaxText())));
         }
         LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(), userInfo);
         if (lockInformation != null && lockInformation.getUserId() == userInfo.getUser().getId()) {

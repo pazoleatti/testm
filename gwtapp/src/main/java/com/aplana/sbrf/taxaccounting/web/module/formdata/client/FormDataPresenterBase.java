@@ -86,7 +86,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void showDeleteManualAnchor(boolean show);
 
-		void setLockInformation(boolean isVisible, boolean readOnlyMode, String lockDate, String lockedBy);
+		void setLockInformation(boolean isVisible, boolean readOnlyMode, String lockDate, String lockedBy, String title);
 
 		DataRow<Cell> getSelectedRow();
 
@@ -214,7 +214,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		unlockForm(formData.getId());
 	}
 	
-	protected void setReadLockedMode(boolean readOnlyMode, String lockedBy, String lockDate){
+	protected void setReadLockedMode(boolean readOnlyMode, String lockedBy, String lockDate, String title){
 		this.readOnlyMode = readOnlyMode;
 
 		MyView view = getView();
@@ -225,7 +225,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
 		view.showDeleteFormButton(false);
-		view.setLockInformation(true, readOnlyMode, lockDate, lockedBy);
+		view.setLockInformation(true, readOnlyMode, lockDate, lockedBy, title);
 
 		view.setWorkflowButtons(null);
 		view.showCheckButton(false);
@@ -240,7 +240,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
     }
 
-    protected void setLowReadLockedMode(String lockedBy, String lockDate){
+    protected void setLowReadLockedMode(String lockedBy, String lockDate, String title){
         readOnlyMode = true;
 
         MyView view = getView();
@@ -256,7 +256,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showOriginalVersionButton(false);
         view.showPrintAnchor(false);
         view.showDeleteFormButton(formDataAccessParams.isCanDelete());
-        view.setLockInformation(true, false, lockDate, lockedBy);
+        view.setLockInformation(true, false, lockDate, lockedBy, title);
 
         view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
         view.showCheckButton(formDataAccessParams.isCanRead());
@@ -272,7 +272,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         placeManager.setOnLeaveConfirmation(null);
     }
 
-    protected void setLowEditLockedMode(String lockedBy, String lockDate){
+    protected void setLowEditLockedMode(String lockedBy, String lockDate, String title){
         readOnlyMode = false;
 
         MyView view = getView();
@@ -292,7 +292,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         view.showPrintAnchor(false);
         view.showDeleteFormButton(false);
-        view.setLockInformation(true, false, lockDate, lockedBy);
+        view.setLockInformation(true, false, lockDate, lockedBy, title);
 
         view.setWorkflowButtons(null);
         view.showCheckButton(formDataAccessParams.isCanRead());
@@ -332,7 +332,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
 		view.showDeleteFormButton(formDataAccessParams.isCanDelete());
-		view.setLockInformation(false, readOnlyMode, null, null);
+		view.setLockInformation(false, readOnlyMode, null, null, null);
 		
 		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
 		view.showCheckButton(formDataAccessParams.isCanRead());
@@ -368,7 +368,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showPrintAnchor(false);
 		view.showDeleteFormButton(false);
-		view.setLockInformation(false, readOnlyMode, null, null);
+		view.setLockInformation(false, readOnlyMode, null, null, null);
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(formDataAccessParams.isCanRead());
