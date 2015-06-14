@@ -82,7 +82,11 @@
                     <g:HorizontalPanel height="30px" ui:field="refBookAttrPanel">
                         <g:Label width="150px">Отображаемый атрибут</g:Label>
                         <g:ValueListBox width="600px" ui:field="refBookAttrBox"/>
-                        <g:ValueListBox addStyleNames="{style.marginLeft10}" width="600px" ui:field="refBookAttrRefBox"/>
+                    </g:HorizontalPanel>
+
+                    <g:HorizontalPanel height="30px" ui:field="refBookRefAttrPanel">
+                        <g:Label width="150px">Определяющий атрибут</g:Label>
+                        <g:ValueListBox width="600px" ui:field="refBookAttrRefBox"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel height="30px" ui:field="refBookAttrFilterPanel">

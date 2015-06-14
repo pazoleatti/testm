@@ -136,6 +136,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     @UiField(provided = true)
     ValueListBox<RefBookAttribute> refBookAttrBox;
 
+    @UiField
+    Panel refBookRefAttrPanel;
+
     @UiField(provided = true)
     ValueListBox<RefBookAttribute> refBookAttrRefBox;
 
@@ -402,12 +405,15 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             RefBook refBookDereference = getUiHandlers().getRefBook(refBookAttrBox.getValue().getRefBookId());
             refBookAttrRefBox.setValue(null);
             refBookAttrRefBox.setAcceptableValues(refBookDereference.getAttributes());
+            refBookRefAttrPanel.setVisible(true);
             refBookAttrRefBox.setVisible(true);
         }
         else{
+            refBookRefAttrPanel.setVisible(false);
             refBookAttrRefBox.setVisible(false);
             refBookAttrRefBox.setValue(null);
-            ((RefBookColumn) currentColumn).setRefBookAttributeId2(null);
+            if (currentColumn instanceof RefBookColumn)
+                ((RefBookColumn) currentColumn).setRefBookAttributeId2(null);
         }
     }
 
@@ -530,6 +536,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         refBookAttrPanel.setVisible(false);
         refBookAttrFilterPanel.setVisible(false);
         refBooktAttrParentPanel.setVisible(false);
+        refBookRefAttrPanel.setVisible(false);
         refBookAttrRefBox.setVisible(false);
         autoNumerationPanel.setVisible(false);
 
@@ -562,6 +569,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             // Справочник
             refBookPanel.setVisible(true);
             refBookAttrPanel.setVisible(true);
+            refBookRefAttrPanel.setVisible(false);
             refBookAttrRefBox.setVisible(false);
             refBookAttrFilterPanel.setVisible(true);
             // Указанный атрибут
@@ -571,11 +579,12 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             refBookAttrBox.setValue(
                     refBookAttribute == null ?
                             refBook.getAttributes() != null && !refBook.getAttributes().isEmpty() ?
-                                    refBook.getAttributes().get(0) : refBookAttribute
+                                    refBook.getAttributes().get(0) : null
                             : refBookAttribute,
                     true);
             refBookAttrBox.setAcceptableValues(refBook.getAttributes());
             if (refBookAttribute != null && refBookAttribute.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                refBookRefAttrPanel.setVisible(true);
                 refBookAttrRefBox.setVisible(true);
 
                 if (((RefBookColumn)column).getRefBookAttributeId2() != null){
@@ -599,6 +608,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             // Зависимая графа
             refBooktAttrParentPanel.setVisible(true);
             refBookAttrPanel.setVisible(true);
+            refBookRefAttrPanel.setVisible(true);
             refBookAttrRefBox.setVisible(true);
             List<Column> availableList = getRefBookColumn(column);
             if (!availableList.isEmpty()) {
@@ -632,6 +642,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
                                     refBookAttribute.getRefBookAttributeId(), false)).getAttributes());
                 }
                 else{
+                    refBookRefAttrPanel.setVisible(false);
                     refBookAttrRefBox.setVisible(false);
                     refBookAttrRefBox.setValue(null);
                 }
