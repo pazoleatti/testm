@@ -56,8 +56,10 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
 
         String inn = saveDepartmentRefBookValuesAction.getNotTableParams().get("INN").getStringValue();
-        if (checkPattern(logger, false, null, null, "ИНН", inn, innPattern)){
-            checkSumInn(logger, false, null, null, "ИНН", inn);
+        if (inn != null && !inn.isEmpty()) {
+            if (checkPattern(logger, false, null, null, "ИНН", inn, innPattern, RefBookUtils.INN_JUR_MEANING)){
+                checkSumInn(logger, false, null, null, "ИНН", inn);
+            }
         }
         for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
             String sig = row.get("SIGNATORY_ID").getDeRefValue();
@@ -81,12 +83,20 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             }
             String taxOrganCode = row.get("TAX_ORGAN_CODE").getStringValue();
             String kpp = row.get("KPP").getStringValue();
-            if (checkPattern(logger, true,  taxOrganCode, kpp, "ИНН реорганизованной организации",row.get("REORG_INN").getStringValue(), innPattern)){
-                checkSumInn(logger, true, taxOrganCode, kpp, "ИНН реорганизованной организации", row.get("REORG_INN").getStringValue());
+            if (row.get("REORG_INN").getStringValue() != null && !row.get("REORG_INN").getStringValue().isEmpty()) {
+                if (checkPattern(logger, true,  taxOrganCode, kpp, "ИНН реорганизованной организации",row.get("REORG_INN").getStringValue(), innPattern, RefBookUtils.INN_JUR_MEANING)){
+                    checkSumInn(logger, true, taxOrganCode, kpp, "ИНН реорганизованной организации", row.get("REORG_INN").getStringValue());
+                }
             }
-            checkPattern(logger, true, taxOrganCode, kpp,"КПП",  row.get("KPP").getStringValue(), kppPattern);
-            checkPattern(logger, true, taxOrganCode, kpp, "КПП реорганизованной организации", row.get("REORG_KPP").getStringValue(), kppPattern);
-            checkPattern(logger, true, taxOrganCode, kpp, "Код налогового органа", row.get("TAX_ORGAN_CODE").getStringValue(), taxOrganPattern);
+            if (row.get("KPP").getStringValue() != null && !row.get("KPP").getStringValue().isEmpty()) {
+                checkPattern(logger, true, taxOrganCode, kpp,"КПП",  row.get("KPP").getStringValue(), kppPattern, RefBookUtils.KPP_MEANING);
+            }
+            if (row.get("REORG_KPP").getStringValue() != null && !row.get("REORG_KPP").getStringValue().isEmpty()) {
+                checkPattern(logger, true, taxOrganCode, kpp, "КПП реорганизованной организации", row.get("REORG_KPP").getStringValue(), kppPattern, RefBookUtils.KPP_MEANING);
+            }
+            if (row.get("TAX_ORGAN_CODE").getStringValue() != null && !row.get("TAX_ORGAN_CODE").getStringValue().isEmpty()) {
+                checkPattern(logger, true, taxOrganCode, kpp, "Код налогового органа", row.get("TAX_ORGAN_CODE").getStringValue(), taxOrganPattern, RefBookUtils.TAX_ORGAN_MEANING);
+            }
         }
 
         if (logger.containsLevel(LogLevel.ERROR) && result.getErrorType() == SaveDepartmentRefBookValuesResult.ERROR_TYPE.NONE){
@@ -296,12 +306,13 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         return convertedRow;
     }
 
-    private boolean checkPattern(Logger logger, boolean isTable, String taxOrganCode, String kpp, String name, String value, Pattern pattern) {
+    private boolean checkPattern(Logger logger, boolean isTable, String taxOrganCode, String kpp, String name, String value, Pattern pattern, String patternMeaning) {
         if (value != null && !pattern.matcher(value).matches()){
             if (isTable)
                 logger.error("Код налогового органа \"%s\", КПП \"%s\": Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", taxOrganCode, kpp, name, value, pattern.pattern());
             else
                 logger.error("Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", name, value, pattern.pattern());
+            logger.error("Расшифровка паттерна \"%s\": %s", pattern.pattern(), patternMeaning);
             return false;
         }
         return true;

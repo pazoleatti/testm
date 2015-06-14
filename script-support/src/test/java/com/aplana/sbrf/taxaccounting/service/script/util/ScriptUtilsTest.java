@@ -123,6 +123,7 @@ public class ScriptUtilsTest {
         String str4 = "  000AA";
         String str5 = " 99 9 9 00";
         String str6 = "";
+        String str7 = "1 016,94";
         double d1 = -0.9999345345345436d;
         long l1 = 999900L;
 
@@ -135,6 +136,7 @@ public class ScriptUtilsTest {
         Assert.assertEquals(l1, ScriptUtils.parseNumber(str5, 1, 1, null, false).longValue());
         Assert.assertNull(ScriptUtils.parseNumber(str6, 1, 1, null, true));
         Assert.assertNull(ScriptUtils.parseNumber(str6, 1, 1, null, false));
+        Assert.assertEquals(1016.94, ScriptUtils.parseNumber(str7, 1, 1, null, false).doubleValue(), 0);
     }
 
     @Test
@@ -678,11 +680,11 @@ public class ScriptUtilsTest {
         Logger logger = new Logger();
         List<DataRow<Cell>> dataRows = getDatePatternValidTestRows();
         DataRow<Cell> row = dataRows.get(0);
-        Assert.assertTrue(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), Arrays.asList(ScriptUtils.INN_JUR_PATTERN, ScriptUtils.INN_IND_PATTERN), true));
+        Assert.assertTrue(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), Arrays.asList(ScriptUtils.INN_JUR_PATTERN, ScriptUtils.INN_IND_PATTERN), Arrays.asList(ScriptUtils.INN_JUR_MEANING, null), true));
         Assert.assertFalse(logger.containsLevel(LogLevel.ERROR));
         row = dataRows.get(1);
-        Assert.assertFalse(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), ScriptUtils.INN_JUR_PATTERN, true));
-        Assert.assertEquals(1, logger.getEntries().size());
+        Assert.assertFalse(ScriptUtils.checkPattern(logger, row, "c2", row.getCell("c2").getStringValue(), ScriptUtils.INN_JUR_PATTERN, ScriptUtils.INN_JUR_MEANING, true));
+        Assert.assertEquals(2, logger.getEntries().size());
         //ScriptUtilsTest.logger.info(logger.getEntries().get(0).getMessage());
     }
 

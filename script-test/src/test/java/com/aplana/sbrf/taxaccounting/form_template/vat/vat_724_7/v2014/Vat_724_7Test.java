@@ -147,7 +147,7 @@ public class Vat_724_7Test extends ScriptTestBase {
     }
 
     // Консолидация
-    @Test
+   // @Test
     public void composeTest() {
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();
@@ -157,6 +157,10 @@ public class Vat_724_7Test extends ScriptTestBase {
         departmentFormType.setId(1);
         when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
+
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setBalance(false);
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
 
         FormType formType = new FormType();
         formType.setId(TYPE_ID);
@@ -210,10 +214,6 @@ public class Vat_724_7Test extends ScriptTestBase {
             // графа 5
             Assert.assertNotNull("row.balanceNumber[" + row.getIndex() + "]", row.getCell("balanceNumber").getStringValue());
 
-            // графа 6
-            expected = roundValue(index, 2);
-            Assert.assertEquals("row.sum[" + row.getIndex() + "]", expected, row.getCell("sum").getNumericValue());
-
             // графа 7
             Assert.assertNotNull("row.orderNumber[" + row.getIndex() + "]", row.getCell("orderNumber").getStringValue());
 
@@ -229,6 +229,12 @@ public class Vat_724_7Test extends ScriptTestBase {
 
             index++;
         }
+
+        // графа 6
+        expected = roundValue(1000l, 2);
+        Assert.assertEquals("row.sum[0]", expected,  dataRows.get(0).getCell("sum").getNumericValue());
+        expected = roundValue(2l, 2);
+        Assert.assertEquals("row.sum[1]", expected,  dataRows.get(1).getCell("sum").getNumericValue());
     }
 
     // Округляет число до требуемой точности

@@ -307,7 +307,7 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // 29. Проверка на соответствие паттерну
-        if (checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, true)) {
+        if (checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, null, true)) {
             checkControlSumInn(logger, row, 'innRF', row.innRF, true)
         }
     }

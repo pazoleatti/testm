@@ -147,6 +147,13 @@ void logicCheck() {
         // графа 4
         if (row.inn && !row.inn.matches("^\\S{10}\$")) {
             loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'inn'), "ХХХХХХХХХХ"))
+        } else if (row.inn && checkPattern(logger, row, 'inn', row.inn, [INN_JUR_PATTERN], [INN_JUR_MEANING], !isBalancePeriod())) {
+            checkControlSumInn(logger, row, 'inn', row.inn, !isBalancePeriod())
+        }
+        ['operDate', 'sfDate'].each{
+            if (row[it]) {
+                checkDateValid(logger, row, it, row[it], !isBalancePeriod())
+            }
         }
     }
 

@@ -159,22 +159,22 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
 
             if (depCombined.getReorgInn() != null && !depCombined.getReorgInn().isEmpty()) {
-                if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern)){
+                if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern, RefBookUtils.INN_JUR_MEANING)){
                     checkSumInn(logger, "ИНН реорганизованной организации", depCombined.getReorgInn());
                 }
-                checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern);
+                checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern, RefBookUtils.KPP_MEANING);
             }
             if (depCombined.getInn() != null && !depCombined.getInn().isEmpty()) {
-                if (checkPattern(logger, "ИНН", depCombined.getInn(), innPattern)){
+                if (checkPattern(logger, "ИНН", depCombined.getInn(), innPattern, RefBookUtils.INN_JUR_MEANING)){
                     checkSumInn(logger, "ИНН", depCombined.getInn());
                 }
             }
             if (depCombined.getKpp() != null && !depCombined.getKpp().isEmpty()) {
-                checkPattern(logger, "КПП", depCombined.getKpp(), kppPattern);
+                checkPattern(logger, "КПП", depCombined.getKpp(), kppPattern, RefBookUtils.KPP_MEANING);
             }
 
             if (depCombined.getTaxOrganCode() != null && !depCombined.getTaxOrganCode().isEmpty()) {
-                checkPattern(logger, "Код налогового органа", depCombined.getTaxOrganCode(), taxOrganPattern);
+                checkPattern(logger, "Код налогового органа", depCombined.getTaxOrganCode(), taxOrganPattern, RefBookUtils.TAX_ORGAN_MEANING);
             }
 
             // Проверка необходимости редактирования
@@ -257,9 +257,10 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
         return (list != null && !list.isEmpty() ? list.get(0) : null);
     }
 
-    private boolean checkPattern(Logger logger, String name, String value, Pattern pattern) {
+    private boolean checkPattern(Logger logger, String name, String value, Pattern pattern, String patternMeaning) {
         if (value != null && !pattern.matcher(value).matches()){
             logger.error("Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", name, value, pattern.pattern());
+            logger.error("Расшифровка паттерна \"%s\": %s", pattern.pattern(), patternMeaning);
             return false;
         }
         return true;
