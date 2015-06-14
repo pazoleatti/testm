@@ -107,10 +107,16 @@ def sortColumns = ['dateRegistration', 'invoice', 'typeCode', 'invoiceCorrecting
 def pattern1000Date = "^\\S.{0,999}( ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4}))?\$"
 
 @Field
-def pattern3Date = "^\\d{1,3} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+def pattern3Date = "^(\\d{1,3}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
 
 @Field
-def pattern256Date = "^\\S.{0,255} ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+def pattern256Date = "^(\\S.{0,255}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def pattern1000DateStrict = "^(\\S.{0,999}) ([0-2]\\d|3[01])\\.(0\\d|1[012])\\.(\\d{4})\$"
+
+@Field
+def selectDatePattern = /$2\.$3\.$4/
 
 // Дата начала отчетного периода
 @Field
@@ -224,6 +230,41 @@ void logicCheck() {
         // графа 2
         if (row.typeCode && (!row.typeCode.matches("^[0-9]{2}\$") || !(Integer.valueOf(row.typeCode) in ((1..13) + (16..28))))) {
             loggerLog(row, String.format("Строка %s: Графа «%s» заполнена неверно! Графа «%s» должна принимать значение из следующего диапазона: 01, 02, …,13, 16, 17, …, 28.", index, getColumnName(row,'typeCode'), getColumnName(row,'typeCode')))
+        }
+        def innKppPatterns = [/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})/, /([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}/]
+        ['salesmanInnKpp', 'agentInnKpp'].each { alias ->
+            if (checkPattern(logger, row, alias, row[alias], innKppPatterns, null, !isBalancePeriod())) {
+                checkControlSumInn(logger, row, alias, row[alias].split("/")[0], !isBalancePeriod())
+            } else {
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_JUR_PATTERN, INN_JUR_MEANING))
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, KPP_PATTERN, KPP_MEANING))
+                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_IND_PATTERN, INN_IND_MEANING))
+            }
+        }
+        // Проверки формата дат (графы 3-8)
+        // графа 3
+        if (row.invoice && row.invoice.matches(pattern1000DateStrict)) {
+            checkDateValid(logger, row, 'invoice', row.invoice?.replaceFirst(pattern1000DateStrict, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 4
+        if (row.invoiceCorrecting && row.invoiceCorrecting.matches(pattern3Date)) {
+            checkDateValid(logger, row, 'invoiceCorrecting', row.invoiceCorrecting?.replaceFirst(pattern3Date, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 5
+        if (row.invoiceCorrection && row.invoiceCorrection.matches(pattern256Date)) {
+            checkDateValid(logger, row, 'invoiceCorrection', row.invoiceCorrection?.replaceFirst(pattern256Date, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 6
+        if (row.invoiceCorrectingCorrection && row.invoiceCorrectingCorrection.matches(pattern3Date)) {
+            checkDateValid(logger, row, 'invoiceCorrectingCorrection', row.invoiceCorrectingCorrection?.replaceFirst(pattern3Date, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 7
+        if (row.documentPay && row.documentPay.matches(pattern256Date)) {
+            checkDateValid(logger, row, 'documentPay', row.documentPay?.replaceFirst(pattern256Date, selectDatePattern), !isBalancePeriod())
+        }
+        // графа 8
+        if (row.dateRegistration) {
+            checkDateValid(logger, row, 'dateRegistration', row.dateRegistration, !isBalancePeriod())
         }
     }
 

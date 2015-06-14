@@ -123,9 +123,13 @@ public final class ScriptUtils {
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
 
     public static String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
+    public static String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
+    public static String INN_IND_MEANING = RefBookUtils.INN_IND_MEANING;
     public static String KPP_PATTERN = RefBookUtils.KPP_PATTERN;
+    public static String KPP_MEANING = RefBookUtils.KPP_MEANING;
     public static String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
+    public static String TAX_ORGAN_MEANING = RefBookUtils.TAX_ORGAN_MEANING;
 
     /**
      * Интерфейс для переопределения алгоритма расчета
@@ -1912,8 +1916,8 @@ public final class ScriptUtils {
         return true;
     }
 
-    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, String pattern, boolean fatal) {
-        return checkPattern(logger, row, alias, value, Arrays.asList(pattern), fatal);
+    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, String pattern, String meaning, boolean fatal) {
+        return checkPattern(logger, row, alias, value, Arrays.asList(pattern), Arrays.asList(meaning), fatal);
     }
 
     /**
@@ -1925,7 +1929,7 @@ public final class ScriptUtils {
      * @param patterns regExp для проверки
      * @param fatal
      */
-    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, List<String> patterns, boolean fatal) {
+    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, List<String> patterns, List<String> meanings, boolean fatal) {
         if (value == null || value.isEmpty()) {
             return false;
         }
@@ -1942,6 +1946,16 @@ public final class ScriptUtils {
         }
         if (!result) {
             rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", getColumnName(row, alias), value, sb.toString()), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            if (meanings != null) {
+                for (String meaning : meanings) {
+                    if (meaning != null && !meaning.isEmpty()) {
+                        int index = meanings.indexOf(meaning);
+                        if (patterns.size() > index) {
+                            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Расшифровка паттерна \"%s\": %s", patterns.get(index), meaning), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+                        }
+                    }
+                }
+            }
         }
         return result;
     }

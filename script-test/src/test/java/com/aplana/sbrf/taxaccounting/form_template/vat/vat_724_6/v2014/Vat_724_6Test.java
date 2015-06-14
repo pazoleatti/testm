@@ -158,6 +158,10 @@ public class Vat_724_6Test extends ScriptTestBase {
         when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
 
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        departmentReportPeriod.setBalance(false);
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
+
         FormType formType = new FormType();
         formType.setId(TYPE_ID);
         formType.setTaxType(TaxType.VAT);

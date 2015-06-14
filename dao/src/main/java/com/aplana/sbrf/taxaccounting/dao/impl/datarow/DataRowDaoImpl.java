@@ -96,7 +96,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 				"       || 'select ord as row_index, '||fc.id ||' as column_id, '\n" +
 				"       || case when type = 'S' then 'to_char(c'||fc.id||') as raw_value, '\n" +
 				"               when type = 'N' then case when fc.precision is null or fc.precision = 0 then 'to_char(c'||fc.id||') as raw_value, '\n" +
-				"                 else 'ltrim(to_char(c'||fc.id||',substr(''99999999999999999D0000000000'',1,18+'||fc.precision||'))) as raw_value, ' end\n" +
+				"                 else 'ltrim(to_char(c'||fc.id||',substr(''99999999999999999.0000000000'',1,18+'||fc.precision||'))) as raw_value, ' end\n" +
 				"               when type = 'A' then 'to_char((row_number() over(order by ord)) + ' || case when fc.NUMERATION_ROW=0 then 0 else (select number_previous_row from form_data where id = :fdId) end ||') as raw_value,'  \n" +
 				"               else ' null as raw_value, ' end\n" +
 				"       || case when type = 'R' then 'c'||fc.id||' as reference_id ' else ' null as reference_id ' end  \n" +
