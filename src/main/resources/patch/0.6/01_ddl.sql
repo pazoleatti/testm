@@ -142,6 +142,10 @@ comment on column async_task_type.short_queue_limit is 'Ограничение �
 alter table async_task_type add limit_kind varchar2(400);
 comment on column async_task_type.limit_kind is 'Вид ограничения';
 
+ALTER TABLE async_task_type ADD dev_mode NUMBER(1) DEFAULT 0 NOT NULL;
+ALTER TABLE async_task_type ADD CONSTRAINT async_task_type_chk_dev_mode CHECK (dev_mode in (0, 1));
+COMMENT ON COLUMN async_task_type.dev_mode IS 'Признак задачи для dev-мода';
+
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (401, 'Настройки асинхронных задач', 0, 0, 0, null, 'ASYNC_TASK_TYPE', 0);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4101, 401, '№', 'ID', 2, 1, null, null, 1, 0, 10, 1, 1, 1, null, 0, 18);
