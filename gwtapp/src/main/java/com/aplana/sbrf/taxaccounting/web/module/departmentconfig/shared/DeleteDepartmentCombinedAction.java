@@ -14,6 +14,7 @@ public class DeleteDepartmentCombinedAction extends UnsecuredActionImpl<DeleteDe
     private Integer period;
     private TaxType taxType;
     private Integer department;
+    private String oldUUID;
 
     @Override
     public String getName() {
@@ -50,5 +51,13 @@ public class DeleteDepartmentCombinedAction extends UnsecuredActionImpl<DeleteDe
 
     public void setDepartment(Integer department) {
         this.department = department;
+    }
+
+    public String getOldUUID() {
+        return oldUUID;
+    }
+
+    public void setOldUUID(String oldUUID) {
+        this.oldUUID = oldUUID;
     }
 }

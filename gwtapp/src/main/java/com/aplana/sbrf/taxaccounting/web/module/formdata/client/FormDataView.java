@@ -735,7 +735,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-	public void setLockInformation(boolean isVisible, boolean readOnlyMode, String lockDate, String lockedBy){
+	public void setLockInformation(boolean isVisible, boolean readOnlyMode, String lockDate, String lockedBy, String title){
 		lockInformation.setVisible(isVisible);
 		if(lockedBy != null && lockDate != null){
             String text;
@@ -746,7 +746,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 text = "Выбранная налоговая форма в текущий момент заблокирована на редактирование текущим пользователем (с " + lockDate + ")";
             }
 			lockInformation.setText(text);
-			lockInformation.setTitle(text);
+			lockInformation.setTitle(title);
 		}
         changeTableTopPosition(isVisible);
 	}

@@ -32,7 +32,7 @@ import static java.util.Arrays.asList;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDeclarationAction, GetCheckDeclarationResult> {
 
-    private static final String WARN_MSG = "\"%s\" %s, \"%s\", состояние - \"%s\"";
+    private static final String WARN_MSG = "\"%s\" %s, \"%s\"%s, состояние - \"%s\"";
     private final static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
@@ -142,7 +142,12 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
             periodName = departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
             correctionDate = (departmentReportPeriod.getCorrectionDate() == null) ? "" :
                     "с датой сдачи корректировки \"" + (departmentReportPeriod.getCorrectionDate()) + "\"";
-            logger.warn(String.format(WARN_MSG, periodName, correctionDate, declarationTemplateService.get(item.getDeclarationTemplateId()).getType().getName(), item.isAccepted() ? "Принята" : "Создана"));
+            String taxOrgan = (item.getTaxOrganCode() != null && !item.getTaxOrganCode().isEmpty()) ? ", налоговый орган " + item.getTaxOrganCode() : "";
+            String kpp = (item.getKpp() != null && !item.getKpp().isEmpty()) ? ", КПП " + item.getKpp() : "";
+            logger.warn(String.format(WARN_MSG, periodName, correctionDate,
+                    declarationTemplateService.get(item.getDeclarationTemplateId()).getType().getName(),
+                    taxOrgan + kpp,
+                    item.isAccepted() ? "Принята" : "Создана"));
             result.setDeclarationFormFound(true);
         }
 
@@ -152,21 +157,23 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
             formDataFilter.setFormTypeId(formTypeIds);
             formDataFilter.setTaxType(action.getTaxType());
             TAUserInfo userInfo = userService.getSystemUserInfo();
-            boolean manual = true;
             List<Long> formDataIds = formDataSearchService.findDataIdsByUserAndFilter(userInfo, formDataFilter);
+
             for (Long formDataId : formDataIds) {
+                boolean manual = formDataService.existManual(formDataId);
                 FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
                 PagingResult<DataRow<Cell>> resultDataRow = dataRowService.getDataRows(formDataId, null, true, manual);
                 for (DataRow<Cell> dataRow : resultDataRow) {
                     BigDecimal regionBankDivisionId = dataRow.getCell("regionBankDivision").getNumericValue();
                     if (regionBankDivisionId != null && regionBankDivisionId.intValue() == action.getDepartment()) {
                         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-                        periodName = departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
+                        String month = formData.getPeriodOrder() != null ? " " + Months.fromId(formData.getPeriodOrder()).getTitle() : "";
+                        periodName = departmentReportPeriod.getReportPeriod().getName() + month + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear();
                         correctionDate = (departmentReportPeriod.getCorrectionDate() == null) ? "" :
                                 "с датой сдачи корректировки \"" + (departmentReportPeriod.getCorrectionDate()) + "\"";
-                        logger.warn(String.format(WARN_MSG, periodName, correctionDate, formData.getFormType().getName(), formData.getState().getName()));
+                        logger.warn(String.format(WARN_MSG, periodName, correctionDate, formData.getFormType().getName(), "",
+                                formData.getState().getName()));
                         result.setDeclarationFormFound(true);
-                        break;
                     }
                 }
             }

@@ -110,7 +110,12 @@ public class DeleteDepartmentCombinedHandler extends AbstractActionHandler<Delet
                 else
                     logger.info(String.format(SUCCESS_INFO, sdf.format(period.getCalendarStartDate()), sdf.format(recordVersion.getVersionEnd())));
             }
-            result.setUuid(logEntryService.save(logger.getEntries()));
+
+            if (action.getOldUUID() == null) {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+            } else {
+                result.setUuid(logEntryService.update(logger.getEntries(), action.getOldUUID()));
+            }
             if (logger.containsLevel(LogLevel.ERROR)) {
                 result.setHasError(true);
             }

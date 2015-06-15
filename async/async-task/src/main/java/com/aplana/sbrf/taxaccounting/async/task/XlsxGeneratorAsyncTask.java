@@ -55,7 +55,7 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
 
         Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.EXCEL_DEC);
         if (checkTaskLimit == null) {
-            throw new AsyncTaskException("Декларация не сформирована");
+            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
         } else if (checkTaskLimit.getFirst() == null) {
             Logger logger = new Logger();
             DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
@@ -63,7 +63,7 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
             logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
             throw new AsyncTaskException(new ServiceLoggerException(ReportType.CHECK_TASK,
                     logEntryService.save(logger.getEntries()),
-                    String.format(ReportType.PDF_DEC.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
+                    String.format(ReportType.EXCEL_DEC.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
                     String.format("xml файл %s имеет слишком большой размер(%s байт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), checkTaskLimit.getSecond())));
         }
         return checkTaskLimit.getFirst();

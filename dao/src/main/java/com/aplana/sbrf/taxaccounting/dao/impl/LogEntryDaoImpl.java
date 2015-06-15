@@ -25,21 +25,32 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         if (logEntries == null || logEntries.isEmpty() || uuid == null || uuid.isEmpty()) {
             return;
         }
+
+        ObjectOutput out = null;
+        InputStream in  = null;
+        File file = null;
         try {
             final BlobData blobData = new BlobData();
+            file = File.createTempFile("log_entry_", ".tmp");
+            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+            out.writeObject(logEntries);
+            out.flush();
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream output = new ObjectOutputStream(baos);
-            output.writeObject(logEntries);
-            InputStream is = new ByteArrayInputStream(baos.toByteArray());
-
-            blobData.setInputStream(is);
+            in = new BufferedInputStream(new FileInputStream(file));
+            blobData.setInputStream(in);
             blobData.setUuid(uuid);
             blobData.setCreationDate(new java.util.Date());
 
             blobDataDao.create(blobData);
         } catch (Exception e) {
             throw new DaoException("Не удалось создать запись. " + e.getMessage());
+        } finally {
+            try {
+                out.close();
+                in.close();
+                file.delete();
+            } catch (Exception e) {
+            }
         }
     }
 
@@ -54,7 +65,7 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         if (blobData != null) {
             InputStream is = blobData.getInputStream();
             try {
-                ObjectInputStream ois = new ObjectInputStream(is);
+                ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(is));
                 return (List<LogEntry>) ois.readObject();
             } catch (Exception e) {
                 throw new DaoException(String.format("Не удалось получить запись с id = %s", uuid), e);
@@ -69,16 +80,27 @@ public class LogEntryDaoImpl extends AbstractDao implements LogEntryDao {
         if (logEntries == null || logEntries.isEmpty() || uuid == null || uuid.isEmpty()) {
             return;
         }
+
+        ObjectOutput out = null;
+        InputStream in  = null;
+        File file = null;
         try {
+            file = File.createTempFile("log_entry_", ".tmp");
+            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+            out.writeObject(logEntries);
+            out.flush();
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream output = new ObjectOutputStream(baos);
-            output.writeObject(logEntries);
-            InputStream is = new ByteArrayInputStream(baos.toByteArray());
-
-            blobDataDao.save(uuid, is);
+            in = new BufferedInputStream(new FileInputStream(file));
+            blobDataDao.save(uuid, in);
         } catch (Exception e) {
-            throw new DaoException("Не удалось обновить запись. " + e.getMessage());
+            throw new DaoException("Не удалось создать запись. " + e.getMessage());
+        } finally {
+            try {
+                out.close();
+                in.close();
+                file.delete();
+            } catch (Exception e) {
+            }
         }
     }
 }

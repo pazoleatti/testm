@@ -240,46 +240,76 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
 
     @Override
     public void delete(final DepartmentCombined combinedDepartmentParam, final Integer period, final Integer department) {
-        CheckSettingExistAction settingExistAction = new CheckSettingExistAction();
-        settingExistAction.setDepartmentId(department.longValue());
-        settingExistAction.setReportPeriodId(period);
-        settingExistAction.setTaxType(getView().getTaxType());
-        dispatcher.execute(settingExistAction, CallbackUtils
-                .defaultCallback(new AbstractCallback<CheckSettingExistResult>() {
-                    @Override
-                    public void onSuccess(CheckSettingExistResult result) {
-                        if (result.isSettingsExist()) {
-                            Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
-                                @Override
-                                public void yes() {
-                                    super.yes();
-                                    if (combinedDepartmentParam != null && department != null && period != null) {
-                                        LogCleanEvent.fire(DepartmentConfigPresenter.this);
+        if (combinedDepartmentParam == null || department == null || period == null) {
+            return;
+        }
+        LogCleanEvent.fire(DepartmentConfigPresenter.this);
+        final String[] uuid = {""};
 
-                                        DeleteDepartmentCombinedAction action = new DeleteDepartmentCombinedAction();
-                                        action.setDepartmentCombined(combinedDepartmentParam);
-                                        action.setReportPeriodId(period);
-                                        action.setTaxType(getView().getTaxType());
-                                        action.setDepartment(department);
-                                        dispatcher.execute(action, CallbackUtils
-                                                .defaultCallback(new AbstractCallback<DeleteDepartmentCombinedResult>() {
-                                                    @Override
-                                                    public void onSuccess(DeleteDepartmentCombinedResult result) {
-                                                        LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                                                        getView().reloadDepartmentParams();
-                                                    }
-                                                }, DepartmentConfigPresenter.this));
-                                    }
-                                    getView().update();
+        final GetCheckDeclarationAction action = new GetCheckDeclarationAction();
+        action.setReportPeriodId(period);
+        action.setDepartment(department);
+        action.setTaxType(getView().getTaxType());
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetCheckDeclarationResult>() {
+                            void delete() {
+                                CheckSettingExistAction settingExistAction = new CheckSettingExistAction();
+                                settingExistAction.setDepartmentId(department.longValue());
+                                settingExistAction.setReportPeriodId(period);
+                                settingExistAction.setTaxType(getView().getTaxType());
+                                dispatcher.execute(settingExistAction, CallbackUtils
+                                        .defaultCallback(new AbstractCallback<CheckSettingExistResult>() {
+                                            @Override
+                                            public void onSuccess(CheckSettingExistResult result) {
+                                                if (result.isSettingsExist()) {
+                                                    Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?", new DialogHandler() {
+                                                        @Override
+                                                        public void yes() {
+                                                            super.yes();
+                                                            LogCleanEvent.fire(DepartmentConfigPresenter.this);
+
+                                                            DeleteDepartmentCombinedAction action = new DeleteDepartmentCombinedAction();
+                                                            action.setDepartmentCombined(combinedDepartmentParam);
+                                                            action.setReportPeriodId(period);
+                                                            action.setTaxType(getView().getTaxType());
+                                                            action.setDepartment(department);
+                                                            action.setOldUUID(uuid[0]);
+                                                            dispatcher.execute(action, CallbackUtils
+                                                                    .defaultCallback(new AbstractCallback<DeleteDepartmentCombinedResult>() {
+                                                                        @Override
+                                                                        public void onSuccess(DeleteDepartmentCombinedResult result) {
+                                                                            LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                                                                            getView().reloadDepartmentParams();
+                                                                        }
+                                                                    }, DepartmentConfigPresenter.this));
+                                                            getView().update();
+                                                        }
+                                                    });
+                                                } else {
+                                                    Dialog.errorMessage("Удаление настроек не выполнено", "Удаление настроек выбранного " +
+                                                            "подразделения и периода не может быть выполнено, т.к. данная версия настроек не создана");
+                                                }
+                                            }
+                                        }, DepartmentConfigPresenter.this));
+                            }
+
+                            @Override
+                            public void onSuccess(final GetCheckDeclarationResult result) {
+                                isControlUnp = result.isControlUnp();
+                                uuid[0] = result.getUuid();
+                                if (uuid[0] != null) {
+                                    LogAddEvent.fire(DepartmentConfigPresenter.this, uuid[0]);
                                 }
-                            });
-                        } else {
-                            Dialog.errorMessage("Удаление настроек не выполнено", "Удаление настроек выбранного " +
-                                    "подразделения и периода не может быть выполнено, т.к. данная версия настроек не создана");
-                        }
-                    }
-                }, DepartmentConfigPresenter.this));
-
+                                if (result.isDeclarationFormFound()) {
+                                    Dialog.errorMessage("В периоде " + result.getReportPeriodName() + " найдены экземпляры налоговых форм/деклараций, " +
+                                            "которые используют данные значения формы настроек подразделения. Для удаления данной версии настроек формы необходимо удалить найденные налоговые формы/декларации:");
+                                    LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                                } else {
+                                    delete();
+                                }
+                            }
+                        }, this));
     }
 
     @Override

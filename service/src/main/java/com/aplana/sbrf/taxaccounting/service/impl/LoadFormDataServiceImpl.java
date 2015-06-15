@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -461,10 +462,16 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     departmentReportPeriod.getId(), formDataKind, month);
             formData = formDataDao.get(formDataId, false);
         } else {
+            // 17А.5 Система инициирует выполнение сценария Удаление отчета НФ для экземпляра НФ, данные которой были перезаполнены.
+            formDataService.deleteReport(formData.getId(), null, userInfo.getUser().getId());
             formData.initFormTemplateParams(formTemplate);
         }
 
-        formDataService.checkLockedByTask(formData.getId(), localLogger, userInfo, "Загрузка ТФ НФ", false);
+        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
+        if (lockType != null) {
+            log(userInfo, LogData.L40, localLogger,
+                    lock, lockType.getSecond().getDescription(), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
+        }
         // Блокировка
         LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
                 userInfo.getUser().getId(),

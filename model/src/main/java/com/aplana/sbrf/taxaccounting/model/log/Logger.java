@@ -34,6 +34,8 @@ public class Logger {
 
     // Ограничение по длине для каждого сообщения об ошибке из Exception
     private static final int MAX_EXCEPTION_LOG_MESSAGE_LENGTH = 10000;
+    // Ограничение на количество хранимых логов
+    private static final int MAX_LOGS_COUNT = 10000;
 
 	/**
 	 * Добавить информационное сообщение в журнал (это сообщения, не требующие особой реакции пользователя) 
@@ -75,12 +77,14 @@ public class Logger {
 	}
 
 	private void log(LogLevel level, String message, Object...args) {
-		String extMessage = String.format(message, args);
-		if (messageDecorator != null) {
-			extMessage = messageDecorator.getDecoratedMessage(extMessage);
-		}
-		LogEntry entry = new LogEntry(level, extMessage);
-		entries.add(entry);
+        if (entries.size() < MAX_LOGS_COUNT) {
+            String extMessage = String.format(message, args);
+            if (messageDecorator != null) {
+                extMessage = messageDecorator.getDecoratedMessage(extMessage);
+            }
+            LogEntry entry = new LogEntry(level, extMessage);
+            entries.add(entry);
+        }
 	}
 	
 	/**

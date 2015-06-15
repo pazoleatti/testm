@@ -194,7 +194,7 @@ void generateXML() {
                     mapYesNo.put(recNoId, '0')
 
                     def rowCounter = 0
-                    for (row in dataRowHelper.getAllSaved()) {
+                    for (row in dataRowHelper.allSaved) {
                         if (row.getAlias() != null) {
                             continue
                         }

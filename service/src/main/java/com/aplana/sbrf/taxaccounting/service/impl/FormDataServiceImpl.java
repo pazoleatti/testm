@@ -82,8 +82,6 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String FD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\" в подразделении \"%s\", состояние - \"%s\"";
     private static final String LOCK_CURRENT_1 =
             "Текущая налоговая форма заблокирована пользователем \"%s\" в \"%s\". Попробуйте выполнить операцию позже";
-    private static final String LOCK_CURRENT_2 =
-            "\"%s\" пользователем \"%s\" запущена операция \"%s\"";
     private static final String SOURCE_MSG_ERROR =
             "существует форма-приёмник, статус которой отличен от \"Создана\". Консолидация возможна только в том случае, если форма-приёмник не существует или имеет статус \"Создана\"";
     //Выводит информацию о НФ в определенном формате
@@ -1029,7 +1027,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Transactional(readOnly = false)
     public void compose(final FormData formData, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
         stateLogger.updateState("Выполнение проверок на возможность консолидации");
-        checkCompose(formData, userInfo, logger);
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
@@ -1727,7 +1724,7 @@ public class FormDataServiceImpl implements FormDataService {
             default:
                 logger.error(
                         String.format(
-                                LOCK_CURRENT_2,
+                                LockData.LOCK_CURRENT,
                                 SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
                                 user.getName(),
                                 lockData.getDescription())
