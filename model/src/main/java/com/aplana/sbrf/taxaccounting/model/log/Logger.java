@@ -77,6 +77,9 @@ public class Logger {
 	}
 
 	private void log(LogLevel level, String message, Object...args) {
+        if (entries.size() == MAX_LOGS_COUNT) {
+            entries.add(0, new LogEntry(LogLevel.INFO, "Выведены первые " + MAX_LOGS_COUNT + " сообщений:"));
+        }
         if (entries.size() < MAX_LOGS_COUNT) {
             String extMessage = String.format(message, args);
             if (messageDecorator != null) {
