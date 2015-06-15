@@ -582,7 +582,7 @@ def consolidation() {
         }
     }
 
-    updateIndexes(rows)
+    updateIndexes(dataRows)
 }
 
 def formNewRow(def sRow) {

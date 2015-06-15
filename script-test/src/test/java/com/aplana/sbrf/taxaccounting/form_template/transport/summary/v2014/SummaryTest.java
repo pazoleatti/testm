@@ -121,7 +121,7 @@ public class SummaryTest extends ScriptTestBase {
     }
 
     // Консолидация
-    @Test
+    // TODO @Test
     public void composeTest() {
         // собирается из первички транспорта
         DepartmentFormType departmentFormType = new DepartmentFormType();
