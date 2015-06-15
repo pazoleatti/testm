@@ -199,7 +199,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
                         formDataMap[reportPeriod.order] = formDataCollection?.records?.find { it.formType.id == 200 }
                         if (formDataMap[reportPeriod.order] != null) {
                             // «Своя» сводная есть и «Принята»
-                            rowsDataMap[reportPeriod.order] = formDataService.getDataRowHelper(formDataMap[reportPeriod.order]).getAllCached()
+                            rowsDataMap[reportPeriod.order] = formDataService.getDataRowHelper(formDataMap[reportPeriod.order]).allSaved
 
                             // Заполнение данных предыдущих кварталов
                             if (reportPeriod.order > 1) {
@@ -208,7 +208,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
                                     reportPeriodMap[order] = period
                                     formDataMap[order] = formDataService.getLast(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id, formDataMap[reportPeriod.order].periodOrder)
                                     if (formDataMap[order] != null && formDataMap[order].state == WorkflowState.ACCEPTED) {
-                                        rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).getAllCached()
+                                        rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).allSaved
                                     }
                                 }
                             }
