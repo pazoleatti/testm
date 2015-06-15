@@ -225,6 +225,7 @@ alter table lock_data_subscribers add constraint lock_data_subscr_fk_lock_data f
 alter table lock_data_subscribers add constraint lock_data_subscr_fk_sec_user foreign key (user_id) references sec_user(id) on delete cascade;
 
 alter table async_task_type add constraint async_task_type_pk primary key (id);
+alter table async_task_type add constraint async_task_type_chk_dev_mode check (dev_mode in (0, 1));
 
 alter table form_data_report add constraint form_data_rep_pk primary key (form_data_id,type, manual,checking,absolute);
 alter table form_data_report add constraint form_data_rep_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;

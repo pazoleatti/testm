@@ -596,7 +596,8 @@ void importData() {
         // Пропуск итоговых строк
         // если это начало раздела, то запомнить его название и обрабатывать следующую строку
         def firstValue = rowValues[INDEX_FOR_SKIP]
-        if (firstValue != null && firstValue != '' && firstValue != 'Итого') {
+        def valuesTotal = ['1. По операциям Банка', '2. По налоговому агенту']
+        if (firstValue != null && firstValue != '' && valuesTotal.contains(firstValue)) {
             sectionIndex = firstValue[0]
             mapRows.put(sectionIndex, [])
             allValues.remove(rowValues)
@@ -606,6 +607,10 @@ void importData() {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
+        }
+
+        if (sectionIndex == null) {
+            throw new ServiceException("Строка %d: Структура файла не соответствует макету налоговой формы", fileRowIndex)
         }
 
         // простая строка
