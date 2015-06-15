@@ -94,18 +94,18 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                         try {
                             lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                             logger.info(String.format(LockData.LOCK_INFO_MSG,
-                                    String.format(reportType.getDescription(), getWStateText(action.getMove().getToState()), action.getTaxType().getTaxText()),
+                                    String.format(reportType.getDescription(), action.getMove().getToState().getActionName(), action.getTaxType().getTaxText()),
                                     sdf.format(lockDataTask.getDateLock()),
                                     userService.getUser(lockDataTask.getUserId()).getName()));
                         } catch (ServiceException e) {
                         }
                         result.setLock(false);
-                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), getWStateText(action.getMove().getToState()), action.getTaxType().getTaxText());
+                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getMove().getToState().getActionName(), action.getTaxType().getTaxText());
                         result.setUuid(logEntryService.save(logger.getEntries()));
                         return result;
                     }
                     if (lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                            formDataService.getFormDataFullName(action.getFormDataId(), getWStateText(action.getMove().getToState()), reportType),
+                            formDataService.getFormDataFullName(action.getFormDataId(), action.getMove().getToState().getActionName(), reportType),
                             LockData.State.IN_QUEUE.getText(),
                             lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                         try {
@@ -122,7 +122,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                             BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                             lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant);
-                            logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), getWStateText(action.getMove().getToState()), action.getTaxType().getTaxText());
+                            logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getMove().getToState().getActionName(), action.getTaxType().getTaxText());
                             result.setLock(false);
                         } catch (Exception e) {
                             lockDataService.unlock(keyTask, userInfo.getUser().getId());
@@ -139,7 +139,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                 default:
                     if (lockDataService.lock(keyTask,
                             userInfo.getUser().getId(),
-                            formDataService.getFormDataFullName(action.getFormDataId(), getWStateText(action.getMove().getToState()), reportType),
+                            formDataService.getFormDataFullName(action.getFormDataId(), action.getMove().getToState().getActionName(), reportType),
                             lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                         try {
                             formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
@@ -157,20 +157,6 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
 	}
-
-    private String getWStateText(WorkflowState state) {
-        switch (state) {
-            case CREATED:
-                return "Создание";
-            case PREPARED:
-                return "Подготовка";
-            case APPROVED:
-                return "Утверждение";
-            case ACCEPTED:
-                return "Принятие";
-        }
-        return "";
-    }
 
 	@Override
 	public void undo(GoMoveAction action, GoMoveResult result,

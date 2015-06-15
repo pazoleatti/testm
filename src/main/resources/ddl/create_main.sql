@@ -583,7 +583,7 @@ CREATE TABLE log_system (
   event_id              NUMBER(3, 0)        NOT NULL,
   user_login            VARCHAR2(255)       NOT NULL,
   roles                 VARCHAR2(200),
-  department_name       VARCHAR2(4000 BYTE) NOT NULL,
+  department_name       VARCHAR2(4000 BYTE),
   report_period_name    VARCHAR2(100),
   form_kind_id          NUMBER(9, 0),
   note                  VARCHAR2(4000 BYTE),
@@ -764,7 +764,8 @@ name varchar2(100) not null,
 handler_jndi varchar2(500) not null,
 short_queue_limit number(18),
 task_limit number(18),
-limit_kind varchar2(400)
+limit_kind varchar2(400),
+dev_mode number(1) default 0 not null
 );
 
 comment on table async_task_type is 'Типы асинхронных задач';
@@ -774,6 +775,7 @@ comment on column async_task_type.handler_jndi is 'JNDI имя класса-об
 comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
 comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
 comment on column async_task_type.limit_kind is 'Вид ограничения';
+comment on column async_task_type.dev_mode is 'Признак задачи для dev-мода';
 
 --------------------------------------------------------------------------------------------------------
 create table form_data_report 

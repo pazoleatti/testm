@@ -142,6 +142,10 @@ comment on column async_task_type.short_queue_limit is 'Ограничение �
 alter table async_task_type add limit_kind varchar2(400);
 comment on column async_task_type.limit_kind is 'Вид ограничения';
 
+ALTER TABLE async_task_type ADD dev_mode NUMBER(1) DEFAULT 0 NOT NULL;
+ALTER TABLE async_task_type ADD CONSTRAINT async_task_type_chk_dev_mode CHECK (dev_mode in (0, 1));
+COMMENT ON COLUMN async_task_type.dev_mode IS 'Признак задачи для dev-мода';
+
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (401, 'Настройки асинхронных задач', 0, 0, 0, null, 'ASYNC_TASK_TYPE', 0);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4101, 401, '№', 'ID', 2, 1, null, null, 1, 0, 10, 1, 1, 1, null, 0, 18);
@@ -150,7 +154,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4104, 401, 'Ограничение на выполнение задачи в очереди быстрых задач', 'SHORT_QUEUE_LIMIT', 2, 4, null, null, 1, 0, 10, 1, 0, null, null, 0, 18);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4105, 401, 'Ограничение на выполнение задачи', 'TASK_LIMIT', 2, 5, null, null, 1, 0, 10, 1, 0, null, null, 0, 18);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4106, 401, 'Вид ограничения', 'LIMIT_KIND', 1, 6, null, null, 1, null, 10, 0, 0, null, null, 0, 400);
-
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4107, 401, 'Признак задачи для dev-мода', 'DEV_MODE', 2, 7, null, null, 1, 0, 10, 1, 0, null, null, 0, 1);
 
 ---------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-11083: логирование действий настройщика в ЖА (создание/изменение/удаление версии макета НФ/декларации)
@@ -159,6 +163,129 @@ alter table log_system drop constraint log_system_chk_dcl_form;
 
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705) or report_period_name is not null);
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
+
+--http://jira.aplana.com/browse/SBRFACCTAX-11594: логирование в ЖА (необязательность для заполнения Наименование подразделения)
+alter table log_system modify department_name VARCHAR2(4000 BYTE) null;
+---------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-10837: Триггеры для источников-приемников
+CREATE OR REPLACE TRIGGER FORM_DATA_SRC_AFTER_INS_UPD
+for insert or update on form_data_source
+COMPOUND TRIGGER
+
+  AFTER STATEMENT IS
+  vConnectByNoCycle_cnt number(18) := 0;
+  vAmbiguityByDate_cnt number(18) := 0;
+  vIncorrectDateRange_cnt number(18) := 0;
+  BEGIN
+
+ --Проверка, что дата окончания больше даты начала для корректности последующих проверок
+  select count(*) into vIncorrectDateRange_cnt
+  from form_data_source
+  where coalesce(period_end, to_date('31.12.9999', 'DD.MM.YYYY')) < period_start;
+
+  if (vIncorrectDateRange_cnt <> 0) then
+        raise_application_error(-20001, 'Некорректный временной диапазон / An incorrect date range detected (end < start)');
+  end if;
+
+  -----------------------------------------------------------------------------
+  -- Проверка на зацикливание иерархическим запросом
+  select count(*) into vConnectByNoCycle_cnt from (
+  with subset(src, tgt, period_start, period_end) as
+  (
+  --существующие записи из таблицы соответствия
+  select tds.src_department_form_type_id, 
+         tds.department_form_type_id, 
+         period_start, 
+         coalesce(period_end, to_date('31.12.9999', 'DD.MM.YYYY'))  
+  from form_data_source tds
+  )
+  select
+
+       CONNECT_BY_ROOT src as IN_src_department_form_type_id, --исходный источник
+       CONNECT_BY_ROOT tgt as IN_department_form_type_id, --исходный приемник
+       src as src_department_form_type_id,
+       tgt as department_form_type_id
+  from subset
+  where connect_by_iscycle = 1 -- есть зацикливание
+  connect by nocycle prior src = tgt and period_end >= prior period_start and period_start <= prior period_end);
+
+  if (vConnectByNoCycle_cnt <> 0) then
+        raise_application_error(-20002, 'Обнаружено зацикливание / An infinite loop detected');
+  end if;
+
+  -----------------------------------------------------------------------------
+  -- Проверка на пересечение по датам с другим периодом
+  with subset (id, src, tgt, period_start, period_end)as (
+    select row_number() over (order by tds.src_department_form_type_id, --порядковый номер строки в качестве идентификатора
+           tds.department_form_type_id, period_start, period_end) as id,
+           tds.src_department_form_type_id,
+           tds.department_form_type_id,
+           period_start,
+           coalesce(period_end, to_date('31.12.9999', 'DD.MM.YYYY')) as period_end
+    from form_data_source tds)
+  select count(*) into vAmbiguityByDate_cnt
+  from subset a1
+  join subset a2 on a1.src = a2.src
+       and a1.tgt = a2.tgt
+       and a1.id <> a2.id
+       and a1.period_start <= a2.period_end
+       and a1.period_end >= a2.period_start;
+
+  if (vAmbiguityByDate_cnt <> 0) then
+        raise_application_error(-20003, 'Обнаружено пересечение с другим периодом для заданной пары источник/приемник / Ambiguity by the date range detected');
+  end if;
+
+  END AFTER STATEMENT;
+end FORM_DATA_SRC_AFTER_INS_UPD;
+/
+
+CREATE OR REPLACE TRIGGER DECL_DATA_SRC_AFTER_INS_UPD
+for insert or update on declaration_source
+COMPOUND TRIGGER
+
+  AFTER STATEMENT IS
+  vAmbiguityByDate_cnt number(18) := 0;
+  vIncorrectDateRange_cnt number(18) := 0;
+  BEGIN
+
+ --Проверка, что дата окончания больше даты начала для корректности последующих проверок
+  select count(*) into vIncorrectDateRange_cnt
+  from declaration_source
+  where coalesce(period_end, to_date('31.12.9999', 'DD.MM.YYYY')) < period_start;
+
+  if (vIncorrectDateRange_cnt <> 0) then
+        raise_application_error(-20101, 'Некорректный временной диапазон / An incorrect date range detected (end < start)');
+  end if;
+
+  -----------------------------------------------------------------------------
+  -- Проверка на пересечение по датам с другим периодом
+  with subset (id, src, tgt, period_start, period_end)as (
+    select row_number() over (order by tds.src_department_form_type_id, --порядковый номер строки в качестве идентификатора
+           tds.department_declaration_type_id, period_start, period_end) as id,
+           tds.src_department_form_type_id,
+           tds.department_declaration_type_id,
+           period_start,
+           coalesce(period_end, to_date('31.12.9999', 'DD.MM.YYYY')) as period_end
+    from declaration_source tds)
+  select count(*) into vAmbiguityByDate_cnt
+  from subset a1
+  join subset a2 on a1.src = a2.src
+       and a1.tgt = a2.tgt
+       and a1.id <> a2.id
+       and a1.period_start <= a2.period_end
+       and a1.period_end >= a2.period_start;
+
+  if (vAmbiguityByDate_cnt <> 0) then
+        raise_application_error(-20102, 'Обнаружено пересечение с другим периодом для заданной пары источник/приемник / Ambiguity by the date range detected');
+  end if;
+
+  END AFTER STATEMENT;
+end DECL_DATA_SRC_AFTER_INS_UPD;
+/
+
+
+
+
 ---------------------------------------------------------------------------------------------
 
 commit;

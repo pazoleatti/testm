@@ -127,6 +127,7 @@ void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def FORMAT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s»"
+    def meanings = [INN_JUR_MEANING]
 
     for (def row in dataRows) {
         if (row.getAlias() != null) {
@@ -147,8 +148,10 @@ void logicCheck() {
         // графа 4
         if (row.inn && !row.inn.matches("^\\S{10}\$")) {
             loggerError(row, String.format(FORMAT_ERROR_MSG, index, getColumnName(row, 'inn'), "ХХХХХХХХХХ"))
-        } else if (row.inn && checkPattern(logger, row, 'inn', row.inn, [INN_JUR_PATTERN], [INN_JUR_MEANING], !isBalancePeriod())) {
+        } else if (row.inn && checkPattern(logger, row, 'inn', row.inn, [INN_JUR_PATTERN], meanings, !isBalancePeriod())) {
             checkControlSumInn(logger, row, 'inn', row.inn, !isBalancePeriod())
+        } else if (row.inn) { // чтобы отображать подсказку один раз
+            meanings = null
         }
         ['operDate', 'sfDate'].each{
             if (row[it]) {
@@ -430,7 +433,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 0
+    int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -467,7 +470,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (!rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] == 'Итого') {
             allValues.remove(rowValues)
             rowValues.clear()
             continue

@@ -704,7 +704,7 @@ void importData() {
     int HEADER_ROW_COUNT = 4
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 0
+    int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -769,7 +769,8 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (!rowValues[INDEX_FOR_SKIP]) {
+        def String str = rowValues[INDEX_FOR_SKIP]
+        if (str && (aliasR[str] != null || str == 'Итого' || str == 'Всего')) {
             title = rowValues[1]
             if (isFirstSection && title == 'Итого') {
                 isFirstSection = false
