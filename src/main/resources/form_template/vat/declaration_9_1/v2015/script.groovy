@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
+import javax.xml.namespace.QName
 import java.text.SimpleDateFormat
 
 /**
@@ -148,12 +149,12 @@ void generateXML() {
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
 
             def codes = getCodes()
-            code020 = codes?.@СтПродБезНДС18?.text()
-            code030 = codes?.@СтПродБезНДС10?.text()
-            code040 = codes?.@СтПродБезНДС0?.text()
-            code050 = codes?.@СумНДСВсКПр18?.text()
-            code060 = codes?.@СумНДСВсКПр10?.text()
-            code070 = codes?.@СтПродОсвВсКПр?.text()
+            code020 = codes?.code020
+            code030 = codes?.code030
+            code040 = codes?.code040
+            code050 = codes?.code050
+            code060 = codes?.code060
+            code070 = codes?.code070
 
             def totalRow = getDataRow(sourceDataRows, 'total') // "Всего"
             code310 = totalRow?.saleCostB18
@@ -360,13 +361,27 @@ def getCodes() {
         return result
     }
     if (declarationData9.id != null) {
-        def xmlString = declarationService.getXmlData(declarationData9.id)
-        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        if (xmlString == null) {
-            return result
+        def reader = declarationService.getXmlStreamReader(declarationData9.id)
+        if (reader == null) {
+            return
         }
-        def xmlData = new XmlSlurper().parseText(xmlString)
-        result = xmlData?.Документ?.КнигаПрод
+        try{
+            while (reader.hasNext()) {
+                if (reader.startElement && QName.valueOf('КнигаПрод').equals(reader.name)) {
+                    def code020 = reader.getAttributeValue(null, "СтПродБезНДС18")
+                    def code030 = reader.getAttributeValue(null, "СтПродБезНДС10")
+                    def code040 = reader.getAttributeValue(null, "СтПродБезНДС0")
+                    def code050 = reader.getAttributeValue(null, "СумНДСВсКПр18")
+                    def code060 = reader.getAttributeValue(null, "СумНДСВсКПр10")
+                    def code070 = reader.getAttributeValue(null, "СтПродОсвВсКПр")
+                    result = ['code020' : code020, 'code030' : code030, 'code040' : code040,
+                              'code050' : code050, 'code060' : code060, 'code070' : code070]
+                    break
+                }
+            }
+        } finally {
+            reader.close()
+        }
     }
     return result
 }
