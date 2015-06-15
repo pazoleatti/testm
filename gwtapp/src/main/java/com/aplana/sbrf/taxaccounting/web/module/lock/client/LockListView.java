@@ -140,7 +140,7 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         TextColumn<LockDataItem> stateDateColumn = new TextColumn<LockDataItem>() {
             @Override
             public String getValue(LockDataItem taskItem) {
-                return taskItem.getDateLock();
+                return taskItem.getStateDate();
             }
         };
         stateDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
