@@ -82,6 +82,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -92,11 +93,7 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData)?.delete(currentDataRow)
         break
-// После принятия из Утверждено
     case FormDataEvent.AFTER_MOVE_CREATED_TO_ACCEPTED:
-        logicCheck()
-        break
-// После принятия из Подготовлена
     case FormDataEvent.AFTER_MOVE_PREPARED_TO_ACCEPTED:
         logicCheck()
         break
@@ -106,6 +103,7 @@ switch (formDataEvent) {
         calc()
         logicCheck()
         if (!logger.containsLevel(LogLevel.ERROR)) {
+            formDataService.saveCachedDataRows(formData, logger)
             logger.info('Формирование сводной формы прошло успешно.')
         }
         break
@@ -115,6 +113,7 @@ switch (formDataEvent) {
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.SORT_ROWS:
@@ -138,8 +137,7 @@ def startDate = null
 def endDate = null
 
 void addNewRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
@@ -149,7 +147,8 @@ void addNewRow() {
     }
     def newRow = formData.createDataRow()
     dataRows.add(index, newRow)
-    dataRowHelper.save(dataRows)
+
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 def getReportPeriodStartDate() {
@@ -202,8 +201,7 @@ void logicCheck() {
 
 // Расчеты. Алгоритмы заполнения полей формы.
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удаляем строки-группировки по организациям
     deleteAllAliased(dataRows)
@@ -214,15 +212,11 @@ void calc() {
     // добавляем строки-группировки по организациям
     addAllStatic(dataRows)
 
-    dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 // Консолидация
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def matrixRows = []
     def rowsMap = [:]
     // счетчик по группам для табл. 86
@@ -241,7 +235,7 @@ void consolidation() {
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
-            formDataService.getDataRowHelper(source).allCached.each { srcRow ->
+            formDataService.getDataRowHelper(source).allSaved.each { srcRow ->
                 if (srcRow.getAlias() == null) {
                     def matrixRow = getPreRow(srcRow, source.formType.id, typeMap, classMap)
 
@@ -305,7 +299,8 @@ void consolidation() {
         summaryRows.add(getRow(mapForSummary, typeMap))
     }
 
-    dataRowHelper.save(summaryRows)
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = summaryRows
 }
 
 // Строка сводного отчета из первичных и консолидированных отчетов модуля МУКС (табл. 85)
@@ -1972,7 +1967,8 @@ void addData(def xml, int headRowCount) {
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        formDataService.getDataRowHelper(formData).save(rows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -1987,11 +1983,15 @@ def getYesNoByNumber(def number) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), null, false)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 // Получение подитоговых строк
