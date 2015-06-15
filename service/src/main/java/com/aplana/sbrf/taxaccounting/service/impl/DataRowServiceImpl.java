@@ -89,7 +89,7 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     private void checkLockedMe(LockData lockData, TAUser user){
-        if (lockData.getUserId() != user.getId()) {
+        if (lockData == null || lockData.getUserId() != user.getId()) {
             throw new ServiceException("Объект не заблокирован текущим пользователем");
         }
     }
