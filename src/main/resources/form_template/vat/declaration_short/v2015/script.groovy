@@ -12,6 +12,8 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
 
+import javax.xml.namespace.QName
+
 /**
  * Декларация по НДС (короткая, раздел 1-7)
  *
@@ -589,12 +591,38 @@ void generateXML() {
 
 // Логические проверки
 void logicCheck() {
-    def xmlString = declarationService.getXmlData(declarationData.id)
-    if (xmlString == null) {
+    def exist8_12
+    def exist8
+    def exist81
+    def exist9
+    def exist91
+    def exist10
+    def exist11
+    def exist12
+
+    def reader = declarationService.getXmlStreamReader(declarationData.id)
+    if (reader == null) {
         return
     }
-    xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-    def xmlData = new XmlSlurper().parseText(xmlString)
+    try {
+        while (reader.hasNext()) {
+            if (reader.startElement && QName.valueOf('Файл').equals(reader.name)) {
+                // Атрибуты записи
+                exist8_12 = reader.getAttributeValue(null, "ПризнНал8-12")
+                exist8 = reader.getAttributeValue(null, "ПризнНал8")
+                exist81 = reader.getAttributeValue(null, "ПризнНал81")
+                exist9 = reader.getAttributeValue(null, "ПризнНал9")
+                exist91 = reader.getAttributeValue(null, "ПризнНал91")
+                exist10 = reader.getAttributeValue(null, "ПризнНал10")
+                exist11 = reader.getAttributeValue(null, "ПризнНал11")
+                exist12 = reader.getAttributeValue(null, "ПризнНал12")
+                break
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
 
     // 1. Не создан ни один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения
     // ИЛИ
@@ -627,22 +655,21 @@ void logicCheck() {
     if (hasOneOrMoreDeclaration() == 1) {
         def checkMap = [
                 'Признак наличия разделов с 8 по 12'
-                : [getXmlValue(xmlData.@'ПризнНал8-12'.text()) as BigDecimal, hasOneOrMoreDeclaration()],
+                : [getXmlValue(exist8_12) as BigDecimal, hasOneOrMoreDeclaration()],
                 'Признак наличия сведений из книги покупок об операциях, отражаемых за истекший налоговый период'
-                : [getXmlValue(xmlData.@ПризнНал8.text()) as BigDecimal, (has8 || has8n) ? 1 : 0],
+                : [getXmlValue(exist8) as BigDecimal, (has8 || has8n) ? 1 : 0],
                 'Признак наличия сведений из дополнительного листа книги покупок'
-                : [getXmlValue(xmlData.@ПризнНал81.text()) as BigDecimal, isDeclarationExist(declarations().declaration81[0])],
+                : [getXmlValue(exist81) as BigDecimal, isDeclarationExist(declarations().declaration81[0])],
                 'Признак наличия сведений из книги продаж об операциях, отражаемых за истекший налоговый период'
-                : [getXmlValue(xmlData.@ПризнНал9.text()) as BigDecimal, (has9 || has9n) ? 1 : 0],
+                : [getXmlValue(exist9) as BigDecimal, (has9 || has9n) ? 1 : 0],
                 'Признак наличия сведений из дополнительного листа книги продаж'
-                : [getXmlValue(xmlData.@ПризнНал91.text()) as BigDecimal, isDeclarationExist(declarations().declaration91[0])],
+                : [getXmlValue(exist91) as BigDecimal, isDeclarationExist(declarations().declaration91[0])],
                 'Признак наличия сведений из журнала учета выставленных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
-                : [getXmlValue(xmlData.@ПризнНал10.text()) as BigDecimal, isDeclarationExist(declarations().declaration10[0])],
+                : [getXmlValue(exist10) as BigDecimal, isDeclarationExist(declarations().declaration10[0])],
                 'Признак наличия сведений из журнала учета полученных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
-                : [getXmlValue(xmlData.@ПризнНал11.text()) as BigDecimal, isDeclarationExist(declarations().declaration11[0])],
+                : [getXmlValue(exist11) as BigDecimal, isDeclarationExist(declarations().declaration11[0])],
                 'Признак наличия сведений из счетов-фактур, выставленных лицами, указанными в пункте 5 статьи 173 Налогового кодекса Российской Федерации'
-                : [getXmlValue(xmlData.@ПризнНал12.text()) as BigDecimal, 0]
-
+                : [getXmlValue(exist12) as BigDecimal, 0]
         ]
         checkMap.each { key, value ->
             if (value[0] != value[1]) {

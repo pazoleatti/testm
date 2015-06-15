@@ -2,10 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
@@ -48,6 +45,13 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
     @Override
     @ProxyEvent
     public void onSetData(final FormTemplateMainEvent event) {
+        InitTypeAction action = new InitTypeAction();
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<InitTypeResult>() {
+            @Override
+            public void onSuccess(InitTypeResult result) {
+                FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, result.getRefBookList());
+            }
+        }, FormTemplateMainPresenter.this));
         formTemplateExt = new FormTemplateExt();
         formTemplate = new FormTemplate();
         formTemplateExt.setFormTemplate(formTemplate);
@@ -62,7 +66,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         getView().setFormId(0);
         getView().setTitle(formTemplate.getName());
         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
-        FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
 
         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                 with(AdminConstants.NameTokens.formTemplateId, "0").build());
@@ -317,9 +320,13 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
-                    FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
-                    formTemplate.getColumns().clear();
-                    formTemplate.getColumns().addAll(result.getColumns());
+                    //FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
+                    for (Column column : result.getColumns()){
+                        Column col = formTemplate.getColumn(column.getAlias());
+                        if (col.getId()==null){
+                            col.setId(column.getId());
+                        }
+                    }
                 }
             }, this));
         }
@@ -332,8 +339,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     .defaultCallback(new AbstractCallback<UpdateFormResult>() {
                         @Override
                         public void onSuccess(UpdateFormResult result) {
-                            formTemplate.getColumns().clear();
-                            formTemplate.getColumns().addAll(result.getFormTemplate().getColumns());
                             LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                             Dialog.infoMessage("Форма сохранена");
                         }

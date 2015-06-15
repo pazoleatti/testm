@@ -221,7 +221,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                         }
 
                         if (ColumnType.REFBOOK.equals(col.getColumnType())) {
-                            ps.setLong(12, ((RefBookColumn) col).getRefBookAttributeId());
+                            if (((RefBookColumn) col).getRefBookAttributeId() != null)
+                                ps.setLong(12, ((RefBookColumn) col).getRefBookAttributeId());
+                            else
+                                ps.setNull(12, Types.NUMERIC);
                             ps.setString(13, ((RefBookColumn) col).getFilter());
                             ps.setNull(14, Types.NUMERIC);
                             if (((RefBookColumn) col).getRefBookAttributeId2()== null){
