@@ -583,7 +583,7 @@ CREATE TABLE log_system (
   event_id              NUMBER(3, 0)        NOT NULL,
   user_login            VARCHAR2(255)       NOT NULL,
   roles                 VARCHAR2(200),
-  department_name       VARCHAR2(4000 BYTE) NOT NULL,
+  department_name       VARCHAR2(4000 BYTE),
   report_period_name    VARCHAR2(100),
   form_kind_id          NUMBER(9, 0),
   note                  VARCHAR2(4000 BYTE),
