@@ -185,6 +185,7 @@ void logicCheck() {
     def FILLED_CURRENCY_ERROR_MSG = "Строка %s: В случае если графа «%s» заполнена и код валюты графы «%s» не равен «643», должна быть заполнена графа «%s»!"
     def ONE_FMT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s». Оба поля обязательны для заполнения."
     def TWO_FMT_ERROR_MSG = "Строка %s: Графа «%s» заполнена неверно! Ожидаемый формат: «%s»."
+    boolean wasError = false
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -262,10 +263,13 @@ void logicCheck() {
         ['buyerInnKpp', 'mediatorInnKpp'].each { alias ->
             if (checkPattern(logger, row, alias, row[alias], innKppPatterns, null, !isBalancePeriod())) {
                 checkControlSumInn(logger, row, alias, row[alias].split("/")[0], !isBalancePeriod())
-            } else {
-                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_JUR_PATTERN, INN_JUR_MEANING))
-                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, KPP_PATTERN, KPP_MEANING))
-                loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_IND_PATTERN, INN_IND_MEANING))
+            } else if (row[alias]) {
+                if (!wasError) {
+                    loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_JUR_PATTERN, INN_JUR_MEANING))
+                    loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, KPP_PATTERN, KPP_MEANING))
+                    loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_IND_PATTERN, INN_IND_MEANING))
+                }
+                wasError = true
             }
         }
         // Проверки формата дат (графы 3-6, 11)
