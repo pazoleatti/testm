@@ -646,7 +646,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4104, 401, 'Ограничение на выполнение задачи в очереди быстрых задач', 'SHORT_QUEUE_LIMIT', 2, 4, null, null, 1, 0, 10, 1, 0, null, null, 0, 18);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4105, 401, 'Ограничение на выполнение задачи', 'TASK_LIMIT', 2, 5, null, null, 1, 0, 10, 1, 0, null, null, 0, 18);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4106, 401, 'Вид ограничения', 'LIMIT_KIND', 1, 6, null, null, 1, null, 10, 0, 0, null, null, 0, 400);
-
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4107, 401, 'Признак задачи для dev-мода', 'DEV_MODE', 2, 7, null, null, 1, 0, 10, 1, 0, null, null, 0, 1);
 
 ALTER TABLE ref_book ENABLE CONSTRAINT ref_book_fk_region;
 ALTER TABLE ref_book_attribute ENABLE CONSTRAINT ref_book_attr_fk_attribute_id;
