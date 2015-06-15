@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
@@ -11,6 +12,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class TimerTaskAction extends UnsecuredActionImpl<TimerTaskResult> implements ActionName {
 
     private long formDataId;
+    private TaxType taxType;
 
     public long getFormDataId() {
         return formDataId;
@@ -18,6 +20,14 @@ public class TimerTaskAction extends UnsecuredActionImpl<TimerTaskResult> implem
 
     public void setFormDataId(long formDataId) {
         this.formDataId = formDataId;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
     }
 
     @Override
