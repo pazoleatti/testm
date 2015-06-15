@@ -258,6 +258,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         leftPanel.getElement().getStyle().setRight(width / 2 + 7 + CHECK_BOX_COLUMN_WIDTH / 2, Style.Unit.PX);
         rightPanel.getElement().getStyle().setLeft(width / 2 + 7 - CHECK_BOX_COLUMN_WIDTH / 2, Style.Unit.PX);
     }
+
+    @Override
+    public void clearSelection() {
+        downSM.clear();
+        rightSM.clear();
+    }
+
     /**
      * Настройка левой таблицы
      */

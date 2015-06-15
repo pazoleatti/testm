@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * @author lhaziev
@@ -27,6 +30,9 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
 
     @Autowired
     private FormDataService formDataService;
+
+    @Autowired
+    private FormDataAccessService formDataAccessService;
 
     @Autowired
     private SecurityService securityService;
@@ -48,7 +54,19 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
             result.setLockedByUser(taUserService.getUser(lockType.getSecond().getUserId()).getName());
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
             result.setLockDate(formatter.format(lockType.getSecond().getDateLock()));
-            result.setTitle(String.format("Запущена операция \"%s\"", String.format(lockType.getFirst().getDescription(), action.getTaxType().getTaxText())));
+            if (ReportType.MOVE_FD.equals(lockType.getFirst())) {
+                List<WorkflowMove> workflowMoveList = formDataAccessService.getAvailableMoves(userInfo, action.getFormDataId());
+                String moveName = "Подготовка/утверждение/принятие";
+                for (WorkflowMove workflowMove: workflowMoveList) {
+                    if (!workflowMove.isReasonToMoveShouldBeSpecified()) {
+                        moveName = workflowMove.getToState().getActionName();
+                        break;
+                    }
+                }
+                result.setTitle(String.format("Запущена операция \"%s\"", String.format(lockType.getFirst().getDescription(), moveName, action.getTaxType().getTaxText())));
+            } else {
+                result.setTitle(String.format("Запущена операция \"%s\"", String.format(lockType.getFirst().getDescription(), action.getTaxType().getTaxText())));
+            }
         }
         LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(), userInfo);
         if (lockInformation != null && lockInformation.getUserId() == userInfo.getUser().getId()) {

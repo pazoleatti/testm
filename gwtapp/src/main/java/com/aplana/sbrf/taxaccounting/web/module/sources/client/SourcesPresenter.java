@@ -143,6 +143,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         void loadRightData();
 
         void setPanelWidth();
+
+        void clearSelection();
     }
 
 	private final DispatchAsync dispatcher;
@@ -399,6 +401,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                     .defaultCallback(new AbstractCallback<CreateAssignResult>() {
                         @Override
                         public void onSuccess(CreateAssignResult result) {
+                            getView().clearSelection();
                             getCurrentAssigns(leftObject);
                             getView().loadRightData();
                             LogCleanEvent.fire(SourcesPresenter.this);
