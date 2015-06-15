@@ -45,6 +45,13 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
     @Override
     @ProxyEvent
     public void onSetData(final FormTemplateMainEvent event) {
+        InitTypeAction action = new InitTypeAction();
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<InitTypeResult>() {
+            @Override
+            public void onSuccess(InitTypeResult result) {
+                FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, result.getRefBookList());
+            }
+        }, FormTemplateMainPresenter.this));
         formTemplateExt = new FormTemplateExt();
         formTemplate = new FormTemplate();
         formTemplateExt.setFormTemplate(formTemplate);
@@ -59,7 +66,6 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
         getView().setFormId(0);
         getView().setTitle(formTemplate.getName());
         RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
-        FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
 
         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(AdminConstants.NameTokens.formTemplateInfoPage).
                 with(AdminConstants.NameTokens.formTemplateId, "0").build());
