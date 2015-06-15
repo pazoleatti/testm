@@ -518,6 +518,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         }
                     });
                 } else if (result.isSave()) {
+                    modifiedRows.clear();
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
                         @Override
@@ -900,13 +901,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                 innerLogUuid = result.getUuid();
                 if (result.isLock()) {
-                    Dialog.confirmMessage("Запуск операции приведет к удалению блокировок для некоторых ранее запущенных операций (операции, уже выполняемые Системой, будут отменены только после выполнения бизнес-логики, при этом изменения не будут сохранены). Продолжить?", new DialogHandler() {
+                    Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
                         public void yes() {
                             onUploadTF(true, false, uuid);
                         }
                     });
                 } else if (result.isSave()) {
+                    modifiedRows.clear();
                     Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {
