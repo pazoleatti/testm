@@ -55,7 +55,7 @@ begin
          EXECUTE IMMEDIATE query_str;
                  
          
-         dml_query_str_header := 'select seq_form_data_nnn.nextval, dr.form_data_id, dr.type as temporary, dr.manual, row_number() over (partition by dr.form_data_id, dr.type, dr.manual order by dr.ord) as ord, dr.alias ';
+         dml_query_str_header := 'select seq_form_data_nnn.nextval, dr.form_data_id, 0 as temporary, dr.manual, row_number() over (partition by dr.form_data_id, dr.manual order by dr.ord) as ord, dr.alias ';
          dml_query_str_body := ' from form_data fd '
                           || ' join data_row dr on dr.form_data_id = fd.id and form_template_id = '||t.form_template_id||' ';
          
@@ -126,7 +126,7 @@ begin
          
          -------------------------------------------------------------------------------------
          --Заполнение данными
-         dml_query := 'insert into '||v_table_name||' '||dml_query_str_header || ' '|| dml_query_str_body;
+         dml_query := 'insert into '||v_table_name||' '||dml_query_str_header || ' '|| dml_query_str_body || ' where dr.type in (0, -1)';
 			insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DML', dml_query);
          execute immediate dml_query;
             insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, null, '--------------------------------------');
