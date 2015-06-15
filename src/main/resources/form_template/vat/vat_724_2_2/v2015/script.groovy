@@ -401,8 +401,8 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     colIndex++
     tmpValues.name = values[colIndex]
 
-    // Проверить фиксированные значения (графа 1..3)
-    ['rowNum', 'code', 'name'].each { alias ->
+    // Проверить фиксированные значения (графы 2, 3)
+    ['code', 'name'].each { alias ->
         def value = StringUtils.cleanString(tmpValues[alias]?.toString())
         def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
         checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
