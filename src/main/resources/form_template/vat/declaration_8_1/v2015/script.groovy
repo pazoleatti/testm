@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
+import javax.xml.namespace.QName
 import java.text.SimpleDateFormat
 
 /**
@@ -328,13 +329,20 @@ def getCode005() {
         return result
     }
     if (declarationData8.id != null) {
-        def xmlString = declarationService.getXmlData(declarationData8.id)
-        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        if (xmlString == null) {
-            return result
+        def reader = declarationService.getXmlStreamReader(declarationData8.id)
+        if (reader == null) {
+            return
         }
-        def xmlData = new XmlSlurper().parseText(xmlString)
-        result = xmlData?.Документ?.КнигаПокуп?.@СумНДСВсКПк?.text()
+        try{
+            while (reader.hasNext()) {
+                if (reader.startElement && QName.valueOf('КнигаПокуп').equals(reader.name)) {
+                    result = reader.getAttributeValue(null, "СумНДСВсКПк")
+                    break
+                }
+            }
+        } finally {
+            reader.close()
+        }
     }
     return result
 }
