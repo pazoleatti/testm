@@ -749,24 +749,34 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 }
             }, this));
         } else {
-            goMove(wfMove);
+            goMove(wfMove, false);
         }
     }
 
-	private void goMove(final WorkflowMove wfMove){
+	private void goMove(final WorkflowMove wfMove, final boolean force){
 		LogCleanEvent.fire(this);
 		GoMoveAction action = new GoMoveAction();
 		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
         action.setTaxType(formData.getFormType().getTaxType());
+        action.setForce(force);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                        innerLogUuid = result.getUuid();
-                        timerType = ReportType.MOVE_FD;
-                        timer.run();
+                        if (result.isLock()) {
+                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    goMove(wfMove, true);
+                                }
+                            });
+                        } else {
+                            innerLogUuid = result.getUuid();
+                            timerType = ReportType.MOVE_FD;
+                            timer.run();
+                        }
                     }
                 }, this));
 	}
