@@ -69,6 +69,16 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
             }
         }
         LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(), userInfo);
+        if (lockInformation != null) {
+            result.setEditMode(true);
+            if (lockInformation.getUserId() == userInfo.getUser().getId()) {
+                result.setLockedMe(true);
+            } else {
+                result.setLockedMe(false);
+            }
+        } else {
+            result.setEditMode(false);
+        }
         if (lockInformation != null && lockInformation.getUserId() == userInfo.getUser().getId()) {
             if (ReportType.EDIT_FD.equals(lockType.getFirst())) {
                 // есто только блокировка режима редактирования

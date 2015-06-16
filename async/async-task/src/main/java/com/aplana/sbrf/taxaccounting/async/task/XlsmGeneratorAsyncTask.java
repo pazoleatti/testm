@@ -1,10 +1,14 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,9 +45,35 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LockDataService lockService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
+
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
-        return BalancingVariants.SHORT;
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
+        int userId = (Integer)params.get(USER_ID.name());
+        long formDataId = (Long)params.get("formDataId");
+        boolean manual = (Boolean)params.get("manual");
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(userService.getUser(userId));
+        Logger logger = new Logger();
+        FormData formData = formDataService.getFormData(
+                userInfo,
+                formDataId,
+                manual,
+                logger);
+        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.EXCEL, null);
+        if (checkTaskLimit.getFirst() == null) {
+            AsyncTaskTypeData taskTypeDataReport = asyncTaskTypeDao.get(ReportType.EXCEL.getAsyncTaskTypeId(true));
+            logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
+            throw new AsyncTaskException(new ServiceLoggerException(ReportType.CHECK_TASK,
+                    logEntryService.save(logger.getEntries()),
+                    ReportType.EXCEL.getDescription(),
+                    String.format("количество ячеек таблицы формы(%s) превышает максимально допустимое(%s)!", checkTaskLimit.getSecond(), taskTypeDataReport.getTaskLimit())));
+        }
+        return checkTaskLimit.getFirst();
     }
 
     @Override
