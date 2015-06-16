@@ -1032,7 +1032,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     switch (result.getFormMode()) {
                                         case EDIT:
                                             if (readOnlyMode) {
-                                                setReadUnlockedMode();
+                                                if (result.isEditMode()) {
+                                                    setLowReadLockedMode(result.getLockedByUser(),
+                                                            result.getLockDate(),
+                                                            result.getTitle(),
+                                                            result.isEditMode());
+                                                } else {
+                                                    setReadUnlockedMode();
+                                                }
                                             } else {
                                                 setEditMode();
                                             }
@@ -1042,7 +1049,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 setLowReadLockedMode(
                                                         result.getLockedByUser(),
                                                         result.getLockDate(),
-                                                        result.getTitle());
+                                                        result.getTitle(),
+                                                        result.isEditMode());
                                             } else {
                                                 setLowEditLockedMode(
                                                         result.getLockedByUser(),
@@ -1054,13 +1062,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             setReadLockedMode(true,
                                                     result.getLockedByUser(),
                                                     result.getLockDate(),
-                                                    result.getTitle());
+                                                    result.getTitle(),
+                                                    result.isEditMode());
                                             break;
                                         case LOCKED_READ:
                                             setLowReadLockedMode(
                                                     result.getLockedByUser(),
                                                     result.getLockDate(),
-                                                    result.getTitle());
+                                                    result.getTitle(),
+                                                    result.isEditMode());
                                             break;
 
                                     }

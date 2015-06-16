@@ -680,7 +680,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showCheckButton(boolean show) {
-//        checkButton.setVisible(show);
+        checkButton.setVisible(show);
 	}
 
 	@Override
