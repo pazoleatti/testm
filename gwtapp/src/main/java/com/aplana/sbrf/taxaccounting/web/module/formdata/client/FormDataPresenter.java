@@ -299,7 +299,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	}
 
 	@Override
-	public void onPrintExcelClicked() {
+	public void onPrintExcelClicked(final boolean force) {
         final ReportType reportType = ReportType.EXCEL;
         CreateReportAction action = new CreateReportAction();
         action.setFormDataId(formData.getId());
@@ -307,6 +307,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
+        action.setForce(force);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -321,6 +322,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
                                             + absoluteView);
+                        } else if (result.isLock()) {
+                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    onPrintExcelClicked(true);
+                                }
+                            });
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -358,7 +366,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onPrintCSVClicked() {
+    public void onPrintCSVClicked(boolean force) {
         final ReportType reportType = ReportType.CSV;
         CreateReportAction action = new CreateReportAction();
         action.setFormDataId(formData.getId());
@@ -366,6 +374,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
+        action.setForce(force);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -380,6 +389,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
                                             + absoluteView);
+                        } else if (result.isLock()) {
+                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    onPrintCSVClicked(true);
+                                }
+                            });
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -438,7 +454,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         checkAction.setForce(force);
         checkAction.setSave(save);
-        dispatcher.execute(checkAction, createDataRowResultCallback(force, save, ReportType.CALCULATE_FD));
+        dispatcher.execute(checkAction, createDataRowResultCallback(force, save, ReportType.CHECK_FD));
 	}  	
 	
 	/* (non-Javadoc)
@@ -733,24 +749,34 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 }
             }, this));
         } else {
-            goMove(wfMove);
+            goMove(wfMove, false);
         }
     }
 
-	private void goMove(final WorkflowMove wfMove){
+	private void goMove(final WorkflowMove wfMove, final boolean force){
 		LogCleanEvent.fire(this);
 		GoMoveAction action = new GoMoveAction();
 		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
         action.setTaxType(formData.getFormType().getTaxType());
+        action.setForce(force);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                        innerLogUuid = result.getUuid();
-                        timerType = ReportType.MOVE_FD;
-                        timer.run();
+                        if (result.isLock()) {
+                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    goMove(wfMove, true);
+                                }
+                            });
+                        } else {
+                            innerLogUuid = result.getUuid();
+                            timerType = ReportType.MOVE_FD;
+                            timer.run();
+                        }
                     }
                 }, this));
 	}
@@ -1006,7 +1032,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     switch (result.getFormMode()) {
                                         case EDIT:
                                             if (readOnlyMode) {
-                                                setReadUnlockedMode();
+                                                if (result.isEditMode()) {
+                                                    setLowReadLockedMode(result.getLockedByUser(),
+                                                            result.getLockDate(),
+                                                            result.getTitle(),
+                                                            result.isEditMode());
+                                                } else {
+                                                    setReadUnlockedMode();
+                                                }
                                             } else {
                                                 setEditMode();
                                             }
@@ -1016,7 +1049,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 setLowReadLockedMode(
                                                         result.getLockedByUser(),
                                                         result.getLockDate(),
-                                                        result.getTitle());
+                                                        result.getTitle(),
+                                                        result.isEditMode());
                                             } else {
                                                 setLowEditLockedMode(
                                                         result.getLockedByUser(),
@@ -1028,13 +1062,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             setReadLockedMode(true,
                                                     result.getLockedByUser(),
                                                     result.getLockDate(),
-                                                    result.getTitle());
+                                                    result.getTitle(),
+                                                    result.isEditMode());
                                             break;
                                         case LOCKED_READ:
                                             setLowReadLockedMode(
                                                     result.getLockedByUser(),
                                                     result.getLockDate(),
-                                                    result.getTitle());
+                                                    result.getTitle(),
+                                                    result.isEditMode());
                                             break;
 
                                     }

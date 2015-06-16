@@ -7,8 +7,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FormTemplateColumnUiHandlers extends UiHandlers {
 
-	void addColumn(int position, Column column);
-
 	void addColumn(Column column);
 
 	void removeColumn(Column column);

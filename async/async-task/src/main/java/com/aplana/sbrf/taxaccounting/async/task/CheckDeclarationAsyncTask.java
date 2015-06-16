@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -35,6 +36,8 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private LockDataService lockService;
+
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
@@ -103,9 +106,12 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
         } else {
             str = ".";
         }
-        return String.format("Выполнена проверка %s: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\"%s",
+        return String.format("Выполнена проверка %s: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
                 declarationTemplate.getType().getTaxType().getDeclarationShortName(),
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(),
+                reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                        formatter.format(reportPeriod.getCorrectionDate())) : "",
+                department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
 
@@ -126,9 +132,12 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
         } else {
             str = "";
         }
-        return String.format("Выполнена проверка %s: Период: \"%s, %s\", Подразделение: \"%s\", Вид: \"%s\"%s. Найдены фатальные ошибки.",
+        return String.format("Выполнена проверка %s: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s. Найдены фатальные ошибки.",
                 declarationTemplate.getType().getTaxType().getDeclarationShortName(),
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), department.getName(),
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(),
+                reportPeriod.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                        formatter.format(reportPeriod.getCorrectionDate())) : "",
+                department.getName(),
                 declarationTemplate.getType().getName(), str);
     }
 }

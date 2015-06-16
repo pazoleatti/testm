@@ -146,7 +146,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                     String.format(
                             LockData.LOCK_CURRENT,
                             sdf.format(lockData.getDateLock()),
-                            userInfo.getUser().getName(),
+                            userService.getUser(lockData.getUserId()).getName(),
                             lockData.getDescription())
             );
             throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), action.getTaxType().getDeclarationShortName());

@@ -1731,6 +1731,10 @@ public class FormDataServiceImpl implements FormDataService {
                 );
         }
         switch (reportType) {
+            case EXCEL:
+            case CSV:
+                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых формирование отчета невозможно";
+                break;
             case CHECK_FD:
                 msg = "Для текущего экземпляра налоговой формы запущены операции, при которых ее проверка невозможна";
                 break;
@@ -1756,8 +1760,6 @@ public class FormDataServiceImpl implements FormDataService {
             case CHECK_FD:
             case MOVE_FD:
             case CALCULATE_FD:
-            case EXCEL:
-            case CSV:
                 int rowCount = dataRowDao.getSavedSize(formData);
                 int columnCount = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
                 long cellCount = rowCount * columnCount;
@@ -1766,6 +1768,18 @@ public class FormDataServiceImpl implements FormDataService {
                     return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCount);
                 }
                 return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCount);
+            case EXCEL:
+            case CSV:
+                int rowCountReport = dataRowDao.getSavedSize(formData);
+                int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                long cellCountReport = rowCountReport * columnCountReport;
+                AsyncTaskTypeData taskTypeDataReport = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                if (cellCountReport > taskTypeDataReport.getTaskLimit()) {
+                    return new Pair<BalancingVariants, Long>(null, cellCountReport);
+                } else if (cellCountReport < taskTypeDataReport.getShortQueueLimit()) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountReport);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountReport);
             case CONSOLIDATE_FD:
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(

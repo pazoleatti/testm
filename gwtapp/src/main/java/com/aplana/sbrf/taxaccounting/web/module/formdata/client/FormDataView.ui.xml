@@ -233,31 +233,31 @@
                 <!--Панель кнопок-->
 
                 <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.btnPanel}">
-                    <g:HorizontalPanel ui:field="addRemoveRowsBlock" verticalAlignment="middle">
+                    <g:HorizontalPanel ui:field="addRemoveRowsBlock" verticalAlignment="middle" visible="false">
                         <style:LinkButton ui:field="addRowButton" text="Добавить строку" addStyleNames="{style.btnMarginRight}"
                                           img="resources/img/row-add.png"/>
                         <style:LinkButton ui:field="removeRowButton" text="Удалить строку"
                                           img="resources/img/row-delete.png" addStyleNames="{style.btnMarginRight}"/>
                         <g:Label addStyleNames="{style.verSep}"/>
                     </g:HorizontalPanel>
-                    <g:HorizontalPanel >
-                        <g:Button ui:field="checkButton" text="Проверить" addStyleNames="{style.btnMarginRight}"/>
-                        <g:Button ui:field="recalculateButton" text="Рассчитать" addStyleNames="{style.btnMarginRight}"/>
-                        <g:HorizontalPanel ui:field="workflowButtons"/>
-                        <g:Button ui:field="deleteFormButton" text="Удалить" addStyleNames="{style.btnMarginRight}"/>
-                        <g:Button ui:field="originalVersionButton" text="Исходная версия"/>
+                    <g:HorizontalPanel>
+                        <g:Button ui:field="checkButton" text="Проверить" addStyleNames="{style.btnMarginRight}" visible="false"/>
+                        <g:Button ui:field="recalculateButton" text="Рассчитать" addStyleNames="{style.btnMarginRight}" visible="false"/>
+                        <g:HorizontalPanel ui:field="workflowButtons" visible="false"/>
+                        <g:Button ui:field="deleteFormButton" text="Удалить" addStyleNames="{style.btnMarginRight}" visible="false"/>
+                        <g:Button ui:field="originalVersionButton" text="Исходная версия" visible="false"/>
                         <g:Button ui:field="consolidationButton" text="Консолидировать" visible="false"/>
 
                         <g:Label addStyleNames="{style.verSep}"/>
                     </g:HorizontalPanel>
 
                     <style:LinkButton ui:field="editAnchor" text="Редактировать..." addStyleNames="{style.btnMarginRight}"
-                                      img="resources/img/pencil-16.png" title="Перейти в режим редактирования" />
+                                      img="resources/img/pencil-16.png" title="Перейти в режим редактирования" visible="false"/>
 
                     <style:LinkButton ui:field="manualAnchor" text="Ручной ввод" addStyleNames="{style.btnMarginRight}"
-                                      img="resources/img/pencil-16.png" title="Перейти в режим редактирования" />
+                                      img="resources/img/pencil-16.png" title="Перейти в режим редактирования" visible="false"/>
 
-                    <g:HorizontalPanel ui:field="saveCancelPanel">
+                    <g:HorizontalPanel ui:field="saveCancelPanel" visible="false">
                         <g:Button ui:field="saveButton" text="Сохранить" addStyleNames="{style.btnMarginRight}"/>
                         <g:Button ui:field="cancelButton" text="Выход" addStyleNames="{style.btnMarginRight}"/>
                     </g:HorizontalPanel>
@@ -270,14 +270,14 @@
                         <g:Button ui:field="fillPreviousButton" text="Заполнить предыдущими значениями" visible="false" addStyleNames="{style.btnMarginRight}"/>
                     </g:cell>
 
-                    <g:cell>
-                        <style:LinkButton ui:field="correctionButton" text="Показать изменения" disableImage="true" addStyleNames="{style.corr}"/>
+                    <g:cell visible="false">
+                        <style:LinkButton ui:field="correctionButton" text="Показать изменения" disableImage="true" addStyleNames="{style.corr}" visible="false"/>
                     </g:cell>
 
                     <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"
-                                value="true" text="Показывать контрольные поля"/>
+                                value="true" text="Показывать контрольные поля" visible="false"/>
 
-                    <g:HorizontalPanel verticalAlignment="middle" ui:field="versionBlock">
+                    <g:HorizontalPanel verticalAlignment="middle" ui:field="versionBlock" visible="false">
                         <g:Label addStyleNames="{style.verSep}"/>
                         <g:Label text="Версия:" width="48px"/>
                         <style:LinkButton ui:field="manualVersionLink" text="ручного ввода"
@@ -290,7 +290,7 @@
                     </g:HorizontalPanel>
 
                     <style:LinkButton ui:field="deleteManualAnchor" text="Удалить версию ручного ввода" addStyleNames="{style.btnMarginRight}"
-                                      img="resources/img/row-delete.png" title="Удалить версию ручного ввода"/>
+                                      img="resources/img/row-delete.png" title="Удалить версию ручного ввода" visible="false"/>
 
                 </g:HorizontalPanel>
 

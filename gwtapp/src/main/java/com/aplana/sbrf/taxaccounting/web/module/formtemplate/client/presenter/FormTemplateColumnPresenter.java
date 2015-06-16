@@ -126,20 +126,14 @@ public class FormTemplateColumnPresenter
 	 * @param column столбец
 	 */
 	private void fixAlias(Column column) {
-		int i = 0;
+		/*int i = 0;
 		String oldAlias = column.getAlias() == null ? "псевдоним" : column.getAlias();
 		while (aliasExists(column)) {
 			column.setAlias(oldAlias + ++i);
 		}
 		if (!oldAlias.equals(column.getAlias())) {
 			getView().setColumn(column);
-		}
-	}
-
-	@Override
-	public void addColumn(int position, Column column) {
-		fixAlias(column);
-		formTemplate.addColumn(position, column);
+		} */
 	}
 
 	@Override

@@ -6,6 +6,7 @@ public class CreateReportResult implements Result {
     private static final long serialVersionUID = 7832261980997033051L;
 
     private boolean existReport = false;
+    private boolean lock;
     private String uuid;
 
     public boolean isExistReport() {
@@ -14,6 +15,14 @@ public class CreateReportResult implements Result {
 
     public void setExistReport(boolean existReport) {
         this.existReport = existReport;
+    }
+
+    public boolean isLock() {
+        return lock;
+    }
+
+    public void setLock(boolean lock) {
+        this.lock = lock;
     }
 
     public String getUuid() {

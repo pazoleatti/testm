@@ -7,8 +7,8 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public enum ReportType {
 
-    EXCEL(0, "Excel", "", 3L, 103L),
-    CSV(1, "CSV", "", 4L, 104L),
+    EXCEL(0, "Excel", "Формирование Excel отчета", 3L, 103L),
+    CSV(1, "CSV", "Формирование CSV отчета", 4L, 104L),
 
     EXCEL_DEC(0, "Excel", "Формирование печатного представления %s", 5L, 105L),
     XML_DEC(1, "XML", "Расчет %s", 6L, 106L),
