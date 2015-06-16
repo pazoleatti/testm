@@ -323,7 +323,9 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     //FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
                     for (Column column : result.getColumns()){
                         Column col = formTemplate.getColumn(column.getAlias());
-                        if (col.getId()==null){
+                        if (col.getId()==null || col.getId()<0){
+                            if (col instanceof ReferenceColumn)
+                                ((ReferenceColumn)col).setParentId(((ReferenceColumn)column).getParentId());
                             col.setId(column.getId());
                         }
                     }

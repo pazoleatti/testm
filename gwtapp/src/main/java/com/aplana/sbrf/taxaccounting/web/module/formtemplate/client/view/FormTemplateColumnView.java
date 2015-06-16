@@ -722,6 +722,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		} else if (REFBOOK_TYPE.equals(typeColumnDropBox.getValue())){
 			RefBookColumn refBookColumn = new RefBookColumn();
             copyMainColumnAttributes(column, refBookColumn);
+            RefBook refBook = getUiHandlers().getRefBook(getUiHandlers().getRefBookByAttributeId(null, true));
+            refBookColumn.setRefBookAttributeId(refBook.getAttributes().get(0).getId());
 			newColumn = refBookColumn;
 		} else if (REFERENCE_TYPE.equals(typeColumnDropBox.getValue())){
             ReferenceColumn referenceColumn = new ReferenceColumn();
