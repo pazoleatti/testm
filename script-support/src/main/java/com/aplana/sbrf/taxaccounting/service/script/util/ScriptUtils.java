@@ -1844,7 +1844,7 @@ public final class ScriptUtils {
                     value = formatter.formatRawCellContents(Double.parseDouble(value), this.formatIndex, this.formatString);
                 }
             }
-            return value;
+            return value.trim();
         }
     }
 
