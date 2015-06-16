@@ -299,7 +299,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	}
 
 	@Override
-	public void onPrintExcelClicked() {
+	public void onPrintExcelClicked(final boolean force) {
         final ReportType reportType = ReportType.EXCEL;
         CreateReportAction action = new CreateReportAction();
         action.setFormDataId(formData.getId());
@@ -307,6 +307,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
+        action.setForce(force);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -321,6 +322,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
                                             + absoluteView);
+                        } else if (result.isLock()) {
+                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    onPrintExcelClicked(true);
+                                }
+                            });
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);
@@ -358,7 +366,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onPrintCSVClicked() {
+    public void onPrintCSVClicked(boolean force) {
         final ReportType reportType = ReportType.CSV;
         CreateReportAction action = new CreateReportAction();
         action.setFormDataId(formData.getId());
@@ -366,6 +374,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
+        action.setForce(force);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -380,6 +389,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
                                             + absoluteView);
+                        } else if (result.isLock()) {
+                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    onPrintCSVClicked(true);
+                                }
+                            });
                         } else {
                             getView().updatePrintReportButtonName(reportType, false);
                             getView().startTimerReport(reportType);

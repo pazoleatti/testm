@@ -431,14 +431,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("printToExcel")
     void onPrintExcelClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onPrintExcelClicked();
+            getUiHandlers().onPrintExcelClicked(false);
         }
     }
 
     @UiHandler("printToCSV")
     void onPrintCSVClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onPrintCSVClicked();
+            getUiHandlers().onPrintCSVClicked(false);
         }
     }
 
@@ -680,6 +680,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showCheckButton(boolean show) {
+//        checkButton.setVisible(show);
 	}
 
 	@Override

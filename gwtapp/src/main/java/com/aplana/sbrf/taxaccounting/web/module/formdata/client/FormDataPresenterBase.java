@@ -259,7 +259,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setLockInformation(true, false, lockDate, lockedBy, title);
 
         view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
-        view.showCheckButton(formDataAccessParams.isCanRead());
+        view.showCheckButton(false);
 
         view.showEditAnchor(formDataAccessParams.isCanEdit());
         view.showModeAnchor(existManual, formData.isManual());
@@ -295,7 +295,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setLockInformation(true, false, lockDate, lockedBy, title);
 
         view.setWorkflowButtons(null);
-        view.showCheckButton(formDataAccessParams.isCanRead());
+        view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);
         view.setSelectedRow(null, true);
 
         view.showEditAnchor(false);
@@ -335,7 +335,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setLockInformation(false, readOnlyMode, null, null, null);
 		
 		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
-		view.showCheckButton(formDataAccessParams.isCanRead());
+		view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);
 
         view.showEditAnchor(formDataAccessParams.isCanEdit());
         view.showModeAnchor(existManual, formData.isManual());
@@ -371,7 +371,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.setLockInformation(false, readOnlyMode, null, null, null);
 		
 		view.setWorkflowButtons(null);
-		view.showCheckButton(formDataAccessParams.isCanRead());
+		view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);
 		view.setSelectedRow(null, true);
 
         view.showEditAnchor(false);
