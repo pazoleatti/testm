@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateImpexPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -40,12 +39,15 @@ public class FormTemplateImpexView extends ViewWithUiHandlers<FormTemplateImpexU
                     Dialog.errorMessage("Ошибки при импорте формы.");
                     return;
                 }
-                if (event.getResults().toLowerCase().contains(UuidEnum.ERROR_UUID.toString())) {
+                if (event.getResults().toLowerCase().contains(ERROR_RESP)) {
                     String errorUuid = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
                     getUiHandlers().uploadDectResponseWithErrorUuid(errorUuid.replaceFirst(ERROR_RESP, ""));
+                } else if (event.getResults().toLowerCase().contains(ERROR)) {
+                    String error = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
+                    Dialog.errorMessage("Загрузить макет не удалось. Ошибка: " + error.replaceFirst(ERROR, ""));
                 } else {
                     String uuid = event.getResults().toLowerCase().replaceAll(respPattern, "$2");
-                    getUiHandlers().uploadFormTemplateSuccess(uuid.replaceFirst(UuidEnum.SUCCESS_UUID.toString(), ""));
+                    getUiHandlers().uploadFormTemplateSuccess(uuid.replaceFirst(SUCCESS_RESP, ""));
                 }
 			}
 		});
