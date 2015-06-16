@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TaskFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -159,11 +160,11 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getFormData().getFormType().getTaxType().getTaxText());
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
-                    if (e instanceof ServiceLoggerException) {
-                        throw (ServiceLoggerException) e;
-                    } else {
-                        throw new ActionException(e);
+                    int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+                    if (i != -1) {
+                        throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
                     }
+                    throw new ActionException(e);
                 }
             } else {
                 throw new ActionException("Не удалось запустить расчет. Попробуйте выполнить операцию позже");

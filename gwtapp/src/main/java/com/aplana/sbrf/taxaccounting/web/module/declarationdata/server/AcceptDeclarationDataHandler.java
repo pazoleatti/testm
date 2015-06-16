@@ -103,21 +103,14 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                         result.setUuid(logEntryService.save(logger.getEntries()));
                         return result;
                     }
-                    if (lockDataService.lock(key, userInfo.getUser().getId(),
+                    if (!action.isCancelTask() && declarationDataService.checkExistTask(action.getDeclarationId(), reportType, logger)) {
+                        result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
+                    } else if (lockDataService.lock(key, userInfo.getUser().getId(),
                             declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
                             LockData.State.IN_QUEUE.getText(),
                             lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
                         try {
-                            String keyCheck = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.CHECK_DEC);
-                            LockData lockDataCheck = lockDataService.getLock(keyCheck);
-                            if (lockDataCheck != null) {
-                                List<Integer> waitingUsers = lockDataService.getUsersWaitingForLock(keyCheck);
-                                lockDataService.interruptTask(lockDataCheck, userInfo.getUser().getId(), true);
-                                for(Integer userId: waitingUsers) {
-                                    if (userId != userInfo.getUser().getId())
-                                        lockDataService.addUserWaitingForLock(key, userId);
-                                }
-                            }
+                            declarationDataService.interruptTask(action.getDeclarationId(), userInfo.getUser().getId(), reportType);
                             params.put("declarationDataId", action.getDeclarationId());
                             params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                             params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);

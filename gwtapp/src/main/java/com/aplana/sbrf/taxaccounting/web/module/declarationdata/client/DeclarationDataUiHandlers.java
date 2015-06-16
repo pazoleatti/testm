@@ -7,8 +7,8 @@ import com.gwtplatform.mvp.client.UiHandlers;
 import java.util.Date;
 
 public interface DeclarationDataUiHandlers extends UiHandlers {
-	void onRecalculateClicked(Date docDate, boolean force);
-	void accept(boolean accepted, final boolean force);
+	void onRecalculateClicked(Date docDate, boolean force, boolean cancelTask);
+	void accept(boolean accepted, boolean force, boolean cancelTask);
 	void delete();
 	void check(boolean force);
     void viewReport(boolean force, ReportType reportType);
