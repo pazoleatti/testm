@@ -353,15 +353,17 @@ public class SourceServiceImpl implements SourceService {
 
 
     /**
-     * Проверяет существование экземпляров нф
+     * Проверяет существование экземпляров нф и заполняет списки id форм-источников и приемников
      * http://conf.aplana.com/pages/viewpage.action?pageId=12321547
      *
      * @param logger         логгер
      * @param sourcePairs  входной набор пар источник-приемник
      * @param newPeriodStart начало нового периода
      * @param newPeriodEnd   окончание нового периода
+     * @param sourceIds набор id источников
+     * @param destIds набор id приемников
      */
-    public void checkFormInstances(Logger logger, List<SourcePair> sourcePairs, Date newPeriodStart, Date newPeriodEnd, boolean declaration) {
+    public void checkFormInstances(Logger logger, List<SourcePair> sourcePairs, Date newPeriodStart, Date newPeriodEnd, boolean declaration, Set<Long> sourceIds, Set<Long> destIds) {
         for (SourcePair sourcePair : sourcePairs) {
             /** Получаем промежуточные периоды, которые будут объединены при создании новой версии */
             List<SourceObject> emptyPeriods = sourceDao.getEmptyPeriods(sourcePair,
@@ -372,11 +374,27 @@ public class SourceServiceImpl implements SourceService {
                     /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
                     consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(empty.getSourcePair().getSource(),
                             empty.getPeriodStart(), empty.getPeriodEnd(), declaration));
+                    if (destIds != null) {
+                        destIds.addAll(sourceDao.findConsolidatedInstanceIds(empty.getSourcePair().getSource(),
+                                        empty.getPeriodStart(), empty.getPeriodEnd(), declaration));
+                    }
+                    if (sourceIds != null) {
+                        sourceIds.addAll(sourceDao.findFDConsolidatedSourceInstanceIds(empty.getSourcePair().getSource(),
+                                        empty.getPeriodStart(), empty.getPeriodEnd(), declaration));
+                    }
                 }
             } else {
                 /** Получаем источники, имеющие принятые экземпляры в создаваемом новом периоде */
                 consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(sourcePair.getSource(),
                         newPeriodStart, newPeriodEnd, declaration));
+                if (destIds != null) {
+                    destIds.addAll(sourceDao.findConsolidatedInstanceIds(sourcePair.getSource(),
+                            newPeriodStart, newPeriodEnd, declaration));
+                }
+                if (sourceIds != null) {
+                    sourceIds.addAll(sourceDao.findFDConsolidatedSourceInstanceIds(sourcePair.getSource(),
+                            newPeriodStart, newPeriodEnd, declaration));
+                }
             }
 
             /** Выводим информацию о найденных экземплярах-приемниках */
@@ -632,7 +650,7 @@ public class SourceServiceImpl implements SourceService {
                     sourceClientData.getMode(), sourceClientData.isDeclaration(), sourceClientData.getTaxType());
 
             /** Проверка существования экземпляров нф */
-            checkFormInstances(logger, sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(), sourceClientData.isDeclaration());
+            checkFormInstances(logger, sourcePairs, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(), sourceClientData.isDeclaration(), null, null);
 
             /** Проверка зацикливания */
             sourcePairs = checkLoops(logger, sourceClientData.getPeriodStart(), sourceClientData.getPeriodEnd(),
@@ -780,6 +798,10 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public void updateSources(Logger logger, List<SourceClientData> sourceClientDataList) {
         ServiceLoggerException criticalError = null;
+
+        HashSet<Long> sourceIds = new HashSet<Long>();
+        HashSet<Long> destIds = new HashSet<Long>();
+
         for (SourceClientData sourceClientData : sourceClientDataList) {
             try {
                 Date periodStart = sourceClientData.getPeriodStart();
@@ -798,8 +820,8 @@ public class SourceServiceImpl implements SourceService {
                             /** Дата окончания нового периода меньше даты окончания старого периода и больше даты начала старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1), sourceClientData.isDeclaration());
-                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd, sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1), sourceClientData.isDeclaration(), sourceIds, destIds);
+                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
                             /** Проверка зацикливания */
                             sourcePairs = checkLoops(logger, periodStart, oldPeriodEnd,
                                     sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
@@ -810,8 +832,8 @@ public class SourceServiceImpl implements SourceService {
                             /** Дата окончания нового периода меньше даты начала старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, oldPeriodStart, oldPeriodEnd, sourceClientData.isDeclaration());
-                            checkFormInstances(logger, sourcePairs, periodStart, periodEnd, sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, oldPeriodStart, oldPeriodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
+                            checkFormInstances(logger, sourcePairs, periodStart, periodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
                             /** Проверка зацикливания */
                             sourcePairs = checkLoops(logger, periodStart, periodEnd,
                                     sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
@@ -823,8 +845,8 @@ public class SourceServiceImpl implements SourceService {
                             /** Дата окончания нового периода больше даты окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1), sourceClientData.isDeclaration());
-                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd, sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1), sourceClientData.isDeclaration(), sourceIds, destIds);
+                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
                             /** Проверка зацикливания */
                             sourcePairs = checkLoops(logger, periodStart, periodEnd,
                                     sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
@@ -835,7 +857,7 @@ public class SourceServiceImpl implements SourceService {
                             /** Равна дате окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1), sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, periodStart, SimpleDateUtils.addDayToDate(oldPeriodStart, -1), sourceClientData.isDeclaration(), sourceIds, destIds);
                             /** Проверка зацикливания */
                             sourcePairs = checkLoops(logger, periodStart, periodEnd,
                                     sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
@@ -849,13 +871,13 @@ public class SourceServiceImpl implements SourceService {
                             /** Дата окончания нового периода меньше даты окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd, sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
                         } else if ((periodEnd == null && oldPeriodEnd != null)
                                 || (periodEnd != null && periodEnd.after(oldPeriodEnd))) {
                             /** Дата окончания нового периода больше даты окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd, sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
                             /** Проверка зацикливания */
                             sourcePairs = checkLoops(logger, periodStart, periodEnd,
                                     sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
@@ -871,20 +893,20 @@ public class SourceServiceImpl implements SourceService {
                             /** Равна дате окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration(), sourceIds, destIds);
 
                         } else if (periodEnd != null && (oldPeriodEnd == null || periodEnd.before(oldPeriodEnd))) {
                             /** Дата окончания нового периода меньше даты окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration());
-                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd, sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration(), sourceIds, destIds);
+                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(periodEnd, 1), oldPeriodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
                         } else if ((periodEnd == null && oldPeriodEnd != null)|| (periodEnd.after(oldPeriodEnd))) {
                             /** Дата окончания нового периода больше даты окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration());
-                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd, sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration(), sourceIds, destIds);
+                            checkFormInstances(logger, sourcePairs, SimpleDateUtils.addDayToDate(oldPeriodEnd, 1), periodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
                             /** Проверка зацикливания */
                             sourcePairs = checkLoops(logger, periodStart, periodEnd,
                                     sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
@@ -895,7 +917,7 @@ public class SourceServiceImpl implements SourceService {
                             /** Дата окончания нового периода равна дате окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, oldPeriodStart, SimpleDateUtils.addDayToDate(periodStart, -1), sourceClientData.isDeclaration(), sourceIds, destIds);
                         }
                     } else if (oldPeriodEnd != null && periodStart.after(oldPeriodEnd)) {
                         /** Дата начала нового периода больше даты окончания старого периода */
@@ -903,8 +925,8 @@ public class SourceServiceImpl implements SourceService {
                             /** Дата окончания нового периода больше даты окончания старого периода */
 
                             /** Проверка существования экземпляров нф */
-                            checkFormInstances(logger, sourcePairs, oldPeriodStart, oldPeriodEnd, sourceClientData.isDeclaration());
-                            checkFormInstances(logger, sourcePairs, periodStart, periodEnd, sourceClientData.isDeclaration());
+                            checkFormInstances(logger, sourcePairs, oldPeriodStart, oldPeriodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
+                            checkFormInstances(logger, sourcePairs, periodStart, periodEnd, sourceClientData.isDeclaration(), sourceIds, destIds);
                             /** Проверка зацикливания */
                             sourcePairs = checkLoops(logger, periodStart, periodEnd,
                                     sourcePairs, sourceClientData.getMode(), sourceClientData.isDeclaration());
@@ -914,6 +936,11 @@ public class SourceServiceImpl implements SourceService {
                         }
                     }
                     if (!sourcePairs.isEmpty()) {
+                        // удаляем(обновляем) инф-ю о консолидации
+                        if (!sourceClientData.isDeclaration())
+                            sourceDao.updateFDConsolidationInfo(sourceIds, destIds);
+                        else
+                            sourceDao.updateDDConsolidationInfo(sourceIds, destIds);
                         List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, oldPeriodStart, oldPeriodEnd);
                         sourceDao.updateAll(sourceObjects, periodStart, periodEnd, sourceClientData.isDeclaration());
                         if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
