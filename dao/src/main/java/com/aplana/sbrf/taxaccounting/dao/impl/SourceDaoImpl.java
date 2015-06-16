@@ -489,7 +489,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     "  JOIN report_period trp ON trp.id = tdrp.report_period_id\n" +
                     "  JOIN tax_period ttp ON ttp.id = trp.tax_period_id\n" +
                     "WHERE dft.id = :source AND (\n" +
-                    "  (:periodStart <= trp.calendar_start_date AND (:periodEnd IS NULL OR NULL >= trp.calendar_start_date)) OR\n" +
+                    "  (:periodStart <= trp.calendar_start_date AND (:periodEnd IS NULL OR :periodEnd >= trp.calendar_start_date)) OR\n" +
                     "  (:periodStart >= trp.calendar_start_date AND :periodStart <= trp.end_date)\n" +
                     ")";
 
@@ -505,8 +505,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     "  JOIN report_period trp ON trp.id = tdrp.report_period_id\n" +
                     "  JOIN tax_period ttp ON ttp.id = trp.tax_period_id\n" +
                     "WHERE dft.id = :source AND (\n" +
-                    "  (:periodStart <= trp.calendar_start_date AND (:periodEnd IS NULL OR NULL >= trp.calendar_start_date)) OR\n" +
-                    "  (:periodStart >= trp.calendar_start_date AND DATE'2015-01-01' <= trp.end_date)\n" +
+                    "  (:periodStart <= trp.calendar_start_date AND (:periodEnd IS NULL OR :periodEnd >= trp.calendar_start_date)) OR\n" +
+                    "  (:periodStart >= trp.calendar_start_date AND :periodStart <= trp.end_date)\n" +
                     ")";
 
     @Override
