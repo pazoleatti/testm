@@ -10,9 +10,15 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -700,4 +706,34 @@ public class ScriptUtilsTest {
         Assert.assertEquals(1, logger.getEntries().size());
         //ScriptUtilsTest.logger.info(logger.getEntries().get(0).getMessage());
     }
+
+    @Test
+    public void checkAndReadFileTest() throws IOException, OpenXML4JException, SAXException {
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(new File("src/test/resources/importFile.xlsm")));
+        List<List<String>> allValues = new ArrayList<List<String>>();
+        List<List<String>> headerValues = new ArrayList<List<String>>();
+        Map<String, Object> paramsMap = new HashMap<String, Object>();
+        paramsMap.put("rowOffset", 0);
+        paramsMap.put("colOffset", 0);
+
+        ScriptUtils.checkAndReadFile(bufferedInputStream, "importFile.xlsm", allValues, headerValues, "№ пп", null, 3, paramsMap);
+
+        Assert.assertEquals("", allValues.get(0).get(4));
+        Assert.assertEquals("", allValues.get(1).get(4));
+        Assert.assertEquals("nameA", allValues.get(2).get(4));
+        Assert.assertEquals("nameB", allValues.get(3).get(4));
+
+        Assert.assertEquals(1000d, ScriptUtils.parseNumber(allValues.get(0).get(5), 1, 1, null, true).doubleValue(), 0);
+
+        Date date1 = new Date(2011 - 1900, 1 - 1, 1);
+        String format = "dd.MM.yyyy";
+        Assert.assertEquals(date1, ScriptUtils.parseDate(allValues.get(0).get(6), format, 1, 1, null, true));
+
+        Assert.assertEquals(11, allValues.size());
+        Assert.assertEquals(9, allValues.get(0).size());
+
+        Assert.assertEquals(3, headerValues.size());
+        Assert.assertEquals(8, headerValues.get(0).size());
+    }
+
 }
