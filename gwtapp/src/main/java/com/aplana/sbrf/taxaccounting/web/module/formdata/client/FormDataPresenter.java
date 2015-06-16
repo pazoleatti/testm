@@ -454,7 +454,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         checkAction.setForce(force);
         checkAction.setSave(save);
-        dispatcher.execute(checkAction, createDataRowResultCallback(force, save, ReportType.CALCULATE_FD));
+        dispatcher.execute(checkAction, createDataRowResultCallback(force, save, ReportType.CHECK_FD));
 	}  	
 	
 	/* (non-Javadoc)
