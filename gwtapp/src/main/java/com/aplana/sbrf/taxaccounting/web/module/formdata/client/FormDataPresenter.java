@@ -985,7 +985,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         final ReportType oldType = timerType;
         TimerTaskAction action = new TimerTaskAction();
         action.setFormDataId(formData.getId());
-        action.setTaxType(formData.getFormType().getTaxType());
         dispatcher.execute(
                 action,
                 CallbackUtils.simpleCallback(
@@ -993,9 +992,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             @Override
                             public void onSuccess(TimerTaskResult result) {
                                 timerType = result.getTaskType();
+                                boolean isUpdate = false;
                                 if (readOnlyMode) {
                                     if (timerType == null
                                             && oldType != null) {
+                                        isUpdate = true;
                                         // задача завершена, обновляем таблицу с данными
                                         switch (oldType) {
                                             case MOVE_FD:
@@ -1007,6 +1008,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         manualMenuPresenter.updateNotificationCount();
                                     } else if (oldType != null && !oldType.equals(timerType)) {
                                         // изменился тип задачи, возможно нужно обновить форму???
+                                        isUpdate = true;
                                         switch (oldType) {
                                             case MOVE_FD:
                                                 revealFormData(true, formData.isManual(), !absoluteView, innerLogUuid);
@@ -1020,23 +1022,22 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     if ((timerType == null || ReportType.EDIT_FD.equals(timerType))
                                             && (oldType != null && !ReportType.EDIT_FD.equals(timerType))) {
                                         // задача завершена, обновляем таблицу с данными
+                                        isUpdate = true;
                                         getView().updateData();
                                         manualMenuPresenter.updateNotificationCount();
                                     } else if (oldType != null && !oldType.equals(timerType)) {
                                         // изменился тип задачи, возможно нужно обновить форму???
+                                        isUpdate = true;
                                         getView().updateData();
                                         manualMenuPresenter.updateNotificationCount();
                                     }
                                 }
-                                if (isForce || !result.getFormMode().equals(formMode))
+                                if (isForce || isUpdate || !result.getFormMode().equals(formMode))
                                     switch (result.getFormMode()) {
                                         case EDIT:
                                             if (readOnlyMode) {
-                                                if (result.isEditMode()) {
-                                                    setLowReadLockedMode(result.getLockedByUser(),
-                                                            result.getLockDate(),
-                                                            result.getTitle(),
-                                                            result.isEditMode());
+                                                if (result.getLockInfo().isEditMode()) {
+                                                    setLowReadLockedMode(result.getLockInfo());
                                                 } else {
                                                     setReadUnlockedMode();
                                                 }
@@ -1046,33 +1047,17 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             break;
                                         case LOCKED_EDIT:
                                             if (readOnlyMode) {
-                                                setLowReadLockedMode(
-                                                        result.getLockedByUser(),
-                                                        result.getLockDate(),
-                                                        result.getTitle(),
-                                                        result.isEditMode());
+                                                setLowReadLockedMode(result.getLockInfo());
                                             } else {
-                                                setLowEditLockedMode(
-                                                        result.getLockedByUser(),
-                                                        result.getLockDate(),
-                                                        result.getTitle());
+                                                setLowEditLockedMode(result.getLockInfo());
                                             }
                                             break;
                                         case LOCKED:
-                                            setReadLockedMode(true,
-                                                    result.getLockedByUser(),
-                                                    result.getLockDate(),
-                                                    result.getTitle(),
-                                                    result.isEditMode());
+                                            setReadLockedMode(true, result.getLockInfo());
                                             break;
                                         case LOCKED_READ:
-                                            setLowReadLockedMode(
-                                                    result.getLockedByUser(),
-                                                    result.getLockDate(),
-                                                    result.getTitle(),
-                                                    result.isEditMode());
+                                            setLowReadLockedMode(result.getLockInfo());
                                             break;
-
                                     }
                                 formMode = result.getFormMode();
                             }

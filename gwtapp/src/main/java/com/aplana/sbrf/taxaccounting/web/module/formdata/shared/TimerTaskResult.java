@@ -15,14 +15,7 @@ public class TimerTaskResult implements Result {
 
     private ReportType taskType;
     private FormMode formMode;
-    private String lockDate;
-    private String lockedByUser;
-    private String title;
-
-    // форма находиться в режиме редактирования(неважно кем)
-    private boolean editMode;
-    // форма заблокирована текущим пользователем
-    private boolean lockedMe;
+    private LockInfo lockInfo;
 
     public ReportType getTaskType() {
         return taskType;
@@ -40,43 +33,11 @@ public class TimerTaskResult implements Result {
         this.formMode = formMode;
     }
 
-    public String getLockDate() {
-        return lockDate;
+    public LockInfo getLockInfo() {
+        return lockInfo;
     }
 
-    public void setLockDate(String lockDate) {
-        this.lockDate = lockDate;
-    }
-
-    public String getLockedByUser() {
-        return lockedByUser;
-    }
-
-    public void setLockedByUser(String lockedByUser) {
-        this.lockedByUser = lockedByUser;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public boolean isEditMode() {
-        return editMode;
-    }
-
-    public void setEditMode(boolean editMode) {
-        this.editMode = editMode;
-    }
-
-    public boolean isLockedMe() {
-        return lockedMe;
-    }
-
-    public void setLockedMe(boolean lockedMe) {
-        this.lockedMe = lockedMe;
+    public void setLockInfo(LockInfo lockInfo) {
+        this.lockInfo = lockInfo;
     }
 }

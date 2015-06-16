@@ -95,7 +95,7 @@ public class ManualMenuView extends AbstractMenuView implements ManualMenuPresen
 
     @Override
     public void updateNotificationCount(int count) {
-        notificationMenuItem.setCount(count);
+        if (notificationMenuItem != null) notificationMenuItem.setCount(count);
     }
 
     @Override
