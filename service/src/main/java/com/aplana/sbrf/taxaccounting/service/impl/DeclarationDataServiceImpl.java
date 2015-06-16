@@ -1015,7 +1015,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), dd.getDepartmentReportPeriodId(), null);
             if (sourceFD==null){
                 DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
-                logger.error(
+                logger.warn(
                         NOT_EXIST_SOURCE_DECLARATION_WARNING,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         formTypeService.get(sourceDFT.getFormTypeId()).getName(),
@@ -1026,7 +1026,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 formatter.format(drp.getCorrectionDate())) : "");
             } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
                 DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
-                logger.error(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
+                logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
                         departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
                         sourceFD.getFormType().getName(),
                         sourceFD.getKind().getName(),
