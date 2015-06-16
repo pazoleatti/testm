@@ -268,19 +268,19 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
             Dialog.warningMessage("Введите дату.");
         } else {
             if (getUiHandlers() != null) {
-                getUiHandlers().onRecalculateClicked(dateBox.getValue(), false);
+                getUiHandlers().onRecalculateClicked(dateBox.getValue(), false, false);
             }
         }
     }
 
 	@UiHandler("acceptButton")
 	public void onAccept(ClickEvent event){
-		getUiHandlers().accept(true, false);
+		getUiHandlers().accept(true, false, false);
 	}
 
 	@UiHandler("cancelButton")
 	public void onCancel(ClickEvent event){
-		getUiHandlers().accept(false, false);
+		getUiHandlers().accept(false, false, false);
 	}
 
 	@UiHandler("deleteButton")

@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -179,8 +181,16 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
             }
         }
         // Запись ошибок в лог при наличии
-        if (!logger.getEntries().isEmpty()) {
-            result.setUuid(logEntryService.save(logger.getEntries()));
+        if (result.isDeclarationFormFound() && action.isFatal()) {
+            logger.logTopMessage(LogLevel.ERROR, "В периоде %s найдены экземпляры налоговых форм/деклараций, " +
+                    "которые используют данные значения формы настроек подразделения. Для удаления данной версии настроек " +
+                    "формы необходимо удалить найденные налоговые формы/декларации:", result.getReportPeriodName());
+            throw new ServiceLoggerException("Настройка не удалена, обнаружены фатальные ошибки!",
+                    logEntryService.save(logger.getEntries()));
+        } else {
+            if (!logger.getEntries().isEmpty()) {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+            }
         }
         return result;
     }

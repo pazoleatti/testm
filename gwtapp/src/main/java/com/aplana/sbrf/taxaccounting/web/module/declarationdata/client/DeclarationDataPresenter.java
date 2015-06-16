@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
@@ -266,7 +267,7 @@ public class DeclarationDataPresenter
 	}
 
 	@Override
-	public void onRecalculateClicked(final Date docDate, final boolean force) {
+	public void onRecalculateClicked(final Date docDate, final boolean force, final boolean cancelTask) {
 		LogCleanEvent.fire(this);
         getView().showNoPdf(!TaxType.DEAL.equals(taxType)?"Заполнение декларации данными":"Заполнение уведомления данными");
         RecalculateDeclarationDataAction action = new RecalculateDeclarationDataAction();
@@ -274,6 +275,7 @@ public class DeclarationDataPresenter
 		action.setDocDate(docDate);
         action.setTaxType(taxType);
         action.setForce(force);
+        action.setCancelTask(cancelTask);
 		dispatcher
 				.execute(
 						action,
@@ -287,7 +289,14 @@ public class DeclarationDataPresenter
                                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                                 @Override
                                                 public void yes() {
-                                                    onRecalculateClicked(docDate, true);
+                                                    onRecalculateClicked(docDate, true, cancelTask);
+                                                }
+                                            });
+                                        } else if (CreateAsyncTaskStatus.EXIST_TASK.equals(result.getStatus()) && !cancelTask) {
+                                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                                @Override
+                                                public void yes() {
+                                                    onRecalculateClicked(docDate, force, true);
                                                 }
                                             });
                                         }
@@ -304,7 +313,7 @@ public class DeclarationDataPresenter
 	}
 
 	@Override
-	public void accept(boolean accepted, final boolean force) {
+	public void accept(boolean accepted, final boolean force, final boolean cancelTask) {
 		if (accepted) {
 			LogCleanEvent.fire(this);
 			AcceptDeclarationDataAction action = new AcceptDeclarationDataAction();
@@ -312,6 +321,7 @@ public class DeclarationDataPresenter
 			action.setDeclarationId(declarationId);
             action.setForce(force);
             action.setTaxType(taxType);
+            action.setCancelTask(cancelTask);
 			dispatcher
 					.execute(
 							action,
@@ -327,7 +337,14 @@ public class DeclarationDataPresenter
                                                 Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                                     @Override
                                                     public void yes() {
-                                                        accept(true, true);
+                                                        accept(true, true, cancelTask);
+                                                    }
+                                                });
+                                            } else if (CreateAsyncTaskStatus.EXIST_TASK.equals(result.getStatus()) && !cancelTask) {
+                                                Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                                                    @Override
+                                                    public void yes() {
+                                                        accept(true, force, true);
                                                     }
                                                 });
                                             }

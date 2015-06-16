@@ -245,45 +245,36 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         action.setReportPeriodId(getView().getReportPeriodId());
         action.setDepartment(getView().getDepartmentId());
         action.setTaxType(getView().getTaxType());
+        action.setFatal(true);
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetCheckDeclarationResult>() {
                             @Override
                             public void onSuccess(final GetCheckDeclarationResult result) {
-                                uuid[0] = result.getUuid();
-                                if (uuid[0] != null) {
-                                    LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, uuid[0]);
-                                }
-                                if (result.isDeclarationFormFound()) {
-                                    Dialog.errorMessage("В периоде " + result.getReportPeriodName() + " найдены экземпляры налоговых форм/деклараций, " +
-                                            "которые используют данные значения формы настроек подразделения. Для удаления данной версии настроек формы необходимо удалить найденные налоговые формы/декларации:");
-                                    LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
-                                } else {
-                                    Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?",
-                                            new DialogHandler() {
-                                                @Override
-                                                public void yes() {
-                                                    super.yes();
-                                                    DeleteConfigPropertyAction action = new DeleteConfigPropertyAction();
-                                                    action.setRefBookId(getCurrentRefBookId());
-                                                    action.setSlaveRefBookId(getCurrentTableRefBookId());
-                                                    action.setReportPeriodId(getView().getReportPeriodId());
-                                                    action.setDepartmentId(getView().getDepartmentId());
-                                                    action.setRows(convert(getView().getTableRows()));
-                                                    action.setRecordId(recordId);
-                                                    action.setNotTableParams(getView().getNonTableParams());
-                                                    dispatcher.execute(action, CallbackUtils
-                                                            .defaultCallback(new AbstractCallback<DeleteConfigPropertyResult>() {
-                                                                @Override
-                                                                public void onSuccess(DeleteConfigPropertyResult result) {
-                                                                    getData();
-                                                                    LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+                                Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?",
+                                        new DialogHandler() {
+                                            @Override
+                                            public void yes() {
+                                                super.yes();
+                                                DeleteConfigPropertyAction action = new DeleteConfigPropertyAction();
+                                                action.setRefBookId(getCurrentRefBookId());
+                                                action.setSlaveRefBookId(getCurrentTableRefBookId());
+                                                action.setReportPeriodId(getView().getReportPeriodId());
+                                                action.setDepartmentId(getView().getDepartmentId());
+                                                action.setRows(convert(getView().getTableRows()));
+                                                action.setRecordId(recordId);
+                                                action.setNotTableParams(getView().getNonTableParams());
+                                                dispatcher.execute(action, CallbackUtils
+                                                        .defaultCallback(new AbstractCallback<DeleteConfigPropertyResult>() {
+                                                            @Override
+                                                            public void onSuccess(DeleteConfigPropertyResult result) {
+                                                                getData();
+                                                                LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
 
-                                                                }
-                                                            }, DepartmentConfigPropertyPresenter.this));
-                                                }
-                                            });
-                                }
+                                                            }
+                                                        }, DepartmentConfigPropertyPresenter.this));
+                                            }
+                                        });
                             }
                         }, this));
 

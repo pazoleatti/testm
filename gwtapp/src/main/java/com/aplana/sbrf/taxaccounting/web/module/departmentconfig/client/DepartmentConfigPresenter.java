@@ -250,6 +250,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         action.setReportPeriodId(period);
         action.setDepartment(department);
         action.setTaxType(getView().getTaxType());
+        action.setFatal(true);
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetCheckDeclarationResult>() {
@@ -297,17 +298,7 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                             @Override
                             public void onSuccess(final GetCheckDeclarationResult result) {
                                 isControlUnp = result.isControlUnp();
-                                uuid[0] = result.getUuid();
-                                if (uuid[0] != null) {
-                                    LogAddEvent.fire(DepartmentConfigPresenter.this, uuid[0]);
-                                }
-                                if (result.isDeclarationFormFound()) {
-                                    Dialog.errorMessage("В периоде " + result.getReportPeriodName() + " найдены экземпляры налоговых форм/деклараций, " +
-                                            "которые используют данные значения формы настроек подразделения. Для удаления данной версии настроек формы необходимо удалить найденные налоговые формы/декларации:");
-                                    LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
-                                } else {
-                                    delete();
-                                }
+                                delete();
                             }
                         }, this));
     }

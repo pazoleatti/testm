@@ -851,6 +851,64 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         reportService.deleteDec(declarationDataId);
     }
 
+    /**
+     * Список операции, по которым требуется удалить блокировку
+     * @param reportType
+     * @return
+     */
+    private ReportType[] getCheckTaskList(ReportType reportType) {
+        switch (reportType) {
+            case XML_DEC:
+                return new ReportType[]{ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC, ReportType.ACCEPT_DEC};
+            case ACCEPT_DEC:
+                return new ReportType[]{ReportType.CHECK_DEC};
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public boolean checkExistTask(long declarationDataId, ReportType reportType, Logger logger) {
+        ReportType[] reportTypes = getCheckTaskList(reportType);
+        if (reportTypes == null) return false;
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        boolean exist = false;
+        for (ReportType reportType1: reportTypes) {
+            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType1));
+            if (lock != null) {
+                exist = true;
+                if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
+                    logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
+                            SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                            taUserService.getUser(lock.getUserId()).getName(),
+                            String.format(reportType1.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
+                } else {
+                    logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
+                            SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                            taUserService.getUser(lock.getUserId()).getName(),
+                            String.format(reportType1.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
+                }
+            }
+        }
+        return exist;
+    }
+
+    @Override
+    public void interruptTask(long declarationDataId, int userId, ReportType reportType) {
+        ReportType[] reportTypes = getCheckTaskList(reportType);
+        if (reportTypes == null) return;
+        for (ReportType reportType1: reportTypes) {
+            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType1));
+            if (lock != null) {
+                lockDataService.interruptTask(lock, userId, true);
+            }
+        }
+        if (ReportType.XML_DEC.equals(reportType)) {
+            reportService.deleteDec(declarationDataId);
+        }
+    }
+
     @Override
     public void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger) {
         List<Integer> ddIds = declarationDataDao.findDDIdsByRangeInReportPeriod(decTemplateId,

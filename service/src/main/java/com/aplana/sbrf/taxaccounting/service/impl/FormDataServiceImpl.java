@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.common.model.UserInfo;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -1260,9 +1261,22 @@ public class FormDataServiceImpl implements FormDataService {
                                     : "");
                     break;
                 case IMPORT_FD:
-                case IMPORT_TF_FD:
                     name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            String.format(reportType.getDescription(), str, formData.getFormType().getTaxType().getTaxText()),
+                            reportType.getDescription(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            department.getName(),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "");
+                    break;
+                case IMPORT_TF_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_IMPORT.getText(),
+                            str,
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
                             department.getName(),
@@ -1825,6 +1839,33 @@ public class FormDataServiceImpl implements FormDataService {
                     return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, fileSize);
                 }
                 return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, fileSize);
+            default:
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+        }
+    }
+
+    @Override
+    public String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo) {
+        FormData formData = formDataDao.get(formDataId, false);
+        switch (reportType) {
+            case EDIT_FD:
+            case CALCULATE_FD:
+            case CONSOLIDATE_FD:
+            case CHECK_FD:
+                return String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText());
+            case IMPORT_FD:
+            case IMPORT_TF_FD:
+                return reportType.getDescription();
+            case MOVE_FD:
+                List<WorkflowMove> workflowMoveList = formDataAccessService.getAvailableMoves(userInfo, formDataId);
+                String moveName = "Подготовка/утверждение/принятие";
+                for (WorkflowMove workflowMove: workflowMoveList) {
+                    if (!workflowMove.isReasonToMoveShouldBeSpecified()) {
+                        moveName = workflowMove.getToState().getActionName();
+                        break;
+                    }
+                }
+                return String.format(reportType.getDescription(), moveName, formData.getFormType().getTaxType().getTaxText());
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }

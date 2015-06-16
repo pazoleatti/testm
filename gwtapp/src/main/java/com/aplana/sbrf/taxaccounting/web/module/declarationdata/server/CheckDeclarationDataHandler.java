@@ -140,14 +140,20 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                 result.setStatus(CreateAsyncTaskStatus.CREATE);
             }
         } else {
+            String taskName;
             LockData lockData = lockDataCalc;
-            if (lockData == null) lockData = lockDataAccept;
+            if (lockData == null) {
+                lockData = lockDataAccept;
+                taskName = String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName());
+            } else {
+                taskName = String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName());
+            }
             logger.error(
                     String.format(
                             LockData.LOCK_CURRENT,
                             sdf.format(lockData.getDateLock()),
                             userService.getUser(lockData.getUserId()).getName(),
-                            lockData.getDescription())
+                            taskName)
             );
             throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), action.getTaxType().getDeclarationShortName());
         }
