@@ -293,7 +293,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	private void validateFormColumns(FormTemplate formTemplate, Logger logger) {
         List<Column> columns = formTemplate.getColumns();
-        Integer formTemplateId = formTemplate.getId();
 
         checkSet.clear();
 
@@ -314,16 +313,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                         + ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
             }
 
-            if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
+            /*if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
 				if (formTemplateDao.checkExistLargeString(formTemplateId, column.getId(), ((StringColumn) column).getMaxLength())) {
 					logger.error("Длина одного из существующих значений графы '" + column.getName() + "' больше указанной длины " + ((StringColumn) column).getPrevLength());
                 }
-            }
+            }*/
         }
     }
 
 	private void validateFormRows(List<DataRow<Cell>> rows, Logger logger) {
-		//TODO: подумать о уникальности порядка строк
 		for (DataRow<Cell> row : rows) {
 			if (row.getAlias() != null && row.getAlias().getBytes().length > DATA_ROW_ALIAS_MAX_VALUE) {
 				logger.error("значение для кода строки \"" + row.getAlias() +

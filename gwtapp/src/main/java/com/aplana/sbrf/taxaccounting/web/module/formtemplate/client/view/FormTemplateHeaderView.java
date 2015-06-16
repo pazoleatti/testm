@@ -232,7 +232,12 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 		while (topRowIndex <= bottomRowIndex) {
 			for (int colIndex = rightColumnIndex; colIndex <= leftColumnIndex; colIndex++) {
 				Element element = DOM.getElementById(CustomTableBuilder.TD + "_" + topRowIndex + "_" + colIndex);
-				DataRow<HeaderCell> currentRow = rows.get(topRowIndex);
+                DataRow<HeaderCell> currentRow;
+				try{
+                    currentRow = rows.get(topRowIndex);
+                } catch (IndexOutOfBoundsException e){
+                    break;
+                }
 				HeaderCell cell = currentRow.getCell(columns.get(colIndex - COLUMN_OFFSET).getAlias());
 
 				if (select) { // выделяем ячейки

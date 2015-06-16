@@ -245,7 +245,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 }
                 DepartmentConfigPropertyView.this.currentReportPeriodId = selPeriodId;
                 editButton.setEnabled(false);
-                getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
+                if (currentReportPeriodId != null && currentDepartmentId != null) {
+                    getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
+                }
             }
         });
 
@@ -321,6 +323,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @Override
     public void setTableColumns(List<RefBookAttribute> attributes) {
+        model.getList().clear();
+        table.redraw();
         removeAllColumns();
 
         checkColumn = new Column<DataRow<Cell>, Boolean>(
