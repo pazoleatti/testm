@@ -1,16 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.FormTemplateRowPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.ui.StyleCellPopup;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.ColumnContext;
+import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.*;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.NativeEvent;
@@ -31,6 +28,9 @@ import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHandlers>
@@ -183,7 +183,12 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 		while (topRowIndex <= bottomRowIndex) {
 			for (int colIndex = rightColumnIndex; colIndex <= leftColumnIndex; colIndex++) {
 				Element element = DOM.getElementById(CustomTableBuilder.TD + "_" + topRowIndex + "_" + colIndex);
-				DataRow<Cell> currentRow = rows.get(topRowIndex);
+				DataRow<Cell> currentRow;
+                try{
+                    currentRow = rows.get(topRowIndex);
+                } catch (IndexOutOfBoundsException e){
+                    break;
+                }
 				Cell cell = currentRow.getCell(columns.get(colIndex - COLUMN_OFFSET).getAlias());
 
 				if (select) { // выделяем ячейки
