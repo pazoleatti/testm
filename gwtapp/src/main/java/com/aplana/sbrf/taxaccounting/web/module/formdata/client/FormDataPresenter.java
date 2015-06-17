@@ -323,7 +323,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             + formData.isManual() + "/"
                                             + absoluteView);
                         } else if (result.isLock()) {
-                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     onPrintExcelClicked(true);
@@ -390,7 +390,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             + formData.isManual() + "/"
                                             + absoluteView);
                         } else if (result.isLock()) {
-                            Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
                                     onPrintCSVClicked(true);
@@ -454,7 +454,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         checkAction.setForce(force);
         checkAction.setSave(save);
-        dispatcher.execute(checkAction, createDataRowResultCallback(force, save, ReportType.CHECK_FD));
+        dispatcher.execute(checkAction, createDataRowResultCallback(force, save, false, ReportType.CHECK_FD));
 	}  	
 	
 	/* (non-Javadoc)
@@ -507,27 +507,28 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
      * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRecalculateClicked()
      */
 	@Override
-	public void onRecalculateClicked(final boolean force, final boolean save) {
+	public void onRecalculateClicked(final boolean force, final boolean save, final boolean cancelTask) {
 		RecalculateDataRowsAction action = new RecalculateDataRowsAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         action.setForce(force);
         action.setSave(save);
-		dispatcher.execute(action, createDataRowResultCallback(force, save, ReportType.CALCULATE_FD));
+        action.setCancelTask(cancelTask);
+		dispatcher.execute(action, createDataRowResultCallback(force, save, cancelTask, ReportType.CALCULATE_FD));
 	}
 
-    private AsyncCallback<TaskFormDataResult> createDataRowResultCallback(final boolean force, final boolean save, final ReportType reportType){
+    private AsyncCallback<TaskFormDataResult> createDataRowResultCallback(final boolean force, final boolean save, final boolean cancelTask, final ReportType reportType){
         AbstractCallback<TaskFormDataResult> callback = new AbstractCallback<TaskFormDataResult>() {
             @Override
             public void onSuccess(TaskFormDataResult result) {
                 innerLogUuid = result.getUuid();
                 if (result.isLock()) {
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                    Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                    Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                         @Override
                         public void yes() {
                             if (ReportType.CALCULATE_FD.equals(reportType)) {
-                                onRecalculateClicked(true, false);
+                                onRecalculateClicked(true, false, cancelTask);
                             } else if (ReportType.CHECK_FD.equals(reportType)) {
                                 onCheckClicked(true, false);
                             }
@@ -540,9 +541,22 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         @Override
                         public void yes() {
                             if (ReportType.CALCULATE_FD.equals(reportType)) {
-                                onRecalculateClicked(force, true);
+                                onRecalculateClicked(force, true, cancelTask);
                             } else if (ReportType.CHECK_FD.equals(reportType)) {
                                 onCheckClicked(force, true);
+                            }
+                        }
+                    });
+                } else if (result.isLockTask()) {
+                    modifiedRows.clear();
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            if (ReportType.CALCULATE_FD.equals(reportType)) {
+                                onRecalculateClicked(force, save, true);
+                            } else if (ReportType.CHECK_FD.equals(reportType)) {
+                                onCheckClicked(force, save);
                             }
                         }
                     });
@@ -661,11 +675,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onConsolidate(final boolean force) {
+    public void onConsolidate(final boolean force, final boolean cancelTask) {
         ConsolidateAction action = new ConsolidateAction();
         action.setManual(formData.isManual());
         action.setFormDataId(formData.getId());
         action.setForce(force);
+        action.setCancelTask(cancelTask);
         action.setTaxType(formData.getFormType().getTaxType());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<ConsolidateResult>() {
             @Override
@@ -676,7 +691,17 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
                         public void yes() {
-                            onConsolidate(true);
+                            onConsolidate(true, cancelTask);
+                        }
+                    });
+                } else if (result.isLockTask()) {
+                    modifiedRows.clear();
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            onConsolidate(force, true);
+
                         }
                     });
                 } else {
@@ -749,27 +774,35 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 }
             }, this));
         } else {
-            goMove(wfMove, false);
+            goMove(wfMove, false, false);
         }
     }
 
-	private void goMove(final WorkflowMove wfMove, final boolean force){
+	private void goMove(final WorkflowMove wfMove, final boolean force, final boolean cancelTask){
 		LogCleanEvent.fire(this);
 		GoMoveAction action = new GoMoveAction();
 		action.setFormDataId(formData.getId());
 		action.setMove(wfMove);
         action.setTaxType(formData.getFormType().getTaxType());
         action.setForce(force);
+        action.setCancelTask(cancelTask);
 		dispatcher.execute(action, CallbackUtils
 				.defaultCallback(new AbstractCallback<GoMoveResult>() {
 					@Override
 					public void onSuccess(GoMoveResult result) {
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         if (result.isLock()) {
+                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    goMove(wfMove, true, cancelTask);
+                                }
+                            });
+                        } else if (result.isLockTask()) {
                             Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                                 @Override
                                 public void yes() {
-                                    goMove(wfMove, true);
+                                    goMove(wfMove, force, true);
                                 }
                             });
                         } else {
@@ -905,7 +938,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         ValueChangeHandler<String> valueChangeHandler = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                onUploadTF(false, false, event.getValue());
+                onUploadTF(false, false, false, event.getValue());
             }
         };
 
@@ -913,7 +946,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         addRegisteredHandler(SetFocus.getType(), this);
     }
 
-    private void onUploadTF(final boolean force, final boolean save, final String uuid) {
+    private void onUploadTF(final boolean force, final boolean save, final boolean cancelTask, final String uuid) {
         final ReportType reportType = ReportType.IMPORT_FD;
         final UploadDataRowsAction action = new UploadDataRowsAction();
         action.setFormData(formData);
@@ -921,6 +954,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setForce(force);
         action.setSave(save);
         action.setUuid(uuid);
+        action.setCancelTask(cancelTask);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<UploadFormDataResult>() {
             @Override
             public void onSuccess(UploadFormDataResult result) {
@@ -930,15 +964,25 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
                         public void yes() {
-                            onUploadTF(true, false, uuid);
+                            onUploadTF(true, false, cancelTask, uuid);
                         }
                     });
                 } else if (result.isSave()) {
                     modifiedRows.clear();
-                    Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
+                    Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                         @Override
                         public void yes() {
-                            onUploadTF(force, true, uuid);
+                            onUploadTF(force, true, cancelTask, uuid);
+                        }
+                    });
+                } else if (result.isLockTask()) {
+                    modifiedRows.clear();
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            onUploadTF(force, save, true, uuid);
+
                         }
                     });
                 } else {

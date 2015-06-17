@@ -28,13 +28,13 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onOriginalVersionClicked();
 
-	void onRecalculateClicked(boolean force, boolean save);
+	void onRecalculateClicked(boolean force, boolean save, boolean cancelTask);
 
-	void onCheckClicked(final boolean force, final boolean save);
+	void onCheckClicked(boolean force, boolean save);
 
 	void onPrintExcelClicked(boolean force);
 
-    void onTimerReport(ReportType reportType, final boolean isTimer);
+    void onTimerReport(ReportType reportType, boolean isTimer);
 
     void onPrintCSVClicked(boolean force);
 
@@ -66,5 +66,5 @@ public interface FormDataUiHandlers extends UiHandlers{
 
     void onCorrectionSwitch();
 
-    void onConsolidate(boolean force);
+    void onConsolidate(boolean force, boolean cancelTask);
 }

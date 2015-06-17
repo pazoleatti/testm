@@ -64,6 +64,10 @@ public class LoadFormDataServiceTest {
     private DepartmentDao departmentDao;
     @Autowired
     private LockDataService lockDataService;
+    @Autowired
+    private LogBusinessService logBusinessService;
+    @Autowired
+    private AuditService auditService;
 
     private static final List<Integer> DEPARTMENT_LIST = Arrays.asList(1, 2, 3, 4, 5);
     private static String FILE_NAME_1 = "____852-4______________147212014__.rnu";
@@ -111,6 +115,8 @@ public class LoadFormDataServiceTest {
         mockFormDataDao();
         mockLockDataService();
         mockFormDataService();
+        mockLogBusinessService();
+        mockAuditService();
         mockSignService();
         mockDepartmentReportPeriodDao();
     }
@@ -189,6 +195,9 @@ public class LoadFormDataServiceTest {
         formTemplate.setMonthly(false);
         formTemplate.setName("template");
         formTemplate.setId(1);
+        FormType formType = new FormType();
+        formType.setName("Тип формы");
+        formTemplate.setType(formType);
         when(formTemplateService.getActiveFormTemplateId(1, 1)).thenReturn(1);
         when(formTemplateService.get(1)).thenReturn(formTemplate);
     }
@@ -197,6 +206,10 @@ public class LoadFormDataServiceTest {
         FormData formData = new FormData();
         formData.setState(WorkflowState.CREATED);
         formData.setId(1L);
+        formData.setKind(FormDataKind.PRIMARY);
+        FormType formType = new FormType();
+        formType.setName("Тип формы");
+        formData.setFormType(formType);
         when(formDataDao.get(1L, false)).thenReturn(formData);
         when(formDataDao.find(1, FormDataKind.PRIMARY, 1, null)).thenReturn(formData);
     }
@@ -208,7 +221,16 @@ public class LoadFormDataServiceTest {
 
     private void mockFormDataService() {
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(Integer.class))).thenReturn(1L);
+                eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
+    }
+
+    private void mockAuditService() {
+        doNothing().when(auditService).add(any(FormDataEvent.class), any(TAUserInfo.class), anyInt(), anyInt(), anyString(),
+                anyString(), anyInt(), anyString(), anyString());
+    }
+
+    private void mockLogBusinessService() {
+        doNothing().when(logBusinessService).add(anyLong(), anyLong(), any(TAUserInfo.class), any(FormDataEvent.class), anyString());
     }
 
     private void mockSignService() {
@@ -350,7 +372,7 @@ public class LoadFormDataServiceTest {
 
         FormDataService formDataService = mock(FormDataService.class);
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(Integer.class))).thenReturn(1L);
+                eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
 
         doThrow(new RuntimeException("Test RuntimeException")).when(formDataService).importFormData(any(Logger.class), any(TAUserInfo.class),
                 any(Long.class), any(Boolean.class), any(InputStream.class), anyString(), any(FormDataEvent.class));

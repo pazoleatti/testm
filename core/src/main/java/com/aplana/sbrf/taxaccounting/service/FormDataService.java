@@ -23,10 +23,11 @@ public interface FormDataService {
      * @param departmentReportPeriodId Отчетный период подразделения
      * @param kind Тип НФ
      * @param periodOrder Номер месяца для ежемесячных форм (для остальных параметр отсутствует)
+     * @param importFormData флаг создания при загрузке
      * @return Id НФ
      */
     long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
-                        FormDataKind kind, Integer periodOrder);
+                        FormDataKind kind, Integer periodOrder, boolean importFormData);
 
     /**
      * Создает версию ручного ввода
@@ -398,7 +399,7 @@ public interface FormDataService {
      * @param logger
      * @param reportType тип текущей операции
      */
-    void locked(LockData lockData, Logger logger, ReportType reportType);
+    void locked(long formDataId, ReportType reportType, LockData lockData, Logger logger);
 
     /**
      * Проверка возможности изменения НФ
@@ -427,4 +428,22 @@ public interface FormDataService {
      * @return
      */
     String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo);
+
+    /**
+     * Проверяет существование операции, по которым требуется удалить блокировку
+     * @param formDataId
+     * @param reportType
+     * @param logger
+     * @param userInfo
+     * @return
+     */
+    boolean checkExistTask(long formDataId, boolean manual, ReportType reportType, Logger logger, TAUserInfo userInfo);
+
+    /**
+     * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
+     * @param formDataId
+     * @param reportType
+     * @param userId
+     */
+    void interruptTask(long formDataId, boolean manual, int userId, ReportType reportType);
 }

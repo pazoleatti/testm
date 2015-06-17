@@ -123,7 +123,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 
                 int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());
                 long formDataId = formDataService.createFormData(logger, userInfo, templateId, departmentReportPeriod.getId(),
-                        kind, action.getMonthId());
+                        kind, action.getMonthId(), false);
 
                 // Если декларация является приемником и есть форма ручного ввода в корректируемом периоде
                 List<FormData> manualInputForms = formDataService.getManualInputForms(

@@ -18,6 +18,7 @@ public class RecalculateDataRowsAction extends UnsecuredActionImpl<TaskFormDataR
 
     private boolean force;
     private boolean save;
+    private boolean cancelTask;
 
     private List<DataRow<Cell>> modifiedRows;
     private FormData formData;
@@ -52,6 +53,14 @@ public class RecalculateDataRowsAction extends UnsecuredActionImpl<TaskFormDataR
 
     public void setFormData(FormData formData) {
         this.formData = formData;
+    }
+
+    public boolean isCancelTask() {
+        return cancelTask;
+    }
+
+    public void setCancelTask(boolean cancelTask) {
+        this.cancelTask = cancelTask;
     }
 
     @Override

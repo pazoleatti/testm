@@ -13,6 +13,8 @@ public class UploadFormDataResult implements Result {
     private String uuid;
     private boolean lock;
     private boolean save;
+    private boolean lockTask;
+    private String restartMsg;
 
     public String getUuid() {
         return uuid;
@@ -36,5 +38,21 @@ public class UploadFormDataResult implements Result {
 
     public void setSave(boolean save) {
         this.save = save;
+    }
+
+    public boolean isLockTask() {
+        return lockTask;
+    }
+
+    public void setLockTask(boolean lockTask) {
+        this.lockTask = lockTask;
+    }
+
+    public String getRestartMsg() {
+        return restartMsg;
+    }
+
+    public void setRestartMsg(String restartMsg) {
+        this.restartMsg = restartMsg;
     }
 }
