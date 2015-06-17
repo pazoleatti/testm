@@ -261,7 +261,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showSaveCancelPanel(false, readOnlyMode);
         view.showEditModeLabel(false);
         view.showAddRemoveRowsBlock(false);
-        view.showConsolidation(WorkflowState.ACCEPTED != formData.getState()
+        view.showConsolidation(!lockInfo.isEditMode() && WorkflowState.ACCEPTED != formData.getState()
                 &&
                 (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind())
                 &&

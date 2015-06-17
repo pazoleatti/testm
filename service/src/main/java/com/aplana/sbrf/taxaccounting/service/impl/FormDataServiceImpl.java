@@ -729,12 +729,6 @@ public class FormDataServiceImpl implements FormDataService {
      */
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-        // Форма не должна быть заблокирована даже текущим пользователем
-        String lockKey = generateTaskKey(formDataId, ReportType.EDIT_FD);
-        //checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
-        //Проверяем не заблокирована ли нф операцией загрузки в нее
-        //checkLockedByImport(formDataId, logger);
-
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
@@ -747,71 +741,52 @@ public class FormDataServiceImpl implements FormDataService {
 
         FormData formData = formDataDao.get(formDataId, manual);
         dataRowDao.createTemporary(formData);
-        List<String> lockedObjects = new ArrayList<String>();
-        try {
-            switch (workflowMove){
-                case PREPARED_TO_APPROVED:
-                    lockForm(lockedObjects, userInfo, lockKey, logger, formData);
-                    //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
-                    checkReferenceValues(logger, formData, false);
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                case CREATED_TO_PREPARED:
-                case APPROVED_TO_ACCEPTED:
-                case PREPARED_TO_ACCEPTED:
-                case CREATED_TO_ACCEPTED:
-                    lockForm(lockedObjects, userInfo, lockKey, logger, formData);
-                    //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
-                    checkReferenceValues(logger, formData, false);
-                    checkConsolidateFromSources(formData, logger);
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                case APPROVED_TO_CREATED:
-                case ACCEPTED_TO_APPROVED:
-                case ACCEPTED_TO_PREPARED:
-                case ACCEPTED_TO_CREATED:
-                    sourceService.updateFDDDConsolidation(formDataId);
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                default:
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-            }
-        } finally {
-            for (String lock : lockedObjects) {
-                lockService.unlock(lock, userInfo.getUser().getId());
-            }
+        switch (workflowMove){
+            case PREPARED_TO_APPROVED:
+                lockForm(logger, formData);
+                //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                checkReferenceValues(logger, formData, false);
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            case CREATED_TO_PREPARED:
+            case APPROVED_TO_ACCEPTED:
+            case PREPARED_TO_ACCEPTED:
+            case CREATED_TO_ACCEPTED:
+                lockForm(logger, formData);
+                //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                checkReferenceValues(logger, formData, false);
+                checkConsolidateFromSources(formData, logger);
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            case APPROVED_TO_CREATED:
+            case ACCEPTED_TO_APPROVED:
+            case ACCEPTED_TO_PREPARED:
+            case ACCEPTED_TO_CREATED:
+                sourceService.updateFDDDConsolidation(formDataId);
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            default:
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
         }
     }
 
-    private void lockForm(List<String> listWithLocks, TAUserInfo userInfo, String lockKey, Logger logger, FormData formData){
-        //Устанавливаем блокировку на текущую нф
-        int userId = userInfo.getUser().getId();
-        checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
-        LockData lockData = lockService.lock(lockKey, userId, getFormDataFullName(formData.getId(), null, null),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-        if (lockData == null) {
-            //Блокировка установлена
-            listWithLocks.add(lockKey);
-            //Проверяем блокировку необходимых справочников. Их не должно быть
-            for (Column column : formData.getFormColumns()) {
-                if (ColumnType.REFBOOK.equals(column.getColumnType())) {
-                    Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
-                    if (attributeId != null) {
-                        RefBook refBook = refBookDao.getByAttribute(attributeId);
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-                        if (lockService.isLockExists(referenceLockKey, false)) {
-                            throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
-                                    logEntryService.save(logger.getEntries()));
-                        }
+    private void lockForm(Logger logger, FormData formData){
+        //Проверяем блокировку необходимых справочников. Их не должно быть
+        for (Column column : formData.getFormColumns()) {
+            if (ColumnType.REFBOOK.equals(column.getColumnType())) {
+                Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
+                if (attributeId != null) {
+                    RefBook refBook = refBookDao.getByAttribute(attributeId);
+                    String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
+                    if (lockService.isLockExists(referenceLockKey, false)) {
+                        throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
+                                logEntryService.save(logger.getEntries()));
                     }
                 }
             }
-        } else {
-            throw new ServiceLoggerException(LOCK_MESSAGE,
-                    logEntryService.save(logger.getEntries()));
         }
     }
 
