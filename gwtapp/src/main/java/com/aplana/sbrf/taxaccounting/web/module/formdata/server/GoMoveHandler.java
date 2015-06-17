@@ -154,7 +154,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                     }
             }
         } else {
-            formDataService.locked(action.getFormDataId(), reportType, lockType.getSecond(), logger);
+            formDataService.locked(action.getFormDataId(), reportType, lockType, logger);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

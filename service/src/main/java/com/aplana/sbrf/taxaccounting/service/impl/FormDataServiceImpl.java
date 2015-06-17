@@ -1733,8 +1733,8 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void locked(long formDataId, ReportType reportType, LockData lockData, Logger logger) {
-        TAUser user = userService.getUser(lockData.getUserId());
+    public void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger) {
+        TAUser user = userService.getUser(lockType.getSecond().getUserId());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(user);
         String msg = "";
@@ -1744,17 +1744,17 @@ public class FormDataServiceImpl implements FormDataService {
                         String.format(
                                 LOCK_CURRENT_1,
                                 user.getName(),
-                                SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
-                                lockData.getDescription())
+                                SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
+                                getTaskName(lockType.getFirst(), formDataId, userInfo))
                 );
                 break;
             default:
                 logger.error(
                         String.format(
                                 LockData.LOCK_CURRENT,
-                                SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
+                                SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
                                 user.getName(),
-                                lockData.getDescription())
+                                getTaskName(lockType.getFirst(), formDataId, userInfo))
                 );
         }
         switch (reportType) {
@@ -1766,13 +1766,13 @@ public class FormDataServiceImpl implements FormDataService {
                 msg = "Для текущего экземпляра налоговой формы запущены операции, при которых ее проверка невозможна";
                 break;
             case MOVE_FD:
-                msg = String.format("Для текущего экземпляра налоговой формы запущены операции, при которых его подготовка/утверждение/принятие невозможно", "".toLowerCase(new Locale("ru", "RU")));
+                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых изменение его состояния невозможно";
                 break;
             case CALCULATE_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), lockData.getDescription());
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
                 break;
             case IMPORT_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", getTaskName(reportType, formDataId, userInfo), lockData.getDescription());
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
                 break;
             case CONSOLIDATE_FD:
                 msg = "";
