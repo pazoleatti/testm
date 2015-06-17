@@ -139,7 +139,8 @@ public class MappingServiceImpl implements MappingService {
                         formTemplateId,
                         departmentReportPeriod.getId(),
                         FormDataKind.PRIMARY,
-                        periodOrder);
+                        periodOrder,
+                        false);
 
                 // Вызов скрипта
                 formDataService.lock(formDataId, userInfo);

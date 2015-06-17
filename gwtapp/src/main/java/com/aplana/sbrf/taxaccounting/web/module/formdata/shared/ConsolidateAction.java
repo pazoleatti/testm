@@ -11,6 +11,7 @@ public class ConsolidateAction extends UnsecuredActionImpl<ConsolidateResult> {
     private TaxType taxType;
     private boolean manual;
     private boolean force;
+    private boolean cancelTask;
 
     public boolean isManual() {
         return manual;
@@ -42,5 +43,13 @@ public class ConsolidateAction extends UnsecuredActionImpl<ConsolidateResult> {
 
     public void setForce(boolean force) {
         this.force = force;
+    }
+
+    public boolean isCancelTask() {
+        return cancelTask;
+    }
+
+    public void setCancelTask(boolean cancelTask) {
+        this.cancelTask = cancelTask;
     }
 }

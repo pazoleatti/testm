@@ -67,9 +67,8 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
         Map<String, Object> params = new HashMap<String, Object>();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        LockData lockDataCalc = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC));
         LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.ACCEPT_DEC));
-        if (lockDataCalc == null && lockDataAccept == null) {
+        if (lockDataAccept == null) {
             String keyAccept = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.ACCEPT_DEC);
             if (lockDataService.getLock(keyAccept) == null) {
                 String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
@@ -140,20 +139,12 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                 result.setStatus(CreateAsyncTaskStatus.CREATE);
             }
         } else {
-            String taskName;
-            LockData lockData = lockDataCalc;
-            if (lockData == null) {
-                lockData = lockDataAccept;
-                taskName = String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName());
-            } else {
-                taskName = String.format(ReportType.XML_DEC.getDescription(), action.getTaxType().getDeclarationShortName());
-            }
             logger.error(
                     String.format(
                             LockData.LOCK_CURRENT,
-                            sdf.format(lockData.getDateLock()),
-                            userService.getUser(lockData.getUserId()).getName(),
-                            taskName)
+                            sdf.format(lockDataAccept.getDateLock()),
+                            userService.getUser(lockDataAccept.getUserId()).getName(),
+                            String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName()))
             );
             throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), action.getTaxType().getDeclarationShortName());
         }

@@ -8,6 +8,7 @@ public class CreateReportResult implements Result {
     private boolean existReport = false;
     private boolean lock;
     private String uuid;
+    private String restartMsg;
 
     public boolean isExistReport() {
         return existReport;
@@ -31,5 +32,13 @@ public class CreateReportResult implements Result {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getRestartMsg() {
+        return restartMsg;
+    }
+
+    public void setRestartMsg(String restartMsg) {
+        this.restartMsg = restartMsg;
     }
 }

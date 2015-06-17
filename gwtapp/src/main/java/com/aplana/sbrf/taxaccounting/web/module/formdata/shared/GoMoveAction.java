@@ -16,6 +16,7 @@ public class GoMoveAction extends UnsecuredActionImpl<GoMoveResult> implements A
 	private String reasonToWorkflowMove;
     private TaxType taxType;
     private boolean force;
+    private boolean cancelTask;
 
 	public String getReasonToWorkflowMove() {
 		return reasonToWorkflowMove;
@@ -48,6 +49,12 @@ public class GoMoveAction extends UnsecuredActionImpl<GoMoveResult> implements A
     }
     public void setForce(boolean force) {
         this.force = force;
+    }
+    public boolean isCancelTask() {
+        return cancelTask;
+    }
+    public void setCancelTask(boolean cancelTask) {
+        this.cancelTask = cancelTask;
     }
 
     @Override

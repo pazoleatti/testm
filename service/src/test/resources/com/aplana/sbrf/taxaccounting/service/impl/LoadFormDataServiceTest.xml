@@ -32,6 +32,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.core.api.LockDataService"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogBusinessService"/>
+    </bean>
 
     <bean id="loadFormDataService" class="com.aplana.sbrf.taxaccounting.service.impl.LoadFormDataServiceImpl"/>
 
