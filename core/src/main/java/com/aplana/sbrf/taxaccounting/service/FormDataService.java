@@ -53,7 +53,7 @@ public interface FormDataService {
      * 
      * TODO (sgoryachkin) заменить параметры is и fileName на uid блоба
      */
-    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream is, String fileName);
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream is, String fileName, LockStateLogger stateLogger);
 
     /**
      * Метод для импорта данных из модуля миграции

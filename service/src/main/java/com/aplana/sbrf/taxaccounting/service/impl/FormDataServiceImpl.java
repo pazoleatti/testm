@@ -180,24 +180,21 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
-        loadFormData(logger, userInfo, formDataId, isManual, false, inputStream, fileName, formDataEvent);
+        loadFormData(logger, userInfo, formDataId, isManual, false, inputStream, fileName, formDataEvent, null);
     }
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
-        String key = generateTaskKey(formDataId, ReportType.IMPORT_FD);
-        log.info(String.format("Начался импорт excel-файла в налоговую форму по ключу %s", key));
-        loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT);
-        log.info(String.format("Закончился импорт excel-файла в налоговую форму по ключу %s", key));
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName, LockStateLogger stateLogger) {
+        loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT, stateLogger);
     }
 
     @Override
     @Transactional
     public void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, false, false, inputStream, fileName, FormDataEvent.MIGRATION);
+        loadFormData(logger, userInfo, formDataId, false, false, inputStream, fileName, FormDataEvent.MIGRATION, null);
     }
 
-    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, boolean isInner, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, boolean isInner, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger) {
         String key = generateTaskKey(formDataId, ReportType.EDIT_FD);
 
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
@@ -208,6 +205,9 @@ public class FormDataServiceImpl implements FormDataService {
 
         try {
             log.info(String.format("Создание временного файла: %s", key));
+            if (stateLogger != null) {
+                stateLogger.updateState("Создание временного файла");
+            }
             dataFile = File.createTempFile("dataFile", ".original");
             dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
             IOUtils.copy(inputStream, dataFileOutputStream);
@@ -215,7 +215,6 @@ public class FormDataServiceImpl implements FormDataService {
 
             String ext = getFileExtention(fileName);
 
-            log.info(String.format("Проверка ЭЦП: %s", key));
             // Проверка ЭЦП
             // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
             boolean check = false;
@@ -226,6 +225,7 @@ public class FormDataServiceImpl implements FormDataService {
                     List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
                     if (paramList != null) { // Необходимо проверить подпись
                         try {
+                            log.info(String.format("Проверка ЭЦП: %s", key));
                             check = signService.checkSign(dataFile.getAbsolutePath(), 0);
                         } catch (Exception e) {
                             logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
@@ -248,17 +248,21 @@ public class FormDataServiceImpl implements FormDataService {
                 Map<String, Object> additionalParameters = new HashMap<String, Object>();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
-                log.info(String.format("Выполнение скрипта началось: %s", key));
+                if (stateLogger != null) {
+                    stateLogger.updateState("Импорт XLSX-файла");
+                }
+                log.info(String.format("Выполнение скрипта: %s", key));
                 dataRowDao.createTemporary(fd);
                 formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-                log.info(String.format("Выполнение скрипта закончилось: %s", key));
                 IOUtils.closeQuietly(dataFileInputStream);
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                log.info(String.format("Сохранение ошибок началось: %s", key));
+                if (stateLogger != null) {
+                    stateLogger.updateState("Сохранение ошибок");
+                }
+                log.info(String.format("Сохранение ошибок: %s", key));
                 String uuid = logEntryService.save(logger.getEntries());
-                log.info(String.format("Сохранение ошибок закончилось: %s", key));
                 throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
             } else if (isInner) {
                 logger.info("Данные загружены");
