@@ -82,8 +82,10 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                     lockDataService.interruptTask(lockDataTask, userInfo.getUser().getId(), false);
                 } else {
                     result.setLock(true);
-                    lockDataService.lockInfo(lockDataTask, logger);
-                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    String restartMsg = (lockDataTask.getState().equals(LockData.State.IN_QUEUE.getText())) ?
+                            String.format(LockData.CANCEL_MSG, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)) :
+                            String.format(LockData.RESTART_MSG, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo));
+                    result.setRestartMsg(restartMsg);
                     return result;
                 }
             } else if (lockDataTask != null) {

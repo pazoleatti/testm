@@ -86,32 +86,34 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             lockDataService.interruptTask(lockDataTask, userInfo.getUser().getId(), false);
                         } else {
                             result.setLock(true);
-                            lockDataService.lockInfo(lockType.getSecond(), logger);
-                            result.setUuid(logEntryService.save(logger.getEntries()));
+                            String restartMsg = (lockType.getSecond().getState().equals(LockData.State.IN_QUEUE.getText())) ?
+                                    String.format(LockData.CANCEL_MSG, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)) :
+                                    String.format(LockData.RESTART_MSG, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo));
+                            result.setRestartMsg(restartMsg);
                             return result;
                         }
                     } else if (lockDataTask != null) {
                         try {
                             lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                             logger.info(String.format(LockData.LOCK_INFO_MSG,
-                                    String.format(reportType.getDescription(), action.getMove().getToState().getActionName(), action.getTaxType().getTaxText()),
+                                    formDataService.getTaskName(reportType, action.getFormDataId(), userInfo),
                                     sdf.format(lockDataTask.getDateLock()),
                                     userService.getUser(lockDataTask.getUserId()).getName()));
                         } catch (ServiceException e) {
                         }
                         result.setLock(false);
-                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getMove().getToState().getActionName(), action.getTaxType().getTaxText());
+                        logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)));
                         result.setUuid(logEntryService.save(logger.getEntries()));
                         return result;
                     }
-                    if (lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                    if (!action.isCancelTask() && formDataService.checkExistTask(action.getFormDataId(), false, reportType, logger, userInfo)) {
+                        result.setLockTask(true);
+                    } else if (lockDataService.lock(keyTask, userInfo.getUser().getId(),
                             formDataService.getFormDataFullName(action.getFormDataId(), action.getMove().getToState().getActionName(), reportType),
                             LockData.State.IN_QUEUE.getText(),
                             lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                         try {
-                            List<ReportType> reportTypes = new ArrayList<ReportType>();
-                            reportTypes.add(ReportType.CHECK_FD);
-                            formDataService.interruptTask(action.getFormDataId(), userInfo, reportTypes);
+                            formDataService.interruptTask(action.getFormDataId(), false, userInfo.getUser().getId(), reportType);
                             Map<String, Object> params = new HashMap<String, Object>();
                             params.put("formDataId", action.getFormDataId());
                             params.put("workflowMoveId", action.getMove().getId());
@@ -122,7 +124,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                             BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                             lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant);
-                            logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getMove().getToState().getActionName(), action.getTaxType().getTaxText());
+                            logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)));
                             result.setLock(false);
                         } catch (Exception e) {
                             lockDataService.unlock(keyTask, userInfo.getUser().getId());
@@ -152,7 +154,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                     }
             }
         } else {
-            formDataService.locked(lockType.getSecond(), logger, reportType);
+            formDataService.locked(action.getFormDataId(), reportType, lockType.getSecond(), logger);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

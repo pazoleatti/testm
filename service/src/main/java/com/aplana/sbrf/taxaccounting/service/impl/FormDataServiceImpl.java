@@ -59,6 +59,8 @@ public class FormDataServiceImpl implements FormDataService {
 
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+    private static final SimpleDateFormat SDF_DD_MM_YYYY_HH_MM_SS = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
     private static final Calendar CALENDAR = Calendar.getInstance();
     private static final Date MAX_DATE;
     static {
@@ -1634,7 +1636,7 @@ public class FormDataServiceImpl implements FormDataService {
             logger.error("\"%s\" пользователем \"%s\" запущена операция \"%s\"",
                     SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
                     userService.getUser(lockType.getSecond().getUserId()).getName(),
-                    lockType.getSecond().getDescription());
+                    getTaskName(lockType.getFirst(), formDataId, userInfo));
             throw new ServiceLoggerException(LOCK_MESSAGE_TASK,
                     logEntryService.save(logger.getEntries()), taskName);
         }
@@ -1653,23 +1655,30 @@ public class FormDataServiceImpl implements FormDataService {
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
     }
 
+    private List<String> generateReportKeys(ReportType reportType, long formDataId, Boolean manual) {
+        List<String> lockKeys = new ArrayList<String>();
+        boolean[] b = {false, true};
+        for (boolean showChecked : b) {
+            for(boolean saved : b) {
+                if (manual != null) {
+                    lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved));
+                } else {
+                    for(boolean manual1: b) {
+                        lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual1, saved));
+                    }
+                }
+            }
+        }
+        return lockKeys;
+    }
+
     @Override
     public void deleteReport(long formDataId, Boolean manual, int userId) {
         List<String> lockKeys = new ArrayList<String>();
         boolean[] b = {false, true};
         ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
         for (ReportType reportType: reportTypes) {
-            for (boolean showChecked : b) {
-                for(boolean saved : b) {
-                    if (manual != null) {
-                        lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved));
-                    } else {
-                        for(boolean manual1: b) {
-                            lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual1, saved));
-                        }
-                    }
-                }
-            }
+            lockKeys.addAll(generateReportKeys(reportType, formDataId, manual));
         }
         lockService.interuptAllTasks(lockKeys, userId);
         reportService.delete(formDataId, manual);
@@ -1724,8 +1733,10 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void locked(LockData lockData, Logger logger, ReportType reportType) {
+    public void locked(long formDataId, ReportType reportType, LockData lockData, Logger logger) {
         TAUser user = userService.getUser(lockData.getUserId());
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(user);
         String msg = "";
         switch (reportType) {
             case CONSOLIDATE_FD:
@@ -1758,10 +1769,10 @@ public class FormDataServiceImpl implements FormDataService {
                 msg = String.format("Для текущего экземпляра налоговой формы запущены операции, при которых его подготовка/утверждение/принятие невозможно", "".toLowerCase(new Locale("ru", "RU")));
                 break;
             case CALCULATE_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", String.format(reportType.getDescription(),"налоговой "), lockData.getDescription());
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), lockData.getDescription());
                 break;
             case IMPORT_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", reportType.getDescription(), lockData.getDescription());
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", getTaskName(reportType, formDataId, userInfo), lockData.getDescription());
                 break;
             case CONSOLIDATE_FD:
                 msg = "";
@@ -1825,7 +1836,7 @@ public class FormDataServiceImpl implements FormDataService {
                         cellCountSource += rowCountSource * columnCountSource;
                     }
                 }
-                AsyncTaskTypeData taskTypeConsolidate= asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                AsyncTaskTypeData taskTypeConsolidate = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
                 if (cellCountSource < taskTypeConsolidate.getShortQueueLimit()) {
                     return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountSource);
                 }
@@ -1855,21 +1866,107 @@ public class FormDataServiceImpl implements FormDataService {
             case CONSOLIDATE_FD:
             case CHECK_FD:
                 return String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText());
+            case EXCEL:
+            case CSV:
             case IMPORT_FD:
             case IMPORT_TF_FD:
-                return reportType.getDescription();
             case MOVE_FD:
-                List<WorkflowMove> workflowMoveList = formDataAccessService.getAvailableMoves(userInfo, formDataId);
-                String moveName = "Подготовка/утверждение/принятие";
-                for (WorkflowMove workflowMove: workflowMoveList) {
-                    if (!workflowMove.isReasonToMoveShouldBeSpecified()) {
-                        moveName = workflowMove.getToState().getActionName();
-                        break;
-                    }
-                }
-                return String.format(reportType.getDescription(), moveName, formData.getFormType().getTaxType().getTaxText());
+                return reportType.getDescription();
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+        }
+    }
+
+    /**
+     * Список операции, по которым требуется удалить блокировку
+     * @param reportType
+     * @return
+     */
+    private ReportType[] getCheckTaskList(ReportType reportType) {
+        switch (reportType) {
+            case CONSOLIDATE_FD:
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.IMPORT_TF_FD, ReportType.EXCEL, ReportType.CSV};
+            case CALCULATE_FD:
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
+            case IMPORT_FD:
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
+            case MOVE_FD:
+                return new ReportType[]{ReportType.CHECK_FD};
+            case CHECK_FD:
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public boolean checkExistTask(long formDataId, boolean manual, ReportType reportType, Logger logger, TAUserInfo userInfo) {
+        ReportType[] reportTypes = getCheckTaskList(reportType);
+        if (reportTypes == null) return false;
+        boolean exist = false;
+        Boolean manualReport;
+        switch (reportType) {
+            case CALCULATE_FD:
+            case IMPORT_FD:
+                manualReport = manual;
+                break;
+            default:
+                manualReport = null;
+        }
+        for (ReportType reportType1: reportTypes) {
+            List<String> taskKeyList = new ArrayList<String>();
+            if (ReportType.CSV.equals(reportType1) || ReportType.EXCEL.equals(reportType1)) {
+                taskKeyList.addAll(generateReportKeys(reportType1, formDataId, manualReport));
+            } else {
+                taskKeyList.add(generateTaskKey(formDataId, reportType1));
+            }
+            for(String key: taskKeyList) {
+                LockData lock = lockService.getLock(key);
+                if (lock != null) {
+                    exist = true;
+                    if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
+                        logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
+                                SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                                userService.getUser(lock.getUserId()).getName(),
+                                getTaskName(reportType1, formDataId, userInfo));
+                    } else {
+                        logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
+                                SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                                userService.getUser(lock.getUserId()).getName(),
+                                getTaskName(reportType1, formDataId, userInfo));
+                    }
+                }
+            }
+        }
+        return exist;
+    }
+
+    @Override
+    public void interruptTask(long formDataId, boolean manual, int userId, ReportType reportType) {
+        ReportType[] reportTypes = getCheckTaskList(reportType);
+        if (reportTypes == null) return;
+        Boolean manualReport;
+        switch (reportType) {
+            case CALCULATE_FD:
+            case IMPORT_FD:
+                manualReport = manual;
+                break;
+            default:
+                manualReport = null;
+        }
+        for (ReportType reportType1: reportTypes) {
+            List<String> taskKeyList = new ArrayList<String>();
+            if (ReportType.CSV.equals(reportType1) || ReportType.EXCEL.equals(reportType1)) {
+                taskKeyList.addAll(generateReportKeys(reportType1, formDataId, manualReport));
+                reportService.delete(formDataId, manual);
+            } else {
+                taskKeyList.add(generateTaskKey(formDataId, reportType1));
+            }
+            for(String key: taskKeyList) {
+                LockData lock = lockService.getLock(key);
+                if (lock != null) {
+                    lockService.interruptTask(lock, userId, true);
+                }
+            }
         }
     }
 }

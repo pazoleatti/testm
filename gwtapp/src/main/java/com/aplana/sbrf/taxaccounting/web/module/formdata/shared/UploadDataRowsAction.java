@@ -16,6 +16,7 @@ public class UploadDataRowsAction extends UnsecuredActionImpl<UploadFormDataResu
     private String uuid;
     private boolean force;
     private boolean save;
+    private boolean cancelTask;
 
     private List<DataRow<Cell>> modifiedRows;
     private FormData formData;
@@ -58,6 +59,14 @@ public class UploadDataRowsAction extends UnsecuredActionImpl<UploadFormDataResu
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public boolean isCancelTask() {
+        return cancelTask;
+    }
+
+    public void setCancelTask(boolean cancelTask) {
+        this.cancelTask = cancelTask;
     }
 
     @Override

@@ -399,7 +399,7 @@ public interface FormDataService {
      * @param logger
      * @param reportType тип текущей операции
      */
-    void locked(LockData lockData, Logger logger, ReportType reportType);
+    void locked(long formDataId, ReportType reportType, LockData lockData, Logger logger);
 
     /**
      * Проверка возможности изменения НФ
@@ -428,4 +428,22 @@ public interface FormDataService {
      * @return
      */
     String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo);
+
+    /**
+     * Проверяет существование операции, по которым требуется удалить блокировку
+     * @param formDataId
+     * @param reportType
+     * @param logger
+     * @param userInfo
+     * @return
+     */
+    boolean checkExistTask(long formDataId, boolean manual, ReportType reportType, Logger logger, TAUserInfo userInfo);
+
+    /**
+     * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
+     * @param formDataId
+     * @param reportType
+     * @param userId
+     */
+    void interruptTask(long formDataId, boolean manual, int userId, ReportType reportType);
 }

@@ -528,7 +528,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("recalculateButton")
 	void onRecalculateButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onRecalculateClicked(false, false);
+			getUiHandlers().onRecalculateClicked(false, false, false);
 		}
 	}
 
@@ -579,7 +579,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("consolidationButton")
     void onConsolidationButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onConsolidate(false);
+            getUiHandlers().onConsolidate(false, false);
         }
     }
 
