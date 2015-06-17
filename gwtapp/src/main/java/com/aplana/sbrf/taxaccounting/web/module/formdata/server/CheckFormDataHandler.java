@@ -111,7 +111,6 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     if (action.isSave()) {
                         // сохраняем данные при нажантии "Да"
                         formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-                        dataRowService.createTemporary(formData);
                     } else {
                         lockDataService.unlock(keyTask, userInfo.getUser().getId());
                         // Вызов диалога, для подтверждения сохранения данных

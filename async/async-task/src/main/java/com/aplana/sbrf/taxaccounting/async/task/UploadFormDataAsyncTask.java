@@ -88,6 +88,8 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                 logger);
         BlobData blobData = blobDataService.get(uuid);
 
+        logger.info("Создание временного среза для нф "+formDataId);
+        dataRowService.createTemporary(formData);
         logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
         //Парсит загруженный в фаловое хранилище xls-файл
         formDataService.importFormData(logger, userInfo,
@@ -97,6 +99,8 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                         lockService.updateState(lock, lockDate, state);
                     }
                 });
+        // восстанавливаем временный срез, чтобы продолжить редактирование
+        dataRowService.createTemporary(formData);
     }
 
     @Override

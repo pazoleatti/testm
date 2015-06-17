@@ -249,7 +249,7 @@ public class FormDataServiceImpl implements FormDataService {
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
                 if (stateLogger != null) {
-                    stateLogger.updateState("Импорт XLSX-файла");
+                    stateLogger.updateState("Импорт XLSM-файла");
                 }
                 log.info(String.format("Выполнение скрипта: %s", key));
                 dataRowDao.createTemporary(fd);
