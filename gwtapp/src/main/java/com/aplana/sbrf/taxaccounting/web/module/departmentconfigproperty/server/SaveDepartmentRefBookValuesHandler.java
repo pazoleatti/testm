@@ -312,7 +312,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 logger.error("Код налогового органа \"%s\", КПП \"%s\": Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", taxOrganCode, kpp, name, value, pattern.pattern());
             else
                 logger.error("Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", name, value, pattern.pattern());
-            logger.error("Расшифровка паттерна \"%s\": %s", pattern.pattern(), patternMeaning);
+            logger.error("Расшифровка паттерна \"%s\": %s.", pattern.pattern(), patternMeaning);
             return false;
         }
         return true;

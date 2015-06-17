@@ -63,7 +63,7 @@ public class RefBookUtilsTest {
     public void checkControlSumInnTest() {
         // длина больше 10, но для проверки используются только первые 10 символов
         assertTrue(RefBookUtils.checkControlSumInn("7723643863"));
-        assertTrue(RefBookUtils.checkControlSumInn("772364386312"));
+        assertTrue(RefBookUtils.checkControlSumInn("500100732259"));
         assertFalse(RefBookUtils.checkControlSumInn("7723643862"));
         assertFalse(RefBookUtils.checkControlSumInn("111"));
         assertFalse(RefBookUtils.checkControlSumInn("abcderfsdf"));

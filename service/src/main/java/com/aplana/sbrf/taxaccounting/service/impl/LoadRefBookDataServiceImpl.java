@@ -186,169 +186,166 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     continue;
                 }
 
-                // ЭЦП
-                List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
-                if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
-                    boolean check = false;
-                    try {
-                        check = signService.checkSign(currentFile.getPath(), 0);
-                    } catch (Exception e) {
-                        log(userInfo, LogData.L36, logger, lockId, e.getMessage());
-                    }
-                    if (!check) {
-                        log(userInfo, LogData.L16, logger, lockId, fileName);
-                        fail++;
-                        // Разблокировка файла
-                        lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                        if (move) {
-                            moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile, null, logger, lockId);
+                try {
+                    // ЭЦП
+                    List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
+                    if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                        boolean check = false;
+                        try {
+                            check = signService.checkSign(currentFile.getPath(), 0);
+                        } catch (Exception e) {
+                            log(userInfo, LogData.L36, logger, lockId, e.getMessage());
                         }
-                        log(userInfo, LogData.L20, logger, lockId, currentFile.getName());
-                        continue;
-                    }
-                    log(userInfo, LogData.L15, logger, lockId, fileName);
-                } else {
-                    log(userInfo, LogData.L15_1, logger, lockId, fileName);
-                }
-
-                // Один файл может соответствоваь нескольким справочникам
-                List<Pair<Boolean, Long>> matchList = mappingMap.get(mappingMatch(currentFile.getName(), mappingMap.keySet()));
-
-                // Локальные логгеры
-                List<Logger> localLoggerList = new ArrayList<Logger>(matchList.size());
-
-                int skip = 0;
-                boolean load = false;
-                // Попытка загрузить один файл в несколько справочников
-                for (int i = 0; i < matchList.size(); i++) {
-                    if (load) {
-                        break;
-                    }
-                    Pair<Boolean, Long> refBookMapPair = matchList.get(i);
-                    InputStream is = null;
-                    Long refBookId = refBookMapPair.getSecond();
-                    localLoggerList.add(new Logger());
-                    ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
-                    try {
-                        is = new BufferedInputStream(currentFile.getInputStream());
-                        if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
-                            ZipInputStream zis = new ZipInputStream(is);
-                            ZipEntry zipFileName = zis.getNextEntry();
-                            if (zipFileName != null) { // в архиве есть файл
-                                // дальше работаем с первым файлом архива вместо самого архива
-                                is = zis;
+                        if (!check) {
+                            log(userInfo, LogData.L16, logger, lockId, fileName);
+                            fail++;
+                            if (move) {
+                                moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile, null, logger, lockId);
                             }
+                            log(userInfo, LogData.L20, logger, lockId, currentFile.getName());
+                            continue;
                         }
-                        // Обращение к скрипту
-                        Map<String, Object> additionalParameters = new HashMap<String, Object>();
-                        additionalParameters.put("inputStream", is);
-                        additionalParameters.put("fileName", fileName);
-                        additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
+                        log(userInfo, LogData.L15, logger, lockId, fileName);
+                    } else {
+                        log(userInfo, LogData.L15_1, logger, lockId, fileName);
+                    }
 
-                        //Устанавливаем блокировку на справочник
-                        List<String> lockedObjects = new ArrayList<String>();
-                        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBookId;
-                        int userId = userInfo.getUser().getId();
+                    // Один файл может соответствоваь нескольким справочникам
+                    List<Pair<Boolean, Long>> matchList = mappingMap.get(mappingMatch(currentFile.getName(), mappingMap.keySet()));
 
-                        RefBook refBook = refBookDao.get(refBookId);
-                        LockData lockData = lockService.lock(lockKey, userId,
-                                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
-                                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
-                        if (lockData == null) {
-                            try {
-                                //Блокировка установлена
-                                lockedObjects.add(lockKey);
-                                //Блокируем связанные справочники
-                                List<RefBookAttribute> attributes = refBook.getAttributes();
-                                for (RefBookAttribute attribute : attributes) {
-                                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
-                                        if (!lockedObjects.contains(referenceLockKey)) {
-                                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
-                                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
-                                            if (referenceLockData == null) {
-                                                //Блокировка установлена
-                                                lockedObjects.add(referenceLockKey);
-                                            } else {
-                                                throw new ServiceException(String.format(LOCK_MESSAGE, attributeRefBook.getName()));
+                    // Локальные логгеры
+                    List<Logger> localLoggerList = new ArrayList<Logger>(matchList.size());
+
+                    int skip = 0;
+                    boolean load = false;
+                    // Попытка загрузить один файл в несколько справочников
+                    for (int i = 0; i < matchList.size(); i++) {
+                        if (load) {
+                            break;
+                        }
+                        Pair<Boolean, Long> refBookMapPair = matchList.get(i);
+                        InputStream is = null;
+                        Long refBookId = refBookMapPair.getSecond();
+                        localLoggerList.add(new Logger());
+                        ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+                        try {
+                            is = new BufferedInputStream(currentFile.getInputStream());
+                            if (!refBookMapPair.getFirst()) {  // Если это не сам файл, а архив
+                                ZipInputStream zis = new ZipInputStream(is);
+                                ZipEntry zipFileName = zis.getNextEntry();
+                                if (zipFileName != null) { // в архиве есть файл
+                                    // дальше работаем с первым файлом архива вместо самого архива
+                                    is = zis;
+                                }
+                            }
+                            // Обращение к скрипту
+                            Map<String, Object> additionalParameters = new HashMap<String, Object>();
+                            additionalParameters.put("inputStream", is);
+                            additionalParameters.put("fileName", fileName);
+                            additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
+
+                            //Устанавливаем блокировку на справочник
+                            List<String> lockedObjects = new ArrayList<String>();
+                            String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBookId;
+                            int userId = userInfo.getUser().getId();
+
+                            RefBook refBook = refBookDao.get(refBookId);
+                            LockData lockData = lockService.lock(lockKey, userId,
+                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
+                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
+                            if (lockData == null) {
+                                try {
+                                    //Блокировка установлена
+                                    lockedObjects.add(lockKey);
+                                    //Блокируем связанные справочники
+                                    List<RefBookAttribute> attributes = refBook.getAttributes();
+                                    for (RefBookAttribute attribute : attributes) {
+                                        if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                                            RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
+                                            String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attribute.getRefBookId();
+                                            if (!lockedObjects.contains(referenceLockKey)) {
+                                                LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                                        String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
+                                                        lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
+                                                if (referenceLockData == null) {
+                                                    //Блокировка установлена
+                                                    lockedObjects.add(referenceLockKey);
+                                                } else {
+                                                    throw new ServiceException(String.format(LOCK_MESSAGE, attributeRefBook.getName()));
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                //Выполняем логику скрипта
-                                refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
-                                        localLoggerList.get(i), additionalParameters);
-                                IOUtils.closeQuietly(is);
-                                // Обработка результата выполнения скрипта
-                                switch (scriptStatusHolder.getScriptStatus()) {
-                                    case SUCCESS:
-                                        // Уже загрузили, больше не пытаемся
-                                        load = true;
-                                        if (move) {
-                                            // Перемещение в каталог архива
-                                            boolean result = moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo,
-                                                    logger, lockId), currentFile, logger, lockId);
-                                            if (result) {
+                                    //Выполняем логику скрипта
+                                    refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
+                                            localLoggerList.get(i), additionalParameters);
+                                    IOUtils.closeQuietly(is);
+                                    // Обработка результата выполнения скрипта
+                                    switch (scriptStatusHolder.getScriptStatus()) {
+                                        case SUCCESS:
+                                            // Уже загрузили, больше не пытаемся
+                                            load = true;
+                                            if (move) {
+                                                // Перемещение в каталог архива
+                                                boolean result = moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo,
+                                                        logger, lockId), currentFile, logger, lockId);
+                                                if (result) {
+                                                    success++;
+                                                    logger.getEntries().addAll(localLoggerList.get(i).getEntries());
+                                                    log(userInfo, LogData.L20, logger, lockId, currentFile.getName());
+                                                } else {
+                                                    fail++;
+                                                    // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
+                                                    moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile,
+                                                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lockId, ""))), logger, lockId);
+                                                }
+                                            } else {
                                                 success++;
                                                 logger.getEntries().addAll(localLoggerList.get(i).getEntries());
                                                 log(userInfo, LogData.L20, logger, lockId, currentFile.getName());
-                                            } else {
-                                                fail++;
-                                                // Если в архив не удалось перенести, то пытаемся перенести в каталог ошибок
-                                                moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile,
-                                                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lockId, ""))), logger, lockId);
                                             }
-                                        } else {
-                                            success++;
-                                            logger.getEntries().addAll(localLoggerList.get(i).getEntries());
-                                            log(userInfo, LogData.L20, logger, lockId, currentFile.getName());
-                                        }
-                                        break;
-                                    case SKIP:
-                                        skip++;
-                                        if (skip == matchList.size()) {
-                                            // В случае неуспешного импорта в общий лог попадает вывод всех скриптов
-                                            logger.getEntries().addAll(getEntries(localLoggerList));
-                                            // Файл пропущен всеми справочниками — неправильный формат
-                                            log(userInfo, LogData.L4, logger, lockId, fileName, path);
-                                            fail++;
-                                        }
-                                        break;
+                                            break;
+                                        case SKIP:
+                                            skip++;
+                                            if (skip == matchList.size()) {
+                                                // В случае неуспешного импорта в общий лог попадает вывод всех скриптов
+                                                logger.getEntries().addAll(getEntries(localLoggerList));
+                                                // Файл пропущен всеми справочниками — неправильный формат
+                                                log(userInfo, LogData.L4, logger, lockId, fileName, path);
+                                                fail++;
+                                            }
+                                            break;
+                                    }
+                                } finally {
+                                    for (String lock : lockedObjects) {
+                                        lockService.unlock(lock, userId);
+                                    }
                                 }
-                            } finally {
-                                //Снимаем блокировки
-                                lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                                for (String lock : lockedObjects) {
-                                    lockService.unlock(lock, userId);
-                                }
+                            } else {
+                                throw new ServiceException(String.format(LOCK_MESSAGE, refBook.getName()));
                             }
-                        } else {
-                            // Разблокировка файла
-                            lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                            throw new ServiceException(String.format(LOCK_MESSAGE, refBook.getName()));
+                        } catch (Exception e) {
+                            // При ошибке второй раз не пытаемся загрузить
+                            load = true;
+                            IOUtils.closeQuietly(is);
+                            fail++;
+                            // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
+                            log(userInfo, LogData.L21, logger, lockId, e.getMessage());
+                            // Перемещение в каталог ошибок
+                            logger.getEntries().addAll(getEntries(localLoggerList));
+                            if (move) {
+                                moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile,
+                                        getEntries(localLoggerList), logger, lockId);
+                            }
                         }
-                    } catch (Exception e) {
-                        // При ошибке второй раз не пытаемся загрузить
-                        load = true;
-                        IOUtils.closeQuietly(is);
-                        fail++;
-                        // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
-                        log(userInfo, LogData.L21, logger, lockId, e.getMessage());
-                        // Перемещение в каталог ошибок
-                        logger.getEntries().addAll(getEntries(localLoggerList));
-                        // Разблокировка файла
-                        lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
-                        if (move) {
-                            moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile,
-                                    getEntries(localLoggerList), logger, lockId);
+                        if (!load) {
+                            log(userInfo, LogData.L38, logger, lockId, refBookName);
                         }
                     }
-                    if (!load) {
-                        log(userInfo, LogData.L38, logger, lockId, refBookName);
-                    }
+                } finally {
+                    //Снимаем блокировки
+                    lockService.unlock(LockData.LockObjects.FILE.name() + "_" + fileName, userInfo.getUser().getId());
                 }
             }
         }
