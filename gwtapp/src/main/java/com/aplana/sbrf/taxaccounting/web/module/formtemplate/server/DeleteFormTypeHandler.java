@@ -1,12 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.MainOperatingService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.DeleteFormTypeAction;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.shared.DeleteFormTypeResult;
@@ -47,6 +45,9 @@ public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeA
     private FormTemplateService formTemplateService;
 
     @Autowired
+    private FormTemplateDao formTemplateDao;
+
+    @Autowired
     private LockDataService lockDataService;
 
     public DeleteFormTypeHandler() {
@@ -79,7 +80,13 @@ public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeA
 
         try{
             DeleteFormTypeResult result = new DeleteFormTypeResult();
+            List<Integer> versionIds = formTemplateService.getFTVersionIdsByStatus(action.getFormTypeId(), VersionedObjectStatus.DRAFT, VersionedObjectStatus.NORMAL);
             mainOperatingService.deleteTemplate(action.getFormTypeId(), logger, securityService.currentUserInfo());
+            //Изменения уже не получится откатить
+            for (Integer versionId : versionIds){
+                formTemplateDao.dropFDTable(versionId);
+            }
+
             result.setUuid(logEntryService.save(logger.getEntries()));
             return result;
         } finally {
