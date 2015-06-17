@@ -298,17 +298,22 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
         for (Column column : columns) {
             if (!checkSet.add(column.getAlias())) {
-                logger.error("найден повторяющийся алиас \" " + column.getAlias() +
-                        "\" для столбца " + column.getName());
+                logger.error(
+                        String.format(
+                                "Нарушено требование к уникальности, уже существует графа с псевдонимом \"%s\" в данной версии макета \"%s\"!",
+                                column.getAlias(),
+                                column.getName()
+                        )
+                );
             }
 
             if (column.getName() != null && column.getName().getBytes().length > FORM_COLUMN_NAME_MAX_VALUE) {
-                logger.error("значение для имени столбца \"" + column.getName() +
+                logger.error("Значение для имени столбца \"" + column.getName() +
                         "\" слишком велико (фактическое: " + column.getName().getBytes().length +
                         ", максимальное: " + FORM_COLUMN_NAME_MAX_VALUE + ")");
             }
             if (column.getAlias() != null && column.getAlias().getBytes().length > FORM_COLUMN_ALIAS_MAX_VALUE) {
-                logger.error("значение для алиаса столбца \"" + column.getAlias() +
+                logger.error("Значение для алиаса столбца \"" + column.getAlias() +
                         "\" слишком велико (фактическое: " + column.getAlias().getBytes().length
                         + ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
             }
@@ -336,7 +341,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 		for (FormStyle style : styles) {
 			if (!checkSet.add(style.getAlias())) {
-				logger.error("найден повторяющийся алиас стиля " + style.getAlias());
+				logger.error(
+                        String.format("Нарушено требование к уникальности, уже существует стиль с именем \"%s\" в данной версии макета!",
+                                style.getAlias()
+                        )
+                );
 			}
 
 			if (style.getAlias() != null && style.getAlias().getBytes().length > FORM_STYLE_ALIAS_MAX_VALUE) {
