@@ -23,10 +23,11 @@ public interface FormDataService {
      * @param departmentReportPeriodId Отчетный период подразделения
      * @param kind Тип НФ
      * @param periodOrder Номер месяца для ежемесячных форм (для остальных параметр отсутствует)
+     * @param importFormData флаг создания при загрузке
      * @return Id НФ
      */
     long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
-                        FormDataKind kind, Integer periodOrder);
+                        FormDataKind kind, Integer periodOrder, boolean importFormData);
 
     /**
      * Создает версию ручного ввода

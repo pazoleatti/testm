@@ -68,6 +68,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     private TAUserService userService;
+    @Autowired
+    private LogBusinessService logBusinessService;
+    @Autowired
+    private AuditService auditService;
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
@@ -359,10 +363,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 }
 
                 // флаг того что форма уже создана
-                boolean formWasCreated = false;
                 if (formData != null) {
                     // 13А.1 Существует и имеет статус "Создана"
-                    formWasCreated = true;
                     log(userInfo, LogData.L13, logger, lockId);
                 }
 
@@ -372,7 +374,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 try {
                     // Загрузка
                     result = importFormData(userInfo, departmentId, currentFile, formData, formType, formTemplate,
-                            departmentReportPeriod, formDataKind, transportDataParam, formWasCreated, localLogger, lockId);
+                            departmentReportPeriod, formDataKind, transportDataParam, localLogger, lockId);
 
                     // Вывод скрипта в область уведомлений
                     logger.getEntries().addAll(localLogger.getEntries());
@@ -420,11 +422,12 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                                    FormType formType,
                                    FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod,
                                    FormDataKind formDataKind, TransportDataParam transportDataParam,
-                                   boolean formWasCreated, Logger localLogger, String lock) {
+                                   Logger localLogger, String lock) {
         String reportPeriodName = departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear() + " - "
                 + departmentReportPeriod.getReportPeriod().getName();
 
         boolean success = false;
+        boolean formWasCreated = formData != null;
         // Если формы нет, то создаем
         if (formData == null) {
             // Если форма не ежемесячная, то месяц при созданнии не указывается
@@ -435,7 +438,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             int formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(),
                     departmentReportPeriod.getReportPeriod().getId());
             long formDataId = formDataService.createFormData(localLogger, userInfo, formTemplateId,
-                    departmentReportPeriod.getId(), formDataKind, month);
+                    departmentReportPeriod.getId(), formDataKind, month, true);
             formData = formDataDao.get(formDataId, false);
         } else {
             // 17А.5 Система инициирует выполнение сценария Удаление отчета НФ для экземпляра НФ, данные которой были перезаполнены.
@@ -480,6 +483,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 }
                 // Исключение для отката транзакции сознания и заполнения НФ
                 throw new ServiceException("При выполнении загрузки произошли ошибки");
+            } else {
+                logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
+                auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                        null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
             }
 
             Department formDepartment = departmentDao.getDepartment(departmentReportPeriod.getDepartmentId());

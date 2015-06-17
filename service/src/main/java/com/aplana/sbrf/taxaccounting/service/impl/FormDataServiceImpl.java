@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.common.model.UserInfo;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -163,9 +162,9 @@ public class FormDataServiceImpl implements FormDataService {
     private BlobDataService blobDataService;
 
     @Override
-    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder) {
+    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder, boolean importFormData) {
         formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
-        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, kind, periodOrder, false);
+        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, kind, periodOrder, importFormData);
     }
 
     @Override
@@ -331,8 +330,7 @@ public class FormDataServiceImpl implements FormDataService {
         formData.setPerformer(performer);
 
         // Execute scripts for the form event CREATE
-		formDataScriptingService.executeScript(userInfo, formData,
-                importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
+		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CREATE, logger, null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
@@ -340,22 +338,22 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 		formDataDao.save(formData);
 
-		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null, formData.getFormType().getId());
+        if (!importFormData) {
+            logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
+            auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
+        }
 
-		// Заполняем начальные строки (но не сохраняем)
+        // Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
-		if (!importFormData) {
-			// Execute scripts for the form event AFTER_CREATE
-			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_CREATE, logger, null);
-			if (logger.containsLevel(LogLevel.ERROR)) {
-				throw new ServiceLoggerException(
-						"Произошли ошибки в скрипте после создания налоговой формы",
-						logEntryService.save(logger.getEntries()));
-			}
-		}
+        // Execute scripts for the form event AFTER_CREATE
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_CREATE, logger, null);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки в скрипте после создания налоговой формы",
+                    logEntryService.save(logger.getEntries()));
+        }
 
 		dataRowDao.commit(formData);
 
