@@ -166,17 +166,35 @@ public class RefBookUtils extends AbstractDao {
      * @return результат проверки (успешная или нет)
      */
     public static boolean checkControlSumInn(String inn) {
-        if (inn == null || inn.length() < 10) {
+        if (inn == null) {
             return false;
         }
-        int[] koefArray = new int[]{2, 4, 10, 3, 5, 9, 4, 6, 8};
-        int sum = 0;
-        for (int i = 0; i < 9; i++) {
-            if (!Character.isDigit(inn.charAt(i))){
-                return false;
+        if (inn.length() == 10) {
+            int[] koefArray10 = new int[]{2, 4, 10, 3, 5, 9, 4, 6, 8};
+            int sum10 = 0;
+            for (int i = 0; i < 9; i++) {
+                if (!Character.isDigit(inn.charAt(i))){
+                    return false;
+                }
+                sum10 += koefArray10[i] * Character.getNumericValue(inn.charAt(i));
             }
-            sum += koefArray[i] * Character.getNumericValue(inn.charAt(i));
+            return (sum10 % 11) % 10 == Character.getNumericValue(inn.charAt(9));
+        } else if (inn.length() == 12){
+            int[] koefArray11 = new int[]{7, 2, 4, 10, 3, 5, 9, 4, 6, 8};
+            int[] koefArray12 = new int[]{3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8};
+            int sum11, sum12;
+            sum11 = sum12 = 0;
+            for (int i = 0; i < 10; i++) {
+                if (!Character.isDigit(inn.charAt(i))){
+                    return false;
+                }
+                sum11 += koefArray11[i] * Character.getNumericValue(inn.charAt(i));
+                sum12 += koefArray12[i] * Character.getNumericValue(inn.charAt(i));
+            }
+            sum12 += koefArray12[10] * Character.getNumericValue(inn.charAt(10));
+            return (sum11 % 11) % 10 == Character.getNumericValue(inn.charAt(10)) &&
+                    (sum12 % 11) % 10 == Character.getNumericValue(inn.charAt(11));
         }
-        return (sum % 11) % 10 == Character.getNumericValue(inn.charAt(9));
+        return false;
     }
 }
