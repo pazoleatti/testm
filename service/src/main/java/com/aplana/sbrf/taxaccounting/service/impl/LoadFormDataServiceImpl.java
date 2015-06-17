@@ -449,7 +449,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
         if (lockType != null) {
             log(userInfo, LogData.L40, localLogger,
-                    lock, lockType.getSecond().getDescription(), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
+                    lock, formDataService.getTaskName(lockType.getFirst(), formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
         }
         // Блокировка
         LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
