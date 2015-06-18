@@ -71,7 +71,7 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
             Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormData().getId());
             LockData lockData = lockDataService.getLock(keyTask);
             if (lockType != null && !lockType.getFirst().equals(ReportType.EDIT_FD)) {
-                formDataService.locked(action.getFormData().getId(), reportType, lockType.getSecond(), logger);
+                formDataService.locked(action.getFormData().getId(), reportType, lockType, logger);
             }
             if (lockData != null) {
                 if (lockData.getUserId() == userInfo.getUser().getId()) {
@@ -110,7 +110,6 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     if (action.isSave()) {
                         // сохраняем данные при нажантии "Да"
                         formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-                        dataRowService.createTemporary(formData);
                     } else {
                         lockDataService.unlock(keyTask, userInfo.getUser().getId());
                         // Вызов диалога, для подтверждения сохранения данных

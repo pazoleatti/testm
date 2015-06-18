@@ -537,7 +537,7 @@ void importData() {
  * @param rowCount количество строк в таблице
  */
 void checkHeaderXls(def headerRows, def colCount, rowCount) {
-    if (headerRows.isEmpty() || headerRows.size < rowCount) {
+    if (headerRows.isEmpty() || headerRows.size() < rowCount) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)

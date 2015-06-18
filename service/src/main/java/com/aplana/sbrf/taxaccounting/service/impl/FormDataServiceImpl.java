@@ -250,7 +250,7 @@ public class FormDataServiceImpl implements FormDataService {
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
                 if (stateLogger != null) {
-                    stateLogger.updateState("Импорт XLSX-файла");
+                    stateLogger.updateState("Импорт XLSM-файла");
                 }
                 log.info(String.format("Выполнение скрипта: %s", key));
                 dataRowDao.createTemporary(fd);
@@ -729,12 +729,6 @@ public class FormDataServiceImpl implements FormDataService {
      */
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-        // Форма не должна быть заблокирована даже текущим пользователем
-        String lockKey = generateTaskKey(formDataId, ReportType.EDIT_FD);
-        //checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
-        //Проверяем не заблокирована ли нф операцией загрузки в нее
-        //checkLockedByImport(formDataId, logger);
-
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
@@ -747,71 +741,52 @@ public class FormDataServiceImpl implements FormDataService {
 
         FormData formData = formDataDao.get(formDataId, manual);
         dataRowDao.createTemporary(formData);
-        List<String> lockedObjects = new ArrayList<String>();
-        try {
-            switch (workflowMove){
-                case PREPARED_TO_APPROVED:
-                    lockForm(lockedObjects, userInfo, lockKey, logger, formData);
-                    //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
-                    checkReferenceValues(logger, formData, false);
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                case CREATED_TO_PREPARED:
-                case APPROVED_TO_ACCEPTED:
-                case PREPARED_TO_ACCEPTED:
-                case CREATED_TO_ACCEPTED:
-                    lockForm(lockedObjects, userInfo, lockKey, logger, formData);
-                    //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
-                    checkReferenceValues(logger, formData, false);
-                    checkConsolidateFromSources(formData, logger);
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                case APPROVED_TO_CREATED:
-                case ACCEPTED_TO_APPROVED:
-                case ACCEPTED_TO_PREPARED:
-                case ACCEPTED_TO_CREATED:
-                    sourceService.updateFDDDConsolidation(formDataId);
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                default:
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-            }
-        } finally {
-            for (String lock : lockedObjects) {
-                lockService.unlock(lock, userInfo.getUser().getId());
-            }
+        switch (workflowMove){
+            case PREPARED_TO_APPROVED:
+                lockForm(logger, formData);
+                //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                checkReferenceValues(logger, formData, false);
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            case CREATED_TO_PREPARED:
+            case APPROVED_TO_ACCEPTED:
+            case PREPARED_TO_ACCEPTED:
+            case CREATED_TO_ACCEPTED:
+                lockForm(logger, formData);
+                //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                checkReferenceValues(logger, formData, false);
+                checkConsolidateFromSources(formData, logger);
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            case APPROVED_TO_CREATED:
+            case ACCEPTED_TO_APPROVED:
+            case ACCEPTED_TO_PREPARED:
+            case ACCEPTED_TO_CREATED:
+                sourceService.updateFDDDConsolidation(formDataId);
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            default:
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
         }
     }
 
-    private void lockForm(List<String> listWithLocks, TAUserInfo userInfo, String lockKey, Logger logger, FormData formData){
-        //Устанавливаем блокировку на текущую нф
-        int userId = userInfo.getUser().getId();
-        checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
-        LockData lockData = lockService.lock(lockKey, userId, getFormDataFullName(formData.getId(), null, null),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-        if (lockData == null) {
-            //Блокировка установлена
-            listWithLocks.add(lockKey);
-            //Проверяем блокировку необходимых справочников. Их не должно быть
-            for (Column column : formData.getFormColumns()) {
-                if (ColumnType.REFBOOK.equals(column.getColumnType())) {
-                    Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
-                    if (attributeId != null) {
-                        RefBook refBook = refBookDao.getByAttribute(attributeId);
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-                        if (lockService.isLockExists(referenceLockKey, false)) {
-                            throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
-                                    logEntryService.save(logger.getEntries()));
-                        }
+    private void lockForm(Logger logger, FormData formData){
+        //Проверяем блокировку необходимых справочников. Их не должно быть
+        for (Column column : formData.getFormColumns()) {
+            if (ColumnType.REFBOOK.equals(column.getColumnType())) {
+                Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
+                if (attributeId != null) {
+                    RefBook refBook = refBookDao.getByAttribute(attributeId);
+                    String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
+                    if (lockService.isLockExists(referenceLockKey, false)) {
+                        throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
+                                logEntryService.save(logger.getEntries()));
                     }
                 }
             }
-        } else {
-            throw new ServiceLoggerException(LOCK_MESSAGE,
-                    logEntryService.save(logger.getEntries()));
         }
     }
 
@@ -1733,8 +1708,8 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void locked(long formDataId, ReportType reportType, LockData lockData, Logger logger) {
-        TAUser user = userService.getUser(lockData.getUserId());
+    public void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger) {
+        TAUser user = userService.getUser(lockType.getSecond().getUserId());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(user);
         String msg = "";
@@ -1744,17 +1719,17 @@ public class FormDataServiceImpl implements FormDataService {
                         String.format(
                                 LOCK_CURRENT_1,
                                 user.getName(),
-                                SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
-                                lockData.getDescription())
+                                SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
+                                getTaskName(lockType.getFirst(), formDataId, userInfo))
                 );
                 break;
             default:
                 logger.error(
                         String.format(
                                 LockData.LOCK_CURRENT,
-                                SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
+                                SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
                                 user.getName(),
-                                lockData.getDescription())
+                                getTaskName(lockType.getFirst(), formDataId, userInfo))
                 );
         }
         switch (reportType) {
@@ -1766,13 +1741,13 @@ public class FormDataServiceImpl implements FormDataService {
                 msg = "Для текущего экземпляра налоговой формы запущены операции, при которых ее проверка невозможна";
                 break;
             case MOVE_FD:
-                msg = String.format("Для текущего экземпляра налоговой формы запущены операции, при которых его подготовка/утверждение/принятие невозможно", "".toLowerCase(new Locale("ru", "RU")));
+                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых изменение его состояния невозможно";
                 break;
             case CALCULATE_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), lockData.getDescription());
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
                 break;
             case IMPORT_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", getTaskName(reportType, formDataId, userInfo), lockData.getDescription());
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
                 break;
             case CONSOLIDATE_FD:
                 msg = "";

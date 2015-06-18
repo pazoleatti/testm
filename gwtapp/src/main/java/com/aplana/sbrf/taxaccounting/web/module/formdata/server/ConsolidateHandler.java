@@ -123,7 +123,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                 throw new ActionException("Не удалось запустить консолидацию. Попробуйте выполнить операцию позже");
             }
         } else {
-            formDataService.locked(action.getFormDataId(), reportType, lockType.getSecond(), logger);
+            formDataService.locked(action.getFormDataId(), reportType, lockType, logger);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

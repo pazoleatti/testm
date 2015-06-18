@@ -117,7 +117,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     }
                 } else {
                     // ошибка
-                    formDataService.locked(action.getFormData().getId(), reportType, lockType.getSecond(), logger);
+                    formDataService.locked(action.getFormData().getId(), reportType, lockType, logger);
                 }
             }
             result.setLock(false);
@@ -130,7 +130,6 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                 if (action.isSave()) {
                     // сохраняем данные при нажантии "Да"
                     formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-                    dataRowService.createTemporary(formData);
                 } else {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
                     // Вызов диалога, для подтверждения сохранения данных
