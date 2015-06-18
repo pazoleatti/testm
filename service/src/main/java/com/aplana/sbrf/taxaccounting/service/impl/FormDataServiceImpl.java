@@ -1650,7 +1650,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void deleteReport(long formDataId, Boolean manual, int userId) {
         List<String> lockKeys = new ArrayList<String>();
-        boolean[] b = {false, true};
         ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
         for (ReportType reportType: reportTypes) {
             lockKeys.addAll(generateReportKeys(reportType, formDataId, manual));
@@ -1860,13 +1859,13 @@ public class FormDataServiceImpl implements FormDataService {
     private ReportType[] getCheckTaskList(ReportType reportType) {
         switch (reportType) {
             case CONSOLIDATE_FD:
-                return new ReportType[]{ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.IMPORT_TF_FD, ReportType.EXCEL, ReportType.CSV};
+                return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.IMPORT_TF_FD, ReportType.EXCEL, ReportType.CSV};
             case CALCULATE_FD:
                 return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case IMPORT_FD:
                 return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case MOVE_FD:
-                return new ReportType[]{ReportType.CHECK_FD};
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case CHECK_FD:
             default:
                 return null;

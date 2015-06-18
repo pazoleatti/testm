@@ -62,7 +62,7 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        logger.info("Создание временного среза для нф "+formDataId);
+        //Создание временного среза для нф
         dataRowService.createTemporary(formData);
         formDataService.doCalc(logger, userInfo, formData);
         // сохраняем данные в основном срезе

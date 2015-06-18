@@ -22,6 +22,6 @@ public class FormDataEditAction extends UnsecuredActionImpl<FormDataEditResult> 
 
     @Override
     public String getName() {
-        return "Перевод НФ в режим редактирования";
+        return "";
     }
 }

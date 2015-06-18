@@ -68,7 +68,7 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        logger.info("Создание временного среза для нф "+formDataId);
+        //Создание временного среза для нф
         dataRowService.createTemporary(formData);
         try {
             transactionHelper.executeInNewTransaction(new TransactionLogic() {
@@ -86,9 +86,6 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
         } catch (ServiceRollbackException e) {
             // считаем, что проверка прошла успешно
         }
-        // восстанавливаем временный срез, чтобы продолжить редактирование
-        dataRowService.createTemporary(formData);
-
     }
 
     @Override

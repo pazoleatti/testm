@@ -164,8 +164,6 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
         FormDataUtils.setValueOwners(dataRows);
         this.dataRows = dataRows;
-        //Сохраняем временный срез в постоянный, т.к теперь операции изменяющие нф - асинхронные и пользователь может выйти из режима редактирования
-        dataRowDao.commit(fd);
     }
 
     void updateIndexes(List<DataRow<Cell>> dataRows) {

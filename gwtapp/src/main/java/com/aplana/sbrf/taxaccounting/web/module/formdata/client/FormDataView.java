@@ -742,7 +742,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		if(lockInfo != null){
             String text;
             if (readOnlyMode) {
-                text = "Выбранная налоговая форма в текущий момент заблокирована на изменение " + (lockInfo.isLockedMe()?"текущим пользователем":("другим пользователем \"" + lockInfo.getLockedByUser()+"\"")) + " (с " + lockInfo.getLockDate() + ")";
+                if (lockInfo.isEditMode()) {
+                    text = "Выбранная налоговая форма в текущий момент редактируется " + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\"")) + " (с " + lockInfo.getLockDate() + ")";
+                } else {
+                    text = "Выбранная налоговая форма в текущий момент заблокирована на изменение " + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\"")) + " (с " + lockInfo.getLockDate() + ")";
+                }
             } else {
                 text = "Выбранная налоговая форма в текущий момент заблокирована на редактирование текущим пользователем (с " + lockInfo.getLockDate() + ")";
             }
