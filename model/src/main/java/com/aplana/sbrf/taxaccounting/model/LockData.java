@@ -140,6 +140,8 @@ public final class LockData {
     public static final String CANCEL_TASK_IN_PROGRESS = "\"%s\" пользователем \"%s\" запущена операция \"%s\". Данная операция уже выполняется Системой.";
     public static final String CANCEL_TASK_NOT_PROGRESS = "\"%s\" пользователем \"%s\" запущена операция \"%s\". Данная операция находится в очереди на выполнение.";
 
+    public static final String STANDARD_LOCK_MSG = "Объект заблокирован другой операцией. Попробуйте выполнить операцию позже";
+
 	public LockData(){
 	}
 
