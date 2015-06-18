@@ -395,11 +395,11 @@ public interface FormDataService {
 
     /**
      * Вывод сообщения, что форма заблокирована
-     * @param lockData
+     * @param lockType
      * @param logger
      * @param reportType тип текущей операции
      */
-    void locked(long formDataId, ReportType reportType, LockData lockData, Logger logger);
+    void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger);
 
     /**
      * Проверка возможности изменения НФ

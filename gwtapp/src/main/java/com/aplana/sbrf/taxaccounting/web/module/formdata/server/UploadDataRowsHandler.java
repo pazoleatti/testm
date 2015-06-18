@@ -112,7 +112,7 @@ public class UploadDataRowsHandler extends
                     }
                 } else {
                     // ошибка
-                    formDataService.locked(action.getFormData().getId(), reportType, lockType.getSecond(), logger);
+                    formDataService.locked(action.getFormData().getId(), reportType, lockType, logger);
                 }
             }
             result.setLock(false);
