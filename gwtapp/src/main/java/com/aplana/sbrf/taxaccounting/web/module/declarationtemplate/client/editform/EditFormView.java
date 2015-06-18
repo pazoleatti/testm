@@ -34,6 +34,8 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     CheckBox isIfrs;
     @UiField
     HorizontalPanel ifrsPanel;
+    @UiField
+    HorizontalPanel checkIfrsPanel;
 
     @Inject
     public EditFormView(Binder uiBinder, MyDriver driver) {
@@ -87,5 +89,10 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @Override
     public boolean checkIfrs() {
         return !(isIfrs.getValue() && (ifrsName.getValue() == null || ifrsName.getValue().isEmpty()));
+    }
+
+    @Override
+    public void setVisibleIfrs(boolean isVisibleIfrs) {
+        checkIfrsPanel.setVisible(isVisibleIfrs);
     }
 }

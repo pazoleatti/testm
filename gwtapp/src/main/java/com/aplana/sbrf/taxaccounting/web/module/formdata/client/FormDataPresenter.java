@@ -59,6 +59,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private Timer timer;
     private ReportType timerType;
     private TimerTaskResult.FormMode formMode;
+    private boolean lockEditMode;
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -1076,7 +1077,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         manualMenuPresenter.updateNotificationCount();
                                     }
                                 }
-                                if (isForce || isUpdate || !result.getFormMode().equals(formMode))
+                                if (isForce || isUpdate || !result.getFormMode().equals(formMode) || result.getLockInfo().isEditMode() != lockEditMode)
                                     switch (result.getFormMode()) {
                                         case EDIT:
                                             if (readOnlyMode) {
@@ -1104,6 +1105,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             break;
                                     }
                                 formMode = result.getFormMode();
+                                lockEditMode = result.getLockInfo().isEditMode();
                             }
 
                             @Override

@@ -270,7 +270,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showOriginalVersionButton(false);
         view.showPrintAnchor(false);
         view.showDeleteFormButton(!lockInfo.isEditMode() && formDataAccessParams.isCanDelete());
-        view.setLockInformation(true, false, lockInfo);
+        view.setLockInformation(true, readOnlyMode, lockInfo);
 
         if (lockInfo.isEditMode()) {
             view.setWorkflowButtons(null);
