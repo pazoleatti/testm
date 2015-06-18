@@ -99,6 +99,8 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                         lockService.updateState(lock, lockDate, state);
                     }
                 });
+        // сохраняем данные в основном срезе
+        formDataService.saveFormData(logger, userInfo, formData);
         // восстанавливаем временный срез, чтобы продолжить редактирование
         dataRowService.createTemporary(formData);
     }

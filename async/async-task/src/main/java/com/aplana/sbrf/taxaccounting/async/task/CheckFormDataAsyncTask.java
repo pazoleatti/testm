@@ -86,9 +86,6 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
         } catch (ServiceRollbackException e) {
             // считаем, что проверка прошла успешно
         }
-        // восстанавливаем временный срез, чтобы продолжить редактирование
-        dataRowService.createTemporary(formData);
-
     }
 
     @Override
