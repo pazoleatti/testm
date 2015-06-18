@@ -1877,7 +1877,7 @@ public class FormDataServiceImpl implements FormDataService {
             case MOVE_FD:
                 return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case DELETE_FD:
-                return new ReportType[]{ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.CONSOLIDATE_FD};// excel, csv прерывается при удалении отчета
+                return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.CONSOLIDATE_FD};// excel, csv прерывается при удалении отчета
             case CHECK_FD:
             default:
                 return null;
