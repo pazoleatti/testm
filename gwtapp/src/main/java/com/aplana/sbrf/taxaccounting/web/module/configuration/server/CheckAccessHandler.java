@@ -89,7 +89,8 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                     continue;
                 }
 
-                if (limit != 0 && shortLimit != 0 && shortLimit > limit) {
+                if (sLimit != null && !sLimit.isEmpty() && +
+                        shortLimit > limit) {
                     logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть больше значения параметра \"Ограничение на выполнение задания в очереди быстрых заданий\" (\"%s\")!",
                             type, sLimit, sShortLimit));
                 }
