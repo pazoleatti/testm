@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Расшифровка графы 13 &quot;Расхождение&quot; формы 937.2</name>
     <fullName>Расшифровка графы 13 &quot;Расхождение&quot; формы 937.2</fullName>
-    <header>(937.2.13)</header>
+    <header>937.2.13</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
