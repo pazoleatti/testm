@@ -698,25 +698,35 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional
 	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
-		// Форма не должна быть заблокирована для редактирования другим пользователем
+        ReportType reportType = ReportType.DELETE_FD;
+        // Форма не должна быть заблокирована для редактирования другим пользователем
         checkLockAnotherUser(lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD)),
                 logger,  userInfo.getUser());
         //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formDataId, logger, userInfo, "Удаление НФ", true);
+        checkLockedByTask(formDataId, logger, userInfo, "Удаление НФ", false);
 
-		FormData formData = formDataDao.get(formDataId, manual);
-        if (manual) {
-            formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
-			formDataDao.deleteManual(formData);
-        } else {
-            formDataAccessService.canDelete(userInfo, formDataId);
-            auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
-
-            formDataDao.delete(formDataId);
-            deleteReport(formDataId, null, userInfo.getUser().getId());
-            auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
+        String keyTask = generateTaskKey(formDataId, reportType);
+        if (lockService.lock(keyTask, userInfo.getUser().getId(),
+                getFormDataFullName(formDataId, null, reportType),
+                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
+            try {
+                FormData formData = formDataDao.get(formDataId, manual);
+                if (manual) {
+                    formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
+                    formDataDao.deleteManual(formData);
+                    deleteReport(formDataId, true, userInfo.getUser().getId());
+                } else {
+                    formDataAccessService.canDelete(userInfo, formDataId);
+                    auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                            null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null);
+                    sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
+                    formDataDao.delete(formDataId);
+                    interruptTask(formDataId, false, userInfo.getUser().getId(), reportType);
+                    deleteReport(formDataId, null, userInfo.getUser().getId());
+                }
+            } finally {
+                lockService.unlock(keyTask, userInfo.getUser().getId());
+            }
         }
 	}
 
@@ -1866,6 +1876,8 @@ public class FormDataServiceImpl implements FormDataService {
                 return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case MOVE_FD:
                 return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
+            case DELETE_FD:
+                return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.CONSOLIDATE_FD};// excel, csv прерывается при удалении отчета
             case CHECK_FD:
             default:
                 return null;

@@ -162,6 +162,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern, RefBookUtils.INN_JUR_MEANING)){
                     checkSumInn(logger, "ИНН реорганизованной организации", depCombined.getReorgInn());
                 }
+            }
+            if (depCombined.getReorgKpp() != null && !depCombined.getReorgKpp().isEmpty()) {
                 checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern, RefBookUtils.KPP_MEANING);
             }
             if (depCombined.getInn() != null && !depCombined.getInn().isEmpty()) {
