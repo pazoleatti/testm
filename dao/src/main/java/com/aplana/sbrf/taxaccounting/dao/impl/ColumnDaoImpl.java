@@ -160,9 +160,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         for (int i = 0; i<newColumns.size(); i++) {
             Column column = newColumns.get(i);
             column.setId(genKeys.get(i).intValue());
+        }
+        for (Column column : newColumns) {
             if (ColumnType.REFERENCE.equals(column.getColumnType())) {
                 ReferenceColumn referenceColumn = (ReferenceColumn)column;
-                //TODO: Может быть проблема с получением родительского id, но пока так оставим
                 if(referenceColumn.getParentAlias()!=null){
                     referenceColumn.setParentId(formTemplate.getColumn(referenceColumn.getParentAlias()).getId());
                 }

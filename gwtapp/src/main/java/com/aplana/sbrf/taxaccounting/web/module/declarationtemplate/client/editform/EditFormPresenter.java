@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.edit
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event.UpdateTableEvent;
@@ -28,6 +29,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         boolean isChangeFilter();
         void edit(DeclarationType type);
         boolean checkIfrs();
+        void setVisibleIfrs(boolean isVisibleIfrs);
     }
 
     DispatchAsync dispatchAsync;
@@ -53,6 +55,8 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
             @Override
             public void onSuccess(GetDeclarationTypeResult result) {
                 changeItem(result.getDeclarationType());
+                DeclarationType type = result.getDeclarationType();
+                getView().setVisibleIfrs(type.getTaxType() == TaxType.INCOME);
             }
         }, this));
     }
