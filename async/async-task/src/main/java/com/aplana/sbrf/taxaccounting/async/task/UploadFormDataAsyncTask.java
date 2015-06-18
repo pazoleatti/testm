@@ -88,7 +88,7 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                 logger);
         BlobData blobData = blobDataService.get(uuid);
 
-        logger.info("Создание временного среза для нф "+formDataId);
+        //Создание временного среза для нф
         dataRowService.createTemporary(formData);
         logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
         //Парсит загруженный в фаловое хранилище xls-файл
