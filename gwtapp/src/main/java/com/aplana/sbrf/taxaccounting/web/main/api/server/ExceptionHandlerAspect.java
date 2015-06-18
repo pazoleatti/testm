@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.main.api.server;
 
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -7,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
 import com.gwtplatform.dispatch.shared.Action;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -58,7 +60,12 @@ public class ExceptionHandlerAspect {
         } else if (e instanceof org.springframework.security.access.AccessDeniedException) {
             throw new TaActionException(getErrorMessage(actionName) + "Доступ запрещен");
         } else if (e instanceof DaoException) {
-            throw new TaActionException(getErrorMessage(actionName), formatException(e));
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof java.sql.SQLSyntaxErrorException && rootCause.getLocalizedMessage().contains("ORA-02049")) {
+                throw new TaActionException(LockData.STANDARD_LOCK_MSG, formatException(e));
+            } else {
+                throw new TaActionException(getErrorMessage(actionName), formatException(e));
+            }
         } else {
             throw new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""), formatException(e));
         }

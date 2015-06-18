@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.aop;
 
+import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -22,7 +23,7 @@ public class DaoExceptionHandlerAspect {
     public void handleDaoException(Throwable e) throws DaoException {
         Throwable rootCause = ExceptionUtils.getRootCause(e);
         if (rootCause instanceof java.sql.SQLSyntaxErrorException && rootCause.getLocalizedMessage().contains("ORA-02049")) {
-            throw new DaoException("Объект заблокирован другой операцией. Попробуйте выполнить операцию позже", e);
+            throw new DaoException(LockData.STANDARD_LOCK_MSG, e);
         }
         if (e instanceof DaoException) {
             throw (DaoException) e;
