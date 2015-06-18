@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -15,8 +14,6 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -95,13 +92,11 @@ public class FormTemplateController {
             IOUtils.closeQuietly(file.getInputStream());
             resp.setContentType("text/plain");
             resp.setCharacterEncoding("UTF-8");
-            JSONObject result = new JSONObject();
-
+            /*JSONObject result = new JSONObject();
             result.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
-            resp.getWriter().printf(result.toString());
-        } catch (JSONException e) {
-            logger.error("", e);
-            throw new ServiceException("", e);
+            resp.getWriter().printf(result.toString());*/
+
+            resp.getWriter().printf("uuid %s",  logEntryService.save(logger.getEntries()));
         } finally {
             if (formTemplateService.unlock(formTemplateId, userInfo)){
                 logger.warn(String.format("Не разблокировалась запись %d в макетах НФ", formTemplateId));

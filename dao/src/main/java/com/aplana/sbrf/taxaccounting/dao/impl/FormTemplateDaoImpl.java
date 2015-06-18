@@ -150,15 +150,17 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     sb.append(SqlUtils.transformToSqlInStatement(String.format("c%d_style_id", colId), removedStyleIds));
                     sb.append(" OR ");
                 }
-                String sqlForUpdateStyles = sb.toString().substring(0, sb.toString().lastIndexOf("OR") - 1);
+                if (!sb.toString().isEmpty()){
+                    String sqlForUpdateStyles = sb.toString().substring(0, sb.toString().lastIndexOf("OR") - 1);
 
-                int num = getJdbcTemplate().update(
-                        String.format(
-                                "update form_data_%d set %s where %s",
-                                formTemplate.getId(),
-                                transformForCleanColumns(allColumnsForUpdate, "_style_id"), sqlForUpdateStyles)
-                );
-                logger.info("Number of updated styles " + num);
+                    int num = getJdbcTemplate().update(
+                            String.format(
+                                    "update form_data_%d set %s where %s",
+                                    formTemplate.getId(),
+                                    transformForCleanColumns(allColumnsForUpdate, "_style_id"), sqlForUpdateStyles)
+                    );
+                    logger.info("Number of updated styles " + num);
+                }
             }
 
             return formTemplateId;

@@ -1,12 +1,11 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.MessageEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSaveEvent;
-import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateFTIdEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateImpexUiHandlers;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
@@ -20,11 +19,23 @@ import com.gwtplatform.mvp.client.proxy.TabContentProxyPlace;
 
 
 public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPresenter.MyView, FormTemplateImpexPresenter.MyProxy>
-		implements FormTemplateImpexUiHandlers, FormTemplateSetEvent.MyHandler {
+		implements FormTemplateImpexUiHandlers, UpdateFTIdEvent.MyHandler {
 
-	private FormTemplate formTemplate;
+	private int ftId;
 
-	/**
+    @ProxyEvent
+    @Override
+    public void onUpdateId(UpdateFTIdEvent event) {
+        ftId = event.getFtId();
+    }
+
+    @Override
+    protected void onReveal() {
+        super.onReveal();
+        getView().setFormId(ftId);
+    }
+
+    /**
 	 * {@link FormTemplateImpexPresenter}'s proxy.
 	 */
 	@Title("Шаблоны налоговых форм")
@@ -48,13 +59,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 	public FormTemplateImpexPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy) {
 		super(eventBus, view, proxy, FormTemplateMainPresenter.TYPE_SetTabContent);
 		getView().setUiHandlers(this);
-	}
-
-	@ProxyEvent
-	@Override
-	public void onSet(FormTemplateSetEvent event) {
-		formTemplate = event.getFormTemplateExt().getFormTemplate();
-		getView().setFormId(formTemplate.getId() != null?formTemplate.getId():0);
+        getView().setFormId(ftId);
 	}
 
     @Override
@@ -65,7 +70,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
     @Override
 	public void uploadFormTemplateSuccess(String uuid) {
-        if (uuid != null && !uuid.isEmpty() && !uuid.equalsIgnoreCase("<pre></pre>")){
+        if (uuid != null && !uuid.isEmpty() && !uuid.equalsIgnoreCase("<pre></pre>") && !uuid.equalsIgnoreCase("null")){
             LogAddEvent.fire(this, uuid);
         }else {
             Dialog.infoMessage("Макет загружен");
@@ -75,7 +80,7 @@ public class FormTemplateImpexPresenter extends Presenter<FormTemplateImpexPrese
 
 	@Override
 	public void downloadFormTemplate() {
-		Window.open(GWT.getHostPageBaseURL() + "download/formTemplate/download/" + formTemplate.getId(), null, null);
+		Window.open(GWT.getHostPageBaseURL() + "download/formTemplate/download/" + ftId, null, null);
 	}
 
     @Override
