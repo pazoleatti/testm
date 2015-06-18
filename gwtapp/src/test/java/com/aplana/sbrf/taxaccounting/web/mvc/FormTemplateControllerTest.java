@@ -2,13 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.UuidEnum;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,13 +78,13 @@ public class FormTemplateControllerTest {
             contentTypeParams.put("boundary", "265001916915724");
             MediaType mediaType = new MediaType("multipart", "form-data", contentTypeParams);
 
-            JSONObject expectedJson = new JSONObject();
-            expectedJson.put(UuidEnum.SUCCESS_UUID.toString(), uuid);
+            /*JSONObject expectedJson = new JSONObject();
+            expectedJson.put(UuidEnum.SUCCESS_UUID.toString(), uuid);*/
             mockMvc.perform(fileUpload("/formTemplate/upload/1").file(multipartFile)
                             .contentType(mediaType)
             )
                     .andExpect(MockMvcResultMatchers.status().isOk())
-                    .andExpect(MockMvcResultMatchers.content().string(expectedJson.toString()));
+                    .andExpect(MockMvcResultMatchers.content().string("uuid " + uuid));
         } finally {
             if (!cf.delete())
                 System.out.println("Can't delete");
