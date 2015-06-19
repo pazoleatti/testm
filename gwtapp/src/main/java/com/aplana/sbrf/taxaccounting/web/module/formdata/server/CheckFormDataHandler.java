@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +58,11 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 
     @Autowired
     private LockDataService lockDataService;
+
+    @Autowired
+    private TAUserService userService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
 
 	public CheckFormDataHandler() {
 		super(CheckFormDataAction.class);
@@ -95,6 +102,10 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     // добавление подписчика
                     try {
                         lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
+                        logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                        formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)),
+                                sdf.format(lockData.getDateLock()),
+                                userService.getUser(lockData.getUserId()).getName());
                     } catch (ServiceException e) {
                     }
                     result.setLock(false);
