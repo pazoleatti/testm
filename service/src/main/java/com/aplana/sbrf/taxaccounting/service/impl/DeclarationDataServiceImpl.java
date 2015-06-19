@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
@@ -126,6 +127,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Autowired
     private FormTypeService formTypeService;
+
+    @Autowired
+    private DataRowDao dataRowDao;
+
+    @Autowired
+    private FormTemplateService formTemplateService;
 
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
@@ -1034,9 +1041,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         switch (reportType) {
             case PDF_DEC:
             case EXCEL_DEC:
-                String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
-                if (uuidXml != null) {
-                    Long size = blobDataService.getLength(uuidXml);
+                String uuidXmlReport = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+                if (uuidXmlReport != null) {
+                    Long size = blobDataService.getLength(uuidXmlReport);
                     AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
                     long maxSize = taskTypeData.getTaskLimit() * 1024;
                     long shortSize = taskTypeData.getShortQueueLimit() * 1024;
@@ -1049,8 +1056,45 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else {
                     return null;
                 }
+            case ACCEPT_DEC:
+            case CHECK_DEC:
+                String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+                if (uuidXml != null) {
+                    Long size = blobDataService.getLength(uuidXml);
+                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
+                    if (size < shortSize) {
+                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                    }
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                } else {
+                    return null;
+                }
             case XML_DEC:
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+                long cellCountSource = 0;
+                DeclarationData declarationData = get(declarationDataId, userInfo);
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
+                List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
+                        declarationData.getDepartmentId(),
+                        declarationTemplate.getType().getId(),
+                        reportPeriod.getCalendarStartDate(),
+                        reportPeriod.getEndDate());
+                for (DepartmentFormType dftSource : dftSources){
+                    DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
+                    FormData formData =
+                            formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), null);
+                    if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
+                        int rowCountSource = dataRowDao.getSavedSize(formData);
+                        int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                        cellCountSource += rowCountSource * columnCountSource;
+                    }
+                }
+                AsyncTaskTypeData taskTypeXML = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                if (cellCountSource < taskTypeXML.getShortQueueLimit()) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountSource);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountSource);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }
