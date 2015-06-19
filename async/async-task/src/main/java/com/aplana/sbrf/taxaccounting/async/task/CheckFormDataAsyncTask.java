@@ -34,6 +34,9 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
     @Autowired
     private TransactionHelper transactionHelper;
 
+    @Autowired
+    private DataRowService dataRowService;
+
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
@@ -65,6 +68,8 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
+        //Создание временного среза для нф
+        dataRowService.createTemporary(formData);
         try {
             transactionHelper.executeInNewTransaction(new TransactionLogic() {
                           @Override
@@ -81,7 +86,6 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
         } catch (ServiceRollbackException e) {
             // считаем, что проверка прошла успешно
         }
-
     }
 
     @Override

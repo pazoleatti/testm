@@ -10,12 +10,15 @@ import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.CreateAsyncTaskStatus;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TaskFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,9 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
 
 	@Autowired
 	private DataRowService dataRowService;
+
+    @Autowired
+    private RefBookHelper refBookHelper;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -92,8 +98,10 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                         } else {
                             // вызов диалога
                             result.setLock(true);
-                            lockDataService.lockInfo(lockType.getSecond(), logger);
-                            result.setUuid(logEntryService.save(logger.getEntries()));
+                            String restartMsg = (lockType.getSecond().getState().equals(LockData.State.IN_QUEUE.getText())) ?
+                                    String.format(LockData.CANCEL_MSG, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)) :
+                                    String.format(LockData.RESTART_MSG, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo));
+                            result.setRestartMsg(restartMsg);
                             return result;
                         }
                     } else {
@@ -101,24 +109,25 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                         try {
                             lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                             logger.info(String.format(LockData.LOCK_INFO_MSG,
-                                    String.format(reportType.getDescription(), action.getFormData().getFormType().getTaxType().getTaxText()),
+                                    formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo),
                                     sdf.format(lockType.getSecond().getDateLock()),
                                     userService.getUser(lockType.getSecond().getUserId()).getName()));
                         } catch (ServiceException e) {
                         }
                         result.setLock(false);
-                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getFormData().getFormType().getTaxType());
+                        logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)));
                         result.setUuid(logEntryService.save(logger.getEntries()));
                         return result;
                     }
                 } else {
                     // ошибка
-                    formDataService.locked(lockType.getSecond(), logger, reportType);
+                    formDataService.locked(action.getFormData().getId(), reportType, lockType, logger);
                 }
             }
             result.setLock(false);
 
             if (!action.getModifiedRows().isEmpty()) {
+                refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
                 dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
             }
             // проверка наличия не сохраненных изменений
@@ -136,16 +145,15 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
             }
             result.setSave(false);
 
-            if (lockDataService.lock(keyTask,
+            if (!action.isCancelTask() && formDataService.checkExistTask(action.getFormData().getId(), action.getFormData().isManual(), reportType, logger, userInfo)) {
+                result.setLockTask(true);
+            } else if (lockDataService.lock(keyTask,
                     userInfo.getUser().getId(),
                     formDataService.getFormDataFullName(action.getFormData().getId(), null, reportType),
                     LockData.State.IN_QUEUE.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                 try {
-                    List<ReportType> reportTypes = new ArrayList<ReportType>();
-                    reportTypes.add(ReportType.CHECK_FD);
-                    formDataService.interruptTask(formData.getId(), userInfo, reportTypes);
-                    formDataService.deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
+                    formDataService.interruptTask(action.getFormData().getId(), action.getFormData().isManual(), userInfo.getUser().getId(), reportType);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("formDataId", action.getFormData().getId());
                     params.put("manual", action.getFormData().isManual());
@@ -156,14 +164,14 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant);
-                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getFormData().getFormType().getTaxType().getTaxText());
+                    logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)));
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
-                    if (e instanceof ServiceLoggerException) {
-                        throw (ServiceLoggerException) e;
-                    } else {
-                        throw new ActionException(e);
+                    int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+                    if (i != -1) {
+                        throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
                     }
+                    throw new ActionException(e);
                 }
             } else {
                 throw new ActionException("Не удалось запустить расчет. Попробуйте выполнить операцию позже");

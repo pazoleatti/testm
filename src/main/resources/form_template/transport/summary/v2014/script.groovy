@@ -60,6 +60,7 @@ switch (formDataEvent) {
         checkRegionId()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkRegionId()
@@ -70,6 +71,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
@@ -236,8 +238,7 @@ def getReportDate() {
 
 /** Алгоритмы заполнения полей формы (9.1.1.8.1) Табл. 45. */
 def calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def int monthCountInPeriod = getMonthCount()
 
@@ -374,10 +375,7 @@ def calc() {
     def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalColumns)
 
-    dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void fillTaKpp(def row, def errorMsg) {
@@ -404,8 +402,7 @@ def checkTaKpp(def row, def errorMsg) {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int monthCountInPeriod = getMonthCount()
 
     for (def row : dataRows) {
@@ -508,8 +505,7 @@ def getRegionByOKTMO(def oktmoCell, def errorMsg) {
  */
 def consolidation() {
     // очистить форму
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     dataRows.removeAll { it.getAlias() == null }
     Map<String, List> dataRowsMap = ['A': [], 'B': [], 'C': []]
     List<DataRow<Cell>> sourcesRows = new ArrayList()
@@ -519,8 +515,7 @@ def consolidation() {
             getCalendarStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
-            def sourceDataRowHelper = formDataService.getDataRowHelper(source)
-            def sourceDataRows = sourceDataRowHelper.allCached
+            def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
             def formTypeVehicleId = 201
             if (source.formType.id == formTypeVehicleId) {
                 Department sDepartment = departmentService.get(it.departmentId)
@@ -584,14 +579,10 @@ def consolidation() {
         if (copyRows != null && !copyRows.isEmpty()) {
             def insertIndex = getDataRow(dataRows, "$section").getIndex()
             dataRows.addAll(insertIndex, copyRows)
-            // поправить индексы, потому что они после вставки не пересчитываются
-            dataRows.eachWithIndex { row, i ->
-                row.setIndex(i + 1)
-            }
         }
     }
 
-    dataRowHelper.save(dataRows)
+    updateIndexes(dataRows)
 }
 
 def formNewRow(def sRow) {
@@ -943,7 +934,7 @@ def getBenefitCode(def parentRecordId) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     groups.each { section ->
@@ -959,8 +950,11 @@ void sortFormDataRows() {
 
         sortRowsSimple(sectionsRows)
     }
-
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 // Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
@@ -971,8 +965,7 @@ void checkRegionId() {
 }
 
 void addNewRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1 || currentDataRow.getAlias() == 'total') {
         index = getDataRow(dataRows, 'totalC').getIndex()
@@ -992,5 +985,5 @@ void addNewRow() {
         newRow.getCell(it).setStyleAlias("Редактируемое поле")
     }
     dataRows.add(index - 1, newRow)
-    dataRowHelper.save(dataRows)
+    formDataService.saveCachedDataRows(formData, logger)
 }

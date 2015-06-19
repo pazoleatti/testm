@@ -217,4 +217,21 @@ public interface DeclarationDataService {
      * @return название
      */
     String getDeclarationFullName(long declarationId, ReportType reportType);
+
+    /**
+     * Проверяет существование операции, по которым требуется удалить блокировку
+     * @param declarationDataId
+     * @param reportType
+     * @param logger
+     * @return
+     */
+    boolean checkExistTask(long declarationDataId, ReportType reportType, Logger logger);
+
+    /**
+     * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
+     * @param declarationDataId
+     * @param userId
+     * @param reportType
+     */
+    void interruptTask(long declarationDataId, int userId, ReportType reportType);
 }

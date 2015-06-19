@@ -240,30 +240,43 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     @Override
     public void onDelete() {
-        Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?",
-                new DialogHandler() {
-                    @Override
-                    public void yes() {
-                        super.yes();
-                        DeleteConfigPropertyAction action = new DeleteConfigPropertyAction();
-                        action.setRefBookId(getCurrentRefBookId());
-                        action.setSlaveRefBookId(getCurrentTableRefBookId());
-                        action.setReportPeriodId(getView().getReportPeriodId());
-                        action.setDepartmentId(getView().getDepartmentId());
-                        action.setRows(convert(getView().getTableRows()));
-                        action.setRecordId(recordId);
-                        action.setNotTableParams(getView().getNonTableParams());
-                        dispatcher.execute(action, CallbackUtils
-                                .defaultCallback(new AbstractCallback<DeleteConfigPropertyResult>() {
-                                    @Override
-                                    public void onSuccess(DeleteConfigPropertyResult result) {
-                                        getData();
-                                        LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+        final GetCheckDeclarationAction action = new GetCheckDeclarationAction();
+        final String[] uuid = {""};
+        action.setReportPeriodId(getView().getReportPeriodId());
+        action.setDepartment(getView().getDepartmentId());
+        action.setTaxType(getView().getTaxType());
+        action.setFatal(true);
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetCheckDeclarationResult>() {
+                            @Override
+                            public void onSuccess(final GetCheckDeclarationResult result) {
+                                Dialog.confirmMessage("Подтверждение операции", "Настройки подразделения будут удалены, начиная с указанного периода. Продолжить?",
+                                        new DialogHandler() {
+                                            @Override
+                                            public void yes() {
+                                                super.yes();
+                                                DeleteConfigPropertyAction action = new DeleteConfigPropertyAction();
+                                                action.setRefBookId(getCurrentRefBookId());
+                                                action.setSlaveRefBookId(getCurrentTableRefBookId());
+                                                action.setReportPeriodId(getView().getReportPeriodId());
+                                                action.setDepartmentId(getView().getDepartmentId());
+                                                action.setRows(convert(getView().getTableRows()));
+                                                action.setRecordId(recordId);
+                                                action.setNotTableParams(getView().getNonTableParams());
+                                                dispatcher.execute(action, CallbackUtils
+                                                        .defaultCallback(new AbstractCallback<DeleteConfigPropertyResult>() {
+                                                            @Override
+                                                            public void onSuccess(DeleteConfigPropertyResult result) {
+                                                                getData();
+                                                                LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
 
-                                    }
-                                }, DepartmentConfigPropertyPresenter.this));
-                    }
-                });
+                                                            }
+                                                        }, DepartmentConfigPropertyPresenter.this));
+                                            }
+                                        });
+                            }
+                        }, this));
 
     }
 

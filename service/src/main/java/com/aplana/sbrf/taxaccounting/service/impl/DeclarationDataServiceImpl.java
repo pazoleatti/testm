@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
@@ -126,6 +127,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Autowired
     private FormTypeService formTypeService;
+
+    @Autowired
+    private DataRowDao dataRowDao;
+
+    @Autowired
+    private FormTemplateService formTemplateService;
 
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
@@ -851,6 +858,64 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         reportService.deleteDec(declarationDataId);
     }
 
+    /**
+     * Список операции, по которым требуется удалить блокировку
+     * @param reportType
+     * @return
+     */
+    private ReportType[] getCheckTaskList(ReportType reportType) {
+        switch (reportType) {
+            case XML_DEC:
+                return new ReportType[]{ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC, ReportType.ACCEPT_DEC};
+            case ACCEPT_DEC:
+                return new ReportType[]{ReportType.CHECK_DEC};
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public boolean checkExistTask(long declarationDataId, ReportType reportType, Logger logger) {
+        ReportType[] reportTypes = getCheckTaskList(reportType);
+        if (reportTypes == null) return false;
+        DeclarationData declarationData = declarationDataDao.get(declarationDataId);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        boolean exist = false;
+        for (ReportType reportType1: reportTypes) {
+            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType1));
+            if (lock != null) {
+                exist = true;
+                if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
+                    logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
+                            SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                            taUserService.getUser(lock.getUserId()).getName(),
+                            String.format(reportType1.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
+                } else {
+                    logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
+                            SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                            taUserService.getUser(lock.getUserId()).getName(),
+                            String.format(reportType1.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
+                }
+            }
+        }
+        return exist;
+    }
+
+    @Override
+    public void interruptTask(long declarationDataId, int userId, ReportType reportType) {
+        ReportType[] reportTypes = getCheckTaskList(reportType);
+        if (reportTypes == null) return;
+        for (ReportType reportType1: reportTypes) {
+            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType1));
+            if (lock != null) {
+                lockDataService.interruptTask(lock, userId, true);
+            }
+        }
+        if (ReportType.XML_DEC.equals(reportType)) {
+            reportService.deleteDec(declarationDataId);
+        }
+    }
+
     @Override
     public void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger) {
         List<Integer> ddIds = declarationDataDao.findDDIdsByRangeInReportPeriod(decTemplateId,
@@ -976,9 +1041,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         switch (reportType) {
             case PDF_DEC:
             case EXCEL_DEC:
-                String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
-                if (uuidXml != null) {
-                    Long size = blobDataService.getLength(uuidXml);
+                String uuidXmlReport = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+                if (uuidXmlReport != null) {
+                    Long size = blobDataService.getLength(uuidXmlReport);
                     AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
                     long maxSize = taskTypeData.getTaskLimit() * 1024;
                     long shortSize = taskTypeData.getShortQueueLimit() * 1024;
@@ -991,8 +1056,45 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 } else {
                     return null;
                 }
+            case ACCEPT_DEC:
+            case CHECK_DEC:
+                String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
+                if (uuidXml != null) {
+                    Long size = blobDataService.getLength(uuidXml);
+                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
+                    if (size < shortSize) {
+                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
+                    }
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                } else {
+                    return null;
+                }
             case XML_DEC:
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, 0L);
+                long cellCountSource = 0;
+                DeclarationData declarationData = get(declarationDataId, userInfo);
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
+                List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
+                        declarationData.getDepartmentId(),
+                        declarationTemplate.getType().getId(),
+                        reportPeriod.getCalendarStartDate(),
+                        reportPeriod.getEndDate());
+                for (DepartmentFormType dftSource : dftSources){
+                    DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
+                    FormData formData =
+                            formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), null);
+                    if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
+                        int rowCountSource = dataRowDao.getSavedSize(formData);
+                        int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                        cellCountSource += rowCountSource * columnCountSource;
+                    }
+                }
+                AsyncTaskTypeData taskTypeXML = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                if (cellCountSource < taskTypeXML.getShortQueueLimit()) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountSource);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountSource);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }
@@ -1015,7 +1117,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), dd.getDepartmentReportPeriodId(), null);
             if (sourceFD==null){
                 DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
-                logger.error(
+                logger.warn(
                         NOT_EXIST_SOURCE_DECLARATION_WARNING,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         formTypeService.get(sourceDFT.getFormTypeId()).getName(),
@@ -1026,7 +1128,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                                 formatter.format(drp.getCorrectionDate())) : "");
             } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
                 DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
-                logger.error(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
+                logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
                         departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
                         sourceFD.getFormType().getName(),
                         sourceFD.getKind().getName(),
@@ -1038,7 +1140,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
 
-        if (!logger.containsLevel(LogLevel.ERROR)){
+        if (!sourceDDs.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
             logger.info("Консолидация выполнена из всех форм-источников.");
         }
     }

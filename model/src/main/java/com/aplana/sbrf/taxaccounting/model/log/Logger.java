@@ -76,6 +76,28 @@ public class Logger {
 		logger.error("Unhandled exception: " + msg, e);
 	}
 
+    /**
+     * Записывает соощение, которое будет находиться первым в списке
+     * @param level уровень важности
+     * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+     * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+     */
+    public void logTopMessage(LogLevel level, String message, Object...args) {
+        int topPosition = 0;
+        if (entries.size() == MAX_LOGS_COUNT) {
+            entries.add(0, new LogEntry(LogLevel.INFO, "Выведены первые " + MAX_LOGS_COUNT + " сообщений:"));
+            topPosition = 1;
+        }
+        if (entries.size() < MAX_LOGS_COUNT) {
+            String extMessage = String.format(message, args);
+            if (messageDecorator != null) {
+                extMessage = messageDecorator.getDecoratedMessage(extMessage);
+            }
+            LogEntry entry = new LogEntry(level, extMessage);
+            entries.add(topPosition, entry);
+        }
+    }
+
 	private void log(LogLevel level, String message, Object...args) {
         if (entries.size() == MAX_LOGS_COUNT) {
             entries.add(0, new LogEntry(LogLevel.INFO, "Выведены первые " + MAX_LOGS_COUNT + " сообщений:"));

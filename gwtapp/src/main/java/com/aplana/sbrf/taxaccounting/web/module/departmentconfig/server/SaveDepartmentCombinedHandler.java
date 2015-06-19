@@ -162,6 +162,8 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 if (checkPattern(logger, "ИНН реорганизованной организации", depCombined.getReorgInn(), innPattern, RefBookUtils.INN_JUR_MEANING)){
                     checkSumInn(logger, "ИНН реорганизованной организации", depCombined.getReorgInn());
                 }
+            }
+            if (depCombined.getReorgKpp() != null && !depCombined.getReorgKpp().isEmpty()) {
                 checkPattern(logger, "КПП реорганизованной организации", depCombined.getReorgKpp(), kppPattern, RefBookUtils.KPP_MEANING);
             }
             if (depCombined.getInn() != null && !depCombined.getInn().isEmpty()) {
@@ -260,7 +262,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     private boolean checkPattern(Logger logger, String name, String value, Pattern pattern, String patternMeaning) {
         if (value != null && !pattern.matcher(value).matches()){
             logger.error("Поле \"%s\" заполнено неверно (%s)! Ожидаемый паттерн: \"%s\".", name, value, pattern.pattern());
-            logger.error("Расшифровка паттерна \"%s\": %s", pattern.pattern(), patternMeaning);
+            logger.error("Расшифровка паттерна \"%s\": %s.", pattern.pattern(), patternMeaning);
             return false;
         }
         return true;

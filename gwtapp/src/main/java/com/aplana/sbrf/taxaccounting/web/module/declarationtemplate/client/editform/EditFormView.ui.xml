@@ -51,7 +51,7 @@
                                 <g:TextBox ui:field="name" addStyleNames="{style.editFields}"/>
                             </g:cell>
                         </g:HorizontalPanel>
-                        <g:HorizontalPanel>
+                        <g:HorizontalPanel ui:field="checkIfrsPanel">
                             <g:cell horizontalAlignment="right" verticalAlignment="middle">
                                 <g:Label text="Отчетность для МФСО" addStyleNames="{style.leftLabel}"/>
                             </g:cell>

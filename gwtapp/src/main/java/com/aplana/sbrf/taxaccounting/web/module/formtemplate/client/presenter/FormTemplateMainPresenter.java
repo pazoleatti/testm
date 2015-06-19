@@ -251,6 +251,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
             getView().activateVersion(false);
             getView().setLockInformation(false, null, null);
         }
+        UpdateFTIdEvent.fire(FormTemplateMainPresenter.this, formId);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -299,6 +300,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
                     FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
+                    UpdateFTIdEvent.fire(FormTemplateMainPresenter.this, result.getFormTemplateId());
                 }
             }, this));
         }
@@ -321,9 +323,12 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     getView().setTitle(formTemplate.getName());
                     getView().setFormId(formTemplate.getId());
                     //FormTemplateSetEvent.fire(FormTemplateMainPresenter.this, formTemplateExt, new ArrayList<RefBook>());
+                    UpdateFTIdEvent.fire(FormTemplateMainPresenter.this, result.getFormTemplateId());
                     for (Column column : result.getColumns()){
                         Column col = formTemplate.getColumn(column.getAlias());
-                        if (col.getId()==null){
+                        if (col.getId()==null || col.getId()<0){
+                            if (col instanceof ReferenceColumn)
+                                ((ReferenceColumn)col).setParentId(((ReferenceColumn)column).getParentId());
                             col.setId(column.getId());
                         }
                     }

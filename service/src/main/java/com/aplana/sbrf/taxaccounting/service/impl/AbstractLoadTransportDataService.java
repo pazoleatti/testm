@@ -76,7 +76,8 @@ public abstract class AbstractLoadTransportDataService {
         L36("Номер загрузки: %s. Обнаружена ошибка при использовании библиотеки для проверки ЭЦП! %s.", LogLevel.ERROR, true, false),
         L37("Номер загрузки: %s. Не указан путь к каталогу загрузки для %s!", LogLevel.ERROR, true, false),
         L38("Номер загрузки: %s. Не задан алгоритм загрузки для %s!", LogLevel.ERROR, true, false),
-        L40("Номер загрузки: %s. Обработка данных транспортного файла не выполнена, т.к. в данный момент выполняется \"\", инициированное пользователем \"\" в \"\".", LogLevel.ERROR, true, false),
+        L40("Номер загрузки: %s. Обработка данных транспортного файла не выполнена, т.к. в данный момент выполняется операция \"%s\", инициированная пользователем \"%s\" в \"%s\".", LogLevel.ERROR, true, false),
+        L40_1("Номер загрузки: %s. Удалена блокировка \"%s\", инициированная пользователем %s в %s.", LogLevel.ERROR, true, false),
         L41("Номер загрузки: %s. Номер загрузки: %s. Файл %s пропущен, т.к. он уже обрабатывается системой.", LogLevel.ERROR, true, false),
         L42("Номер загрузки: %s. Нет доступа %s ТБ «%s»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
         L42_1("Номер загрузки: %s. Нет доступа %s справочников! Загрузка не выполнена.", LogLevel.ERROR, true, false),
@@ -143,7 +144,7 @@ public abstract class AbstractLoadTransportDataService {
                 prefix = "Событие инициировано Системой. ";
             }
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + String.format(logData.getText(), args), null, formTypeId);
+                    null, null, null, prefix + String.format(logData.getText(), args), null);
         }
     }
 

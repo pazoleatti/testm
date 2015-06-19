@@ -691,3 +691,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     return newRow
 }
+
+def loggerError(def row, def msg) {
+    if (isBalancePeriod()) {
+        rowWarning(logger, row, msg)
+    } else {
+        rowError(logger, row, msg)
+    }
+}

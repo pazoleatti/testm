@@ -346,27 +346,35 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
         params.put("form_data_id", formData.getId());
         params.put("manual", formData.isManual());
 
-        StringBuilder sql = new StringBuilder(" SELECT count(*) FROM ( \n (SELECT ");
+        StringBuilder sql = new StringBuilder(" SELECT count(*) FROM ( \n SELECT ");
         sql.append(sqlColumns);
         sql.append("\n FROM form_data_");
         sql.append(formData.getFormTemplateId());
-        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = 0");
+        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = :temporary1");
         sql.append("\n MINUS \n SELECT ");
         sql.append(sqlColumns);
         sql.append("\n FROM form_data_");
         sql.append(formData.getFormTemplateId());
-        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = 1)");
-        sql.append("\n UNION ALL \n (SELECT ");
-        sql.append(sqlColumns);
-        sql.append("\n FROM form_data_");
-        sql.append(formData.getFormTemplateId());
-        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = 1");
-        sql.append("\n MINUS \n SELECT ");
-        sql.append(sqlColumns);
-        sql.append("\n FROM form_data_");
-        sql.append(formData.getFormTemplateId());
-        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = 0))");
+        sql.append("\n WHERE form_data_id = :form_data_id and manual = :manual and temporary = :temporary2)");
 
+        params.put("temporary1", 1);
+        params.put("temporary2", 0);
+
+        if (log.isTraceEnabled()) {
+            log.trace(params);
+            log.trace(sql.toString());
+        }
+        if (getNamedParameterJdbcTemplate().queryForLong(sql.toString(), params) != 0) {
+            return false;
+        }
+
+        params.put("temporary1", 0);
+        params.put("temporary2", 1);
+
+        if (log.isTraceEnabled()) {
+            log.trace(params);
+            log.trace(sql.toString());
+        }
         return getNamedParameterJdbcTemplate().queryForLong(sql.toString(), params) == 0 ? true : false;
     }
 

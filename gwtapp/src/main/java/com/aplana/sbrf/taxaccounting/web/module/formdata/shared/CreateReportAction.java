@@ -11,11 +11,20 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
  */
 public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> implements ActionName {
 
+    private boolean force;
     private long formDataId;
     private ReportType type;
     private boolean isShowChecked;
     private boolean manual;
     private boolean saved;
+
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
 
     public long getFormDataId() {
         return formDataId;

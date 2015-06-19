@@ -13,6 +13,15 @@ public class GetCheckDeclarationAction extends UnsecuredActionImpl<GetCheckDecla
     private TaxType taxType;
     private Integer period;
     private Integer department;
+    private boolean fatal;
+
+    public boolean isFatal() {
+        return fatal;
+    }
+
+    public void setFatal(boolean fatal) {
+        this.fatal = fatal;
+    }
 
     public TaxType getTaxType() {
         return taxType;
@@ -40,6 +49,6 @@ public class GetCheckDeclarationAction extends UnsecuredActionImpl<GetCheckDecla
 
     @Override
     public String getName() {
-        return "Получение списка деклараций";
+        return "";
     }
 }

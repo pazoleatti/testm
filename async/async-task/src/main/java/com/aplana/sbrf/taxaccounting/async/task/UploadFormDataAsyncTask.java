@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -8,8 +10,11 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.Map;
 
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
@@ -34,6 +39,9 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private LockDataService lockService;
 
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
@@ -67,6 +75,8 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
         String uuid = (String)params.get("uuid");
+        final String lock = (String) params.get(LOCKED_OBJECT.name());
+        final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
@@ -78,10 +88,21 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                 logger);
         BlobData blobData = blobDataService.get(uuid);
 
+        //Создание временного среза для нф
+        dataRowService.createTemporary(formData);
         logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
         //Парсит загруженный в фаловое хранилище xls-файл
         formDataService.importFormData(logger, userInfo,
-                formData.getId(), formData.isManual(), blobData.getInputStream(), blobData.getName());
+                formData.getId(), formData.isManual(), blobData.getInputStream(), blobData.getName(), new LockStateLogger() {
+                    @Override
+                    public void updateState(String state) {
+                        lockService.updateState(lock, lockDate, state);
+                    }
+                });
+        // сохраняем данные в основном срезе
+        formDataService.saveFormData(logger, userInfo, formData);
+        // восстанавливаем временный срез, чтобы продолжить редактирование
+        dataRowService.createTemporary(formData);
     }
 
     @Override

@@ -245,4 +245,12 @@ public interface FormDataDao {
      * @param formData форма нф
      */
     void updateManual(FormData formData);
+
+    /**
+     * Удаление из вспомогательных таблиц для НФ
+     * @param ftId идентификатор версии макетв
+     * @param fdId идентификатор НФ
+     * @return
+     */
+    int deleteFormDataNnn(int ftId, long fdId);
 }

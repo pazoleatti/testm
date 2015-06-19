@@ -15,9 +15,7 @@ public class TimerTaskResult implements Result {
 
     private ReportType taskType;
     private FormMode formMode;
-    private String lockDate;
-    private String lockedByUser;
-    private String title;
+    private LockInfo lockInfo;
 
     public ReportType getTaskType() {
         return taskType;
@@ -35,27 +33,11 @@ public class TimerTaskResult implements Result {
         this.formMode = formMode;
     }
 
-    public String getLockDate() {
-        return lockDate;
+    public LockInfo getLockInfo() {
+        return lockInfo;
     }
 
-    public void setLockDate(String lockDate) {
-        this.lockDate = lockDate;
-    }
-
-    public String getLockedByUser() {
-        return lockedByUser;
-    }
-
-    public void setLockedByUser(String lockedByUser) {
-        this.lockedByUser = lockedByUser;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+    public void setLockInfo(LockInfo lockInfo) {
+        this.lockInfo = lockInfo;
     }
 }

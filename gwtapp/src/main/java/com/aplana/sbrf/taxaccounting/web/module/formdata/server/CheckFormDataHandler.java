@@ -7,9 +7,11 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +48,9 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 	private DataRowService dataRowService;
 
     @Autowired
+    private RefBookHelper refBookHelper;
+
+    @Autowired
     private LogEntryService logEntryService;
 
     @Autowired
@@ -52,6 +58,11 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 
     @Autowired
     private LockDataService lockDataService;
+
+    @Autowired
+    private TAUserService userService;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
 
 	public CheckFormDataHandler() {
 		super(CheckFormDataAction.class);
@@ -69,41 +80,45 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
         if (!action.isEditMode() || action.isEditMode() && lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
             String keyTask = formDataService.generateTaskKey(action.getFormData().getId(), reportType);
             Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormData().getId());
-            if (lockType != null) {
-                if (lockType.getFirst().equals(ReportType.EDIT_FD)) {
-                    // всё нормально, продолжаем выполнение
-                } else if (lockType.getFirst().equals(reportType)) {
-                    if (lockType.getSecond().getUserId() == userInfo.getUser().getId()) {
-                        if (action.isForce()) {
-                            // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
-                            lockDataService.interruptTask(lockType.getSecond(), userInfo.getUser().getId(), false);
-                        } else {
-                            // вызов диалога
-                            result.setLock(true);
-                            lockDataService.lockInfo(lockType.getSecond(), logger);
-                            result.setUuid(logEntryService.save(logger.getEntries()));
-                            return result;
-                        }
+            LockData lockData = lockDataService.getLock(keyTask);
+            if (lockType != null && !lockType.getFirst().equals(ReportType.EDIT_FD)) {
+                formDataService.locked(action.getFormData().getId(), reportType, lockType, logger);
+            }
+            if (lockData != null) {
+                if (lockData.getUserId() == userInfo.getUser().getId()) {
+                    if (action.isForce()) {
+                        // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
+                        lockDataService.interruptTask(lockData, userInfo.getUser().getId(), false);
                     } else {
-                        // добавление подписчика
-                        try {
-                            lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
-                        } catch (ServiceException e) {
-                        }
-                        result.setLock(false);
-                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getFormData().getFormType().getTaxType());
-                        result.setUuid(logEntryService.save(logger.getEntries()));
+                        // вызов диалога
+                        result.setLock(true);
+                        String restartMsg = (lockData.getState().equals(LockData.State.IN_QUEUE.getText())) ?
+                                String.format(LockData.CANCEL_MSG, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)) :
+                                String.format(LockData.RESTART_MSG, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo));
+                        result.setRestartMsg(restartMsg);
                         return result;
                     }
                 } else {
-                    // ошибка
-                    formDataService.locked(lockType.getSecond(), logger, reportType);
+                    // добавление подписчика
+                    try {
+                        lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
+                        logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                        formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)),
+                                sdf.format(lockData.getDateLock()),
+                                userService.getUser(lockData.getUserId()).getName());
+                    } catch (ServiceException e) {
+                    }
+                    result.setLock(false);
+                    logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)));
+                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    return result;
                 }
             }
             result.setLock(false);
 
             if (action.isEditMode()) {
                 if (!action.getModifiedRows().isEmpty()) {
+                    refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
                     dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
                 }
                 // проверка наличия не сохраненных изменений
@@ -133,12 +148,12 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     params.put("manual", action.getFormData().isManual());
                     params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                     params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), keyTask);
-                    LockData lockData = lockDataService.getLock(keyTask);
+                    lockData = lockDataService.getLock(keyTask);
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant);
-                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), formData.getFormType().getTaxType().getTaxText());
+                    logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)));
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
                     if (e instanceof ServiceLoggerException) {

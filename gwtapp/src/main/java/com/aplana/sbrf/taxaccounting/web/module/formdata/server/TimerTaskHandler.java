@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.LockInfo;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerTaskAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerTaskResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -48,27 +49,32 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
     public TimerTaskResult execute(TimerTaskAction action, ExecutionContext executionContext) throws ActionException {
         TimerTaskResult result = new TimerTaskResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
+        LockInfo lockInfo = new LockInfo();
         Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
         if (lockType != null) {
             result.setTaskType(lockType.getFirst());
-            result.setLockedByUser(taUserService.getUser(lockType.getSecond().getUserId()).getName());
+            lockInfo.setLockedByUser(taUserService.getUser(lockType.getSecond().getUserId()).getName());
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
-            result.setLockDate(formatter.format(lockType.getSecond().getDateLock()));
-            if (ReportType.MOVE_FD.equals(lockType.getFirst())) {
-                List<WorkflowMove> workflowMoveList = formDataAccessService.getAvailableMoves(userInfo, action.getFormDataId());
-                String moveName = "Подготовка/утверждение/принятие";
-                for (WorkflowMove workflowMove: workflowMoveList) {
-                    if (!workflowMove.isReasonToMoveShouldBeSpecified()) {
-                        moveName = workflowMove.getToState().getActionName();
-                        break;
-                    }
-                }
-                result.setTitle(String.format("Запущена операция \"%s\"", String.format(lockType.getFirst().getDescription(), moveName, action.getTaxType().getTaxText())));
-            } else {
-                result.setTitle(String.format("Запущена операция \"%s\"", String.format(lockType.getFirst().getDescription(), action.getTaxType().getTaxText())));
-            }
+            lockInfo.setLockDate(formatter.format(lockType.getSecond().getDateLock()));
+            lockInfo.setTitle(String.format("Запущена операция \"%s\"", formDataService.getTaskName(lockType.getFirst(), action.getFormDataId(), userInfo)));
         }
         LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(), userInfo);
+        if (lockInformation != null) {
+            lockInfo.setEditMode(true);
+            if (lockInformation.getUserId() == userInfo.getUser().getId()) {
+                lockInfo.setLockedMe(true);
+            } else {
+                lockInfo.setLockedMe(false);
+            }
+        } else {
+            lockInfo.setEditMode(false);
+            if (lockType != null && lockType.getSecond().getUserId() == userInfo.getUser().getId()) {
+                lockInfo.setLockedMe(true);
+            } else {
+                lockInfo.setLockedMe(false);
+            }
+        }
+        result.setLockInfo(lockInfo);
         if (lockInformation != null && lockInformation.getUserId() == userInfo.getUser().getId()) {
             if (ReportType.EDIT_FD.equals(lockType.getFirst())) {
                 // есто только блокировка режима редактирования

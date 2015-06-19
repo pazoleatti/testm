@@ -59,6 +59,9 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormTypeService"/>
     </bean>
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormTemplateService"/>
+    </bean>
 
     <bean id="declarationDataService" class="com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataServiceImpl" />
 

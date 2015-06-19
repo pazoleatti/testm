@@ -10,8 +10,9 @@ public class AcceptDeclarationDataAction extends UnsecuredActionImpl<AcceptDecla
 	private String reasonForReturn;
     private TaxType taxType;
     private boolean force;
+    private boolean cancelTask;
 
-	public long getDeclarationId() {
+    public long getDeclarationId() {
 		return declarationId;
 	}
 
@@ -49,6 +50,14 @@ public class AcceptDeclarationDataAction extends UnsecuredActionImpl<AcceptDecla
 
     public void setForce(boolean force) {
         this.force = force;
+    }
+
+    public boolean isCancelTask() {
+        return cancelTask;
+    }
+
+    public void setCancelTask(boolean cancelTask) {
+        this.cancelTask = cancelTask;
     }
 
     @Override

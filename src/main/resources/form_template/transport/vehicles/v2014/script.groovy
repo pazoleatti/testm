@@ -57,12 +57,14 @@ switch (formDataEvent) {
         if (formData.kind == FormDataKind.PRIMARY) {
             checkRegionId()
             copyData()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.CALCULATE:
         checkRegionId()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkRegionId()
@@ -90,6 +92,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         checkRegionId()
@@ -97,11 +100,13 @@ switch (formDataEvent) {
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
             logicCheck()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         checkRegionId()
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -206,21 +211,20 @@ def isBalancePeriod() {
 //// Кастомные методы
 
 def addRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
         index = getDataRow(dataRows, 'B').getIndex()
     } else {
         index = currentDataRow.getIndex() + 1
     }
-    dataRowHelper.insert(getNewRow(), index)
+    dataRows.add(index, getNewRow())
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def currentYear = getReportPeriod().taxPeriod.year
     for (def row : dataRows) {
@@ -234,9 +238,7 @@ void calc() {
         row.base = calc24(row)
     }
 
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 def calc15(def row, def currentYear) {
@@ -494,8 +496,7 @@ def getRowEqualsMap(def dataRows, def columns) {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     deleteNotFixedRows(dataRows)
@@ -506,7 +507,7 @@ void consolidation() {
         if (it.formTypeId == formData.formType.id) {
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+                def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 // копирование данных по разделам
                 sections.each { section ->
                     copyRows(sourceDataRows, dataRows, section)
@@ -514,7 +515,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 def String checkPrevPeriod(def reportPeriod) {
@@ -531,8 +531,7 @@ def String checkPrevPeriod(def reportPeriod) {
 // Также получение данных из старых форм "Сведения о транспортных средствах, по которым уплачивается транспортный налог"
 // и "Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог"
 def copyData() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = []
 
     def reportPeriod = getReportPeriod()
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
@@ -554,7 +553,8 @@ def copyData() {
     }
 
     if (dataRows.size() > 3) {
-        dataRowHelper.save(dataRows)
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = dataRows
     }
 }
 
@@ -592,14 +592,14 @@ def getPrevRowsForCopy(def reportPeriod, def dataRows) {
         def formData201 = formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, null)
         if (formData201 != null && formData201.formTemplateId == 201) {
             // получить нет формы за предыдущий отчетный период, то попытаться найти старую форму 201
-            def dataRows201 = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allCached : null)
+            def dataRows201 = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allSaved : null)
 
             if (dataRows201 != null && !dataRows201.isEmpty()) {
                 dataRows = copyFromOldForm(dataRows, dataRows201)
             }
         } else {
             // получить форму за предыдущий отчетный период
-            def dataRowsPrev = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allCached : null)
+            def dataRowsPrev = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allSaved : null)
             if (dataRowsPrev != null && !dataRowsPrev.isEmpty()) {
                 dataRows = copyFromOursForm(dataRows, dataRowsPrev)
             }
@@ -1002,8 +1002,7 @@ void addData(def xml, int headRowCount) {
         }
     }
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.allCached
+        def dataRows = formDataService.getDataRowHelper(formData).allCached
 
         deleteNotFixedRows(dataRows)
 
@@ -1017,7 +1016,7 @@ void addData(def xml, int headRowCount) {
                 updateIndexes(dataRows)
             }
         }
-        dataRowHelper.save(dataRows)
+        formDataService.getDataRowHelper(formData).allCached = dataRows
     }
 }
 
@@ -1332,7 +1331,7 @@ def insertRows(def dataRowHelper, def mapRows) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     for (def section : sections) {
@@ -1347,7 +1346,11 @@ void sortFormDataRows() {
 
         sortRowsSimple(sectionRows)
     }
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 /**

@@ -59,6 +59,8 @@ public class FormDataServiceImpl implements FormDataService {
 
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+    private static final SimpleDateFormat SDF_DD_MM_YYYY_HH_MM_SS = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
     private static final Calendar CALENDAR = Calendar.getInstance();
     private static final Date MAX_DATE;
     static {
@@ -162,9 +164,9 @@ public class FormDataServiceImpl implements FormDataService {
     private BlobDataService blobDataService;
 
     @Override
-    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder) {
+    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder, boolean importFormData) {
         formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
-        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, kind, periodOrder, false);
+        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, kind, periodOrder, importFormData);
     }
 
     @Override
@@ -179,24 +181,21 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
-        loadFormData(logger, userInfo, formDataId, isManual, false, inputStream, fileName, formDataEvent);
+        loadFormData(logger, userInfo, formDataId, isManual, false, inputStream, fileName, formDataEvent, null);
     }
 
     @Override
-    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName) {
-        String key = generateTaskKey(formDataId, ReportType.IMPORT_FD);
-        log.info(String.format("Начался импорт excel-файла в налоговую форму по ключу %s", key));
-        loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT);
-        log.info(String.format("Закончился импорт excel-файла в налоговую форму по ключу %s", key));
+    public void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream inputStream, String fileName, LockStateLogger stateLogger) {
+        loadFormData(logger, userInfo, formDataId, isManual, true, inputStream, fileName, FormDataEvent.IMPORT, stateLogger);
     }
 
     @Override
     @Transactional
     public void migrationFormData(Logger logger, TAUserInfo userInfo, long formDataId, InputStream inputStream, String fileName) {
-        loadFormData(logger, userInfo, formDataId, false, false, inputStream, fileName, FormDataEvent.MIGRATION);
+        loadFormData(logger, userInfo, formDataId, false, false, inputStream, fileName, FormDataEvent.MIGRATION, null);
     }
 
-    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, boolean isInner, InputStream inputStream, String fileName, FormDataEvent formDataEvent) {
+    private void loadFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, boolean isInner, InputStream inputStream, String fileName, FormDataEvent formDataEvent, LockStateLogger stateLogger) {
         String key = generateTaskKey(formDataId, ReportType.EDIT_FD);
 
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
@@ -207,6 +206,9 @@ public class FormDataServiceImpl implements FormDataService {
 
         try {
             log.info(String.format("Создание временного файла: %s", key));
+            if (stateLogger != null) {
+                stateLogger.updateState("Создание временного файла");
+            }
             dataFile = File.createTempFile("dataFile", ".original");
             dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
             IOUtils.copy(inputStream, dataFileOutputStream);
@@ -214,7 +216,6 @@ public class FormDataServiceImpl implements FormDataService {
 
             String ext = getFileExtention(fileName);
 
-            log.info(String.format("Проверка ЭЦП: %s", key));
             // Проверка ЭЦП
             // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
             boolean check = false;
@@ -225,6 +226,7 @@ public class FormDataServiceImpl implements FormDataService {
                     List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
                     if (paramList != null) { // Необходимо проверить подпись
                         try {
+                            log.info(String.format("Проверка ЭЦП: %s", key));
                             check = signService.checkSign(dataFile.getAbsolutePath(), 0);
                         } catch (Exception e) {
                             logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
@@ -247,17 +249,21 @@ public class FormDataServiceImpl implements FormDataService {
                 Map<String, Object> additionalParameters = new HashMap<String, Object>();
                 additionalParameters.put("ImportInputStream", dataFileInputStream);
                 additionalParameters.put("UploadFileName", fileName);
-                log.info(String.format("Выполнение скрипта началось: %s", key));
+                if (stateLogger != null) {
+                    stateLogger.updateState("Импорт XLSM-файла");
+                }
+                log.info(String.format("Выполнение скрипта: %s", key));
                 dataRowDao.createTemporary(fd);
                 formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-                log.info(String.format("Выполнение скрипта закончилось: %s", key));
                 IOUtils.closeQuietly(dataFileInputStream);
             }
 
             if (logger.containsLevel(LogLevel.ERROR)) {
-                log.info(String.format("Сохранение ошибок началось: %s", key));
+                if (stateLogger != null) {
+                    stateLogger.updateState("Сохранение ошибок");
+                }
+                log.info(String.format("Сохранение ошибок: %s", key));
                 String uuid = logEntryService.save(logger.getEntries());
-                log.info(String.format("Сохранение ошибок закончилось: %s", key));
                 throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
             } else if (isInner) {
                 logger.info("Данные загружены");
@@ -326,8 +332,7 @@ public class FormDataServiceImpl implements FormDataService {
         formData.setPerformer(performer);
 
         // Execute scripts for the form event CREATE
-		formDataScriptingService.executeScript(userInfo, formData,
-                importFormData ? FormDataEvent.IMPORT : FormDataEvent.CREATE, logger, null);
+		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CREATE, logger, null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
 					"Произошли ошибки в скрипте создания налоговой формы",
@@ -335,22 +340,22 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 		formDataDao.save(formData);
 
-		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-		auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null, formData.getFormType().getId());
+        if (!importFormData) {
+            logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
+            auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
+        }
 
-		// Заполняем начальные строки (но не сохраняем)
+        // Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
-		if (!importFormData) {
-			// Execute scripts for the form event AFTER_CREATE
-			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_CREATE, logger, null);
-			if (logger.containsLevel(LogLevel.ERROR)) {
-				throw new ServiceLoggerException(
-						"Произошли ошибки в скрипте после создания налоговой формы",
-						logEntryService.save(logger.getEntries()));
-			}
-		}
+        // Execute scripts for the form event AFTER_CREATE
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_CREATE, logger, null);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошли ошибки в скрипте после создания налоговой формы",
+                    logEntryService.save(logger.getEntries()));
+        }
 
 		dataRowDao.commit(formData);
 
@@ -615,9 +620,6 @@ public class FormDataServiceImpl implements FormDataService {
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
-        //Проверка актуальности справочных значений
-        checkReferenceValues(logger, formData, true);
-
         // Отработка скриптом события сохранения
         // dataRowDao.createTemporary(formData); не вызываем, т.к это должно быть сделано до этого, в вызывающих операциях
 		formDataScriptingService.executeScript(userInfo, formData,
@@ -625,14 +627,6 @@ public class FormDataServiceImpl implements FormDataService {
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
-        }
-
-        // Отработка скриптом события сортировки
-        formDataScriptingService.executeScript(userInfo, formData,
-                FormDataEvent.SORT_ROWS, logger, null);
-
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
         }
 
         // Обновление для сквозной нумерации
@@ -693,25 +687,38 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	@Transactional
 	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
-		// Форма не должна быть заблокирована для редактирования другим пользователем
-        checkLockAnotherUser(lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD)),
-                logger,  userInfo.getUser());
-        //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formDataId, logger, userInfo, "Удаление НФ", true);
+        ReportType reportType = ReportType.DELETE_FD;
+        LockData lockData = lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD));
+        if (!manual && lockData != null) {
+            locked(formDataId, ReportType.DELETE_FD, new Pair<ReportType, LockData>(ReportType.EDIT_FD, lockData), logger);
+        } else if (manual) {
+            // Форма не должна быть заблокирована для редактирования другим пользователем
+            checkLockedMe(lockData, userInfo.getUser());
+        }
 
-		FormData formData = formDataDao.get(formDataId, manual);
-        if (manual) {
-            formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
-			formDataDao.deleteManual(formData);
-        } else {
-            formDataAccessService.canDelete(userInfo, formDataId);
-            auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
-
-            formDataDao.delete(formDataId);
-            deleteReport(formDataId, null, userInfo.getUser().getId());
-            auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null, formData.getFormType().getId());
+        String keyTask = generateTaskKey(formDataId, reportType);
+        if (lockService.lock(keyTask, userInfo.getUser().getId(),
+                getFormDataFullName(formDataId, null, reportType),
+                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
+            try {
+                FormData formData = formDataDao.get(formDataId, manual);
+                if (manual) {
+                    formDataAccessService.canDeleteManual(logger, userInfo, formDataId);
+                    formDataDao.deleteManual(formData);
+                    deleteReport(formDataId, true, userInfo.getUser().getId());
+                } else {
+                    formDataAccessService.canDelete(userInfo, formDataId);
+                    sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
+                    formDataDao.delete(formDataId);
+                    formDataDao.deleteFormDataNnn(formData.getFormTemplateId(), formDataId);
+                    interruptTask(formDataId, false, userInfo.getUser().getId(), reportType);
+                    deleteReport(formDataId, null, userInfo.getUser().getId());
+                    auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                            null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null);
+                }
+            } finally {
+                lockService.unlock(keyTask, userInfo.getUser().getId());
+            }
         }
 	}
 
@@ -724,12 +731,6 @@ public class FormDataServiceImpl implements FormDataService {
      */
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
-        // Форма не должна быть заблокирована даже текущим пользователем
-        String lockKey = generateTaskKey(formDataId, ReportType.EDIT_FD);
-        //checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
-        //Проверяем не заблокирована ли нф операцией загрузки в нее
-        //checkLockedByImport(formDataId, logger);
-
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
@@ -742,71 +743,62 @@ public class FormDataServiceImpl implements FormDataService {
 
         FormData formData = formDataDao.get(formDataId, manual);
         dataRowDao.createTemporary(formData);
-        List<String> lockedObjects = new ArrayList<String>();
-        try {
-            switch (workflowMove){
-                case PREPARED_TO_APPROVED:
-                    lockForm(lockedObjects, userInfo, lockKey, logger, formData);
-                    //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
-                    checkReferenceValues(logger, formData, false);
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                case CREATED_TO_PREPARED:
-                case APPROVED_TO_ACCEPTED:
-                case PREPARED_TO_ACCEPTED:
-                case CREATED_TO_ACCEPTED:
-                    lockForm(lockedObjects, userInfo, lockKey, logger, formData);
-                    //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
-                    checkReferenceValues(logger, formData, false);
-                    checkConsolidateFromSources(formData, logger);
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                case APPROVED_TO_CREATED:
-                case ACCEPTED_TO_APPROVED:
-                case ACCEPTED_TO_PREPARED:
-                case ACCEPTED_TO_CREATED:
-                    sourceService.updateFDDDConsolidation(formDataId);
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-                    break;
-                default:
-                    //Делаем переход
-                    moveProcess(formData, userInfo, workflowMove, note, logger);
-            }
-        } finally {
-            for (String lock : lockedObjects) {
-                lockService.unlock(lock, userInfo.getUser().getId());
-            }
+        switch (workflowMove){
+            case PREPARED_TO_APPROVED:
+                lockForm(logger, formData);
+                //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                checkReferenceValues(logger, formData, false);
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            case CREATED_TO_PREPARED:
+            case APPROVED_TO_ACCEPTED:
+            case PREPARED_TO_ACCEPTED:
+            case CREATED_TO_ACCEPTED:
+                lockForm(logger, formData);
+                //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                checkReferenceValues(logger, formData, false);
+                checkConsolidateFromSources(formData, logger);
+                if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
+                    // Отработка скриптом события сортировки
+                    formDataScriptingService.executeScript(userInfo, formData,
+                            FormDataEvent.SORT_ROWS, logger, null);
+
+                    if (logger.containsLevel(LogLevel.ERROR)) {
+                        throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
+                    }
+                    logger.info("Выполнена сортировка строк налоговой формы.");
+                }
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            case APPROVED_TO_CREATED:
+            case ACCEPTED_TO_APPROVED:
+            case ACCEPTED_TO_PREPARED:
+            case ACCEPTED_TO_CREATED:
+                sourceService.updateFDDDConsolidation(formDataId);
+                moveProcess(formData, userInfo, workflowMove, note, logger);
+                break;
+            default:
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger);
         }
     }
 
-    private void lockForm(List<String> listWithLocks, TAUserInfo userInfo, String lockKey, Logger logger, FormData formData){
-        //Устанавливаем блокировку на текущую нф
-        int userId = userInfo.getUser().getId();
-        checkLockAnotherUser(lockService.getLock(lockKey), logger,  userInfo.getUser());
-        LockData lockData = lockService.lock(lockKey, userId, getFormDataFullName(formData.getId(), null, null),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-        if (lockData == null) {
-            //Блокировка установлена
-            listWithLocks.add(lockKey);
-            //Проверяем блокировку необходимых справочников. Их не должно быть
-            for (Column column : formData.getFormColumns()) {
-                if (ColumnType.REFBOOK.equals(column.getColumnType())) {
-                    Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
-                    if (attributeId != null) {
-                        RefBook refBook = refBookDao.getByAttribute(attributeId);
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
-                        if (lockService.isLockExists(referenceLockKey, false)) {
-                            throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
-                                    logEntryService.save(logger.getEntries()));
-                        }
+    private void lockForm(Logger logger, FormData formData){
+        //Проверяем блокировку необходимых справочников. Их не должно быть
+        for (Column column : formData.getFormColumns()) {
+            if (ColumnType.REFBOOK.equals(column.getColumnType())) {
+                Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
+                if (attributeId != null) {
+                    RefBook refBook = refBookDao.getByAttribute(attributeId);
+                    String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + refBook.getId();
+                    if (lockService.isLockExists(referenceLockKey, false)) {
+                        throw new ServiceLoggerException(String.format(LOCK_REFBOOK_MESSAGE, refBook.getName()),
+                                logEntryService.save(logger.getEntries()));
                     }
                 }
             }
-        } else {
-            throw new ServiceLoggerException(LOCK_MESSAGE,
-                    logEntryService.save(logger.getEntries()));
         }
     }
 
@@ -1025,7 +1017,7 @@ public class FormDataServiceImpl implements FormDataService {
      *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
      */
     @Transactional(readOnly = false)
-    public void compose(final FormData formData, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
+    public void compose(final FormData formData, final TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
         stateLogger.updateState("Выполнение проверок на возможность консолидации");
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -1074,6 +1066,18 @@ public class FormDataServiceImpl implements FormDataService {
 
         //1Е.  Система проверяет экземпляр на возможность выполнения консолидации в него. Не существует ни одной принятой формы-источника
         if (srcAcceptedIds.isEmpty()){
+            //Очищаем устаревшие данные, оставшиеся после старой консолидации
+            tx.executeInNewTransaction(new TransactionLogic() {
+                @Override
+                public void execute() {
+                    clearDataRows(formData, userInfo);
+                }
+
+                @Override
+                public Object executeWithReturn() {
+                    return null;
+                }
+            });
             throw new ServiceException("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
         }
 
@@ -1132,7 +1136,7 @@ public class FormDataServiceImpl implements FormDataService {
             logger.info(s);
         }
 
-        //Удаление отчета НФ             
+        //Удаление отчета НФ
         stateLogger.updateState("Удаление отчетов формы");
         reportService.delete(formData.getId(), null);
         //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
@@ -1144,7 +1148,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void checkCompose(final FormData formData, TAUserInfo userInfo, Logger logger) {
+    public void checkCompose(final FormData formData, final TAUserInfo userInfo, Logger logger) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         //1А. Отчетный период закрыт
@@ -1201,7 +1205,29 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getCalendarStartDate(),
                 reportPeriod.getEndDate());
         if (departmentFormTypesSources.isEmpty()){
+            //Очищаем устаревшие данные, оставшиеся после старой консолидации
+            tx.executeInNewTransaction(new TransactionLogic() {
+                @Override
+                public void execute() {
+                    clearDataRows(formData, userInfo);
+                }
+
+                @Override
+                public Object executeWithReturn() {
+                    return null;
+                }
+            });
             throw new ServiceException("для текущей формы не назначено ни одного источника");
+        }
+    }
+
+    // очищаем данные в нф (кроме фиксированных строк)
+    private void clearDataRows(FormData formData, TAUserInfo userInfo){
+        List<DataRow<Cell>> fixRows = formTemplateService.getFullFormTemplate(formData.getFormTemplateId()).getRows();
+        if (dataRowDao.getSavedSize(formData) > fixRows.size()) {
+            dataRowDao.saveRows(formData, fixRows);
+            dataRowDao.commit(formData);
+            updatePreviousRowNumber(formData, userInfo);
         }
     }
 
@@ -1260,9 +1286,22 @@ public class FormDataServiceImpl implements FormDataService {
                                     : "");
                     break;
                 case IMPORT_FD:
-                case IMPORT_TF_FD:
                     name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            String.format(reportType.getDescription(), str, formData.getFormType().getTaxType().getTaxText()),
+                            reportType.getDescription(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            department.getName(),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "");
+                    break;
+                case IMPORT_TF_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_IMPORT.getText(),
+                            str,
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
                             department.getName(),
@@ -1426,6 +1465,9 @@ public class FormDataServiceImpl implements FormDataService {
         int previousRowNumber = 0;
         // Отчетный период подразделения
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+        if (!beInOnAutoNumeration(formData.getState(), departmentReportPeriod)){
+            return previousRowNumber;
+        }
         // Налоговый период
         TaxPeriod taxPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
@@ -1618,7 +1660,7 @@ public class FormDataServiceImpl implements FormDataService {
             logger.error("\"%s\" пользователем \"%s\" запущена операция \"%s\"",
                     SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
                     userService.getUser(lockType.getSecond().getUserId()).getName(),
-                    lockType.getSecond().getDescription());
+                    getTaskName(lockType.getFirst(), formDataId, userInfo));
             throw new ServiceLoggerException(LOCK_MESSAGE_TASK,
                     logEntryService.save(logger.getEntries()), taskName);
         }
@@ -1637,23 +1679,29 @@ public class FormDataServiceImpl implements FormDataService {
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
     }
 
-    @Override
-    public void deleteReport(long formDataId, Boolean manual, int userId) {
+    private List<String> generateReportKeys(ReportType reportType, long formDataId, Boolean manual) {
         List<String> lockKeys = new ArrayList<String>();
         boolean[] b = {false, true};
-        ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
-        for (ReportType reportType: reportTypes) {
-            for (boolean showChecked : b) {
-                for(boolean saved : b) {
-                    if (manual != null) {
-                        lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved));
-                    } else {
-                        for(boolean manual1: b) {
-                            lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual1, saved));
-                        }
+        for (boolean showChecked : b) {
+            for(boolean saved : b) {
+                if (manual != null) {
+                    lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved));
+                } else {
+                    for(boolean manual1: b) {
+                        lockKeys.add(String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual1, saved));
                     }
                 }
             }
+        }
+        return lockKeys;
+    }
+
+    @Override
+    public void deleteReport(long formDataId, Boolean manual, int userId) {
+        List<String> lockKeys = new ArrayList<String>();
+        ReportType[] reportTypes = {ReportType.CSV, ReportType.EXCEL};
+        for (ReportType reportType: reportTypes) {
+            lockKeys.addAll(generateReportKeys(reportType, formDataId, manual));
         }
         lockService.interuptAllTasks(lockKeys, userId);
         reportService.delete(formDataId, manual);
@@ -1708,8 +1756,10 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void locked(LockData lockData, Logger logger, ReportType reportType) {
-        TAUser user = userService.getUser(lockData.getUserId());
+    public void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger) {
+        TAUser user = userService.getUser(lockType.getSecond().getUserId());
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(user);
         String msg = "";
         switch (reportType) {
             case CONSOLIDATE_FD:
@@ -1717,34 +1767,41 @@ public class FormDataServiceImpl implements FormDataService {
                         String.format(
                                 LOCK_CURRENT_1,
                                 user.getName(),
-                                SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
-                                lockData.getDescription())
+                                SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
+                                getTaskName(lockType.getFirst(), formDataId, userInfo))
                 );
                 break;
             default:
                 logger.error(
                         String.format(
                                 LockData.LOCK_CURRENT,
-                                SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()),
+                                SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
                                 user.getName(),
-                                lockData.getDescription())
+                                getTaskName(lockType.getFirst(), formDataId, userInfo))
                 );
         }
         switch (reportType) {
+            case EXCEL:
+            case CSV:
+                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых формирование отчета невозможно";
+                break;
             case CHECK_FD:
                 msg = "Для текущего экземпляра налоговой формы запущены операции, при которых ее проверка невозможна";
                 break;
             case MOVE_FD:
-                msg = String.format("Для текущего экземпляра налоговой формы запущены операции, при которых его подготовка/утверждение/принятие невозможно", "".toLowerCase(new Locale("ru", "RU")));
+                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых изменение его состояния невозможно";
                 break;
             case CALCULATE_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", String.format(reportType.getDescription(),"налоговой "), lockData.getDescription());
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
                 break;
             case IMPORT_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", reportType.getDescription(), lockData.getDescription());
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
                 break;
             case CONSOLIDATE_FD:
                 msg = "";
+                break;
+            case DELETE_FD:
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных", getTaskName(reportType, formDataId, userInfo));
                 break;
         }
         throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
@@ -1756,8 +1813,6 @@ public class FormDataServiceImpl implements FormDataService {
             case CHECK_FD:
             case MOVE_FD:
             case CALCULATE_FD:
-            case EXCEL:
-            case CSV:
                 int rowCount = dataRowDao.getSavedSize(formData);
                 int columnCount = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
                 long cellCount = rowCount * columnCount;
@@ -1766,6 +1821,18 @@ public class FormDataServiceImpl implements FormDataService {
                     return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCount);
                 }
                 return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCount);
+            case EXCEL:
+            case CSV:
+                int rowCountReport = dataRowDao.getSavedSize(formData);
+                int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                long cellCountReport = rowCountReport * columnCountReport;
+                AsyncTaskTypeData taskTypeDataReport = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                if (cellCountReport > taskTypeDataReport.getTaskLimit()) {
+                    return new Pair<BalancingVariants, Long>(null, cellCountReport);
+                } else if (cellCountReport < taskTypeDataReport.getShortQueueLimit()) {
+                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountReport);
+                }
+                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountReport);
             case CONSOLIDATE_FD:
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
@@ -1790,12 +1857,12 @@ public class FormDataServiceImpl implements FormDataService {
                     //Запись на будущее, чтобы второго цикла не делать
                     //1E.
                     if (sourceForm.getState() == WorkflowState.ACCEPTED){
-                        int rowCountSource = dataRowDao.getSavedSize(formData);
-                        int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                        int rowCountSource = dataRowDao.getSavedSize(sourceForm);
+                        int columnCountSource = formTemplateService.get(sourceForm.getFormTemplateId()).getColumns().size();
                         cellCountSource += rowCountSource * columnCountSource;
                     }
                 }
-                AsyncTaskTypeData taskTypeConsolidate= asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+                AsyncTaskTypeData taskTypeConsolidate = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
                 if (cellCountSource < taskTypeConsolidate.getShortQueueLimit()) {
                     return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountSource);
                 }
@@ -1813,6 +1880,122 @@ public class FormDataServiceImpl implements FormDataService {
                 return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, fileSize);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+        }
+    }
+
+    @Override
+    public String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo) {
+        FormData formData = formDataDao.get(formDataId, false);
+        switch (reportType) {
+            case DELETE_FD:
+            case EDIT_FD:
+            case CALCULATE_FD:
+            case CONSOLIDATE_FD:
+            case CHECK_FD:
+                return String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText());
+            case EXCEL:
+            case CSV:
+            case IMPORT_FD:
+            case IMPORT_TF_FD:
+            case MOVE_FD:
+                return reportType.getDescription();
+            default:
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+        }
+    }
+
+    /**
+     * Список операции, по которым требуется удалить блокировку
+     * @param reportType
+     * @return
+     */
+    private ReportType[] getCheckTaskList(ReportType reportType) {
+        switch (reportType) {
+            case CONSOLIDATE_FD:
+                return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.IMPORT_TF_FD, ReportType.EXCEL, ReportType.CSV};
+            case CALCULATE_FD:
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
+            case IMPORT_FD:
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
+            case MOVE_FD:
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
+            case DELETE_FD:
+                return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.CONSOLIDATE_FD};// excel, csv прерывается при удалении отчета
+            case CHECK_FD:
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public boolean checkExistTask(long formDataId, boolean manual, ReportType reportType, Logger logger, TAUserInfo userInfo) {
+        ReportType[] reportTypes = getCheckTaskList(reportType);
+        if (reportTypes == null) return false;
+        boolean exist = false;
+        Boolean manualReport;
+        switch (reportType) {
+            case CALCULATE_FD:
+            case IMPORT_FD:
+                manualReport = manual;
+                break;
+            default:
+                manualReport = null;
+        }
+        for (ReportType reportType1: reportTypes) {
+            List<String> taskKeyList = new ArrayList<String>();
+            if (ReportType.CSV.equals(reportType1) || ReportType.EXCEL.equals(reportType1)) {
+                taskKeyList.addAll(generateReportKeys(reportType1, formDataId, manualReport));
+            } else {
+                taskKeyList.add(generateTaskKey(formDataId, reportType1));
+            }
+            for(String key: taskKeyList) {
+                LockData lock = lockService.getLock(key);
+                if (lock != null) {
+                    exist = true;
+                    if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
+                        logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
+                                SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                                userService.getUser(lock.getUserId()).getName(),
+                                getTaskName(reportType1, formDataId, userInfo));
+                    } else {
+                        logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
+                                SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
+                                userService.getUser(lock.getUserId()).getName(),
+                                getTaskName(reportType1, formDataId, userInfo));
+                    }
+                }
+            }
+        }
+        return exist;
+    }
+
+    @Override
+    public void interruptTask(long formDataId, boolean manual, int userId, ReportType reportType) {
+        ReportType[] reportTypes = getCheckTaskList(reportType);
+        if (reportTypes == null) return;
+        Boolean manualReport;
+        switch (reportType) {
+            case CALCULATE_FD:
+            case IMPORT_FD:
+                manualReport = manual;
+                break;
+            default:
+                manualReport = null;
+        }
+        for (ReportType reportType1: reportTypes) {
+            List<String> taskKeyList = new ArrayList<String>();
+            if (ReportType.CSV.equals(reportType1) || ReportType.EXCEL.equals(reportType1)) {
+                taskKeyList.addAll(generateReportKeys(reportType1, formDataId, manualReport));
+                reportService.delete(formDataId, manual);
+            } else {
+                taskKeyList.add(generateTaskKey(formDataId, reportType1));
+            }
+            for(String key: taskKeyList) {
+                LockData lock = lockService.getLock(key);
+                if (lock != null) {
+                    lockService.interruptTask(lock, userId, true);
+                }
+            }
         }
     }
 }

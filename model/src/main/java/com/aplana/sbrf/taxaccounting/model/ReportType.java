@@ -7,8 +7,8 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public enum ReportType {
 
-    EXCEL(0, "Excel", "", 3L, 103L),
-    CSV(1, "CSV", "", 4L, 104L),
+    EXCEL(0, "Excel", "Формирование Excel отчета", 3L, 103L),
+    CSV(1, "CSV", "Формирование CSV отчета", 4L, 104L),
 
     EXCEL_DEC(0, "Excel", "Формирование печатного представления %s", 5L, 105L),
     XML_DEC(1, "XML", "Расчет %s", 6L, 106L),
@@ -22,9 +22,10 @@ public enum ReportType {
     CALCULATE_FD(1, "CALCULATE_FORM_DATA", "Расчет %sформы", 17L, 117L),
     IMPORT_FD(2, "IMPORT_FORM_DATA", "Загрузка XLSM-файла с формы экземпляра налоговой формы", 18L, 118L), //импорт из режима редактирования
     CHECK_FD(3, "CHECK_FORM_DATA", "Проверка %sформы", 19L, 119L),
-    MOVE_FD(4, "MOVE_FORM_DATA", "%s %sформы", 20L, 120L),
-    IMPORT_TF_FD(5, "IMPORT_TF_FORM_DATA", "Импорт файла %s для %sформы из каталога загрузки", 0L, 0L), //формально является задачей, блокирует форму при импорт из каталога загрузки
+    MOVE_FD(4, "MOVE_FORM_DATA", "Изменение состояния НФ", 20L, 120L),
+    IMPORT_TF_FD(5, "IMPORT_TF_FORM_DATA", "Импорт транспортного файла из каталога загрузки", 0L, 0L), //формально является задачей, блокирует форму при импорт из каталога загрузки
     EDIT_FD(6, "EDIT_FORM_DATA", "Редактирование %sформы", 0L, 0L), //формально является задачей, нужна для блокирки формы в режиме редартирования/при консолидации приемника
+    DELETE_FD(7, "DELETE_FORM_DATA", "Удаление %sформы", 0L, 0L), //формально является задачей
 
     ZIP_IFRS(0, "Zip", "", 9L, 109L),
 

@@ -26,13 +26,13 @@ import java.util.regex.Pattern;
 public class RefBookUtils extends AbstractDao {
 
     public static String INN_JUR_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}";
-    public static String INN_JUR_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9).";
+    public static String INN_JUR_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9)";
     public static String INN_IND_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}";
     public static String INN_IND_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 10 символов: (0-9)";
     public static String KPP_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})";
-    public static String KPP_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9).";
+    public static String KPP_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9)";
     public static String TAX_ORGAN_PATTERN = "[0-9]{4}";
-    public static String TAX_ORGAN_MEANING = "Все 4 символа: (0-9).";
+    public static String TAX_ORGAN_MEANING = "Все 4 символа: (0-9)";
     public static String OKATO_PATTERN = "[0-9]{11}";
     public static String OKTMO_PATTERN = "[0-9]{11}|[0-9]{8}";
     public static String CODE_TS_PATTERN = "[0-9]{3}([0-9]{2}|[?]{2})";
@@ -166,17 +166,35 @@ public class RefBookUtils extends AbstractDao {
      * @return результат проверки (успешная или нет)
      */
     public static boolean checkControlSumInn(String inn) {
-        if (inn == null || inn.length() < 10) {
+        if (inn == null) {
             return false;
         }
-        int[] koefArray = new int[]{2, 4, 10, 3, 5, 9, 4, 6, 8};
-        int sum = 0;
-        for (int i = 0; i < 9; i++) {
-            if (!Character.isDigit(inn.charAt(i))){
-                return false;
+        if (inn.length() == 10) {
+            int[] koefArray10 = new int[]{2, 4, 10, 3, 5, 9, 4, 6, 8};
+            int sum10 = 0;
+            for (int i = 0; i < 9; i++) {
+                if (!Character.isDigit(inn.charAt(i))){
+                    return false;
+                }
+                sum10 += koefArray10[i] * Character.getNumericValue(inn.charAt(i));
             }
-            sum += koefArray[i] * Character.getNumericValue(inn.charAt(i));
+            return (sum10 % 11) % 10 == Character.getNumericValue(inn.charAt(9));
+        } else if (inn.length() == 12){
+            int[] koefArray11 = new int[]{7, 2, 4, 10, 3, 5, 9, 4, 6, 8};
+            int[] koefArray12 = new int[]{3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8};
+            int sum11, sum12;
+            sum11 = sum12 = 0;
+            for (int i = 0; i < 10; i++) {
+                if (!Character.isDigit(inn.charAt(i))){
+                    return false;
+                }
+                sum11 += koefArray11[i] * Character.getNumericValue(inn.charAt(i));
+                sum12 += koefArray12[i] * Character.getNumericValue(inn.charAt(i));
+            }
+            sum12 += koefArray12[10] * Character.getNumericValue(inn.charAt(10));
+            return (sum11 % 11) % 10 == Character.getNumericValue(inn.charAt(10)) &&
+                    (sum12 % 11) % 10 == Character.getNumericValue(inn.charAt(11));
         }
-        return (sum % 11) % 10 == Character.getNumericValue(inn.charAt(9));
+        return false;
     }
 }

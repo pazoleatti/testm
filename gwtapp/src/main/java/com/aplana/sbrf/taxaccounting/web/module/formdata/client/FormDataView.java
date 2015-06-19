@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.LockInfo;
 import com.aplana.sbrf.taxaccounting.web.widget.cell.IndexCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomHeaderBuilder;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.CustomTableBuilder;
@@ -431,14 +432,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("printToExcel")
     void onPrintExcelClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onPrintExcelClicked();
+            getUiHandlers().onPrintExcelClicked(false);
         }
     }
 
     @UiHandler("printToCSV")
     void onPrintCSVClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onPrintCSVClicked();
+            getUiHandlers().onPrintCSVClicked(false);
         }
     }
 
@@ -527,7 +528,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("recalculateButton")
 	void onRecalculateButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onRecalculateClicked(false, false);
+			getUiHandlers().onRecalculateClicked(false, false, false);
 		}
 	}
 
@@ -578,7 +579,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("consolidationButton")
     void onConsolidationButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onConsolidate(false);
+            getUiHandlers().onConsolidate(false, false);
         }
     }
 
@@ -680,6 +681,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showCheckButton(boolean show) {
+        checkButton.setVisible(show);
 	}
 
 	@Override
@@ -735,18 +737,21 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-	public void setLockInformation(boolean isVisible, boolean readOnlyMode, String lockDate, String lockedBy, String title){
+	public void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo){
 		lockInformation.setVisible(isVisible);
-		if(lockedBy != null && lockDate != null){
+		if(lockInfo != null){
             String text;
             if (readOnlyMode) {
-                text = "Выбранная налоговая форма в текущий момент редактируется другим пользователем \"" + lockedBy
-                        + "\" (с " + lockDate + ")";
+                if (lockInfo.isEditMode()) {
+                    text = "Выбранная налоговая форма в текущий момент редактируется " + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\"")) + " (с " + lockInfo.getLockDate() + ")";
+                } else {
+                    text = "Выбранная налоговая форма в текущий момент заблокирована на изменение " + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\"")) + " (с " + lockInfo.getLockDate() + ")";
+                }
             } else {
-                text = "Выбранная налоговая форма в текущий момент заблокирована на редактирование текущим пользователем (с " + lockDate + ")";
+                text = "Выбранная налоговая форма в текущий момент заблокирована на редактирование текущим пользователем (с " + lockInfo.getLockDate() + ")";
             }
 			lockInformation.setText(text);
-			lockInformation.setTitle(title);
+			lockInformation.setTitle(lockInfo.getTitle());
 		}
         changeTableTopPosition(isVisible);
 	}

@@ -62,7 +62,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
         Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
-        if (lockType == null || reportType.equals(lockType.getFirst())) {
+        if (lockType == null || !ReportType.EDIT_FD.equals(lockType.getFirst())) {
             String keyTask = formDataService.generateTaskKey(action.getFormDataId(), reportType);
             LockData lockDataTask = lockDataService.getLock(keyTask);
             if (lockDataTask != null && lockDataTask.getUserId() == userInfo.getUser().getId()) {
@@ -70,35 +70,36 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                     // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
                     lockDataService.interruptTask(lockDataTask, userInfo.getUser().getId(), false);
                 } else {
+                    // вызов диалога
                     result.setLock(true);
-                    lockDataService.lockInfo(lockType.getSecond(), logger);
-                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    String restartMsg = (lockDataTask.getState().equals(LockData.State.IN_QUEUE.getText())) ?
+                            String.format(LockData.CANCEL_MSG, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)) :
+                            String.format(LockData.RESTART_MSG, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo));
+                    result.setRestartMsg(restartMsg);
                     return result;
                 }
             } else if (lockDataTask != null) {
                 try {
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     logger.info(String.format(LockData.LOCK_INFO_MSG,
-                            String.format(reportType.getDescription(), action.getTaxType().getTaxText()),
+                            formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)),
                             sdf.format(lockDataTask.getDateLock()),
-                            userService.getUser(lockDataTask.getUserId()).getName()));
+                            userService.getUser(lockDataTask.getUserId()).getName());
                 } catch (ServiceException e) {
                 }
                 result.setLock(false);
-                logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getTaxText());
+                logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)));
                 result.setUuid(logEntryService.save(logger.getEntries()));
                 return result;
             }
-            if (lockDataService.lock(keyTask, userInfo.getUser().getId(),
+            if (!action.isCancelTask() && formDataService.checkExistTask(action.getFormDataId(), false, reportType, logger, userInfo)) {
+                result.setLockTask(true);
+            } else if (lockDataService.lock(keyTask, userInfo.getUser().getId(),
                     formDataService.getFormDataFullName(action.getFormDataId(), null, reportType),
                     LockData.State.IN_QUEUE.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                 try {
-                    List<ReportType> reportTypes = new ArrayList<ReportType>();
-                    reportTypes.add(ReportType.CHECK_FD);
-                    reportTypes.add(ReportType.CALCULATE_FD);
-                    reportTypes.add(ReportType.IMPORT_FD);
-                    formDataService.interruptTask(action.getFormDataId(), userInfo, reportTypes);
+                    formDataService.interruptTask(action.getFormDataId(), false, userInfo.getUser().getId(), reportType);
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("formDataId", action.getFormDataId());
                     params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
@@ -108,7 +109,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant);
-                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getTaxText());
+                    logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)));
                     result.setLock(false);
                 } catch (Exception e) {
                     lockDataService.unlock(keyTask, userInfo.getUser().getId());
@@ -122,7 +123,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                 throw new ActionException("Не удалось запустить консолидацию. Попробуйте выполнить операцию позже");
             }
         } else {
-            formDataService.locked(lockType.getSecond(), logger, reportType);
+            formDataService.locked(action.getFormDataId(), reportType, lockType, logger);
         }
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;

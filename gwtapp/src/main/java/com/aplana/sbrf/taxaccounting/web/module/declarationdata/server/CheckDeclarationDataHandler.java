@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -67,87 +68,78 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
         Map<String, Object> params = new HashMap<String, Object>();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        LockData lockDataCalc = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.XML_DEC));
         LockData lockDataAccept = lockDataService.getLock(declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.ACCEPT_DEC));
-        if (lockDataCalc == null && lockDataAccept == null) {
-            String keyAccept = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), ReportType.ACCEPT_DEC);
-            if (lockDataService.getLock(keyAccept) == null) {
-                String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
-                if (uuidXml != null) {
-                    String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
-                    LockData lockDataReportTask = lockDataService.getLock(key);
-                    if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
-                        if (action.isForce()) {
-                            // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
-                            lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId(), false);
-                        } else {
-                            result.setStatus(CreateAsyncTaskStatus.LOCKED);
-                            String restartMsg = (lockDataReportTask.getState().equals(LockData.State.IN_QUEUE.getText())) ?
-                                    String.format(LockData.CANCEL_MSG, String.format(ReportType.CHECK_DEC.getDescription(), action.getTaxType().getDeclarationShortName())) :
-                                    String.format(LockData.RESTART_MSG, String.format(ReportType.CHECK_DEC.getDescription(), action.getTaxType().getDeclarationShortName()));
-                            result.setRestartMsg(restartMsg);
-                            return result;
-                        }
-                    } else if (lockDataReportTask != null) {
-                        try {
-                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                            logger.info(String.format(LockData.LOCK_INFO_MSG,
-                                    String.format(ReportType.CHECK_DEC.getDescription(), action.getTaxType().getDeclarationShortName()),
-                                    sdf.format(lockDataReportTask.getDateLock()),
-                                    userService.getUser(lockDataReportTask.getUserId()).getName()));
-                        } catch (ServiceException e) {
-                        }
-                        result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
-                        result.setUuid(logEntryService.save(logger.getEntries()));
+        if (lockDataAccept == null) {
+            String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
+            if (uuidXml != null) {
+                String key = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
+                LockData lockDataReportTask = lockDataService.getLock(key);
+                if (lockDataReportTask != null && lockDataReportTask.getUserId() == userInfo.getUser().getId()) {
+                    if (action.isForce()) {
+                        // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
+                        lockDataService.interruptTask(lockDataReportTask, userInfo.getUser().getId(), false);
+                    } else {
+                        result.setStatus(CreateAsyncTaskStatus.LOCKED);
+                        String restartMsg = (lockDataReportTask.getState().equals(LockData.State.IN_QUEUE.getText())) ?
+                                String.format(LockData.CANCEL_MSG, String.format(ReportType.CHECK_DEC.getDescription(), action.getTaxType().getDeclarationShortName())) :
+                                String.format(LockData.RESTART_MSG, String.format(ReportType.CHECK_DEC.getDescription(), action.getTaxType().getDeclarationShortName()));
+                        result.setRestartMsg(restartMsg);
                         return result;
                     }
-                    if (lockDataService.lock(key, userInfo.getUser().getId(),
-                            declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
-                            LockData.State.IN_QUEUE.getText(),
-                            lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
-                        try {
-                            params.put("declarationDataId", action.getDeclarationId());
-                            params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
-                            params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                            LockData lockData = lockDataService.getLock(key);
-                            params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
-                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                            BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                            lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
-                            logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
-                            result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        } catch (Exception e) {
-                            lockDataService.unlock(key, userInfo.getUser().getId());
-                            if (e instanceof ServiceLoggerException) {
-                                throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                            } else {
-                                throw new ActionException(e);
-                            }
+                } else if (lockDataReportTask != null) {
+                    try {
+                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                        logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                String.format(ReportType.CHECK_DEC.getDescription(), action.getTaxType().getDeclarationShortName()),
+                                sdf.format(lockDataReportTask.getDateLock()),
+                                userService.getUser(lockDataReportTask.getUserId()).getName()));
+                    } catch (ServiceException e) {
+                    }
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
+                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    return result;
+                }
+                if (lockDataService.lock(key, userInfo.getUser().getId(),
+                        declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
+                        LockData.State.IN_QUEUE.getText(),
+                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
+                    try {
+                        params.put("declarationDataId", action.getDeclarationId());
+                        params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
+                        params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
+                        LockData lockData = lockDataService.getLock(key);
+                        params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
+                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                        BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                        lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
+                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
+                        result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    } catch (Exception e) {
+                        lockDataService.unlock(key, userInfo.getUser().getId());
+                        if (e instanceof ServiceLoggerException) {
+                            throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
+                        } else {
+                            throw new ActionException(e);
                         }
-                    } else {
-                        throw new ActionException("Не удалось запустить проверку. Попробуйте выполнить операцию позже");
                     }
                 } else {
-                    result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
+                    throw new ActionException("Не удалось запустить проверку. Попробуйте выполнить операцию позже");
                 }
             } else {
-                try {
-                    lockDataService.addUserWaitingForLock(keyAccept, userInfo.getUser().getId());
-                } catch (Exception e) {
-                }
-                logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
-                result.setStatus(CreateAsyncTaskStatus.CREATE);
+                result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
             }
         } else {
-            LockData lockData = lockDataCalc;
-            if (lockData == null) lockData = lockDataAccept;
+            try {
+                lockDataService.addUserWaitingForLock(lockDataAccept.getKey(), userInfo.getUser().getId());
+            } catch (Exception e) {
+            }
             logger.error(
                     String.format(
                             LockData.LOCK_CURRENT,
-                            sdf.format(lockData.getDateLock()),
-                            userInfo.getUser().getName(),
-                            lockData.getDescription())
+                            sdf.format(lockDataAccept.getDateLock()),
+                            userService.getUser(lockDataAccept.getUserId()).getName(),
+                            String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName()))
             );
             throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), action.getTaxType().getDeclarationShortName());
         }

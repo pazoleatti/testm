@@ -293,37 +293,40 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 	private void validateFormColumns(FormTemplate formTemplate, Logger logger) {
         List<Column> columns = formTemplate.getColumns();
-        Integer formTemplateId = formTemplate.getId();
 
         checkSet.clear();
 
         for (Column column : columns) {
             if (!checkSet.add(column.getAlias())) {
-                logger.error("найден повторяющийся алиас \" " + column.getAlias() +
-                        "\" для столбца " + column.getName());
+                logger.error(
+                        String.format(
+                                "Нарушено требование к уникальности, уже существует графа с псевдонимом \"%s\" в данной версии макета \"%s\"!",
+                                column.getAlias(),
+                                column.getName()
+                        )
+                );
             }
 
             if (column.getName() != null && column.getName().getBytes().length > FORM_COLUMN_NAME_MAX_VALUE) {
-                logger.error("значение для имени столбца \"" + column.getName() +
+                logger.error("Значение для имени столбца \"" + column.getName() +
                         "\" слишком велико (фактическое: " + column.getName().getBytes().length +
                         ", максимальное: " + FORM_COLUMN_NAME_MAX_VALUE + ")");
             }
             if (column.getAlias() != null && column.getAlias().getBytes().length > FORM_COLUMN_ALIAS_MAX_VALUE) {
-                logger.error("значение для алиаса столбца \"" + column.getAlias() +
+                logger.error("Значение для алиаса столбца \"" + column.getAlias() +
                         "\" слишком велико (фактическое: " + column.getAlias().getBytes().length
                         + ", максимальное: " + FORM_COLUMN_ALIAS_MAX_VALUE + ")");
             }
 
-            if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
+            /*if (ColumnType.STRING.equals(column.getColumnType()) && ((StringColumn) column).getMaxLength() < ((StringColumn) column).getPrevLength()) {
 				if (formTemplateDao.checkExistLargeString(formTemplateId, column.getId(), ((StringColumn) column).getMaxLength())) {
 					logger.error("Длина одного из существующих значений графы '" + column.getName() + "' больше указанной длины " + ((StringColumn) column).getPrevLength());
                 }
-            }
+            }*/
         }
     }
 
 	private void validateFormRows(List<DataRow<Cell>> rows, Logger logger) {
-		//TODO: подумать о уникальности порядка строк
 		for (DataRow<Cell> row : rows) {
 			if (row.getAlias() != null && row.getAlias().getBytes().length > DATA_ROW_ALIAS_MAX_VALUE) {
 				logger.error("значение для кода строки \"" + row.getAlias() +
@@ -338,7 +341,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
 		for (FormStyle style : styles) {
 			if (!checkSet.add(style.getAlias())) {
-				logger.error("найден повторяющийся алиас стиля " + style.getAlias());
+				logger.error(
+                        String.format("Нарушено требование к уникальности, уже существует стиль с именем \"%s\" в данной версии макета!",
+                                style.getAlias()
+                        )
+                );
 			}
 
 			if (style.getAlias() != null && style.getAlias().getBytes().length > FORM_STYLE_ALIAS_MAX_VALUE) {

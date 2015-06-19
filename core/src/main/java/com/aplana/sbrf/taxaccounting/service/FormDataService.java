@@ -23,10 +23,11 @@ public interface FormDataService {
      * @param departmentReportPeriodId Отчетный период подразделения
      * @param kind Тип НФ
      * @param periodOrder Номер месяца для ежемесячных форм (для остальных параметр отсутствует)
+     * @param importFormData флаг создания при загрузке
      * @return Id НФ
      */
     long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
-                        FormDataKind kind, Integer periodOrder);
+                        FormDataKind kind, Integer periodOrder, boolean importFormData);
 
     /**
      * Создает версию ручного ввода
@@ -53,7 +54,7 @@ public interface FormDataService {
      * 
      * TODO (sgoryachkin) заменить параметры is и fileName на uid блоба
      */
-    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream is, String fileName);
+    void importFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean isManual, InputStream is, String fileName, LockStateLogger stateLogger);
 
     /**
      * Метод для импорта данных из модуля миграции
@@ -394,11 +395,11 @@ public interface FormDataService {
 
     /**
      * Вывод сообщения, что форма заблокирована
-     * @param lockData
+     * @param lockType
      * @param logger
      * @param reportType тип текущей операции
      */
-    void locked(LockData lockData, Logger logger, ReportType reportType);
+    void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger);
 
     /**
      * Проверка возможности изменения НФ
@@ -418,4 +419,31 @@ public interface FormDataService {
      * @return
      */
     Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid);
+
+    /**
+     * Формирует название операции
+     * @param reportType
+     * @param formDataId
+     * @param userInfo
+     * @return
+     */
+    String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo);
+
+    /**
+     * Проверяет существование операции, по которым требуется удалить блокировку
+     * @param formDataId
+     * @param reportType
+     * @param logger
+     * @param userInfo
+     * @return
+     */
+    boolean checkExistTask(long formDataId, boolean manual, ReportType reportType, Logger logger, TAUserInfo userInfo);
+
+    /**
+     * Отмена операции, по которым требуется удалить блокировку(+удаление отчетов)
+     * @param formDataId
+     * @param reportType
+     * @param userId
+     */
+    void interruptTask(long formDataId, boolean manual, int userId, ReportType reportType);
 }

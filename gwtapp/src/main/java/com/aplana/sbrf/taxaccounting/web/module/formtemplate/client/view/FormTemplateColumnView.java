@@ -387,6 +387,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
         }
         refBookAttrBox.setValue(event.getValue().getAttributes().get(0));
         refBookAttrBox.setAcceptableValues(event.getValue().getAttributes());
+        updateReferenceColumn(event.getValue(), currentColumn);
 	}
 
     @UiHandler("refBookAttrBox")
@@ -721,6 +722,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 		} else if (REFBOOK_TYPE.equals(typeColumnDropBox.getValue())){
 			RefBookColumn refBookColumn = new RefBookColumn();
             copyMainColumnAttributes(column, refBookColumn);
+            RefBook refBook = getUiHandlers().getRefBook(getUiHandlers().getRefBookByAttributeId(null, true));
+            refBookColumn.setRefBookAttributeId(refBook.getAttributes().get(0).getId());
 			newColumn = refBookColumn;
 		} else if (REFERENCE_TYPE.equals(typeColumnDropBox.getValue())){
             ReferenceColumn referenceColumn = new ReferenceColumn();
@@ -774,5 +777,13 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
             return;
         refBookBox.setValue(refBookList.get(0));
         refBookBox.setAcceptableValues(refBookList);
+    }
+
+    private void updateReferenceColumn(RefBook refBook, Column currColumn){
+        for (Column column : columns){
+            if (column instanceof ReferenceColumn && ((ReferenceColumn) column).getParentAlias().equals(currColumn.getAlias())){
+                ((ReferenceColumn)column).setRefBookAttributeId(refBook.getAttributes().get(0).getId());
+            }
+        }
     }
 }
