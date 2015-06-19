@@ -717,12 +717,12 @@ public class FormDataServiceImpl implements FormDataService {
                     deleteReport(formDataId, true, userInfo.getUser().getId());
                 } else {
                     formDataAccessService.canDelete(userInfo, formDataId);
-                    auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                            null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null);
                     sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
                     formDataDao.delete(formDataId);
                     interruptTask(formDataId, false, userInfo.getUser().getId(), reportType);
                     deleteReport(formDataId, null, userInfo.getUser().getId());
+                    auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                            null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null);
                 }
             } finally {
                 lockService.unlock(keyTask, userInfo.getUser().getId());
