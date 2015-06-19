@@ -689,7 +689,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                 innerLogUuid = result.getUuid();
                 if (result.isLock()) {
-                    Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                    Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                         @Override
                         public void yes() {
                             onConsolidate(true, cancelTask);
