@@ -1851,8 +1851,8 @@ public class FormDataServiceImpl implements FormDataService {
                     //Запись на будущее, чтобы второго цикла не делать
                     //1E.
                     if (sourceForm.getState() == WorkflowState.ACCEPTED){
-                        int rowCountSource = dataRowDao.getSavedSize(formData);
-                        int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                        int rowCountSource = dataRowDao.getSavedSize(sourceForm);
+                        int columnCountSource = formTemplateService.get(sourceForm.getFormTemplateId()).getColumns().size();
                         cellCountSource += rowCountSource * columnCountSource;
                     }
                 }
