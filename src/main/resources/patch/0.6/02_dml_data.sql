@@ -1,16 +1,16 @@
 --http://jira.aplana.com/browse/SBRFACCTAX-10831
 insert into configuration_lock (key, timeout) values ('CONFIGURATION_PARAMS', 86400000);
 
---http://jira.aplana.com/browse/SBRFACCTAX-11050: 0.6 Новые асинхронные задачи(загрузка ТФ)
+--http://jira.aplana.com/browse/SBRFACCTAX-11050: 0.6 РќРѕРІС‹Рµ Р°СЃРёРЅС…СЂРѕРЅРЅС‹Рµ Р·Р°РґР°С‡Рё(Р·Р°РіСЂСѓР·РєР° РўР¤)
 INSERT INTO configuration_lock (key, timeout) VALUES ('LOAD_TRANSPORT_DATA', 86400000);
-INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (12, 'Загрузка ТФ с локального компьютера', 'ejb/taxaccounting/async-task.jar/UploadTransportDataAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
-INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (13, 'Загрузка ТФ из каталога загрузки', 'ejb/taxaccounting/async-task.jar/LoadAllTransportDataAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (12, 'Р—Р°РіСЂСѓР·РєР° РўР¤ СЃ Р»РѕРєР°Р»СЊРЅРѕРіРѕ РєРѕРјРїСЊСЋС‚РµСЂР°', 'ejb/taxaccounting/async-task.jar/UploadTransportDataAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (13, 'Р—Р°РіСЂСѓР·РєР° РўР¤ РёР· РєР°С‚Р°Р»РѕРіР° Р·Р°РіСЂСѓР·РєРё', 'ejb/taxaccounting/async-task.jar/LoadAllTransportDataAsyncTask#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
 
---http://jira.aplana.com/browse/SBRFACCTAX-10965: Ограничить время XSD-валидации
+--http://jira.aplana.com/browse/SBRFACCTAX-10965: РћРіСЂР°РЅРёС‡РёС‚СЊ РІСЂРµРјСЏ XSD-РІР°Р»РёРґР°С†РёРё
 INSERT INTO configuration_lock (key, timeout) VALUES ('XSD_VALIDATION', 3600000);
 
 -----------------------------------------------------------------------
---http://jira.aplana.com/browse/SBRFACCTAX-10770: Очистка данных (несоответствие типа графы графы с типом данных)
+--http://jira.aplana.com/browse/SBRFACCTAX-10770: РћС‡РёСЃС‚РєР° РґР°РЅРЅС‹С… (РЅРµСЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ С‚РёРїР° РіСЂР°С„С‹ РіСЂР°С„С‹ СЃ С‚РёРїРѕРј РґР°РЅРЅС‹С…)
 
 -- SET NULLS instead of invalid data
 update data_cell dc
@@ -40,18 +40,18 @@ where svalue is null
 	and editable is null;
 
 -----------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-11238: 0.6 Добавить в бд записи об асинхронном формировании для ЖА
+-- http://jira.aplana.com/browse/SBRFACCTAX-11238: 0.6 Р”РѕР±Р°РІРёС‚СЊ РІ Р±Рґ Р·Р°РїРёСЃРё РѕР± Р°СЃРёРЅС…СЂРѕРЅРЅРѕРј С„РѕСЂРјРёСЂРѕРІР°РЅРёРё РґР»СЏ Р–Рђ
 insert into async_task_type (id, name, handler_jndi) 
-  values (10, 'Генерация архива ЖА', 'ejb/taxaccounting/async-task.jar/CsvAuditArchiveGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+  values (10, 'Р“РµРЅРµСЂР°С†РёСЏ Р°СЂС…РёРІР° Р–Рђ', 'ejb/taxaccounting/async-task.jar/CsvAuditArchiveGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
 insert into async_task_type (id, name, handler_jndi)
-  values (110, 'Генерация архива ЖА', 'CsvAuditArchiveGeneratorAsyncTaskSpring');
+  values (110, 'Р“РµРЅРµСЂР°С†РёСЏ Р°СЂС…РёРІР° Р–Рђ', 'CsvAuditArchiveGeneratorAsyncTaskSpring');
 insert into async_task_type (id, name, handler_jndi)
-  values (11, 'Генерация отчета ЖА', 'ejb/taxaccounting/async-task.jar/CsvAuditGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
+  values (11, 'Р“РµРЅРµСЂР°С†РёСЏ РѕС‚С‡РµС‚Р° Р–Рђ', 'ejb/taxaccounting/async-task.jar/CsvAuditGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote');
 insert into async_task_type (id, name, handler_jndi)
-  values (111, 'Генерация отчета ЖА', 'CsvAuditGeneratorAsyncTaskSpring');
+  values (111, 'Р“РµРЅРµСЂР°С†РёСЏ РѕС‚С‡РµС‚Р° Р–Рђ', 'CsvAuditGeneratorAsyncTaskSpring');
 
 -----------------------------------------------------------------------
--- http://jira.aplana.com/browse/SBRFACCTAX-11235: Обновление данных в ASYNC_TASK_TYPE
+-- http://jira.aplana.com/browse/SBRFACCTAX-11235: РћР±РЅРѕРІР»РµРЅРёРµ РґР°РЅРЅС‹С… РІ ASYNC_TASK_TYPE
 update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/XlsmGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 3;
 update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/CsvGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 4;
 update async_task_type set handler_jndi = 'ejb/taxaccounting/async-task.jar/XlsxGeneratorAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote' where id = 5;

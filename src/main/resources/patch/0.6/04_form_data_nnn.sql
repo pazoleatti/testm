@@ -107,12 +107,7 @@ begin
                insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);   
           execute immediate query_str;
           
-          
-          --Фиксированная ссылка на FORM_DATA + индекс ?
-          query_str := 'alter table '|| v_table_name ||' add constraint '||v_table_name||'_FK foreign key (FORM_DATA_ID) references FORM_DATA(ID) on delete cascade';
-               insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);   
-          execute immediate query_str;
-          
+           
           query_str := 'create index i_'|| v_table_name||' on '|| v_table_name ||' (form_data_id)';
                insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);   
           execute immediate query_str;
@@ -135,6 +130,43 @@ begin
          -------------------------------------------------------------------------------------         
       end loop;                  
 end CREATE_FORM_DATA_NNN_ARCHIVE;
+/
+create or replace procedure DELETE_FORM_TYPE(FT_ID number) is
+       query_str varchar2(1024);
+       v_session_id number(18) := 0;
+begin
+  --Получить идентификатор текущей сессии для логирования
+	    select seq_log_query_session.nextval into v_session_id from dual;
+    
+  insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
+         values(seq_log_query.nextval, FT_ID, 'INFO', null, v_session_id);
+  commit;                     
+       
+  --Всё заблокировать (царь я или не царь)     
+  for x in (select id from form_template where type_id = FT_ID) loop
+      query_str := 'LOCK TABLE FORM_DATA_'||x.id||' IN EXCLUSIVE MODE WAIT 300';
+      insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
+         values(seq_log_query.nextval, FT_ID, 'DDL', query_str, v_session_id);          
+      execute immediate query_str;
+  end loop;
+  
+  --Удалить таблицы
+  for x in (select id from form_template where type_id = FT_ID) loop   
+      query_str := 'DROP TABLE FORM_DATA_'||x.id;
+      insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
+           values(seq_log_query.nextval, FT_ID, 'DDL', query_str, v_session_id);    
+      execute immediate query_str;
+    
+  end loop;
+  --Удалить все упоминания
+  DELETE FROM FORM_TEMPLATE WHERE TYPE_ID = FT_ID;
+  DELETE FROM FORM_TYPE WHERE ID = FT_ID;
+  
+  insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
+         values(seq_log_query.nextval, FT_ID, 'INFO', null, v_session_id);
+  commit;    
+  
+end DELETE_FORM_TYPE;
 /
 
 create or replace procedure CREATE_FORM_DATA_NNN (FT_ID number)
@@ -209,12 +241,6 @@ begin
           execute immediate query_str;
 
           query_str := 'create unique index i_'|| v_table_name ||'_unq on '||v_table_name||' (FORM_DATA_ID, TEMPORARY, MANUAL, ORD)';
-               insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
-          execute immediate query_str;
-
-		  lock table form_data in exclusive mode;
-          --Фиксированная ссылка на FORM_DATA + индекс ?
-          query_str := 'alter table '|| v_table_name ||' add constraint '||v_table_name||'_FK foreign key (FORM_DATA_ID) references FORM_DATA(ID) on delete cascade';
                insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
           execute immediate query_str;
 
