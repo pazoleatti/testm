@@ -970,7 +970,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     });
                 } else if (result.isSave()) {
                     modifiedRows.clear();
-                    Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
+                    Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {
                             onUploadTF(force, true, cancelTask, uuid);
