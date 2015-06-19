@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -43,6 +44,9 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 
 	@Autowired
 	private DataRowService dataRowService;
+
+    @Autowired
+    private RefBookHelper refBookHelper;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -103,6 +107,7 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 
             if (action.isEditMode()) {
                 if (!action.getModifiedRows().isEmpty()) {
+                    refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
                     dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
                 }
                 // проверка наличия не сохраненных изменений
@@ -110,6 +115,7 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     if (action.isSave()) {
                         // сохраняем данные при нажантии "Да"
                         formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
+                        dataRowService.createTemporary(formData);
                     } else {
                         lockDataService.unlock(keyTask, userInfo.getUser().getId());
                         // Вызов диалога, для подтверждения сохранения данных

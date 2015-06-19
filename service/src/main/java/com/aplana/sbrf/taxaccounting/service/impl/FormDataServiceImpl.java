@@ -620,9 +620,6 @@ public class FormDataServiceImpl implements FormDataService {
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
-        //Проверка актуальности справочных значений
-        checkReferenceValues(logger, formData, true);
-
         // Отработка скриптом события сохранения
         // dataRowDao.createTemporary(formData); не вызываем, т.к это должно быть сделано до этого, в вызывающих операциях
 		formDataScriptingService.executeScript(userInfo, formData,
@@ -630,14 +627,6 @@ public class FormDataServiceImpl implements FormDataService {
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
-        }
-
-        // Отработка скриптом события сортировки
-        formDataScriptingService.executeScript(userInfo, formData,
-                FormDataEvent.SORT_ROWS, logger, null);
-
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
         }
 
         // Обновление для сквозной нумерации
@@ -767,6 +756,16 @@ public class FormDataServiceImpl implements FormDataService {
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                 checkReferenceValues(logger, formData, false);
                 checkConsolidateFromSources(formData, logger);
+                if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
+                    // Отработка скриптом события сортировки
+                    formDataScriptingService.executeScript(userInfo, formData,
+                            FormDataEvent.SORT_ROWS, logger, null);
+
+                    if (logger.containsLevel(LogLevel.ERROR)) {
+                        throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
+                    }
+                    logger.info("Выполнена сортировка строк налоговой формы.");
+                }
                 //Делаем переход
                 moveProcess(formData, userInfo, workflowMove, note, logger);
                 break;
