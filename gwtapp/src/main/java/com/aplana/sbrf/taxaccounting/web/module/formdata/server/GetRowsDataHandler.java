@@ -60,6 +60,7 @@ public class GetRowsDataHandler extends
         if (!action.isFree()) {
             // Обновление измененных строк во временном срезе
             if (!action.getModifiedRows().isEmpty()) {
+                refBookHelper.dataRowsCheck(action.getModifiedRows(), formTemplate.getColumns());
                 dataRowService.update(securityService.currentUserInfo(), action.getFormDataId(),
                         action.getModifiedRows(), action.isManual());
             }

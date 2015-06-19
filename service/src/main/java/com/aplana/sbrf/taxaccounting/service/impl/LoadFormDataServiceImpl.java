@@ -448,9 +448,21 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
         Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
         if (lockType != null) {
-            log(userInfo, LogData.L40, localLogger,
-                    lock, formDataService.getTaskName(lockType.getFirst(), formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
-            return false;
+            ReportType reportType = lockType.getFirst();
+            List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV, ReportType.CHECK_FD);
+            List<ReportType> blockReportTypes = Arrays.asList(ReportType.EDIT_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.MOVE_FD);
+            if (blockReportTypes.contains(reportType)) {
+                log(userInfo, LogData.L40, localLogger,
+                        lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
+                // Переносим файл в каталог ошибок
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, localLogger, lock), currentFile,
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lock, ""))), localLogger, lock);
+                return false;
+            } else if (interruptedReportTypes.contains(reportType)) {
+                log(userInfo, LogData.L40_1, localLogger,
+                        lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
+                formDataService.interruptTask(formData.getId(), userInfo, interruptedReportTypes);
+            }
         }
         // Блокировка
         LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
