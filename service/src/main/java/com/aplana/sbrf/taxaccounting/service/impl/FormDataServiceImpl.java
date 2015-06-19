@@ -1462,6 +1462,9 @@ public class FormDataServiceImpl implements FormDataService {
         int previousRowNumber = 0;
         // Отчетный период подразделения
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+        if (!beInOnAutoNumeration(formData.getState(), departmentReportPeriod)){
+            return previousRowNumber;
+        }
         // Налоговый период
         TaxPeriod taxPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
