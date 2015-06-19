@@ -1015,7 +1015,7 @@ public class FormDataServiceImpl implements FormDataService {
      *  http://conf.aplana.com/pages/viewpage.action?pageId=8788114
      */
     @Transactional(readOnly = false)
-    public void compose(final FormData formData, TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
+    public void compose(final FormData formData, final TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
         stateLogger.updateState("Выполнение проверок на возможность консолидации");
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -1064,6 +1064,18 @@ public class FormDataServiceImpl implements FormDataService {
 
         //1Е.  Система проверяет экземпляр на возможность выполнения консолидации в него. Не существует ни одной принятой формы-источника
         if (srcAcceptedIds.isEmpty()){
+            //Очищаем устаревшие данные, оставшиеся после старой консолидации
+            tx.executeInNewTransaction(new TransactionLogic() {
+                @Override
+                public void execute() {
+                    clearDataRows(formData, userInfo);
+                }
+
+                @Override
+                public Object executeWithReturn() {
+                    return null;
+                }
+            });
             throw new ServiceException("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
         }
 
@@ -1122,7 +1134,7 @@ public class FormDataServiceImpl implements FormDataService {
             logger.info(s);
         }
 
-        //Удаление отчета НФ             
+        //Удаление отчета НФ
         stateLogger.updateState("Удаление отчетов формы");
         reportService.delete(formData.getId(), null);
         //Система проверяет, содержит ли макет НФ хотя бы одну графу со сквозной автонумерацией
@@ -1134,7 +1146,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void checkCompose(final FormData formData, TAUserInfo userInfo, Logger logger) {
+    public void checkCompose(final FormData formData, final TAUserInfo userInfo, Logger logger) {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
         //1А. Отчетный период закрыт
@@ -1191,7 +1203,29 @@ public class FormDataServiceImpl implements FormDataService {
                 reportPeriod.getCalendarStartDate(),
                 reportPeriod.getEndDate());
         if (departmentFormTypesSources.isEmpty()){
+            //Очищаем устаревшие данные, оставшиеся после старой консолидации
+            tx.executeInNewTransaction(new TransactionLogic() {
+                @Override
+                public void execute() {
+                    clearDataRows(formData, userInfo);
+                }
+
+                @Override
+                public Object executeWithReturn() {
+                    return null;
+                }
+            });
             throw new ServiceException("для текущей формы не назначено ни одного источника");
+        }
+    }
+
+    // очищаем данные в нф (кроме фиксированных строк)
+    private void clearDataRows(FormData formData, TAUserInfo userInfo){
+        List<DataRow<Cell>> fixRows = formTemplateService.getFullFormTemplate(formData.getFormTemplateId()).getRows();
+        if (dataRowDao.getSavedSize(formData) > fixRows.size()) {
+            dataRowDao.saveRows(formData, fixRows);
+            dataRowDao.commit(formData);
+            updatePreviousRowNumber(formData, userInfo);
         }
     }
 
