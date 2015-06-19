@@ -497,9 +497,11 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Исключение для отката транзакции сознания и заполнения НФ
                 throw new ServiceException("При выполнении загрузки произошли ошибки");
             } else {
-                logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-                auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                        null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
+                if (!formWasCreated) {
+                    logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
+                    auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
+                            null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
+                }
             }
 
             Department formDepartment = departmentDao.getDepartment(departmentReportPeriod.getDepartmentId());
