@@ -3,6 +3,7 @@
 
 --Вспомогательные таблицы для логирования:
 create table log_clob_query (id number(9) not null primary key, form_template_id number(9), sql_mode varchar2(10), text_query clob, log_date timestamp(6) default current_timestamp not null, session_id number(18) default 0 not null);
+alter table log_clob_query add form_type_id number(9);
 
 comment on table log_clob_query is 'Логирование DDL/DML запросов из ХП';
 comment on column log_clob_query.id is 'Идентификатор записи (seq_log_query)';
@@ -11,6 +12,7 @@ comment on column log_clob_query.sql_mode is 'DDL/DML';
 comment on column log_clob_query.text_query is 'Текст запроса';
 comment on column log_clob_query.log_date is 'Дата/время начала обработки запроса';
 comment on column log_clob_query.session_id is 'Идентификатор сессии (seq_log_query_session)';
+comment on column log_clob_query.form_type_id is 'Идентификатор типа (при вызове из процедуры удаления)';
 
 create sequence seq_log_query start with 1 increment by 1;
 create sequence seq_log_query_session start with 1 increment by 1;
