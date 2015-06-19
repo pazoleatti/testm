@@ -30,7 +30,7 @@ is
        chk_table number(1) :=0;
 begin
        dbms_output.enable;
-       for t in (select id as form_template_id, translate(fullname, '''', ' ') as table_template_fullname from form_template where id in (P_NNN) order by id) loop
+       for t in (select id as form_template_id, translate(fullname, '''', ' ') as table_template_fullname from form_template where id in (P_NNN) and exists (select 1 from user_tables where table_name = 'DATA_CELL') order by id) loop
           
          v_table_name := 'FORM_DATA_'||t.form_template_id;
          
@@ -263,27 +263,13 @@ end CREATE_FORM_DATA_NNN;
 set serveroutput on size 30000;
 begin
   delete from log_clob_query;
-  for x in (select id as form_template_id, fullname as table_template_fullname from form_template order by id) loop
+  for x in (select id as form_template_id, fullname as table_template_fullname from form_template where exists (select 1 from user_tables where table_name = 'DATA_CELL') order by id) loop
       CREATE_FORM_DATA_NNN_ARCHIVE (x.form_template_id);
 	  dbms_output.put_line('Done: '|| x.form_template_id);
 	  commit;
   end loop; 
 end;
 /
-
---STATS
-/*select form_template_id, min(log_date), max(log_date),
-EXTRACT (HOUR   FROM (max(log_date)-min(log_date)))*60*60+
-             EXTRACT (MINUTE FROM (max(log_date)-min(log_date)))*60+
-             EXTRACT (SECOND FROM (max(log_date)-min(log_date))) as template_duration_sec,
-sum(
-EXTRACT (HOUR   FROM (max(log_date)-min(log_date)))*60*60+
-             EXTRACT (MINUTE FROM (max(log_date)-min(log_date)))*60+
-             EXTRACT (SECOND FROM (max(log_date)-min(log_date)))
-             )
-             over (order by form_template_id)/60 total_duration_min
-from log_clob_query group by form_template_id
-order by 2;*/
 --------------------------------------------------------------------------------------
 create table form_data_ref_book
 (
