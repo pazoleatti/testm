@@ -1096,7 +1096,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
 
-        if (!logger.containsLevel(LogLevel.ERROR)){
+        if (!sourceDDs.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
             logger.info("Консолидация выполнена из всех форм-источников.");
         }
     }
