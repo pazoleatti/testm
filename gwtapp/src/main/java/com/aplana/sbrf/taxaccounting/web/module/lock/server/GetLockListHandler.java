@@ -57,11 +57,13 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
             lock.setStateDate(lockData.getStateDate() != null ? df.format(lockData.getStateDate()) : null);
             if (lockData.getQueue() == LockData.LockQueues.NONE) {
                 lock.setQueue("");
+                lock.setQueuePosition(-1);
             } else {
                 lock.setQueue(lockData.getQueue().getText());
+                lock.setQueuePosition(lock.getQueue() != null ? lockData.getQueuePosition() : -1);
             }
             lock.setState(lockData.getState());
-            if (lock.getState() != null && lock.getQueuePosition() == 0 && lock.getState().equals(LockData.State.IN_QUEUE.getText())) {
+            if (lock.getState() != null && lock.getQueuePosition() == 1 && lock.getState().equals(LockData.State.IN_QUEUE.getText())) {
                 lock.setState(LockData.State.LOCKED.getText());
             }
             locks.add(lock);
