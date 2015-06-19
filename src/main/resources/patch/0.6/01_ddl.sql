@@ -76,7 +76,7 @@ alter table tax_period add constraint tax_period_fk_taxtype foreign key (tax_typ
 
 create table form_data_consolidation
 (
-source_form_data_id number(9) not null,
+source_form_data_id number(9),
 target_form_data_id number(9) not null
 );
 
@@ -86,7 +86,7 @@ comment on column form_data_consolidation.target_form_data_id is 'Идентиф
 
 create table declaration_data_consolidation
 (
-source_form_data_id number(9) not null,
+source_form_data_id number(9),
 target_declaration_data_id number(9) not null
 );
 
