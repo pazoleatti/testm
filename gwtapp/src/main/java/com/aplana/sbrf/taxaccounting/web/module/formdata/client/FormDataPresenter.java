@@ -1045,7 +1045,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         // задача завершена, обновляем таблицу с данными
                                         switch (oldType) {
                                             case MOVE_FD:
-                                                revealFormData(true, formData.isManual(), !absoluteView, innerLogUuid);
+                                                revealFormData(true, formData.isManual(), !absoluteView, null);
                                                 break;
                                             default:
                                                 getView().updateData();
@@ -1056,7 +1056,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         isUpdate = true;
                                         switch (oldType) {
                                             case MOVE_FD:
-                                                revealFormData(true, formData.isManual(), !absoluteView, innerLogUuid);
+                                                revealFormData(true, formData.isManual(), !absoluteView, null);
                                                 break;
                                             default:
                                                 getView().updateData();
