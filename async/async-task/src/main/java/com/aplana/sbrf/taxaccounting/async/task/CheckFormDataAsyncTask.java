@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
-import net.sf.jasperreports.engine.util.JRStyledText;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
@@ -32,7 +31,7 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
     private LogEntryService logEntryService;
 
     @Autowired
-    private TransactionHelper transactionHelper;
+    private TransactionHelper tx;
 
     @Autowired
     private DataRowService dataRowService;
@@ -68,23 +67,35 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        //Создание временного среза для нф
-        dataRowService.createTemporary(formData);
         try {
-            transactionHelper.executeInNewTransaction(new TransactionLogic() {
-                          @Override
-                          public void execute() {
-                              formDataService.doCheck(logger, userInfo, formData, false);
+            tx.executeInNewTransaction(new TransactionLogic() {
+                @Override
+                public void execute() {
+                    //Создание временного среза для нф
+                    dataRowService.createTemporary(formData);
+                    formDataService.doCheck(logger, userInfo, formData, false);
+                }
 
-                          }
-
-                          @Override
-                          public Object executeWithReturn() {
-                              return null;
-                          }
-                      });
+                @Override
+                public Object executeWithReturn() {
+                    return null;
+                }
+            });
         } catch (ServiceRollbackException e) {
             // считаем, что проверка прошла успешно
+        } finally {
+            tx.executeInNewTransaction(new TransactionLogic() {
+                @Override
+                public void execute() {
+                    // восстанавливаем временный срез, чтобы продолжить редактирование
+                    dataRowService.createTemporary(formData);
+                }
+
+                @Override
+                public Object executeWithReturn() {
+                    return null;
+                }
+            });
         }
     }
 

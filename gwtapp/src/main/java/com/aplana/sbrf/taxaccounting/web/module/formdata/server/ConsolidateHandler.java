@@ -82,9 +82,9 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                 try {
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     logger.info(String.format(LockData.LOCK_INFO_MSG,
-                            formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)),
+                            formDataService.getTaskName(reportType, action.getFormDataId(), userInfo),
                             sdf.format(lockDataTask.getDateLock()),
-                            userService.getUser(lockDataTask.getUserId()).getName());
+                            userService.getUser(lockDataTask.getUserId()).getName()));
                 } catch (ServiceException e) {
                 }
                 result.setLock(false);
