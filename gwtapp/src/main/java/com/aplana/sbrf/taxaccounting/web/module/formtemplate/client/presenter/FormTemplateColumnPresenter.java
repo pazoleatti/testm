@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.UpdateFTIdEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view.FormTemplateColumnUiHandlers;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -28,7 +29,7 @@ public class FormTemplateColumnPresenter
 		extends
 		Presenter<FormTemplateColumnPresenter.MyView, FormTemplateColumnPresenter.MyProxy>
 		implements FormTemplateColumnUiHandlers,
-		FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler {
+		FormTemplateSetEvent.MyHandler, FormTemplateFlushEvent.MyHandler, UpdateFTIdEvent.MyHandler {
 
     private Map<Long, RefBook> refBookMap = new HashMap<Long, RefBook>();
     private Map<Long, RefBookAttribute> refBookAttributeMap = new HashMap<Long, RefBookAttribute>();
@@ -36,7 +37,13 @@ public class FormTemplateColumnPresenter
     private List<RefBook> refBookList = new ArrayList<RefBook>();
     private int generatedColumnId = -1;
 
-	@Title("Шаблоны налоговых форм")
+    @ProxyEvent
+    @Override
+    public void onUpdateId(UpdateFTIdEvent event) {
+        getView().setEnableModify(event.getFtId()==0);
+    }
+
+    @Title("Шаблоны налоговых форм")
 	@ProxyCodeSplit
 	@NameToken(AdminConstants.NameTokens.formTemplateColumnPage)
 	@TabInfo(container = FormTemplateMainPresenter.class, label = AdminConstants.TabLabels.formTemplateColumnLabel, priority = AdminConstants.TabPriorities.formTemplateColumnPriority)

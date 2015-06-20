@@ -181,7 +181,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         String.format(LockData.DescriptionTemplate.FILE.getText(), fileName),
                         lockService.getLockTimeout(LockData.LockObjects.FILE));
                 if (fileLock != null) {
-                    log(userInfo, LogData.L41, logger, lockId, fileName, path);
+                    log(userInfo, LogData.L41, logger, lockId, fileName);
                     fail++;
                     continue;
                 }

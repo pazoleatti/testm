@@ -268,7 +268,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
                 readOnlyMode);
         view.showRecalculateButton(false);
         view.showOriginalVersionButton(false);
-        view.showPrintAnchor(false);
+        view.showPrintAnchor(true);
         view.showDeleteFormButton(!lockInfo.isEditMode() && formDataAccessParams.isCanDelete());
         view.setLockInformation(true, readOnlyMode, lockInfo);
 

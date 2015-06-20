@@ -441,29 +441,35 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     departmentReportPeriod.getId(), formDataKind, month, true);
             formData = formDataDao.get(formDataId, false);
         } else {
+            // 17А.2Б
+            Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
+            if (lockType != null) {
+                ReportType reportType = lockType.getFirst();
+                List<ReportType> blockReportTypes = Arrays.asList(ReportType.EDIT_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.MOVE_FD);
+                if (blockReportTypes.contains(reportType)) {
+                    log(userInfo, LogData.L40, localLogger,
+                            lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
+                    // Переносим файл в каталог ошибок
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, localLogger, lock), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lock, ""))), localLogger, lock);
+                    return false;
+                }
+            }
+            // 17А.4.А.1 Система снимает обнаруженные блокировки с задачи на формирование XLSM/CSV отчета и/или проверки НФ
+            List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV, ReportType.CHECK_FD);
+            for (ReportType interruptedType : interruptedReportTypes) {
+                LockData lockData = lockDataService.getLock(formDataService.generateTaskKey(formData.getId(), interruptedType));
+                if (lockData != null) {
+                    lockDataService.interruptTask(lockData, userInfo.getUser().getId(), true);
+                    log(userInfo, LogData.L40_1, localLogger,
+                            lock, formDataService.getTaskName(interruptedType, formData.getId(), userInfo), userService.getUser(lockData.getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
+                }
+            }
             // 17А.5 Система инициирует выполнение сценария Удаление отчета НФ для экземпляра НФ, данные которой были перезаполнены.
             formDataService.deleteReport(formData.getId(), null, userInfo.getUser().getId());
             formData.initFormTemplateParams(formTemplate);
         }
 
-        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
-        if (lockType != null) {
-            ReportType reportType = lockType.getFirst();
-            List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV, ReportType.CHECK_FD);
-            List<ReportType> blockReportTypes = Arrays.asList(ReportType.EDIT_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.MOVE_FD);
-            if (blockReportTypes.contains(reportType)) {
-                log(userInfo, LogData.L40, localLogger,
-                        lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
-                // Переносим файл в каталог ошибок
-                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, localLogger, lock), currentFile,
-                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L12.getText(), lock, ""))), localLogger, lock);
-                return false;
-            } else if (interruptedReportTypes.contains(reportType)) {
-                log(userInfo, LogData.L40_1, localLogger,
-                        lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
-                formDataService.interruptTask(formData.getId(), userInfo, interruptedReportTypes);
-            }
-        }
         // Блокировка
         LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
                 userInfo.getUser().getId(),
