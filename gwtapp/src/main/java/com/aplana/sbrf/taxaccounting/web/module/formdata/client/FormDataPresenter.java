@@ -1083,6 +1083,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             if (readOnlyMode) {
                                                 if (result.getLockInfo().isEditMode()) {
                                                     setLowReadLockedMode(result.getLockInfo());
+                                                    onTimerReport(ReportType.EXCEL, false);
+                                                    onTimerReport(ReportType.CSV, false);
                                                 } else {
                                                     setReadUnlockedMode();
                                                 }
@@ -1093,15 +1095,21 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         case LOCKED_EDIT:
                                             if (readOnlyMode) {
                                                 setLowReadLockedMode(result.getLockInfo());
+                                                onTimerReport(ReportType.EXCEL, false);
+                                                onTimerReport(ReportType.CSV, false);
                                             } else {
                                                 setLowEditLockedMode(result.getLockInfo());
                                             }
                                             break;
                                         case LOCKED:
                                             setReadLockedMode(true, result.getLockInfo());
+                                            onTimerReport(ReportType.EXCEL, false);
+                                            onTimerReport(ReportType.CSV, false);
                                             break;
                                         case LOCKED_READ:
                                             setLowReadLockedMode(result.getLockInfo());
+                                            onTimerReport(ReportType.EXCEL, false);
+                                            onTimerReport(ReportType.CSV, false);
                                             break;
                                     }
                                 formMode = result.getFormMode();
