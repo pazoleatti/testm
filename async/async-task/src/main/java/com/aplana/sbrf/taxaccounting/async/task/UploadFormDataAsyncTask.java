@@ -38,10 +38,12 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
     private DataRowService dataRowService;
 
     @Autowired
-    private LogEntryService logEntryService;
-
-    @Autowired
     private LockDataService lockService;
+
+    @Override
+    protected ReportType getReportType() {
+        return ReportType.IMPORT_FD;
+    }
 
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
@@ -58,15 +60,10 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.IMPORT_FD, uuid);
-        if (checkTaskLimit.getFirst() == null) {
-            logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-            throw new AsyncTaskException(new ServiceLoggerException(ReportType.CHECK_TASK,
-                    logEntryService.save(logger.getEntries()),
-                    ReportType.IMPORT_FD.getDescription(),
-                    String.format("выбранный файл имеет слишком большой размер (%s байт)!",  checkTaskLimit.getSecond())));
-        }
-        return checkTaskLimit.getFirst();
+
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), uuid);
+        String msg = String.format("выбранный файл имеет слишком большой размер (%s Кбайт)!",  value);
+        return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }
 
     @Override

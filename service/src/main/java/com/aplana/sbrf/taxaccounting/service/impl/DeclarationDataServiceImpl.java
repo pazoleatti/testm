@@ -1037,22 +1037,18 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
+    public Long getTaskLimit(ReportType reportType) {
+        return asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true)).getTaskLimit();
+    }
+
+    @Override
+    public Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType) {
         switch (reportType) {
             case PDF_DEC:
             case EXCEL_DEC:
                 String uuidXmlReport = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
                 if (uuidXmlReport != null) {
-                    Long size = blobDataService.getLength(uuidXmlReport);
-                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                    long maxSize = taskTypeData.getTaskLimit() * 1024;
-                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
-                    if (size > maxSize) {
-                        return new Pair<BalancingVariants, Long>(null, size);
-                    } else if (size < shortSize) {
-                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
-                    }
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                    return blobDataService.getLength(uuidXmlReport)/1024;
                 } else {
                     return null;
                 }
@@ -1060,13 +1056,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case CHECK_DEC:
                 String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
                 if (uuidXml != null) {
-                    Long size = blobDataService.getLength(uuidXml);
-                    AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                    long shortSize = taskTypeData.getShortQueueLimit() * 1024;
-                    if (size < shortSize) {
-                        return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, size);
-                    }
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, size);
+                    return blobDataService.getLength(uuidXml)/1024;
                 } else {
                     return null;
                 }
@@ -1090,11 +1080,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         cellCountSource += rowCountSource * columnCountSource;
                     }
                 }
-                AsyncTaskTypeData taskTypeXML = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                if (cellCountSource < taskTypeXML.getShortQueueLimit()) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountSource);
-                }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountSource);
+                return cellCountSource;
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }

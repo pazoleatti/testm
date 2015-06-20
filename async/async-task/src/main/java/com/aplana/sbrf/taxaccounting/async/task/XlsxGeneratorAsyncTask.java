@@ -41,10 +41,12 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     private DeclarationDataScriptingService scriptingService;
 
     @Autowired
-    private LogEntryService logEntryService;
-
-    @Autowired
     private LockDataService lockService;
+
+    @Override
+    protected ReportType getReportType() {
+        return ReportType.EXCEL_DEC;
+    }
 
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
@@ -53,20 +55,14 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.EXCEL_DEC);
-        if (checkTaskLimit == null) {
+        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, getReportType());
+        if (value == null) {
             throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
-        } else if (checkTaskLimit.getFirst() == null) {
-            Logger logger = new Logger();
-            DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-            logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-            throw new AsyncTaskException(new ServiceLoggerException(ReportType.CHECK_TASK,
-                    logEntryService.save(logger.getEntries()),
-                    String.format(ReportType.EXCEL_DEC.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
-                    String.format("xml файл %s имеет слишком большой размер(%s байт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), checkTaskLimit.getSecond())));
         }
-        return checkTaskLimit.getFirst();
+        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        String msg = String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), value);
+        return checkTask(getReportType(), value, String.format(getReportType().getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()), msg);
     }
 
     @Override

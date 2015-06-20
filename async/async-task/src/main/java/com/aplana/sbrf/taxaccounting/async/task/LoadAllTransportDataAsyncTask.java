@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -44,6 +45,11 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private LockDataService lockService;
+
+    @Override
+    protected ReportType getReportType() {
+        return ReportType.LOAD_ALL_TF;
+    }
 
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {

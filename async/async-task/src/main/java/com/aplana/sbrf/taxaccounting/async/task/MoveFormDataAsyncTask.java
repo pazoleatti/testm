@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
@@ -28,7 +29,12 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
     private LogEntryService logEntryService;
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+    protected ReportType getReportType() {
+        return ReportType.MOVE_FD;
+    }
+
+    @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         TAUserInfo userInfo = new TAUserInfo();
@@ -39,8 +45,10 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 false,
                 logger);
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.MOVE_FD, null);
-        return checkTaskLimit.getFirst();
+
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null);
+        String msg = String.format("количество ячеек таблицы формы(%s) превышает максимально допустимое(%s)!", value, "%s");
+        return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }
 
     @Override

@@ -418,7 +418,7 @@ public interface FormDataService {
      * @param reportType
      * @return
      */
-    Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid);
+    Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid);
 
     /**
      * Формирует название операции

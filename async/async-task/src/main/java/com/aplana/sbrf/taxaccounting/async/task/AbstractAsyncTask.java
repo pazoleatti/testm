@@ -1,8 +1,9 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -39,6 +40,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private TransactionHelper transactionHelper;
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
@@ -74,6 +77,21 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * @return текст сообщения
      */
     protected abstract String getErrorMsg(Map<String, Object> params);
+
+    protected BalancingVariants checkTask(ReportType reportType, Long value, String taskName, String msg) throws AsyncTaskException {
+        AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+        if (taskTypeData.getTaskLimit() != 0 && taskTypeData.getTaskLimit() < value) {
+            Logger logger = new Logger();
+            logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
+            throw new AsyncTaskException(new ServiceLoggerException(ReportType.CHECK_TASK,
+                    logEntryService.save(logger.getEntries()),
+                    taskName,
+                    String.format(msg, taskTypeData.getTaskLimit())));
+        } else if (taskTypeData.getShortQueueLimit() == 0 || taskTypeData.getShortQueueLimit() >= value) {
+            return BalancingVariants.SHORT;
+        }
+        return BalancingVariants.LONG;
+    }
 
     @Override
     public void execute(final Map<String, Object> params) {
@@ -193,6 +211,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     protected boolean isProductionMode() {
         throw new UnsupportedOperationException();
     }
+
+    protected abstract ReportType getReportType();
 
     /**
      * Отправка уведомлений подисчикам на указанную блокировку

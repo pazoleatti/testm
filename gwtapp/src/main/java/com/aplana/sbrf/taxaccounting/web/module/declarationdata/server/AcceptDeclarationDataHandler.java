@@ -24,6 +24,7 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -123,11 +124,11 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                             result.setStatus(CreateAsyncTaskStatus.CREATE);
                         } catch (Exception e) {
                             lockDataService.unlock(key, userInfo.getUser().getId());
-                            if (e instanceof ServiceLoggerException) {
-                                throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                            } else {
-                                throw new ActionException(e);
+                            int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+                            if (i != -1) {
+                                throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
                             }
+                            throw new ActionException(e);
                         }
                     } else {
                         throw new ActionException("Не удалось запустить принятие. Попробуйте выполнить операцию позже");

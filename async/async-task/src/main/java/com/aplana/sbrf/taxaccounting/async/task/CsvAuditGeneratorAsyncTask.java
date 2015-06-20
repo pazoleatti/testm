@@ -36,6 +36,11 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
     PrintingService printingService;
 
     @Override
+    protected ReportType getReportType() {
+        return ReportType.CSV_AUDIT;
+    }
+
+    @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         return BalancingVariants.LONG;
     }
