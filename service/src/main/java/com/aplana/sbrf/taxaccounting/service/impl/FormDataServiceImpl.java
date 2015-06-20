@@ -688,11 +688,13 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
         ReportType reportType = ReportType.DELETE_FD;
-        // Форма не должна быть заблокирована для редактирования другим пользователем
-        checkLockAnotherUser(lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD)),
-                logger,  userInfo.getUser());
-        //Проверяем не заблокирована ли нф какими-либо операциями
-        checkLockedByTask(formDataId, logger, userInfo, "Удаление НФ", false);
+        LockData lockData = lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD));
+        if (!manual && lockData != null) {
+            locked(formDataId, ReportType.DELETE_FD, new Pair<ReportType, LockData>(ReportType.EDIT_FD, lockData), logger);
+        } else if (manual) {
+            // Форма не должна быть заблокирована для редактирования другим пользователем
+            checkLockedMe(lockData, userInfo.getUser());
+        }
 
         String keyTask = generateTaskKey(formDataId, reportType);
         if (lockService.lock(keyTask, userInfo.getUser().getId(),
@@ -708,6 +710,7 @@ public class FormDataServiceImpl implements FormDataService {
                     formDataAccessService.canDelete(userInfo, formDataId);
                     sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
                     formDataDao.delete(formDataId);
+                    formDataDao.deleteFormDataNnn(formData.getFormTemplateId(), formDataId);
                     interruptTask(formDataId, false, userInfo.getUser().getId(), reportType);
                     deleteReport(formDataId, null, userInfo.getUser().getId());
                     auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
@@ -1462,6 +1465,9 @@ public class FormDataServiceImpl implements FormDataService {
         int previousRowNumber = 0;
         // Отчетный период подразделения
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+        if (!beInOnAutoNumeration(formData.getState(), departmentReportPeriod)){
+            return previousRowNumber;
+        }
         // Налоговый период
         TaxPeriod taxPeriod = departmentReportPeriod.getReportPeriod().getTaxPeriod();
         // Получить упорядоченный список экземпляров НФ, которые участвуют в сквозной нумерации и находятся до указанного экземпляра НФ
@@ -1794,6 +1800,9 @@ public class FormDataServiceImpl implements FormDataService {
             case CONSOLIDATE_FD:
                 msg = "";
                 break;
+            case DELETE_FD:
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных", getTaskName(reportType, formDataId, userInfo));
+                break;
         }
         throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
     }
@@ -1848,8 +1857,8 @@ public class FormDataServiceImpl implements FormDataService {
                     //Запись на будущее, чтобы второго цикла не делать
                     //1E.
                     if (sourceForm.getState() == WorkflowState.ACCEPTED){
-                        int rowCountSource = dataRowDao.getSavedSize(formData);
-                        int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
+                        int rowCountSource = dataRowDao.getSavedSize(sourceForm);
+                        int columnCountSource = formTemplateService.get(sourceForm.getFormTemplateId()).getColumns().size();
                         cellCountSource += rowCountSource * columnCountSource;
                     }
                 }
@@ -1878,6 +1887,7 @@ public class FormDataServiceImpl implements FormDataService {
     public String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo) {
         FormData formData = formDataDao.get(formDataId, false);
         switch (reportType) {
+            case DELETE_FD:
             case EDIT_FD:
             case CALCULATE_FD:
             case CONSOLIDATE_FD:

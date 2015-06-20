@@ -689,7 +689,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                 innerLogUuid = result.getUuid();
                 if (result.isLock()) {
-                    Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
+                    Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                         @Override
                         public void yes() {
                             onConsolidate(true, cancelTask);
@@ -970,7 +970,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     });
                 } else if (result.isSave()) {
                     modifiedRows.clear();
-                    Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
+                    Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {
                             onUploadTF(force, true, cancelTask, uuid);

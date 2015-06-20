@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
@@ -47,6 +48,10 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
         PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(filter);
         if (records.isEmpty())
             throw new ServiceException("Нет записей за указанную дату.");
+
+        Date firstDate = records.get(records.size() - 1).getLogDate();
+        filter.setFromSearchDate(firstDate);
+
         String uuid = printingService.generateAuditZip(records);
         reportService.createAudit(null, uuid, ReportType.ARCHIVE_AUDIT);
 

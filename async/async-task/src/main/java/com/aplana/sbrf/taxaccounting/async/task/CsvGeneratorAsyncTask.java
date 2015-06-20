@@ -63,7 +63,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.EXCEL, null);
+        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CSV, null);
         if (checkTaskLimit.getFirst() == null) {
             AsyncTaskTypeData taskTypeDataReport = asyncTaskTypeDao.get(ReportType.CSV.getAsyncTaskTypeId(true));
             logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");

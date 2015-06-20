@@ -39,7 +39,7 @@ public class MapCache implements Cache {
 
 	@Override
     public String getName() {
-		return this.name;
+		return name;
 	}
 
 	/*
@@ -49,16 +49,16 @@ public class MapCache implements Cache {
 	 */
 	@Override
 	public Map<Object, Object> getNativeCache() {
-		return this.store;
+		return store;
 	}
 
 	public boolean isAllowNullValues() {
-		return this.allowNullValues;
+		return allowNullValues;
 	}
 
 	@Override
     public ValueWrapper get(Object key) {
-		Object value = this.store.get(new KeyWrapper(this.name, key));
+		Object value = store.get(new KeyWrapper(name, key));
 		if (log.isDebugEnabled()) {
 			log.debug("Get element with key = " + key + " from cache '" + name
 					+ "'. Value present: " + (value != null));
@@ -67,10 +67,10 @@ public class MapCache implements Cache {
 				: null);
 	}
 
-    @Override
+/*    @Override
     public <T> T get(Object key, Class<T> type) {
-        return null;
-    }
+        return (T) fromStoreValue(store.get(new KeyWrapper(name, key)));
+    }*/
 
     @Override
     public void put(Object key, Object value) {
@@ -78,13 +78,20 @@ public class MapCache implements Cache {
 			log.debug("Put element with key = " + key + " to cache '" + name
 					+ "'");
 		}
-		this.store.put(new KeyWrapper(this.name, key), toStoreValue(value));
+		store.put(new KeyWrapper(name, key), toStoreValue(value));
 	}
 
-    @Override
+/*    @Override
     public ValueWrapper putIfAbsent(Object key, Object value) {
-        return null;
-    }
+		KeyWrapper wKey = new KeyWrapper(name, key);
+		Object existingValue = fromStoreValue(store.get(wKey));
+		if (existingValue == null) {
+			store.put(wKey, toStoreValue(value));
+			return null;
+		} else {
+			return new SimpleValueWrapper(existingValue);
+		}
+    }*/
 
     @Override
 	public void evict(Object key) {
@@ -111,14 +118,14 @@ public class MapCache implements Cache {
 	 * @return the value to return to the user
 	 */
 	protected Object fromStoreValue(Object storeValue) {
-		if (this.allowNullValues && NULL_HOLDER.equals(storeValue)) {
+		if (allowNullValues && NULL_HOLDER.equals(storeValue)) {
 			return null;
 		}
 		return storeValue;
 	}
 
 	protected Object toStoreValue(Object userValue) {
-		if (this.allowNullValues && userValue == null) {
+		if (allowNullValues && userValue == null) {
 			return NULL_HOLDER;
 		}
 		return userValue;

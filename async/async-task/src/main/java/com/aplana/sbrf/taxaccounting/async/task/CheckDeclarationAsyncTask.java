@@ -1,10 +1,13 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,28 +43,17 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
-        return BalancingVariants.LONG;
-    /*
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.EXCEL_DEC);
+        Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.ACCEPT_DEC);
         if (checkTaskLimit == null) {
-            throw new ServiceException("Декларация не сформирована");
-        } else if (checkTaskLimit.getFirst() == null) {
-            Logger logger = new Logger();
-            DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
-            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-            logger.error("Критерий возможности формирования печатного представления декларации задается в конфигурационных параметрах. За разъяснениями обратитесь к Администратору");
-            throw new ServiceLoggerException(ReportType.CHECK_TASK,
-                    logEntryService.save(logger.getEntries()),
-                    String.format(ReportType.PDF_DEC.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
-                    String.format("xml файл %s имеет слишком большой размер(%s байт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), checkTaskLimit.getSecond()));
+            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
         }
-        return checkTaskLimit.getFirst();*/
+        return checkTaskLimit.getFirst();
     }
 
     @Override

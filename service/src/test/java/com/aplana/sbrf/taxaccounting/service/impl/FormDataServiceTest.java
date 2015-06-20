@@ -385,7 +385,7 @@ public class FormDataServiceTest {
         newFormData.setReportPeriodId(3);
         newFormData.setKind(FormDataKind.PRIMARY);
         newFormData.setDepartmentReportPeriodId(1);
-        newFormData.setState(WorkflowState.CREATED);
+        newFormData.setState(WorkflowState.APPROVED);
 
         List<FormData> formDataList = new ArrayList<FormData>();
         formDataList.add(formData);
@@ -450,8 +450,8 @@ public class FormDataServiceTest {
         departmentReportPeriod.setReportPeriod(reportPeriod);
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
-        Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
-                formDataService.getPreviousRowNumber(newFormData, null).equals(3));
+        Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
+                formDataService.getPreviousRowNumber(newFormData, null).equals(0));
     }
 
     /**

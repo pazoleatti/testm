@@ -599,6 +599,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         getJdbcTemplate().update("UPDATE form_data SET manual = ? WHERE id = ?", manual, formData.getId());
     }
 
+    private static final String DELETE_FROM_FD_NNN = "delete from form_data_%s where form_data_id=?";
+    @Override
+    public int deleteFormDataNnn(int ftId, long fdId) {
+        return getJdbcTemplate().update(String.format(DELETE_FROM_FD_NNN, ftId), fdId);
+    }
+
     private static final String UPDATE_FORM_DATA_PERFORMER_TB =
             "merge into FORM_DATA_PERFORMER fdp using ( " +
                     "  with formDataIdsWithRegExp as (select distinct fd.ID fd_id, FORM_DATA_PERFORMER.REPORT_DEPARTMENT_NAME from FORM_DATA fd " +
