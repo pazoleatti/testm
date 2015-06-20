@@ -714,7 +714,7 @@ public class SourceServiceImpl implements SourceService {
                     if ((srcTB == null && destTB != null) ||
                             (srcTB != null && destTB == null) ||
                             (destTB != null && !destTB.equals(srcTB))) {
-                        throw new ServiceLoggerException("Ограничение регионального налога: приёмник и источник должны относится к одному и тому же территориальному банку!",
+                        throw new ServiceLoggerException("Ограничение регионального налога: приёмник и источник должны относиться к одному и тому же территориальному банку!",
                                 logEntryService.save(logger.getEntries()));
                     }
                 }
