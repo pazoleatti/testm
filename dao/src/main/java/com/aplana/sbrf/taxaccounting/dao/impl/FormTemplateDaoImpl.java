@@ -5,27 +5,45 @@ import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnKeyEnum;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.CallableStatementCreator;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao {
@@ -69,7 +87,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
-	@Cacheable(CacheConstants.FORM_TEMPLATE)
+	//@Cacheable(CacheConstants.FORM_TEMPLATE)
 	@Override
 	public FormTemplate get(int formId) {
 		if (logger.isDebugEnabled()) {
@@ -99,8 +117,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	 * Кэш инфалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
 	 * Иначе, если версии не совпадают кэш продолжает возвращать старую версию.
 	 */
-    @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
+    //@Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
+    //        @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
         try {
@@ -170,7 +188,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
 	}
 
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, allEntries = true)
+    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, allEntries = true)
     @Override
     public int[] update(final List<FormTemplate> formTemplates) {
         try {
@@ -226,7 +244,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
-    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplateId + new String(\"_script\")")
+    //@Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplateId + new String(\"_script\")")
     @Override
     public String getFormTemplateScript(int formTemplateId) {
         try {
@@ -402,7 +420,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true)
+    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true)
     public int delete(int formTemplateId) {
         try {
             getJdbcTemplate().update("delete from form_template where id = ?", new Object[]{formTemplateId}, new int[]{Types.INTEGER});
@@ -414,7 +432,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, allEntries = true)
+    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, allEntries = true)
     public void delete(final Collection<Integer> formTemplateIds) {
         try {
             getNamedParameterJdbcTemplate().update("delete from form_template where " + SqlUtils.transformToSqlInStatement("id", formTemplateIds),
@@ -504,7 +522,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
+    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
     public int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId) {
         try {
             return getJdbcTemplate().update("update form_template set status=? where id = ?", versionStatus.getId(), formTemplateId);

@@ -3,6 +3,7 @@
 
 --Вспомогательные таблицы для логирования:
 create table log_clob_query (id number(9) not null primary key, form_template_id number(9), sql_mode varchar2(10), text_query clob, log_date timestamp(6) default current_timestamp not null, session_id number(18) default 0 not null);
+alter table log_clob_query add form_type_id number(9);
 
 comment on table log_clob_query is 'Логирование DDL/DML запросов из ХП';
 comment on column log_clob_query.id is 'Идентификатор записи (seq_log_query)';
@@ -11,6 +12,7 @@ comment on column log_clob_query.sql_mode is 'DDL/DML';
 comment on column log_clob_query.text_query is 'Текст запроса';
 comment on column log_clob_query.log_date is 'Дата/время начала обработки запроса';
 comment on column log_clob_query.session_id is 'Идентификатор сессии (seq_log_query_session)';
+comment on column log_clob_query.form_type_id is 'Идентификатор типа (при вызове из процедуры удаления)';
 
 create sequence seq_log_query start with 1 increment by 1;
 create sequence seq_log_query_session start with 1 increment by 1;
@@ -28,7 +30,7 @@ is
        chk_table number(1) :=0;
 begin
        dbms_output.enable;
-       for t in (select id as form_template_id, fullname as table_template_fullname from form_template where id in (P_NNN) order by id) loop
+       for t in (select id as form_template_id, translate(fullname, '''', ' ') as table_template_fullname from form_template where id in (P_NNN) and exists (select 1 from user_tables where table_name = 'DATA_CELL') order by id) loop
           
          v_table_name := 'FORM_DATA_'||t.form_template_id;
          
@@ -37,18 +39,14 @@ begin
             insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', 'DROP TABLE '||v_table_name);
             EXECUTE IMMEDIATE 'DROP TABLE '||v_table_name;
          end if;   
-            
-         --DEBUG ONLY
-         --EXECUTE IMMEDIATE 'DROP TABLE '||table_name;
-         --delete from log_clob_query;
          
          -- Фиксированная "шапка" создания таблицы
          query_str := 'create table '||v_table_name||' ('
-		 || 'ID    NUMBER(18) not null,'
+     || 'ID    NUMBER(18) not null,'
          || 'FORM_DATA_ID    NUMBER(18) not null,'
          || 'TEMPORARY       NUMBER(1) not null,'
          || 'MANUAL          NUMBER(1) not null,'
-		 || 'ORD             NUMBER(14) not null,'
+     || 'ORD             NUMBER(14) not null,'
          || 'ALIAS           VARCHAR2(20)'
          || ')';
                   insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);
@@ -81,7 +79,7 @@ begin
               execute immediate query_str;
             
               -- Комментарий = form_column.alias + ' - ' + form_column.name
-              query_str := 'COMMENT ON COLUMN '||v_table_name ||'.c'||x.Id ||' is '''||x.column_comment||'''';
+              query_str := 'COMMENT ON COLUMN '||v_table_name ||'.c'||x.Id ||' is '''||translate(x.column_comment, '''', ' ')||'''';
                         insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);
               execute immediate query_str;
               
@@ -102,17 +100,12 @@ begin
           query_str := 'alter table '|| v_table_name ||' add constraint '||v_table_name||'_PK primary key (ID)';
                insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);   
           execute immediate query_str;
-		  
-		  query_str := 'create unique index i_'|| v_table_name ||'_id on '||v_table_name||' (FORM_DATA_ID, TEMPORARY, MANUAL, ORD)';
+      
+      query_str := 'create unique index i_'|| v_table_name ||'_id on '||v_table_name||' (FORM_DATA_ID, TEMPORARY, MANUAL, ORD)';
                insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);   
           execute immediate query_str;
           
-          
-          --Фиксированная ссылка на FORM_DATA + индекс ?
-          query_str := 'alter table '|| v_table_name ||' add constraint '||v_table_name||'_FK foreign key (FORM_DATA_ID) references FORM_DATA(ID) on delete cascade';
-               insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);   
-          execute immediate query_str;
-          
+          --Индекс на FORM_DATA
           query_str := 'create index i_'|| v_table_name||' on '|| v_table_name ||' (form_data_id)';
                insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str);   
           execute immediate query_str;
@@ -127,14 +120,53 @@ begin
          -------------------------------------------------------------------------------------
          --Заполнение данными
          dml_query := 'insert into '||v_table_name||' '||dml_query_str_header || ' '|| dml_query_str_body || ' where dr.type in (0, -1)';
-			insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DML', dml_query);
+      insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, 'DML', dml_query);
          execute immediate dml_query;
             insert into log_clob_query (id, form_template_id, sql_mode, text_query) values(seq_log_query.nextval, t.form_template_id, null, '--------------------------------------');
          
-		 commit;
+     commit;
          -------------------------------------------------------------------------------------         
       end loop;                  
 end CREATE_FORM_DATA_NNN_ARCHIVE;
+
+/
+
+create or replace procedure DELETE_FORM_TYPE(FT_ID number) is
+       query_str varchar2(1024);
+       v_session_id number(18) := 0;
+begin
+  --Получить идентификатор текущей сессии для логирования
+	    select seq_log_query_session.nextval into v_session_id from dual;
+    
+  insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
+         values(seq_log_query.nextval, FT_ID, 'INFO', null, v_session_id);
+  commit;                     
+       
+  --Всё заблокировать (царь я или не царь)     
+  for x in (select id from form_template where type_id = FT_ID) loop
+      query_str := 'LOCK TABLE FORM_DATA_'||x.id||' IN EXCLUSIVE MODE WAIT 300';
+      insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
+         values(seq_log_query.nextval, FT_ID, 'DDL', query_str, v_session_id);          
+      execute immediate query_str;
+  end loop;
+  
+  --Удалить таблицы
+  for x in (select id from form_template where type_id = FT_ID) loop   
+      query_str := 'DROP TABLE FORM_DATA_'||x.id;
+      insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
+           values(seq_log_query.nextval, FT_ID, 'DDL', query_str, v_session_id);    
+      execute immediate query_str;
+    
+  end loop;
+  --Удалить все упоминания
+  DELETE FROM FORM_TEMPLATE WHERE TYPE_ID = FT_ID;
+  DELETE FROM FORM_TYPE WHERE ID = FT_ID;
+  
+  insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
+         values(seq_log_query.nextval, FT_ID, 'INFO', null, v_session_id);
+  commit;    
+  
+end DELETE_FORM_TYPE;
 /
 
 create or replace procedure CREATE_FORM_DATA_NNN (FT_ID number)
@@ -148,8 +180,8 @@ is
 begin
 		--Получить идентификатор текущей сессии для логирования
 	    select seq_log_query_session.nextval into v_session_id from dual;
-       
-	   for t in (select id as form_template_id, fullname as table_template_fullname from form_template where id in (P_NNN) order by id) loop
+
+	   for t in (select id as form_template_id, translate(fullname, '''', ' ') as table_template_fullname from form_template where id in (P_NNN) order by id) loop
 
          v_table_name := 'FORM_DATA_'||t.form_template_id;
 
@@ -190,7 +222,7 @@ begin
               execute immediate query_str;
 
               -- Комментарий = form_column.alias + ' - ' + form_column.name
-              query_str := 'COMMENT ON COLUMN '||v_table_name ||'.c'||x.Id ||' is '''||x.column_comment||'''';
+              query_str := 'COMMENT ON COLUMN '||v_table_name ||'.c'||x.Id ||' is '''||translate(x.column_comment, '''', ' ') ||'''';
                         insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
               execute immediate query_str;
 
@@ -212,12 +244,7 @@ begin
                insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
           execute immediate query_str;
 
-		  lock table form_data in exclusive mode;
-          --Фиксированная ссылка на FORM_DATA + индекс ?
-          query_str := 'alter table '|| v_table_name ||' add constraint '||v_table_name||'_FK foreign key (FORM_DATA_ID) references FORM_DATA(ID) on delete cascade';
-               insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
-          execute immediate query_str;
-
+          --Индекс на FORM_DATA
           query_str := 'create index i_'|| v_table_name||' on '|| v_table_name ||' (form_data_id)';
                insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
           execute immediate query_str;
@@ -236,27 +263,13 @@ end CREATE_FORM_DATA_NNN;
 set serveroutput on size 30000;
 begin
   delete from log_clob_query;
-  for x in (select id as form_template_id, fullname as table_template_fullname from form_template order by id) loop
+  for x in (select id as form_template_id, fullname as table_template_fullname from form_template where exists (select 1 from user_tables where table_name = 'DATA_CELL') order by id) loop
       CREATE_FORM_DATA_NNN_ARCHIVE (x.form_template_id);
 	  dbms_output.put_line('Done: '|| x.form_template_id);
 	  commit;
   end loop; 
 end;
 /
-
---STATS
-/*select form_template_id, min(log_date), max(log_date),
-EXTRACT (HOUR   FROM (max(log_date)-min(log_date)))*60*60+
-             EXTRACT (MINUTE FROM (max(log_date)-min(log_date)))*60+
-             EXTRACT (SECOND FROM (max(log_date)-min(log_date))) as template_duration_sec,
-sum(
-EXTRACT (HOUR   FROM (max(log_date)-min(log_date)))*60*60+
-             EXTRACT (MINUTE FROM (max(log_date)-min(log_date)))*60+
-             EXTRACT (SECOND FROM (max(log_date)-min(log_date)))
-             )
-             over (order by form_template_id)/60 total_duration_min
-from log_clob_query group by form_template_id
-order by 2;*/
 --------------------------------------------------------------------------------------
 create table form_data_ref_book
 (

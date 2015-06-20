@@ -76,7 +76,7 @@ alter table tax_period add constraint tax_period_fk_taxtype foreign key (tax_typ
 
 create table form_data_consolidation
 (
-source_form_data_id number(9) not null,
+source_form_data_id number(9),
 target_form_data_id number(9) not null
 );
 
@@ -86,7 +86,7 @@ comment on column form_data_consolidation.target_form_data_id is 'Идентиф
 
 create table declaration_data_consolidation
 (
-source_form_data_id number(9) not null,
+source_form_data_id number(9),
 target_declaration_data_id number(9) not null
 );
 
@@ -134,10 +134,10 @@ create index i_lock_data_subscr on lock_data_subscribers(lock_key);
 --http://jira.aplana.com/browse/SBRFACCTAX-11339: Таблица для конфигов асинхронных задач
 --совместно с http://jira.aplana.com/browse/SBRFACCTAX-11160
 alter table async_task_type add short_queue_limit number(18);
-comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
-
 alter table async_task_type add task_limit number(18);
+
 comment on column async_task_type.short_queue_limit is 'Ограничение на выполнение задачи в очереди быстрых задач';
+comment on column async_task_type.task_limit is 'Ограничение на выполнение задачи';
 
 alter table async_task_type add limit_kind varchar2(400);
 comment on column async_task_type.limit_kind is 'Вид ограничения';
@@ -283,10 +283,7 @@ COMPOUND TRIGGER
 end DECL_DATA_SRC_AFTER_INS_UPD;
 /
 
-
-
-
 ---------------------------------------------------------------------------------------------
 
 commit;
-end;
+exit;
