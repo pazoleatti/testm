@@ -103,9 +103,9 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     try {
                         lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                         logger.info(String.format(LockData.LOCK_INFO_MSG,
-                                        formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)),
+                                        formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo),
                                 sdf.format(lockData.getDateLock()),
-                                userService.getUser(lockData.getUserId()).getName());
+                                userService.getUser(lockData.getUserId()).getName()));
                     } catch (ServiceException e) {
                     }
                     result.setLock(false);
