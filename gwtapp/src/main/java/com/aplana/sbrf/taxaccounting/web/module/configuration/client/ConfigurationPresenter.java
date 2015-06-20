@@ -274,7 +274,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             String archivePath = cleanString(dataRow.getCell(getView().getArchivePathColumn().getAlias()).getStringValue());
             String errorPath = cleanString(dataRow.getCell(getView().getErrorPathColumn().getAlias()).getStringValue());
 
-            if (departmentId == null || uploadPath == null || archivePath == null || errorPath == null) {
+            if (notSetFields != null && (departmentId == null || uploadPath == null || archivePath == null || errorPath == null)) {
                 Integer idInt = departmentId == null ? null : departmentId.intValue();
                 if (notSetFields.get(idInt) == null) {
                     notSetFields.put(idInt, new HashSet<String>());
