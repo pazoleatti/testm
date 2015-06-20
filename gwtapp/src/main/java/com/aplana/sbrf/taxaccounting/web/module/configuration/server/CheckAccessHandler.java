@@ -71,6 +71,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                 if (sLimit != null && !sLimit.isEmpty()) {
                     try {
                         limit = Integer.valueOf(sLimit);
+                        if (limit == 0) throw new NumberFormatException();
                     } catch (NumberFormatException e) {
                         logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть числовым (больше нуля)!", type, sLimit));
                         error = true;
@@ -80,6 +81,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                 if (sShortLimit != null && !sShortLimit.isEmpty()) {
                     try {
                         shortLimit = Integer.valueOf(sShortLimit);
+                        if (shortLimit == 0) throw new NumberFormatException();
                     } catch (NumberFormatException e) {
                         logger.error(String.format("%s: Значение параметра \"Ограничение на выполнение задания\" (\"%s\") должно быть числовым (больше нуля)!", type, sShortLimit));
                         error = true;
