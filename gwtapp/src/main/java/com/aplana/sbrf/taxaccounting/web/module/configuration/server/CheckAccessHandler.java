@@ -100,7 +100,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                 result.setHasError(false);
             } else {
                 if (logger.containsLevel(LogLevel.ERROR)) {
-                    result.setHasError(false);
+                    result.setHasError(true);
                 }
             }
         }
