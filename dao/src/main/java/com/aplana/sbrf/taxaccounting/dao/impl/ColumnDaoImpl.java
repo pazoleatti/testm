@@ -157,10 +157,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         OrderUtils.reorder(newColumns);
 
         List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());
-        for (int i = 0; i<newColumns.size(); i++) {
-            Column column = newColumns.get(i);
-            column.setId(genKeys.get(i).intValue());
-        }
+        prepareColumns(formTemplate, newColumns, genKeys);
+
         for (Column column : newColumns) {
             if (ColumnType.REFERENCE.equals(column.getColumnType())) {
                 ReferenceColumn referenceColumn = (ReferenceColumn)column;
@@ -271,6 +269,39 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         return genKeys;
     }
 
+    private void prepareColumns(FormTemplate formTemplate, List<Column> columns, List<Long> genKeys){
+        for (int i = 0; i<columns.size(); i++) {
+            Column column = columns.get(i);
+            column.setId(genKeys.get(i).intValue());
+        }
+
+        for (Column column : columns) {
+            if (ColumnType.REFERENCE.equals(column.getColumnType())) {
+                ReferenceColumn referenceColumn = (ReferenceColumn)column;
+                // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
+                if(referenceColumn.getParentAlias()!=null){
+                    referenceColumn.setParentId(
+                            formTemplate.getColumn(
+                                    referenceColumn.getParentAlias()).getId());
+                }
+            }
+        }
+    }
+
+    private void prepareColumns(FormTemplate formTemplate, List<Column> columns){
+        for (Column column : columns) {
+            if (ColumnType.REFERENCE.equals(column.getColumnType())) {
+                ReferenceColumn referenceColumn = (ReferenceColumn)column;
+                // При экспорте parentId не сериализуется, а прописывается алиас для parentId, здесь в случии импорта подставляем нужный id
+                if(referenceColumn.getParentAlias()!=null){
+                    referenceColumn.setParentId(
+                            formTemplate.getColumn(
+                                    referenceColumn.getParentAlias()).getId());
+                }
+            }
+        }
+    }
+
     /**
      * Удаляем столбцы
      * @return возвращаем идентификаторы колонок удаленных
@@ -311,6 +342,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
     private Collection<Long> updateFormColumns(final List<Column> oldColumns, final FormTemplate formTemplate){
         final HashSet<Long> updatedColumns = new HashSet<Long>();
+        prepareColumns(formTemplate, oldColumns);
+
         getJdbcTemplate().batchUpdate(
                 "UPDATE form_column SET name = ?, alias = ?, type = ?, width = ?, precision = ?, ord = ?, " +
                         "max_length = ?, checking = ?, format = ?, attribute_id = ?, filter = ?, " +
