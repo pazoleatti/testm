@@ -706,7 +706,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
         periodPickerPopup.setPeriods(reportPeriods);
         ReportPeriod maxPeriod = getMaxPeriod(reportPeriods);
-        periodPickerPopup.setValue(maxPeriod == null ? null : Arrays.asList(maxPeriod.getId()));
+        periodPickerPopup.setValue(maxPeriod == null ? null : Arrays.asList(maxPeriod.getId()), true);
         this.currentReportPeriodId = maxPeriod == null ? null : maxPeriod.getId();
 
     }
