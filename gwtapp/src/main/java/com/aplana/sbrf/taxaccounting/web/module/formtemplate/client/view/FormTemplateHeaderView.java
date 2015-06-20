@@ -268,7 +268,7 @@ public class FormTemplateHeaderView extends ViewWithUiHandlers<FormTemplateHeade
 
 	@UiHandler("addRowButton")
 	public void onAddButton(ClickEvent event){
-		if(getUiHandlers()!= null){
+		if(getUiHandlers()!= null && !columns.isEmpty()){
 			getUiHandlers().onAddButton(new DataRow<HeaderCell>("", FormDataUtils.createHeaderCells(columns)));
 		}
 	}
