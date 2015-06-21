@@ -265,6 +265,9 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 }
                 DepartmentConfigPropertyView.this.currentDepartmentId = selDepartmentId;
                 editButton.setEnabled(false);
+                if (currentReportPeriodId != null && currentDepartmentId != null) {
+                    getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
+                }
             }
         });
 

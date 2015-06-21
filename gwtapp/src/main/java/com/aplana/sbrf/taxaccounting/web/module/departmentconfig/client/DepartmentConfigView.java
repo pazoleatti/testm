@@ -242,6 +242,9 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                 editButton.setEnabled(false);
                 clear();
                 updateVisibility();
+                if (currentReportPeriodId != null && currentDepartmentId != null) {
+                    getUiHandlers().getRefBookPeriod(currentReportPeriodId, currentDepartmentId);
+                }
             }
         });
 	}
