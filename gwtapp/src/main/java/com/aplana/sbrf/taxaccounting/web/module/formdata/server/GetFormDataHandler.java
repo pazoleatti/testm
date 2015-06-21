@@ -122,7 +122,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		fillFormDataAccessParams(action, userInfo, result);
 
         FormData formData = result.getFormData();
-        FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
+        FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
         //Проверка статуса макета НФ при открытиии налоговой формы.
         if (formTemplate.getStatus() == VersionedObjectStatus.DRAFT) {
             logger.error("Форма выведена из действия!");
@@ -147,6 +147,12 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
 
+        try {
+            //Принудительно инициализим данные макета в нф
+            result.getFormData().initFormTemplateParams(formTemplate);
+        } catch (Exception e) {
+            //все равно
+        }
 		return result;
 	}
 
@@ -195,12 +201,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		result.setAllStyles(formTemplate.getStyles());
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());
-        try {
-            //Принудительно инициализим данные макета в нф
-            formData.initFormTemplateParams(formTemplate);
-        } catch (Exception e) {
-            //все равно
-        }
         result.setFormData(formData);
         result.setBankSummaryForm(true);
         result.setCorrectionDiff(action.isCorrectionDiff());
