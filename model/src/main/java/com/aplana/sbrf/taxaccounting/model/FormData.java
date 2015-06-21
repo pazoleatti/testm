@@ -143,6 +143,10 @@ public class FormData extends IdentityObject<Long> {
 	 *             если значение поля form уже было проинициализировано
 	 */
 	public final void initFormTemplateParams(FormTemplate formTemplate) {
+		if (this.formColumns != null) {
+			throw new IllegalStateException(
+					"FormTemplate-related properties was already initialized in this FormData instance");
+		}
 		this.formColumns = formTemplate.getColumns();
 		this.formTemplateId = formTemplate.getId();
 		this.formType = formTemplate.getType();
