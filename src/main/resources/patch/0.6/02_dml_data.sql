@@ -9,6 +9,8 @@ INSERT INTO ASYNC_TASK_TYPE (ID, NAME, HANDLER_JNDI) VALUES (13, 'Загрузк
 --http://jira.aplana.com/browse/SBRFACCTAX-10965: Ограничить время XSD-валидации
 INSERT INTO configuration_lock (key, timeout) VALUES ('XSD_VALIDATION', 3600000);
 
+INSERT INTO configuration_lock (key, timeout) VALUES ('XSDLOG_SYSTEM_CSV', 3600000);
+
 -----------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-10770: Очистка данных (несоответствие типа графы графы с типом данных)
 
