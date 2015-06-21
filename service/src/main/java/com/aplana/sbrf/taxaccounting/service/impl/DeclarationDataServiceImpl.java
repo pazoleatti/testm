@@ -942,96 +942,55 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declaration.getDeclarationTemplateId());
         if (reportType == null)
-            return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
-                    declarationTemplate.getType().getName(),
-                    department.getName(),
+            return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
+                    declarationTemplate.getType().getTaxType() == TaxType.DEAL ? "Уведомление" : "Декларация",
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     reportPeriod.getCorrectionDate() != null
                             ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
                             : "",
+                    department.getName(),
+                    declarationTemplate.getType().getName(),
                     declaration.getTaxOrganCode() != null
-                            ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                            ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
                             : "",
                     declaration.getKpp() != null
-                            ? ", КПП \"" + declaration.getKpp() + "\""
+                            ? ", КПП: \"" + declaration.getKpp() + "\""
                             : "");
 
         switch (reportType) {
             case EXCEL_DEC:
             case PDF_DEC:
-                return String.format(LockData.DescriptionTemplate.DECLARATION_REPORT.getText(),
-                        reportType.getName(),
-                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
-                        declarationTemplate.getType().getName(),
-                        department.getName(),
-                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                : "",
-                        declaration.getTaxOrganCode() != null
-                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
-                                : "",
-                        declaration.getKpp() != null
-                                ? ", КПП \"" + declaration.getKpp() + "\""
-                                : "");
             case XML_DEC:
-                return String.format(LockData.DescriptionTemplate.DECLARATION_CALCULATE.getText(),
-                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
-                        declarationTemplate.getType().getName(),
-                        department.getName(),
-                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                : "",
-                        declaration.getTaxOrganCode() != null
-                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
-                                : "",
-                        declaration.getKpp() != null
-                                ? ", КПП \"" + declaration.getKpp() + "\""
-                                : "");
             case CHECK_DEC:
-                return String.format(LockData.DescriptionTemplate.DECLARATION_CHECK.getText(),
-                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
-                        declarationTemplate.getType().getName(),
-                        department.getName(),
-                        reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        reportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                : "",
-                        declaration.getTaxOrganCode() != null
-                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
-                                : "",
-                        declaration.getKpp() != null
-                                ? ", КПП \"" + declaration.getKpp() + "\""
-                                : "");
             case ACCEPT_DEC:
-                return String.format(LockData.DescriptionTemplate.DECLARATION_ACCEPT.getText(),
-                        declarationTemplate.getType().getTaxType().getDeclarationShortName(),
-                        declarationTemplate.getType().getName(),
-                        department.getName(),
+                return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
+                        String.format(reportType.getName(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
                                 : "",
+                        department.getName(),
+                        declarationTemplate.getType().getName(),
                         declaration.getTaxOrganCode() != null
-                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
                                 : "",
                         declaration.getKpp() != null
-                                ? ", КПП \"" + declaration.getKpp() + "\""
+                                ? ", КПП: \"" + declaration.getKpp() + "\""
                                 : "");
             default:
-                return String.format(LockData.DescriptionTemplate.DECLARATION.getText(),
-                        declarationTemplate.getType().getName(),
-                        department.getName(),
+                return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
+                        declarationTemplate.getType().getTaxType() == TaxType.DEAL ? "Уведомление" : "Декларация",
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
                                 : "",
+                        department.getName(),
+                        declarationTemplate.getType().getName(),
                         declaration.getTaxOrganCode() != null
-                                ? ", налоговый орган \"" + declaration.getTaxOrganCode() + "\""
+                                ? ", Налоговый орган: \"" + declaration.getTaxOrganCode() + "\""
                                 : "",
                         declaration.getKpp() != null
-                                ? ", КПП \"" + declaration.getKpp() + "\""
+                                ? ", КПП: \"" + declaration.getKpp() + "\""
                                 : "");
         }
     }

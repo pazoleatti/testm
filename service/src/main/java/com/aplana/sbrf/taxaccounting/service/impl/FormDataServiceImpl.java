@@ -1242,102 +1242,93 @@ public class FormDataServiceImpl implements FormDataService {
             switch (reportType) {
                 case CSV:
                 case EXCEL:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_REPORT.getText(),
-                            reportType.getName(),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
+                case IMPORT_FD:
+                case IMPORT_TF_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            reportType.getDescription(),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             formData.getPeriodOrder() != null
                                     ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
+                                    : "",
+                            department.getName(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            reportPeriod.getCorrectionDate() != null
+                                    ? "Корректировка"
+                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
+                    break;
+                case MOVE_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            str == null ? reportType.getDescription() : String.format("Возврат налоговой формы в \"%s\"", str),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "",
+                            department.getName(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            reportPeriod.getCorrectionDate() != null
+                                    ? "Корректировка"
+                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
                     break;
                 case CONSOLIDATE_FD:
                 case CALCULATE_FD:
                 case CHECK_FD:
                     name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
                             String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             formData.getPeriodOrder() != null
                                     ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
-                    break;
-                case MOVE_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            String.format(reportType.getDescription(), str, formData.getFormType().getTaxType().getTaxText()),
+                                    : "",
+                            department.getName(),
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
-                            department.getName(),
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
                             reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
-                    break;
-                case IMPORT_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            reportType.getDescription(),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
-                            reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
-                    break;
-                case IMPORT_TF_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_IMPORT.getText(),
-                            str,
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
-                            reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
+                                    ? "Корректировка"
+                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
                     break;
                 default:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA.getText(),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            "Налоговая форма",
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             formData.getPeriodOrder() != null
                                     ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
+                                    : "",
+                            department.getName(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            reportPeriod.getCorrectionDate() != null
+                                    ? "Корректировка"
+                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
             }
         } else {
-            name = String.format(LockData.DescriptionTemplate.FORM_DATA.getText(),
-                    formData.getFormType().getName(),
-                    formData.getKind().getName(),
-                    department.getName(),
+            name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                    "Налоговая форма",
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     formData.getPeriodOrder() != null
                             ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                             : "",
                     reportPeriod.getCorrectionDate() != null
                             ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                            : "");
+                            : "",
+                    department.getName(),
+                    formData.getFormType().getName(),
+                    formData.getKind().getName(),
+                    reportPeriod.getCorrectionDate() != null
+                            ? "Корректировка"
+                            : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
         }
         return name;
     }

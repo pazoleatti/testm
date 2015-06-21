@@ -86,17 +86,21 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         FormType formType = formTypeService.get(formDataTypeId);
 
         if (lockDataService.lock(key, userInfo.getUser().getId(),
-                String.format(LockData.DescriptionTemplate.FORM_DATA_CREATE.getText(),
-                        formType.getName(),
-                        kind.getName(),
-                        department.getName(),
+                String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                        "Создание налоговой формы",
                         departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         action.getMonthId() != null
                                 ? " " + Formats.getRussianMonthNameWithTier(action.getMonthId())
                                 : "",
                         departmentReportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
-                                : ""),
+                                : "",
+                        department.getName(),
+                        formType.getName(),
+                        kind.getName(),
+                        departmentReportPeriod.getCorrectionDate() != null
+                                ? "Корректировка"
+                                : "Абсолютные значения"),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
             //Если блокировка успешно установлена
             try {
