@@ -147,12 +147,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
 
-        try {
-            //Принудительно инициализим данные макета в нф
-            result.getFormData().initFormTemplateParams(formTemplate);
-        } catch (Exception e) {
-            //все равно
-        }
+        result.getFormData().initFormTemplateParams(formTemplate);
 		return result;
 	}
 
@@ -201,7 +196,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		result.setAllStyles(formTemplate.getStyles());
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());
-        result.setFormData(formData);
+		result.setFormData(formData);
         result.setBankSummaryForm(true);
         result.setCorrectionDiff(action.isCorrectionDiff());
         result.setExistManual(formDataService.existManual(action.getFormDataId()));
