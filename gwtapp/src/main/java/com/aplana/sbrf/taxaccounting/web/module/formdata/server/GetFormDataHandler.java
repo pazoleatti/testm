@@ -122,7 +122,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		fillFormDataAccessParams(action, userInfo, result);
 
         FormData formData = result.getFormData();
-        FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
+        FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
         //Проверка статуса макета НФ при открытиии налоговой формы.
         if (formTemplate.getStatus() == VersionedObjectStatus.DRAFT) {
             logger.error("Форма выведена из действия!");
@@ -147,7 +147,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             result.setUuid(logEntryService.save(logger.getEntries()));
         }
 
-        result.getFormData().initFormTemplateParams(formTemplate);
 		return result;
 	}
 

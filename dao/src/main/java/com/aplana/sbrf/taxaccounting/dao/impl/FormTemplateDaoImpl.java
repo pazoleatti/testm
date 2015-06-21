@@ -264,7 +264,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     new Object[]{formTemplate.getId()},
                     new int[]{Types.INTEGER},
                     String.class);
-            System.out.println("headerDataXml: "+headerDataXml);
             return headerDataXml != null ? xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class):
                     new ArrayList<DataRow<HeaderCell>>();
         }  catch (IllegalArgumentException e){
