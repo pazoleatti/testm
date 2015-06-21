@@ -195,7 +195,13 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		result.setAllStyles(formTemplate.getStyles());
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());
-		result.setFormData(formData);
+        try {
+            //Принудительно инициализим данные макета в нф
+            formData.initFormTemplateParams(formTemplate);
+        } catch (Exception e) {
+            //все равно
+        }
+        result.setFormData(formData);
         result.setBankSummaryForm(true);
         result.setCorrectionDiff(action.isCorrectionDiff());
         result.setExistManual(formDataService.existManual(action.getFormDataId()));
