@@ -110,7 +110,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                     if (!action.isCancelTask() && formDataService.checkExistTask(action.getFormDataId(), false, reportType, logger, userInfo)) {
                         result.setLockTask(true);
                     } else if (lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                            formDataService.getFormDataFullName(action.getFormDataId(), action.getMove().getToState().getActionName(), reportType),
+                            formDataService.getFormDataFullName(action.getFormDataId(), action.getMove().isReasonToMoveShouldBeSpecified() ? action.getMove().getToState().getName() : null, reportType),
                             LockData.State.IN_QUEUE.getText(),
                             lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                         try {
@@ -146,7 +146,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                         try {
                             formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
-                                    action.getMove(), action.getReasonToWorkflowMove(), logger);
+                                    action.getMove(), action.getReasonToWorkflowMove(), logger, false);
                         } finally {
                             lockDataService.unlock(keyTask, userInfo.getUser().getId());
                         }

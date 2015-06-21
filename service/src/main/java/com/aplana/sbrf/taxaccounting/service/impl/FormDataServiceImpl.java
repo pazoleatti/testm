@@ -730,7 +730,7 @@ public class FormDataServiceImpl implements FormDataService {
      * @param workflowMove переход
      */
     @Override
-    public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+    public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync) {
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
@@ -749,7 +749,7 @@ public class FormDataServiceImpl implements FormDataService {
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                 checkReferenceValues(logger, formData, false);
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
                 break;
             case CREATED_TO_PREPARED:
             case APPROVED_TO_ACCEPTED:
@@ -770,18 +770,18 @@ public class FormDataServiceImpl implements FormDataService {
                     logger.info("Выполнена сортировка строк налоговой формы.");
                 }
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
                 break;
             case APPROVED_TO_CREATED:
             case ACCEPTED_TO_APPROVED:
             case ACCEPTED_TO_PREPARED:
             case ACCEPTED_TO_CREATED:
                 sourceService.updateFDDDConsolidation(formDataId);
-                moveProcess(formData, userInfo, workflowMove, note, logger);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
                 break;
             default:
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
         }
     }
 
@@ -941,7 +941,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+    private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync) {
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (WorkflowMove.CREATED_TO_ACCEPTED.equals(workflowMove) ||
@@ -983,7 +983,8 @@ public class FormDataServiceImpl implements FormDataService {
 
         dataRowDao.commit(formData);
 
-        logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
+        if (!isAsync)
+            logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
 
         //Считаем что при наличие версии ручного ввода движение о жц невозможно
         deleteReport(formData.getId(), null, userInfo.getUser().getId());
@@ -1242,102 +1243,93 @@ public class FormDataServiceImpl implements FormDataService {
             switch (reportType) {
                 case CSV:
                 case EXCEL:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_REPORT.getText(),
-                            reportType.getName(),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
+                case IMPORT_FD:
+                case IMPORT_TF_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            reportType.getDescription(),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             formData.getPeriodOrder() != null
                                     ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
+                                    : "",
+                            department.getName(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            reportPeriod.getCorrectionDate() != null
+                                    ? "Корректировка"
+                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
+                    break;
+                case MOVE_FD:
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            str == null ? reportType.getDescription() : String.format("Возврат налоговой формы в \"%s\"", str),
+                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                            formData.getPeriodOrder() != null
+                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
+                                    : "",
+                            reportPeriod.getCorrectionDate() != null
+                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
+                                    : "",
+                            department.getName(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            reportPeriod.getCorrectionDate() != null
+                                    ? "Корректировка"
+                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
                     break;
                 case CONSOLIDATE_FD:
                 case CALCULATE_FD:
                 case CHECK_FD:
                     name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
                             String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             formData.getPeriodOrder() != null
                                     ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
-                    break;
-                case MOVE_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            String.format(reportType.getDescription(), str, formData.getFormType().getTaxType().getTaxText()),
+                                    : "",
+                            department.getName(),
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
-                            department.getName(),
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
                             reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
-                    break;
-                case IMPORT_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            reportType.getDescription(),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
-                            reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
-                    break;
-                case IMPORT_TF_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_IMPORT.getText(),
-                            str,
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
-                            reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
+                                    ? "Корректировка"
+                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
                     break;
                 default:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA.getText(),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
-                            department.getName(),
+                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                            "Налоговая форма",
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             formData.getPeriodOrder() != null
                                     ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                                     : "",
                             reportPeriod.getCorrectionDate() != null
                                     ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "");
+                                    : "",
+                            department.getName(),
+                            formData.getFormType().getName(),
+                            formData.getKind().getName(),
+                            reportPeriod.getCorrectionDate() != null
+                                    ? "Корректировка"
+                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
             }
         } else {
-            name = String.format(LockData.DescriptionTemplate.FORM_DATA.getText(),
-                    formData.getFormType().getName(),
-                    formData.getKind().getName(),
-                    department.getName(),
+            name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                    "Налоговая форма",
                     reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     formData.getPeriodOrder() != null
                             ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
                             : "",
                     reportPeriod.getCorrectionDate() != null
                             ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                            : "");
+                            : "",
+                    department.getName(),
+                    formData.getFormType().getName(),
+                    formData.getKind().getName(),
+                    reportPeriod.getCorrectionDate() != null
+                            ? "Корректировка"
+                            : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
         }
         return name;
     }
