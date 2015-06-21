@@ -39,14 +39,25 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
     private LockDataService lockService;
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+    protected ReportType getReportType() {
+        return ReportType.XML_DEC;
+    }
+
+    @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.XML_DEC);
-        return checkTaskLimit.getFirst();
+        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, getReportType());
+        if (value == null) {
+            throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
+        }
+        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        String msg = String.format("сумма количества ячеек таблицы формы по всем формам источникам (%s) превышает максимально допустимое (%s)!",  value, "%s");
+        return checkTask(getReportType(), value, String.format(getReportType().getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()), msg);
     }
 
     @Override

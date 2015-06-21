@@ -40,6 +40,11 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
     private LockDataService lockService;
 
     @Override
+    protected ReportType getReportType() {
+        return ReportType.EXCEL;
+    }
+
+    @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
@@ -60,8 +65,9 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
             throw new AsyncTaskException(new ServiceLoggerException(errorMsg,
                     logEntryService.save(logger.getEntries())));
         }
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CONSOLIDATE_FD, null);
-        return checkTaskLimit.getFirst();
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null);
+        String msg = String.format("сумма количества ячеек таблицы формы по всем формам источникам (%s) превышает максимально допустимое (%s)!", value, "%s");
+        return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -19,6 +20,11 @@ public abstract class TestAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     RefBookFactory refBookFactory;
+
+    @Override
+    protected ReportType getReportType() {
+        return null;
+    }
 
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {

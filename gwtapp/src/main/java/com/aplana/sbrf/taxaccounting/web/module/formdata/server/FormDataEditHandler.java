@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
@@ -27,6 +31,8 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
 	private DataRowService dataRowService;
     @Autowired
     private FormDataService formDataService;
+    @Autowired
+    private LockDataService lockDataService;
 
     public FormDataEditHandler() {
         super(FormDataEditAction.class);
@@ -38,6 +44,13 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
 		FormData formData = action.getFormData();
         Logger logger = new Logger();
         formDataService.checkLockedByTask(formData.getId(), logger, userInfo, "Редактирование НФ", true);
+
+        // http://conf.aplana.com/pages/viewpage.action?pageId=19664668 (2A.1)
+        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
+        if(lockType != null && ReportType.CHECK_FD.equals(lockType.getFirst())) {
+            lockDataService.unlock(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_FD), userInfo.getUser().getId());
+        }
+
 		accessService.canEdit(userInfo, formData.getId(), formData.isManual());
 		if (formData.isManual()) {
         	accessService.canCreateManual(logger, userInfo, formData.getId());

@@ -43,17 +43,25 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
+    protected ReportType getReportType() {
+        return ReportType.ACCEPT_DEC;
+    }
+
+    @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, ReportType.ACCEPT_DEC);
-        if (checkTaskLimit == null) {
+        Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, getReportType());
+        if (value == null) {
             throw new AsyncTaskException(new ServiceLoggerException("Декларация не сформирована", null));
         }
-        return checkTaskLimit.getFirst();
+        DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
+        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+        String msg = String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), value);
+        return checkTask(getReportType(), value, String.format(getReportType().getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()), msg);
     }
 
     @Override

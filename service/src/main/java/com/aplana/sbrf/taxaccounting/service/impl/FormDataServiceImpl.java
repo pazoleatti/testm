@@ -1808,31 +1808,16 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public Pair<BalancingVariants, Long> checkTaskLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid) {
+    public Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid) {
         switch (reportType) {
             case CHECK_FD:
             case MOVE_FD:
             case CALCULATE_FD:
-                int rowCount = dataRowDao.getSavedSize(formData);
-                int columnCount = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
-                long cellCount = rowCount * columnCount;
-                AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                if (cellCount < taskTypeData.getShortQueueLimit()) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCount);
-                }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCount);
             case EXCEL:
             case CSV:
                 int rowCountReport = dataRowDao.getSavedSize(formData);
                 int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
-                long cellCountReport = rowCountReport * columnCountReport;
-                AsyncTaskTypeData taskTypeDataReport = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                if (cellCountReport > taskTypeDataReport.getTaskLimit()) {
-                    return new Pair<BalancingVariants, Long>(null, cellCountReport);
-                } else if (cellCountReport < taskTypeDataReport.getShortQueueLimit()) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountReport);
-                }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountReport);
+                return Long.valueOf(rowCountReport * columnCountReport);
             case CONSOLIDATE_FD:
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
@@ -1862,22 +1847,9 @@ public class FormDataServiceImpl implements FormDataService {
                         cellCountSource += rowCountSource * columnCountSource;
                     }
                 }
-                AsyncTaskTypeData taskTypeConsolidate = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                if (cellCountSource < taskTypeConsolidate.getShortQueueLimit()) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, cellCountSource);
-                }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, cellCountSource);
+                return cellCountSource;
             case IMPORT_FD:
-                Long fileSize = blobDataService.getLength(uuid);
-                AsyncTaskTypeData taskTypeDataImport = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
-                Long maxSize = taskTypeDataImport.getTaskLimit() * 1024;
-                Long shortSize = taskTypeDataImport.getShortQueueLimit() * 1024;
-                if (maxSize != 0 && fileSize > maxSize) {
-                    return new Pair<BalancingVariants, Long>(null, fileSize);
-                } else if (fileSize < shortSize) {
-                    return new Pair<BalancingVariants, Long>(BalancingVariants.SHORT, fileSize);
-                }
-                return new Pair<BalancingVariants, Long>(BalancingVariants.LONG, fileSize);
+                return blobDataService.getLength(uuid)/1024;
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }

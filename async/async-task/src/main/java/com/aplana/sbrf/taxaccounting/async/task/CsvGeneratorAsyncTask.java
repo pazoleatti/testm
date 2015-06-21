@@ -44,11 +44,10 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
     @Autowired
     private LockDataService lockService;
 
-    @Autowired
-    private LogEntryService logEntryService;
-
-    @Autowired
-    private AsyncTaskTypeDao asyncTaskTypeDao;
+    @Override
+    protected ReportType getReportType() {
+        return ReportType.CSV;
+    }
 
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
@@ -63,16 +62,10 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CSV, null);
-        if (checkTaskLimit.getFirst() == null) {
-            AsyncTaskTypeData taskTypeDataReport = asyncTaskTypeDao.get(ReportType.CSV.getAsyncTaskTypeId(true));
-            logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-            throw new AsyncTaskException(new ServiceLoggerException(ReportType.CHECK_TASK,
-                    logEntryService.save(logger.getEntries()),
-                    ReportType.CSV.getDescription(),
-                    String.format("количество ячеек таблицы формы(%s) превышает максимально допустимое(%s)!", checkTaskLimit.getSecond(), taskTypeDataReport.getTaskLimit())));
-        }
-        return checkTaskLimit.getFirst();
+
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null);
+        String msg = String.format("количество ячеек таблицы формы(%s) превышает максимально допустимое(%s)!", value, "%s");
+        return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }
 
     @Override

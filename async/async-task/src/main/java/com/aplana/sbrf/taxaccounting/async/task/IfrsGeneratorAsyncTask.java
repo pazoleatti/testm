@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
@@ -31,6 +32,11 @@ public abstract class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private LockDataService lockService;
+
+    @Override
+    protected ReportType getReportType() {
+        return ReportType.ZIP_IFRS;
+    }
 
     @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {

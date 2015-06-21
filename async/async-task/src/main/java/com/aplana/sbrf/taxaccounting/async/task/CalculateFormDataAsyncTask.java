@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
+import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -32,7 +34,12 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
     private LogEntryService logEntryService;
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+    protected ReportType getReportType() {
+        return ReportType.CALCULATE_FD;
+    }
+
+    @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -44,8 +51,10 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        Pair<BalancingVariants, Long> checkTaskLimit = formDataService.checkTaskLimit(userInfo, formData, ReportType.CALCULATE_FD, null);
-        return checkTaskLimit.getFirst();
+
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null);
+        String msg = String.format("количество ячеек таблицы формы(%s) превышает максимально допустимое(%s)!", value, "%s");
+        return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }
 
     @Override
@@ -56,7 +65,6 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        checkTaskLimit(params);
         FormData formData = formDataService.getFormData(
                 userInfo,
                 formDataId,

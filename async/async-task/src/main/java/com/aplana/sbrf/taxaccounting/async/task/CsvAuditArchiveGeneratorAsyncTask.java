@@ -34,6 +34,11 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
     private ReportService reportService;
 
     @Override
+    protected ReportType getReportType() {
+        return ReportType.ARCHIVE_AUDIT;
+    }
+
+    @Override
     public BalancingVariants checkTaskLimit(Map<String, Object> params) {
         return BalancingVariants.LONG;
     }

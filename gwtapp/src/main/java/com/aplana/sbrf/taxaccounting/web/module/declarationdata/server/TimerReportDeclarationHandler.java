@@ -75,8 +75,9 @@ public class TimerReportDeclarationHandler extends AbstractActionHandler<TimerRe
             if (ReportType.ACCEPT_DEC.equals(reportType)) {
                 return TimerReportResult.StatusReport.EXIST;
             } else if (reportService.getDec(userInfo, declarationDataId, reportType) == null) {
-                Pair<BalancingVariants, Long> checkTaskLimit = declarationDataService.checkTaskLimit(userInfo, declarationDataId, reportType);
-                if (checkTaskLimit != null && checkTaskLimit.getFirst() == null) {
+                Long value = declarationDataService.getValueForCheckLimit(userInfo, declarationDataId, reportType);
+                Long limit = declarationDataService.getTaskLimit(reportType);
+                if (value != null && limit != 0 && limit > value) {
                     return TimerReportResult.StatusReport.LIMIT;
                 } else {
                     return TimerReportResult.StatusReport.NOT_EXIST;

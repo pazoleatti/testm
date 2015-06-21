@@ -22,6 +22,7 @@ import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -117,11 +118,11 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                         result.setStatus(CreateAsyncTaskStatus.CREATE);
                     } catch (Exception e) {
                         lockDataService.unlock(key, userInfo.getUser().getId());
-                        if (e instanceof ServiceLoggerException) {
-                            throw new ServiceLoggerException(e.getMessage(), ((ServiceLoggerException) e).getUuid());
-                        } else {
-                            throw new ActionException(e);
+                        int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
+                        if (i != -1) {
+                            throw (ServiceLoggerException)ExceptionUtils.getThrowableList(e).get(i);
                         }
+                        throw new ActionException(e);
                     }
                 } else {
                     throw new ActionException("Не удалось запустить проверку. Попробуйте выполнить операцию позже");
