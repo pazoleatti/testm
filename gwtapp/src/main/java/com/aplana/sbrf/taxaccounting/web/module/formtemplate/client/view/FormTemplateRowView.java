@@ -352,8 +352,10 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 	@UiHandler("addRowButton")
 	public void onAddButton(ClickEvent event){
-		rows.add(new DataRow<Cell>("Новый код", FormDataUtils.createCells(columns, styles)));
-		setRowsData(rows);
+        if (!columns.isEmpty()){
+            rows.add(new DataRow<Cell>("Новый код", FormDataUtils.createCells(columns, styles)));
+            setRowsData(rows);
+        }
 	}
 
 	@UiHandler("removeRowButton")
