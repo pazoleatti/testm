@@ -730,7 +730,7 @@ public class FormDataServiceImpl implements FormDataService {
      * @param workflowMove переход
      */
     @Override
-    public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+    public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync) {
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
@@ -749,7 +749,7 @@ public class FormDataServiceImpl implements FormDataService {
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                 checkReferenceValues(logger, formData, false);
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
                 break;
             case CREATED_TO_PREPARED:
             case APPROVED_TO_ACCEPTED:
@@ -770,18 +770,18 @@ public class FormDataServiceImpl implements FormDataService {
                     logger.info("Выполнена сортировка строк налоговой формы.");
                 }
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
                 break;
             case APPROVED_TO_CREATED:
             case ACCEPTED_TO_APPROVED:
             case ACCEPTED_TO_PREPARED:
             case ACCEPTED_TO_CREATED:
                 sourceService.updateFDDDConsolidation(formDataId);
-                moveProcess(formData, userInfo, workflowMove, note, logger);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
                 break;
             default:
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
         }
     }
 
@@ -941,7 +941,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger) {
+    private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync) {
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (WorkflowMove.CREATED_TO_ACCEPTED.equals(workflowMove) ||
@@ -983,7 +983,8 @@ public class FormDataServiceImpl implements FormDataService {
 
         dataRowDao.commit(formData);
 
-        logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
+        if (!isAsync)
+            logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
 
         //Считаем что при наличие версии ручного ввода движение о жц невозможно
         deleteReport(formData.getId(), null, userInfo.getUser().getId());

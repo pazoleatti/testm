@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,9 +23,6 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-
-    @Autowired
-    private LogEntryService logEntryService;
 
     @Override
     protected ReportType getReportType() {
@@ -60,7 +56,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
         final TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        formDataService.doMove(formDataId, false, userInfo, move, null, logger);
+        formDataService.doMove(formDataId, false, userInfo, move, null, logger, true);
     }
 
     @Override

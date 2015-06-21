@@ -146,7 +146,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                         try {
                             formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
-                                    action.getMove(), action.getReasonToWorkflowMove(), logger);
+                                    action.getMove(), action.getReasonToWorkflowMove(), logger, false);
                         } finally {
                             lockDataService.unlock(keyTask, userInfo.getUser().getId());
                         }
