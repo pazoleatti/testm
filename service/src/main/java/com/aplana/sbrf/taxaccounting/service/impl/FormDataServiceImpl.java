@@ -1670,7 +1670,8 @@ public class FormDataServiceImpl implements FormDataService {
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
     }
 
-    private List<String> generateReportKeys(ReportType reportType, long formDataId, Boolean manual) {
+    @Override
+    public List<String> generateReportKeys(ReportType reportType, long formDataId, Boolean manual) {
         List<String> lockKeys = new ArrayList<String>();
         boolean[] b = {false, true};
         for (boolean showChecked : b) {
