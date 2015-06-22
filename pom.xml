@@ -36,8 +36,8 @@
 		<gwt.version>2.5.1</gwt.version>
 		<gwtp.version>1.0</gwtp.version>
 		<jetty.version>6.1H.22</jetty.version>
-		<springframework.version>3.2.13.RELEASE</springframework.version>
-		<springsecurity.version>3.2.3.RELEASE</springsecurity.version>
+		<springframework.version>3.1.4.RELEASE</springframework.version>
+		<springsecurity.version>3.1.4.RELEASE</springsecurity.version>
 		<org.aspectj.version>1.8.0</org.aspectj.version>
 		<groovy.version>2.0.6</groovy.version>
 		<jasperreports.version>5.0.1</jasperreports.version>
@@ -402,6 +402,11 @@
 				<version>1.4</version>
 				<scope>test</scope>
 			</dependency>
+            <dependency>
+                <groupId>com.ibm.ws</groupId>
+                <artifactId>ws-runtime</artifactId>
+                <version>8.5.0.2</version>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
