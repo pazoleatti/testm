@@ -3,7 +3,6 @@
 
 --Вспомогательные таблицы для логирования:
 create table log_clob_query (id number(9) not null primary key, form_template_id number(9), sql_mode varchar2(10), text_query clob, log_date timestamp(6) default current_timestamp not null, session_id number(18) default 0 not null);
-alter table log_clob_query add form_type_id number(9);
 
 comment on table log_clob_query is 'Логирование DDL/DML запросов из ХП';
 comment on column log_clob_query.id is 'Идентификатор записи (seq_log_query)';
@@ -12,7 +11,6 @@ comment on column log_clob_query.sql_mode is 'DDL/DML';
 comment on column log_clob_query.text_query is 'Текст запроса';
 comment on column log_clob_query.log_date is 'Дата/время начала обработки запроса';
 comment on column log_clob_query.session_id is 'Идентификатор сессии (seq_log_query_session)';
-comment on column log_clob_query.form_type_id is 'Идентификатор типа (при вызове из процедуры удаления)';
 
 create sequence seq_log_query start with 1 increment by 1;
 create sequence seq_log_query_session start with 1 increment by 1;
@@ -128,45 +126,43 @@ begin
          -------------------------------------------------------------------------------------         
       end loop;                  
 end CREATE_FORM_DATA_NNN_ARCHIVE;
-
 /
 
-create or replace procedure DELETE_FORM_TYPE(FT_ID number) is
+create or replace procedure DELETE_FORM_TEMPLATE(FT_STR varchar) is
        query_str varchar2(1024);
        v_session_id number(18) := 0;
 begin
   --Получить идентификатор текущей сессии для логирования
-	    select seq_log_query_session.nextval into v_session_id from dual;
-    
-  insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
-         values(seq_log_query.nextval, FT_ID, 'INFO', null, v_session_id);
-  commit;                     
+      select seq_log_query_session.nextval into v_session_id from dual;        
        
-  --Всё заблокировать (царь я или не царь)     
-  for x in (select id from form_template where type_id = FT_ID) loop
+  --Всё монопольно заблокировать    
+  for x in (select id from (
+                  select trim(regexp_substr(FT_STR,'[^,]+', 1, level)) as id
+                  from dual
+                  connect by regexp_substr(FT_STR, '[^,]+', 1, level) is not null
+                  ) t 
+                  join user_tables ut on upper('FORM_DATA_'||t.id) = upper(ut.table_name)) loop
       query_str := 'LOCK TABLE FORM_DATA_'||x.id||' IN EXCLUSIVE MODE WAIT 300';
-      insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
-         values(seq_log_query.nextval, FT_ID, 'DDL', query_str, v_session_id);          
+      insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) 
+         values(seq_log_query.nextval, x.id, 'DDL', query_str, v_session_id);          
       execute immediate query_str;
   end loop;
   
   --Удалить таблицы
-  for x in (select id from form_template where type_id = FT_ID) loop   
+  for x in (select id from (
+                  select trim(regexp_substr(FT_STR,'[^,]+', 1, level)) as id
+                  from dual
+                  connect by regexp_substr(FT_STR, '[^,]+', 1, level) is not null
+                  ) t 
+                  join user_tables ut on upper('FORM_DATA_'||t.id) = upper(ut.table_name)) loop
       query_str := 'DROP TABLE FORM_DATA_'||x.id;
-      insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
-           values(seq_log_query.nextval, FT_ID, 'DDL', query_str, v_session_id);    
+      insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) 
+         values(seq_log_query.nextval, x.id, 'DDL', query_str, v_session_id);          
       execute immediate query_str;
     
   end loop;
-  --Удалить все упоминания
-  DELETE FROM FORM_TEMPLATE WHERE TYPE_ID = FT_ID;
-  DELETE FROM FORM_TYPE WHERE ID = FT_ID;
   
-  insert into log_clob_query (id, form_type_id, sql_mode, text_query, session_id) 
-         values(seq_log_query.nextval, FT_ID, 'INFO', null, v_session_id);
-  commit;    
-  
-end DELETE_FORM_TYPE;
+end DELETE_FORM_TEMPLATE;
 /
 
 create or replace procedure CREATE_FORM_DATA_NNN (FT_ID number)
