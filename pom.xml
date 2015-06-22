@@ -402,11 +402,6 @@
 				<version>1.4</version>
 				<scope>test</scope>
 			</dependency>
-            <dependency>
-                <groupId>com.ibm.ws</groupId>
-                <artifactId>ws-runtime</artifactId>
-                <version>8.5.0.2</version>
-            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
