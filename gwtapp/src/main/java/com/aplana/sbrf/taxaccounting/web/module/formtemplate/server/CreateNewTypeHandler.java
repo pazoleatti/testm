@@ -62,6 +62,9 @@ public class CreateNewTypeHandler extends AbstractActionHandler<CreateNewTypeAct
         try {
             formTemplateDao.createFDTable(formTemplateId);
         } catch (Exception e){
+            if (formTemplateDao.isFDTableExist(formTemplateId)){
+                formTemplateDao.dropFDTable(formTemplateId);
+            }
             formTemplateService.delete(formTemplateId);
             throw new ServiceException("", e);
         }

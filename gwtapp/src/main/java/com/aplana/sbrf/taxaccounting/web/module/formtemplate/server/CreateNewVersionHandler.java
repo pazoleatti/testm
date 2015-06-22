@@ -60,8 +60,11 @@ public class CreateNewVersionHandler extends AbstractActionHandler<CreateNewVers
         try {
             formTemplateDao.createFDTable(formTemplateId);
         } catch (Exception e){
+            if (formTemplateDao.isFDTableExist(formTemplateId)){
+                formTemplateDao.dropFDTable(formTemplateId);
+            }
             formTemplateService.delete(formTemplateId);
-            throw new ServiceException("", e);
+            throw new ServiceException("Не удалось создать версию макета. Попробуйте позже.", e);
         }
         result.setFormTemplateId(formTemplateId);
         result.setColumns(formTemplateService.get(formTemplateId).getColumns());
