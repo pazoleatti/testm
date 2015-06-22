@@ -624,7 +624,7 @@ public class RefBookDaoTest {
         recordIds.add(7L);
 
         List<String> recordsOutPeriod = refBookDao.isVersionUsedInRefBooks(2L, recordIds, getDate(1, 2, 2013), getDate(1, 5, 2013), false, null);
-        assertEquals(1, recordsOutPeriod.size());
+        assertEquals(2, recordsOutPeriod.size());
 
         List<String> recordsValueChanged = refBookDao.isVersionUsedInRefBooks(2L, recordIds, getDate(1, 2, 2013), getDate(1, 5, 2013), true, null);
         assertEquals(3, recordsValueChanged.size());

@@ -439,7 +439,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
                 }
-                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, null);
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(result.getRecordId()), versionFrom, versionTo, false, null);
                 if (usagesResult != null && !usagesResult.isEmpty()) {
                     for (String error: usagesResult) {
                         if (logger != null) {
