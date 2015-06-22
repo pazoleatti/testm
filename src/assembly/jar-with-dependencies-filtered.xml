@@ -36,12 +36,12 @@
             <scope>runtime</scope>
             <unpackOptions>
                 <excludes>
-                    <exclude>README*</exclude>
-                    <exclude>LICENSE*</exclude>
-                    <exclude>NOTICE*</exclude>
-                    <exclude>readme*</exclude>
-                    <exclude>license*</exclude>
-                    <exclude>notice*</exclude>
+                    <exclude>**/README*</exclude>
+                    <exclude>**/LICENSE*</exclude>
+                    <exclude>**/NOTICE*</exclude>
+                    <exclude>*/readme*</exclude>
+                    <exclude>**/license*</exclude>
+                    <exclude>**/notice*</exclude>
                 </excludes>
             </unpackOptions>
         </dependencySet>
