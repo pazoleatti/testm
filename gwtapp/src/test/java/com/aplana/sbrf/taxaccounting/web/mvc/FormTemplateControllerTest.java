@@ -15,10 +15,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-/*import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;*/
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,16 +29,16 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.when;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 
 /**
  * User: avanteev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(value = "FormTemplateControllerTest.xml")
-//@WebAppConfiguration
+@WebAppConfiguration
 public class FormTemplateControllerTest {
-    //private MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @Autowired
     FormTemplateController formTemplateController;
@@ -56,7 +56,7 @@ public class FormTemplateControllerTest {
         when(securityService.currentUserInfo()).thenReturn(new TAUserInfo());
 
         // Setup Spring test in standalone mode
-        //this.mockMvc = MockMvcBuilders.standaloneSetup(formTemplateController).build();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(formTemplateController).build();
     }
 
     @Test
@@ -80,11 +80,11 @@ public class FormTemplateControllerTest {
 
             /*JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.SUCCESS_UUID.toString(), uuid);*/
-            /*mockMvc.perform(fileUpload("/formTemplate/upload/1").file(multipartFile)
+            mockMvc.perform(fileUpload("/formTemplate/upload/1").file(multipartFile)
                             .contentType(mediaType)
             )
                     .andExpect(MockMvcResultMatchers.status().isOk())
-                    .andExpect(MockMvcResultMatchers.content().string("uuid " + uuid));*/
+                    .andExpect(MockMvcResultMatchers.content().string("uuid " + uuid));
         } finally {
             if (!cf.delete())
                 System.out.println("Can't delete");
