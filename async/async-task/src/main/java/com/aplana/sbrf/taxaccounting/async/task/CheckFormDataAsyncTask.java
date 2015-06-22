@@ -90,19 +90,6 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
             });
         } catch (ServiceRollbackException e) {
             // считаем, что проверка прошла успешно
-        } finally {
-            tx.executeInNewTransaction(new TransactionLogic() {
-                @Override
-                public void execute() {
-                    // восстанавливаем временный срез, чтобы продолжить редактирование
-                    dataRowService.createTemporary(formData);
-                }
-
-                @Override
-                public Object executeWithReturn() {
-                    return null;
-                }
-            });
         }
     }
 
