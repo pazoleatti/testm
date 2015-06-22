@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersion
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import com.ibm.websphere.runtime.ServerName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class GetProjectVersionHandler extends
         }
 		
 		GetProjectVersionResult result = new GetProjectVersionResult();
-        result.setProjectVersion(String.format("Версия: %s, Ревизия: %s", version, revision));
+        result.setProjectVersion(String.format("Версия: %s, Ревизия: %s, Сервер: %s", version, revision, ServerName.getDisplayName()));
         return result;
 
 	}
