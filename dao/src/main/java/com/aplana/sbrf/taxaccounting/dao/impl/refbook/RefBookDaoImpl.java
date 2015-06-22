@@ -152,7 +152,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    @Cacheable(value = "PermanentData", key = "'RefBook_attributes_'+#refBookId.toString()")
     public List<RefBookAttribute> getAttributes(Long refBookId) {
         try {
             return getJdbcTemplate().query(
@@ -1832,9 +1831,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             params.put("refBookId", refBookId);
             if (!isValuesChanged) {
                 /** Если атрибуты не были изменены то дополнительно фильтруем по периоду актуальности */
-                sql += "\n where (:versionTo is not null and :versionTo < rp.calendar_start_date) or (rp.end_date is not null and rp.end_date < :versionFrom)";
+                sql += "\nwhere (rp.calendar_start_date >= :versionFrom or (rp.calendar_start_date < :versionFrom and rp.end_date >= :versionFrom))";
                 params.put("versionFrom", versionFrom);
-                params.put("versionTo", versionTo);
             }
             results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
                 @Override
@@ -1863,9 +1861,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             params.clear();
             if (!isValuesChanged) {
                 /** Если атрибуты не были изменены то дополнительно фильтруем по периоду актуальности */
-                sql += "\n and ((:versionTo is not null and :versionTo < periodStart) or (:versionFrom > periodEnd))";
+                sql += "\n and (periodStart >= :versionFrom or (periodStart < :versionFrom and periodEnd >= :versionFrom))";
                 params.put("versionFrom", versionFrom);
-                params.put("versionTo", versionTo);
             }
             results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
                 @Override
@@ -1908,7 +1905,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
             "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
             "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id %s)\n" +
-            "WHERE (:versionTo IS NOT NULL AND :versionTo < versionStart) OR (versionEnd IS NOT NULL AND versionEnd < :versionFrom)";
+            "WHERE (versionStart >= :versionFrom or (versionStart < :versionFrom and (versionEnd is null or versionEnd >= :versionFrom)))";
 
     public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
                                                 boolean isValuesChanged, List<Long> excludedRefBooks) {
@@ -1931,7 +1928,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 sql = String.format(CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION, in, inExcludeRefBook);
                 params.put("refBookId", refBookId);
                 params.put("versionFrom", versionFrom);
-                params.put("versionTo", versionTo);
             }
 
             final Map<Integer, Map<String, String>> records = new HashMap<Integer, Map<String, String>>();
