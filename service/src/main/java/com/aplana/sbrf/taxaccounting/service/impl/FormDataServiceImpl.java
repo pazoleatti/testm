@@ -1263,7 +1263,7 @@ public class FormDataServiceImpl implements FormDataService {
                     break;
                 case MOVE_FD:
                     name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            str == null ? reportType.getDescription() : String.format("Возврат налоговой формы в \"%s\"", str),
+                            str,
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                             formData.getPeriodOrder() != null
                                     ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
